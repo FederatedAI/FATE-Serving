@@ -1,5 +1,7 @@
 # FATE-Serving
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 ## Introduction
 
 FATE-Serving is a high-performance, industrialized serving system for federated learning models, designed for production environments.
