@@ -33,10 +33,10 @@ public class HeteroLRGuest extends HeteroLR {
             LOGGER.info("host response is {}", hostPredictResponse.getData());
             if(hostPredictResponse.getData()!=null&&hostPredictResponse.getData().get("score")!=null) {
                 double hostScore = ((Number) hostPredictResponse.getData().get("score")).doubleValue();
-                LOGGER.info("host score:{}", hostScore);
+
+                LOGGER.info("guest score{} host score:{}",score, hostScore);
                 score += hostScore;
             }
-            score += hostScore;
         } catch (Exception ex) {
             LOGGER.error("get host predict failed:", ex);
         }
