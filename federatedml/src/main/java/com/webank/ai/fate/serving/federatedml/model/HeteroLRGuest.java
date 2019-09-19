@@ -23,18 +23,14 @@ public class HeteroLRGuest extends HeteroLR {
         Map<String, Object> result = new HashMap<>();
         Map<String, Double> forwardRet = forward(inputData);
         double score = forwardRet.get("score");
-
-        LOGGER.info("guest score:{}", score);
-
+        double guestScore = score;
+        double hostScore = 0;
         try {
             ReturnResult hostPredictResponse = this.getFederatedPredict(context,(Map<String, Object>) predictParams.get("federatedParams"));
-            //predictParams.put("federatedResult", hostPredictResponse);
             context.setFederatedResult(hostPredictResponse);
-            LOGGER.info("host response is {}", hostPredictResponse.getData());
+            LOGGER.info("caseid {} host response is {}",context.getCaseId(), hostPredictResponse.getData());
             if(hostPredictResponse.getData()!=null&&hostPredictResponse.getData().get("score")!=null) {
-                double hostScore = ((Number) hostPredictResponse.getData().get("score")).doubleValue();
-
-                LOGGER.info("guest score{} host score:{}",score, hostScore);
+                 hostScore = ((Number) hostPredictResponse.getData().get("score")).doubleValue();
                 score += hostScore;
             }
         } catch (Exception ex) {
@@ -42,10 +38,10 @@ public class HeteroLRGuest extends HeteroLR {
         }
 
         double prob = sigmod(score);
+        LOGGER.info("caseid {} guest score {} host score {} prob {}",context.getCaseId(),guestScore, hostScore,prob);
         result.put("prob", prob);
         result.put("guestModelWeightHitRate:{}", forwardRet.get("modelWrightHitRate"));
         result.put("guestInputDataHitRate:{}", forwardRet.get("inputDataHitRate"));
-
         return result;
     }
 }
