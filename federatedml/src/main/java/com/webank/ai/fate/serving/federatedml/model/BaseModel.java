@@ -101,12 +101,12 @@ public abstract class BaseModel {
 
             metaDataBuilder.setSrc(
                     topicBuilder.setPartyId(String.valueOf(srcParty.getPartyId())).
-                            setRole(Configuration.getProperty("serviceRoleName", "serving"))
+                            setRole(Configuration.getProperty("serviceRoleName", "serving-1.0"))
                             .setName("partnerPartyName")
                             .build());
             metaDataBuilder.setDst(
                     topicBuilder.setPartyId(String.valueOf(dstParty.getPartyId()))
-                            .setRole(Configuration.getProperty("serviceRoleName", "serving"))
+                            .setRole(Configuration.getProperty("serviceRoleName", "serving-1.0"))
                             .setName("partyName")
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName("federatedInference").build());
