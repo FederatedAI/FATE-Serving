@@ -65,8 +65,8 @@ public class DataTransferPipedClient {
     private ToStringUtils toStringUtils;
     @Autowired
     private ErrorUtils errorUtils;
-    @Autowired
-    private RouterService routerService;
+
+    public static  RouterService routerService;
 
 
     private BasicMeta.Endpoint endpoint;

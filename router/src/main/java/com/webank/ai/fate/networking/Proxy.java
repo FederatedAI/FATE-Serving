@@ -20,9 +20,13 @@ import com.google.common.collect.Sets;
 import com.webank.ai.fate.jmx.server.FateMBeanServer;
 import com.webank.ai.fate.networking.proxy.factory.GrpcServerFactory;
 import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
+import com.webank.ai.fate.networking.proxy.grpc.client.DataTransferPipedClient;
 import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
+import com.webank.ai.fate.register.loadbalance.LoadBalancer;
+import com.webank.ai.fate.register.loadbalance.RandomLoadBalance;
 import com.webank.ai.fate.register.provider.FateServer;
+import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import io.grpc.Server;
@@ -42,6 +46,8 @@ public class Proxy {
     public static ZookeeperRegistry zookeeperRegistry;
 
     private static boolean useRegister = false;
+
+    private static boolean useZkRouter = false;
 
     public static void main(String[] args) throws Exception {
         Options options = new Options();
@@ -73,13 +79,32 @@ public class Proxy {
         server.start();
         Properties properties = serverConf.getProperties();
         useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
-
+        useZkRouter = Boolean.valueOf(properties.getProperty("useZkRouter", "false"));
         if (useRegister) {
             String zkUrl = properties.getProperty("zk.url");
             zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, "proxy", "online", serverConf.getPort());
             zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject("serving");
+
+            if(useZkRouter){
+
+
+                LoadBalancer loadBalancer = new RandomLoadBalance();
+
+                DefaultRouterService routerService = new DefaultRouterService();
+
+                routerService.setRegistry(zookeeperRegistry);
+
+                routerService.setLoadBalancer(loadBalancer);
+
+                DataTransferPipedClient.routerService = routerService;
+
+            }
+
         }
+
+
+
 
         boolean useJMX = Boolean.valueOf(properties.getProperty("useJMX", "false"));
         if (useJMX) {
