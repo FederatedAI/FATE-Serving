@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.adapter.processing;
 import com.webank.ai.fate.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.bean.PostProcessingResult;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class PassPostProcessing implements PostProcessing {
         ReturnResult returnResult = new ReturnResult();
         PostProcessingResult postProcessingResult = new PostProcessingResult();
         returnResult.setRetcode(0);
-        returnResult.setRetmsg("success");
+        returnResult.setRetmsg(Dict.SUCCESS);
         returnResult.setData(modelResult);
         postProcessingResult.setProcessingResult(returnResult);
         return postProcessingResult;

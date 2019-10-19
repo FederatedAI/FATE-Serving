@@ -26,15 +26,15 @@ public class PreProcessingResult {
         return featureIds;
     }
 
+    public void setFeatureIds(Map<String, Object> featureIds) {
+        this.featureIds = featureIds;
+    }
+
     public Map<String, Object> getProcessingResult() {
         return processingResult;
     }
 
     public void setProcessingResult(Map<String, Object> processingResult) {
         this.processingResult = processingResult;
-    }
-
-    public void setFeatureIds(Map<String, Object> featureIds) {
-        this.featureIds = featureIds;
     }
 }

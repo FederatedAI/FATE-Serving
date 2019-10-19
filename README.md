@@ -1,7 +1,5 @@
 # FATE-Serving
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
 ## Introduction
 
 FATE-Serving is a high-performance, industrialized serving system for federated learning models, designed for production environments.
@@ -16,6 +14,8 @@ FATE-Serving is a high-performance, industrialized serving system for federated 
 - Real-time inference using federated learning models.
 - Support multi-level cache for remote party federated inference result.
 - Support pre-processing, post-processing and data-access adapters for the production deployment.
+- Provide service managerment for grpc interface by using zookeeper as registry (optional)
+- Requests for publishing models are persisted to local files，so the loaded model will be loaded automatically when the application is restarted
 
 
 
@@ -32,15 +32,37 @@ FATE-Serving is a high-performance, industrialized serving system for federated 
 
 
 ## Deploy
-The code directory for FATE-Serving is ``FATE/fate-serving``, which contains three parts:
 
-- fate-serving-core: base api for FATE-Serving.
-- federatedml: high performance online Federated Learning algorithms. 
-- serving-server: Federated Learning online inference service based on GRPC.
+The preparations are as follows：
 
-After the compilation is complete, the fate-serving-core and federatedml will be included in the lib, and the serving-server is included in the jar package.
+1. The serving-server rely on Redis,Redis needs to be installed in advance
+2. All models is run in the JVM ,Java  needs to be installed in advance
+3. Verify that the service governance feature is required, you can set it to be enabled in the configuration file, and if it is enabled, you need to install zookeeper in advance
 
-FATE-Serving has two profiles, one is the log4j2.xml for log settings, another is serving-server.properties.
+the ordinary deploy architecture as the graph shows，If you use this pattern， the IP addresses of each module need to be manually configured in the configuration file
+
+![fate_serving_arch](./images/serving-server.png)
+
+
+
+
+
+If you want use the service management,the deploy architecture is show here:
+
+![fate_serving_arch](./images/serving-server.png)
+
+
+- serving-server: Federated Learning online inference service based on GRPC
+- serving-router: route requests to serving-server or to another party ，The function of this module is similar to the Proxy module in FATE
+- Zookeeper: work as the register center 
+
+
+
+### The data in the zookeeper
+
+
+
+
 
 
 
@@ -58,23 +80,37 @@ Key configuration item description:
 | proxy | the address of proxy | custom configuration |
 | roll | the address of roll | custom configuration |
 | OnlineDataAccessAdapter | data access adapter class for obtaining host feature data | default TestFile, read host feature data from ``host_data.csv`` on serving-server root directory |
-| InferencePostProcessingAdapter| inference post-processing adapter class for dealing result after model inference | default pass |
-| InferencePreProcessingAdapter | inference pre-processing adapter class for dealing guest feature data before model inference | default pass |
+| InferencePostProcessingAdapter| inference post-processing adapter class for dealing result after model inference | default PassPostProcessing |
+| InferencePreProcessingAdapter | inference pre-processing adapter class for dealing guest feature data before model inference | default PassPreProcessing |
+| useRegister | Register interface to registry or not | default false |
+| useZkRouter | route request by the interface info which is registered into zookeeper | default false |
+| zk.url | zookeeper url ,eg:zookeeper://localhost:2181?backup=localhost:2182,localhost:2183 | default zookeeper://localhost:2181 |
 
 
 
-### Deploy Serving-Server
-For detail, please refer to cluster deploy guide at [cluster-deploy](../cluster-deploy). 
-Here are some key steps:
+### Deploy Serving-Server 
+For detail, Here are some key steps:
 
-- Compile in the arch directory
-- Compile in the fate-serving directory
-- Create your serving directory by referring to the cluster-deploy/example-dir-tree/serving-server directory
-- Copy fate-serving/serving-server/target/fate-serving-server-*.jar to serving-server directory
-- Copy fate-serving/serving-server/target/lib to serving-server directory
-- Copy fate-serving/serving-server/src/main/resources/* to serving-server/conf
-- Modify the configuration file according to the actual situation
-- Using the service.sh script to start/stop/restart
+
+    1.git clone https://github.com/FederatedAI/FATE-Serving.git
+    2.cd  FATE-Serving
+    3.mvn clean package
+    4.copy serving-server/target/fate-serving-server-1.0-release.zip to your deploy location and unzip it
+    5.modify the configuration file conf/serving-server.properties according to your own requirements
+    6.confirm whether Java is installed. You can check through the java -version command.
+    7.sh service.sh  restart
+
+​    
+
+Deploy Serving-Router
+
+
+
+
+
+
+
+
 
 
 

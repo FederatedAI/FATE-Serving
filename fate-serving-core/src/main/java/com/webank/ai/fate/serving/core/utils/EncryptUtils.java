@@ -38,9 +38,9 @@ public class EncryptUtils {
         return "";
     }
 
-    private static String getEncryptMethodString(EncryptMethod encryptMethod){
+    private static String getEncryptMethodString(EncryptMethod encryptMethod) {
         String methodString = "";
-        switch (encryptMethod){
+        switch (encryptMethod) {
             case MD5:
                 methodString = "MD5";
                 break;

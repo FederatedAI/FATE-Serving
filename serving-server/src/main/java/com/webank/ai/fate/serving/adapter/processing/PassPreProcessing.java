@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.adapter.processing;
 import com.webank.ai.fate.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.bean.PreProcessingResult;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,11 +28,11 @@ import java.util.Optional;
 
 public class PassPreProcessing implements PreProcessing {
     @Override
-    public PreProcessingResult getResult(Context context , String paras) {
+    public PreProcessingResult getResult(Context context, String paras) {
         PreProcessingResult preProcessingResult = new PreProcessingResult();
         preProcessingResult.setProcessingResult((Map<String, Object>) ObjectTransform.json2Bean(paras, HashMap.class));
         Map<String, Object> featureIds = new HashMap<>();
-        Arrays.asList("device_id", "phone_num").forEach((field -> {
+        Arrays.asList(Dict.DEVICE_ID, Dict.PHONE_NUM).forEach((field -> {
             featureIds.put(field, Optional.ofNullable(preProcessingResult.getProcessingResult().get(field)).orElse(""));
         }));
         preProcessingResult.setFeatureIds(featureIds);

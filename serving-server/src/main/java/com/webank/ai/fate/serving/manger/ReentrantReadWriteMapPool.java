@@ -29,14 +29,20 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ReentrantReadWriteMapPool<K, V> extends BaseMapPool<K, V> {
     private static final Logger LOGGER = LogManager.getLogger();
-    private Map<K, V> pool;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock readLock = lock.readLock();
     private final Lock writeLock = lock.writeLock();
+    private Map<K, V> pool;
 
     public ReentrantReadWriteMapPool(Map<K, V> staticMap) {
         this.pool = staticMap;
     }
+
+
+    public Map getDataMap() {
+        return pool;
+    }
+
 
     @Override
     public void put(K key, V value) {
