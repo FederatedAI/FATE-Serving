@@ -45,7 +45,7 @@ public class HeteroLRGuest extends HeteroLR {
         LOGGER.info("guest score:{}", score);
 
         try {
-            ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
+            ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
             //predictParams.put("federatedResult", hostPredictResponse);
             //context.setFederatedResult(hostPredictResponse);
             LOGGER.info("host response is {}", hostPredictResponse.getData());
