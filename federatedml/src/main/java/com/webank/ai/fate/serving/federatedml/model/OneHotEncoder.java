@@ -92,6 +92,7 @@ public class OneHotEncoder extends BaseModel {
                 LOGGER.error("HeteroFeatureBinning error" ,e);
             }
         }
+        LOGGER.info("OneHotEncoder output {}",outputData);
         return outputData;
     }
 }

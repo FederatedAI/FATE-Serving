@@ -88,6 +88,8 @@ public class HeteroFeatureBinning extends BaseModel {
             }
         }
 
+        LOGGER.info("HeteroFeatureBinning output {}",outputData);
+
         return outputData;
     }
 
