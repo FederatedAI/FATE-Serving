@@ -48,7 +48,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     }
 
     @Override
-    @RegisterService(serviceName = "getInferenceResult")
+    @RegisterService(serviceName = "getInferenceResult" ,useDynamicEnvironment = true)
     public void getInferenceResult(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         inferenceServiceAction(req, responseObserver, InferenceActionType.GET_RESULT);
     }

@@ -196,11 +196,23 @@ public class ServingServer implements InitializingBean {
     }
 
     private void initialize() {
+        this.initializeClientPool();
         HttpClientPool.initPool();
         InferenceWorkerManager.prestartAllCoreThreads();
     }
 
-
+    private void initializeClientPool() {
+        ArrayList<String> serverAddress = new ArrayList<>();
+        serverAddress.add(Configuration.getProperty("proxy"));
+        serverAddress.add(Configuration.getProperty("roll"));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                GrpcClientPool.initPool(serverAddress);
+            }
+        }).start();
+        LOGGER.info("Finish init client pool");
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {

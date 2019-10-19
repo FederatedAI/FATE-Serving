@@ -54,60 +54,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
     private PreProcessing preProcessing;
 
 
-//    public  ReturnResult inference(Context  context, InferenceRequest inferenceRequest, InferenceActionType inferenceActionType) {
-//        long inferenceBeginTime = System.currentTimeMillis();
-//        ReturnResult inferenceResultFromCache = CacheManager.getInferenceResultCache(inferenceRequest.getAppid(), inferenceRequest.getCaseid());
-//        LOGGER.info("caseid {} query cache cost {}",inferenceRequest.getCaseid(),System.currentTimeMillis()-inferenceBeginTime);
-//        if (inferenceResultFromCache != null) {
-//            LOGGER.info("request caseId {} cost time {}  hit cache true",inferenceRequest.getCaseid(),System.currentTimeMillis()-inferenceBeginTime);
-//            return inferenceResultFromCache;
-//        }
-//        switch (inferenceActionType) {
-//            case SYNC_RUN:
-//                ReturnResult inferenceResult = runInference(  context,inferenceRequest);
-//                if (inferenceResult!=null&&inferenceResult.getRetcode() == 0) {
-//                    CacheManager.putInferenceResultCache(context ,inferenceRequest.getAppid(), inferenceRequest.getCaseid(), inferenceResult);
-//                }
-//
-//                return inferenceResult;
-//            case GET_RESULT:
-//                ReturnResult noCacheInferenceResult = new ReturnResult();
-//                noCacheInferenceResult.setRetcode(InferenceRetCode.NO_RESULT);
-//                return noCacheInferenceResult;
-//            case ASYNC_RUN:
-//                long  beginTime= System.currentTimeMillis();
-//                InferenceWorkerManager.exetute(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        ReturnResult inferenceResult=null;
-//                        Context subContext = context.subContext();
-//                        subContext.preProcess();
-//
-//                        try {
-//
-//                             subContext.setActionType("ASYNC_EXECUTE");
-//                             inferenceResult=   runInference(subContext,inferenceRequest);
-//                             if (inferenceResult!=null&&inferenceResult.getRetcode() == 0) {
-//                                CacheManager.putInferenceResultCache(subContext ,inferenceRequest.getAppid(), inferenceRequest.getCaseid(), inferenceResult);
-//                             }
-//                        }finally {
-//
-//                            subContext.postProcess(inferenceRequest,inferenceResult);
-//                        }
-//                        }
-//
-//                });
-//                ReturnResult startInferenceJobResult = new ReturnResult();
-//                startInferenceJobResult.setRetcode(InferenceRetCode.OK);
-//                startInferenceJobResult.setCaseid(inferenceRequest.getCaseid());
-//                return startInferenceJobResult;
-//            default:
-//                ReturnResult systemErrorReturnResult = new ReturnResult();
-//                systemErrorReturnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
-//                return systemErrorReturnResult;
-//        }
-//    }
+
 
     private static void logInference(Context context, InferenceRequest inferenceRequest, ModelNamespaceData modelNamespaceData, ReturnResult inferenceResult, long elapsed, boolean getRemotePartyResult, boolean billing) {
         InferenceUtils.logInference(context, FederatedInferenceType.INITIATED, modelNamespaceData.getLocal(), modelNamespaceData.getRole(), inferenceRequest.getCaseid(), inferenceRequest.getSeqno(), inferenceResult.getRetcode(), elapsed, getRemotePartyResult, billing, new ObjectMapper().convertValue(inferenceRequest, HashMap.class), inferenceResult);
@@ -174,17 +121,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return inferenceResult;
         }
         Map<String, Object> predictParams = new HashMap<>();
-        //   Map<String, Object> federatedParams = new HashMap<>();
-//        federatedParams.put(Dict.CASEID, inferenceRequest.getCaseid());
-//        federatedParams.put(Dict.SEQNO, inferenceRequest.getSeqno());
-//        federatedParams.put("local", modelNamespaceData.getLocal());
-//        federatedParams.put("model_info", new ModelInfo(modelName, modelNamespace));
-//        federatedParams.put("role", modelNamespaceData.getRole());
-//        federatedParams.put("feature_id", featureIds);
-//        predictParams.put("federatedParams", federatedParams);
         Map<String, Object> modelFeatureData = Maps.newHashMap(featureData);
-
-
         FederatedParams federatedParams = new FederatedParams();
 
         federatedParams.setCaseId(inferenceRequest.getCaseid());
@@ -202,8 +139,10 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             inferenceResult = postProcessingResult.getProcessingResult();
         } catch (Exception ex) {
             LOGGER.error("model result postprocessing failed", ex);
-            inferenceResult.setRetcode(InferenceRetCode.COMPUTE_ERROR);
-            inferenceResult.setRetmsg(ex.getMessage());
+            if(inferenceResult!=null) {
+                inferenceResult.setRetcode(InferenceRetCode.COMPUTE_ERROR);
+                inferenceResult.setRetmsg(ex.getMessage());
+            }
         }
         inferenceResult = handleResult(context, inferenceRequest, modelNamespaceData, inferenceResult);
 
@@ -227,10 +166,12 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
                     billing = false;
                 }
 
+
                 if (federatedResult.getRetcode() != 0) {
                     partyInferenceRetcode += 2;
                     inferenceResult.setRetcode(federatedResult.getRetcode());
                 }
+
             }
             if (inferenceResult.getRetcode() != 0) {
                 partyInferenceRetcode += 1;
