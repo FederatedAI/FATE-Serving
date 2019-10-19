@@ -113,7 +113,9 @@ public class DSLParser {
                         String upComponent = data.getString(j).split("\\.", -1)[0];
                         int upComponentId = -1;
                         if (!upComponent.equals("args")) {
-                            upComponentId = componentIndexMapping.get(upComponent);
+                            if(componentIndexMapping.get(upComponent)!=null) {
+                                upComponentId = componentIndexMapping.get(upComponent);
+                            }
                         }
     
                         if (upComponentId != -1) {			

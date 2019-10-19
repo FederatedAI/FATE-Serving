@@ -76,10 +76,12 @@ public class PipelineTask {
                 Iterator<Integer> iters = upInputComponents.iterator();
                 while (iters.hasNext()) {
                     Integer upInput = iters.next();
-                    if (upInput == -1) {
-                        inputs.add(inputData);
-                    } else {
-                        inputs.add(outputData.get(upInput));
+                    if(upInput!=null) {
+                        if (upInput == -1) {
+                            inputs.add(inputData);
+                        } else {
+                            inputs.add(outputData.get(upInput));
+                        }
                     }
                 }
             } else {
