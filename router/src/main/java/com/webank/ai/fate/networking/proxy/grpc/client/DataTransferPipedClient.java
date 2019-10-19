@@ -220,12 +220,14 @@ public class DataTransferPipedClient {
     private DataTransferServiceGrpc.DataTransferServiceStub getStub(Proxy.Topic from, Proxy.Topic to, Proxy.Packet pack
     ) {
 
+
+
         DataTransferServiceGrpc.DataTransferServiceStub stub = null;
 
         String useZkRouterString = serverConf.getProperties().getProperty("useZkRouter", "false");
 
         boolean useZkRouter = Boolean.valueOf(useZkRouterString);
-
+        LOGGER.info("=========================={}====={}",ConfFileBasedFdnRouter.class,useZkRouter);
         if (fdnRouter instanceof ConfFileBasedFdnRouter && useZkRouter) {
 
             ConfFileBasedFdnRouter confFileBasedFdnRouter = (ConfFileBasedFdnRouter) fdnRouter;
