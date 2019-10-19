@@ -27,7 +27,7 @@ public abstract class HeteroLR extends BaseModel {
             ex.printStackTrace();
             return StatusCode.ILLEGALDATA;
         }
-        LOGGER.info("Finish init HeteroLR class, model weight is {}", this.weight);
+    //    LOGGER.info("Finish init HeteroLR class, model weight is {}", this.weight);
         return StatusCode.OK;
     }
 

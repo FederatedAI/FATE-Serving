@@ -42,6 +42,7 @@ public class FeatureSelection extends BaseModel {
     public Map<String, Object> predict(Context context , List<Map<String, Object> > inputData, Map<String, Object> predictParams) {
         LOGGER.info("Start Feature Selection predict");
         HashMap<String, Object> outputData = new HashMap<>();
+
         Map<String, Object> firstData = inputData.get(0);
 
 		if (!this.needRun) {
