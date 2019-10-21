@@ -240,7 +240,8 @@ public class DataTransferPipedClient {
                     LOGGER.info("appid {} register return stub", to.getPartyId());
                     return stub;
                 } else {
-                    LOGGER.info("appid {} register not return stub,try router table", to.getPartyId());
+                    LOGGER.info("appid {} register not return stub", to.getPartyId());
+                    return null;
                 }
 
             }

@@ -88,15 +88,18 @@ public abstract class AbstractRouterService implements RouterService {
 
             urls.forEach(url -> {
 
-                String targetVersion = url.getParameter(Constants.VERSION_KEY);
                 String routerModel = url.getParameter(Constants.ROUTER_MODEL);
                 try {
-
+                    String targetVersion = url.getParameter(Constants.VERSION_KEY);
+                    if (StringUtils.isBlank(targetVersion)) {
+                        return;
+                    }
 
                     if(RouterModel.ALL_ALLOWED.name().equals(routerModel)){
                         resultUrls.add(url);
                         return;
                     }
+
                     Double targetVersionValue = Double.parseDouble(targetVersion);
                     Double versionValue = Double.parseDouble(version);
 
