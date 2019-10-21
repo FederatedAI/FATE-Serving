@@ -301,7 +301,7 @@ public class DataTransferPipedClient {
         String serviceName = pack.getHeader().getCommand().getName();
         String version = pack.getHeader().getOperator();
 
-        URL paramUrl = URL.valueOf(role + "/" + partId + "/" + serviceName);
+        URL paramUrl = URL.valueOf("serving/" + partId + "/unaryCall");
         if(StringUtils.isNotEmpty(version)) {
             paramUrl= paramUrl.addParameter(Constants.VERSION_KEY,version
             );
@@ -311,7 +311,7 @@ public class DataTransferPipedClient {
         if (CollectionUtils.isNotEmpty(urls)) {
             URL url = urls.get(0);
             BasicMeta.Endpoint.Builder builder = BasicMeta.Endpoint.newBuilder();
-            builder.setIp(url.getIp());
+            builder.setIp(url.getHost());
             builder.setPort(url.getPort());
             BasicMeta.Endpoint endpoint = builder.build();
             stub = grpcStubFactory.getAsyncStub(endpoint);
