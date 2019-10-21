@@ -227,7 +227,7 @@ public class DataTransferPipedClient {
         String useZkRouterString = serverConf.getProperties().getProperty("useZkRouter", "false");
 
         boolean useZkRouter = Boolean.valueOf(useZkRouterString);
-        LOGGER.info("=========================={}====={}",ConfFileBasedFdnRouter.class,useZkRouter);
+        LOGGER.info("=========================={}====={}",fdnRouter,useZkRouter);
         if (fdnRouter instanceof ConfFileBasedFdnRouter && useZkRouter) {
 
             ConfFileBasedFdnRouter confFileBasedFdnRouter = (ConfFileBasedFdnRouter) fdnRouter;
