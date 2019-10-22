@@ -90,13 +90,13 @@ public abstract class AbstractRouterService implements RouterService {
 
                 String routerModel = url.getParameter(Constants.ROUTER_MODEL);
                 try {
-                    String targetVersion = url.getParameter(Constants.VERSION_KEY);
-                    if (StringUtils.isBlank(targetVersion)) {
+                    if(RouterModel.ALL_ALLOWED.name().equals(routerModel)){
+                        resultUrls.add(url);
                         return;
                     }
 
-                    if(RouterModel.ALL_ALLOWED.name().equals(routerModel)){
-                        resultUrls.add(url);
+                    String targetVersion = url.getParameter(Constants.VERSION_KEY);
+                    if (StringUtils.isBlank(targetVersion)) {
                         return;
                     }
 

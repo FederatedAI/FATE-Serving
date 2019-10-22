@@ -69,7 +69,6 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                 @Override
                 public void stateChanged(CuratorFramework client, ConnectionState state) {
 
-                    logger.info("stateChanged ========{}", state);
                     if (state == ConnectionState.LOST) {
                         CuratorZookeeperClient.this.stateChanged(StateListener.DISCONNECTED);
                     } else if (state == ConnectionState.CONNECTED) {
@@ -292,9 +291,6 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
         @Override
         public void process(WatchedEvent event) throws Exception {
 
-
-            logger.info("=========watchedEvent {}", event);
-
             if (childListener != null) {
                 String path = event.getPath() == null ? "" : event.getPath();
                 childListener.childChanged(path,
@@ -320,36 +316,29 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                 String path = null;
                 switch (type) {
                     case NODE_ADDED:
-                        logger.info("===================childEvent NODE_ADDED");
                         eventType = EventType.NodeCreated;
                         path = event.getData().getPath();
                         content = event.getData().getData() == null ? "" : new String(event.getData().getData(), CHARSET);
                         break;
                     case NODE_UPDATED:
-                        logger.info("===================childEvent NODE_UPDATED");
                         eventType = EventType.NodeDataChanged;
                         path = event.getData().getPath();
                         content = event.getData().getData() == null ? "" : new String(event.getData().getData(), CHARSET);
                         break;
                     case NODE_REMOVED:
-                        logger.info("===================childEvent NODE_REMOVED");
                         path = event.getData().getPath();
                         eventType = EventType.NodeDeleted;
                         break;
                     case INITIALIZED:
-                        logger.info("===================childEvent INITIALIZED");
                         eventType = EventType.INITIALIZED;
                         break;
                     case CONNECTION_LOST:
-                        logger.info("===================childEvent CONNECTION_LOST");
                         eventType = EventType.CONNECTION_LOST;
                         break;
                     case CONNECTION_RECONNECTED:
-                        logger.info("===================childEvent CONNECTION_RECONNECTED");
                         eventType = EventType.CONNECTION_RECONNECTED;
                         break;
                     case CONNECTION_SUSPENDED:
-                        logger.info("===================childEvent CONNECTION_SUSPENDED");
                         eventType = EventType.CONNECTION_SUSPENDED;
                         break;
 

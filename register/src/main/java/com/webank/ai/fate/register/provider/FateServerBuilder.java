@@ -214,9 +214,6 @@ public class FateServerBuilder extends ServerBuilder {
 
     @Override
     public FateServerBuilder addService(ServerServiceDefinition serverServiceDefinition) {
-
-        System.err.println("addService =====111=" + serverServiceDefinition);
-
         prepareRegister(serverServiceDefinition);
         serverBuilder.addService(serverServiceDefinition);
         return this;
@@ -231,9 +228,6 @@ public class FateServerBuilder extends ServerBuilder {
     }
 
     public FateServerBuilder addService(ServerServiceDefinition serverServiceDefinition, Class clazz) {
-
-        System.err.println("addService =====111=" + serverServiceDefinition);
-
         prepareRegister(clazz);
         serverBuilder.addService(serverServiceDefinition);
         return this;
@@ -241,9 +235,6 @@ public class FateServerBuilder extends ServerBuilder {
 
     @Override
     public FateServerBuilder addService(BindableService bindableService) {
-
-        System.err.println("addService ======" + bindableService);
-
         prepareRegister(bindableService);
         serverBuilder.addService(bindableService);
         return this;

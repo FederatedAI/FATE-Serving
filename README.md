@@ -85,7 +85,39 @@ Key configuration item description:
 | useRegister | Register interface to registry or not | default false |
 | useZkRouter | route request by the interface info which is registered into zookeeper | default false |
 | zk.url | zookeeper url ,eg:zookeeper://localhost:2181?backup=localhost:2182,localhost:2183 | default zookeeper://localhost:2181 |
+| coordinator | The party id for serving  | default webank | 
+| serviceRoleName | The federated roles  model name | default serving | 
+| modelCacheAccessTTL | The model cache expire after access | default 12 | 
+| modelCacheMaxSize | The maximum size of model cache | default 50 | 
+| remoteModelInferenceResultCacheTTL | The remote model inference result cache expire after access | default 300 |
+| remoteModelInferenceResultCacheMaxSize | The maximum size of remote model inference result cache | default 10000 | 
+| inferenceResultCacheTTL | The inference result cache expire after access | default 30 | 
+| inferenceResultCacheCacheMaxSize | The maximum size of inference result cache | default 1000 | 
+| redis.ip | The connection host | default 127.0.0.1 | 
+| redis.port | Accept redis connections on the specified port| default 6379 | 
+| redis.password | The connection password | default  fate_dev | 
+| redis.timeout | Close the connection after a client is idle for N seconds | default 10 | 
+| redis.maxTotal | The maximum number of objects that can be allocated by the pool | default 100 | 
+| redis.maxIdle | The maximum number of "idle" instances that can be held in the pool or a negative value if there is no limit | default 100 | 
+| external.remoteModelInferenceResultCacheTTL | The remote model inference result cache expire after access  for external cache | default 86400 | 
+| external.remoteModelInferenceResultCacheDBIndex | The remote model inference result cache DBIndex for external | default 1,10 | 
+| external.inferenceResultCacheTTL | The inference result cache expire after access for external cache | default 300 | 
+| external.inferenceResultCacheDBIndex | The inference result cache DBIndex for external cache | default 0 | 
+| external.processCacheDBIndex | The process cache DBIndex for external cache | default 3 |
+| canCacheRetcode | Caching result by retcode | default 0,102 |
 
+### proxy.properties
+Key configuration item description:
+
+| Configuration item | Configuration item meaning | Configuration item value |
+| - | - | - |
+| ip | listen address for FATE-Serving-Router | default 0.0.0.0 |
+| port | listen port for the FATE-Serving-Router | default 9370 |
+| coordinator | The party id for serving | default webank |
+| zk.url | zookeeper url, same as serving configuration | default zookeeper://localhost:2181 |
+| useRegister | Register interface to registry or not | default false |
+| useZkRouter | route request by the interface info which is registered into zookeeper | default false |
+| route.table | router table configuration file absolute path | default conf/router_table.json |
 
 
 ### Deploy Serving-Server 
@@ -100,10 +132,19 @@ For detail, Here are some key steps:
     6.confirm whether Java is installed. You can check through the java -version command.
     7.sh service.sh  restart
 
-​    
+​   
 
-Deploy Serving-Router
+### Deploy Serving-Router
 
+For detail, Here are some key steps:
+
+    1.git clone https://github.com/FederatedAI/FATE-Serving.git
+    2.cd  FATE-Serving
+    3.mvn clean package
+    4.copy router/target/fate-serving-router-1.0-release.zip to your deploy location and unzip it
+    5.modify the configuration file conf/proxy.properties and conf/router_table.json according to your own requirements
+    6.confirm whether Java is installed. You can check through the java -version command.
+    7.sh service.sh  restart
 
 
 

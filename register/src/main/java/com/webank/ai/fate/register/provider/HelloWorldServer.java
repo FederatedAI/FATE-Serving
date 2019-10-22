@@ -69,9 +69,6 @@
 //    }
 //
 //    private class GreeterImpl extends InferenceServiceGrpc.InferenceServiceImplBase {
-//        /**
-//         * 原子Integer
-//         */
 //        public AtomicInteger count = new AtomicInteger(0);
 //        @RegisterService(groupKey="fate-test",commandKey="fate-cmd")
 //        @Override

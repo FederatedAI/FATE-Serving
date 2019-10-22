@@ -229,9 +229,9 @@
                 <executions>
                     <execution>
                         <id>make-assembly</id>
-                        <phase>package</phase> <!--this is used for inheritance merges  绑定到这个生命周期-->
+                        <phase>package</phase>
                         <goals>
-                            <goal>single</goal> <!--执行一次-->
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>

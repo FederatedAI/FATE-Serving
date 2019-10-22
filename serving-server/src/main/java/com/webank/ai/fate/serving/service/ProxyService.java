@@ -67,7 +67,6 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
             switch (req.getHeader().getCommand().getName()) {
                 case Dict.FEDERATED_INFERENCE:
                     responseResult = hostInferenceProvider.federatedInference(context, requestData);
-                    logger.info("result ============:{}",responseResult);
                     break;
                 case Dict.FEDERATED_INFERENCE_FOR_TREE:
                     responseResult = hostInferenceProvider.federatedInferenceForTree(context, requestData);
