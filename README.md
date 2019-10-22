@@ -138,13 +138,11 @@ For detail, Here are some key steps:
 
 For detail, Here are some key steps:
 
-    1.git clone https://github.com/FederatedAI/FATE-Serving.git
-    2.cd  FATE-Serving
-    3.mvn clean package
-    4.copy router/target/fate-serving-router-1.0-release.zip to your deploy location and unzip it
-    5.modify the configuration file conf/proxy.properties and conf/router_table.json according to your own requirements
-    6.confirm whether Java is installed. You can check through the java -version command.
-    7.sh service.sh  restart
+    1.Same as serving-server deploy steps 1/2/3, if it has been executed, you can skip
+    2.copy router/target/fate-serving-router-1.0-release.zip to your deploy location and unzip it
+    3.modify the configuration file conf/proxy.properties and conf/router_table.json according to your own requirements
+    5.confirm whether Java is installed. You can check through the java -version command.
+    6.sh service.sh  restart
 
 
 
