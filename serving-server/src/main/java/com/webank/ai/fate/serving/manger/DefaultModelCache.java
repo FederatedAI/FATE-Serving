@@ -20,21 +20,26 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.webank.ai.fate.core.utils.Configuration;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
+import com.webank.ai.fate.serving.interfaces.ModelCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public class ModelCache {
+@Service
+public class DefaultModelCache implements ModelCache {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static LoadingCache<String, PipelineTask> modelCache;
+    private LoadingCache<String, PipelineTask> modelCache;
 
-    static {
+    public DefaultModelCache() {
         modelCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(Configuration.getPropertyInt("modelCacheAccessTTL"), TimeUnit.HOURS)
-                .maximumSize(Configuration.getPropertyInt("modelCacheMaxSize"))
+                .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_ACCESS_TTL), TimeUnit.HOURS)
+                .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_MAX_SIZE))
                 .build(new CacheLoader<String, PipelineTask>() {
                     @Override
                     public PipelineTask load(String s) throws Exception {
@@ -43,12 +48,14 @@ public class ModelCache {
                 });
     }
 
-    public static PipelineTask loadModel(String modelKey) {
+    @Override
+    public PipelineTask loadModel(String modelKey) {
         String[] modelKeyFields = ModelUtils.splitModelKey(modelKey);
         return ModelUtils.loadModel(modelKeyFields[0], modelKeyFields[1]);
     }
 
-    public static PipelineTask get(String modelKey) {
+    @Override
+    public PipelineTask get(String modelKey) {
         try {
             return modelCache.get(modelKey);
         } catch (ExecutionException ex) {
@@ -57,11 +64,20 @@ public class ModelCache {
         }
     }
 
-    public static void put(String modelKey, PipelineTask model) {
+    @Override
+    public void put(String modelKey, PipelineTask model) {
         modelCache.put(modelKey, model);
     }
 
-    public static long getSize() {
+    @Override
+    public long getSize() {
         return modelCache.size();
+    }
+
+    @Override
+    public Set<String> getKeys() {
+
+        return modelCache.asMap().keySet();
+
     }
 }

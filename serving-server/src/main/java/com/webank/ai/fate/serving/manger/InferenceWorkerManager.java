@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.manger;
 
 import com.webank.ai.fate.core.utils.Configuration;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,14 +25,14 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InferenceWorkerManager {
-    private static ThreadPoolExecutor threadPoolExecutor;
     private static final Logger LOGGER = LogManager.getLogger();
+    private static ThreadPoolExecutor threadPoolExecutor;
 
     static {
         LinkedBlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>(10);
         threadPoolExecutor = new ThreadPoolExecutor(
-                Configuration.getPropertyInt("inferenceWorkerThreadNum"),
-                Configuration.getPropertyInt("inferenceWorkerThreadNum"),
+                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM),
+                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM),
                 60,
                 TimeUnit.SECONDS,
                 taskQueue,
@@ -42,6 +43,10 @@ public class InferenceWorkerManager {
 
     public static void exetute(Runnable task) {
         threadPoolExecutor.execute(task);
+    }
+
+    public static void prestartAllCoreThreads() {
+        threadPoolExecutor.prestartAllCoreThreads();
     }
 
     static class InferenceWorkerThreadFactory implements ThreadFactory {
@@ -59,9 +64,5 @@ public class InferenceWorkerManager {
         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
             LOGGER.info("{} rejected.", r.toString());
         }
-    }
-
-    public static void prestartAllCoreThreads() {
-        threadPoolExecutor.prestartAllCoreThreads();
     }
 }

@@ -20,46 +20,53 @@ import com.google.common.base.Charsets;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.hash.Hashing;
-import com.webank.ai.fate.core.bean.FederatedParty;
-import com.webank.ai.fate.core.bean.FederatedRoles;
 import com.webank.ai.fate.core.bean.ReturnResult;
 import com.webank.ai.fate.core.utils.Configuration;
-import com.webank.ai.fate.core.utils.FederatedUtils;
 import com.webank.ai.fate.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.core.bean.CacheValueConfig;
-import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
+import com.webank.ai.fate.serving.core.bean.CacheManager;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class CacheManager {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static JedisPool jedisPool;
-    private static Cache<String, ReturnResult> inferenceResultCache;
-    private static Cache<String, ReturnResult> remoteModelInferenceResultCache;
-    private static int[] remoteModelInferenceResultCacheDBIndex;
-    private static int[] inferenceResultCacheDBIndex;
-    private static int externalRemoteModelInferenceResultCacheTTL;
-    private static int externalInferenceResultCacheTTL;
-    private static Set<Integer> canCacheRetcode;
+@Service
+public class DefaultCacheManager implements CacheManager, InitializingBean {
 
-    private enum CacheType {
-        INFERENCE_RESULT,
-        REMOTE_MODEL_INFERENCE_RESULT
-    }
+    private final Logger LOGGER = LogManager.getLogger();
+    private JedisPool jedisPool;
+    private Cache<String, ReturnResult> inferenceResultCache;
+    private Cache<String, ReturnResult> remoteModelInferenceResultCache;
+    private Cache<String, Object> processDataCache;
+    private int[] remoteModelInferenceResultCacheDBIndex;
+    private int[] inferenceResultCacheDBIndex;
+    private int[] processCacheDBIndex;
 
-    static {
+
+    private int externalRemoteModelInferenceResultCacheTTL;
+    private int externalInferenceResultCacheTTL;
+    private Set<Integer> canCacheRetcode;
+
+    DefaultCacheManager() {
         remoteModelInferenceResultCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(Configuration.getPropertyInt("remoteModelInferenceResultCacheTTL"), TimeUnit.SECONDS)
                 .maximumSize(Configuration.getPropertyInt("remoteModelInferenceResultCacheMaxSize"))
                 .build();
+
+
+        processDataCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(60, TimeUnit.SECONDS)
+                .maximumSize(50000)
+                .build();
+
 
         inferenceResultCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(Configuration.getPropertyInt("inferenceResultCacheTTL"), TimeUnit.SECONDS)
@@ -74,16 +81,45 @@ public class CacheManager {
                 Configuration.getPropertyInt("redis.port"),
                 Configuration.getPropertyInt("redis.timeout"),
                 Configuration.getProperty("redis.password"));
+
+
         inferenceResultCacheDBIndex = initializeCacheDBIndex(Configuration.getProperty("external.inferenceResultCacheDBIndex"));
         externalInferenceResultCacheTTL = Configuration.getPropertyInt("external.inferenceResultCacheTTL");
         remoteModelInferenceResultCacheDBIndex = initializeCacheDBIndex(Configuration.getProperty("external.remoteModelInferenceResultCacheDBIndex"));
+        processCacheDBIndex = initializeCacheDBIndex(Configuration.getProperty("external.processCacheDBIndex"));
         externalRemoteModelInferenceResultCacheTTL = Configuration.getPropertyInt("external.remoteModelInferenceResultCacheTTL");
         canCacheRetcode = initializeCanCacheRetcode();
     }
 
-    public static void putInferenceResultCache(Context context , String partyId, String caseid, ReturnResult returnResult) {
+    @Override
+    public void afterPropertiesSet() throws Exception {
 
-        long  beginTime =System.currentTimeMillis();
+
+    }
+
+    @Override
+    public void store(Context context, String key, Object object) {
+
+        LOGGER.info("store key {} value {}", key, object);
+        CacheValueConfig cacheValueConfig = getCacheValueConfig(key, CacheType.PROCESS_DATA);
+        putIntoRedisCache(key, cacheValueConfig, object);
+
+
+    }
+
+    @Override
+    public <T> T restore(Context context, String key, Class<T> dataType) {
+
+        CacheValueConfig cacheValueConfig = getCacheValueConfig(key, CacheType.PROCESS_DATA);
+        T result = getFromRedisCache(key, cacheValueConfig, dataType);
+        LOGGER.info("restore key {} value {}", key, result);
+        return result;
+    }
+
+    @Override
+    public void putInferenceResultCache(Context context, String partyId, String caseid, ReturnResult returnResult) {
+
+        long beginTime = System.currentTimeMillis();
         try {
 
             String inferenceResultCacheKey = generateInferenceResultCacheKey(partyId, caseid);
@@ -91,16 +127,15 @@ public class CacheManager {
             if (putCacheSuccess) {
                 LOGGER.info("Put {} inference result into cache", inferenceResultCacheKey);
             }
-        }finally {
-            long  end =System.currentTimeMillis();
-            LOGGER.info("caseid {} putInferenceResultCache cost {}",context.getCaseId(),end - beginTime);
+        } finally {
+            long end = System.currentTimeMillis();
+            LOGGER.info("caseid {} putInferenceResultCache cost {}", context.getCaseId(), end - beginTime);
 
         }
-
-
     }
 
-    public static ReturnResult getInferenceResultCache(String partyId, String caseid) {
+    @Override
+    public ReturnResult getInferenceResultCache(String partyId, String caseid) {
         String inferenceResultCacheKey = generateInferenceResultCacheKey(partyId, caseid);
         ReturnResult returnResult = getFromCache(inferenceResultCacheKey, CacheType.INFERENCE_RESULT);
         if (returnResult != null) {
@@ -109,8 +144,9 @@ public class CacheManager {
         return returnResult;
     }
 
-    public static void putRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds, ReturnResult returnResult) {
-        if (! Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))){
+    @Override
+    public void putRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds, ReturnResult returnResult) {
+        if (!Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))) {
             return;
         }
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(remoteParty, federatedRoles, featureIds);
@@ -120,8 +156,9 @@ public class CacheManager {
         }
     }
 
-    public static ReturnResult getRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds) {
-        if (! Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))){
+    @Override
+    public ReturnResult getRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds) {
+        if (!Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))) {
             return null;
         }
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(remoteParty, federatedRoles, featureIds);
@@ -132,20 +169,20 @@ public class CacheManager {
         return returnResult;
     }
 
-    private static ReturnResult getFromCache(String cacheKey, CacheType cacheType) {
+    private ReturnResult getFromCache(String cacheKey, CacheType cacheType) {
         CacheValueConfig cacheValueConfig = getCacheValueConfig(cacheKey, cacheType);
         ReturnResult returnResultFromInCache = (ReturnResult) cacheValueConfig.getInProcessCache().getIfPresent(cacheKey);
         if (returnResultFromInCache != null) {
             return returnResultFromInCache;
         }
-        ReturnResult returnResultFromExternalCache = getFromRedisCache(cacheKey, cacheValueConfig);
+        ReturnResult returnResultFromExternalCache = getFromRedisCache(cacheKey, cacheValueConfig, ReturnResult.class);
         if (returnResultFromExternalCache != null) {
             cacheValueConfig.getInProcessCache().put(cacheKey, returnResultFromExternalCache);
         }
         return returnResultFromExternalCache;
     }
 
-    private static boolean putIntoCache(String cacheKey, CacheType cacheType, ReturnResult returnResult) {
+    private boolean putIntoCache(String cacheKey, CacheType cacheType, ReturnResult returnResult) {
         CacheValueConfig cacheValueConfig = getCacheValueConfig(cacheKey, cacheType);
         if (canCacheRetcode.contains(returnResult.getRetcode())) {
             cacheValueConfig.getInProcessCache().put(cacheKey, returnResult);
@@ -156,29 +193,29 @@ public class CacheManager {
         }
     }
 
-    private static ReturnResult getFromRedisCache(String cacheKey, CacheValueConfig cacheValueConfig) {
+    private <T> T getFromRedisCache(String cacheKey, CacheValueConfig cacheValueConfig, Class<T> dataType) {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.select(cacheValueConfig.getDbIndex());
             String cacheValueString = jedis.get(cacheKey);
-            ReturnResult returnResultFromExternalCache = (ReturnResult) ObjectTransform.json2Bean(cacheValueString, ReturnResult.class);
+            T returnResultFromExternalCache = (T) ObjectTransform.json2Bean(cacheValueString, dataType);
             return returnResultFromExternalCache;
         }
 
     }
 
-    private static void putIntoRedisCache(String cacheKey, CacheValueConfig cacheValueConfig, ReturnResult returnResult) {
+    private void putIntoRedisCache(String cacheKey, CacheValueConfig cacheValueConfig, Object returnResult) {
         try (Jedis jedis = jedisPool.getResource()) {
-                Pipeline redisPipeline = jedis.pipelined();
-                redisPipeline.select(cacheValueConfig.getDbIndex());
-                redisPipeline.set(cacheKey, ObjectTransform.bean2Json(returnResult));
-                redisPipeline.expire(cacheKey, cacheValueConfig.getTtl());
-                redisPipeline.sync();
+            Pipeline redisPipeline = jedis.pipelined();
+            redisPipeline.select(cacheValueConfig.getDbIndex());
+            redisPipeline.set(cacheKey, ObjectTransform.bean2Json(returnResult));
+            redisPipeline.expire(cacheKey, cacheValueConfig.getTtl());
+            redisPipeline.sync();
 
 
         }
     }
 
-    private static int[] initializeCacheDBIndex(String config) {
+    private int[] initializeCacheDBIndex(String config) {
         int[] dbIndexs;
         String[] indexStartEnd = config.split(",");
         if (indexStartEnd.length > 1) {
@@ -195,7 +232,7 @@ public class CacheManager {
         return dbIndexs;
     }
 
-    private static Set<Integer> initializeCanCacheRetcode() {
+    private Set<Integer> initializeCanCacheRetcode() {
         Set<Integer> retcodes = new HashSet<>();
         String[] retcodeString = Configuration.getProperty("canCacheRetcode").split(",");
         for (int i = 0; i < retcodeString.length; i++) {
@@ -204,7 +241,7 @@ public class CacheManager {
         return retcodes;
     }
 
-    private static CacheValueConfig getCacheValueConfig(String cacheKey, CacheType cacheType) {
+    private CacheValueConfig getCacheValueConfig(String cacheKey, CacheType cacheType) {
         int dbIndex;
         int ttl;
         switch (cacheType) {
@@ -216,21 +253,25 @@ public class CacheManager {
                 dbIndex = getCacheDBIndex(cacheKey, remoteModelInferenceResultCacheDBIndex);
                 ttl = externalRemoteModelInferenceResultCacheTTL + new Random().nextInt(100);
                 return new CacheValueConfig<>(dbIndex, ttl, remoteModelInferenceResultCache);
+            case PROCESS_DATA:
+                dbIndex = getCacheDBIndex(cacheKey, processCacheDBIndex);
+                ttl = 60;
+                return new CacheValueConfig<>(dbIndex, ttl, processDataCache);
             default:
                 return null;
         }
     }
 
-    private static int getCacheDBIndex(String cacheKey, int[] dbIndexs) {
+    private int getCacheDBIndex(String cacheKey, int[] dbIndexs) {
         int i = Hashing.murmur3_128().hashString(cacheKey, Charsets.UTF_8).asInt() % dbIndexs.length;
         return dbIndexs[i > 0 ? i : -i];
     }
 
-    private static String generateInferenceResultCacheKey(String partyId, String caseid) {
+    private String generateInferenceResultCacheKey(String partyId, String caseid) {
         return StringUtils.join(Arrays.asList(partyId, caseid), "_");
     }
 
-    private static String generateRemoteModelInferenceResultCacheKey(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds) {
+    private String generateRemoteModelInferenceResultCacheKey(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds) {
         String remotePartyKey = StringUtils.join(Arrays.asList(remoteParty.getRole(), remoteParty.getPartyId(), FederatedUtils.federatedRolesIdentificationString(federatedRoles)), "#");
         Object[] featureIdKeys = featureIds.keySet().toArray();
         Arrays.sort(featureIdKeys);
@@ -244,4 +285,13 @@ public class CacheManager {
         LOGGER.info(cacheKey);
         return cacheKey;
     }
+
+    private enum CacheType {
+        INFERENCE_RESULT,
+        REMOTE_MODEL_INFERENCE_RESULT,
+        PROCESS_DATA
+
+    }
+
+
 }

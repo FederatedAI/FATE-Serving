@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.manger;
+package com.webank.ai.fate.networking.proxy.factory;
 
-public class ModelInfo {
-    private String name;
-    private String namespace;
+import org.springframework.stereotype.Component;
 
-    public ModelInfo() {
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
+@Component
+public class QueueFactory {
+    public <T> ConcurrentLinkedQueue<T> createConcurrentLinkedQueue() {
+        return new ConcurrentLinkedQueue<T>();
     }
 
-    public ModelInfo(String name, String namespace) {
-        this.name = name;
-        this.namespace = namespace;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getNamespace() {
-        return namespace;
+    public <T> LinkedBlockingQueue<T> createLinkedBlockingQueue(int capacity) {
+        return new LinkedBlockingQueue<>(capacity);
     }
 }

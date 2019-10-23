@@ -24,7 +24,11 @@ import java.util.Map;
 
 public interface PostProcessing {
 
-    PostProcessingResult getResult(Context context , Map<String, Object> featureData, Map<String, Object> modelResult);
+    PostProcessingResult getResult(Context context, Map<String, Object> featureData, Map<String, Object> modelResult);
 
-    public default ReturnResult  handleResult(Context context ,ReturnResult  result)  {  return  result;};
+    public default ReturnResult handleResult(Context context, ReturnResult result) {
+        return result;
+    }
+
+    ;
 }
