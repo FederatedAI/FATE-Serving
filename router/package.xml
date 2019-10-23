@@ -41,21 +41,28 @@
 
         <fileSet>
             <outputDirectory>/conf</outputDirectory>
-            <directory>conf</directory>
+            <directory>src/main/resources</directory>
             <includes>
                 <include>proxy.properties</include>
             </includes>
         </fileSet>
 
+        <!--
         <fileSet>
             <outputDirectory>/conf</outputDirectory>
-            <directory>src/resources</directory>
+            <directory>src/main/resources</directory>
             <includes>
                 <include>log4j2.properties</include>
             </includes>
         </fileSet>
-
-
+        -->
+        <fileSet>
+            <outputDirectory>/conf</outputDirectory>
+            <directory>src/main/resources/route_tables</directory>
+            <includes>
+                <include>route_table.json</include>
+            </includes>
+        </fileSet>
 
     </fileSets>
 </assembly>
