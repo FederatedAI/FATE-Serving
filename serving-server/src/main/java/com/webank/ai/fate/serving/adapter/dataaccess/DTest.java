@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
 import com.webank.ai.fate.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.utils.HttpClientPool;
 import com.webank.ai.fate.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
@@ -33,7 +34,7 @@ public class DTest implements FeatureData {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public ReturnResult getData(Map<String, Object> featureIds) {
+    public ReturnResult getData(Map<String, Object> featureIds, Context context) {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> requestData = new HashMap<>();
         requestData.putAll(featureIds);

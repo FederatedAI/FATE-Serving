@@ -50,6 +50,12 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
             requestData = (Map<String, Object>) ObjectTransform.json2Bean(req.getBody().getValue().toStringUtf8(), HashMap.class);
             context.setCaseId(requestData.get(Dict.CASEID)!=null?requestData.get(Dict.CASEID).toString():Dict.NONE);
 
+            FederatedParty party = (FederatedParty) ObjectTransform.json2Bean(requestData.get("local").toString(), FederatedParty.class);
+            FederatedParty partnerParty = (FederatedParty) ObjectTransform.json2Bean(requestData.get("partner_local").toString(), FederatedParty.class);
+
+            context.putData(Dict.GUEST_APP_ID, partnerParty.getPartyId());
+            context.putData(Dict.HOST_APP_ID, party.getPartyId());
+
             switch (req.getHeader().getCommand().getName()) {
                 case "federatedInference":
                     responseResult = InferenceManager.federatedInference(context, requestData);
@@ -67,8 +73,6 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
 
             Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
-            FederatedParty partnerParty = (FederatedParty) ObjectTransform.json2Bean(requestData.get("partner_local").toString(), FederatedParty.class);
-            FederatedParty party = (FederatedParty) ObjectTransform.json2Bean(requestData.get("local").toString(), FederatedParty.class);
 
             metaDataBuilder.setSrc(
                     topicBuilder.setPartyId(String.valueOf(party.getPartyId()))
