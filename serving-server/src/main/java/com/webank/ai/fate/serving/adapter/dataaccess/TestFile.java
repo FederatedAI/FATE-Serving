@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
 import com.webank.ai.fate.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +33,7 @@ public class TestFile implements FeatureData {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public ReturnResult getData(Map<String, Object> featureIds) {
+    public ReturnResult getData(Map<String, Object> featureIds, Context context) {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
         try {
