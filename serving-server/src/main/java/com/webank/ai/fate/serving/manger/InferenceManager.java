@@ -274,7 +274,7 @@ public class InferenceManager {
         predictParams.put("federatedParams", federatedParams);
 
         try {
-            ReturnResult getFeatureDataResult = getFeatureData(featureIds);
+            ReturnResult getFeatureDataResult = getFeatureData(featureIds, context);
             if (getFeatureDataResult.getRetcode() == InferenceRetCode.OK) {
                 if (getFeatureDataResult.getData() == null || getFeatureDataResult.getData().size() < 1) {
                     returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
@@ -321,7 +321,7 @@ public class InferenceManager {
             LOGGER.info("postprocess caseid {} cost time {}",context.getCaseId(),endTime-beginTime);
         }
     }
-    private static ReturnResult getFeatureData(Map<String, Object> featureIds) {
+    private static ReturnResult getFeatureData(Map<String, Object> featureIds, Context context) {
         ReturnResult defaultReturnResult = new ReturnResult();
         String classPath = FeatureData.class.getPackage().getName() + "." + Configuration.getProperty("OnlineDataAccessAdapter");
         FeatureData featureData = (FeatureData) InferenceUtils.getClassByName(classPath);
@@ -330,7 +330,7 @@ public class InferenceManager {
             return defaultReturnResult;
         }
         try {
-            return featureData.getData(featureIds);
+            return featureData.getData(featureIds, context);
         } catch (Exception ex) {
             defaultReturnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
             LOGGER.error("get feature data error:", ex);

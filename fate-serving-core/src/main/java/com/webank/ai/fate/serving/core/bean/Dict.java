@@ -15,4 +15,7 @@ public class Dict {
     public  static  final String HIT_CACHE = "hitCache";
 
     public  static  final String REQUEST_SEQNO="REQUEST_SEQNO";
+
+    public  static  final String GUEST_APP_ID = "guestAppId";
+    public  static  final String HOST_APP_ID = "hostAppId";
 }
