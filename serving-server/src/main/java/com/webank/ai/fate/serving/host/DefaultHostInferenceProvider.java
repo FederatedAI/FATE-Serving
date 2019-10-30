@@ -97,7 +97,7 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
         predictParams.put(Dict.FEDERATED_PARAMS, federatedParams);
 
         try {
-            ReturnResult getFeatureDataResult = getFeatureData(featureIds);
+            ReturnResult getFeatureDataResult = getFeatureData(context,featureIds);
             if (getFeatureDataResult.getRetcode() == InferenceRetCode.OK) {
                 if (getFeatureDataResult.getData() == null || getFeatureDataResult.getData().size() < 1) {
                     returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);

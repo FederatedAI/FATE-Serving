@@ -120,6 +120,14 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                     }
                 });
             });
+
+            if(Dict.HOST.equals(role)){
+                if (zookeeperRegistry != null) {
+                    zookeeperRegistry.addDynamicEnvironment(partyId);
+                    zookeeperRegistry.register(FateServer.serviceSets);
+                }
+
+            }
             logger.info("load the model successfully");
             return returnResult;
         } catch (Exception ex) {

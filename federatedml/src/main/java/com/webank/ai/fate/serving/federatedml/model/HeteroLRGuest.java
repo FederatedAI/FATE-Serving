@@ -50,9 +50,13 @@ public class HeteroLRGuest extends HeteroLR {
             //predictParams.put("federatedResult", hostPredictResponse);
             //context.setFederatedResult(hostPredictResponse);
             LOGGER.info("host response is {}", hostPredictResponse.getData());
-            double hostScore = (double) hostPredictResponse.getData().get(Dict.SCORE);
-            LOGGER.info("host score:{}", hostScore);
-            score += hostScore;
+            if(hostPredictResponse.getData()!=null&&hostPredictResponse.getData().get(Dict.SCORE)!=null) {
+                double hostScore =( (Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
+                LOGGER.info("host score:{}", hostScore);
+                score += hostScore;
+            }
+
+
         } catch (Exception ex) {
             LOGGER.error("get host predict failed:", ex);
         }
