@@ -16,8 +16,9 @@
 
 package com.webank.ai.fate.serving.bean;
 
-import com.webank.ai.fate.core.bean.FederatedParty;
-import com.webank.ai.fate.core.bean.FederatedRoles;
+
+import com.webank.ai.fate.serving.core.bean.FederatedParty;
+import com.webank.ai.fate.serving.core.bean.FederatedRoles;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 
 public class ModelNamespaceData {
@@ -42,43 +43,43 @@ public class ModelNamespaceData {
         this.usedModel = usedModel;
     }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public void setLocal(FederatedParty local) {
-        this.local = local;
-    }
-
-    public void setRole(FederatedRoles role) {
-        this.role = role;
-    }
-
-    public void setUsedModelName(String usedModelName) {
-        this.usedModelName = usedModelName;
-    }
-
-    public void setUsedModel(PipelineTask usedModel) {
-        this.usedModel = usedModel;
-    }
-
     public String getNamespace() {
         return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     public FederatedParty getLocal() {
         return local;
     }
 
+    public void setLocal(FederatedParty local) {
+        this.local = local;
+    }
+
     public FederatedRoles getRole() {
         return role;
+    }
+
+    public void setRole(FederatedRoles role) {
+        this.role = role;
     }
 
     public String getUsedModelName() {
         return usedModelName;
     }
 
+    public void setUsedModelName(String usedModelName) {
+        this.usedModelName = usedModelName;
+    }
+
     public PipelineTask getUsedModel() {
         return usedModel;
+    }
+
+    public void setUsedModel(PipelineTask usedModel) {
+        this.usedModel = usedModel;
     }
 }
