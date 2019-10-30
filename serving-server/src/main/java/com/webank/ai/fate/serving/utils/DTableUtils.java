@@ -16,9 +16,12 @@
 
 package com.webank.ai.fate.serving.utils;
 
-import com.webank.ai.fate.core.bean.FederatedRoles;
-import com.webank.ai.fate.core.storage.dtable.DTableInfo;
-import com.webank.ai.fate.core.utils.SceneUtils;
+
+import com.webank.ai.eggroll.core.storage.dtable.DTableInfo;
+
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.FederatedRoles;
+import com.webank.ai.fate.serving.core.manager.SceneUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,9 +38,9 @@ public class DTableUtils {
             namespace = getSceneNamespace(SceneUtils.genSceneKey(role, partyId, federatedRoles), dataType);
         }
         if (StringUtils.isEmpty(tableName)) {
-            Map<String, String> versionInfo = VersionControl.getVersionInfo(namespace, "", "", "master");
+            Map<String, String> versionInfo = VersionControl.getVersionInfo(namespace, "", "", Dict.BRANCH_MASTER);
             if (versionInfo != null) {
-                tableName = versionInfo.get("commitId");
+                tableName = versionInfo.get(Dict.COMMIT_ID);
             }
         }
         return new DTableInfo(tableName, namespace);

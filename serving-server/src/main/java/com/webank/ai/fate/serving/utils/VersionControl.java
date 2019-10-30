@@ -16,9 +16,11 @@
 
 package com.webank.ai.fate.serving.utils;
 
-import com.webank.ai.fate.core.storage.dtable.DTable;
-import com.webank.ai.fate.core.storage.dtable.DTableFactory;
-import com.webank.ai.fate.core.utils.ObjectTransform;
+
+import com.webank.ai.eggroll.core.storage.dtable.DTable;
+import com.webank.ai.eggroll.core.storage.dtable.DTableFactory;
+import com.webank.ai.eggroll.core.utils.ObjectTransform;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
