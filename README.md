@@ -158,7 +158,7 @@ FATE-Serving provide publish model and online inference API.
 
 ### Publish Model
 
-Please use FATE-Flow Client which in the fate-flow to operate, refer to **Online Inference** guide at [fate_flow_readme](../fate_flow/README.md). 
+Please use FATE-Flow Client which in the fate-flow to operate, refer to **Online Inference** guide at [fate_flow_readme](https://github.com/FederatedAI/FATE/blob/master/fate_flow/README.md). 
 
 
 
