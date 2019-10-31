@@ -24,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InferenceRequest implements Request{
+public class InferenceRequest implements Request {
     private String appid;
     private String partyId;
     private String modelVersion;
@@ -39,9 +39,10 @@ public class InferenceRequest implements Request{
         featureData = new HashMap<>();
     }
 
-    public  void  setCaseId(String  caseId){
+    public void setCaseId(String caseId) {
         this.caseid = caseId;
     }
+
     @Override
     public String getSeqno() {
         return seqno;
@@ -52,6 +53,11 @@ public class InferenceRequest implements Request{
         return appid;
     }
 
+    public void setAppid(String appid) {
+        this.appid = appid;
+        this.partyId = appid;
+    }
+
     @Override
     public String getCaseid() {
         return caseid;
@@ -60,6 +66,11 @@ public class InferenceRequest implements Request{
     @Override
     public String getPartyId() {
         return partyId;
+    }
+
+    public void setPartyId(String partyId) {
+        this.partyId = partyId;
+        this.appid = partyId;
     }
 
     @Override
@@ -77,34 +88,23 @@ public class InferenceRequest implements Request{
         return featureData;
     }
 
-    public void setAppid(String appid) {
-        this.appid = appid;
-        this.partyId = appid;
-    }
-
-    public void setPartyId(String partyId) {
-        this.partyId = partyId;
-        this.appid = partyId;
-    }
-
     public boolean haveAppId() {
         return (!StringUtils.isEmpty(appid) || !StringUtils.isEmpty(partyId));
     }
 
     @Override
-    public String toString(){
-        String  result = "";
-        try
-        {
+    public String toString() {
+        String result = "";
+        try {
 
             ObjectMapper objectMapper = new ObjectMapper();
 
             result = objectMapper.writeValueAsString(this);
 
-        }catch(Throwable e){
+        } catch (Throwable e) {
 
         }
-        return  result;
+        return result;
 
     }
 
