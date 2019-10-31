@@ -27,7 +27,7 @@
     <artifactId>fate-serving-core</artifactId>
 
     <properties>
-        <jackson.version>2.9.8</jackson.version>
+        <jackson.version>2.10.0</jackson.version>
         <jedis.version>2.9.0</jedis.version>
     </properties>
     <dependencies>
