@@ -41,7 +41,7 @@ The preparations are as follows：
 
 the ordinary deploy architecture as the graph shows，If you use this pattern， the IP addresses of each module need to be manually configured in the configuration file
 
-![fate_serving_arch](./images/useZk.png)
+![fate_serving_arch](./images/noZk.png)
 
 
 
@@ -49,7 +49,7 @@ the ordinary deploy architecture as the graph shows，If you use this pattern，
 
 If you want use the service management,the deploy architecture is show here:
 
-![fate_serving_arch](./images/noZk.png)
+![fate_serving_arch](./images/useZk.png)
 
 
 - serving-server: Federated Learning online inference service based on GRPC
@@ -117,7 +117,7 @@ Key configuration item description:
 | zk.url | zookeeper url, same as serving configuration | default zookeeper://localhost:2181 |
 | useRegister | Register interface to registry or not | default false |
 | useZkRouter | route request by the interface info which is registered into zookeeper | default false |
-| route.table | router table configuration file absolute path | default conf/router_table.json |
+| route.table | router table configuration file absolute path | default conf/route_table.json |
 
 
 ### Deploy Serving-Server 
@@ -127,10 +127,11 @@ For detail, Here are some key steps:
     1.git clone https://github.com/FederatedAI/FATE-Serving.git
     2.cd  FATE-Serving
     3.mvn clean package
-    4.copy serving-server/target/fate-serving-server-1.0-release.zip to your deploy location and unzip it
+    4.copy serving-server/target/fate-serving-server-1.1-release.zip to your deploy location and unzip it
     5.modify the configuration file conf/serving-server.properties according to your own requirements
     6.confirm whether Java is installed. You can check through the java -version command.
-    7.sh service.sh  restart
+    7.ln -s fate-serving-server-1.1.jar fate-serving-server.jar, creating soft links for jar.
+    8.sh service.sh restart
 
    
 
@@ -139,10 +140,11 @@ For detail, Here are some key steps:
 For detail, Here are some key steps:
 
     1.Same as serving-server deploy steps 1/2/3, if it has been executed, you can skip
-    2.copy router/target/fate-serving-router-1.0-release.zip to your deploy location and unzip it
-    3.modify the configuration file conf/proxy.properties and conf/router_table.json according to your own requirements
+    2.copy router/target/fate-serving-router-1.1-release.zip to your deploy location and unzip it
+    3.modify the configuration file conf/proxy.properties and conf/route_table.json according to your own requirements
     5.confirm whether Java is installed. You can check through the java -version command.
-    6.sh service.sh  restart
+    6.ln -s fate-serving-router-1.1.jar fate-serving-router.jar, creating soft links for jar.
+    6.sh service.sh restart
 
 
 
@@ -169,10 +171,6 @@ Serving currently supports three inference-related interfaces, using the grpc pr
 - inference: Initiate an inference request and get the result
 - startInferenceJob: Initiate an inference request task without getting results
 - getInferenceResult: Get the result of the inference by caseid
-
-```shell
-python examples/inference_request.py ${sering_host}
-```
 
 please refer to this script for inference.
 

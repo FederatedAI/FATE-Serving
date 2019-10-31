@@ -31,7 +31,7 @@
         </fileSet>
 
         <fileSet>
-            <outputDirectory>/bin</outputDirectory>
+            <outputDirectory>/</outputDirectory>
             <directory>bin</directory>
             <includes>
                 <include>*</include>
@@ -47,7 +47,6 @@
             </includes>
         </fileSet>
 
-        <!--
         <fileSet>
             <outputDirectory>/conf</outputDirectory>
             <directory>src/main/resources</directory>
@@ -55,7 +54,15 @@
                 <include>log4j2.properties</include>
             </includes>
         </fileSet>
-        -->
+
+        <fileSet>
+            <outputDirectory>/conf</outputDirectory>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>applicationContext-proxy.xml</include>
+            </includes>
+        </fileSet>
+
         <fileSet>
             <outputDirectory>/conf</outputDirectory>
             <directory>src/main/resources/route_tables</directory>
