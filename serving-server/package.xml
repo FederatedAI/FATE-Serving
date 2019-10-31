@@ -31,7 +31,7 @@
         </fileSet>
 
         <fileSet>
-            <outputDirectory>/bin</outputDirectory>
+            <outputDirectory>/</outputDirectory>
             <directory>bin</directory>
             <includes>
                 <include>*</include>
@@ -47,13 +47,13 @@
             </includes>
         </fileSet>
 
-        <!--<fileSet>
+        <fileSet>
             <outputDirectory>/conf</outputDirectory>
-            <directory>src/resources</directory>
+            <directory>src/main/resources</directory>
             <includes>
                 <include>log4j2.xml</include>
             </includes>
-        </fileSet>-->
+        </fileSet>
 
 
 

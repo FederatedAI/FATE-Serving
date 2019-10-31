@@ -20,12 +20,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <artifactId>fate-register</artifactId>
-    <version>1.0</version>
+    <version>${fate.version}</version>
 
     <parent>
         <artifactId>fate-serving</artifactId>
         <groupId>com.webank.ai.fate</groupId>
-        <version>1.0</version>
+        <version>${fate.version}</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -33,7 +33,6 @@
 
 
     <properties>
-        <fate.version>1.0</fate.version>
         <jackson.version>2.10.0.pr1</jackson.version>
 
         <mysql.connector.version>8.0.13</mysql.connector.version>
