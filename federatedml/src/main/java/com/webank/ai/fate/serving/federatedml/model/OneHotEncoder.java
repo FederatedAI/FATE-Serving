@@ -61,6 +61,7 @@ public class OneHotEncoder extends BaseModel {
         LOGGER.info("Start OneHot Encoder transform");
         HashMap<String, Object> outputData = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
+        LOGGER.debug("Need run is ", this.needRun);
         if (!this.needRun) {
             return firstData;
         }
