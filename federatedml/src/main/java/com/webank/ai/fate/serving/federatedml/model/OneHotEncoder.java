@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class OneHotEncoder extends BaseModel {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -45,7 +46,7 @@ public class OneHotEncoder extends BaseModel {
             OneHotParam oneHotParam = this.parseModel(OneHotParam.parser(), protoParam);
             this.needRun = oneHotMeta.getNeedRun();
 
-            this.cols = oneHotMeta.getColsList();
+            this.cols = oneHotMeta.getTransformColNamesList();
             this.colsMapMap = oneHotParam.getColMapMap();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -71,23 +72,22 @@ public class OneHotEncoder extends BaseModel {
                 }
                 ColsMap colsMap = this.colsMapMap.get(colName);
 
-                String dataType = colsMap.getDataType();
-                if (! dataType.equals("int")) {
-                    LOGGER.warn("One Hot Encoder support integer input only now");
-                    outputData.put(colName, firstData.get(colName));
-                    continue;
-                }
+
                 List<String> values = colsMap.getValuesList();
-                List<String> encodedVariables = colsMap.getEncodedVariablesList();
+                List<String> encodedVariables = colsMap.getTransformedHeadersList();
 //                Integer inputValue = new Integer(firstData.get(colName).toString());
 
                 Integer inputValue = 0;
                 try {
                     String thisInputValue = firstData.get(colName).toString();
-                    double d = Double.valueOf(thisInputValue);
-                    inputValue = (int) Math.ceil(d);
+                    if (this.isDouble(thisInputValue)) {
+                        double d = Double.valueOf(thisInputValue);
+                        inputValue = (int) Math.ceil(d);
+                    }else {
+                        inputValue = Integer.valueOf(thisInputValue);
+                    }
                 }catch (Throwable e){
-                    LOGGER.error("Onehot component accept integer input value only");
+                    LOGGER.error("Onehot component accept number input value only");
                 }
 
                 for (int i = 0; i < values.size(); i ++) {
@@ -106,4 +106,21 @@ public class OneHotEncoder extends BaseModel {
         LOGGER.info("OneHotEncoder output {}",outputData);
         return outputData;
     }
+
+    private boolean isInteger(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
+    }
+
+    private boolean isDouble(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("^-?([1-9]\\\\d*\\\\.\\\\d*|0\\\\.\\\\d*[1-9]\\\\d*|0?\\\\.0+|0)$");
+        return pattern.matcher(str).matches();
+    }
+
 }
