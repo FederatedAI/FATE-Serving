@@ -59,7 +59,7 @@ public class OneHotEncoder extends BaseModel {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         LOGGER.info("Start OneHot Encoder transform");
-        LOGGER.info("First time need run: ", this.needRun);
+        LOGGER.info("First time need run");
         HashMap<String, Object> outputData = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
         LOGGER.info("Need run is ", this.needRun);
