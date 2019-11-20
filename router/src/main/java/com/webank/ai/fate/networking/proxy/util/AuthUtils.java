@@ -102,13 +102,14 @@ public class AuthUtils implements InitializingBean{
         return signature;
     }
 
-    public Proxy.Packet.Builder addAuthInfo(Context context, Proxy.Metadata header, Proxy.Data body, Proxy.Packet.Builder packetBuilder) {
+    public Proxy.Packet.Builder addAuthInfo(Context context, Proxy.Metadata header, Proxy.Data body, Proxy.Packet.Builder packetBuilder, String version) {
 
         Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
         long timestamp = System.currentTimeMillis();
         authBuilder.setTimestamp(timestamp);
         authBuilder.setNonce(context.getCaseId());
         authBuilder.setApplyId(applyId);
+        authBuilder.setVersion(version);
         if(ifUseAuth){
             String signature = calSignature(header, body);
             authBuilder.setSignature(signature);

@@ -195,12 +195,12 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
             String version =  Configuration.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
+
             Proxy.Metadata header = bodymetaDataBuilder.build();
             packetBuilder.setHeader(header);
 
             // to add authentication info
-            packetBuilder = authUtils.addAuthInfo(context, header, body, packetBuilder);
+            packetBuilder = authUtils.addAuthInfo(context, header, body, packetBuilder, version);
 
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
             String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
