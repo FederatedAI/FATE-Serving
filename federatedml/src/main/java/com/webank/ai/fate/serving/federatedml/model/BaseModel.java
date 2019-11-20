@@ -27,19 +27,27 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
+import com.webank.ai.fate.networking.proxy.util.AuthUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
-import java.util.Map;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public abstract class BaseModel implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>> {
 
     private static final Logger LOGGER = LogManager.getLogger();
+
+    @Autowired
+    private AuthUtils authUtils;
+
     public static RouterService routerService;
     protected String componentName;
 
@@ -50,6 +58,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
     public void setComponentName(String componentName) {
         this.componentName = componentName;
     }
+
 
     public abstract int initModel(byte[] protoMeta, byte[] protoParam);
 
@@ -77,7 +86,6 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
     }
 
-    ;
 
     @Override
     public void preprocess(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
@@ -166,10 +174,10 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 //                    .setValue(ByteString.copyFrom(ObjectTransform.bean2Json(requestData).getBytes()))
 //                    .build());
 
-
-            packetBuilder.setBody(Proxy.Data.newBuilder()
+            Proxy.Data body = Proxy.Data.newBuilder()
                     .setValue(ByteString.copyFrom(JSON.toJSONBytes(hostFederatedParams)))
-                    .build());
+                    .build();
+            packetBuilder.setBody(body);
 
             Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
@@ -188,7 +196,12 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
             String version =  Configuration.getProperty(Dict.VERSION,"");
             metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
-            packetBuilder.setHeader(metaDataBuilder.build());
+            Proxy.Metadata header = bodymetaDataBuilder.build();
+            packetBuilder.setHeader(header);
+
+            // to add authentication info
+            packetBuilder = authUtils.addAuthInfo(context, header, body, packetBuilder);
+
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
             String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
             boolean routerByzk = Boolean.valueOf(routerByZkString);

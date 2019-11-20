@@ -18,6 +18,9 @@ package com.webank.ai.fate.networking.proxy.grpc.service;
 
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+
+import com.webank.ai.fate.networking.proxy.util.AuthUtils;
+
 import com.webank.ai.fate.networking.proxy.event.model.PipeHandleNotificationEvent;
 import com.webank.ai.fate.networking.proxy.factory.EventFactory;
 import com.webank.ai.fate.networking.proxy.factory.GrpcStreamObserverFactory;
@@ -57,6 +60,8 @@ public class DataTransferPipedServerImpl extends DataTransferServiceGrpc.DataTra
     private ErrorUtils errorUtils;
     private Pipe defaultPipe;
     private PipeFactory pipeFactory;
+    @Autowired
+    private AuthUtils authUtils;
 
     @RegisterService(serviceName = "push")
     @Override
@@ -184,6 +189,15 @@ public class DataTransferPipedServerImpl extends DataTransferServiceGrpc.DataTra
     @Override
     @RegisterService(serviceName = "unaryCall")
     public void unaryCall(Proxy.Packet request, StreamObserver<Proxy.Packet> responseObserver) {
+        // check authentication
+        if(false == authUtils.checkAuthentication(request)){
+            String msg = "authentication not pass!";
+            LOGGER.error(msg);
+            RuntimeException e = new RuntimeException(msg);
+            responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
+            return;
+        }
+
         Proxy.Metadata inputMetadata = request.getHeader();
         String oneLineStringInputMetadata = toStringUtils.toOneLineString(inputMetadata);
         LOGGER.info("[UNARYCALL][SERVER] server unary request received. src: {}, dst: {}",

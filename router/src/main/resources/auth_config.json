@@ -1,0 +1,12 @@
+{
+  "if_use_auth": false,
+  "request_expire_seconds": 20,
+  "apply_id": "20191119163236256",
+  "access_keys": [{
+    "appKey": "111",
+    "appSecret": "11111"
+  }, {
+    "appKey": "222",
+    "appSecret": "22222"
+  }]
+}
