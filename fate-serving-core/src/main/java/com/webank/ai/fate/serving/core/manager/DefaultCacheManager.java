@@ -45,9 +45,9 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
     private Cache<String, ReturnResult> inferenceResultCache;
     private Cache<String, ReturnResult> remoteModelInferenceResultCache;
     private Cache<String, Object> processDataCache;
-    private int[] remoteModelInferenceResultCacheDBIndex;
-    private int[] inferenceResultCacheDBIndex;
-    private int[] processCacheDBIndex;
+    private int remoteModelInferenceResultCacheDBIndex;
+    private int inferenceResultCacheDBIndex;
+    private int processCacheDBIndex;
 
 
     private int externalRemoteModelInferenceResultCacheTTL;
@@ -82,10 +82,10 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
                 Configuration.getProperty("redis.password"));
 
 
-        inferenceResultCacheDBIndex = initializeCacheDBIndex(Configuration.getProperty("external.inferenceResultCacheDBIndex"));
+        inferenceResultCacheDBIndex = Configuration.getPropertyInt("external.inferenceResultCacheDBIndex");
         externalInferenceResultCacheTTL = Configuration.getPropertyInt("external.inferenceResultCacheTTL");
-        remoteModelInferenceResultCacheDBIndex = initializeCacheDBIndex(Configuration.getProperty("external.remoteModelInferenceResultCacheDBIndex"));
-        processCacheDBIndex = initializeCacheDBIndex(Configuration.getProperty("external.processCacheDBIndex"));
+        remoteModelInferenceResultCacheDBIndex = Configuration.getPropertyInt("external.remoteModelInferenceResultCacheDBIndex");
+        processCacheDBIndex = Configuration.getPropertyInt("external.processCacheDBIndex");
         externalRemoteModelInferenceResultCacheTTL = Configuration.getPropertyInt("external.remoteModelInferenceResultCacheTTL");
         canCacheRetcode = initializeCanCacheRetcode();
     }
@@ -247,15 +247,15 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         int ttl;
         switch (cacheType) {
             case INFERENCE_RESULT:
-                dbIndex = getCacheDBIndex(cacheKey, inferenceResultCacheDBIndex);
+                dbIndex = inferenceResultCacheDBIndex;
                 ttl = externalInferenceResultCacheTTL + new Random().nextInt(10);
                 return new CacheValueConfig<>(dbIndex, ttl, inferenceResultCache);
             case REMOTE_MODEL_INFERENCE_RESULT:
-                dbIndex = getCacheDBIndex(cacheKey, remoteModelInferenceResultCacheDBIndex);
+                dbIndex = remoteModelInferenceResultCacheDBIndex;
                 ttl = externalRemoteModelInferenceResultCacheTTL + new Random().nextInt(100);
                 return new CacheValueConfig<>(dbIndex, ttl, remoteModelInferenceResultCache);
             case PROCESS_DATA:
-                dbIndex = getCacheDBIndex(cacheKey, processCacheDBIndex);
+                dbIndex = processCacheDBIndex;
                 ttl = 60;
                 return new CacheValueConfig<>(dbIndex, ttl, processDataCache);
             default:
