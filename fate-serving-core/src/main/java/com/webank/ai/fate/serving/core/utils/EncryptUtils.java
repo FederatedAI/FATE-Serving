@@ -73,8 +73,8 @@ public class EncryptUtils {
                                            String appKey, String appSecret, String uri, String body) {
         try {
             String encryptText = applyId + "\n" + timestamp + "\n" + nonce + "\n" + appKey + "\n" + uri + "\n" + body;
-            encryptText = new String(encryptText.getBytes(), EncryptUtil.UTF8);
-            return Base64.getEncoder().encodeToString(EncryptUtil.HmacSHA1Encrypt(encryptText, appSecret));
+            encryptText = new String(encryptText.getBytes(), UTF8);
+            return Base64.getEncoder().encodeToString(HmacSHA1Encrypt(encryptText, appSecret));
         } catch (Exception e) {
             e.printStackTrace();
         }

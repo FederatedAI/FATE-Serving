@@ -37,6 +37,7 @@ import com.google.gson.stream.JsonReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 @Component
@@ -87,7 +88,7 @@ public class AuthUtils implements InitializingBean{
         return ACCESS_KEYS_MAP.get(appKey);
     }
 
-    private String calSignature(Proxy.Metadata header, Proxy.Data body) {
+    private String calSignature(Proxy.Metadata header, Proxy.Data body) throws Exception {
         String signature = "";
         String appSecret = getSecret(header.getDst().getPartyId());
         if (StringUtils.isEmpty(appSecret)) {
@@ -102,14 +103,12 @@ public class AuthUtils implements InitializingBean{
         return signature;
     }
 
-    public Proxy.Packet.Builder addAuthInfo(Context context, Proxy.Metadata header, Proxy.Data body, Proxy.Packet.Builder packetBuilder, String version) {
+    public Proxy.Packet.Builder addAuthInfo(Proxy.Metadata header, Proxy.Data body, Proxy.Packet.Builder packetBuilder) throws Exception {
 
         Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
         long timestamp = System.currentTimeMillis();
         authBuilder.setTimestamp(timestamp);
-        authBuilder.setNonce(context.getCaseId());
         authBuilder.setApplyId(applyId);
-        authBuilder.setVersion(version);
         if(ifUseAuth){
             String signature = calSignature(header, body);
             authBuilder.setSignature(signature);
@@ -119,7 +118,7 @@ public class AuthUtils implements InitializingBean{
         return packetBuilder;
     }
 
-    public boolean checkAuthentication(Proxy.Packet packet) {
+    public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
         if(ifUseAuth) {
             // check timestamp
             long currentTimeMillis = System.currentTimeMillis();
