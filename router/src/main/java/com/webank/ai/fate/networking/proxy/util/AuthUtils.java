@@ -16,39 +16,37 @@
 
 package com.webank.ai.fate.networking.proxy.util;
 
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.utils.EncryptUtils;
-import com.webank.ai.fate.api.networking.proxy.Proxy;
-
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
+import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.networking.proxy.util.EncryptUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 @Component
 public class AuthUtils implements InitializingBean{
     private static final Logger LOGGER = LogManager.getLogger();
-    @Value("${auth.key.path}")
+    @Value("${auth.config.path}")
     private String keysFilePath;
     private static Map<String, String> ACCESS_KEYS_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
     private static String applyId = "";
     private static boolean ifUseAuth = false;
+    private static String selfPartyId = "";
     @Autowired
     private ToStringUtils toStringUtils;
 
@@ -61,7 +59,7 @@ public class AuthUtils implements InitializingBean{
             jsonReader = new JsonReader(new FileReader(keysFilePath));
             jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
         } catch (FileNotFoundException e) {
-            logger.error("File not found: {}", keysFilePath);
+            LOGGER.error("File not found: {}", keysFilePath);
             throw new RuntimeException(e);
         } finally {
             if (jsonReader != null) {
@@ -71,12 +69,13 @@ public class AuthUtils implements InitializingBean{
                 }
             }
         }
-
+        selfPartyId = jsonObject.get("self_party_id").getAsString();
         ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
         validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
         applyId = jsonObject.get("apply_id").getAsString();
 
         JsonArray jsonArray = jsonObject.getAsJsonArray("access_keys");
+        Gson gson = new Gson();
         List<Map> allowKeys = gson.fromJson(jsonArray, ArrayList.class);
         ACCESS_KEYS_MAP.clear();
         for (Map allowKey : allowKeys) {
@@ -88,11 +87,11 @@ public class AuthUtils implements InitializingBean{
         return ACCESS_KEYS_MAP.get(appKey);
     }
 
-    private String calSignature(Proxy.Metadata header, Proxy.Data body) throws Exception {
+    private String calSignature(Proxy.Metadata header, Proxy.Data body, long timestamp) throws Exception {
         String signature = "";
         String appSecret = getSecret(header.getDst().getPartyId());
         if (StringUtils.isEmpty(appSecret)) {
-            logger.error("appSecret not found");
+            LOGGER.error("appSecret not found");
             return signature;
         }
         String encryptText = String.valueOf(timestamp) + "\n"
@@ -103,35 +102,40 @@ public class AuthUtils implements InitializingBean{
         return signature;
     }
 
-    public Proxy.Packet.Builder addAuthInfo(Proxy.Metadata header, Proxy.Data body, Proxy.Packet.Builder packetBuilder) throws Exception {
+    public Proxy.Packet addAuthInfo(Proxy.Packet packet) throws Exception {
 
-        Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
+        Proxy.Packet.Builder packetBuilder = packet.toBuilder();
+        Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
+
         long timestamp = System.currentTimeMillis();
+
         authBuilder.setTimestamp(timestamp);
         authBuilder.setApplyId(applyId);
-        if(ifUseAuth){
-            String signature = calSignature(header, body);
+
+        if(ifUseAuth
+                && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
+            String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp);
             authBuilder.setSignature(signature);
         }
         packetBuilder.setAuth(authBuilder.build());
-
-        return packetBuilder;
+        return packetBuilder.build();
     }
 
     public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
-        if(ifUseAuth) {
+        if(ifUseAuth
+                && StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
             // check timestamp
             long currentTimeMillis = System.currentTimeMillis();
             long requestTimeMillis = packet.getAuth().getTimestamp();
             if (currentTimeMillis >= (requestTimeMillis + validRequestTimeoutSecond * 1000)) {
-                logger.error("receive an expired request, currentTimeMillis:{}, requestTimeMillis{}.", currentTimeMillis, requestTimeMillis);
+                LOGGER.error("receive an expired request, currentTimeMillis:{}, requestTimeMillis{}.", currentTimeMillis, requestTimeMillis);
                 return false;
             }
             // check signature
             String reqSignature = packet.getAuth().getSignature();
-            String validSignature = calSignature(packet.getHeader(), packet.getBody());
-            if (!StringUtils.equals(signature, validSignature)) {
-                logger.error("invalid signature, request:{}, valid:{}", reqSignature, validSignature);
+            String validSignature = calSignature(packet.getHeader(), packet.getBody(), requestTimeMillis);
+            if (!StringUtils.equals(reqSignature, validSignature)) {
+                LOGGER.error("invalid signature, request:{}, valid:{}", reqSignature, validSignature);
                 return false;
             }
         }

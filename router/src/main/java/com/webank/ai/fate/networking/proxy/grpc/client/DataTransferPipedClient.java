@@ -31,6 +31,7 @@ import com.webank.ai.fate.networking.proxy.service.ConfFileBasedFdnRouter;
 import com.webank.ai.fate.networking.proxy.service.FdnRouter;
 import com.webank.ai.fate.networking.proxy.util.ErrorUtils;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
+import com.webank.ai.fate.networking.proxy.util.AuthUtils;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.CollectionUtils;
@@ -65,6 +66,8 @@ public class DataTransferPipedClient {
     private ToStringUtils toStringUtils;
     @Autowired
     private ErrorUtils errorUtils;
+    @Autowired
+    private AuthUtils authUtils;
 
     public static  RouterService routerService;
 
@@ -187,27 +190,38 @@ public class DataTransferPipedClient {
 
     public void unaryCall(Proxy.Packet packet, Pipe pipe) {
         Preconditions.checkNotNull(packet);
+
         Proxy.Metadata header = packet.getHeader();
-        String onelineStringMetadata = toStringUtils.toOneLineString(header);
-        LOGGER.info("[UNARYCALL][CLIENT] client send unary call to server: {}", onelineStringMetadata);
-        //LOGGER.info("[UNARYCALL][CLIENT] packet: {}", toStringUtils.toOneLineString(packet));
-
-        DataTransferServiceGrpc.DataTransferServiceStub stub = getStub(
-                packet.getHeader().getSrc(), packet.getHeader().getDst(), packet);
-
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
         StreamObserver<Proxy.Packet> responseObserver = grpcStreamObserverFactory
-                .createClientUnaryCallResponseStreamObserver(pipe, finishLatch, packet.getHeader());
-        stub.unaryCall(packet, responseObserver);
-
-        LOGGER.info("[UNARYCALL][CLIENT] unary call stub: {}, metadata: {}",
-                stub.getChannel(), onelineStringMetadata);
+                .createClientUnaryCallResponseStreamObserver(pipe, finishLatch, header);
 
         try {
-            finishLatch.await(MAX_AWAIT_HOURS, TimeUnit.HOURS);
-        } catch (InterruptedException e) {
-            LOGGER.error("[UNARYCALL][CLIENT] client unary call: finishLatch.await() interrupted");
+            String onelineStringMetadata = toStringUtils.toOneLineString(header);
+            LOGGER.info("[UNARYCALL][CLIENT] client send unary call to server: {}", onelineStringMetadata);
+
+            packet = authUtils.addAuthInfo(packet);
+
+            DataTransferServiceGrpc.DataTransferServiceStub stub = getStub(
+                    packet.getHeader().getSrc(), packet.getHeader().getDst(), packet);
+
+            stub.unaryCall(packet, responseObserver);
+
+            LOGGER.info("[UNARYCALL][CLIENT] unary call stub: {}, metadata: {}",
+                    stub.getChannel(), onelineStringMetadata);
+
+            try {
+                finishLatch.await(MAX_AWAIT_HOURS, TimeUnit.HOURS);
+            } catch (InterruptedException e) {
+                LOGGER.error("[UNARYCALL][CLIENT] client unary call: finishLatch.await() interrupted");
+                responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
+                pipe.onError(e);
+                Thread.currentThread().interrupt();
+                return;
+            }
+        } catch (Exception e) {
+            LOGGER.error("[UNARYCALL][CLIENT] client unary call: exception: ", e);
             responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
             pipe.onError(e);
             Thread.currentThread().interrupt();

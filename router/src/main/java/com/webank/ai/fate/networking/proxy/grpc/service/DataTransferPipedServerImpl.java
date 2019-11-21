@@ -190,7 +190,15 @@ public class DataTransferPipedServerImpl extends DataTransferServiceGrpc.DataTra
     @RegisterService(serviceName = "unaryCall")
     public void unaryCall(Proxy.Packet request, StreamObserver<Proxy.Packet> responseObserver) {
         // check authentication
-        if(false == authUtils.checkAuthentication(request)){
+        boolean isAuthPass = false;
+        try {
+            isAuthPass = authUtils.checkAuthentication(request);
+        } catch (Exception e) {
+            LOGGER.error("checkAuthentication throw an exception: ", e);
+            responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
+            return;
+        }
+        if(false == isAuthPass){
             String msg = "authentication not pass!";
             LOGGER.error(msg);
             RuntimeException e = new RuntimeException(msg);
