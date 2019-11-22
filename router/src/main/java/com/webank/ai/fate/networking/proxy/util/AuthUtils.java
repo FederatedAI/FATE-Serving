@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.networking.proxy.model.ServerConf;
 import com.webank.ai.fate.networking.proxy.util.EncryptUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -40,8 +41,8 @@ import java.util.*;
 @Component
 public class AuthUtils implements InitializingBean{
     private static final Logger LOGGER = LogManager.getLogger();
-    @Value("${auth.config.path}")
-    private String keysFilePath;
+    @Autowired
+    private ServerConf serverConf;
     private static Map<String, String> ACCESS_KEYS_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
     private static String applyId = "";
@@ -56,10 +57,10 @@ public class AuthUtils implements InitializingBean{
         JsonReader jsonReader = null;
         JsonObject jsonObject = null;
         try {
-            jsonReader = new JsonReader(new FileReader(keysFilePath));
+            jsonReader = new JsonReader(new FileReader(serverConf.getauthConfigPath()));
             jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
         } catch (FileNotFoundException e) {
-            LOGGER.error("File not found: {}", keysFilePath);
+            LOGGER.error("File not found: {}", serverConf.getauthConfigPath());
             throw new RuntimeException(e);
         } finally {
             if (jsonReader != null) {
