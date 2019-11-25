@@ -22,17 +22,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import com.webank.ai.fate.networking.proxy.model.ServerConf;
-import com.webank.ai.fate.networking.proxy.util.EncryptUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -41,8 +39,7 @@ import java.util.*;
 @Component
 public class AuthUtils implements InitializingBean{
     private static final Logger LOGGER = LogManager.getLogger();
-    @Autowired
-    private ServerConf serverConf;
+    private static final String confFilePath = System.getProperty("user.dir") + File.separator + "conf" + File.separator + "auth_config.json";
     private static Map<String, String> ACCESS_KEYS_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
     private static String applyId = "";
@@ -57,10 +54,10 @@ public class AuthUtils implements InitializingBean{
         JsonReader jsonReader = null;
         JsonObject jsonObject = null;
         try {
-            jsonReader = new JsonReader(new FileReader(serverConf.getauthConfigPath()));
+            jsonReader = new JsonReader(new FileReader(confFilePath));
             jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
         } catch (FileNotFoundException e) {
-            LOGGER.error("File not found: {}", serverConf.getauthConfigPath());
+            LOGGER.error("File not found: {}", confFilePath);
             throw new RuntimeException(e);
         } finally {
             if (jsonReader != null) {
@@ -82,6 +79,7 @@ public class AuthUtils implements InitializingBean{
         for (Map allowKey : allowKeys) {
             ACCESS_KEYS_MAP.put(allowKey.get("appKey").toString(), allowKey.get("appSecret").toString());
         }
+        LOGGER.debug("refreshed auth cfg using file {}.", confFilePath);
     }
 
     private String getSecret(String appKey) {

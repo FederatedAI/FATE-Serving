@@ -277,13 +277,6 @@ public class GrpcServerFactory {
             } else {
                 serverConf.setDebugEnabled(false);
             }
-
-            String authConfigPath = properties.getProperty("auth.config.path", null);
-            if (authConfigPath == null) {
-                throw new IllegalArgumentException("auth config cannot be null");
-            } else {
-                serverConf.setauthConfigPath(authConfigPath);
-            }
         } catch (Exception e) {
             LOGGER.error(e);
             throw e;

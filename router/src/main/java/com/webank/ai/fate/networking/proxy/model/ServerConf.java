@@ -41,7 +41,6 @@ public class ServerConf {
     private boolean isAuditEnabled;
     private boolean isNeighbourInsecureChannelEnabled;
     private boolean isDebugEnabled;
-    private String authConfigPath;
 
     public Properties getProperties() {
         return properties;
@@ -77,7 +76,6 @@ public class ServerConf {
                 ", isAuditEnabled=" + isAuditEnabled +
                 ", isNeighbourInsecureChannelEnabled=" + isNeighbourInsecureChannelEnabled +
                 ", isDebugEnabled=" + isDebugEnabled +
-                ", authConfigPath=" + authConfigPath +
                 '}';
     }
 
@@ -201,11 +199,4 @@ public class ServerConf {
         isDebugEnabled = debugEnabled;
     }
 
-    public String getauthConfigPath() {
-        return authConfigPath;
-    }
-
-    public void setauthConfigPath(String authConfigPath) {
-        this.authConfigPath = authConfigPath;
-    }
 }
