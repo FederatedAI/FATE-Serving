@@ -88,7 +88,7 @@ public class AuthUtils implements InitializingBean{
 
     private String calSignature(Proxy.Metadata header, Proxy.Data body, long timestamp) throws Exception {
         String signature = "";
-        String appSecret = getSecret(header.getDst().getPartyId());
+        String appSecret = getSecret(header.getSrc().getPartyId());
         if (StringUtils.isEmpty(appSecret)) {
             LOGGER.error("appSecret not found");
             return signature;
