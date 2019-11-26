@@ -39,7 +39,7 @@ import java.util.*;
 @Component
 public class AuthUtils implements InitializingBean{
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String confFilePath = System.getProperty("user.dir") + File.separator + "conf" + File.separator + "auth_config.json";
+    private static final String confFilePath = System.getProperty("authFile");
     private static Map<String, String> ACCESS_KEYS_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
     private static String applyId = "";
