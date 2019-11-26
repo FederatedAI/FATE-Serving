@@ -64,7 +64,6 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
-
         InferenceRequest inferenceRequest = null;
         Context context = new BaseContext(new GuestInferenceLoggerPrinter());
         context.preProcess();
@@ -92,10 +91,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                             returnResult = guestInferenceProvider.asynInference(context, inferenceRequest);
                             break;
                         default:
-
                             throw new Exception();
-
-
                     }
 
                     //  returnResult = inferenceProvider.inference(context,inferenceRequest, actionType);
@@ -107,7 +103,6 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                     returnResult.setRetcode(InferenceRetCode.EMPTY_DATA);
                 }
             } catch (Throwable e) {
-
                 returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
                 LOGGER.error(String.format("inference system error:\n%s", req.getBody().toStringUtf8()), e);
             }

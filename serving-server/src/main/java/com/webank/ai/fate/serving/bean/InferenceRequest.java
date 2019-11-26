@@ -31,6 +31,16 @@ public class InferenceRequest implements Request {
     private String modelId;
     private String seqno;
     private String caseid;
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    private String serviceId;
     private Map<String, Object> featureData;
 
     InferenceRequest() {

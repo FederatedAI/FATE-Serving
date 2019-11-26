@@ -96,7 +96,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
-            returnResult = modelManager.publishLoadModel(
+            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            returnResult = modelManager.publishLoadModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtils.getFederatedRoles(req.getRoleMap()),
                     ModelUtils.getFederatedRolesModel(req.getModelMap()));
@@ -129,7 +130,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         ReturnResult returnResult = null;
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
-            returnResult = modelManager.publishOnlineModel(
+            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtils.getFederatedRoles(req.getRoleMap()),
                     ModelUtils.getFederatedRolesModel(req.getModelMap())
@@ -291,7 +293,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 byte[] data = Base64.decode(v.toString().toCharArray());
                 PublishRequest req = PublishRequest.parseFrom(data);
                 logger.info("resotre publishLoadModel req {}", req);
-                modelManager.publishLoadModel(
+                Context  context = new BaseContext();
+                context.putData(Dict.SERVICE_ID,req.getServiceId());
+                modelManager.publishLoadModel(context,
                         new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                         ModelUtils.getFederatedRoles(req.getRoleMap()),
                         ModelUtils.getFederatedRolesModel(req.getModelMap()));
@@ -306,7 +310,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 PublishRequest req = PublishRequest.parseFrom(data);
 
                 logger.info("resotre publishOnlineModel req {}", req);
-                modelManager.publishOnlineModel(
+                Context  context = new BaseContext();
+                context.putData(Dict.SERVICE_ID,req.getServiceId());
+                modelManager.publishOnlineModel(context,
                         new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                         ModelUtils.getFederatedRoles(req.getRoleMap()),
                         ModelUtils.getFederatedRolesModel(req.getModelMap()));
