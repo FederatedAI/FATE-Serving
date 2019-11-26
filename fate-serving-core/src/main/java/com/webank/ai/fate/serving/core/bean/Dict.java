@@ -132,6 +132,7 @@ public class Dict {
 
     public  static  final String GUEST_APP_ID = "guestAppId";
     public  static  final String HOST_APP_ID = "hostAppId";
+    public  static  final String SERVICE_ID = "serviceId";
 
 
 }

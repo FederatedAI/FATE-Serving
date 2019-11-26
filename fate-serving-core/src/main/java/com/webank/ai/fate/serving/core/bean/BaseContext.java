@@ -33,6 +33,10 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     String actionType;
     Map dataMap = Maps.newHashMap();
 
+    public BaseContext(){
+
+    }
+
     public BaseContext(LoggerPrinter loggerPrinter) {
         this.loggerPrinter = loggerPrinter;
         timestamp = System.currentTimeMillis();

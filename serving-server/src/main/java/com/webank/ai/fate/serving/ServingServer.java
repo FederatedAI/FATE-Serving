@@ -66,7 +66,6 @@ public class ServingServer implements InitializingBean {
 
         System.setProperty("configpath", confPath);
         new Configuration(confPath).load();
-
         new com.webank.ai.eggroll.core.utils.Configuration(confPath).load();
 
     }
@@ -114,7 +113,6 @@ public class ServingServer implements InitializingBean {
         LOGGER.info("Server started listening on port: {}, use configuration: {}", port, this.confPath);
 
         server.start();
-
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
         LOGGER.info("serving useRegister {}", useRegister);

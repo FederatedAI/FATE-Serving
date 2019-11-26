@@ -18,19 +18,16 @@ package com.webank.ai.fate.serving.interfaces;
 
 
 import com.webank.ai.fate.serving.bean.ModelNamespaceData;
-import com.webank.ai.fate.serving.core.bean.FederatedParty;
-import com.webank.ai.fate.serving.core.bean.FederatedRoles;
-import com.webank.ai.fate.serving.core.bean.ModelInfo;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 
 import java.util.Map;
 
 public interface ModelManager {
 
-    public ReturnResult publishLoadModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel);
+    public ReturnResult publishLoadModel(Context context,FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel);
 
-    public ReturnResult publishOnlineModel(FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel);
+    public ReturnResult publishOnlineModel(Context context,FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel);
 
     public PipelineTask getModel(String name, String namespace);
 

@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.networking.proxy.grpc.client;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.api.core.BasicMeta;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -36,6 +37,10 @@ import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.serving.core.bean.EncryptMethod;
+import com.webank.ai.fate.serving.core.bean.HostFederatedParams;
+import com.webank.ai.fate.serving.core.bean.ModelInfo;
+import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -45,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -306,6 +312,12 @@ public class DataTransferPipedClient {
         return stub;
     }
 
+    private static final String modelKeySeparator = "&";
+
+    public static String genModelKey(String name, String namespace) {
+        return StringUtils.join(Arrays.asList(name, namespace), modelKeySeparator);
+    }
+
 
     private DataTransferServiceGrpc.DataTransferServiceStub routerByServiceRegister(Proxy.Topic from, Proxy.Topic to, Proxy.Packet pack) {
         DataTransferServiceGrpc.DataTransferServiceStub stub = null;
@@ -314,8 +326,14 @@ public class DataTransferPipedClient {
         String name = to.getName();
         String serviceName = pack.getHeader().getCommand().getName();
         String version = pack.getHeader().getOperator();
+        String data = pack.getBody().getValue().toStringUtf8();
+        HostFederatedParams requestData = JSON.parseObject(data, HostFederatedParams.class);
+        ModelInfo partnerModelInfo = requestData.getPartnerModelInfo();
+       // (partnerModelInfo.getName(), partnerModelInfo.getNamespace()
+        String key =genModelKey(partnerModelInfo.getName(), partnerModelInfo.getNamespace());
+        String md5Key = EncryptUtils.encrypt(key, EncryptMethod.MD5);
 
-        URL paramUrl = URL.valueOf("serving/" + partId + "/unaryCall");
+        URL paramUrl = URL.valueOf("serving/" + md5Key + "/unaryCall");
         if(StringUtils.isNotEmpty(version)) {
             paramUrl= paramUrl.addParameter(Constants.VERSION_KEY,version
             );

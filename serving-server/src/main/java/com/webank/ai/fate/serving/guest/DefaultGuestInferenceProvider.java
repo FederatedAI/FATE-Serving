@@ -72,8 +72,15 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         inferenceResult.setCaseid(inferenceRequest.getCaseid());
         String modelName = inferenceRequest.getModelVersion();
         String modelNamespace = inferenceRequest.getModelId();
-        if (StringUtils.isEmpty(modelNamespace) && inferenceRequest.haveAppId()) {
-            modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getAppid());
+        String serviceId = inferenceRequest.getServiceId();
+
+
+        if (StringUtils.isEmpty(modelNamespace)  ) {
+            if(StringUtils.isNotEmpty(inferenceRequest.getServiceId())){
+                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getServiceId());
+            }else if(inferenceRequest.haveAppId()) {
+                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getAppid());
+            }
         }
         if (StringUtils.isEmpty(modelNamespace)) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
