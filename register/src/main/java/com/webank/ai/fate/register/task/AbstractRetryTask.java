@@ -23,7 +23,7 @@ import com.webank.ai.fate.register.common.TimerTask;
 import com.webank.ai.fate.register.interfaces.Timeout;
 import com.webank.ai.fate.register.interfaces.Timer;
 import com.webank.ai.fate.register.url.URL;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

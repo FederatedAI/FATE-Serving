@@ -43,10 +43,21 @@ public class InferenceRequest implements Request {
     private String serviceId;
     private Map<String, Object> featureData;
 
+    public Map<String, Object> getSendToRemoteFeatureData() {
+        return sendToRemoteFeatureData;
+    }
+
+    public void setSendToRemoteFeatureData(Map<String, Object> sendToRemoteFeatureData) {
+        this.sendToRemoteFeatureData = sendToRemoteFeatureData;
+    }
+
+    private Map<String, Object> sendToRemoteFeatureData;
+
     InferenceRequest() {
         seqno = InferenceUtils.generateSeqno();
         caseid = InferenceUtils.generateCaseid();
         featureData = new HashMap<>();
+        sendToRemoteFeatureData = new HashMap<>();
     }
 
     public void setCaseId(String caseId) {

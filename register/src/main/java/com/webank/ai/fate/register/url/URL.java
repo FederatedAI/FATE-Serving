@@ -17,8 +17,8 @@
 package com.webank.ai.fate.register.url;
 
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;

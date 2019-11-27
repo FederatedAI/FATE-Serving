@@ -51,7 +51,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Autowired
     ModelManager modelManager;
 
-
     LinkedHashMap<String, String> publishLoadReqMap = new LinkedHashMap();
     LinkedHashMap<String, String> publicOnlineReqMap = new LinkedHashMap();
     ExecutorService executorService = Executors.newSingleThreadExecutor();
