@@ -115,14 +115,13 @@ public class ServingServer implements InitializingBean {
 
         server.start();
 
-        String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
-        useRegister = Boolean.valueOf(userRegisterString);
+        useRegister = Boolean.valueOf(Configuration.getProperty(Dict.USE_REGISTER));
         LOGGER.info("serving useRegister {}", useRegister);
 
         if (useRegister) {
-
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
+            zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
 
             BaseModel.routerService = applicationContext.getBean(RouterService.class);
             FateServer.serviceSets.forEach(servie -> {
@@ -141,10 +140,8 @@ public class ServingServer implements InitializingBean {
                 }
 
             });
-            zookeeperRegistry.register(FateServer.serviceSets);
-
-
         }
+
         boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
         if (useJMX) {
             String jmxServerName = Configuration.getProperty(Dict.JMX_SERVER_NAME, "serving");

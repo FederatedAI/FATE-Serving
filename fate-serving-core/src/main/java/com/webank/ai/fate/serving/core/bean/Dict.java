@@ -68,6 +68,7 @@ public class Dict {
     public static final String PROPERTY_PROXY_ADDRESS = "proxy";
     public static final String ONLINE_ENVIROMMENT = "online";
     public static final String PROPERTY_ROLL_ADDRESS = "roll";
+    public static final String PROPERTY_FLOW_ADDRESS = "flow";
     public static final String PROPERTY_USE_ZOOKEEPER = "useZookeeper";
     public static final String PROPERTY_SERVER_PORT = "port";
     public static final String PROPERTY_USER_DIR = "user.dir";
@@ -128,6 +129,7 @@ public class Dict {
     public static final String USE_JMX = "useJMX";
     public static final String JMX_SERVER_NAME = "jmx.server.name";
     public static final String JMX_PORT = "jmx.port";
+    public static final String MODEL_TRANSFER_URL = "model.transfer.url";
 
 
     public  static  final String GUEST_APP_ID = "guestAppId";
