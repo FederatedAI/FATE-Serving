@@ -1,3 +1,7 @@
+# Release 1.1.1
+## Major Features and Improvements
+* Support indicating partial columns in Onehot Encoder
+
 # Release 1.1
 ## Major Features and Improvements
 * Add Online OneHotEncoder transform
