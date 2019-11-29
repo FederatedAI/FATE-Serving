@@ -107,24 +107,25 @@ public class AuthUtils implements InitializingBean{
     }
 
     public Proxy.Packet addAuthInfo(Proxy.Packet packet) throws Exception {
+        if(!StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
+            Proxy.Packet.Builder packetBuilder = packet.toBuilder();
+            Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
 
-        Proxy.Packet.Builder packetBuilder = packet.toBuilder();
-        Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
+            long timestamp = System.currentTimeMillis();
+            authBuilder.setTimestamp(timestamp);
+            authBuilder.setApplyId(applyId);
 
-        long timestamp = System.currentTimeMillis();
+            if(ifUseAuth) {
+                String appKey = getAppKey(packet.getHeader().getSrc().getPartyId());
+                authBuilder.setAppKey(appKey);
+                String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp, appKey);
+                authBuilder.setSignature(signature);
+            }
 
-        authBuilder.setTimestamp(timestamp);
-        authBuilder.setApplyId(applyId);
-        String appKey = getAppKey(packet.getHeader().getSrc().getPartyId());
-        authBuilder.setAppKey(appKey);
-
-        if(ifUseAuth
-                && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
-            String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp, appKey);
-            authBuilder.setSignature(signature);
+            packetBuilder.setAuth(authBuilder.build());
+            return packetBuilder.build();
         }
-        packetBuilder.setAuth(authBuilder.build());
-        return packetBuilder.build();
+        return packet;
     }
 
     public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
