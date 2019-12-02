@@ -101,25 +101,18 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             FederatedParty srcParty = guestFederatedParams.getLocal();
             FederatedRoles federatedRoles = guestFederatedParams.getRole();
             Map<String, Object> featureIds = (Map<String, Object>) guestFederatedParams.getFeatureIdMap();
-
-            //TODO: foreach
             FederatedParty dstParty = new FederatedParty(Dict.HOST, federatedRoles.getRole(Dict.HOST).get(0));
             if (useCache) {
                 ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(dstParty, federatedRoles, featureIds);
                 if (remoteResultFromCache != null) {
                     LOGGER.info("caseid {} get remote party model inference result from cache.", context.getCaseId());
-                    //federatedParams.put("getRemotePartyResult", false);
                     context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
                     context.hitCache(true);
                     remoteResult = remoteResultFromCache;
                     return remoteResult;
                 }
             }
-
-
             HostFederatedParams hostFederatedParams = new HostFederatedParams();
-
-
             hostFederatedParams.setCaseId(guestFederatedParams.getCaseId());
             hostFederatedParams.setSeqNo(guestFederatedParams.getSeqNo());
             hostFederatedParams.setFeatureIdMap(guestFederatedParams.getFeatureIdMap());
@@ -128,21 +121,9 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             hostFederatedParams.setRole(federatedRoles);
             hostFederatedParams.setPartnerModelInfo(guestFederatedParams.getModelInfo());
             hostFederatedParams.setData(guestFederatedParams.getData());
-
-
-//        Map<String, Object> requestData = new HashMap<>();
-//        Arrays.asList("caseid", "seqno").forEach((field -> {
-//            requestData.put(field, federatedParams.get(field));
-//        }));
-//        requestData.put("partner_local", ObjectTransform.bean2Json(srcParty));
-//        requestData.put("partner_model_info", ObjectTransform.bean2Json(federatedParams.get("model_info")));
-//        requestData.put("feature_id", ObjectTransform.bean2Json(federatedParams.get("feature_id")));
-//        requestData.put("local", ObjectTransform.bean2Json(dstParty));
-//        requestData.put("role", ObjectTransform.bean2Json(federatedParams.get("role")));
-//        federatedParams.put("getRemotePartyResult", true);
             context.putData(Dict.GET_REMOTE_PARTY_RESULT, true);
             remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
-            if (useCache) {
+            if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
                 CacheManager.getInstance().putRemoteModelInferenceResult(dstParty, federatedRoles, featureIds, remoteResult);
                 LOGGER.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
             }
@@ -160,12 +141,6 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
         try {
 
             Proxy.Packet.Builder packetBuilder = Proxy.Packet.newBuilder();
-
-//            packetBuilder.setBody(Proxy.Data.newBuilder()
-//                    .setValue(ByteString.copyFrom(ObjectTransform.bean2Json(requestData).getBytes()))
-//                    .build());
-
-
             packetBuilder.setBody(Proxy.Data.newBuilder()
                     .setValue(ByteString.copyFrom(JSON.toJSONBytes(hostFederatedParams)))
                     .build());
@@ -217,6 +192,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
                 DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
                 Proxy.Packet packet = stub1.unaryCall(packetBuilder.build());
+                LOGGER.info("PPPPPPPPPPPPPPPPPPPPPPPPPP  {}",packet.getBody().getValue().toStringUtf8());
                 remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
             } finally {
                 grpcConnectionPool.returnPool(channel1, address);

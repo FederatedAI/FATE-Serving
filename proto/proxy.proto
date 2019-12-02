@@ -76,6 +76,7 @@ message AuthInfo {
     string applyId = 3;
     string nonce = 4;
     string version = 5;
+    int32  flag = 6;
 }
 
 // data streaming packet

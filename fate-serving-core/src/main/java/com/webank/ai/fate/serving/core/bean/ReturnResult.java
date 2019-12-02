@@ -34,6 +34,16 @@ public class ReturnResult {
     private Map<String, Object> log;
     private Map<String, Object> warn;
 
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    private int flag;
+
     public ReturnResult(){
         this.data = new HashMap<>();
         this.log = new HashMap<>();
@@ -91,9 +101,6 @@ public class ReturnResult {
     @Override
     public String toString(){
         String  result= "";
-
-
-
 
         return  result;
 

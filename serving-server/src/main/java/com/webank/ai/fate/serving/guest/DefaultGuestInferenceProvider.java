@@ -136,11 +136,9 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         federatedParams.setLocal(modelNamespaceData.getLocal());
         federatedParams.setModelInfo(new ModelInfo(modelName, modelNamespace));
         federatedParams.setRole(modelNamespaceData.getRole());
-        if(featureIds.size()>0) {
+        if(featureIds!=null&&featureIds.size()>0) {
             federatedParams.setFeatureIdMap(featureIds);
         }
-
-
         Map<String, Object> modelResult = model.predict(context, modelFeatureData, federatedParams);
         PostProcessingResult postProcessingResult;
         try {
@@ -170,17 +168,15 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             if (!getRemotePartyResult) {
                 billing = false;
             } else if (federatedResult != null) {
-
                 if (federatedResult.getRetcode() == InferenceRetCode.GET_FEATURE_FAILED || federatedResult.getRetcode() == InferenceRetCode.INVALID_FEATURE || federatedResult.getRetcode() == InferenceRetCode.NO_FEATURE) {
                     billing = false;
                 }
-
-
                 if (federatedResult.getRetcode() != 0) {
                     partyInferenceRetcode += 2;
                     inferenceResult.setRetcode(federatedResult.getRetcode());
                 }
-
+            }else{
+                partyInferenceRetcode += 2;
             }
             if (inferenceResult.getRetcode() != 0) {
                 partyInferenceRetcode += 1;

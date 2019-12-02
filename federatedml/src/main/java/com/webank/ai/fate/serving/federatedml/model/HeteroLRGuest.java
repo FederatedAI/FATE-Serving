@@ -43,20 +43,21 @@ public class HeteroLRGuest extends HeteroLR {
         Map<String, Double> forwardRet = forward(inputData);
         double score = forwardRet.get(Dict.SCORE);
 
-        LOGGER.info("guest score:{}", score);
+        LOGGER.info("caseid {} guest score:{}", context.getCaseId(),score);
 
         try {
             ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
-            //predictParams.put("federatedResult", hostPredictResponse);
-            //context.setFederatedResult(hostPredictResponse);
-            LOGGER.info("host response is {}", hostPredictResponse.getData());
-            if(hostPredictResponse.getData()!=null&&hostPredictResponse.getData().get(Dict.SCORE)!=null) {
-                double hostScore =( (Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
-                LOGGER.info("host score:{}", hostScore);
-                score += hostScore;
+            if(hostPredictResponse !=null) {
+                result.put(Dict.RET_CODE,hostPredictResponse.getRetcode());
+                LOGGER.info("caseid {} host response is {}",context.getCaseId(),hostPredictResponse.getData());
+                if (hostPredictResponse.getData() != null && hostPredictResponse.getData().get(Dict.SCORE) != null) {
+                    double hostScore = ((Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
+                    LOGGER.info("caseid {} host score:{}",context.getCaseId(), hostScore);
+                    score += hostScore;
+                }
+            }else{
+                LOGGER.info("caseid {} host response is null",context.getCaseId());
             }
-
-
         } catch (Exception ex) {
             LOGGER.error("get host predict failed:", ex);
         }
@@ -65,7 +66,6 @@ public class HeteroLRGuest extends HeteroLR {
         result.put(Dict.PROB, prob);
         result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE + ":{}", forwardRet.get(Dict.MODEL_WRIGHT_HIT_RATE));
         result.put(Dict.GUEST_INPUT_DATA_HIT_RATE + ":{}", forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
-
         return result;
     }
 }

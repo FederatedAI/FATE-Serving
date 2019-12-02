@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.service;
 
+import com.alibaba.fastjson.JSON;
 import com.google.protobuf.ByteString;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
