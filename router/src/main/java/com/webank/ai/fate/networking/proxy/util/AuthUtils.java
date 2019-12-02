@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,8 +38,9 @@ import java.util.*;
 @Component
 public class AuthUtils implements InitializingBean{
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String confFilePath = System.getProperty("user.dir") + File.separator + "conf" + File.separator + "auth_config.json";
-    private static Map<String, String> ACCESS_KEYS_MAP = new HashMap<>();
+    private static final String confFilePath = System.getProperty("authFile");
+    private static Map<String, String> KEY_SECRET_MAP = new HashMap<>();
+    private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
     private static String applyId = "";
     private static boolean ifUseAuth = false;
@@ -75,20 +75,25 @@ public class AuthUtils implements InitializingBean{
         JsonArray jsonArray = jsonObject.getAsJsonArray("access_keys");
         Gson gson = new Gson();
         List<Map> allowKeys = gson.fromJson(jsonArray, ArrayList.class);
-        ACCESS_KEYS_MAP.clear();
+        KEY_SECRET_MAP.clear();
         for (Map allowKey : allowKeys) {
-            ACCESS_KEYS_MAP.put(allowKey.get("appKey").toString(), allowKey.get("appSecret").toString());
+            KEY_SECRET_MAP.put(allowKey.get("app_key").toString(), allowKey.get("app_secret").toString());
+            PARTYID_KEY_MAP.put(allowKey.get("party_id").toString(), allowKey.get("app_key").toString());
         }
         LOGGER.debug("refreshed auth cfg using file {}.", confFilePath);
     }
 
     private String getSecret(String appKey) {
-        return ACCESS_KEYS_MAP.get(appKey);
+        return KEY_SECRET_MAP.get(appKey);
     }
 
-    private String calSignature(Proxy.Metadata header, Proxy.Data body, long timestamp) throws Exception {
+    private String getAppKey(String partyId) {
+        return PARTYID_KEY_MAP.get(partyId);
+    }
+
+    private String calSignature(Proxy.Metadata header, Proxy.Data body, long timestamp, String appKey) throws Exception {
         String signature = "";
-        String appSecret = getSecret(header.getSrc().getPartyId());
+        String appSecret = getSecret(appKey);
         if (StringUtils.isEmpty(appSecret)) {
             LOGGER.error("appSecret not found");
             return signature;
@@ -102,22 +107,25 @@ public class AuthUtils implements InitializingBean{
     }
 
     public Proxy.Packet addAuthInfo(Proxy.Packet packet) throws Exception {
+        if(!StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
+            Proxy.Packet.Builder packetBuilder = packet.toBuilder();
+            Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
 
-        Proxy.Packet.Builder packetBuilder = packet.toBuilder();
-        Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
+            long timestamp = System.currentTimeMillis();
+            authBuilder.setTimestamp(timestamp);
+            authBuilder.setApplyId(applyId);
 
-        long timestamp = System.currentTimeMillis();
+            if(ifUseAuth) {
+                String appKey = getAppKey(packet.getHeader().getSrc().getPartyId());
+                authBuilder.setAppKey(appKey);
+                String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp, appKey);
+                authBuilder.setSignature(signature);
+            }
 
-        authBuilder.setTimestamp(timestamp);
-        authBuilder.setApplyId(applyId);
-
-        if(ifUseAuth
-                && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
-            String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp);
-            authBuilder.setSignature(signature);
+            packetBuilder.setAuth(authBuilder.build());
+            return packetBuilder.build();
         }
-        packetBuilder.setAuth(authBuilder.build());
-        return packetBuilder.build();
+        return packet;
     }
 
     public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
@@ -132,7 +140,7 @@ public class AuthUtils implements InitializingBean{
             }
             // check signature
             String reqSignature = packet.getAuth().getSignature();
-            String validSignature = calSignature(packet.getHeader(), packet.getBody(), requestTimeMillis);
+            String validSignature = calSignature(packet.getHeader(), packet.getBody(), requestTimeMillis, packet.getAuth().getAppKey());
             if (!StringUtils.equals(reqSignature, validSignature)) {
                 LOGGER.error("invalid signature, request:{}, valid:{}", reqSignature, validSignature);
                 return false;

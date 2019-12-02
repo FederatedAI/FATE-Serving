@@ -56,7 +56,7 @@ start() {
     getpid
     if [[ $? -eq 0 ]]; then
         mklogsdir
-        java -Drouter_file=${configpath}/route_table.json -cp    "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/proxy.properties >> logs/console.log 2>>logs/error.log &
+        java -DauthFile=${configpath}/auth_config.json -Drouter_file=${configpath}/route_table.json -cp    "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/proxy.properties >> logs/console.log 2>>logs/error.log &
         if [[ $? -eq 0 ]]; then
             getpid
             echo "service start sucessfully. pid: ${pid}"
