@@ -116,7 +116,7 @@ public class AuthUtils implements InitializingBean{
             authBuilder.setApplyId(applyId);
 
             if(ifUseAuth) {
-                String appKey = getAppKey(packet.getHeader().getSrc().getPartyId());
+                String appKey = getAppKey(selfPartyId);
                 authBuilder.setAppKey(appKey);
                 String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp, appKey);
                 authBuilder.setSignature(signature);
