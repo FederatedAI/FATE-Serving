@@ -120,9 +120,42 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         }
     }
 
-    @Override
+//    @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
+        Context context = new BaseContext(new BaseLoggerPrinter());
+        context.setActionType(ModelActionType.MODEL_PUBLISH_ONLINE.name());
+        context.preProcess();
+        ReturnResult returnResult = null;
+        try {
+            PublishResponse.Builder builder = PublishResponse.newBuilder();
+            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            returnResult = modelManager.publishOnlineModel(context,
+                    new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
+                    ModelUtils.getFederatedRoles(req.getRoleMap()),
+                    ModelUtils.getFederatedRolesModel(req.getModelMap())
+            );
+            builder.setStatusCode(returnResult.getRetcode())
+                    .setMessage(returnResult.getRetmsg())
+                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
+            if (returnResult.getRetcode() == 0) {
+
+                String content = new String(Base64.encode(req.toByteArray()));
+                String key = Md5Crypt.md5Crypt(content.getBytes());
+
+                publicOnlineReqMap.put(key, content);
+                fireStoreEvent();
+            }
+            responseStreamObserver.onNext(builder.build());
+            responseStreamObserver.onCompleted();
+        } finally {
+            context.postProcess(req, returnResult);
+        }
+    }
+
+    @Override
+    @RegisterService(serviceName = "publishBind")
+    public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter());
         context.setActionType(ModelActionType.MODEL_PUBLISH_ONLINE.name());
         context.preProcess();
