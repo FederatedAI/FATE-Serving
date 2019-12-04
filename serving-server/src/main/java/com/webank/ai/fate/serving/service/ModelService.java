@@ -130,6 +130,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
+            logger.info("receive service id {}",req.getServiceId());
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtils.getFederatedRoles(req.getRoleMap()),
@@ -163,6 +164,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
+            logger.info("publishBind receive service id {}",context.getData(Dict.SERVICE_ID));
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtils.getFederatedRoles(req.getRoleMap()),
@@ -210,7 +212,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
 
     public void doSaveProperties(Map properties, File file, long version) {
-        logger.info("prepare to save modelinfo {} {}", file, properties);
+        //logger.info("prepare to save modelinfo {} {}", file, properties);
 
         if (file == null) {
             return;
@@ -239,7 +241,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                                 try {
 
                                     String content = k + "=" + v;
-                                    logger.info("write content {}", content);
+                                    //logger.info("write content {}", content);
                                     bufferedWriter.write(content);
                                     bufferedWriter.newLine();
                                 } catch (IOException e) {

@@ -156,8 +156,11 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
         String role = federatedParty.getRole();
         String partyId = federatedParty.getPartyId();
         String serviceId = null;
+
         if(context.getData(Dict.SERVICE_ID)!=null) {
             serviceId  = context.getData(Dict.SERVICE_ID).toString();
+        }else{
+            logger.info("service id is null");
         }
         ReturnResult returnResult = new ReturnResult();
         ModelInfo modelInfo = federatedRolesModel.get(role).get(partyId);
@@ -184,7 +187,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             String modelName = modelInfo.getName();
             modelNamespaceDataMapPool.put(modelNamespace, new ModelNamespaceData(modelNamespace, federatedParty, federatedRoles, modelName, model));
             appNamespaceMapPool.put(partyId, modelNamespace);
-            if(serviceId!=null){
+            if(StringUtils.isNotEmpty(serviceId)){
                 logger.info("put serviceId {} input pool",serviceId);
                 appNamespaceMapPool.put(serviceId, modelNamespace);
             }
@@ -193,7 +196,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             logger.info("Get model namespace {} for app {}", modelNamespace, partyId);
             returnResult.setRetcode(InferenceRetCode.OK);
             if (zookeeperRegistry != null) {
-                if(serviceId!=null){
+                if(StringUtils.isNotEmpty(serviceId)){
                     zookeeperRegistry.addDynamicEnvironment(serviceId);
                 }
 

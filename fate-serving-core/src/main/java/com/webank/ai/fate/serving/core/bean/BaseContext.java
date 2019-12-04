@@ -68,7 +68,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public Object getData(Object key) {
-        return null;
+        return dataMap.get(key);
     }
 
     @Override
