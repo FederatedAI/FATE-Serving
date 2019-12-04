@@ -178,7 +178,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             }else{
                 partyInferenceRetcode += 2;
             }
-            if (inferenceResult.getRetcode() != 0) {
+            if (inferenceResult.getRetcode() != 0&&partyInferenceRetcode==0) {
                 partyInferenceRetcode += 1;
             }
             inferenceResult.setRetcode(inferenceResult.getRetcode() + partyInferenceRetcode * 1000);

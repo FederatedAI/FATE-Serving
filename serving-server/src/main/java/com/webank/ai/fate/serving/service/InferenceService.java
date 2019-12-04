@@ -72,7 +72,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         try {
             try {
                 context.putData(Dict.ORIGIN_REQUEST, req.getBody().toStringUtf8());
-                inferenceRequest = (InferenceRequest) ObjectTransform.json2Bean(req.getBody().toStringUtf8(), InferenceRequest.class);
+                inferenceRequest = (InferenceRequest) JSON.parseObject(req.getBody().toStringUtf8(), InferenceRequest.class);
 
                 if (inferenceRequest != null) {
                     if (inferenceRequest.getCaseid().length() == 0) {

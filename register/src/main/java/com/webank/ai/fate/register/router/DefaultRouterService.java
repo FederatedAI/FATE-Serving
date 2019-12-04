@@ -53,13 +53,17 @@ public class DefaultRouterService extends AbstractRouterService {
     }
 
     private List<URL> filterEmpty(List<URL> urls) {
-        List<URL> resultList = new ArrayList<>();
 
-        urls.forEach(url -> {
-            if (!url.getProtocol().equalsIgnoreCase(Constants.EMPTY_PROTOCOL)) {
-                resultList.add(url);
-            }
-        });
+
+        List<URL> resultList = new ArrayList<>();
+        if(urls!=null) {
+
+            urls.forEach(url -> {
+                if (!url.getProtocol().equalsIgnoreCase(Constants.EMPTY_PROTOCOL)) {
+                    resultList.add(url);
+                }
+            });
+        }
         return resultList;
     }
 

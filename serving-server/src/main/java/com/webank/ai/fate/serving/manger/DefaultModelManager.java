@@ -185,6 +185,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             modelNamespaceDataMapPool.put(modelNamespace, new ModelNamespaceData(modelNamespace, federatedParty, federatedRoles, modelName, model));
             appNamespaceMapPool.put(partyId, modelNamespace);
             if(serviceId!=null){
+                logger.info("put serviceId {} input pool",serviceId);
                 appNamespaceMapPool.put(serviceId, modelNamespace);
             }
 

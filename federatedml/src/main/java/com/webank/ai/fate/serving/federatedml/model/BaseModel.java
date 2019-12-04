@@ -180,7 +180,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
                 URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
                 URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
                 List<URL> urls = routerService.router(newUrl);
-                if (urls.size() > 0) {
+                if (urls!=null&&urls.size() > 0) {
                     URL url = urls.get(0);
                     String ip = url.getHost();
                     int port = url.getPort();
@@ -192,7 +192,6 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
                 DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
                 Proxy.Packet packet = stub1.unaryCall(packetBuilder.build());
-                LOGGER.info("PPPPPPPPPPPPPPPPPPPPPPPPPP  {}",packet.getBody().getValue().toStringUtf8());
                 remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
             } finally {
                 grpcConnectionPool.returnPool(channel1, address);
