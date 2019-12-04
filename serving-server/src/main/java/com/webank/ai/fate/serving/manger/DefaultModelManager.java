@@ -131,7 +131,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
 
             if(Dict.HOST.equals(role)){
                 if (zookeeperRegistry != null) {
-                    if(serviceId!=null){
+                    if(StringUtils.isNotEmpty(serviceId)){
                         zookeeperRegistry.addDynamicEnvironment(serviceId);
                     }
                     String key = ModelUtils.genModelKey(modelInfo.getName(),  modelInfo.getNamespace());
