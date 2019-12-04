@@ -44,22 +44,9 @@
             <directory>src/main/resources</directory>
             <includes>
                 <include>proxy.properties</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
-            <outputDirectory>/conf</outputDirectory>
-            <directory>src/main/resources</directory>
-            <includes>
                 <include>log4j2.properties</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
-            <outputDirectory>/conf</outputDirectory>
-            <directory>src/main/resources</directory>
-            <includes>
                 <include>applicationContext-proxy.xml</include>
+                <include>auth_config.json</include>
             </includes>
         </fileSet>
 
