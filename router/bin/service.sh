@@ -25,7 +25,7 @@ module=serving-router
 main_class=com.webank.ai.fate.networking.Proxy
 
 getpid() {
-    pid=`ps aux | grep ${main_class} | grep -v grep | awk '{print $2}'`
+    pid=`ps aux | grep ${module} | grep -v grep | awk '{print $2}'`
 
     if [[ -n ${pid} ]]; then
         return 1
