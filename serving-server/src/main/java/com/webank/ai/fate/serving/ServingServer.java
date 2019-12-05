@@ -68,6 +68,8 @@ public class ServingServer implements InitializingBean {
         new Configuration(confPath).load();
         new com.webank.ai.eggroll.core.utils.Configuration(confPath).load();
 
+        System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
+        System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD));
     }
 
     public static void main(String[] args) {
