@@ -149,7 +149,12 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
             }
         } catch (NodeExistsException e) {
             try {
-                client.setData().forPath(path, dataBytes);
+                if (acls.size() > 0) {
+                    Stat stat = client.checkExists().forPath(path);
+                    client.setData().withVersion(stat.getAversion()).forPath(path, dataBytes);
+                } else {
+                    client.setData().forPath(path, dataBytes);
+                }
             } catch (Exception e1) {
                 throw new IllegalStateException(e.getMessage(), e1);
             }
@@ -170,7 +175,12 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
             }
         } catch (NodeExistsException e) {
             try {
-                client.setData().forPath(path, dataBytes);
+                if (acls.size() > 0) {
+                    Stat stat = client.checkExists().forPath(path);
+                    client.setData().withVersion(stat.getAversion()).forPath(path, dataBytes);
+                } else {
+                    client.setData().forPath(path, dataBytes);
+                }
             } catch (Exception e1) {
                 throw new IllegalStateException(e.getMessage(), e1);
             }
