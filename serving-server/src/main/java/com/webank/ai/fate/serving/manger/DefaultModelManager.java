@@ -85,12 +85,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
 
     }
 
-    public static void main(String[] args) {
 
-        URL serviceUrl = URL.valueOf("grpc://" + "127.0.0.1" + ":" + 1235 + Constants.PATH_SEPARATOR + "kkkkk");
-
-
-    }
 
     @Override
     public ReturnResult publishLoadModel(Context context,FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
@@ -98,7 +93,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
         String partyId = federatedParty.getPartyId();
         String serviceId = null;
         if(context.getData(Dict.SERVICE_ID)!=null) {
-             serviceId  = context.getData(Dict.SERVICE_ID).toString();
+            serviceId  = context.getData(Dict.SERVICE_ID).toString();
         }
 
         ReturnResult returnResult = new ReturnResult();
@@ -134,10 +129,18 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                     if(StringUtils.isNotEmpty(serviceId)){
                         zookeeperRegistry.addDynamicEnvironment(serviceId);
                     }
-                    String key = ModelUtils.genModelKey(modelInfo.getName(),  modelInfo.getNamespace());
-                    String keyMd5 = EncryptUtils.encrypt(key,EncryptMethod.MD5);
-                    zookeeperRegistry.addDynamicEnvironment(keyMd5);
-                    zookeeperRegistry.register(FateServer.serviceSets);
+                    partnerModelData.forEach((key,v)->{
+
+
+                        String keyMd5 = EncryptUtils.encrypt(key,EncryptMethod.MD5);
+                        logger.info("transform key {} to md5key {}",key,keyMd5);
+                        zookeeperRegistry.addDynamicEnvironment(keyMd5);
+                        zookeeperRegistry.register(FateServer.serviceSets);
+
+                    });
+
+
+
                 }
 
             }
@@ -157,7 +160,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
         String partyId = federatedParty.getPartyId();
         String serviceId = null;
 
-        if(context.getData(Dict.SERVICE_ID)!=null) {
+        if(context.getData(Dict.SERVICE_ID)!=null&&StringUtils.isNotEmpty(context.getData(Dict.SERVICE_ID).toString().trim())) {
             serviceId  = context.getData(Dict.SERVICE_ID).toString();
         }else{
             logger.info("service id is null");

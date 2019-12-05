@@ -16,8 +16,9 @@
 
 package com.webank.ai.fate.serving.service;
 
-import ch.ethz.ssh2.crypto.Base64;
+
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishRequest;
@@ -35,7 +36,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Base64;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -50,6 +51,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     private static final Logger logger = LogManager.getLogger();
     @Autowired
     ModelManager modelManager;
+    Base64.Encoder  encoder = Base64.getEncoder();
+    Base64.Decoder  decoder = Base64.getDecoder();
 
     LinkedHashMap<String, String> publishLoadReqMap = new LinkedHashMap();
     LinkedHashMap<String, String> publicOnlineReqMap = new LinkedHashMap();
@@ -109,7 +112,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
                 String key = Md5Crypt.md5Crypt(req.toByteArray());
 
-                publishLoadReqMap.put(key, new String(Base64.encode(req.toByteArray())));
+                publishLoadReqMap.put(key, new String(encoder.encode(req.toByteArray())));
 
                 fireStoreEvent();
             }
@@ -141,7 +144,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             if (returnResult.getRetcode() == 0) {
 
-                String content = new String(Base64.encode(req.toByteArray()));
+                String content = new String(encoder.encode(req.toByteArray()));
                 String key = Md5Crypt.md5Crypt(content.getBytes());
 
                 publicOnlineReqMap.put(key, content);
@@ -175,7 +178,14 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             if (returnResult.getRetcode() == 0) {
 
-                String content = new String(Base64.encode(req.toByteArray()));
+                String content = new String(encoder.encode(req.toByteArray()));
+
+                try {
+                    PublishRequest xx= PublishRequest.parseFrom(decoder.decode(content));
+
+                } catch (InvalidProtocolBufferException e) {
+                    e.printStackTrace();
+                }
                 String key = Md5Crypt.md5Crypt(content.getBytes());
 
                 publicOnlineReqMap.put(key, content);
@@ -236,12 +246,12 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     try (FileOutputStream outputFile = new FileOutputStream(file)) {
                         try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputFile, Charset.forName("UTF-8")))) {
                             bufferedWriter.newLine();
-                            publishLoadReqMap.forEach((k, v) -> {
+                            properties.forEach((k, v) -> {
 
                                 try {
 
                                     String content = k + "=" + v;
-                                    //logger.info("write content {}", content);
+
                                     bufferedWriter.write(content);
                                     bufferedWriter.newLine();
                                 } catch (IOException e) {
@@ -320,13 +330,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     public void afterPropertiesSet() throws Exception {
 
+
+
         loadProperties(publishLoadStoreFile, publishLoadReqMap);
         loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
         publishLoadReqMap.forEach((k, v) -> {
             try {
-                byte[] data = Base64.decode(v.toString().toCharArray());
+                byte[] data = decoder.decode(v.getBytes());
                 PublishRequest req = PublishRequest.parseFrom(data);
-                logger.info("resotre publishLoadModel req {}", req);
+                logger.info("restore publishLoadModel req {}", req);
                 Context  context = new BaseContext();
                 context.putData(Dict.SERVICE_ID,req.getServiceId());
                 modelManager.publishLoadModel(context,
@@ -340,10 +352,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         });
         publicOnlineReqMap.forEach((k, v) -> {
             try {
-                byte[] data = Base64.decode(v.toString().toCharArray());
+                byte[] data = decoder.decode(v.getBytes());
                 PublishRequest req = PublishRequest.parseFrom(data);
 
-                logger.info("resotre publishOnlineModel req {}", req);
+                logger.info("restore publishOnlineModel req {} base64 {}", req,v);
                 Context  context = new BaseContext();
                 context.putData(Dict.SERVICE_ID,req.getServiceId());
                 modelManager.publishOnlineModel(context,
