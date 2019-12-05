@@ -29,6 +29,8 @@ import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.bean.Configuration;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import io.grpc.Server;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
@@ -77,6 +79,10 @@ public class Proxy {
         LOGGER.info("server conf: {}", serverConf);
         server.start();
         Properties properties = serverConf.getProperties();
+
+        System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME));
+        System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD));
+
         useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
         useZkRouter = Boolean.valueOf(properties.getProperty("useZkRouter", "false"));
         if (useRegister) {
