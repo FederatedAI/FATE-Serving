@@ -22,6 +22,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,9 +38,9 @@ import java.io.IOException;
 import java.util.*;
 
 @Component
-public class AuthUtils implements InitializingBean{
+public class AuthUtils {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String confFilePath = System.getProperty("authFile");
+    private static String confFilePath = System.getProperty(Dict.AUTH_FILE);
     private static Map<String, String> KEY_SECRET_MAP = new HashMap<>();
     private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
@@ -48,11 +50,19 @@ public class AuthUtils implements InitializingBean{
     @Autowired
     private ToStringUtils toStringUtils;
 
+    @Autowired
+    private ServerConfManager serverConfManager;
+
     @Scheduled(fixedRate = 10000)
     public void loadConfig(){
         JsonParser jsonParser = new JsonParser();
         JsonReader jsonReader = null;
         JsonObject jsonObject = null;
+
+        if (StringUtils.isEmpty(confFilePath)) {
+            confFilePath = serverConfManager.getServerConf().getData(Dict.AUTH_FILE, "");
+        }
+
         try {
             jsonReader = new JsonReader(new FileReader(confFilePath));
             jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
@@ -149,7 +159,7 @@ public class AuthUtils implements InitializingBean{
         return true;
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
 
         try {
@@ -158,5 +168,5 @@ public class AuthUtils implements InitializingBean{
             LOGGER.error("load authencation keys error", e);
         }
 
-    }
+    }*/
 }
