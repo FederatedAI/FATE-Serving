@@ -36,6 +36,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 import java.util.Base64;
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -110,9 +112,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             if (returnResult.getRetcode() == 0) {
 
-                String key = Md5Crypt.md5Crypt(req.toByteArray());
-
-                publishLoadReqMap.put(key, new String(encoder.encode(req.toByteArray())));
+                publishLoadReqMap.put(md5Crypt(req), new String(encoder.encode(req.toByteArray())));
 
                 fireStoreEvent();
             }
@@ -145,9 +145,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             if (returnResult.getRetcode() == 0) {
 
                 String content = new String(encoder.encode(req.toByteArray()));
-                String key = Md5Crypt.md5Crypt(content.getBytes());
 
-                publicOnlineReqMap.put(key, content);
+                publicOnlineReqMap.put(md5Crypt(req), content);
                 fireStoreEvent();
             }
             responseStreamObserver.onNext(builder.build());
@@ -186,9 +185,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 } catch (InvalidProtocolBufferException e) {
                     e.printStackTrace();
                 }
-                String key = Md5Crypt.md5Crypt(content.getBytes());
 
-                publicOnlineReqMap.put(key, content);
+                publicOnlineReqMap.put(md5Crypt(req), content);
                 fireStoreEvent();
             }
             responseStreamObserver.onNext(builder.build());
@@ -196,6 +194,13 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         } finally {
             context.postProcess(req, returnResult);
         }
+    }
+
+    private String md5Crypt(PublishRequest req) {
+        char[] encryptArray = StringUtils.join(req.getLocal(), req.getRoleMap(), req.getModelMap()).toCharArray();
+        Arrays.sort(encryptArray);
+        String key = Md5Crypt.md5Crypt(String.valueOf(encryptArray).getBytes(), Dict.MD5_SALT);
+        return key;
     }
 
     public void fireStoreEvent() {
