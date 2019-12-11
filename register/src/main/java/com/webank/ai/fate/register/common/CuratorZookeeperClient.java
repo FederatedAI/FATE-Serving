@@ -101,6 +101,8 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                 }
             });
             client.start();
+
+            client.setACL().withACL(acls).forPath("/");
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
