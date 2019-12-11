@@ -18,6 +18,7 @@ package com.webank.ai.fate.register.router;
 
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.loadbalance.LoadBalanceModel;
+import com.webank.ai.fate.register.loadbalance.LoadBalancer;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import org.apache.commons.lang3.StringUtils;
@@ -28,36 +29,24 @@ import java.util.List;
 
 public class DefaultRouterService extends AbstractRouterService {
     @Override
-    public List<URL> doRouter(URL url, LoadBalanceModel loadBalanceModel) {
-
+    public List<URL> doRouter(URL url ,LoadBalancer loadBalancer) {
         List<URL> urls = registry.getCacheUrls(url);
-
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
-
         urls = filterEmpty(urls);
-
         String version = url.getParameter(Constants.VERSION_KEY);
         if (CollectionUtils.isNotEmpty(urls) && StringUtils.isNotBlank(version)) {
             urls = filterVersion(urls, version);
         }
-
-        List<URL> resultUrls = this.loadBalancer.select(urls);
-
+        List<URL> resultUrls = loadBalancer.select(urls);
         logger.info("router service return urls {}", resultUrls);
-
         return resultUrls;
-
-
     }
 
     private List<URL> filterEmpty(List<URL> urls) {
-
-
         List<URL> resultList = new ArrayList<>();
         if(urls!=null) {
-
             urls.forEach(url -> {
                 if (!url.getProtocol().equalsIgnoreCase(Constants.EMPTY_PROTOCOL)) {
                     resultList.add(url);
