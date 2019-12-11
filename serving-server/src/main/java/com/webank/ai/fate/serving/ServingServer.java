@@ -140,6 +140,7 @@ public class ServingServer implements InitializingBean {
                 }
 
             });
+            zookeeperRegistry.register(FateServer.serviceSets);
         }
 
         boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
