@@ -93,14 +93,9 @@ public class Proxy {
 
             if(useZkRouter){
 
-
-                LoadBalancer loadBalancer = new RandomLoadBalance();
-
                 DefaultRouterService routerService = new DefaultRouterService();
 
                 routerService.setRegistry(zookeeperRegistry);
-
-                routerService.setLoadBalancer(loadBalancer);
 
                 DataTransferPipedClient.routerService = routerService;
 

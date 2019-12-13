@@ -39,7 +39,6 @@ public abstract class AbstractRouterService implements RouterService {
 
     protected LoadBalancerFactory loadBalancerFactory = new DefaultLoadBalancerFactory();
     protected AbstractRegistry registry;
-
     Logger logger = LogManager.getLogger();
 
     public Registry getRegistry() {

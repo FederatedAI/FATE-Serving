@@ -21,6 +21,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,9 +43,7 @@ public class HeteroLRGuest extends HeteroLR {
         Map<String, Object> result = new HashMap<>();
         Map<String, Double> forwardRet = forward(inputData);
         double score = forwardRet.get(Dict.SCORE);
-
         LOGGER.info("caseid {} guest score:{}", context.getCaseId(),score);
-
         try {
             ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
             if(hostPredictResponse !=null) {
@@ -58,10 +57,14 @@ public class HeteroLRGuest extends HeteroLR {
             }else{
                 LOGGER.info("caseid {} host response is null",context.getCaseId());
             }
-        } catch (Exception ex) {
+        } catch (io.grpc.StatusRuntimeException ex) {
             LOGGER.error("get host predict failed:", ex);
+            result.put(Dict.RET_CODE, InferenceRetCode.NETWORK_ERROR);
         }
-
+        catch(Exception ex){
+            LOGGER.error("get host predict failed:", ex);
+            result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
+        }
         double prob = sigmod(score);
         result.put(Dict.PROB, prob);
         result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE + ":{}", forwardRet.get(Dict.MODEL_WRIGHT_HIT_RATE));

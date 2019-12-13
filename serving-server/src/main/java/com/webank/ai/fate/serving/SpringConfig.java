@@ -27,8 +27,7 @@ public class SpringConfig {
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
-    @Autowired
-    LoadBalancer loadBalancer;
+
     @Autowired
     RouterService routerService;
 
@@ -46,11 +45,6 @@ public class SpringConfig {
     }
 
 
-    @Bean
-    LoadBalancer getLoadBalancer() {
-        LoadBalancer loadBalancer = new RandomLoadBalance();
-        return loadBalancer;
-    }
 
 
     @Bean
@@ -60,7 +54,7 @@ public class SpringConfig {
 
         routerService.setRegistry(zookeeperRegistry);
 
-        routerService.setLoadBalancer(this.loadBalancer);
+       // routerService.setLoadBalancer(this.loadBalancer);
 
         return routerService;
 
