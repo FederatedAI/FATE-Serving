@@ -34,6 +34,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -77,6 +79,10 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                 if (inferenceRequest != null) {
                     if (inferenceRequest.getCaseid().length() == 0) {
                         inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
+                    }
+                    Map<String,Object> sendToRemoteFeatureData = inferenceRequest.getSendToRemoteFeatureData();
+                    if(sendToRemoteFeatureData!=null) {
+                        inferenceRequest.getFeatureData().putAll(sendToRemoteFeatureData);
                     }
                     context.setCaseId(inferenceRequest.getCaseid());
                     context.setActionType(actionType.name());

@@ -98,6 +98,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
             return inferenceResult;
         }
+
         LOGGER.info("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
         Map<String, Object> rawFeatureData = inferenceRequest.getFeatureData();
 
