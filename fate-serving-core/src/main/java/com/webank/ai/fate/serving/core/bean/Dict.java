@@ -137,6 +137,7 @@ public class Dict {
     public  static  final String ACL_USERNAME = "acl.username";
     public  static  final String ACL_PASSWORD = "acl.password";
     public  static  final String AUTH_FILE = "authFile";
+    public  static  final String ENCRYPT_TYPE = "encrypt_type";
 
     public  static  final String MD5_SALT = "$1$ML";
 

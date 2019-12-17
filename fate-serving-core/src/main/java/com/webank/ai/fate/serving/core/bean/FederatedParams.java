@@ -40,7 +40,7 @@ public class FederatedParams {
     FederatedParty local;
     ModelInfo modelInfo;
     FederatedRoles role;
-    Map<String, Object> featureIdMap;
+    Map<String, Object> featureIdMap = Maps.newHashMap();
     Map<String, Object> data = Maps.newHashMap();
 
     public ModelInfo getModelInfo() {
@@ -87,9 +87,9 @@ public class FederatedParams {
         return featureIdMap;
     }
 
-    public void setFeatureIdMap(Map<String, Object> featureIdMap) {
-        this.featureIdMap = featureIdMap;
-    }
+//    public void setFeatureIdda(Map<String, Object> featureIdMap) {
+//        this.featureIdMap = featureIdMap;
+//    }
 
     public Map<String, Object> getData() {
         return data;
