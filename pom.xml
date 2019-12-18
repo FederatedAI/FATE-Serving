@@ -31,6 +31,7 @@
         <module>register</module>
         <module>router</module>
         <module>fate-jmx</module>
+        <module>serving-proxy</module>
     </modules>
 
     <properties>
