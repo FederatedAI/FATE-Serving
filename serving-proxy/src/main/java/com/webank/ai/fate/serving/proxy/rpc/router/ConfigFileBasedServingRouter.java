@@ -34,7 +34,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
 
     private RouteType routeType;
 
-    @Value("${route.table}")
+    @Value("${route.table:conf/route_table.json}")
     private String routeTableFile;
 
     @Value("${coordinator}")
@@ -216,6 +216,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
 
     @Scheduled(fixedRate = 10000)
     public void loadRouteTable() {
+        logger.debug("start refreshed route table...");
         String fileMd5 = FileUtils.fileMd5(routeTableFile);
         if(null != fileMd5 && fileMd5.equals(lastFileMd5)){
             return;
@@ -249,6 +250,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        logger.debug("in ConfigFileBasedServingRouter:afterPropertiesSet");
         routeType = RouteTypeConvertor.string2RouteType(routeTypeString);
         routeTable = new ConcurrentHashMap<>();
         topicEndpointMapping = new WeakHashMap<>();
@@ -259,6 +261,12 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         defaultAllow = false;
 
         lastFileMd5 = "";
+
+        try {
+            loadRouteTable();
+        } catch (Throwable e) {
+            logger.error("load route table fail. ", e);
+        }
     }
 
 

@@ -16,15 +16,15 @@
 #  limitations under the License.
 #
 basepath=$(cd `dirname $0`;pwd)
-#export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
-#export PATH=$PATH:$JAVA_HOME/bin
+export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
+export PATH=$PATH:$JAVA_HOME/bin
 configpath=$(cd $basepath/conf;pwd)
 
-
-module=serving-router
-main_class=com.webank.ai.fate.networking.Proxy
+module=serving-proxy
+main_class=com.webank.ai.fate.serving.proxy.bootstrap.Bootstrap
 
 getpid() {
+    sleep 1
     pid=`ps aux | grep ${module} | grep -v grep | awk '{print $2}'`
 
     if [[ -n ${pid} ]]; then
@@ -56,7 +56,7 @@ start() {
     getpid
     if [[ $? -eq 0 ]]; then
         mklogsdir
-        java -DauthFile=${configpath}/auth_config.json -Drouter_file=${configpath}/route_table.json -cp    "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/proxy.properties >> logs/console.log 2>>logs/error.log &
+        java -Dspring.config.location=${configpath}/application.properties -DconfPath=$configpath -Xmx2048m -Xms2048m -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -XX:+HeapDumpOnOutOfMemoryError -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/application.properties >> logs/console.log 2>>logs/error.log &
         if [[ $? -eq 0 ]]; then
             getpid
             echo "service start sucessfully. pid: ${pid}"

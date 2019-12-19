@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -41,15 +42,17 @@ import java.util.*;
 @Component
 public class AuthUtils implements InitializingBean{
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String confFilePath = System.getProperty("authFile");
     private static Map<String, String> KEY_SECRET_MAP = new HashMap<>();
     private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
-    private static String applyId = "";
     private static boolean ifUseAuth = false;
     private static String selfPartyId = "";
+
     @Autowired
     private ToStringUtils toStringUtils;
+
+    @Value("${auth.file:conf/auth_config.json}")
+    private String confFilePath;
 
     @Scheduled(fixedRate = 10000)
     public void loadConfig(){
@@ -73,7 +76,6 @@ public class AuthUtils implements InitializingBean{
         selfPartyId = jsonObject.get("self_party_id").getAsString();
         ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
         validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
-        applyId = jsonObject.get("apply_id").getAsString();
 
         JsonArray jsonArray = jsonObject.getAsJsonArray("access_keys");
         Gson gson = new Gson();
@@ -153,7 +155,7 @@ public class AuthUtils implements InitializingBean{
         try {
             loadConfig();
         } catch (Throwable e) {
-            LOGGER.error("load authencation keys error", e);
+            LOGGER.error("load authencation keys fail. ", e);
         }
 
     }

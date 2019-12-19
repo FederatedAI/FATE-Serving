@@ -10,24 +10,9 @@ __pycache__
 *.prefs
 
 # excluded paths
-/arch/core/target/
-/arch/driver/federation/target/
-/arch/eggroll/egg/target/
-/arch/eggroll/meta-service/target/
-/arch/eggroll/roll/target/
-/arch/eggroll/storage-service/target/
-/arch/networking/proxy/target/
-/arch/driver/target/
-/arch/eggroll/target/
 /fate-serving/federatedml/target/
 /fate-serving/serving-server/target/
 /fate-serving/target/
 /fate-serving/fate-serving-core/target/
-/arch/networking/target/
-/arch/target/
-/fateboard/target/
-/data/
-/logs/
-/jobs/
-/audit/
+.idea/*
 .vscode/*

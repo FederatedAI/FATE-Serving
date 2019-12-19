@@ -7,8 +7,6 @@
         <format>zip</format>
     </formats>
 
-
-
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
@@ -43,18 +41,7 @@
             <outputDirectory>/conf</outputDirectory>
             <directory>src/main/resources</directory>
             <includes>
-                <include>proxy.properties</include>
-                <include>log4j2.properties</include>
-                <include>applicationContext-proxy.xml</include>
-                <include>auth_config.json</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
-            <outputDirectory>/conf</outputDirectory>
-            <directory>src/main/resources/route_tables</directory>
-            <includes>
-                <include>route_table.json</include>
+                <include>*</include>
             </includes>
         </fileSet>
 

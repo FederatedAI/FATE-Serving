@@ -34,7 +34,7 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
     @Value("${acl.password}")
     private String aclPassword;
 
-    @Value("${port}")
+    @Value("${zk.self.port}")
     private String port;
 
     @Value("${routeType}")

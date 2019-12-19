@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -16,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  **/
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.webank.ai.fate.serving.proxy.*"})
-@PropertySource("classpath:application.properties")
+//@PropertySource("classpath:application.properties")
 @EnableScheduling
 public class Bootstrap {
 
