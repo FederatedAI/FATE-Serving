@@ -10,8 +10,8 @@ import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.proxy.utils.FederatedModelUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,27 +22,27 @@ import java.util.List;
 
 @Service
 public  class ZkServingRouter extends BaseServingRouter implements InitializingBean{
-    @Value("${zk.url}")
+    @Value("${zk.url:zookeeper://localhost:2181}")
     private  String  zkUrl ;
 
     @Value("${useZkRouter:false}")
     private  String  useZkRouter;
 
-    @Value("${acl.username}")
+    @Value("${acl.username:fate}")
     private String aclUsername;
 
-    @Value("${acl.password}")
+    @Value("${acl.password:fate}")
     private String aclPassword;
 
-    @Value("${port}")
+    @Value("${zk.self.port:1111}")
     private String port;
 
-    @Value("${routeType}")
+    @Value("${routeType:random}")
     private String routeTypeString;
 
     private RouteType routeType;
 
-    @Value("${coordinator}")
+    @Value("${coordinator:9999}")
     private String selfCoordinator;
 
     ZookeeperRegistry  zookeeperRegistry;
@@ -50,7 +50,7 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
     com.webank.ai.fate.register.router.RouterService    zkRouterService;
 
 
-    Logger logger  = LoggerFactory.getLogger(ZkServingRouter.class);
+    private static final Logger logger = LogManager.getLogger();
 
     @Override
     public RouteType getRouteType(){
@@ -59,6 +59,9 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
 
     @Override
     public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage){
+        if(!"true".equals(useZkRouter)){
+            return null;
+        }
         String environment = getEnvironment(context, inboundPackage);
         List<URL>   list =this.zkRouterService.router("serving", environment, context.getServiceName());
         logger.info("try to find zk ,{}:{}:{}, result {}", "serving", environment, context.getServiceName(), list);

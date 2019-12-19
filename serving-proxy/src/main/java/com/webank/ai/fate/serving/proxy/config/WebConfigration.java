@@ -32,27 +32,23 @@ public class WebConfigration implements WebMvcConfigurer {
 
     @Autowired
     ServletContext servletContext;
+
     @Value("${proxy.async.timeout:5000}")
     long  timeout;
+
     @Value("${proxy.async.coresize:10}")
     int  coreSize;
 
     @Value("${proxy.async.maxsize:100}")
     int  maxSize;
 
-    /**
-     * 设置异步线程池大小
-     * @param configurer
-     */
     @Override
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(coreSize);
         executor.setMaxPoolSize(maxSize);
         executor.setThreadNamePrefix("GatewayAsync");
-        /**
-         * 直接拒绝
-         */
+
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.initialize();
         configurer.setTaskExecutor(executor);
@@ -76,10 +72,9 @@ public class WebConfigration implements WebMvcConfigurer {
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
         registration.setFilter(characterEncodingFilter);
 
-        registration.addUrlPatterns("/*");//设置过滤路径，/*所有路径
-       // registration.addInitParameter("name", "alue");//添加默认参数
-        registration.setName("CharacterEncodingFilter");//设置优先级
-        registration.setOrder(Integer.MAX_VALUE);//设置优先级
+        registration.addUrlPatterns("/*");
+        registration.setName("CharacterEncodingFilter");
+        registration.setOrder(Integer.MAX_VALUE);
 
         return registration;
     }

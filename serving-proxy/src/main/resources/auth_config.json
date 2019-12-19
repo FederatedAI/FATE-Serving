@@ -2,7 +2,6 @@
   "self_party_id": "9999",
   "if_use_auth": false,
   "request_expire_seconds": 8,
-  "apply_id": "20191119163236256",
   "access_keys": [{
     "party_id": "9999",
     "app_key": "11",

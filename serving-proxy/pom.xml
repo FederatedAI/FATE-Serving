@@ -4,6 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <artifactId>fate-serving-proxy</artifactId>
+    <version>${fate.version}</version>
 
     <parent>
         <artifactId>fate-serving</artifactId>
@@ -11,25 +12,10 @@
         <version>${fate.version}</version>
     </parent>
 
-    <version>${fate.version}</version>
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
 
     <name>fate-serving-proxy</name>
-
-    <properties>
-        <spring.boot.version>2.2.0.RELEASE</spring.boot.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.7</java.version>
-        <shiro.version>1.4.0</shiro.version>
-
-        <dropwizard-metrics.version>3.1.1</dropwizard-metrics.version>
-        <metrics-spring.version>3.1.0</metrics-spring.version>
-        <spring-statemachine.version>2.0.1.RELEASE</spring-statemachine.version>
-        <os-maven-plugin.version>1.6.1</os-maven-plugin.version>
-        <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -51,6 +37,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1</version>
@@ -60,6 +52,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
             <version>${spring.boot.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

@@ -24,12 +24,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import com.webank.ai.fate.serving.proxy.utils.ToStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -41,18 +43,31 @@ import java.util.*;
 @Component
 public class AuthUtils implements InitializingBean{
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String confFilePath = System.getProperty("authFile");
     private static Map<String, String> KEY_SECRET_MAP = new HashMap<>();
     private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
-    private static String applyId = "";
     private static boolean ifUseAuth = false;
-    private static String selfPartyId = "";
+
     @Autowired
     private ToStringUtils toStringUtils;
 
+    @Value("${auth.file:conf/auth_config.json}")
+    private String confFilePath;
+
+    @Value("${coordinator:9999}")
+    private String selfPartyId;
+
+    private String lastFileMd5;
+
     @Scheduled(fixedRate = 10000)
     public void loadConfig(){
+        LOGGER.debug("start refreshed auth config...");
+        String fileMd5 = FileUtils.fileMd5(confFilePath);
+        if(null != fileMd5 && fileMd5.equals(lastFileMd5)){
+            return;
+        }
+        lastFileMd5 = fileMd5;
+
         JsonParser jsonParser = new JsonParser();
         JsonReader jsonReader = null;
         JsonObject jsonObject = null;
@@ -73,7 +88,6 @@ public class AuthUtils implements InitializingBean{
         selfPartyId = jsonObject.get("self_party_id").getAsString();
         ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
         validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
-        applyId = jsonObject.get("apply_id").getAsString();
 
         JsonArray jsonArray = jsonObject.getAsJsonArray("access_keys");
         Gson gson = new Gson();
@@ -83,7 +97,7 @@ public class AuthUtils implements InitializingBean{
             KEY_SECRET_MAP.put(allowKey.get("app_key").toString(), allowKey.get("app_secret").toString());
             PARTYID_KEY_MAP.put(allowKey.get("party_id").toString(), allowKey.get("app_key").toString());
         }
-        LOGGER.debug("refreshed auth cfg using file {}.", confFilePath);
+        LOGGER.info("refreshed auth cfg using file {}.", confFilePath);
     }
 
     private String getSecret(String appKey) {
@@ -149,11 +163,11 @@ public class AuthUtils implements InitializingBean{
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
+        lastFileMd5 = "";
         try {
             loadConfig();
         } catch (Throwable e) {
-            LOGGER.error("load authencation keys error", e);
+            LOGGER.error("load authencation keys fail. ", e);
         }
 
     }

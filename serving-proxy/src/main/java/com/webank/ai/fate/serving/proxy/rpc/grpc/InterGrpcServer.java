@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 @Service
 public class InterGrpcServer implements InitializingBean {
 
-    @Value("${proxy.grpc.inter.port:8867}")
+    @Value("${proxy.grpc.inter.port:8869}")
     private Integer port;
 
     Logger logger  = LoggerFactory.getLogger(InterGrpcServer.class);
