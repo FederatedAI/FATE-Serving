@@ -17,12 +17,15 @@
 package com.webank.ai.fate.serving.core.manager;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import com.alibaba.fastjson.JSON;
 //import com.webank.ai.fate.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.bean.*;
+import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -144,26 +147,39 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
     }
 
     @Override
-    public void putRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds, ReturnResult returnResult) {
+    public void putRemoteModelInferenceResult(FederatedParams guestFederatedParams, ReturnResult returnResult) {
         if (!Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))) {
             return;
         }
-        String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(remoteParty, federatedRoles, featureIds);
+        String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
         boolean putCacheSuccess = putIntoCache(remoteModelInferenceResultCacheKey, CacheType.REMOTE_MODEL_INFERENCE_RESULT, returnResult);
         if (putCacheSuccess) {
-            LOGGER.info("Put {} remote model inference result into cache.", remoteModelInferenceResultCacheKey);
+            LOGGER.info("put {} remote model inference result into cache", remoteModelInferenceResultCacheKey);
         }
     }
+//
+//    @Override
+//    public ReturnResult getRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds) {
+//        if (!Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))) {
+//            return null;
+//        }
+//        String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(remoteParty, federatedRoles, featureIds);
+//        ReturnResult returnResult = getFromCache(remoteModelInferenceResultCacheKey, CacheType.REMOTE_MODEL_INFERENCE_RESULT);
+//        if (returnResult != null) {
+//            LOGGER.info("Get {} remote model inference result from cache.", remoteModelInferenceResultCacheKey);
+//        }
+//        return returnResult;
+//    }
 
     @Override
-    public ReturnResult getRemoteModelInferenceResult(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds) {
+    public ReturnResult getRemoteModelInferenceResult(FederatedParams guestFederatedParams) {
         if (!Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))) {
             return null;
         }
-        String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(remoteParty, federatedRoles, featureIds);
+        String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
         ReturnResult returnResult = getFromCache(remoteModelInferenceResultCacheKey, CacheType.REMOTE_MODEL_INFERENCE_RESULT);
         if (returnResult != null) {
-            LOGGER.info("Get {} remote model inference result from cache.", remoteModelInferenceResultCacheKey);
+            LOGGER.info("get {} remote model inference result from cache", remoteModelInferenceResultCacheKey);
         }
         return returnResult;
     }
@@ -270,6 +286,29 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     private String generateInferenceResultCacheKey(String partyId, String caseid) {
         return StringUtils.join(Arrays.asList(partyId, caseid), "_");
+    }
+
+
+    private String generateRemoteModelInferenceResultCacheKey(FederatedParams  federatedParams){
+        Preconditions.checkNotNull(federatedParams);
+        Preconditions.checkNotNull(federatedParams.getModelInfo());
+        Preconditions.checkNotNull(federatedParams.getFeatureIdMap());
+        String namespace = federatedParams.getModelInfo().getNamespace();
+        String name = federatedParams.getModelInfo().getName();
+       // Set<String> featureIdKey = federatedParams.getFeatureIdMap();
+
+        Map  sortedMap = Maps.newTreeMap();
+        federatedParams.getFeatureIdMap().forEach((k,v)->{
+            sortedMap.put(k,v);
+        });
+        StringBuffer sb  =  new StringBuffer();
+        sb.append(namespace);
+        sb.append(name);
+        sortedMap.forEach((k,v)->{
+            sb.append(k).append(v);
+        });
+        String md5key = Md5Crypt.md5Crypt(sb.toString().getBytes(), Dict.MD5_SALT);
+        return  md5key;
     }
 
     private String generateRemoteModelInferenceResultCacheKey(FederatedParty remoteParty, FederatedRoles federatedRoles, Map<String, Object> featureIds) {

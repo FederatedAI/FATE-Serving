@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -30,6 +31,7 @@ import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -103,9 +105,9 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             Map<String, Object> featureIds = (Map<String, Object>) guestFederatedParams.getFeatureIdMap();
             FederatedParty dstParty = new FederatedParty(Dict.HOST, federatedRoles.getRole(Dict.HOST).get(0));
             if (useCache) {
-                ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(dstParty, federatedRoles, featureIds);
+                ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(guestFederatedParams);
                 if (remoteResultFromCache != null) {
-                    LOGGER.info("caseid {} get remote party model inference result from cache.", context.getCaseId());
+                    LOGGER.info("caseid {} get remote party model inference result from cache", context.getCaseId());
                     context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
                     context.hitCache(true);
                     remoteResult = remoteResultFromCache;
@@ -125,7 +127,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             context.putData(Dict.GET_REMOTE_PARTY_RESULT, true);
             remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
             if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
-                CacheManager.getInstance().putRemoteModelInferenceResult(dstParty, federatedRoles, featureIds, remoteResult);
+                CacheManager.getInstance().putRemoteModelInferenceResult(guestFederatedParams, remoteResult);
                 LOGGER.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
             }
             return remoteResult;
@@ -188,6 +190,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
                     address = ip + ":" + port;
                 }
             }
+            Preconditions.checkArgument(StringUtils.isNotEmpty(address));
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
             try {
 

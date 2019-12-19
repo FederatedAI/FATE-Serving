@@ -130,7 +130,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         Map<String, Object> predictParams = new HashMap<>();
         Map<String, Object> modelFeatureData = Maps.newHashMap(featureData);
         FederatedParams federatedParams = new FederatedParams();
-        if(inferenceRequest.getSendToRemoteFeatureData()!=null) {
+        if(inferenceRequest.getSendToRemoteFeatureData()!=null&&federatedParams.getFeatureIdMap()!=null) {
             federatedParams.getFeatureIdMap().putAll(inferenceRequest.getSendToRemoteFeatureData());
         }
         federatedParams.setCaseId(inferenceRequest.getCaseid());

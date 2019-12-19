@@ -24,6 +24,7 @@ public class Dict {
     public static final String SCORE = "score";
     public static final String SEQNO = "seqno";
     public static final String NONE = "NONE";
+    public static final String PIPLELINE_IN_MODEL = "pipeline.pipeline:Pipeline";
     public static final String POST_PROCESSING_CONFIG = "InferencePostProcessingAdapter";
     public static final String PRE_PROCESSING_CONFIG = "InferencePreProcessingAdapter";
     public static final String GET_REMOTE_PARTY_RESULT = "getRemotePartyResult";
@@ -138,6 +139,7 @@ public class Dict {
     public  static  final String ACL_PASSWORD = "acl.password";
     public  static  final String AUTH_FILE = "authFile";
     public  static  final String ENCRYPT_TYPE = "encrypt_type";
+
 
     public  static  final String MD5_SALT = "$1$ML";
 
