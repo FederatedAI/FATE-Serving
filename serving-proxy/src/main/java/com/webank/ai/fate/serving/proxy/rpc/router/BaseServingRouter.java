@@ -5,15 +5,15 @@ import com.webank.ai.fate.serving.proxy.exceptions.NoRouteInfoException;
 import com.webank.ai.fate.serving.proxy.rpc.core.Context;
 import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.proxy.rpc.core.OutboundPackage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 public abstract class BaseServingRouter implements RouterInterface{
-    private static final Logger logger  = LoggerFactory.getLogger(BaseServingRouter.class);
+    private static final Logger logger  = LogManager.getLogger();
 
     public abstract List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage);
 
@@ -47,7 +47,7 @@ public abstract class BaseServingRouter implements RouterInterface{
 
         context.setRouterInfo(routerInfo);
 
-        logger.info("host appid {} get route info {}:{}", context.getHostAppid(),routerInfo.getHost(),routerInfo.getPort());
+        logger.info("caseid {} get route info {}:{}", context.getCaseId(),routerInfo.getHost(),routerInfo.getPort());
         return routerInfo;
     }
 

@@ -13,8 +13,8 @@ import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
 import com.webank.ai.fate.serving.proxy.rpc.router.RouterInfo;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 public class InferenceService extends AbstractServiceAdaptor<Map,Map >   {
 
-    Logger logger  = LoggerFactory.getLogger(InferenceService.class);
+    Logger logger  = LogManager.getLogger();
     @Autowired
     GrpcConnectionPool   grpcConnectionPool;
 
@@ -69,16 +69,15 @@ public class InferenceService extends AbstractServiceAdaptor<Map,Map >   {
 
                 Map  inferenceReqMap = Maps.newHashMap();
                 inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
-                inferenceReqMap.put(Dict.SERVICE_ID, reqHeadMap.get(Dict.SERVICE_ID));
-                inferenceReqMap.put(Dict.MODEL_ID, reqHeadMap.get(Dict.MODEL_ID));
-                inferenceReqMap.put(Dict.MODEL_VERSION, reqHeadMap.get(Dict.MODEL_VERSION));
+                inferenceReqMap.putAll(reqHeadMap);
                 inferenceReqMap.put(Dict.FEATURE_DATA,Maps.newHashMap(reqBodyMap));
 
-                InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-                InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
+                logger.info("inference req ============================= {}", JSON.toJSONString(inferenceReqMap));
 
-                logger.info("============================= {}",JSON.toJSONString(inferenceReqMap));
+                InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
                 reqBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(inferenceReqMap).getBytes()));
+
+                InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
                 ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture = futureStub.inference(reqBuilder.build());
                 InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout,TimeUnit.MILLISECONDS);
                 logger.info("routerinfo {} send {} result {}",routerInfo,inferenceReqMap,result);

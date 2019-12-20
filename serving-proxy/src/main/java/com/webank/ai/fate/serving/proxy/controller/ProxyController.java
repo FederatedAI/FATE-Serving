@@ -1,13 +1,14 @@
 package com.webank.ai.fate.serving.proxy.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Maps;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.serving.proxy.common.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.*;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,10 @@ public class ProxyController {
 
     @Autowired
     ProxyServiceRegister proxyServiceRegister;
+
+
+    @Value("${coordinator:9999}")
+    private String selfCoordinator;
 
     Logger logger = LoggerFactory.getLogger(ProxyController.class);
 
@@ -58,7 +63,7 @@ public class ProxyController {
                 Context context = new Context();
                 context.setVersion(version);
 
-                InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, headers, data, httpServletRequest);
+                InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, data, httpServletRequest);
 
                 OutboundPackage<Map>  result  =   serviceAdaptor.service(context,inboundPackage );
                 if(result!=null&&result.getData()!=null) {
@@ -74,19 +79,20 @@ public class ProxyController {
     }
 
 
-    private InboundPackage<Map> buildInboundPackageFederation(Context  context ,HttpHeaders headers,
-                                                              String data,HttpServletRequest  httpServletRequest) {
+    private InboundPackage<Map> buildInboundPackageFederation(Context  context , String data,
+                                                              HttpServletRequest  httpServletRequest) {
         String sourceIp = WebUtil.getIpAddr(httpServletRequest);
         context.setSourceIp(sourceIp);
         context.setCaseId(UUID.randomUUID().toString());
+        context.setGuestAppId(selfCoordinator);
 
-        Map head = Maps.newHashMap();
-        // SERVICE_ID == fun(MODEL_ID, MODEL_VERSION)
-        head.put(Dict.SERVICE_ID, headers.getFirst(Dict.SERVICE_ID)!=null?headers.getFirst(Dict.SERVICE_ID).trim():"");
-        head.put(Dict.MODEL_ID, headers.getFirst(Dict.MODEL_ID)!=null?headers.getFirst(Dict.MODEL_ID).trim():"");
-        head.put(Dict.MODEL_VERSION, headers.getFirst(Dict.MODEL_VERSION)!=null?headers.getFirst(Dict.MODEL_VERSION).trim():"");
+        JSONObject jsonObject =JSON.parseObject(data);
+        Map head = JSON.parseObject(jsonObject.getString(Dict.HEAD), Map.class);
+        Map body = JSON.parseObject(jsonObject.getString(Dict.BODY), Map.class);
 
-        Map body = JSON.parseObject(data, Map.class);
+        if(null != head){
+            context.setHostAppid((String) head.get(Dict.APP_ID));
+        }
 
         InboundPackage<Map> inboundPackage = new InboundPackage<Map>();
         inboundPackage.setBody(body);

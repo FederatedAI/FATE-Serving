@@ -123,7 +123,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         }
     }
 
-//    @Override
+    @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter());

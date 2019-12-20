@@ -47,7 +47,7 @@ public class WebConfigration implements WebMvcConfigurer {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(coreSize);
         executor.setMaxPoolSize(maxSize);
-        executor.setThreadNamePrefix("GatewayAsync");
+        executor.setThreadNamePrefix("ProxyAsync");
 
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.initialize();

@@ -75,7 +75,10 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
                     setRole(inferenceServiceName)
                     .setName(Dict.PARTNER_PARTY_NAME)
                     .build();
-            srcTopic = dstTopic;
+            srcTopic = topicBuilder.setPartyId(selfCoordinator).
+                    setRole(Dict.SELF_PROJECT_NAME)
+                    .setName(Dict.PARTNER_PARTY_NAME)
+                    .build();
         } else {   // default unaryCall
             Proxy.Packet  sourcePacket = (Proxy.Packet) inboundPackage.getBody();
             dstTopic = sourcePacket.getHeader().getDst();
@@ -186,7 +189,6 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         if (rules == null) {
             return result;      // false
         }
-
 
         stage = 0;
         while (stage < 3 && !result) {

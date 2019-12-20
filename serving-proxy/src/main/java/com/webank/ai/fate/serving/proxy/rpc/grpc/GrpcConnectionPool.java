@@ -93,8 +93,6 @@ public class GrpcConnectionPool {
         return objectPool.borrowObject();
     }
 
-    ;
-
 
     private class ManagedChannelFactory extends BasePooledObjectFactory<ManagedChannel> {
 
