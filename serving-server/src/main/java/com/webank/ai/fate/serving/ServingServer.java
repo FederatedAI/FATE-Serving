@@ -66,6 +66,7 @@ public class ServingServer implements InitializingBean {
 
         System.setProperty("configpath", confPath);
         new Configuration(confPath).load();
+
         new com.webank.ai.eggroll.core.utils.Configuration(confPath).load();
 
         System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
@@ -123,6 +124,7 @@ public class ServingServer implements InitializingBean {
 
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
+            zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
 
             BaseModel.routerService = applicationContext.getBean(RouterService.class);
             FateServer.serviceSets.forEach(servie -> {

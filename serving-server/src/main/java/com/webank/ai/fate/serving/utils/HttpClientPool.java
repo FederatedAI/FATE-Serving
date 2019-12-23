@@ -156,4 +156,18 @@ public class HttpClientPool {
             }
         }
     }
+
+    public static String transferPost(String url, Map<String, Object> requestData) {
+        HttpPost httpPost = new HttpPost(url);
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(60000)
+                .setConnectTimeout(60000)
+                .setSocketTimeout(60000).build();
+        httpPost.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
+        httpPost.setConfig(requestConfig);
+        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);
+        stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
+        httpPost.setEntity(stringEntity);
+        return getResponse(httpPost);
+    }
 }

@@ -1339,7 +1339,7 @@ class URL implements Serializable {
 
         if (StringUtils.isNotEmpty(project)) {
 
-
+            buf.append("/");
             buf.append(project);
         }
         if (StringUtils.isNotEmpty(environment)) {
