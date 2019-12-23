@@ -5,6 +5,7 @@ package com.webank.ai.fate.serving.proxy.rpc.grpc;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.proxy.common.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.*;
 import io.grpc.stub.StreamObserver;
@@ -21,6 +22,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
 
     public abstract void setExtraInfo(Context  context, InboundPackage<Proxy.Packet> inboundPackage, Proxy.Packet req);
 
+    @RegisterService(serviceName = "unaryCall")
     @Override
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver)  {
 

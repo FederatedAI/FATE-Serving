@@ -1,9 +1,8 @@
 package com.webank.ai.fate.serving.proxy.rpc.router;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import com.webank.ai.fate.register.router.DefaultRouterService;
+import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.proxy.common.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.Context;
 import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
@@ -22,20 +21,9 @@ import java.util.List;
 
 @Service
 public  class ZkServingRouter extends BaseServingRouter implements InitializingBean{
-    @Value("${zk.url:zookeeper://localhost:2181}")
-    private  String  zkUrl ;
 
     @Value("${useZkRouter:false}")
     private  String  useZkRouter;
-
-    @Value("${acl.username:fate}")
-    private String aclUsername;
-
-    @Value("${acl.password:fate}")
-    private String aclPassword;
-
-    @Value("${zk.self.port:1111}")
-    private String port;
 
     @Value("${routeType:random}")
     private String routeTypeString;
@@ -45,9 +33,11 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
     @Value("${coordinator:9999}")
     private String selfCoordinator;
 
-    ZookeeperRegistry  zookeeperRegistry;
+    public static void setZkRouterService(RouterService zkRouterService) {
+        ZkServingRouter.zkRouterService = zkRouterService;
+    }
 
-    com.webank.ai.fate.register.router.RouterService    zkRouterService;
+    private static RouterService zkRouterService;
 
 
     private static final Logger logger = LogManager.getLogger();
@@ -65,6 +55,9 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
         String environment = getEnvironment(context, inboundPackage);
         List<URL>   list =this.zkRouterService.router("serving", environment, context.getServiceName());
         logger.info("try to find zk ,{}:{}:{}, result {}", "serving", environment, context.getServiceName(), list);
+        if(null == list || list.isEmpty()){
+            return null;
+        }
         List<RouterInfo> routeList = new ArrayList<>();
         for(URL url: list){
             String  urlip = url.getHost();
@@ -102,24 +95,6 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
-        if("true".equals(useZkRouter)&&StringUtils.isNotEmpty(zkUrl)) {
-
-            System.setProperty("acl.username", aclUsername);
-            System.setProperty("acl.password", aclPassword);
-
-            zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, Dict.SELF_PROJECT_NAME, Dict.SELF_ENVIRONMENT, Integer.valueOf(port));
-
-            zookeeperRegistry.subProject("serving");
-
-            DefaultRouterService defaultRouterService = new DefaultRouterService();
-
-            defaultRouterService.setRegistry(zookeeperRegistry);
-
-            zkRouterService = defaultRouterService;
-        }
-
         routeType = RouteTypeConvertor.string2RouteType(routeTypeString);
-
     }
 }

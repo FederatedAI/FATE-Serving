@@ -1,4 +1,5 @@
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
+import com.webank.ai.fate.register.provider.FateServerBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -34,7 +35,7 @@ public class InterGrpcServer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        ServerBuilder serverBuilder = ServerBuilder.forPort(port);
+        FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
         serverBuilder.addService(ServerInterceptors.intercept(interRequestHandler, new ServiceExceptionHandler()));
         serverBuilder.addService(interRequestHandler);

@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  **/
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.webank.ai.fate.serving.proxy.*"})
-//@PropertySource("classpath:application.properties")
+@PropertySource("classpath:application.properties")
 @EnableScheduling
 public class Bootstrap {
 

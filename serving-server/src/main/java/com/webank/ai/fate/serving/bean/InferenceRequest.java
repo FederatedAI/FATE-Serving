@@ -27,7 +27,17 @@ import java.util.Map;
 public class InferenceRequest implements Request {
     private String appid;
     private String partyId;
+
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
+    }
+
     private String modelVersion;
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
     private String modelId;
     private String seqno;
     private String caseid;
