@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.service;
 
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
@@ -53,6 +54,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     private static final Logger logger = LogManager.getLogger();
     @Autowired
     ModelManager modelManager;
+    @Autowired
+    MetricRegistry  metricRegistry;
+
     Base64.Encoder  encoder = Base64.getEncoder();
     Base64.Decoder  decoder = Base64.getDecoder();
 
@@ -93,7 +97,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @RegisterService(serviceName = "publishLoad")
     public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
 
-        Context context = new BaseContext(new BaseLoggerPrinter());
+        Context context = new BaseContext(new BaseLoggerPrinter(),metricRegistry);
         context.setActionType(ModelActionType.MODEL_LOAD.name());
         context.preProcess();
         ReturnResult returnResult = null;
@@ -126,7 +130,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 //    @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter());
+        Context context = new BaseContext(new BaseLoggerPrinter(),metricRegistry);
         context.setActionType(ModelActionType.MODEL_PUBLISH_ONLINE.name());
         context.preProcess();
         ReturnResult returnResult = null;
@@ -159,7 +163,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "publishBind")
     public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter());
+        Context context = new BaseContext(new BaseLoggerPrinter(),metricRegistry);
         context.setActionType(ModelActionType.MODEL_PUBLISH_ONLINE.name());
         context.preProcess();
         ReturnResult returnResult = null;
@@ -227,7 +231,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
 
     public void doSaveProperties(Map properties, File file, long version) {
-        //logger.info("prepare to save modelinfo {} {}", file, properties);
 
         if (file == null) {
             return;

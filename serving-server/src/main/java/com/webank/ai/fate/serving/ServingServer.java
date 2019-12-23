@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving;
 
+import com.codahale.metrics.ConsoleReporter;
 import com.google.common.collect.Sets;
 
 import com.webank.ai.fate.jmx.server.FateMBeanServer;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ServingServer implements InitializingBean {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -60,16 +62,17 @@ public class ServingServer implements InitializingBean {
     public ServingServer() {
 
     }
-
     public ServingServer(String confPath) {
         this.confPath = new File(confPath).getAbsolutePath();
-
-        System.setProperty("configpath", confPath);
+        System.setProperty(Dict.CONFIGPATH, confPath);
         new Configuration(confPath).load();
         new com.webank.ai.eggroll.core.utils.Configuration(confPath).load();
-
-        System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
-        System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD));
+        if(Configuration.getProperty(Dict.ACL_USERNAME)!=null) {
+            System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
+        }
+        if(Configuration.getProperty(Dict.ACL_PASSWORD)!=null) {
+            System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD));
+        }
     }
 
     public static void main(String[] args) {
@@ -98,8 +101,6 @@ public class ServingServer implements InitializingBean {
     private void start(String[] args) throws IOException {
         this.initialize();
         applicationContext = SpringApplication.run(SpringConfig.class, args);
-
-
         ApplicationHolder.applicationContext = applicationContext;
         int port = Integer.parseInt(Configuration.getProperty(Dict.PROPERTY_SERVER_PORT));
         //TODO: Server custom configuration
@@ -111,9 +112,7 @@ public class ServingServer implements InitializingBean {
         serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ModelService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
         serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ProxyService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
         server = serverBuilder.build();
-
-        LOGGER.info("Server started listening on port: {}, use configuration: {}", port, this.confPath);
-
+        LOGGER.info("server started listening on port: {}, use configuration: {}", port, this.confPath);
         server.start();
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
@@ -157,6 +156,9 @@ public class ServingServer implements InitializingBean {
                 zookeeperRegistry.register(jmxUrl);
             }
         }
+
+        ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
+        reporter.start(1, TimeUnit.SECONDS);
 
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

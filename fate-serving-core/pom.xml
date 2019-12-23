@@ -75,6 +75,11 @@
             <artifactId>commons-codec</artifactId>
             <version>1.12</version>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>4.1.0-rc2</version>
+        </dependency>
     </dependencies>
 
 

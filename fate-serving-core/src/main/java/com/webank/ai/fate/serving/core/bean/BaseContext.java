@@ -16,6 +16,9 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,13 +35,16 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     LoggerPrinter loggerPrinter;
     String actionType;
     Map dataMap = Maps.newHashMap();
-
+    Timer.Context  timerContext;
+    long  costTime;
+    MetricRegistry  metricRegistry;
     public BaseContext(){
 
     }
 
-    public BaseContext(LoggerPrinter loggerPrinter) {
+    public BaseContext(LoggerPrinter loggerPrinter,MetricRegistry metricRegistry) {
         this.loggerPrinter = loggerPrinter;
+        this.metricRegistry =  metricRegistry;
         timestamp = System.currentTimeMillis();
     }
 
@@ -61,9 +67,11 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public void preProcess() {
-
         //WatchDog.enter(this);
-
+        Timer timer = metricRegistry.timer(actionType);
+        Counter counter = metricRegistry.counter(actionType);
+        counter.inc();
+        timerContext = timer.time();
     }
 
     @Override
@@ -78,9 +86,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public void putData(Object key, Object data) {
-
         dataMap.put(key, data);
-
     }
 
     @Override
@@ -108,7 +114,11 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
         try {
 
-            //    WatchDog.quit(this);
+            if(timerContext!=null){
+               costTime = timerContext.stop();
+            }else{
+                costTime = System.currentTimeMillis() -  timestamp;
+            }
 
             if (loggerPrinter != null) {
                 loggerPrinter.printLog(this, req, resp);
@@ -155,6 +165,8 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public long getCostTime() {
-        return System.currentTimeMillis() - timestamp;
+
+        return  costTime;
+
     }
 }

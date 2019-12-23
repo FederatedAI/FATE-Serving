@@ -125,6 +125,14 @@ public class Configuration {
         return Integer.parseInt(getProperty(key));
     }
 
+    public static Integer getPropertyInt(String key,Integer defaultInteger) {
+        if (getProperty(key) == null) {
+            return defaultInteger;
+        }
+        return Integer.parseInt(getProperty(key));
+    }
+
+
     public static Integer getPropertyInt(String key, int defaultValue) {
         if (getProperty(key) == null) {
             return defaultValue;

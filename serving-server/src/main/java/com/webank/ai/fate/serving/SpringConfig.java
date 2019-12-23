@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving;
 
 
+import com.codahale.metrics.*;
 import com.webank.ai.fate.register.loadbalance.LoadBalancer;
 import com.webank.ai.fate.register.loadbalance.RandomLoadBalance;
 import com.webank.ai.fate.register.router.DefaultRouterService;
@@ -16,11 +17,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 @Configuration
 @ComponentScan(basePackages = {"com.webank.ai.fate.serving.*"})
 @ConfigurationProperties
 @PropertySource(value = "file:${user.dir}/conf/serving-server.properties", ignoreResourceNotFound = false)
-//@PropertySource(value ={"file:${user.dir}/config/custom.properties","file:${user.dir}/config/custom_prison.properties"}, ignoreResourceNotFound = true)
 @SpringBootApplication
 @Service
 public class SpringConfig {
@@ -33,7 +35,7 @@ public class SpringConfig {
 
     @Bean
     ZookeeperRegistry getServiceRegistry() {
-        // String project, String environment, int port
+
         String useRegisterString = com.webank.ai.fate.serving
                 .core.bean.Configuration.getProperty("useRegister");
         if (Boolean.valueOf(useRegisterString))
@@ -44,29 +46,45 @@ public class SpringConfig {
 
     }
 
-
+    @Bean
+    public MetricRegistry metrics() {
+        return new MetricRegistry();
+    }
 
 
     @Bean
+    public Meter requestMeter(MetricRegistry metrics) {
+        return metrics.meter("request");
+    }
+
+//    @Bean
+//    public Histogram responseSizes(MetricRegistry metrics) {
+//        return metrics.histogram("response-sizes");
+//    }
+
+    @Bean
+    public Counter pendingJobs(MetricRegistry metrics) {
+        return metrics.counter("requestCount");
+    }
+
+    @Bean
+    public ConsoleReporter consoleReporter(MetricRegistry metrics) {
+        return ConsoleReporter.forRegistry(metrics)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .build();
+    }
+
+    @Bean
     RouterService getRouterService() {
-
         DefaultRouterService routerService = new DefaultRouterService();
-
         routerService.setRegistry(zookeeperRegistry);
-
-       // routerService.setLoadBalancer(this.loadBalancer);
-
         return routerService;
 
     }
 
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-//        //List<URL> lists = zookeeperRegistry.lookup(URL.valueOf("proxy/online/unaryCall"));
-//        System.err.println( routerService.router(URL.valueOf("proxy/online/unaryCall"), LoadBalanceModel.random_with_weight));
-//
-//    }
+
 
 
 }
