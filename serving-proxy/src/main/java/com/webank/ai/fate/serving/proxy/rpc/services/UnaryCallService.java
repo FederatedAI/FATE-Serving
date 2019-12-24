@@ -105,8 +105,6 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         fateErrorCodeMap.put(ErrorCode.SERVICE_NOT_FOUND,"502");
         fateErrorCodeMap.put(ErrorCode.SYSTEM_ERROR,"503");
         fateErrorCodeMap.put(ErrorCode.LIMIT_ERROR,"504");
-        fateErrorCodeMap.put(ErrorCode.QUOTA_ERROR,"505");
-        fateErrorCodeMap.put(ErrorCode.ORDER_ERROR,"506");
         fateErrorCodeMap.put(ErrorCode.NET_ERROR,"507");
         fateErrorCodeMap.put(ErrorCode.SHUTDOWN_ERROR,"508");
         fateErrorCodeMap.put(ErrorCode.ROUTER_ERROR,"509");
