@@ -18,6 +18,8 @@ package com.webank.ai.fate.serving.service;
 
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
@@ -38,16 +40,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Base64;
+import java.util.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements InitializingBean {
@@ -60,8 +60,25 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     Base64.Encoder  encoder = Base64.getEncoder();
     Base64.Decoder  decoder = Base64.getDecoder();
 
-    LinkedHashMap<String, String> publishLoadReqMap = new LinkedHashMap();
-    LinkedHashMap<String, String> publicOnlineReqMap = new LinkedHashMap();
+    private static class RequestWapper{
+        public  RequestWapper(String content,long timestamp,String md5){
+
+            this.content= content;
+            this.timestamp =  timestamp;
+            this.md5 = md5;
+        }
+        @Override
+        public  String toString(){
+           return content+":"+timestamp;
+        }
+        String  content;
+        long  timestamp;
+        String  md5;
+    }
+
+
+    LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
+    LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     //    ConcurrentMap<String,PublishRequest> publishLoadReqMap =new ConcurrentHashMap<>();
@@ -115,8 +132,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             builder.setStatusCode(returnResult.getRetcode());
 
             if (returnResult.getRetcode() == 0) {
-
-                publishLoadReqMap.put(md5Crypt(req), new String(encoder.encode(req.toByteArray())));
+                RequestWapper  requestWapper =new RequestWapper(new String(encoder.encode(req.toByteArray())),System.currentTimeMillis(),md5Crypt(req));
+                publishLoadReqMap.put(requestWapper.md5,requestWapper);
 
                 fireStoreEvent();
             }
@@ -146,10 +163,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             if (returnResult.getRetcode() == 0) {
-
                 String content = new String(encoder.encode(req.toByteArray()));
-
-                publicOnlineReqMap.put(md5Crypt(req), content);
+                RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
+                publicOnlineReqMap.put(requestWapper.md5, requestWapper);
                 fireStoreEvent();
             }
             responseStreamObserver.onNext(builder.build());
@@ -163,7 +179,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @RegisterService(serviceName = "publishBind")
     public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
-
         context.preProcess();
         ReturnResult returnResult = null;
         try {
@@ -188,8 +203,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 } catch (InvalidProtocolBufferException e) {
                     e.printStackTrace();
                 }
-
-                publicOnlineReqMap.put(md5Crypt(req), content);
+                RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
+                publicOnlineReqMap.put(requestWapper.md5, requestWapper);
                 fireStoreEvent();
             }
             responseStreamObserver.onNext(builder.build());
@@ -204,6 +219,21 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         Arrays.sort(encryptArray);
         String key = Md5Crypt.md5Crypt(String.valueOf(encryptArray).getBytes(), Dict.MD5_SALT);
         return key;
+    }
+
+    public static   List<RequestWapper>  sortRequest(Map<String,RequestWapper>  data){
+
+        List<RequestWapper>  list = Lists.newArrayList();
+        data.forEach((k,v)->{
+            list.add(v);
+        });
+        Collections.sort(list, new Comparator<RequestWapper>() {
+            @Override
+            public int compare(RequestWapper o1, RequestWapper o2) {
+                return o1.timestamp - o2.timestamp>0?1:-1;
+            }
+        });
+        return  list;
     }
 
     public void fireStoreEvent() {
@@ -229,7 +259,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     }
 
 
-    public void doSaveProperties(Map properties, File file, long version) {
+    public void doSaveProperties(Map<String,RequestWapper> data, File file, long version) {
 
         if (file == null) {
             return;
@@ -253,12 +283,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     try (FileOutputStream outputFile = new FileOutputStream(file)) {
                         try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputFile, Charset.forName("UTF-8")))) {
                             bufferedWriter.newLine();
-                            properties.forEach((k, v) -> {
-
+                            List<RequestWapper> sortedList = sortRequest(data);
+                            sortedList.forEach(( v) -> {
                                 try {
-
-                                    String content = k + "=" + v;
-
+                                    String content = v.md5 + "=" + v.toString();
                                     bufferedWriter.write(content);
                                     bufferedWriter.newLine();
                                 } catch (IOException e) {
@@ -278,47 +306,39 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 }
             }
         } catch (Throwable e) {
-//            savePropertiesRetryTimes.incrementAndGet();
-//            if (savePropertiesRetryTimes.get() >= MAX_RETRY_TIMES_SAVE_PROPERTIES) {
-//                logger.warn("Failed to save registry cache file after retrying " + MAX_RETRY_TIMES_SAVE_PROPERTIES + " times, cause: " + e.getMessage(), e);
-//                savePropertiesRetryTimes.set(0);
-//                return;
-//            }
-//            if (version < lastCacheChanged.get()) {
-//                savePropertiesRetryTimes.set(0);
-//                return;
-//            } else {
-//                registryCacheExecutor.execute(new AbstractRegistry.SaveProperties(lastCacheChanged.incrementAndGet()));
-//            }
             logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
         }
     }
 
-    private void loadProperties(File file, Map properties) {
-
+    private List<RequestWapper> loadProperties(File file, Map<String,RequestWapper> properties) {
 
         if (file != null && file.exists()) {
             InputStream in = null;
             try {
                 in = new FileInputStream(file);
-                //properties.load(in);
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in))) {
-
+                   final AtomicInteger count= new AtomicInteger(0);
 
                     bufferedReader.lines().forEach(temp -> {
+                        count.addAndGet(1);
                         int index = temp.indexOf("=");
                         if (index > 0) {
                             String key = temp.substring(0, index);
                             String value = temp.substring(index + 1);
-                            properties.put(key, value);
+                            String[] args =value.split(":");
+                            String content = args[0];
+                            long timestamp = count.longValue();;
+                            if(args.length>=2){
+                                timestamp =  new Long(args[1]);
+                            }
+                            properties.put(key, new RequestWapper(content,timestamp,key));
                         }
                     });
                 }
-
-
                 if (logger.isInfoEnabled()) {
                     logger.info("Load model cache file " + file + ", data: " + properties);
                 }
+                return  sortRequest(properties);
             } catch (Throwable e) {
                 logger.error("failed to load cache file {} ", file);
             } finally {
@@ -330,7 +350,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     }
                 }
             }
+
         }
+        return null;
     }
 
 
@@ -339,11 +361,11 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
 
 
-        loadProperties(publishLoadStoreFile, publishLoadReqMap);
-        loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
-        publishLoadReqMap.forEach((k, v) -> {
+        List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
+        List<RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
+        publishLoadList.forEach(( v) -> {
             try {
-                byte[] data = decoder.decode(v.getBytes());
+                byte[] data = decoder.decode(v.content.getBytes());
                 PublishRequest req = PublishRequest.parseFrom(data);
                 logger.info("restore publishLoadModel req {}", req);
                 Context  context = new BaseContext();
@@ -357,9 +379,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 e.printStackTrace();
             }
         });
-        publicOnlineReqMap.forEach((k, v) -> {
+        publishOnlineList.forEach(( v) -> {
             try {
-                byte[] data = decoder.decode(v.getBytes());
+                byte[] data = decoder.decode(v.content.getBytes());
                 PublishRequest req = PublishRequest.parseFrom(data);
 
                 logger.info("restore publishOnlineModel req {} base64 {}", req,v);
@@ -378,4 +400,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
 
     }
+
+
 }
