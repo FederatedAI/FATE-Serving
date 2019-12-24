@@ -97,8 +97,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @RegisterService(serviceName = "publishLoad")
     public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
 
-        Context context = new BaseContext(new BaseLoggerPrinter(),metricRegistry);
-        context.setActionType(ModelActionType.MODEL_LOAD.name());
+        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_LOAD.name(),metricRegistry);
+
         context.preProcess();
         ReturnResult returnResult = null;
 
@@ -130,8 +130,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 //    @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(),metricRegistry);
-        context.setActionType(ModelActionType.MODEL_PUBLISH_ONLINE.name());
+        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
         context.preProcess();
         ReturnResult returnResult = null;
         try {
@@ -163,8 +162,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "publishBind")
     public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(),metricRegistry);
-        context.setActionType(ModelActionType.MODEL_PUBLISH_ONLINE.name());
+        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
+
         context.preProcess();
         ReturnResult returnResult = null;
         try {

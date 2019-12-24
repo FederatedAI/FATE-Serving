@@ -71,7 +71,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
         InferenceRequest inferenceRequest = null;
-        Context context = new BaseContext(new GuestInferenceLoggerPrinter(),metricRegistry);
+        Context context = new BaseContext(new GuestInferenceLoggerPrinter(),actionType.name(),metricRegistry);
         context.preProcess();
 
         try {
@@ -88,7 +88,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                         inferenceRequest.getFeatureData().putAll(sendToRemoteFeatureData);
                     }
                     context.setCaseId(inferenceRequest.getCaseid());
-                    context.setActionType(actionType.name());
+
 
                     switch (actionType.name()) {
                         case "SYNC_RUN":

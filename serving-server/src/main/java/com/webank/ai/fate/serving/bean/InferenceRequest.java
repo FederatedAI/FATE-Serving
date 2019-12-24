@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.bean;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.ai.fate.serving.core.bean.Request;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
@@ -31,17 +32,20 @@ public class InferenceRequest implements Request {
     private String modelId;
     private String seqno;
     private String caseid;
-
+    private String serviceId;
+    private Map<String, Object> featureData;
     public String getServiceId() {
         return serviceId;
     }
-
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
     }
-
-    private String serviceId;
-    private Map<String, Object> featureData;
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
+    }
 
     public Map<String, Object> getSendToRemoteFeatureData() {
         return sendToRemoteFeatureData;
@@ -117,16 +121,11 @@ public class InferenceRequest implements Request {
     public String toString() {
         String result = "";
         try {
-
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            result = objectMapper.writeValueAsString(this);
-
+            result= JSON.toJSONString(this);
         } catch (Throwable e) {
 
         }
         return result;
-
     }
 
 }

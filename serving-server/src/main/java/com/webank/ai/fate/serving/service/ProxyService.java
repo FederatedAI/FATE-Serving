@@ -45,7 +45,9 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
         ReturnResult responseResult = null;
-        Context context = new BaseContext(new HostInferenceLoggerPrinter(),metricRegistry);
+        String actionType =  req.getHeader().getCommand().getName();
+
+        Context context = new BaseContext(new HostInferenceLoggerPrinter(),actionType,metricRegistry);
         context.setActionType(req.getHeader().getCommand().getName());
         context.preProcess();
         HostFederatedParams requestData = null;

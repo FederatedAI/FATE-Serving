@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
+import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -25,10 +26,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
-
     private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
     public static ApplicationContext applicationContext;
     long timestamp;
@@ -42,10 +43,11 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     }
 
-    public BaseContext(LoggerPrinter loggerPrinter,MetricRegistry metricRegistry) {
+    public BaseContext(LoggerPrinter loggerPrinter,String  actionType,MetricRegistry metricRegistry) {
         this.loggerPrinter = loggerPrinter;
         this.metricRegistry =  metricRegistry;
         timestamp = System.currentTimeMillis();
+        this.actionType = actionType;
     }
 
     private BaseContext(LoggerPrinter loggerPrinter, long timestamp, Map dataMap) {
@@ -62,16 +64,19 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public void setActionType(String actionType) {
         this.actionType = actionType;
-
     }
 
     @Override
     public void preProcess() {
-        //WatchDog.enter(this);
-        Timer timer = metricRegistry.timer(actionType);
-        Counter counter = metricRegistry.counter(actionType);
-        counter.inc();
-        timerContext = timer.time();
+        try {
+            Timer timer = metricRegistry.timer(actionType+"_timer");
+            Counter counter = metricRegistry.counter(actionType+"_couter");
+            counter.inc();
+            timerContext = timer.time();
+        }catch(Exception e){
+            LOGGER.error("preProcess error" ,e);
+
+        }
     }
 
     @Override
@@ -110,23 +115,19 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public void postProcess(Req req, Resp resp) {
-
-
         try {
-
             if(timerContext!=null){
                costTime = timerContext.stop();
             }else{
                 costTime = System.currentTimeMillis() -  timestamp;
             }
-
             if (loggerPrinter != null) {
                 loggerPrinter.printLog(this, req, resp);
             }
 
         } catch (Throwable e) {
 
-
+            LOGGER.error("postProcess error" ,e);
         }
     }
 
@@ -152,9 +153,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public Context subContext() {
-
         Map newDataMap = Maps.newHashMap(dataMap);
-
         return new BaseContext(this.loggerPrinter, this.timestamp, dataMap);
     }
 
@@ -165,8 +164,9 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public long getCostTime() {
-
         return  costTime;
-
     }
+
+
+
 }

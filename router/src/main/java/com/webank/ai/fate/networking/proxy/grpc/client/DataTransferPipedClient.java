@@ -332,7 +332,7 @@ public class DataTransferPipedClient {
        // (partnerModelInfo.getName(), partnerModelInfo.getNamespace()
         String key =genModelKey(partnerModelInfo.getName(), partnerModelInfo.getNamespace());
         String md5Key = EncryptUtils.encrypt(key, EncryptMethod.MD5);
-
+        
         URL paramUrl = URL.valueOf("serving/" + md5Key + "/unaryCall");
         if(StringUtils.isNotEmpty(version)) {
             paramUrl= paramUrl.addParameter(Constants.VERSION_KEY,version
