@@ -1,3 +1,9 @@
+# Release 1.2.0
+## Major Features and Improvements
+* Decouple FATE-Serving and Eggroll, model is read directly from FATE-Flow
+* Serving router supports authentication
+* Fixed a bug that got the remote inference result cache
+
 # Release 1.1
 ## Major Features and Improvements
 * Add Online OneHotEncoder transform
