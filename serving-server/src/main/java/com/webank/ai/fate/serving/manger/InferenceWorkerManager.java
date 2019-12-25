@@ -62,6 +62,7 @@ public class InferenceWorkerManager {
     }
 
     public static class InferenceWorkerThreadRejectedPolicy implements RejectedExecutionHandler {
+        @Override
         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
             LOGGER.info("{} rejected.", r.toString());
         }

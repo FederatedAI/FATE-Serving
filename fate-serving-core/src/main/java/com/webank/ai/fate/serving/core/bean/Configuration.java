@@ -90,6 +90,7 @@ public class Configuration {
                             fileInputStream.read(bytes);
                             JSONObject jsonObject = new JSONObject(new String(bytes,"UTF-8"));
                             jsonMapConfigPool.put(confFile.getName(), jsonObject);
+                            break;
                     }
                 } catch (IOException ex) {
                     LOGGER.error(ex);

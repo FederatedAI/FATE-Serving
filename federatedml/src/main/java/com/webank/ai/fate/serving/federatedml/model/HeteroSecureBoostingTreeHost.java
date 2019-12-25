@@ -77,9 +77,9 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
         Map<String, Object> input = inputData.get(0);
 
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
-        Map<String, Object> ret = new HashMap<String, Object>();
+        Map<String, Object> ret = new HashMap<String, Object>(8);
 
-        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>();
+        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
         int featureHit = 0;
         for (String key : input.keySet()) {
             if (this.featureNameFidMapping.containsKey(key)) {
@@ -95,7 +95,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
     public Map<String, Object> predictSingleRound(Context context, Map<String, Object> interactiveData, FederatedParams predictParams) {
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
         Map<String, Object> input = this.getData(context, tag);
-        Map<String, Object> ret = new HashMap<String, Object>();
+        Map<String, Object> ret = new HashMap<String, Object>(8);
         for (String treeIdx : interactiveData.keySet()) {
             int idx = Integer.valueOf(treeIdx);
             int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), input);

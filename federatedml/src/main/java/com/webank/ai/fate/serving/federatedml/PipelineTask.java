@@ -127,7 +127,7 @@ public class PipelineTask {
     }
 
     private HashMap<String, byte[]> changeModelProto(Map<String, byte[]> modelProtoMap) {
-        HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>();
+        HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>(8);
         for (Map.Entry<String, byte[]> entry : modelProtoMap.entrySet()) {
             String key = entry.getKey();
             if (!"pipeline.pipeline:Pipeline".equals(key)) {

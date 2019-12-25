@@ -38,7 +38,7 @@ public class DTest implements FeatureData {
     @Override
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {
         ReturnResult returnResult = new ReturnResult();
-        Map<String, Object> requestData = new HashMap<>();
+        Map<String, Object> requestData = new HashMap<>(8);
         requestData.putAll(featureIds);
         String responseBody = HttpClientPool.post("http://127.0.0.1:1234/feature", requestData);
         if (StringUtils.isEmpty(responseBody)) {
@@ -49,7 +49,7 @@ public class DTest implements FeatureData {
             return null;
         }
         String[] features = StringUtils.split(((List<String>) tmp.get(Dict.DATA)).get(0), "\t");
-        Map<String, Object> featureData = new HashMap<>();
+        Map<String, Object> featureData = new HashMap<>(8);
         for (int i = 1; i < features.length; i++) {
             featureData.put(features[i], i);
         }

@@ -17,12 +17,14 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
+import com.google.common.base.Preconditions;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,8 +59,9 @@ public class OneHotEncoder extends BaseModel {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        LOGGER.info("Start OneHot Encoder transform");
-        HashMap<String, Object> outputData = new HashMap<>();
+        LOGGER.info("start onehot encoder transform");
+        HashMap<String, Object> outputData = new HashMap<>(8);
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(inputData));
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
             return firstData;
@@ -72,7 +75,7 @@ public class OneHotEncoder extends BaseModel {
                 ColsMap colsMap = this.colsMapMap.get(colName);
 
                 String dataType = colsMap.getDataType();
-                if (! dataType.equals("int")) {
+                if (! "int".equals(dataType)) {
                     LOGGER.warn("One Hot Encoder support integer input only now");
                     outputData.put(colName, firstData.get(colName));
                     continue;

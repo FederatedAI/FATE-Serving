@@ -48,9 +48,7 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ServingServer implements InitializingBean {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -104,7 +102,13 @@ public class ServingServer implements InitializingBean {
         ApplicationHolder.applicationContext = applicationContext;
         int port = Integer.parseInt(Configuration.getProperty(Dict.PROPERTY_SERVER_PORT));
         //TODO: Server custom configuration
-        Executor executor = Executors.newCachedThreadPool();
+
+        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size",10);
+        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",100);
+        Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time",1000);
+        Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size",10);
+        Executor executor =   new ThreadPoolExecutor(corePoolSize,maxPoolSize,aliveTime.longValue(),TimeUnit.MILLISECONDS,new ArrayBlockingQueue<>(queueSize));
+
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
         //new ServiceOverloadProtectionHandle()
@@ -117,9 +121,7 @@ public class ServingServer implements InitializingBean {
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
         LOGGER.info("serving useRegister {}", useRegister);
-
         if (useRegister) {
-
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
 
