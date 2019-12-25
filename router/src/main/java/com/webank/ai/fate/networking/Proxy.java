@@ -17,7 +17,6 @@
 package com.webank.ai.fate.networking;
 
 import com.google.common.collect.Sets;
-import com.webank.ai.fate.jmx.server.FateMBeanServer;
 import com.webank.ai.fate.networking.proxy.factory.GrpcServerFactory;
 import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.grpc.client.DataTransferPipedClient;
@@ -43,6 +42,7 @@ import java.util.Properties;
 import java.util.Set;
 
 public class Proxy {
+
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static ZookeeperRegistry zookeeperRegistry;
@@ -103,20 +103,6 @@ public class Proxy {
 
         }
 
-
-
-
-        boolean useJMX = Boolean.valueOf(properties.getProperty("useJMX", "false"));
-        if (useJMX) {
-            String jmxServerName = properties.getProperty("jmx.server.name", "proxy");
-            int jmxPort = Integer.valueOf(System.getProperty("jmx.port", "9999"));
-            FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
-            String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-            URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
-            if(useRegister) {
-                zookeeperRegistry.register(jmxUrl);
-            }
-        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.

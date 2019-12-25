@@ -16,8 +16,6 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-
-import com.webank.ai.fate.serving.core.monitor.WatchDog;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,13 +26,12 @@ public class GuestInferenceLoggerPrinter implements LoggerPrinter<Request, Retur
 
     private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
 
-
     @Override
     public void printLog(Context context, Request req, ReturnResult resp) {
 
 
-        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(), context.getSeqNo(), req != null ? ((Request) req).getCaseid() : Dict.NONE, context.getActionType(), context.getCostTime(),
-                resp != null ? resp.getRetcode() : Dict.NONE, WatchDog.get(), req, resp);
+        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(), context.getSeqNo(), req != null ? ((Request) req).getCaseid() : Dict.NONE, context.getActionType(), context.getCostTime(),
+                resp != null ? resp.getRetcode() : Dict.NONE, req, resp);
 
     }
 }

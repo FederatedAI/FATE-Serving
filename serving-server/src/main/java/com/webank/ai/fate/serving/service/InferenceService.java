@@ -17,6 +17,8 @@
 package com.webank.ai.fate.serving.service;
 
 import com.alibaba.fastjson.JSON;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.protobuf.ByteString;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
@@ -42,7 +44,8 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     private static final Logger accessLOGGER = LogManager.getLogger(Dict.ACCESS);
     @Autowired
     GuestInferenceProvider guestInferenceProvider;
-
+    @Autowired
+    MetricRegistry metricRegistry;
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = "inference")
@@ -68,7 +71,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
         InferenceRequest inferenceRequest = null;
-        Context context = new BaseContext(new GuestInferenceLoggerPrinter());
+        Context context = new BaseContext(new GuestInferenceLoggerPrinter(),actionType.name(),metricRegistry);
         context.preProcess();
 
         try {
@@ -85,7 +88,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                         inferenceRequest.getFeatureData().putAll(sendToRemoteFeatureData);
                     }
                     context.setCaseId(inferenceRequest.getCaseid());
-                    context.setActionType(actionType.name());
+
 
                     switch (actionType.name()) {
                         case "SYNC_RUN":

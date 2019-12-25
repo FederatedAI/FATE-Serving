@@ -115,7 +115,7 @@ public class DistributedDTable implements DTable {
         ManagedChannel  channel=null;
         try {
             channel = getChannel(address);
-        Map<String, byte[]> result = new HashMap<>();
+        Map<String, byte[]> result = new HashMap<>(8);
         Kv.Range.Builder rangeOrBuilder = Kv.Range.newBuilder();
         KVServiceGrpc.KVServiceBlockingStub kvServiceBlockingStub = KVServiceGrpc.newBlockingStub(channel);
         Iterator<Kv.Operand> item = MetadataUtils.attachHeaders(kvServiceBlockingStub, this.genHeader()).iterate(rangeOrBuilder.build());
