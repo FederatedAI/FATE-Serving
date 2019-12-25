@@ -17,20 +17,19 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
-import com.google.common.base.Preconditions;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class OneHotEncoder extends BaseModel {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -38,6 +37,8 @@ public class OneHotEncoder extends BaseModel {
     private List<String> cols;
     private Map<String, ColsMap> colsMapMap;
     private boolean needRun;
+    Pattern doublePattern = Pattern.compile("^-?([1-9]\\\\d*\\\\.\\\\d*|0\\\\.\\\\d*[1-9]\\\\d*|0?\\\\.0+|0)$");
+
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -47,7 +48,7 @@ public class OneHotEncoder extends BaseModel {
             OneHotParam oneHotParam = this.parseModel(OneHotParam.parser(), protoParam);
             this.needRun = oneHotMeta.getNeedRun();
 
-            this.cols = oneHotMeta.getColsList();
+            this.cols = oneHotMeta.getTransformColNamesList();
             this.colsMapMap = oneHotParam.getColMapMap();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -59,11 +60,13 @@ public class OneHotEncoder extends BaseModel {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        LOGGER.info("start onehot encoder transform");
-        HashMap<String, Object> outputData = new HashMap<>(8);
-        Preconditions.checkArgument(CollectionUtils.isNotEmpty(inputData));
+        LOGGER.info("Start OneHot Encoder transform");
+        LOGGER.info("First time need run");
+        HashMap<String, Object> outputData = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
+        LOGGER.info("Need run is ", this.needRun);
         if (!this.needRun) {
+            LOGGER.info("Return firstData :", firstData);
             return firstData;
         }
         for (String colName : firstData.keySet()) {
@@ -74,23 +77,22 @@ public class OneHotEncoder extends BaseModel {
                 }
                 ColsMap colsMap = this.colsMapMap.get(colName);
 
-                String dataType = colsMap.getDataType();
-                if (! "int".equals(dataType)) {
-                    LOGGER.warn("One Hot Encoder support integer input only now");
-                    outputData.put(colName, firstData.get(colName));
-                    continue;
-                }
+
                 List<String> values = colsMap.getValuesList();
-                List<String> encodedVariables = colsMap.getEncodedVariablesList();
+                List<String> encodedVariables = colsMap.getTransformedHeadersList();
 //                Integer inputValue = new Integer(firstData.get(colName).toString());
 
                 Integer inputValue = 0;
                 try {
                     String thisInputValue = firstData.get(colName).toString();
-                    double d = Double.valueOf(thisInputValue);
-                    inputValue = (int) Math.ceil(d);
+                    if (this.isDouble(thisInputValue)) {
+                        double d = Double.valueOf(thisInputValue);
+                        inputValue = (int) Math.ceil(d);
+                    }else {
+                        inputValue = Integer.valueOf(thisInputValue);
+                    }
                 }catch (Throwable e){
-                    LOGGER.error("Onehot component accept integer input value only");
+                    LOGGER.error("Onehot component accept number input value only");
                 }
 
                 for (int i = 0; i < values.size(); i ++) {
@@ -109,4 +111,12 @@ public class OneHotEncoder extends BaseModel {
         LOGGER.info("OneHotEncoder output {}",outputData);
         return outputData;
     }
+
+    private boolean isDouble(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        return this.doublePattern.matcher(str).matches();
+    }
+
 }
