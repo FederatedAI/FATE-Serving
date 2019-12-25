@@ -19,14 +19,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <groupId>com.webank.ai.fate</groupId>
     <artifactId>fate-serving</artifactId>
-    <version>1.1.2</version>
+    <version>1.2.0</version>
 
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
         <module>serving-server</module>
-        <module>router</module>
         <module>federatedml</module>
         <module>fate-serving-core</module>
         <module>register</module>
