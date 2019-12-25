@@ -60,7 +60,7 @@ public class FeatureSelection extends BaseModel {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         LOGGER.info("Start Feature Selection predict");
-        HashMap<String, Object> outputData = new HashMap<>();
+        HashMap<String, Object> outputData = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
 
         if (!this.needRun) {

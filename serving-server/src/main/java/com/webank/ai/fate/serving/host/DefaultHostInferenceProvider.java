@@ -85,7 +85,7 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
             return returnResult;
         }
         LOGGER.info("use model to inference on {} {}, id: {}, version: {}", party.getRole(), party.getPartyId(), modelInfo.getNamespace(), modelInfo.getName());
-        Map<String, Object> predictParams = new HashMap<>();
+        Map<String, Object> predictParams = new HashMap<>(8);
         predictParams.put(Dict.FEDERATED_PARAMS, federatedParams);
 
         try {

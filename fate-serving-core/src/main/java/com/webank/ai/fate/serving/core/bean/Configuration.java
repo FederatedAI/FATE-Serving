@@ -90,6 +90,7 @@ public class Configuration {
                             fileInputStream.read(bytes);
                             JSONObject jsonObject = new JSONObject(new String(bytes,"UTF-8"));
                             jsonMapConfigPool.put(confFile.getName(), jsonObject);
+                            break;
                     }
                 } catch (IOException ex) {
                     LOGGER.error(ex);
@@ -124,6 +125,14 @@ public class Configuration {
         }
         return Integer.parseInt(getProperty(key));
     }
+
+    public static Integer getPropertyInt(String key,Integer defaultInteger) {
+        if (getProperty(key) == null) {
+            return defaultInteger;
+        }
+        return Integer.parseInt(getProperty(key));
+    }
+
 
     public static Integer getPropertyInt(String key, int defaultValue) {
         if (getProperty(key) == null) {
