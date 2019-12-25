@@ -39,4 +39,5 @@ message PublishResponse{
 service ModelService{
     rpc publishLoad(PublishRequest) returns (PublishResponse);
     rpc publishBind(PublishRequest) returns (PublishResponse);
+    rpc publishOnline(PublishRequest) returns (PublishResponse);
 }

@@ -307,30 +307,24 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     zkListener = listeners.get(listener);
 
                 }
+                StringBuilder  sb = new StringBuilder(root);
+                sb.append("/").append(url.getProject());
 
-                String xx = root + "/" + url.getProject();
-                List<String> children = zkClient.addChildListener(xx, zkListener);
-
+                List<String> children = zkClient.addChildListener(sb.toString(), zkListener);
 
                 for (String environment : children) {
-
-                    //URL  childUrl =  url.setEnvironment(environment);
-                    //urls.add(childUrl);
-
-                    xx = xx + "/" + environment;
-                    List<String> interfaces = zkClient.addChildListener(xx, zkListener);
+                    sb.append("/").append(environment);
+                    List<String> interfaces = zkClient.addChildListener(sb.toString(), zkListener);
 
                     if (interfaces != null) {
                         for (String inter : interfaces) {
-                            xx = xx + "/" + inter + "/" + Constants.PROVIDERS_CATEGORY;
 
-                            List<String> services = zkClient.addChildListener(xx, zkListener);
+                            sb.append("/").append(inter).append("/").append(Constants.PROVIDERS_CATEGORY);
+                            List<String> services = zkClient.addChildListener(sb.toString(), zkListener);
 
                             if (services != null) {
-                                urls.addAll(toUrlsWithEmpty(url, xx, services));
+                                urls.addAll(toUrlsWithEmpty(url, sb.toString(), services));
                             }
-
-
                         }
 
                     }

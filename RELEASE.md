@@ -4,6 +4,10 @@
 * Serving router supports authentication
 * Fixed a bug that got the remote inference result cache
 
+# Release 1.1.1
+## Major Features and Improvements
+* Support indicating partial columns in Onehot Encoder
+
 # Release 1.1
 ## Major Features and Improvements
 * Add Online OneHotEncoder transform
