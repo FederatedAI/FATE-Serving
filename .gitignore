@@ -1,0 +1,18 @@
+# common file patterns
+.DS_STORE
+.idea
+*.iml
+*.pyc
+__pycache__
+*.jar
+*.class
+.project
+*.prefs
+
+# excluded paths
+/fate-serving/federatedml/target/
+/fate-serving/serving-server/target/
+/fate-serving/target/
+/fate-serving/fate-serving-core/target/
+.idea/*
+.vscode/*

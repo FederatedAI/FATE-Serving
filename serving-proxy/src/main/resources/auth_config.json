@@ -1,0 +1,14 @@
+{
+  "self_party_id": "9999",
+  "if_use_auth": false,
+  "request_expire_seconds": 8,
+  "access_keys": [{
+    "party_id": "9999",
+    "app_key": "11",
+    "app_secret": "11111"
+  }, {
+    "party_id": "10000",
+    "app_key": "22",
+    "app_secret": "22222"
+  }]
+}
