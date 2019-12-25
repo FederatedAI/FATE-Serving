@@ -209,6 +209,12 @@
             <version>4.1.2</version>
         </dependency>
         <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jmx</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-register</artifactId>
             <version>${fate.version}</version>
