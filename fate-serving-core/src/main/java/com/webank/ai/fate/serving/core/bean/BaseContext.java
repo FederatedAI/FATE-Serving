@@ -117,7 +117,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public void postProcess(Req req, Resp resp) {
         try {
             if(timerContext!=null){
-               costTime = timerContext.stop();
+               costTime = timerContext.stop()/1000000;
             }else{
                 costTime = System.currentTimeMillis() -  timestamp;
             }

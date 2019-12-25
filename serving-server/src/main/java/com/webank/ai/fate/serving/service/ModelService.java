@@ -81,8 +81,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    //    ConcurrentMap<String,PublishRequest> publishLoadReqMap =new ConcurrentHashMap<>();
-//    ConcurrentMap<String,PublishRequest> publicOnlineReqMap =new  ConcurrentHashMap();
     File publishLoadStoreFile;
     File publishOnlineStoreFile;
 
@@ -144,7 +142,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         }
     }
 
-//    @Override
+    @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
@@ -243,11 +241,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             store();
 
         });
-    }
-
-
-    public void restore() {
-
     }
 
 

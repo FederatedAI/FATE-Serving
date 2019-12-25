@@ -57,10 +57,7 @@ public class SpringConfig {
         return metrics.meter("request");
     }
 
-//    @Bean
-//    public Histogram responseSizes(MetricRegistry metrics) {
-//        return metrics.histogram("response-sizes");
-//    }
+
 
     @Bean
     public Counter pendingJobs(MetricRegistry metrics) {
@@ -69,6 +66,7 @@ public class SpringConfig {
 
     @Bean
     public ConsoleReporter consoleReporter(MetricRegistry metrics) {
+
         return ConsoleReporter.forRegistry(metrics)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
@@ -82,6 +80,8 @@ public class SpringConfig {
         return routerService;
 
     }
+
+
 
 
 
