@@ -20,13 +20,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <artifactId>fate-serving-router</artifactId>
-    <version>${fate.version}</version>
+    <!--<version>1.1.2</version>-->
 
 
     <parent>
         <artifactId>fate-serving</artifactId>
         <groupId>com.webank.ai.fate</groupId>
-        <version>${fate.version}</version>
+        <version>1.1.2</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-register</artifactId>
-            <version>${fate.version}</version>
+            <version>1.1.2</version>
         </dependency>
 
 
@@ -59,13 +59,8 @@
         </dependency>
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
-            <artifactId>fate-jmx</artifactId>
-            <version>${fate.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-serving-core</artifactId>
-            <version>1.1</version>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

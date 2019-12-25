@@ -30,7 +30,7 @@ public class HeteroFeatureBinning extends BaseModel {
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         LOGGER.info("start init Feature Binning class");
         this.needRun = false;
-        this.splitPoints = new HashMap<>();
+        this.splitPoints = new HashMap<>(8);
 
         try {
             FeatureBinningMeta featureBinningMeta = this.parseModel(FeatureBinningMeta.parser(), protoMeta);
@@ -58,7 +58,7 @@ public class HeteroFeatureBinning extends BaseModel {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         LOGGER.info("Start Feature Binning predict");
-        HashMap<String, Object> outputData = new HashMap<>();
+        HashMap<String, Object> outputData = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
             return firstData;

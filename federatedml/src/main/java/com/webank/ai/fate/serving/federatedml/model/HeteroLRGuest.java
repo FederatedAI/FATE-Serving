@@ -40,7 +40,7 @@ public class HeteroLRGuest extends HeteroLR {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>(8);
         Map<String, Double> forwardRet = forward(inputData);
         double score = forwardRet.get(Dict.SCORE);
         LOGGER.info("caseid {} guest score:{}", context.getCaseId(),score);

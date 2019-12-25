@@ -127,7 +127,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             logInference(context, inferenceRequest, modelNamespaceData, inferenceResult, 0, false, false);
             return inferenceResult;
         }
-        Map<String, Object> predictParams = new HashMap<>();
+        Map<String, Object> predictParams = new HashMap<>(8);
         Map<String, Object> modelFeatureData = Maps.newHashMap(featureData);
         FederatedParams federatedParams = new FederatedParams();
         if(inferenceRequest.getSendToRemoteFeatureData()!=null&&federatedParams.getFeatureIdMap()!=null) {

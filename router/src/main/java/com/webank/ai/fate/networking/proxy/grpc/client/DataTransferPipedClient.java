@@ -332,14 +332,15 @@ public class DataTransferPipedClient {
        // (partnerModelInfo.getName(), partnerModelInfo.getNamespace()
         String key =genModelKey(partnerModelInfo.getName(), partnerModelInfo.getNamespace());
         String md5Key = EncryptUtils.encrypt(key, EncryptMethod.MD5);
-
-        URL paramUrl = URL.valueOf("serving/" + md5Key + "/unaryCall");
+        String urlString = "serving/" + md5Key + "/unaryCall";
+        URL paramUrl = URL.valueOf(urlString);
         if(StringUtils.isNotEmpty(version)) {
             paramUrl= paramUrl.addParameter(Constants.VERSION_KEY,version
             );
         }
-        List<URL> urls = routerService.router(paramUrl);
 
+        List<URL> urls = routerService.router(paramUrl);
+        LOGGER.info("try to find {} returns {}",urlString,urls);
         if (CollectionUtils.isNotEmpty(urls)) {
             URL url = urls.get(0);
             BasicMeta.Endpoint.Builder builder = BasicMeta.Endpoint.newBuilder();

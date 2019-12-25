@@ -16,9 +16,9 @@
 
 package com.webank.ai.fate.serving;
 
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.google.common.collect.Sets;
-
-import com.webank.ai.fate.jmx.server.FateMBeanServer;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.router.RouterService;
@@ -43,12 +43,13 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class ServingServer implements InitializingBean {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -60,17 +61,18 @@ public class ServingServer implements InitializingBean {
     public ServingServer() {
 
     }
-
     public ServingServer(String confPath) {
         this.confPath = new File(confPath).getAbsolutePath();
-
-        System.setProperty("configpath", confPath);
+        System.setProperty(Dict.CONFIGPATH, confPath);
         new Configuration(confPath).load();
 
         new com.webank.ai.eggroll.core.utils.Configuration(confPath).load();
-
-        System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
-        System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD));
+        if(Configuration.getProperty(Dict.ACL_USERNAME)!=null) {
+            System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
+        }
+        if(Configuration.getProperty(Dict.ACL_PASSWORD)!=null) {
+            System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD));
+        }
     }
 
     public static void main(String[] args) {
@@ -99,12 +101,16 @@ public class ServingServer implements InitializingBean {
     private void start(String[] args) throws IOException {
         this.initialize();
         applicationContext = SpringApplication.run(SpringConfig.class, args);
-
-
         ApplicationHolder.applicationContext = applicationContext;
         int port = Integer.parseInt(Configuration.getProperty(Dict.PROPERTY_SERVER_PORT));
         //TODO: Server custom configuration
-        Executor executor = Executors.newCachedThreadPool();
+
+        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size",10);
+        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",100);
+        Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time",1000);
+        Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size",10);
+        Executor executor =   new ThreadPoolExecutor(corePoolSize,maxPoolSize,aliveTime.longValue(),TimeUnit.MILLISECONDS,new ArrayBlockingQueue<>(queueSize));
+
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
         //new ServiceOverloadProtectionHandle()
@@ -112,16 +118,12 @@ public class ServingServer implements InitializingBean {
         serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ModelService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
         serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ProxyService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
         server = serverBuilder.build();
-
-        LOGGER.info("Server started listening on port: {}, use configuration: {}", port, this.confPath);
-
+        LOGGER.info("server started listening on port: {}, use configuration: {}", port, this.confPath);
         server.start();
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
         LOGGER.info("serving useRegister {}", useRegister);
-
         if (useRegister) {
-
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
@@ -147,18 +149,12 @@ public class ServingServer implements InitializingBean {
 
 
         }
-        boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
-        if (useJMX) {
-            String jmxServerName = Configuration.getProperty(Dict.JMX_SERVER_NAME, "serving");
-            int jmxPort = Integer.valueOf(Configuration.getProperty(Dict.JMX_PORT, "9999"));
-            FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
-            String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-            URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
-            if(useRegister) {
-                ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-                zookeeperRegistry.register(jmxUrl);
-            }
-        }
+
+        ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
+        reporter.start(1, TimeUnit.SECONDS);
+
+        JmxReporter jmxReporter = applicationContext.getBean(JmxReporter.class);
+        jmxReporter.start();
 
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

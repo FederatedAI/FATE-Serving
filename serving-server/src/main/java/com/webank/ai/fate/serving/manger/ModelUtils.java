@@ -140,9 +140,9 @@ public class ModelUtils {
     }
 
     public static Map<String, Map<String, ModelInfo>> getFederatedRolesModel(Map<String, ModelServiceProto.RoleModelInfo> federatedRolesModelProto) {
-        Map<String, Map<String, ModelInfo>> federatedRolesModel = new HashMap<>();
+        Map<String, Map<String, ModelInfo>> federatedRolesModel = new HashMap<>(8);
         federatedRolesModelProto.forEach((roleName, roleModelInfo) -> {
-            federatedRolesModel.put(roleName, new HashMap<>());
+            federatedRolesModel.put(roleName, new HashMap<>(8));
             roleModelInfo.getRoleModelInfoMap().forEach((partyId, modelInfo) -> {
                 federatedRolesModel.get(roleName).put(partyId, new ModelInfo(modelInfo.getTableName(), modelInfo.getNamespace()));
             });

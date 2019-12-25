@@ -108,7 +108,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
 
     private Map<String, Object> getFinalPredict(double[] weights) {
-        Map<String, Object> ret = new HashMap<String, Object>();
+        Map<String, Object> ret = new HashMap<String, Object>(8);
         if (this.numClasses == 2) {
             double sum = 0;
             for (int i = 0; i < this.treeNum; ++i) {
@@ -142,7 +142,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         LOGGER.info("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
 
         Map<String, Object> input = inputData.get(0);
-        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>();
+        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
 
         ReturnResult returnResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
 
@@ -158,7 +158,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         double[] weights = new double[this.treeNum];
         int communicationRound = 0;
         while (true) {
-            HashMap<String, Object> treeLocation = new HashMap<String, Object>();
+            HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
             for (int i = 0; i < this.treeNum; ++i) {
                 if (this.isLocateInLeaf(i, treeNodeIds[i])) {
                     continue;

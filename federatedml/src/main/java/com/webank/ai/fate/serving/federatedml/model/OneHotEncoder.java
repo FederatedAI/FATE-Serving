@@ -37,6 +37,8 @@ public class OneHotEncoder extends BaseModel {
     private List<String> cols;
     private Map<String, ColsMap> colsMapMap;
     private boolean needRun;
+    Pattern doublePattern = Pattern.compile("^-?([1-9]\\\\d*\\\\.\\\\d*|0\\\\.\\\\d*[1-9]\\\\d*|0?\\\\.0+|0)$");
+
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -110,20 +112,11 @@ public class OneHotEncoder extends BaseModel {
         return outputData;
     }
 
-    private boolean isInteger(String str) {
-        if (null == str || "".equals(str)) {
-            return false;
-        }
-        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
-        return pattern.matcher(str).matches();
-    }
-
     private boolean isDouble(String str) {
         if (null == str || "".equals(str)) {
             return false;
         }
-        Pattern pattern = Pattern.compile("^-?([1-9]\\\\d*\\\\.\\\\d*|0\\\\.\\\\d*[1-9]\\\\d*|0?\\\\.0+|0)$");
-        return pattern.matcher(str).matches();
+        return this.doublePattern.matcher(str).matches();
     }
 
 }
