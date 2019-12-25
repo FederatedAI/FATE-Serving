@@ -219,11 +219,6 @@
             <artifactId>fate-register</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.webank.ai.fate</groupId>
-            <artifactId>fate-jmx</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

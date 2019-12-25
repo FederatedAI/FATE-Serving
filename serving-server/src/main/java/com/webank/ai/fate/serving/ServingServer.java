@@ -19,8 +19,6 @@ package com.webank.ai.fate.serving;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.jmx.JmxReporter;
 import com.google.common.collect.Sets;
-
-import com.webank.ai.fate.jmx.server.FateMBeanServer;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.router.RouterService;
@@ -45,11 +43,13 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class ServingServer implements InitializingBean {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -146,18 +146,6 @@ public class ServingServer implements InitializingBean {
             zookeeperRegistry.register(FateServer.serviceSets);
 
 
-        }
-        boolean useJMX = Boolean.valueOf(Configuration.getProperty(Dict.USE_JMX));
-        if (useJMX) {
-            String jmxServerName = Configuration.getProperty(Dict.JMX_SERVER_NAME, "serving");
-            int jmxPort = Integer.valueOf(Configuration.getProperty(Dict.JMX_PORT, "9999"));
-            FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
-            String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-            URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
-            if(useRegister) {
-                ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-                zookeeperRegistry.register(jmxUrl);
-            }
         }
 
         ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);

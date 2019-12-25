@@ -30,7 +30,6 @@
         <module>fate-serving-core</module>
         <module>register</module>
         <module>router</module>
-        <module>fate-jmx</module>
     </modules>
 
     <properties>

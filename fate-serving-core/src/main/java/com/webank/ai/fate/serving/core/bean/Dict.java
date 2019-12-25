@@ -124,10 +124,6 @@ public class Dict {
     public static final String USE_ZK_ROUTER = "useZkRouter";
     public static final String FALSE = "false";
     public static final String USE_REGISTER = "useRegister";
-    public static final String USE_JMX = "useJMX";
-    public static final String JMX_SERVER_NAME = "jmx.server.name";
-    public static final String JMX_PORT = "jmx.port";
-
 
     public  static  final String GUEST_APP_ID = "guestAppId";
     public  static  final String HOST_APP_ID = "hostAppId";
