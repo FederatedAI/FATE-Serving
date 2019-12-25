@@ -26,14 +26,16 @@
 
     <modules>
         <module>serving-server</module>
+        <module>router</module>
         <module>federatedml</module>
         <module>fate-serving-core</module>
         <module>register</module>
         <module>router</module>
+        <module>serving-proxy</module>
     </modules>
 
     <properties>
-        <fate.version>1.1</fate.version>
+        <fate.version>1.2.0</fate.version>
         <fate.core.version>0.3</fate.core.version>
         <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,10 +46,12 @@
         <protobuf.version>3.6.1</protobuf.version>
         <junit.version>4.12</junit.version>
         <log4j.version>2.11.1</log4j.version>
-        <spring.version>5.1.9.RELEASE</spring.version>
+        <spring.version>5.2.0.RELEASE</spring.version>
 
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.1</os-maven-plugin.version>
+
+        <spring.boot.version>2.2.0.RELEASE</spring.boot.version>
     </properties>
     <dependencies>
 
