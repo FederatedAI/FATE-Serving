@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving;
 
 import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.google.common.collect.Sets;
 
 import com.webank.ai.fate.jmx.server.FateMBeanServer;
@@ -161,6 +162,9 @@ public class ServingServer implements InitializingBean {
 
         ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
         reporter.start(1, TimeUnit.SECONDS);
+
+        JmxReporter jmxReporter = applicationContext.getBean(JmxReporter.class);
+        jmxReporter.start();
 
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

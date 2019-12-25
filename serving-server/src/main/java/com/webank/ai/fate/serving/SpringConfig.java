@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving;
 
 
 import com.codahale.metrics.*;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.webank.ai.fate.register.loadbalance.LoadBalancer;
 import com.webank.ai.fate.register.loadbalance.RandomLoadBalance;
 import com.webank.ai.fate.register.router.DefaultRouterService;
@@ -71,6 +72,11 @@ public class SpringConfig {
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .build();
+    }
+
+    @Bean
+    public JmxReporter jmxReporter(MetricRegistry metrics) {
+        return JmxReporter.forRegistry(metrics).build();
     }
 
     @Bean
