@@ -102,11 +102,13 @@ Key configuration item description:
 | redis.maxTotal | The maximum number of objects that can be allocated by the pool | default 100 |
 | redis.maxIdle | The maximum number of "idle" instances that can be held in the pool or a negative value if there is no limit | default 100 |
 | external.remoteModelInferenceResultCacheTTL | The remote model inference result cache expire after access  for external cache | default 86400 |
-| external.remoteModelInferenceResultCacheDBIndex | The remote model inference result cache DBIndex for external | default 1,10 |
+| external.remoteModelInferenceResultCacheDBIndex | The remote model inference result cache DBIndex for external | default 0 |
 | external.inferenceResultCacheTTL | The inference result cache expire after access for external cache | default 300 |
 | external.inferenceResultCacheDBIndex | The inference result cache DBIndex for external cache | default 0 |
-| external.processCacheDBIndex | The process cache DBIndex for external cache | default 3 |
+| external.processCacheDBIndex | The process cache DBIndex for external cache | default 0 |
 | canCacheRetcode | Caching result by retcode | default 0,102 |
+| acl.username | Zookeeper acl user name | default fate |
+| acl.password | Zookeeper acl user password | default fate |
 
 ### proxy.properties
 Key configuration item description:
@@ -120,7 +122,8 @@ Key configuration item description:
 | useRegister | Register interface to registry or not | default false |
 | useZkRouter | route request by the interface info which is registered into zookeeper | default false |
 | route.table | router table configuration file absolute path | default conf/route_table.json |
-
+| acl.username | Zookeeper acl authentication user name | default fate |
+| acl.password | Zookeeper acl authentication user password | default fate |
 
 ### Deploy Serving-Server 
 For detail, Here are some key steps:
