@@ -352,44 +352,46 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     public void afterPropertiesSet() throws Exception {
 
-
-
         List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
         List<RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
-        publishLoadList.forEach(( v) -> {
-            try {
-                byte[] data = decoder.decode(v.content.getBytes());
-                PublishRequest req = PublishRequest.parseFrom(data);
-                logger.info("restore publishLoadModel req {}", req);
-                Context  context = new BaseContext();
-                context.putData(Dict.SERVICE_ID,req.getServiceId());
-                modelManager.publishLoadModel(context,
-                        new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                        ModelUtils.getFederatedRoles(req.getRoleMap()),
-                        ModelUtils.getFederatedRolesModel(req.getModelMap()));
-            } catch (Exception e) {
-                logger.error("restore publishLoadModel error", e);
-                e.printStackTrace();
-            }
-        });
-        publishOnlineList.forEach(( v) -> {
-            try {
-                byte[] data = decoder.decode(v.content.getBytes());
-                PublishRequest req = PublishRequest.parseFrom(data);
+        if(publishLoadList!=null) {
+            publishLoadList.forEach((v) -> {
+                try {
+                    byte[] data = decoder.decode(v.content.getBytes());
+                    PublishRequest req = PublishRequest.parseFrom(data);
+                    logger.info("restore publishLoadModel req {}", req);
+                    Context context = new BaseContext();
+                    context.putData(Dict.SERVICE_ID, req.getServiceId());
+                    modelManager.publishLoadModel(context,
+                            new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
+                            ModelUtils.getFederatedRoles(req.getRoleMap()),
+                            ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                } catch (Exception e) {
+                    logger.error("restore publishLoadModel error", e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        if(publishOnlineList!=null) {
+            publishOnlineList.forEach((v) -> {
+                try {
+                    byte[] data = decoder.decode(v.content.getBytes());
+                    PublishRequest req = PublishRequest.parseFrom(data);
 
-                logger.info("restore publishOnlineModel req {} base64 {}", req,v);
-                Context  context = new BaseContext();
-                context.putData(Dict.SERVICE_ID,req.getServiceId());
-                modelManager.publishOnlineModel(context,
-                        new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                        ModelUtils.getFederatedRoles(req.getRoleMap()),
-                        ModelUtils.getFederatedRolesModel(req.getModelMap()));
-            } catch (Exception e) {
-                logger.error("restore publishOnlineModel error", e);
-                e.printStackTrace();
-            }
+                    logger.info("restore publishOnlineModel req {} base64 {}", req, v);
+                    Context context = new BaseContext();
+                    context.putData(Dict.SERVICE_ID, req.getServiceId());
+                    modelManager.publishOnlineModel(context,
+                            new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
+                            ModelUtils.getFederatedRoles(req.getRoleMap()),
+                            ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                } catch (Exception e) {
+                    logger.error("restore publishOnlineModel error", e);
+                    e.printStackTrace();
+                }
 
-        });
+            });
+        }
 
 
     }

@@ -65,7 +65,6 @@ public class ServingServer implements InitializingBean {
         this.confPath = new File(confPath).getAbsolutePath();
         System.setProperty(Dict.CONFIGPATH, confPath);
         new Configuration(confPath).load();
-
         new com.webank.ai.eggroll.core.utils.Configuration(confPath).load();
         if(Configuration.getProperty(Dict.ACL_USERNAME)!=null) {
             System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
