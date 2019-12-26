@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.service;
 
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.monitor.WatchDog;
 import io.grpc.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +39,7 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
             @Override
             public void onHalfClose() {
                 try {
-                    WatchDog.enter(serviceName);
+
                     super.onHalfClose();
                 } catch (Exception e) {
                     LOGGER.info("ServiceException:", e);
@@ -50,13 +49,13 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
 
             @Override
             public void onCancel() {
-                WatchDog.quit(serviceName);
+
                 super.onCancel();
             }
 
             @Override
             public void onComplete() {
-                WatchDog.complete(serviceName);
+
                 super.onComplete();
 //                WatchDog.getCount();
             }

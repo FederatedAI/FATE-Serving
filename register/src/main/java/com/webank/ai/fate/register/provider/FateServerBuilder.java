@@ -296,17 +296,13 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder setZkRegisterLocation(String zkRegisterLocation) {
         this.zkRegisterLocation = zkRegisterLocation;
-
         return this;
     }
 
     @Override
     public Server build() {
-
         Server server = serverBuilder.build();
-
         FateServer fateServer = new FateServer(server);
-
         fateServer.setEnvironment(environment);
         fateServer.setProject(project);
 

@@ -28,5 +28,8 @@ public interface RouterService {
 
     List<URL> router(URL url);
 
+    List<URL>  router(String project,String environment ,String  serviceName);
+
+
 
 }

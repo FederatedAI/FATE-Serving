@@ -16,8 +16,12 @@
 
 package com.webank.ai.fate.serving.service;
 
-import ch.ethz.ssh2.crypto.Base64;
+
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishRequest;
@@ -36,28 +40,47 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements InitializingBean {
     private static final Logger logger = LogManager.getLogger();
     @Autowired
     ModelManager modelManager;
+    @Autowired
+    MetricRegistry  metricRegistry;
+
+    Base64.Encoder  encoder = Base64.getEncoder();
+    Base64.Decoder  decoder = Base64.getDecoder();
+
+    private static class RequestWapper{
+        public  RequestWapper(String content,long timestamp,String md5){
+
+            this.content= content;
+            this.timestamp =  timestamp;
+            this.md5 = md5;
+        }
+        @Override
+        public  String toString(){
+           return content+":"+timestamp;
+        }
+        String  content;
+        long  timestamp;
+        String  md5;
+    }
 
 
-    LinkedHashMap<String, String> publishLoadReqMap = new LinkedHashMap();
-    LinkedHashMap<String, String> publicOnlineReqMap = new LinkedHashMap();
+    LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
+    LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    //    ConcurrentMap<String,PublishRequest> publishLoadReqMap =new ConcurrentHashMap<>();
-//    ConcurrentMap<String,PublishRequest> publicOnlineReqMap =new  ConcurrentHashMap();
     File publishLoadStoreFile;
     File publishOnlineStoreFile;
 
@@ -89,14 +112,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @RegisterService(serviceName = "publishLoad")
     public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
 
-        Context context = new BaseContext(new BaseLoggerPrinter());
-        context.setActionType(ModelActionType.MODEL_LOAD.name());
+        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_LOAD.name(),metricRegistry);
+
         context.preProcess();
         ReturnResult returnResult = null;
 
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
-            returnResult = modelManager.publishLoadModel(
+            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            returnResult = modelManager.publishLoadModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtils.getFederatedRoles(req.getRoleMap()),
                     ModelUtils.getFederatedRolesModel(req.getModelMap()));
@@ -106,10 +130,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             builder.setStatusCode(returnResult.getRetcode());
 
             if (returnResult.getRetcode() == 0) {
-
-                String key = Md5Crypt.md5Crypt(req.toByteArray());
-
-                publishLoadReqMap.put(key, new String(Base64.encode(req.toByteArray())));
+                RequestWapper  requestWapper =new RequestWapper(new String(encoder.encode(req.toByteArray())),System.currentTimeMillis(),md5Crypt(req));
+                publishLoadReqMap.put(requestWapper.md5,requestWapper);
 
                 fireStoreEvent();
             }
@@ -123,13 +145,45 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter());
-        context.setActionType(ModelActionType.MODEL_PUBLISH_ONLINE.name());
+        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
         context.preProcess();
         ReturnResult returnResult = null;
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
-            returnResult = modelManager.publishOnlineModel(
+            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            logger.info("receive service id {}",req.getServiceId());
+            returnResult = modelManager.publishOnlineModel(context,
+                    new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
+                    ModelUtils.getFederatedRoles(req.getRoleMap()),
+                    ModelUtils.getFederatedRolesModel(req.getModelMap())
+            );
+            builder.setStatusCode(returnResult.getRetcode())
+                    .setMessage(returnResult.getRetmsg())
+                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
+            if (returnResult.getRetcode() == 0) {
+                String content = new String(encoder.encode(req.toByteArray()));
+                RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
+                publicOnlineReqMap.put(requestWapper.md5, requestWapper);
+                fireStoreEvent();
+            }
+            responseStreamObserver.onNext(builder.build());
+            responseStreamObserver.onCompleted();
+        } finally {
+            context.postProcess(req, returnResult);
+        }
+    }
+
+    @Override
+    @RegisterService(serviceName = "publishBind")
+    public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
+        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
+        context.preProcess();
+        ReturnResult returnResult = null;
+        try {
+            PublishResponse.Builder builder = PublishResponse.newBuilder();
+            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            logger.info("publishBind receive service id {}",context.getData(Dict.SERVICE_ID));
+            returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtils.getFederatedRoles(req.getRoleMap()),
                     ModelUtils.getFederatedRolesModel(req.getModelMap())
@@ -139,10 +193,16 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             if (returnResult.getRetcode() == 0) {
 
-                String content = new String(Base64.encode(req.toByteArray()));
-                String key = Md5Crypt.md5Crypt(content.getBytes());
+                String content = new String(encoder.encode(req.toByteArray()));
 
-                publicOnlineReqMap.put(key, content);
+                try {
+                    PublishRequest xx= PublishRequest.parseFrom(decoder.decode(content));
+
+                } catch (InvalidProtocolBufferException e) {
+                    e.printStackTrace();
+                }
+                RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
+                publicOnlineReqMap.put(requestWapper.md5, requestWapper);
                 fireStoreEvent();
             }
             responseStreamObserver.onNext(builder.build());
@@ -150,6 +210,28 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         } finally {
             context.postProcess(req, returnResult);
         }
+    }
+
+    private String md5Crypt(PublishRequest req) {
+        char[] encryptArray = StringUtils.join(req.getLocal(), req.getRoleMap(), req.getModelMap()).toCharArray();
+        Arrays.sort(encryptArray);
+        String key = Md5Crypt.md5Crypt(String.valueOf(encryptArray).getBytes(), Dict.MD5_SALT);
+        return key;
+    }
+
+    public static   List<RequestWapper>  sortRequest(Map<String,RequestWapper>  data){
+
+        List<RequestWapper>  list = Lists.newArrayList();
+        data.forEach((k,v)->{
+            list.add(v);
+        });
+        Collections.sort(list, new Comparator<RequestWapper>() {
+            @Override
+            public int compare(RequestWapper o1, RequestWapper o2) {
+                return o1.timestamp - o2.timestamp>0?1:-1;
+            }
+        });
+        return  list;
     }
 
     public void fireStoreEvent() {
@@ -162,11 +244,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     }
 
 
-    public void restore() {
-
-    }
-
-
     public void store() {
 
         doSaveProperties(publishLoadReqMap, publishLoadStoreFile, 0);
@@ -175,8 +252,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     }
 
 
-    public void doSaveProperties(Map properties, File file, long version) {
-        logger.info("prepare to save modelinfo {} {}", file, properties);
+    public void doSaveProperties(Map<String,RequestWapper> data, File file, long version) {
 
         if (file == null) {
             return;
@@ -200,12 +276,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     try (FileOutputStream outputFile = new FileOutputStream(file)) {
                         try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputFile, Charset.forName("UTF-8")))) {
                             bufferedWriter.newLine();
-                            publishLoadReqMap.forEach((k, v) -> {
-
+                            List<RequestWapper> sortedList = sortRequest(data);
+                            sortedList.forEach(( v) -> {
                                 try {
-
-                                    String content = k + "=" + v;
-                                    logger.info("write content {}", content);
+                                    String content = v.md5 + "=" + v.toString();
                                     bufferedWriter.write(content);
                                     bufferedWriter.newLine();
                                 } catch (IOException e) {
@@ -225,47 +299,39 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 }
             }
         } catch (Throwable e) {
-//            savePropertiesRetryTimes.incrementAndGet();
-//            if (savePropertiesRetryTimes.get() >= MAX_RETRY_TIMES_SAVE_PROPERTIES) {
-//                logger.warn("Failed to save registry cache file after retrying " + MAX_RETRY_TIMES_SAVE_PROPERTIES + " times, cause: " + e.getMessage(), e);
-//                savePropertiesRetryTimes.set(0);
-//                return;
-//            }
-//            if (version < lastCacheChanged.get()) {
-//                savePropertiesRetryTimes.set(0);
-//                return;
-//            } else {
-//                registryCacheExecutor.execute(new AbstractRegistry.SaveProperties(lastCacheChanged.incrementAndGet()));
-//            }
             logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
         }
     }
 
-    private void loadProperties(File file, Map properties) {
-
+    private List<RequestWapper> loadProperties(File file, Map<String,RequestWapper> properties) {
 
         if (file != null && file.exists()) {
             InputStream in = null;
             try {
                 in = new FileInputStream(file);
-                //properties.load(in);
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in))) {
-
+                   final AtomicInteger count= new AtomicInteger(0);
 
                     bufferedReader.lines().forEach(temp -> {
+                        count.addAndGet(1);
                         int index = temp.indexOf("=");
                         if (index > 0) {
                             String key = temp.substring(0, index);
                             String value = temp.substring(index + 1);
-                            properties.put(key, value);
+                            String[] args =value.split(":");
+                            String content = args[0];
+                            long timestamp = count.longValue();;
+                            if(args.length>=2){
+                                timestamp =  new Long(args[1]);
+                            }
+                            properties.put(key, new RequestWapper(content,timestamp,key));
                         }
                     });
                 }
-
-
                 if (logger.isInfoEnabled()) {
                     logger.info("Load model cache file " + file + ", data: " + properties);
                 }
+                return  sortRequest(properties);
             } catch (Throwable e) {
                 logger.error("failed to load cache file {} ", file);
             } finally {
@@ -277,21 +343,27 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     }
                 }
             }
+
         }
+        return null;
     }
 
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        loadProperties(publishLoadStoreFile, publishLoadReqMap);
-        loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
-        publishLoadReqMap.forEach((k, v) -> {
+
+
+        List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
+        List<RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
+        publishLoadList.forEach(( v) -> {
             try {
-                byte[] data = Base64.decode(v.toString().toCharArray());
+                byte[] data = decoder.decode(v.content.getBytes());
                 PublishRequest req = PublishRequest.parseFrom(data);
-                logger.info("resotre publishLoadModel req {}", req);
-                modelManager.publishLoadModel(
+                logger.info("restore publishLoadModel req {}", req);
+                Context  context = new BaseContext();
+                context.putData(Dict.SERVICE_ID,req.getServiceId());
+                modelManager.publishLoadModel(context,
                         new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                         ModelUtils.getFederatedRoles(req.getRoleMap()),
                         ModelUtils.getFederatedRolesModel(req.getModelMap()));
@@ -300,13 +372,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 e.printStackTrace();
             }
         });
-        publicOnlineReqMap.forEach((k, v) -> {
+        publishOnlineList.forEach(( v) -> {
             try {
-                byte[] data = Base64.decode(v.toString().toCharArray());
+                byte[] data = decoder.decode(v.content.getBytes());
                 PublishRequest req = PublishRequest.parseFrom(data);
 
-                logger.info("resotre publishOnlineModel req {}", req);
-                modelManager.publishOnlineModel(
+                logger.info("restore publishOnlineModel req {} base64 {}", req,v);
+                Context  context = new BaseContext();
+                context.putData(Dict.SERVICE_ID,req.getServiceId());
+                modelManager.publishOnlineModel(context,
                         new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                         ModelUtils.getFederatedRoles(req.getRoleMap()),
                         ModelUtils.getFederatedRolesModel(req.getModelMap()));
@@ -319,4 +393,6 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
 
     }
+
+
 }

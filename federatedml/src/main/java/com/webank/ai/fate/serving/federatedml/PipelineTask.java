@@ -17,6 +17,8 @@
 package com.webank.ai.fate.serving.federatedml;
 
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
@@ -25,23 +27,24 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
+import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
+
 public class PipelineTask {
     private static final Logger LOGGER = LogManager.getLogger();
     private List<BaseModel> pipeLineNode = new ArrayList<>();
     private Map<String, BaseModel> modelMap = new HashMap<String, BaseModel>();
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
-
     public BaseModel getModelByComponentName(String name) {
         return this.modelMap.get(name);
     }
-
     public int initModel(Map<String, byte[]> modelProtoMap) {
-        LOGGER.info("start init Pipeline");
+        LOGGER.info("start init pipeline,model components {}",modelProtoMap.keySet());
         try {
             Map<String, byte[]> newModelProtoMap = changeModelProto(modelProtoMap);
-            String pipelineProtoName = "pipeline.pipeline:Pipeline";
-            PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(pipelineProtoName));
+            LOGGER.info("after parse pipeline {}",newModelProtoMap.keySet());
+            Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL)!=null);
+            PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
             String dsl = pipeLineProto.getInferenceDsl().toStringUtf8(); //inference_dsl;
             dslParser.parseDagFromDSL(dsl);
             ArrayList<String> components = dslParser.getAllComponent();
@@ -50,7 +53,7 @@ public class PipelineTask {
             for (int i = 0; i < components.size(); ++i) {
                 String componentName = components.get(i);
                 String className = componentModuleMap.get(componentName);
-                LOGGER.info("Start get className:{}", className);
+                LOGGER.info("try to get class:{}", className);
                 try {
                     Class modelClass = Class.forName(this.modelPackage + "." + className);
                     BaseModel mlNode = (BaseModel) modelClass.getConstructor().newInstance();
@@ -66,10 +69,10 @@ public class PipelineTask {
                     LOGGER.warn("Can not instance {} class", className);
                 }
             }
-
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.info("Pipeline init catch error:{}", ex);
+            LOGGER.info("initModel error:{}", ex);
+            throw  new  RuntimeException("initModel error");
         }
         LOGGER.info("Finish init Pipeline");
         return StatusCode.OK;
@@ -113,11 +116,18 @@ public class PipelineTask {
         }
 
         LOGGER.info("Finish Pipeline predict");
-        return outputData.get(outputData.size() - 1);
+
+        if(outputData.size()>0){
+            return outputData.get(outputData.size() - 1);
+        }else{
+            return Maps.newHashMap();
+        }
+
+
     }
 
     private HashMap<String, byte[]> changeModelProto(Map<String, byte[]> modelProtoMap) {
-        HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>();
+        HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>(8);
         for (Map.Entry<String, byte[]> entry : modelProtoMap.entrySet()) {
             String key = entry.getKey();
             if (!"pipeline.pipeline:Pipeline".equals(key)) {

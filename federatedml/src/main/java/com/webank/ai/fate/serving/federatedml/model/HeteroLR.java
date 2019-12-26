@@ -85,7 +85,7 @@ public abstract class HeteroLR extends BaseModel {
         LOGGER.info("model weight hit rate:{}", modelWeightHitRate);
         LOGGER.info("input data features hit rate:{}", inputDataHitRate);
 
-        Map<String, Double> ret = new HashMap<>();
+        Map<String, Double> ret = new HashMap<>(8);
         ret.put(Dict.SCORE, score);
         ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
         ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);

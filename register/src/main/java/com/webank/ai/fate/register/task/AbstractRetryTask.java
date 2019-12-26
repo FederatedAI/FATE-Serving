@@ -23,7 +23,7 @@ import com.webank.ai.fate.register.common.TimerTask;
 import com.webank.ai.fate.register.interfaces.Timeout;
 import com.webank.ai.fate.register.interfaces.Timer;
 import com.webank.ai.fate.register.url.URL;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,7 +72,7 @@ public abstract class AbstractRetryTask implements TimerTask {
         this.taskName = taskName;
         cancel = false;
         this.retryPeriod = url.getParameter(Constants.REGISTRY_FILESAVE_SYNC_KEY, DEFAULT_REGISTRY_RETRY_PERIOD);
-        this.retryTimes = url.getParameter(REGISTRY_RETRY_TIMES_KEY, 5000);
+        this.retryTimes = url.getParameter(REGISTRY_RETRY_TIMES_KEY, Integer.MAX_VALUE);
     }
 
     public void cancel() {

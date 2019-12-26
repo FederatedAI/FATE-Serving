@@ -16,7 +16,7 @@
 
 package com.webank.ai.fate.register.url;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 

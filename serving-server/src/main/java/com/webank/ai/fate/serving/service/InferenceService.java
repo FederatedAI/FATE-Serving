@@ -16,6 +16,9 @@
 
 package com.webank.ai.fate.serving.service;
 
+import com.alibaba.fastjson.JSON;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.protobuf.ByteString;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
@@ -33,13 +36,16 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Logger accessLOGGER = LogManager.getLogger(Dict.ACCESS);
     @Autowired
     GuestInferenceProvider guestInferenceProvider;
-
+    @Autowired
+    MetricRegistry metricRegistry;
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = "inference")
@@ -64,22 +70,25 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
-
         InferenceRequest inferenceRequest = null;
-        Context context = new BaseContext(new GuestInferenceLoggerPrinter());
+        Context context = new BaseContext(new GuestInferenceLoggerPrinter(),actionType.name(),metricRegistry);
         context.preProcess();
 
         try {
             try {
                 context.putData(Dict.ORIGIN_REQUEST, req.getBody().toStringUtf8());
-                inferenceRequest = (InferenceRequest) ObjectTransform.json2Bean(req.getBody().toStringUtf8(), InferenceRequest.class);
+                inferenceRequest = (InferenceRequest) JSON.parseObject(req.getBody().toStringUtf8(), InferenceRequest.class);
 
                 if (inferenceRequest != null) {
                     if (inferenceRequest.getCaseid().length() == 0) {
                         inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
                     }
+                    Map<String,Object> sendToRemoteFeatureData = inferenceRequest.getSendToRemoteFeatureData();
+                    if(sendToRemoteFeatureData!=null) {
+                        inferenceRequest.getFeatureData().putAll(sendToRemoteFeatureData);
+                    }
                     context.setCaseId(inferenceRequest.getCaseid());
-                    context.setActionType(actionType.name());
+
 
                     switch (actionType.name()) {
                         case "SYNC_RUN":
@@ -92,13 +101,9 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                             returnResult = guestInferenceProvider.asynInference(context, inferenceRequest);
                             break;
                         default:
-
                             throw new Exception();
-
-
                     }
 
-                    //  returnResult = inferenceProvider.inference(context,inferenceRequest, actionType);
                     if (returnResult.getRetcode() != InferenceRetCode.OK) {
                         LOGGER.error("caseid {} inference {} failed: {}  result {}", context.getCaseId(), actionType, req.getBody().toStringUtf8(), returnResult);
                     }
@@ -107,7 +112,6 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                     returnResult.setRetcode(InferenceRetCode.EMPTY_DATA);
                 }
             } catch (Throwable e) {
-
                 returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
                 LOGGER.error(String.format("inference system error:\n%s", req.getBody().toStringUtf8()), e);
             }
