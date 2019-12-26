@@ -23,9 +23,10 @@ configpath=$(cd $basepath/conf;pwd)
 
 module=serving-router
 main_class=com.webank.ai.fate.networking.Proxy
+module_version=1.1.2
 
 getpid() {
-    pid=`ps aux | grep ${main_class} | grep -v grep | awk '{print $2}'`
+    pid=`ps aux | grep ${module} | grep -v grep | awk '{print $2}'`
 
     if [[ -n ${pid} ]]; then
         return 1
@@ -56,7 +57,10 @@ start() {
     getpid
     if [[ $? -eq 0 ]]; then
         mklogsdir
-        java -Drouter_file=${configpath}/route_table.json -cp    "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/proxy.properties >> logs/console.log 2>>logs/error.log &
+        if [[ ! -e "fate-${module}.jar" ]]; then
+          ln -s fate-${module}-${module_version}.jar fate-${module}.jar
+        fi
+        java -DauthFile=${configpath}/auth_config.json -Drouter_file=${configpath}/route_table.json -cp    "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/proxy.properties >> logs/console.log 2>>logs/error.log &
         if [[ $? -eq 0 ]]; then
             getpid
             echo "service start sucessfully. pid: ${pid}"

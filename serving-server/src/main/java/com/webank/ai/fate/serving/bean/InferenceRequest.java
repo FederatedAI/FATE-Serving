@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.bean;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.ai.fate.serving.core.bean.Request;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
@@ -31,12 +32,36 @@ public class InferenceRequest implements Request {
     private String modelId;
     private String seqno;
     private String caseid;
+    private String serviceId;
     private Map<String, Object> featureData;
+    public String getServiceId() {
+        return serviceId;
+    }
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
+    }
+
+    public Map<String, Object> getSendToRemoteFeatureData() {
+        return sendToRemoteFeatureData;
+    }
+
+    public void setSendToRemoteFeatureData(Map<String, Object> sendToRemoteFeatureData) {
+        this.sendToRemoteFeatureData = sendToRemoteFeatureData;
+    }
+
+    private Map<String, Object> sendToRemoteFeatureData;
 
     InferenceRequest() {
         seqno = InferenceUtils.generateSeqno();
         caseid = InferenceUtils.generateCaseid();
         featureData = new HashMap<>();
+        sendToRemoteFeatureData = new HashMap<>();
     }
 
     public void setCaseId(String caseId) {
@@ -96,16 +121,11 @@ public class InferenceRequest implements Request {
     public String toString() {
         String result = "";
         try {
-
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            result = objectMapper.writeValueAsString(this);
-
+            result= JSON.toJSONString(this);
         } catch (Throwable e) {
 
         }
         return result;
-
     }
 
 }

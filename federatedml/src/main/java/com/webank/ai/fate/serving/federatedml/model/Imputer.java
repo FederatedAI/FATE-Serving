@@ -34,15 +34,19 @@ public class Imputer {
     }
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
-        LOGGER.info("start imputer transform task");
-        for (String key : inputData.keySet()) {
-            String value = inputData.get(key).toString();
-            if (this.missingValueSet.contains(value.toLowerCase())) {
-                try {
-                    inputData.put(key, this.missingReplaceValues.get(key));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    inputData.put(key, 0.);
+        if(inputData!=null) {
+            LOGGER.info("start imputer transform task");
+            for (String key : inputData.keySet()) {
+                if(inputData.get(key)!=null) {
+                    String value = inputData.get(key).toString();
+                    if (this.missingValueSet.contains(value.toLowerCase())) {
+                        try {
+                            inputData.put(key, this.missingReplaceValues.get(key));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            inputData.put(key, 0.);
+                        }
+                    }
                 }
             }
         }

@@ -17,7 +17,6 @@
 package com.webank.ai.fate.networking;
 
 import com.google.common.collect.Sets;
-import com.webank.ai.fate.jmx.server.FateMBeanServer;
 import com.webank.ai.fate.networking.proxy.factory.GrpcServerFactory;
 import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.grpc.client.DataTransferPipedClient;
@@ -29,6 +28,8 @@ import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.bean.Configuration;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import io.grpc.Server;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +42,7 @@ import java.util.Properties;
 import java.util.Set;
 
 public class Proxy {
+
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static ZookeeperRegistry zookeeperRegistry;
@@ -77,6 +79,10 @@ public class Proxy {
         LOGGER.info("server conf: {}", serverConf);
         server.start();
         Properties properties = serverConf.getProperties();
+
+        System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME));
+        System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD));
+
         useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
         useZkRouter = Boolean.valueOf(properties.getProperty("useZkRouter", "false"));
         if (useRegister) {
@@ -87,14 +93,9 @@ public class Proxy {
 
             if(useZkRouter){
 
-
-                LoadBalancer loadBalancer = new RandomLoadBalance();
-
                 DefaultRouterService routerService = new DefaultRouterService();
 
                 routerService.setRegistry(zookeeperRegistry);
-
-                routerService.setLoadBalancer(loadBalancer);
 
                 DataTransferPipedClient.routerService = routerService;
 
@@ -102,20 +103,6 @@ public class Proxy {
 
         }
 
-
-
-
-        boolean useJMX = Boolean.valueOf(properties.getProperty("useJMX", "false"));
-        if (useJMX) {
-            String jmxServerName = properties.getProperty("jmx.server.name", "proxy");
-            int jmxPort = Integer.valueOf(System.getProperty("jmx.port", "9999"));
-            FateMBeanServer fateMBeanServer = new FateMBeanServer(ManagementFactory.getPlatformMBeanServer(), true);
-            String jmxServerUrl = fateMBeanServer.openJMXServer(jmxServerName, jmxPort);
-            URL jmxUrl = URL.parseJMXServiceUrl(jmxServerUrl);
-            if(useRegister) {
-                zookeeperRegistry.register(jmxUrl);
-            }
-        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.

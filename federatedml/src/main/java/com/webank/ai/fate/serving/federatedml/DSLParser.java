@@ -93,7 +93,7 @@ public class DSLParser {
 
     public void topoSort(JSONObject components, ArrayList<String> topoRankComponent) {
         Stack<Integer> stk = new Stack();
-        HashMap<String, Integer> componentIndexMapping = new HashMap<String, Integer>();
+        HashMap<String, Integer> componentIndexMapping = new HashMap<String, Integer>(8);
         ArrayList<String> componentList = new ArrayList<String>();
         int index = 0;
         Iterator<String> componentNames = components.keys();
@@ -106,7 +106,7 @@ public class DSLParser {
         }
 
         int inDegree[] = new int[index];
-        HashMap<Integer, ArrayList<Integer>> edges = new HashMap<Integer, ArrayList<Integer>>();
+        HashMap<Integer, ArrayList<Integer>> edges = new HashMap<Integer, ArrayList<Integer>>(8);
 
         for (int i = 0; i < componentList.size(); ++i) {
             String componentName = componentList.get(i);

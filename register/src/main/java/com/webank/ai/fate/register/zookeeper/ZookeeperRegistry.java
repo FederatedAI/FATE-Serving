@@ -307,30 +307,24 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     zkListener = listeners.get(listener);
 
                 }
+                StringBuilder  sb = new StringBuilder(root);
+                sb.append("/").append(url.getProject());
 
-                String xx = root + "/" + url.getProject();
-                List<String> children = zkClient.addChildListener(xx, zkListener);
-
+                List<String> children = zkClient.addChildListener(sb.toString(), zkListener);
 
                 for (String environment : children) {
-
-                    //URL  childUrl =  url.setEnvironment(environment);
-                    //urls.add(childUrl);
-
-                    xx = xx + "/" + environment;
-                    List<String> interfaces = zkClient.addChildListener(xx, zkListener);
+                    sb.append("/").append(environment);
+                    List<String> interfaces = zkClient.addChildListener(sb.toString(), zkListener);
 
                     if (interfaces != null) {
                         for (String inter : interfaces) {
-                            xx = xx + "/" + inter + "/" + Constants.PROVIDERS_CATEGORY;
 
-                            List<String> services = zkClient.addChildListener(xx, zkListener);
+                            sb.append("/").append(inter).append("/").append(Constants.PROVIDERS_CATEGORY);
+                            List<String> services = zkClient.addChildListener(sb.toString(), zkListener);
 
                             if (services != null) {
-                                urls.addAll(toUrlsWithEmpty(url, xx, services));
+                                urls.addAll(toUrlsWithEmpty(url, sb.toString(), services));
                             }
-
-
                         }
 
                     }
@@ -339,40 +333,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
 
             }
-
-
-//            if (ANY_VALUE.equals(url.getServiceInterface())) {
-//                String root = toRootPath();
-//                ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
-//                if (listeners == null) {
-//                    zkListeners.putIfAbsent(url, new ConcurrentHashMap<>());
-//                    listeners = zkListeners.get(url);
-//                }
-//                ChildListener zkListener = listeners.get(listener);
-//                if (zkListener == null) {
-//                    listeners.putIfAbsent(listener, (parentPath, currentChilds) -> {
-//                        for (String child : currentChilds) {
-//                            child = URL.decode(child);
-//                            if (!anyServices.contains(child)) {
-//                                anyServices.add(child);
-//                                subscribe(url.setPath(child).addParameters(INTERFACE_KEY, child,
-//                                        Constants.CHECK_KEY, String.valueOf(false)), listener);
-//                            }
-//                        }
-//                    });
-//                    zkListener = listeners.get(listener);
-//                }
-//                zkClient.create(root, false);
-//                List<String> services = zkClient.addChildListener(root, zkListener);
-//                if (CollectionUtils.isNotEmpty(services)) {
-//                    for (String service : services) {
-//                        service = URL.decode(service);
-//                        anyServices.add(service);
-//                        subscribe(url.setPath(service).addParameters(INTERFACE_KEY, service,
-//                                Constants.CHECK_KEY, String.valueOf(false)), listener);
-//                    }
-//                }
-//            }
             else {
 
                 for (String path : toCategoriesPath(url)) {

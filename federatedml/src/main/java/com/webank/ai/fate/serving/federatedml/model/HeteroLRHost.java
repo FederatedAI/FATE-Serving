@@ -35,7 +35,7 @@ public class HeteroLRHost extends HeteroLR {
 
 
         LOGGER.info("hetero lr host begin to predict");
-        HashMap<String, Object> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>(8);
         Map<String, Double> ret = forward(inputData);
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
 

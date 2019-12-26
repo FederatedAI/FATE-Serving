@@ -20,7 +20,7 @@
     <parent>
         <artifactId>fate-serving</artifactId>
         <groupId>com.webank.ai.fate</groupId>
-        <version>${fate.version}</version>
+        <version>1.1.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -88,12 +88,12 @@
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-serving-federatedml</artifactId>
-            <version>${fate.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-serving-core</artifactId>
-            <version>${fate.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -204,14 +204,20 @@
             <version>4.5.7</version>
         </dependency>
         <dependency>
-            <groupId>com.webank.ai.fate</groupId>
-            <artifactId>fate-register</artifactId>
-            <version>${fate.version}</version>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>4.1.2</version>
         </dependency>
         <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jmx</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.webank.ai.fate</groupId>
-            <artifactId>fate-jmx</artifactId>
-            <version>${fate.version}</version>
+            <artifactId>fate-register</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

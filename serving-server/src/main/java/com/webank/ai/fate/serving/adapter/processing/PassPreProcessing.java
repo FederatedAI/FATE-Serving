@@ -31,7 +31,7 @@ public class PassPreProcessing implements PreProcessing {
     public PreProcessingResult getResult(Context context, String paras) {
         PreProcessingResult preProcessingResult = new PreProcessingResult();
         preProcessingResult.setProcessingResult((Map<String, Object>) ObjectTransform.json2Bean(paras, HashMap.class));
-        Map<String, Object> featureIds = new HashMap<>();
+        Map<String, Object> featureIds = new HashMap<>(8);
         Arrays.asList(Dict.DEVICE_ID, Dict.PHONE_NUM).forEach((field -> {
             featureIds.put(field, Optional.ofNullable(preProcessingResult.getProcessingResult().get(field)).orElse(""));
         }));

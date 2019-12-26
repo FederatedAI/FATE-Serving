@@ -35,16 +35,19 @@ public class Outlier {
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
         LOGGER.info("start outlier transform task");
-
-        for (String key : inputData.keySet()) {
-            String value = inputData.get(key).toString();
-            if (this.outlierValueSet.contains(value.toLowerCase())) {
-                try {
-                    LOGGER.info("value:{}", value);
-                    inputData.put(key, outlierReplaceValues.get(key));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    inputData.put(key, 0.);
+        if(inputData!=null) {
+            for (String key : inputData.keySet()) {
+                if(inputData.get(key)!=null) {
+                    String value = inputData.get(key).toString();
+                    if (this.outlierValueSet.contains(value.toLowerCase())) {
+                        try {
+                            LOGGER.info("value:{}", value);
+                            inputData.put(key, outlierReplaceValues.get(key));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            inputData.put(key, 0.);
+                        }
+                    }
                 }
             }
         }
