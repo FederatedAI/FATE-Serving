@@ -21,7 +21,7 @@
 
 module=serving-server
 main_class=com.webank.ai.fate.serving.ServingServer
-module_version=1.1
+module_version=1.1.2
 
 getpid() {
     pid=`ps aux | grep ${main_class} | grep -v grep | awk '{print $2}'`
