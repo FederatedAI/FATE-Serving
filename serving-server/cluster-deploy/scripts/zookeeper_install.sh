@@ -31,7 +31,8 @@ cd conf
 echo "sh  zkServer.sh start ------"  $sh  zkServer.sh start
 cp zoo_sample.cfg zoo.cfg
 sed -i 's#/tmp/zookeepe#'$zk_path'/data#' zoo.cfg
-sed  -i '/^dataDir/a\dataLogDir='$zk_path'/logs\' zoo.cfg
+sed -i '/^dataDir/a\dataLogDir='$zk_path'/logs\' zoo.cfg
+sed -i '$a\admin.serverPort=9080' zoo.cfg
 #cd ../bin
 #sh zkServer.sh start
 #if [ $? -eq 0 ]; then
