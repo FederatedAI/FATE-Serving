@@ -107,8 +107,8 @@ Key configuration item description:
 | external.inferenceResultCacheDBIndex | The inference result cache DBIndex for external cache | default 0 |
 | external.processCacheDBIndex | The process cache DBIndex for external cache | default 0 |
 | canCacheRetcode | Caching result by retcode | default 0,102 |
-| acl.username | Zookeeper acl user name | default fate |
-| acl.password | Zookeeper acl user password | default fate |
+| acl.username | Zookeeper acl authentication user name | default fate |
+| acl.password | Zookeeper acl authentication user password | default fate |
 
 ### proxy.properties
 Key configuration item description:
