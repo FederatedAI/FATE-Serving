@@ -135,8 +135,7 @@ For detail, Here are some key steps:
     4.copy serving-server/target/fate-serving-server-1.1.2-release.zip to your deploy location and unzip it
     5.modify the configuration file conf/serving-server.properties according to your own requirements
     6.confirm whether Java is installed. You can check through the java -version command.
-    7.ln -s fate-serving-server-1.1.2.jar fate-serving-server.jar, creating soft links for jar.
-    8.sh service.sh restart
+    7.sh service.sh restart
 
    
 
@@ -149,7 +148,6 @@ For detail, Here are some key steps:
     2.copy router/target/fate-serving-router-1.1.2-release.zip to your deploy location and unzip it
     3.modify the configuration file conf/proxy.properties and conf/route_table.json according to your own requirements
     5.confirm whether Java is installed. You can check through the java -version command.
-    6.ln -s fate-serving-router-1.1.2.jar fate-serving-router.jar, creating soft links for jar.
     6.sh service.sh restart
 
 
