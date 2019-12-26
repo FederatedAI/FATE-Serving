@@ -23,7 +23,7 @@ configpath=$(cd $basepath/conf;pwd)
 
 module=serving-router
 main_class=com.webank.ai.fate.networking.Proxy
-module_version=1.1
+module_version=1.2.0
 
 getpid() {
     pid=`ps aux | grep ${module} | grep -v grep | awk '{print $2}'`
