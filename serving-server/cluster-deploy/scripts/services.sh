@@ -25,13 +25,8 @@ main() {
     action=$2
     echo "--------------"
     echo "[INFO] processing: ${module}"
-	if [[ "${module}" == "apigateway" ]];then
-        cd ${module}/bin/
-        bash service.sh ${action}
-    else
-		cd ${module}
-		bash service.sh ${action}
-	fi
+	cd ${module}
+	bash service.sh ${action}
     echo "--------------"
     echo
 }
