@@ -38,6 +38,7 @@ message UniqueValueMeta {
 message IVValueSelectionMeta{
     double value_threshold = 1;
 }
+
 message IVPercentileSelectionMeta{
     double percentile_threshold = 1;
 }

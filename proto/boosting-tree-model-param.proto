@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package com.webank.ai.fate.core.mlmodel.buffer;
 option java_outer_classname = "BoostTreeModelParamProto";
 
