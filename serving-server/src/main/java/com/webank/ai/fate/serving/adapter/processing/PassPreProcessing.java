@@ -16,10 +16,10 @@
 
 package com.webank.ai.fate.serving.adapter.processing;
 
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.bean.PreProcessingResult;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 
 import java.util.Arrays;
 import java.util.HashMap;

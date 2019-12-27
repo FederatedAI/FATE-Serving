@@ -24,15 +24,15 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class GrpcConnectionPool {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(GrpcConnectionPool.class);
     static private GrpcConnectionPool pool = new GrpcConnectionPool();
     ConcurrentHashMap<String, GenericObjectPool<ManagedChannel>> poolMap = new ConcurrentHashMap<String, GenericObjectPool<ManagedChannel>>();
     private Integer maxTotal = 64;
@@ -52,7 +52,7 @@ public class GrpcConnectionPool {
             poolMap.get(address).returnObject(channel);
 
         } catch (Exception e) {
-            LOGGER.error("return to pool error", e);
+            logger.error("return to pool error", e);
         }
     }
 

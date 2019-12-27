@@ -23,8 +23,8 @@ import com.webank.ai.fate.networking.proxy.service.FdnRouter;
 import com.webank.ai.fate.networking.proxy.util.ErrorUtils;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
 import io.grpc.stub.StreamObserver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("prototype")
 public class RouteServerImpl extends RouteServiceGrpc.RouteServiceImplBase {
-    private static final Logger LOGGER = LogManager.getLogger(RouteServerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(RouteServerImpl.class);
     @Autowired
     private FdnRouter fdnRouter;
     @Autowired
@@ -44,7 +44,7 @@ public class RouteServerImpl extends RouteServiceGrpc.RouteServiceImplBase {
     @Override
     public void query(Proxy.Topic request, StreamObserver<BasicMeta.Endpoint> responseObserver) {
         String requestString = toStringUtils.toOneLineString(request);
-        LOGGER.info("[ROUTE] querying route for topic: {}", requestString);
+        logger.info("[ROUTE] querying route for topic: {}", requestString);
         BasicMeta.Endpoint result = fdnRouter.route(request);
 
         if (result == null) {
@@ -52,7 +52,7 @@ public class RouteServerImpl extends RouteServiceGrpc.RouteServiceImplBase {
             responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
         }
 
-        LOGGER.info("[ROUTE] querying route result for topic: {}, result: {}", requestString, toStringUtils.toOneLineString(result));
+        logger.info("[ROUTE] querying route result for topic: {}, result: {}", requestString, toStringUtils.toOneLineString(result));
         responseObserver.onNext(result);
         responseObserver.onCompleted();
     }

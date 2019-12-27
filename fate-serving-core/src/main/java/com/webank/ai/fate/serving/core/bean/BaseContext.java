@@ -16,21 +16,19 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
-    private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(logger_NAME);
     public static ApplicationContext applicationContext;
     long timestamp;
     LoggerPrinter loggerPrinter;
@@ -74,7 +72,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
             counter.inc();
             timerContext = timer.time();
         }catch(Exception e){
-            LOGGER.error("preProcess error" ,e);
+            logger.error("preProcess error" ,e);
 
         }
     }
@@ -127,7 +125,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
         } catch (Throwable e) {
 
-            LOGGER.error("postProcess error" ,e);
+            logger.error("postProcess error" ,e);
         }
     }
 

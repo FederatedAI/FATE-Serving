@@ -17,9 +17,7 @@
 package com.webank.ai.fate.serving.manger;
 
 
-import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.provider.FateServer;
-import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.bean.ModelNamespaceData;
 import com.webank.ai.fate.serving.core.bean.*;
@@ -29,12 +27,11 @@ import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelCache;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.security.provider.MD5;
 
 import java.io.File;
 import java.util.HashMap;
@@ -44,7 +41,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class DefaultModelManager implements ModelManager, InitializingBean {
-    private final Logger logger = LogManager.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(DefaultModelManager.class);
     private final AtomicLong lastCacheChanged = new AtomicLong();
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
@@ -147,7 +144,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             logger.info("load the model successfully");
             return returnResult;
         } catch (Exception ex) {
-            logger.error(ex);
+            logger.error(ex.getMessage());
             ex.printStackTrace();
             returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
         }

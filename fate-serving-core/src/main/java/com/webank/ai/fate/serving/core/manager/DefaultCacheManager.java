@@ -16,34 +16,32 @@
 
 package com.webank.ai.fate.serving.core.manager;
 
-import com.google.common.base.Charsets;
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
-import com.google.common.hash.Hashing;
-import com.alibaba.fastjson.JSON;
-//import com.webank.ai.fate.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.bean.*;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
-import com.webank.ai.fate.serving.core.bean.CacheManager;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+//import com.webank.ai.fate.core.utils.ObjectTransform;
+
 @Service
 public class DefaultCacheManager implements CacheManager, InitializingBean {
 
-    private final Logger LOGGER = LogManager.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(DefaultCacheManager.class);
     private JedisPool jedisPool;
     private Cache<String, ReturnResult> inferenceResultCache;
     private Cache<String, ReturnResult> remoteModelInferenceResultCache;
@@ -102,7 +100,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
     @Override
     public void store(Context context, String key, Object object) {
 
-        LOGGER.info("store key {} value {}", key, object);
+        logger.info("store key {} value {}", key, object);
         CacheValueConfig cacheValueConfig = getCacheValueConfig(key, CacheType.PROCESS_DATA);
         putIntoRedisCache(key, cacheValueConfig, object);
 
@@ -114,7 +112,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
         CacheValueConfig cacheValueConfig = getCacheValueConfig(key, CacheType.PROCESS_DATA);
         T result = getFromRedisCache(key, cacheValueConfig, dataType);
-        LOGGER.info("restore key {} value {}", key, result);
+        logger.info("restore key {} value {}", key, result);
         return result;
     }
 
@@ -127,11 +125,11 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
             String inferenceResultCacheKey = generateInferenceResultCacheKey(partyId, caseid);
             boolean putCacheSuccess = putIntoCache(inferenceResultCacheKey, CacheType.INFERENCE_RESULT, returnResult);
             if (putCacheSuccess) {
-                LOGGER.info("Put {} inference result into cache", inferenceResultCacheKey);
+                logger.info("Put {} inference result into cache", inferenceResultCacheKey);
             }
         } finally {
             long end = System.currentTimeMillis();
-            LOGGER.info("caseid {} putInferenceResultCache cost {}", context.getCaseId(), end - beginTime);
+            logger.info("caseid {} putInferenceResultCache cost {}", context.getCaseId(), end - beginTime);
 
         }
     }
@@ -141,7 +139,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String inferenceResultCacheKey = generateInferenceResultCacheKey(partyId, caseid);
         ReturnResult returnResult = getFromCache(inferenceResultCacheKey, CacheType.INFERENCE_RESULT);
         if (returnResult != null) {
-            LOGGER.info("Get {} inference result from cache.", inferenceResultCacheKey);
+            logger.info("Get {} inference result from cache.", inferenceResultCacheKey);
         }
         return returnResult;
     }
@@ -154,7 +152,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
         boolean putCacheSuccess = putIntoCache(remoteModelInferenceResultCacheKey, CacheType.REMOTE_MODEL_INFERENCE_RESULT, returnResult);
         if (putCacheSuccess) {
-            LOGGER.info("put {} remote model inference result into cache", remoteModelInferenceResultCacheKey);
+            logger.info("put {} remote model inference result into cache", remoteModelInferenceResultCacheKey);
         }
     }
 
@@ -167,7 +165,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
         ReturnResult returnResult = getFromCache(remoteModelInferenceResultCacheKey, CacheType.REMOTE_MODEL_INFERENCE_RESULT);
         if (returnResult != null) {
-            LOGGER.info("get {} remote model inference result from cache", remoteModelInferenceResultCacheKey);
+            logger.info("get {} remote model inference result from cache", remoteModelInferenceResultCacheKey);
         }
         return returnResult;
     }
@@ -305,7 +303,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String featureIdString = StringUtils.join(featureIdItemString, "_");
         String cacheKey;
         cacheKey = StringUtils.join(Arrays.asList(remotePartyKey, featureIdString), "#");
-        LOGGER.info(cacheKey);
+        logger.info(cacheKey);
         return cacheKey;
     }
 

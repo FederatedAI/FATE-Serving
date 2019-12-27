@@ -20,13 +20,13 @@ import com.webank.ai.fate.networking.proxy.factory.GrpcServerFactory;
 import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
 import io.grpc.Server;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class Main1 {
-    private static final Logger LOGGER = LogManager.getLogger(Main1.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main1.class);
 
     public static void main(String[] args) throws Exception {
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext-proxy.xml");
@@ -50,11 +50,11 @@ public class Main1 {
         serverConf.setRouteTablePath("src/main/resources/route_tables/route_table1.json");
         serverConf.setPort(port);
 
-        LOGGER.info("Server started listening on port: {}", port);
+        logger.info("Server started listening on port: {}", port);
 
         Server server = serverFactory.createServer(serverConf);
 
-        LOGGER.info("server conf: {}", serverConf);
+        logger.info("server conf: {}", serverConf);
 
         server.start();
         server.awaitTermination();

@@ -2,7 +2,6 @@
 
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
-import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.annotions.RegisterService;
@@ -10,13 +9,11 @@ import com.webank.ai.fate.serving.proxy.common.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.*;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTransferServiceImplBase {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ProxyRequestHandler.class);
 
     public abstract ProxyServiceRegister getProxyServiceRegister();
 

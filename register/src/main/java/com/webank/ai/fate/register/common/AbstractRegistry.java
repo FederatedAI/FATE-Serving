@@ -25,8 +25,8 @@ import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -46,7 +46,7 @@ import static com.webank.ai.fate.register.common.Constants.*;
 public abstract class AbstractRegistry implements Registry {
 
 
-    private static final Logger logger = LogManager.getLogger(AbstractRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
     private static final char URL_SEPARATOR = ' ';
     private static final String URL_SPLIT = "\\s+";
     private static final int MAX_RETRY_TIMES_SAVE_PROPERTIES = 3;

@@ -21,8 +21,8 @@ import com.webank.ai.fate.networking.proxy.infra.ResultCallback;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ import java.util.concurrent.CountDownLatch;
 @Component
 @Scope("prototype")
 public class ClientPushResponseStreamObserver implements StreamObserver<Proxy.Metadata> {
-    private static final Logger LOGGER = LogManager.getLogger(ClientPullResponseStreamObserver.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClientPullResponseStreamObserver.class);
     private final CountDownLatch finishLatch;
     private final ResultCallback<Proxy.Metadata> resultCallback;
     @Autowired
@@ -48,20 +48,20 @@ public class ClientPushResponseStreamObserver implements StreamObserver<Proxy.Me
     public void onNext(Proxy.Metadata metadata) {
         this.metadata = metadata;
         resultCallback.setResult(metadata);
-        LOGGER.info("[PUSH][CLIENTOBSERVER][ONNEXT] ClientPushResponseStreamObserver.onNext(), metadata: {}",
+        logger.info("[PUSH][CLIENTOBSERVER][ONNEXT] ClientPushResponseStreamObserver.onNext(), metadata: {}",
                 toStringUtils.toOneLineString(metadata));
     }
 
     @Override
     public void onError(Throwable throwable) {
-        LOGGER.error("[PUSH][CLIENTOBSERVER][ONERROR] error in push client: {}, metadata: {}", toStringUtils.toOneLineString(metadata));
-        LOGGER.error(ExceptionUtils.getStackTrace(throwable));
+        logger.error("[PUSH][CLIENTOBSERVER][ONERROR] error in push client: {}, metadata: {}", toStringUtils.toOneLineString(metadata));
+        logger.error(ExceptionUtils.getStackTrace(throwable));
         finishLatch.countDown();
     }
 
     @Override
     public void onCompleted() {
-        LOGGER.info("[PUSH][CLIENTOBSERVER][ONCOMPLETE] ClientPushResponseStreamObserver.onCompleted(), metadata: {}",
+        logger.info("[PUSH][CLIENTOBSERVER][ONCOMPLETE] ClientPushResponseStreamObserver.onCompleted(), metadata: {}",
                 toStringUtils.toOneLineString(metadata));
         finishLatch.countDown();
     }

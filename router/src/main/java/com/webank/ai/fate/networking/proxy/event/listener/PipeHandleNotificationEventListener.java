@@ -22,8 +22,8 @@ import com.webank.ai.fate.networking.proxy.infra.impl.PacketQueuePipe;
 import com.webank.ai.fate.networking.proxy.model.PipeHandlerInfo;
 import com.webank.ai.fate.networking.proxy.service.CascadedCaller;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("prototype")
 public class PipeHandleNotificationEventListener implements ApplicationListener<PipeHandleNotificationEvent> {
-    private static final Logger LOGGER = LogManager.getLogger(PipeHandleNotificationEventListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(PipeHandleNotificationEventListener.class);
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
@@ -41,8 +41,8 @@ public class PipeHandleNotificationEventListener implements ApplicationListener<
 
     @Override
     public void onApplicationEvent(PipeHandleNotificationEvent pipeHandleNotificationEvent) {
-        // LOGGER.warn("event listened: {}", pipeHandleNotificationEvent.getPipeHandlerInfo());
-        LOGGER.info("event metadata: {}", toStringUtils.toOneLineString(pipeHandleNotificationEvent.getPipeHandlerInfo().getMetadata()));
+        // logger.warn("event listened: {}", pipeHandleNotificationEvent.getPipeHandlerInfo());
+        logger.info("event metadata: {}", toStringUtils.toOneLineString(pipeHandleNotificationEvent.getPipeHandlerInfo().getMetadata()));
 
         PipeHandlerInfo pipeHandlerInfo = pipeHandleNotificationEvent.getPipeHandlerInfo();
         Pipe pipe = pipeHandlerInfo.getPipe();

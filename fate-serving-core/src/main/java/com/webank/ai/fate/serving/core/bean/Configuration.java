@@ -16,6 +16,10 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -23,13 +27,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
-
 public class Configuration {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
     private final String confPath;
     private static String confDirectory;
     private static HashMap<String, String> properties;
@@ -58,10 +57,10 @@ public class Configuration {
             loadAdapterConf(baseConfFile.getParent());
             return StatusCode.OK;
         } catch (FileNotFoundException ex) {
-            LOGGER.error("Can not found this file: {}", this.confPath);
+            logger.error("Can not found this file: {}", this.confPath);
             return StatusCode.NOFILE;
         } catch (Exception ex) {
-            LOGGER.error("", ex);
+            logger.error("", ex);
             return StatusCode.UNKNOWNERROR;
         }
     }
@@ -93,7 +92,7 @@ public class Configuration {
                             break;
                     }
                 } catch (IOException ex) {
-                    LOGGER.error(ex);
+                    logger.error(ex.getMessage());
                 }
             }
         }

@@ -35,15 +35,14 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
 import org.apache.commons.cli.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -52,7 +51,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class ServingServer implements InitializingBean {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ServingServer.class);
     static ApplicationContext applicationContext;
     private Server server;
     private boolean useRegister = false;
@@ -65,7 +64,6 @@ public class ServingServer implements InitializingBean {
         this.confPath = new File(confPath).getAbsolutePath();
         System.setProperty(Dict.CONFIGPATH, confPath);
         new Configuration(confPath).load();
-        new com.webank.ai.eggroll.core.utils.Configuration(confPath).load();
         if(Configuration.getProperty(Dict.ACL_USERNAME)!=null) {
             System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME));
         }
@@ -117,11 +115,11 @@ public class ServingServer implements InitializingBean {
         serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ModelService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
         serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ProxyService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
         server = serverBuilder.build();
-        LOGGER.info("server started listening on port: {}, use configuration: {}", port, this.confPath);
+        logger.info("server started listening on port: {}, use configuration: {}", port, this.confPath);
         server.start();
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
-        LOGGER.info("serving useRegister {}", useRegister);
+        logger.info("serving useRegister {}", useRegister);
         if (useRegister) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
@@ -140,7 +138,7 @@ public class ServingServer implements InitializingBean {
                         }
                     }
                 } catch (Throwable e) {
-                    LOGGER.error("parse interface weight error", e);
+                    logger.error("parse interface weight error", e);
                 }
 
             });
@@ -159,9 +157,9 @@ public class ServingServer implements InitializingBean {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                LOGGER.info("*** shutting down gRPC server since JVM is shutting down");
+                logger.info("*** shutting down gRPC server since JVM is shutting down");
                 ServingServer.this.stop();
-                LOGGER.info("*** server shut down");
+                logger.info("*** server shut down");
             }
         });
     }
@@ -174,7 +172,7 @@ public class ServingServer implements InitializingBean {
                 Set<URL> urls = Sets.newHashSet();
                 urls.addAll(registered);
                 urls.forEach(url -> {
-                    LOGGER.info("unregister {}", url);
+                    logger.info("unregister {}", url);
                     zookeeperRegistry.unregister(url);
                 });
 
@@ -196,22 +194,8 @@ public class ServingServer implements InitializingBean {
     }
 
     private void initialize() {
-        this.initializeClientPool();
         HttpClientPool.initPool();
         InferenceWorkerManager.prestartAllCoreThreads();
-    }
-
-    private void initializeClientPool() {
-        ArrayList<String> serverAddress = new ArrayList<>();
-        serverAddress.add(Configuration.getProperty("proxy"));
-        serverAddress.add(Configuration.getProperty("roll"));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                com.webank.ai.eggroll.core.network.grpc.client.ClientPool.init_pool(serverAddress);
-            }
-        }).start();
-        LOGGER.info("Finish init client pool");
     }
 
     @Override

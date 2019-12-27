@@ -19,29 +19,25 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public abstract class BaseModel implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>> {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(BaseModel.class);
     public static RouterService routerService;
     protected String componentName;
 
@@ -73,7 +69,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             long cost = endTime - beginTime;
             String caseId = context.getCaseId();
             String className = this.getClass().getSimpleName();
-            LOGGER.info("model {} caseid {} predict cost time {}", className, caseId, cost);
+            logger.info("model {} caseid {} predict cost time {}", className, caseId, cost);
         }
 
 
@@ -107,7 +103,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             if (useCache) {
                 ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(guestFederatedParams);
                 if (remoteResultFromCache != null) {
-                    LOGGER.info("caseid {} get remote party model inference result from cache", context.getCaseId());
+                    logger.info("caseid {} get remote party model inference result from cache", context.getCaseId());
                     context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
                     context.hitCache(true);
                     remoteResult = remoteResultFromCache;
@@ -128,7 +124,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
             if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
                 CacheManager.getInstance().putRemoteModelInferenceResult(guestFederatedParams, remoteResult);
-                LOGGER.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
+                logger.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
             }
             return remoteResult;
         } finally {
@@ -203,18 +199,18 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
             return remoteResult;
         } catch (Exception e) {
-            LOGGER.error("getFederatedPredictFromRemote error", e);
+            logger.error("getFederatedPredictFromRemote error", e);
             throw new RuntimeException(e);
         } finally {
             long end = System.currentTimeMillis();
             long cost = end - beginTime;
-            LOGGER.info("caseid {} getFederatedPredictFromRemote cost {} remote retcode {}", context.getCaseId(), cost, remoteResult != null ? remoteResult.getRetcode() : Dict.NONE);
+            logger.info("caseid {} getFederatedPredictFromRemote cost {} remote retcode {}", context.getCaseId(), cost, remoteResult != null ? remoteResult.getRetcode() : Dict.NONE);
         }
 
     }
 
 
-    public  static  void main(String[] args){
+    /*public  static  void main(String[] args){
 
 
         NettyChannelBuilder builder = NettyChannelBuilder
@@ -234,13 +230,12 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
         builder.negotiationType(NegotiationType.PLAINTEXT)
                 .usePlaintext();
         Proxy.Packet.Builder  packetBuilder =Proxy.Packet.newBuilder();
-            DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(builder.build());
-            Proxy.Packet packet = stub1.unaryCall(packetBuilder.build());
+        DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(builder.build());
+        Proxy.Packet packet = stub1.unaryCall(packetBuilder.build());
+
         ReturnResult  remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
 
-
-
-    }
+    }*/
 
 
 

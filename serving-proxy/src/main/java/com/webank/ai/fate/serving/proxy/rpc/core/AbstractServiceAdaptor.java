@@ -2,17 +2,15 @@ package com.webank.ai.fate.serving.proxy.rpc.core;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.serving.proxy.common.ErrorMessageUtil;
-import com.webank.ai.fate.serving.proxy.exceptions.*;
+import com.webank.ai.fate.serving.proxy.exceptions.ErrorCode;
+import com.webank.ai.fate.serving.proxy.exceptions.ShowDownRejectException;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
-import com.webank.ai.fate.serving.proxy.rpc.router.RouterInterface;
 import io.grpc.stub.AbstractStub;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,8 +17,8 @@
 package com.webank.ai.fate.register.utils;
 
 import com.webank.ai.fate.register.url.URL;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.*;
@@ -44,7 +44,7 @@ public class NetUtils {
         System.out.println(NetUtils.getLocalAddress0("127.0.0.1"));
     }
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
     // returned port range is [30000, 39999]
     private static final int RND_PORT_START = 30000;
     private static final int RND_PORT_RANGE = 10000;
@@ -293,7 +293,7 @@ public class NetUtils {
                 return addressOp.get();
             }
         } catch (Throwable e) {
-            logger.warn(e);
+            logger.warn(e.getMessage());
         }
 
         try {
@@ -326,15 +326,15 @@ public class NetUtils {
                                 }
                             }
                         } catch (Throwable e) {
-                            logger.warn(e);
+                            logger.warn(e.getMessage());
                         }
                     }
                 } catch (Throwable e) {
-                    logger.warn(e);
+                    logger.warn(e.getMessage());
                 }
             }
         } catch (Throwable e) {
-            logger.warn(e);
+            logger.warn(e.getMessage());
         }
         return localAddress;
     }

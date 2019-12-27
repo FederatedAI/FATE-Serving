@@ -16,8 +16,8 @@
 
 package com.webank.ai.fate.serving.host;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
-
 import com.webank.ai.fate.serving.adapter.dataaccess.FeatureData;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
@@ -26,8 +26,8 @@ import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import com.webank.ai.fate.serving.federatedml.model.HeteroSecureBoostingTreeHost;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +38,7 @@ import java.util.Map;
 @Service
 public class DefaultHostInferenceProvider implements HostInferenceProvider {
 
-    private static final Logger LOGGER = LogManager.getLogger(DefaultHostInferenceProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultHostInferenceProvider.class);
     @Autowired
     ModelManager modelManager;
 
@@ -54,7 +54,7 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
             return featureData.getData(context,featureIds);
         } catch (Exception ex) {
             defaultReturnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
-            LOGGER.error("get feature data error:", ex);
+            logger.error("get feature data error:", ex);
             return defaultReturnResult;
         }
     }
@@ -84,7 +84,7 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
             returnResult.setRetmsg("Can not found model.");
             return returnResult;
         }
-        LOGGER.info("use model to inference on {} {}, id: {}, version: {}", party.getRole(), party.getPartyId(), modelInfo.getNamespace(), modelInfo.getName());
+        logger.info("use model to inference on {} {}, id: {}, version: {}", party.getRole(), party.getPartyId(), modelInfo.getNamespace(), modelInfo.getName());
         Map<String, Object> predictParams = new HashMap<>(8);
         predictParams.put(Dict.FEDERATED_PARAMS, federatedParams);
 
@@ -105,14 +105,14 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
                 returnResult.setRetcode(getFeatureDataResult.getRetcode());
             }
         } catch (Exception ex) {
-            LOGGER.info("federatedInference error:", ex);
+            logger.info("federatedInference error:", ex);
             returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
             returnResult.setRetmsg(ex.getMessage());
         }
         long endTime = System.currentTimeMillis();
         long federatedInferenceElapsed = endTime - startTime;
         //   InferenceUtils.logInference(context ,federatedParams, party, federatedRoles, returnResult, federatedInferenceElapsed, false, billing);
-        LOGGER.info(returnResult.getData());
+        logger.info(JSONObject.toJSONString(returnResult.getData()));
         return returnResult;
 
 

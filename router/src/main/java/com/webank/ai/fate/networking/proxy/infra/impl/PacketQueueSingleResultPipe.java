@@ -17,15 +17,15 @@
 package com.webank.ai.fate.networking.proxy.infra.impl;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
 public class PacketQueueSingleResultPipe extends PacketQueuePipe {
-    private static final Logger LOGGER = LogManager.getLogger(PacketQueueSingleResultPipe.class);
+    private static final Logger logger = LoggerFactory.getLogger(PacketQueueSingleResultPipe.class);
     private Proxy.Metadata result;
 
     public PacketQueueSingleResultPipe() {

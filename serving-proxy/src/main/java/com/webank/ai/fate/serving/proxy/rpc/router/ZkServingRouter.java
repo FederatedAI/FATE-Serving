@@ -8,9 +8,8 @@ import com.webank.ai.fate.serving.proxy.rpc.core.Context;
 import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.proxy.utils.FederatedModelUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,7 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
     private static RouterService zkRouterService;
 
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ZkServingRouter.class);
 
     @Override
     public RouteType getRouteType(){

@@ -19,8 +19,8 @@ package com.webank.ai.fate.networking.proxy.infra.impl;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.networking.proxy.factory.QueueFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope("prototype")
 public class PacketQueuePipe extends BasePipe {
-    private static final Logger LOGGER = LogManager.getLogger(PacketQueuePipe.class);
+    private static final Logger logger = LoggerFactory.getLogger(PacketQueuePipe.class);
     @Autowired
     private QueueFactory queueFactory;
     private Proxy.Metadata metadata;
@@ -57,7 +57,7 @@ public class PacketQueuePipe extends BasePipe {
 
     @Override
     public Proxy.Packet read() {
-        // LOGGER.info("read for the {} time, queue size: {}", ++inCounter, queue.size());
+        // logger.info("read for the {} time, queue size: {}", ++inCounter, queue.size());
         return queue.poll();
     }
 
@@ -68,7 +68,7 @@ public class PacketQueuePipe extends BasePipe {
         try {
             result = queue.poll(timeout, unit);
         } catch (InterruptedException e) {
-            LOGGER.debug("read wait timeout");
+            logger.debug("read wait timeout");
             Thread.currentThread().interrupt();
         }
 
@@ -77,7 +77,7 @@ public class PacketQueuePipe extends BasePipe {
 
     @Override
     public void write(Object o) {
-        // LOGGER.info("write for the {} time, queue size: {}", ++outCounter, queue.size());
+        // logger.info("write for the {} time, queue size: {}", ++outCounter, queue.size());
         if (o instanceof Proxy.Packet) {
             queue.add((Proxy.Packet) o);
         } else {

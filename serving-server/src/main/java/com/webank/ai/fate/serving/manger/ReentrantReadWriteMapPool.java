@@ -18,8 +18,8 @@ package com.webank.ai.fate.serving.manger;
 
 
 import com.webank.ai.fate.serving.core.bean.BaseMapPool;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class ReentrantReadWriteMapPool<K, V> extends BaseMapPool<K, V> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ReentrantReadWriteMapPool.class);
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Lock readLock = lock.readLock();
     private final Lock writeLock = lock.writeLock();
@@ -51,7 +51,7 @@ public class ReentrantReadWriteMapPool<K, V> extends BaseMapPool<K, V> {
         try {
             pool.put(key, value);
         } catch (Exception ex) {
-            LOGGER.error(ex);
+            logger.error(ex.getMessage());
         } finally {
             this.writeLock.unlock();
         }
@@ -63,7 +63,7 @@ public class ReentrantReadWriteMapPool<K, V> extends BaseMapPool<K, V> {
         try {
             pool.putIfAbsent(key, value);
         } catch (Exception ex) {
-            LOGGER.error(ex);
+            logger.error(ex.getMessage());
         } finally {
             this.writeLock.unlock();
         }
@@ -75,7 +75,7 @@ public class ReentrantReadWriteMapPool<K, V> extends BaseMapPool<K, V> {
         try {
             pool.putAll(kv);
         } catch (Exception ex) {
-            LOGGER.error(ex);
+            logger.error(ex.getMessage());
         } finally {
             this.writeLock.unlock();
         }

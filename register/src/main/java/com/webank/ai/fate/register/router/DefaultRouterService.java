@@ -17,7 +17,6 @@
 package com.webank.ai.fate.register.router;
 
 import com.webank.ai.fate.register.common.Constants;
-import com.webank.ai.fate.register.loadbalance.LoadBalanceModel;
 import com.webank.ai.fate.register.loadbalance.LoadBalancer;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;

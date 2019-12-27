@@ -19,23 +19,22 @@ package com.webank.ai.fate.serving.service;
 import com.alibaba.fastjson.JSON;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.api.networking.proxy.Proxy.Packet;
-
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.host.HostInferenceProvider;
 import io.grpc.stub.StreamObserver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ProxyService.class);
     @Autowired
     HostInferenceProvider hostInferenceProvider;
     @Autowired

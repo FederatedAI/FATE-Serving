@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.proxy.rpc.router;
 
-import com.webank.ai.fate.serving.proxy.common.Dict;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
