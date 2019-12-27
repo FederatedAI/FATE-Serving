@@ -19,8 +19,8 @@ package com.webank.ai.fate.register.provider;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.register.interfaces.Registry;
 import io.grpc.Server;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class FateServer extends Server {
 
 
-    private static final Logger logger = LogManager.getLogger(FateServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(FateServer.class);
     public static Set<RegisterService> serviceSets = new HashSet<>();
     public String project;
     Server server;

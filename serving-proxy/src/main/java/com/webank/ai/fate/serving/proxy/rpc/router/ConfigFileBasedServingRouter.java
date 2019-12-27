@@ -13,8 +13,8 @@ import com.webank.ai.fate.serving.proxy.rpc.core.Context;
 import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -45,7 +45,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
 
     private String lastFileMd5;
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ConfigFileBasedServingRouter.class);
 
     private Map<Proxy.Topic, Set<Proxy.Topic>> allow;
     private Map<Proxy.Topic, Set<Proxy.Topic>> deny;

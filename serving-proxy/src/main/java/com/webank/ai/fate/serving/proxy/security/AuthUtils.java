@@ -16,19 +16,18 @@
 
 package com.webank.ai.fate.serving.proxy.security;
 
-import com.webank.ai.fate.serving.proxy.utils.EncryptUtil;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.proxy.utils.EncryptUtil;
 import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import com.webank.ai.fate.serving.proxy.utils.ToStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +41,7 @@ import java.util.*;
 
 @Component
 public class AuthUtils implements InitializingBean{
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthUtils.class);
     private static Map<String, String> KEY_SECRET_MAP = new HashMap<>();
     private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
@@ -61,7 +60,7 @@ public class AuthUtils implements InitializingBean{
 
     @Scheduled(fixedRate = 10000)
     public void loadConfig(){
-        LOGGER.debug("start refreshed auth config...");
+        logger.debug("start refreshed auth config...");
         String fileMd5 = FileUtils.fileMd5(confFilePath);
         if(null != fileMd5 && fileMd5.equals(lastFileMd5)){
             return;
@@ -75,7 +74,7 @@ public class AuthUtils implements InitializingBean{
             jsonReader = new JsonReader(new FileReader(confFilePath));
             jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
         } catch (FileNotFoundException e) {
-            LOGGER.error("File not found: {}", confFilePath);
+            logger.error("File not found: {}", confFilePath);
             throw new RuntimeException(e);
         } finally {
             if (jsonReader != null) {
@@ -97,7 +96,7 @@ public class AuthUtils implements InitializingBean{
             KEY_SECRET_MAP.put(allowKey.get("app_key").toString(), allowKey.get("app_secret").toString());
             PARTYID_KEY_MAP.put(allowKey.get("party_id").toString(), allowKey.get("app_key").toString());
         }
-        LOGGER.info("refreshed auth cfg using file {}.", confFilePath);
+        logger.info("refreshed auth cfg using file {}.", confFilePath);
     }
 
     private String getSecret(String appKey) {
@@ -112,7 +111,7 @@ public class AuthUtils implements InitializingBean{
         String signature = "";
         String appSecret = getSecret(appKey);
         if (StringUtils.isEmpty(appSecret)) {
-            LOGGER.error("appSecret not found");
+            logger.error("appSecret not found");
             return signature;
         }
         String encryptText = String.valueOf(timestamp) + "\n"
@@ -147,14 +146,14 @@ public class AuthUtils implements InitializingBean{
             long currentTimeMillis = System.currentTimeMillis();
             long requestTimeMillis = packet.getAuth().getTimestamp();
             if (currentTimeMillis >= (requestTimeMillis + validRequestTimeoutSecond * 1000)) {
-                LOGGER.error("receive an expired request, currentTimeMillis:{}, requestTimeMillis{}.", currentTimeMillis, requestTimeMillis);
+                logger.error("receive an expired request, currentTimeMillis:{}, requestTimeMillis{}.", currentTimeMillis, requestTimeMillis);
                 return false;
             }
             // check signature
             String reqSignature = packet.getAuth().getSignature();
             String validSignature = calSignature(packet.getHeader(), packet.getBody(), requestTimeMillis, packet.getAuth().getAppKey());
             if (!StringUtils.equals(reqSignature, validSignature)) {
-                LOGGER.error("invalid signature, request:{}, valid:{}", reqSignature, validSignature);
+                logger.error("invalid signature, request:{}, valid:{}", reqSignature, validSignature);
                 return false;
             }
         }
@@ -167,7 +166,7 @@ public class AuthUtils implements InitializingBean{
         try {
             loadConfig();
         } catch (Throwable e) {
-            LOGGER.error("load authencation keys fail. ", e);
+            logger.error("load authencation keys fail. ", e);
         }
 
     }

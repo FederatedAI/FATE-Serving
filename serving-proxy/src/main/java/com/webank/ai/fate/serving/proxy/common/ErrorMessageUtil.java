@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.proxy.common;
 
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.webank.ai.fate.serving.proxy.exceptions.*;
-import com.webank.ai.fate.serving.proxy.exceptions.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

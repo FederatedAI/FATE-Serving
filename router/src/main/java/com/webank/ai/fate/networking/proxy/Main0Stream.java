@@ -27,8 +27,8 @@ import com.webank.ai.fate.networking.proxy.service.ConfFileBasedFdnRouter;
 import com.webank.ai.fate.networking.proxy.service.FdnRouter;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -36,7 +36,7 @@ import java.io.*;
 
 
 public class Main0Stream {
-    private static final Logger LOGGER = LogManager.getLogger(Main0Stream.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main0Stream.class);
 
     public static void main(String[] args) throws Exception {
 
@@ -89,7 +89,7 @@ public class Main0Stream {
                 .build()
                 .start();
 
-        LOGGER.info("Server started listening on port: {}", port);
+        logger.info("Server started listening on port: {}", port);
 
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

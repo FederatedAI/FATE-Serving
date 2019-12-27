@@ -19,8 +19,8 @@ package com.webank.ai.fate.serving.proxy.utils;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +38,7 @@ public class ToStringUtils {
     private static final String SEMICOLON = ";";
     private static final String COMMA = ",";
 
-    private static final Logger LOGGER = LogManager.getLogger(ToStringUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(ToStringUtils.class);
 
     private JsonFormat.Printer protoPrinter = JsonFormat.printer()
             .preservingProtoFieldNames()
@@ -48,14 +48,14 @@ public class ToStringUtils {
         String result = "[null]";
 
         if (target == null) {
-            LOGGER.info("target is null");
+            logger.info("target is null");
             return result;
         }
 
         try {
             result = protoPrinter.print(target);
         } catch (Exception e) {
-            LOGGER.info(ExceptionUtils.getStackTrace(e));
+            logger.info(ExceptionUtils.getStackTrace(e));
         }
 
         return result;

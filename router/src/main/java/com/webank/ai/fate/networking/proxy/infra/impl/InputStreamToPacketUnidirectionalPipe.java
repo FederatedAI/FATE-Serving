@@ -20,8 +20,8 @@ import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ public class InputStreamToPacketUnidirectionalPipe extends BasePipe {
     private static final int MAX_EMPTY_READ_COUNT = 10;
     private static final int MAX_READ_COUNT = 50;
     private static final int DEFAULT_TRUNK_SIZE = 2 << 20;
-    private static final Logger LOGGER = LogManager.getLogger(InputStreamToPacketUnidirectionalPipe.class);
+    private static final Logger logger = LoggerFactory.getLogger(InputStreamToPacketUnidirectionalPipe.class);
     private final int trunkSize;
     private InputStream is;
     private Proxy.Metadata metadata;
@@ -61,7 +61,7 @@ public class InputStreamToPacketUnidirectionalPipe extends BasePipe {
 
     @Override
     public Proxy.Packet read() {
-        LOGGER.info("read for the {} time", ++counter);
+        logger.info("read for the {} time", ++counter);
 
         ByteString value = null;
         ByteString cur = null;

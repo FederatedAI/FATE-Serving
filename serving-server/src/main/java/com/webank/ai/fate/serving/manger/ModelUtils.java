@@ -17,8 +17,6 @@
 package com.webank.ai.fate.serving.manger;
 
 import com.alibaba.fastjson.JSONObject;
-import com.webank.ai.eggroll.core.storage.dtable.DTable;
-import com.webank.ai.eggroll.core.storage.dtable.DTableFactory;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
@@ -29,8 +27,8 @@ import com.webank.ai.fate.serving.core.bean.ModelInfo;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.utils.HttpClientPool;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +37,7 @@ import java.util.*;
 
 @Component
 public class ModelUtils {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ModelUtils.class);
     private static final String modelKeySeparator = "&";
 
     private static ModelUtils modelUtils;
@@ -53,7 +51,7 @@ public class ModelUtils {
     }
 
     public static Map<String, byte[]> readModel(String name, String namespace) {
-        LOGGER.info("read model, name: {} namespace: {}", name, namespace);
+        logger.info("read model, name: {} namespace: {}", name, namespace);
 
         String requestUrl = "";
         boolean useRegister = Boolean.valueOf(Configuration.getProperty(Dict.USE_REGISTER));
@@ -61,7 +59,7 @@ public class ModelUtils {
             URL url = URL.valueOf("flow/online/transfer");
             List<URL> urls = modelUtils.routerService.router(url);
             if (urls == null || urls.isEmpty()) {
-                LOGGER.info("url not found, {}", url);
+                logger.info("url not found, {}", url);
                 return null;
             }
 
@@ -72,7 +70,7 @@ public class ModelUtils {
         }
 
         if (StringUtils.isBlank(requestUrl)) {
-            LOGGER.info("roll address not found");
+            logger.info("roll address not found");
             return null;
         }
 
@@ -84,23 +82,23 @@ public class ModelUtils {
         String responseBody = HttpClientPool.transferPost(requestUrl, requestData);
         long end = System.currentTimeMillis();
 
-        LOGGER.info("{}|{}|{}|{}", requestUrl, start, end, (end - start) + " ms");
+        logger.info("{}|{}|{}|{}", requestUrl, start, end, (end - start) + " ms");
 
         if (StringUtils.isEmpty(responseBody)) {
-            LOGGER.info("read model fail, {}, {}", name, namespace);
+            logger.info("read model fail, {}, {}", name, namespace);
             return null;
         }
 
         JSONObject responseData = JSONObject.parseObject(responseBody);
         if (responseData.getInteger("retcode") != 0) {
-            LOGGER.info("read model fail, {}, {}, {}", name, namespace, responseData.getString("retmsg"));
+            logger.info("read model fail, {}, {}, {}", name, namespace, responseData.getString("retmsg"));
             return null;
         }
 
         Map<String, byte[]> resultMap = new HashMap<>();
         Map<String, Object> dataMap = responseData.getJSONObject("data");
         if (dataMap == null || dataMap.isEmpty()) {
-            LOGGER.info("read model fail, {}, {}, {}", name, namespace, dataMap);
+            logger.info("read model fail, {}, {}, {}", name, namespace, dataMap);
             return null;
         }
 
@@ -114,7 +112,7 @@ public class ModelUtils {
     public static PipelineTask loadModel(String name, String namespace) {
         Map<String, byte[]> modelBytes = readModel(name, namespace);
         if (modelBytes == null || modelBytes.size() == 0) {
-            LOGGER.info("loadModel error {} {}",name,namespace);
+            logger.info("loadModel error {} {}",name,namespace);
             return null;
         }
         PipelineTask pipelineTask = new PipelineTask();

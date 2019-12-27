@@ -20,8 +20,8 @@ import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.task.*;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +33,7 @@ import static com.webank.ai.fate.register.common.Constants.*;
 
 public abstract class FailbackRegistry extends AbstractRegistry {
 
-    private static final Logger logger = LogManager.getLogger(FailbackRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(FailbackRegistry.class);
 
 
     private final ConcurrentMap<URL, FailedRegisteredTask> failedRegistered = new ConcurrentHashMap<URL, FailedRegisteredTask>();

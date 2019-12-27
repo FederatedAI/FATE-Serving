@@ -23,21 +23,21 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class Scale extends BaseModel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(Scale.class);
     private ScaleMeta scaleMeta;
     private ScaleParam scaleParam;
     private boolean need_run;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        LOGGER.info("start init Scale class");
+        logger.info("start init Scale class");
         try {
             this.scaleMeta = this.parseModel(ScaleMeta.parser(), protoMeta);
             this.scaleParam = this.parseModel(ScaleParam.parser(), protoParam);
@@ -46,7 +46,7 @@ public class Scale extends BaseModel {
             ex.printStackTrace();
             return StatusCode.ILLEGALDATA;
         }
-        LOGGER.info("Finish init Scale class");
+        logger.info("Finish init Scale class");
         return StatusCode.OK;
     }
 

@@ -19,8 +19,8 @@ package com.webank.ai.fate.networking.proxy.manager;
 
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
 import org.apache.commons.text.StringSubstitutor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -35,7 +35,7 @@ import java.util.Map;
 @Component
 public class ExecutorManager {
     private static final String LOG_TEMPLATE;
-    private static final Logger LOGGER = LogManager.getLogger("stat");
+    private static final Logger logger = LoggerFactory.getLogger("stat");
 
     static {
         LOG_TEMPLATE = "executor stat: pool name: ${name}, " +
@@ -67,7 +67,7 @@ public class ExecutorManager {
     }
 
     public void statExecutor() {
-        LOGGER.info("------------ executor stat ------------");
+        logger.info("------------ executor stat ------------");
 
         Map<String, String> valuesMap = new HashMap<>(10);
         StringSubstitutor stringSubstitutor = new StringSubstitutor(valuesMap);
@@ -79,7 +79,7 @@ public class ExecutorManager {
             valuesMap.put("activeCount", String.valueOf(executor.getActiveCount()));
 
             String log = stringSubstitutor.replace(LOG_TEMPLATE);
-            LOGGER.info(log);
+            logger.info(log);
         }
     }
 }

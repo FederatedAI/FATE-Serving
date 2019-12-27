@@ -6,9 +6,7 @@
 package com.webank.ai.fate.serving.proxy.rpc.core;
 
 
-
 import java.lang.annotation.*;
-import java.util.List;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

@@ -26,8 +26,8 @@ import com.webank.ai.fate.api.core.BasicMeta;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +44,7 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
     private static final String PORT = "port";
     private static final String HOSTNAME = "hostname";
     private static final String DEFAULT = "default";
-    private static final Logger LOGGER = LogManager.getLogger(ConfFileBasedFdnRouter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfFileBasedFdnRouter.class);
     private final BasicMeta.Endpoint emptyEndpoint;
     @Autowired
     private ServerConf serverConf;
@@ -88,11 +88,11 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
     @Override
     public synchronized void setRouteTable(String filename) {
         if (StringUtils.isBlank(routeTableFilename)) {
-            LOGGER.info("setting routeTable path to {}", filename);
+            logger.info("setting routeTable path to {}", filename);
             this.routeTableFilename = filename;
             init();
         } else {
-            LOGGER.warn("trying to reset routeTable path. current path: {}, tried path: {}",
+            logger.warn("trying to reset routeTable path. current path: {}, tried path: {}",
                     routeTableFilename, filename);
         }
     }
@@ -121,7 +121,7 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
             jsonReader = new JsonReader(new FileReader(routeTableFilename));
             confJson = jsonParser.parse(jsonReader).getAsJsonObject();
         } catch (FileNotFoundException e) {
-            LOGGER.error("File not found: {}", routeTableFilename);
+            logger.error("File not found: {}", routeTableFilename);
             throw new RuntimeException(e);
         } finally {
             if (jsonReader != null) {
@@ -136,7 +136,7 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
         initRouteTable(confJson.getAsJsonObject("route_table"));
         initPermission(confJson.getAsJsonObject("permission"));
 
-        LOGGER.info("refreshed route table at: {}", routeTableFilename);
+        logger.info("refreshed route table at: {}", routeTableFilename);
     }
 
     @Override
@@ -224,7 +224,7 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
 
             pos = pos % len;
 
-            LOGGER.info("route: hashcode: {}, len: {}, pos: {}", topic.hashCode(), len, pos);
+            logger.info("route: hashcode: {}, len: {}, pos: {}", topic.hashCode(), len, pos);
 
             result = endpoints.get(pos);
         }

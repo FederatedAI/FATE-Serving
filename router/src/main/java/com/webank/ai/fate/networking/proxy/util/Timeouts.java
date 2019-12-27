@@ -18,8 +18,8 @@ package com.webank.ai.fate.networking.proxy.util;
 
 import com.google.protobuf.Descriptors;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,14 +33,14 @@ public class Timeouts {
     public static final long MAX_PACKET_INTERVAL_TIMEOUT = MAX_OVERALL_TIMEOUT;
     public static final long DEFAULT_PACKET_INTERVAL_TIMEOUT = 20L * 1000;           // 20s
 
-    private static final Logger LOGGER = LogManager.getLogger(Timeouts.class);
+    private static final Logger logger = LoggerFactory.getLogger(Timeouts.class);
 
     public boolean isTimeout(long timeout, long startTimestamp) {
         return isTimeout(timeout, startTimestamp, System.currentTimeMillis());
     }
 
     public boolean isTimeout(long timeout, long startTimestamp, long endTimestamp) {
-        /*LOGGER.info("timeout: {}, start: {}, end: {}, cal: {}, result: {}",
+        /*logger.info("timeout: {}, start: {}, end: {}, cal: {}, result: {}",
                 timeout, startTimestamp, endTimestamp, (endTimestamp - startTimestamp),
                 ((endTimestamp - startTimestamp) > timeout));*/
         return (endTimestamp - startTimestamp) > timeout;
@@ -100,7 +100,7 @@ public class Timeouts {
 
     private long getValue(long proposedValue, long defaultValue, long minValue, long maxValue) {
         long result = proposedValue;
-        // LOGGER.info("proposed: {}, default: {}, min: {}, max: {}", proposedValue, defaultValue, minValue, maxValue);
+        // logger.info("proposed: {}, default: {}, min: {}, max: {}", proposedValue, defaultValue, minValue, maxValue);
 
         if (proposedValue < minValue) {
             result = defaultValue;

@@ -25,8 +25,8 @@ import com.webank.ai.fate.networking.proxy.infra.Pipe;
 import com.webank.ai.fate.networking.proxy.infra.ResultCallback;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
 import io.grpc.stub.StreamObserver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ import java.util.concurrent.CountDownLatch;
 
 @Component
 public class GrpcStreamObserverFactory {
-    private static final Logger LOGGER = LogManager.getLogger(GrpcStreamObserverFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(GrpcStreamObserverFactory.class);
     @Autowired
     private LocalBeanFactory localBeanFactory;
     @Autowired

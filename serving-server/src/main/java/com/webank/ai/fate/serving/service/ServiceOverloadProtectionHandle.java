@@ -16,14 +16,13 @@
 
 package com.webank.ai.fate.serving.service;
 
-import com.webank.ai.fate.serving.core.bean.Dict;
 import io.grpc.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServiceOverloadProtectionHandle implements ServerInterceptor {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ServiceOverloadProtectionHandle.class);
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall, Metadata metadata, ServerCallHandler<ReqT, RespT> serverCallHandler) {
@@ -42,7 +41,7 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
 
                     super.onHalfClose();
                 } catch (Exception e) {
-                    LOGGER.info("ServiceException:", e);
+                    logger.info("ServiceException:", e);
                     serverCall.close(Status.CANCELLED.withCause(e).withDescription(e.getMessage()), metadata);
                 }
             }

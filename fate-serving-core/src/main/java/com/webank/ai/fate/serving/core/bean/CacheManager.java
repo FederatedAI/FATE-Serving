@@ -17,8 +17,6 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
-import java.util.Map;
-
 public interface CacheManager {
 
 

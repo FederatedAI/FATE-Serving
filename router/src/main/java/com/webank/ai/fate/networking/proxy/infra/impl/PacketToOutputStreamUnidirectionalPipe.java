@@ -18,8 +18,8 @@ package com.webank.ai.fate.networking.proxy.infra.impl;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope("prototype")
 public class PacketToOutputStreamUnidirectionalPipe extends BasePipe {
-    private static final Logger LOGGER = LogManager.getLogger(PacketToOutputStreamUnidirectionalPipe.class);
+    private static final Logger logger = LoggerFactory.getLogger(PacketToOutputStreamUnidirectionalPipe.class);
     private OutputStream os;
     private int counter = 0;
 
@@ -51,7 +51,7 @@ public class PacketToOutputStreamUnidirectionalPipe extends BasePipe {
 
     @Override
     public void write(Object o) {
-        LOGGER.info("write for the {} time", ++counter);
+        logger.info("write for the {} time", ++counter);
         if (o instanceof Proxy.Packet) {
             Proxy.Packet packet = (Proxy.Packet) o;
             try {

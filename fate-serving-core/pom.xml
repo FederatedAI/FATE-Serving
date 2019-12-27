@@ -31,13 +31,13 @@
         <jedis.version>2.9.0</jedis.version>
     </properties>
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>eggroll-core</groupId>
             <artifactId>eggroll-core</artifactId>
             <version>${fate.core.version}</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/../lib/eggroll-core-1.1.jar</systemPath>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>

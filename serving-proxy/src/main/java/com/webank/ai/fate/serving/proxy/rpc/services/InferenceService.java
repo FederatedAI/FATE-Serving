@@ -13,8 +13,8 @@ import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
 import com.webank.ai.fate.serving.proxy.rpc.router.RouterInfo;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 public class InferenceService extends AbstractServiceAdaptor<Map,Map >   {
 
-    Logger logger  = LogManager.getLogger();
+    Logger logger  = LoggerFactory.getLogger(InferenceService.class);
     @Autowired
     GrpcConnectionPool   grpcConnectionPool;
 

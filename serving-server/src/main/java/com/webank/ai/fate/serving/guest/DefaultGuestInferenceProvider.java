@@ -18,8 +18,6 @@ package com.webank.ai.fate.serving.guest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.adapter.processing.PostProcessing;
 import com.webank.ai.fate.serving.adapter.processing.PreProcessing;
 import com.webank.ai.fate.serving.bean.InferenceRequest;
@@ -28,13 +26,14 @@ import com.webank.ai.fate.serving.bean.PostProcessingResult;
 import com.webank.ai.fate.serving.bean.PreProcessingResult;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
 import com.webank.ai.fate.serving.manger.InferenceWorkerManager;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ import java.util.Map;
 
 @Service
 public class DefaultGuestInferenceProvider implements GuestInferenceProvider, InitializingBean {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(DefaultGuestInferenceProvider.class);
     @Autowired
     ModelManager modelManager;
     @Autowired
@@ -99,7 +98,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return inferenceResult;
         }
 
-        LOGGER.info("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
+        logger.info("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
         Map<String, Object> rawFeatureData = inferenceRequest.getFeatureData();
 
         if (rawFeatureData == null) {
@@ -114,7 +113,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
 
             preProcessingResult = getPreProcessingFeatureData(context, rawFeatureData);
         } catch (Exception ex) {
-            LOGGER.error("feature data preprocessing failed", ex);
+            logger.error("feature data preprocessing failed", ex);
             inferenceResult.setRetcode(InferenceRetCode.INVALID_FEATURE + 1000);
             inferenceResult.setRetmsg(ex.getMessage());
             return inferenceResult;
@@ -147,7 +146,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             postProcessingResult = getPostProcessedResult(context, featureData, modelResult);
             inferenceResult = postProcessingResult.getProcessingResult();
         } catch (Exception ex) {
-            LOGGER.error("model result postprocessing failed", ex);
+            logger.error("model result postprocessing failed", ex);
             if(inferenceResult!=null) {
                 inferenceResult.setRetcode(InferenceRetCode.COMPUTE_ERROR);
                 inferenceResult.setRetmsg(ex.getMessage());
@@ -201,7 +200,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return preProcessing.getResult(context, ObjectTransform.bean2Json(originFeatureData));
         } finally {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("preprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            logger.info("preprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
         }
 
     }
@@ -212,7 +211,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return postProcessing.getResult(context, featureData, modelResult);
         } finally {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("postprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            logger.info("postprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
         }
     }
 
@@ -226,9 +225,9 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         }
 
         ReturnResult inferenceResultFromCache = cacheManager.getInferenceResultCache(inferenceRequest.getAppid(), inferenceRequest.getCaseid());
-        LOGGER.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+        logger.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
         if (inferenceResultFromCache != null) {
-            LOGGER.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+            logger.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
             return inferenceResultFromCache;
         }
 
@@ -244,9 +243,9 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
     private ReturnResult getReturnResultFromCache(Context context, InferenceRequest inferenceRequest) {
         long inferenceBeginTime = System.currentTimeMillis();
         ReturnResult inferenceResultFromCache = cacheManager.getInferenceResultCache(inferenceRequest.getAppid(), inferenceRequest.getCaseid());
-        LOGGER.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+        logger.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
         if (inferenceResultFromCache != null) {
-            LOGGER.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+            logger.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
 
         }
         return inferenceResultFromCache;
@@ -273,7 +272,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
                         cacheManager.putInferenceResultCache(subContext, inferenceRequest.getAppid(), inferenceRequest.getCaseid(), inferenceResult);
                     }
                 } catch (Throwable e) {
-                    LOGGER.error("asynInference error", e);
+                    logger.error("asynInference error", e);
                 } finally {
                     subContext.postProcess(inferenceRequest, inferenceResult);
                 }
@@ -308,7 +307,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             String preClassPath = classPathPre + "." + Configuration.getProperty(Dict.PRE_PROCESSING_CONFIG);
             preProcessing = (PreProcessing) InferenceUtils.getClassByName(preClassPath);
         } catch (Throwable e) {
-            LOGGER.error("load post/pre processing error", e);
+            logger.error("load post/pre processing error", e);
         }
 
     }

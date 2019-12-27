@@ -17,13 +17,12 @@
 package com.webank.ai.fate.serving.utils;
 
 
-
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.manager.FederatedUtils;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -31,9 +30,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class InferenceUtils {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final Logger inferenceAuditLogger = LogManager.getLogger(Dict.INFERENCE_AUDIT);
-    private static final Logger inferenceLogger = LogManager.getLogger(Dict.INFERENCE);
+    private static final Logger logger = LoggerFactory.getLogger(InferenceUtils.class);
+    private static final Logger inferenceAuditLogger = LoggerFactory.getLogger(Dict.INFERENCE_AUDIT);
+    private static final Logger inferenceLogger = LoggerFactory.getLogger(Dict.INFERENCE);
 
     public static String generateCaseid() {
         return UUID.randomUUID().toString().replace("-", "");
@@ -57,12 +56,12 @@ public class InferenceUtils {
             Class thisClass = Class.forName(classPath);
             return thisClass.getConstructor().newInstance();
         } catch (ClassNotFoundException ex) {
-            LOGGER.error("Can not found this class: {}.", classPath);
+            logger.error("Can not found this class: {}.", classPath);
         } catch (NoSuchMethodException ex) {
-            LOGGER.error("Can not get this class({}) constructor.", classPath);
+            logger.error("Can not get this class({}) constructor.", classPath);
         } catch (Exception ex) {
-            LOGGER.error(ex);
-            LOGGER.error("Can not create class({}) instance.", classPath);
+            logger.error(ex.getMessage());
+            logger.error("Can not create class({}) instance.", classPath);
         }
         return null;
     }

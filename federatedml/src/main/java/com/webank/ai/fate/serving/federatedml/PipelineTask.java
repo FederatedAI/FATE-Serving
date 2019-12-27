@@ -22,15 +22,15 @@ import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 
 public class PipelineTask {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(PipelineTask.class);
     private List<BaseModel> pipeLineNode = new ArrayList<>();
     private Map<String, BaseModel> modelMap = new HashMap<String, BaseModel>();
     private DSLParser dslParser = new DSLParser();
@@ -39,10 +39,10 @@ public class PipelineTask {
         return this.modelMap.get(name);
     }
     public int initModel(Map<String, byte[]> modelProtoMap) {
-        LOGGER.info("start init pipeline,model components {}",modelProtoMap.keySet());
+        logger.info("start init pipeline,model components {}",modelProtoMap.keySet());
         try {
             Map<String, byte[]> newModelProtoMap = changeModelProto(modelProtoMap);
-            LOGGER.info("after parse pipeline {}",newModelProtoMap.keySet());
+            logger.info("after parse pipeline {}",newModelProtoMap.keySet());
             Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL)!=null);
             PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
             String dsl = pipeLineProto.getInferenceDsl().toStringUtf8(); //inference_dsl;
@@ -53,7 +53,7 @@ public class PipelineTask {
             for (int i = 0; i < components.size(); ++i) {
                 String componentName = components.get(i);
                 String className = componentModuleMap.get(componentName);
-                LOGGER.info("try to get class:{}", className);
+                logger.info("try to get class:{}", className);
                 try {
                     Class modelClass = Class.forName(this.modelPackage + "." + className);
                     BaseModel mlNode = (BaseModel) modelClass.getConstructor().newInstance();
@@ -63,30 +63,30 @@ public class PipelineTask {
                     mlNode.initModel(protoMeta, protoParam);
                     modelMap.put(componentName, mlNode);
                     pipeLineNode.add(mlNode);
-                    LOGGER.info(" Add class {} to pipeline task list", className);
+                    logger.info(" Add class {} to pipeline task list", className);
                 } catch (Exception ex) {
                     pipeLineNode.add(null);
-                    LOGGER.warn("Can not instance {} class", className);
+                    logger.warn("Can not instance {} class", className);
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.info("initModel error:{}", ex);
+            logger.info("initModel error:{}", ex);
             throw  new  RuntimeException("initModel error");
         }
-        LOGGER.info("Finish init Pipeline");
+        logger.info("Finish init Pipeline");
         return StatusCode.OK;
     }
 
 
     public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {
-        LOGGER.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
+        logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
         List<Map<String, Object>> outputData = new ArrayList<>();
         for (int i = 0; i < this.pipeLineNode.size(); i++) {
             if (this.pipeLineNode.get(i) != null) {
-                LOGGER.info("component class is {}", this.pipeLineNode.get(i).getClass().getName());
+                logger.info("component class is {}", this.pipeLineNode.get(i).getClass().getName());
             } else {
-                LOGGER.info("component class is {}", this.pipeLineNode.get(i));
+                logger.info("component class is {}", this.pipeLineNode.get(i));
             }
             List<Map<String, Object>> inputs = new ArrayList<>();
             HashSet<Integer> upInputComponents = this.dslParser.getUpInputComponents(i);
@@ -115,7 +115,7 @@ public class PipelineTask {
             inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
         }
 
-        LOGGER.info("Finish Pipeline predict");
+        logger.info("Finish Pipeline predict");
 
         if(outputData.size()>0){
             return outputData.get(outputData.size() - 1);

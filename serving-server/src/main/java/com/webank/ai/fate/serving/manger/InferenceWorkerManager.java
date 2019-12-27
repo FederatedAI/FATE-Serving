@@ -19,14 +19,14 @@ package com.webank.ai.fate.serving.manger;
 
 import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InferenceWorkerManager {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(InferenceWorkerManager.class);
     private static ThreadPoolExecutor threadPoolExecutor;
 
     static {
@@ -56,7 +56,7 @@ public class InferenceWorkerManager {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(r, "inference-worker-thread-" + mThreadNum.getAndIncrement());
-            LOGGER.info("{} thead has ben created.", t.getName());
+            logger.info("{} thead has ben created.", t.getName());
             return t;
         }
     }
@@ -64,7 +64,7 @@ public class InferenceWorkerManager {
     public static class InferenceWorkerThreadRejectedPolicy implements RejectedExecutionHandler {
         @Override
         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-            LOGGER.info("{} rejected.", r.toString());
+            logger.info("{} rejected.", r.toString());
         }
     }
 }

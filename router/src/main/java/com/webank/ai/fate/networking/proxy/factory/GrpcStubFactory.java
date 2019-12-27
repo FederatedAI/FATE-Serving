@@ -36,8 +36,8 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.stub.AbstractStub;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class GrpcStubFactory {
-    private static final Logger LOGGER = LogManager.getLogger(GrpcStubFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(GrpcStubFactory.class);
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
@@ -72,19 +72,19 @@ public class GrpcStubFactory {
                     BasicMeta.Endpoint endpoint = (BasicMeta.Endpoint) removalNotification.getKey();
                     ManagedChannel managedChannel = (ManagedChannel) removalNotification.getValue();
 
-                    LOGGER.info("Managed channel removed for ip: {}, port: {}, hostname: {}. reason: {}",
+                    logger.info("Managed channel removed for ip: {}, port: {}, hostname: {}. reason: {}",
                             endpoint.getIp(),
                             endpoint.getPort(),
                             endpoint.getHostname(),
                             removalNotification.getCause());
-                    LOGGER.info("Managed channel state: isShutdown: {}, isTerminated: {}",
+                    logger.info("Managed channel state: isShutdown: {}, isTerminated: {}",
                             managedChannel.isShutdown(), managedChannel.isTerminated());
                 })
                 .build(new CacheLoader<BasicMeta.Endpoint, ManagedChannel>() {
                            @Override
                            public ManagedChannel load(BasicMeta.Endpoint endpoint) throws Exception {
                                Preconditions.checkNotNull(endpoint);
-                               LOGGER.info("creating channel for endpoint: ip: {}, port: {}, hostname: {}",
+                               logger.info("creating channel for endpoint: ip: {}, port: {}, hostname: {}",
                                        endpoint.getIp(), endpoint.getPort(), endpoint.getHostname());
                                return createChannel(endpoint);
                            }
@@ -125,7 +125,7 @@ public class GrpcStubFactory {
                     break;
                 }
             } catch (Exception e) {
-                LOGGER.warn("get channel failed. target: {}, \n {}",
+                logger.warn("get channel failed. target: {}, \n {}",
                         toStringUtils.toOneLineString(endpoint), ExceptionUtils.getStackTrace(e));
                 try {
                     Thread.sleep(1000);
@@ -156,7 +156,7 @@ public class GrpcStubFactory {
         try {
             result = channelCache.get(endpoint);
             ConnectivityState state = result.getState(true);
-            LOGGER.info("Managed channel state: isShutdown: {}, isTerminated: {}, state: [}",
+            logger.info("Managed channel state: isShutdown: {}, isTerminated: {}, state: [}",
                     result.isShutdown(), result.isTerminated(), state.name());
 
             if (result.isShutdown() || result.isTerminated()) {
@@ -200,7 +200,7 @@ public class GrpcStubFactory {
 
             SslContext sslContext = null;
             try {
-                LOGGER.info("use secure channel to {}", toStringUtils.toOneLineString(endpoint));
+                logger.info("use secure channel to {}", toStringUtils.toOneLineString(endpoint));
                 // sslContext = GrpcSslContexts.forClient().trustManager(trustManagerFactory).build();
                 sslContext = GrpcSslContexts.forClient()
                         .trustManager(caCrt)
@@ -213,14 +213,14 @@ public class GrpcStubFactory {
             }
             builder.sslContext(sslContext).useTransportSecurity().negotiationType(NegotiationType.TLS);
         } else {
-            LOGGER.info("use insecure channel to {}", toStringUtils.toOneLineString(endpoint));
+            logger.info("use insecure channel to {}", toStringUtils.toOneLineString(endpoint));
             builder.negotiationType(NegotiationType.PLAINTEXT);
         }
 
         ManagedChannel managedChannel = builder
                 .build();
 
-        LOGGER.info("created channel to {}", toStringUtils.toOneLineString(endpoint));
+        logger.info("created channel to {}", toStringUtils.toOneLineString(endpoint));
         return managedChannel;
     }
 

@@ -21,7 +21,7 @@ package com.webank.ai.fate.serving.core.bean;
 public interface Context<Req, Resp> {
 
 
-    static final String LOGGER_NAME = "flow";
+    static final String logger_NAME = "flow";
 
     public void preProcess();
 

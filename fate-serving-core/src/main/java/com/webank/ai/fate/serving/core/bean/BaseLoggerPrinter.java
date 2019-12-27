@@ -18,21 +18,21 @@ package com.webank.ai.fate.serving.core.bean;
 
 
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class BaseLoggerPrinter implements LoggerPrinter<Object, ReturnResult> {
 
 
-    static final String LOGGER_NAME = "flow";
+    static final String logger_NAME = "flow";
 
-    private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(logger_NAME);
 
     @Override
     public void printLog(Context context, Object req, ReturnResult resp) {
 
-        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(), context.getSeqNo(), Dict.NONE, context.getActionType(), context.getCostTime(),
+        logger.info("{}|{}|{}|{}|{}|{}|{}|{}", GetSystemInfo.getLocalIp(), context.getSeqNo(), Dict.NONE, context.getActionType(), context.getCostTime(),
                 resp != null ? resp.getRetcode() : Dict.NONE, req, resp);
 
 

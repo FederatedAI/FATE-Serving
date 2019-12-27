@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.bean;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.ai.fate.serving.core.bean.Request;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import org.apache.commons.lang3.StringUtils;

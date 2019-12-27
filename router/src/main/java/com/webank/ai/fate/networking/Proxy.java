@@ -22,28 +22,24 @@ import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.grpc.client.DataTransferPipedClient;
 import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
-import com.webank.ai.fate.register.loadbalance.LoadBalancer;
-import com.webank.ai.fate.register.loadbalance.RandomLoadBalance;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import io.grpc.Server;
 import org.apache.commons.cli.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import java.util.Set;
 
 public class Proxy {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(Proxy.class);
 
     public static ZookeeperRegistry zookeeperRegistry;
 
@@ -75,8 +71,8 @@ public class Proxy {
         Server server = serverFactory.createServer(confFilePath);
         ServerConfManager serverConfManager = context.getBean(ServerConfManager.class);
         ServerConf serverConf = serverConfManager.getServerConf();
-        LOGGER.info("Server started listening on port: {}", serverConf.getPort());
-        LOGGER.info("server conf: {}", serverConf);
+        logger.info("Server started listening on port: {}", serverConf.getPort());
+        logger.info("server conf: {}", serverConf);
         server.start();
         Properties properties = serverConf.getProperties();
 
@@ -112,7 +108,7 @@ public class Proxy {
                 Set<URL> urls = Sets.newHashSet();
                 urls.addAll(registered);
                 urls.forEach(url -> {
-                    LOGGER.info("unregister {}", url);
+                    logger.info("unregister {}", url);
                     zookeeperRegistry.unregister(url);
                 });
                 zookeeperRegistry.destroy();

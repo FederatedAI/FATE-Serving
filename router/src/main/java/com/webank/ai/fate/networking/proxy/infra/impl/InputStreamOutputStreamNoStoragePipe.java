@@ -19,8 +19,8 @@ package com.webank.ai.fate.networking.proxy.infra.impl;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class InputStreamOutputStreamNoStoragePipe extends BasePipe {
     private static final int MAX_EMPTY_READ_COUNT = 10;
     private static final int MAX_READ_COUNT = 50;
-    private static final Logger LOGGER = LogManager.getLogger(InputStreamOutputStreamNoStoragePipe.class);
+    private static final Logger logger = LoggerFactory.getLogger(InputStreamOutputStreamNoStoragePipe.class);
     private InputStream is;
     private OutputStream os;
     private Proxy.Metadata metadata;
@@ -58,7 +58,7 @@ public class InputStreamOutputStreamNoStoragePipe extends BasePipe {
 
     @Override
     public Proxy.Packet read() {
-        LOGGER.info("read for the {} time", ++inCounter);
+        logger.info("read for the {} time", ++inCounter);
 
         ByteString value = null;
         ByteString cur = null;
@@ -100,7 +100,7 @@ public class InputStreamOutputStreamNoStoragePipe extends BasePipe {
 
     @Override
     public void write(Object o) {
-        LOGGER.info("write for the {} time", ++outCounter);
+        logger.info("write for the {} time", ++outCounter);
         if (o instanceof Proxy.Packet) {
             Proxy.Packet packet = (Proxy.Packet) o;
             try {

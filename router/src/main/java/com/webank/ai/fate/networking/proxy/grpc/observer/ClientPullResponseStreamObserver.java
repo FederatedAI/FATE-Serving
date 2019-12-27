@@ -27,8 +27,8 @@ import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -41,9 +41,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 @Scope("prototype")
 public class ClientPullResponseStreamObserver implements StreamObserver<Proxy.Packet> {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final Logger AUDIT = LogManager.getLogger("audit");
-    private static final Logger DEBUGGING = LogManager.getLogger("debugging");
+    private static final Logger logger = LoggerFactory.getLogger(ClientPullResponseStreamObserver.class);
+    private static final Logger AUDIT = LoggerFactory.getLogger("audit");
+    private static final Logger DEBUGGING = LoggerFactory.getLogger("debugging");
     private final CountDownLatch finishLatch;
     @Autowired
     private StatsManager statsManager;
@@ -128,9 +128,9 @@ public class ClientPullResponseStreamObserver implements StreamObserver<Proxy.Pa
 
     @Override
     public void onError(Throwable throwable) {
-        LOGGER.error("[PULL][OBSERVER][ONERROR] error in pull client: {}, metadata: {}, ackCount: {}",
+        logger.error("[PULL][OBSERVER][ONERROR] error in pull client: {}, metadata: {}, ackCount: {}",
                 Status.fromThrowable(throwable), oneLineStringMetadata, ackCount.incrementAndGet());
-        LOGGER.error(ExceptionUtils.getStackTrace(throwable));
+        logger.error(ExceptionUtils.getStackTrace(throwable));
 
         pipe.onError(throwable);
 
@@ -141,19 +141,19 @@ public class ClientPullResponseStreamObserver implements StreamObserver<Proxy.Pa
     @Override
     public void onCompleted() {
         long latestAckCount = ackCount.get();
-        LOGGER.info("[PULL][OBSERVER][ONCOMPLETE] Client pull completed. metadata: {}, ackCount: {}",
+        logger.info("[PULL][OBSERVER][ONCOMPLETE] Client pull completed. metadata: {}, ackCount: {}",
                 oneLineStringMetadata, latestAckCount);
 
         pipe.onComplete();
         finishLatch.countDown();
 
         try {
-            LOGGER.info("[PULL][OBSERVER][ONCOMPLETE] is streamStat set: {}", isStreamStatSet);
+            logger.info("[PULL][OBSERVER][ONCOMPLETE] is streamStat set: {}", isStreamStatSet);
             if (streamStat != null) {
                 streamStat.onComplete();
             }
         } catch (NullPointerException e) {
-            LOGGER.error("[PULL][OBSERVER][ONCOMPLETE] NullPointerException caught in pull onComplete. isStreamStatSet: {}", isStreamStatSet);
+            logger.error("[PULL][OBSERVER][ONCOMPLETE] NullPointerException caught in pull onComplete. isStreamStatSet: {}", isStreamStatSet);
         }
     }
 

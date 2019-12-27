@@ -23,8 +23,8 @@ import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelCache;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class DefaultModelCache implements ModelCache {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(DefaultModelCache.class);
     private LoadingCache<String, PipelineTask> modelCache;
 
     public DefaultModelCache() {
@@ -59,7 +59,7 @@ public class DefaultModelCache implements ModelCache {
         try {
             return modelCache.get(modelKey);
         } catch (ExecutionException ex) {
-            LOGGER.error(ex);
+            logger.error(ex.getMessage());
             return null;
         }
     }

@@ -31,10 +31,10 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class GrpcServerFactory {
-    private static final Logger LOGGER = LogManager.getLogger(GrpcServerFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(GrpcServerFactory.class);
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
@@ -93,15 +93,15 @@ public class GrpcServerFactory {
         // NettyServerBuilder serverBuilder = null;
         FateServerBuilder serverBuilder = null;
         if (StringUtils.isBlank(serverConf.getIp())) {
-            LOGGER.info("server build on port only :{}", serverConf.getPort());
-            // LOGGER.warn("this may cause trouble in multiple network devices. you may want to consider binding to a ip");
+            logger.info("server build on port only :{}", serverConf.getPort());
+            // logger.warn("this may cause trouble in multiple network devices. you may want to consider binding to a ip");
             serverBuilder = (FateServerBuilder) ServerBuilder.forPort(serverConf.getPort());
         } else {
-            LOGGER.info("server build on address {}:{}", serverConf.getIp(), serverConf.getPort());
+            logger.info("server build on address {}:{}", serverConf.getIp(), serverConf.getPort());
             InetSocketAddress inetSocketAddress = new InetSocketAddress(
                     InetAddresses.forString(serverConf.getIp()), serverConf.getPort());
 
-            LOGGER.info(inetSocketAddress);
+            logger.info(inetSocketAddress.toString());
             SocketAddress addr =
                     new InetSocketAddress(
                             InetAddresses.forString(serverConf.getIp()), serverConf.getPort());
@@ -161,10 +161,10 @@ public class GrpcServerFactory {
             }
 
 
-            LOGGER.info("running in secure mode. server crt path: {}, server key path: {}, ca crt path: {}",
+            logger.info("running in secure mode. server crt path: {}, server key path: {}, ca crt path: {}",
                     serverCrtPath, serverKeyPath, caCrtPath);
         } else {
-            LOGGER.info("running in insecure mode");
+            logger.info("running in insecure mode");
         }
 
         Server server = serverBuilder.build();
@@ -244,9 +244,9 @@ public class GrpcServerFactory {
                         Configurator.initialize(null, configurationSource);
 
                         serverConf.setLogPropertiesPath(logPropertiesPath);
-                        LOGGER.info("using log conf file: {}", logPropertiesPath);
+                        logger.info("using log conf file: {}", logPropertiesPath);
                     } catch (Exception e) {
-                        LOGGER.warn("failed to set log conf file at {}. using default conf", logPropertiesPath);
+                        logger.warn("failed to set log conf file at {}. using default conf", logPropertiesPath);
                     }
                 }
             }
@@ -278,7 +278,7 @@ public class GrpcServerFactory {
                 serverConf.setDebugEnabled(false);
             }
         } catch (Exception e) {
-            LOGGER.error(e);
+            logger.error(e.getMessage());
             throw e;
         }
         return createServer(serverConf);

@@ -76,7 +76,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 ++featureHit;
             }
         }
-        LOGGER.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
+        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
 
     }
     */
@@ -139,7 +139,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 
-        LOGGER.info("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
+        logger.info("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
 
         Map<String, Object> input = inputData.get(0);
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
@@ -153,7 +153,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 ++featureHit;
             }
         }
-        LOGGER.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
+        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
         int[] treeNodeIds = new int[this.treeNum];
         double[] weights = new double[this.treeNum];
         int communicationRound = 0;
@@ -182,19 +182,19 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
             predictParams.getData().put(Dict.TREE_LOCATION, treeLocation);
 
             try {
-                LOGGER.info("begin to federated");
+                logger.info("begin to federated");
 
                 ReturnResult tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
 
                 Map<String, Object> afterLocation = tempResult.getData();
 
-                LOGGER.info("after loccation is {}", afterLocation);
+                logger.info("after loccation is {}", afterLocation);
                 for (String location : afterLocation.keySet()) {
                     treeNodeIds[new Integer(location)] = ((Number) afterLocation.get(location)).intValue();
                 }
 
                 if (afterLocation == null) {
-                    LOGGER.info("receive predict result of host is null");
+                    logger.info("receive predict result of host is null");
                     throw new Exception("Null Data");
                 }
 
@@ -208,8 +208,8 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
             weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
         }
 
-        LOGGER.info("tree leaf ids is {}", treeNodeIds);
-        LOGGER.info("weights is {}", weights);
+        logger.info("tree leaf ids is {}", treeNodeIds);
+        logger.info("weights is {}", weights);
 
         return getFinalPredict(weights);
     }

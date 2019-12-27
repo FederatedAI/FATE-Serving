@@ -19,15 +19,15 @@ package com.webank.ai.fate.serving.federatedml;
 
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class DSLParser {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(DSLParser.class);
     private HashMap<String, String> componentModuleMap = new HashMap<String, String>();
     private HashMap<String, Integer> componentIds = new HashMap<String, Integer>();
     private HashMap<String, List<String>> downStream = new HashMap<String, List<String>>();
@@ -36,27 +36,27 @@ public class DSLParser {
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
 
     public int parseDagFromDSL(String jsonStr) {
-        LOGGER.info("start parse dag from dsl");
+        logger.info("start parse dag from dsl");
         try {
             JSONObject dsl = new JSONObject(jsonStr);
             JSONObject components = dsl.getJSONObject(Dict.DSL_COMPONENTS);
 
-            LOGGER.info("start topo sort");
+            logger.info("start topo sort");
             topoSort(components, this.topoRankComponent);
 
-            LOGGER.info("components size is {}", this.topoRankComponent.size());
+            logger.info("components size is {}", this.topoRankComponent.size());
             for (int i = 0; i < this.topoRankComponent.size(); ++i) {
                 this.componentIds.put(this.topoRankComponent.get(i), i);
             }
 
             for (int i = 0; i < topoRankComponent.size(); ++i) {
                 String componentName = topoRankComponent.get(i);
-                LOGGER.info("component is {}", componentName);
+                logger.info("component is {}", componentName);
                 JSONObject component = components.getJSONObject(componentName);
                 String[] codePath = ((String) component.get(Dict.DSL_CODE_PATH)).split("/", -1);
-                LOGGER.info("code path splits is {}", codePath);
+                logger.info("code path splits is {}", codePath);
                 String module = codePath[codePath.length - 1];
-                LOGGER.info("module is {}", module);
+                logger.info("module is {}", module);
                 componentModuleMap.put(componentName, module);
 
                 JSONObject upData = component.getJSONObject(Dict.DSL_INPUT).getJSONObject(Dict.DSL_DATA);
@@ -85,9 +85,9 @@ public class DSLParser {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            LOGGER.info("DSLParser init catch error:{}", ex);
+            logger.info("DSLParser init catch error:{}", ex);
         }
-        LOGGER.info("Finish init DSLParser");
+        logger.info("Finish init DSLParser");
         return StatusCode.OK;
     }
 
@@ -137,7 +137,7 @@ public class DSLParser {
             }
         }
 
-        LOGGER.info("end of construct edges");
+        logger.info("end of construct edges");
         for (int i = 0; i < index; i++) {
             if (inDegree[i] == 0) {
                 stk.push(i);
@@ -160,7 +160,7 @@ public class DSLParser {
             }
         }
 
-        LOGGER.info("end of topo");
+        logger.info("end of topo");
     }
 
     public HashMap<String, String> getComponentModuleMap() {

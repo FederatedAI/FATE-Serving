@@ -26,8 +26,8 @@ import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -40,9 +40,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 @Scope("prototype")
 public class ClientUnaryCallResponseStreamObserver implements StreamObserver<Proxy.Packet> {
-    private static final Logger LOGGER = LogManager.getLogger(ClientUnaryCallResponseStreamObserver.class);
-    private static final Logger DEBUGGING = LogManager.getLogger("debugging");
-    private static final Logger AUDIT = LogManager.getLogger("audit");
+    private static final Logger logger = LoggerFactory.getLogger(ClientUnaryCallResponseStreamObserver.class);
+    private static final Logger DEBUGGING = LoggerFactory.getLogger("debugging");
+    private static final Logger AUDIT = LoggerFactory.getLogger("audit");
     private final CountDownLatch finishLatch;
     @Autowired
     private StatsManager statsManager;
@@ -77,7 +77,7 @@ public class ClientUnaryCallResponseStreamObserver implements StreamObserver<Pro
 
     @Override
     public void onNext(Proxy.Packet packet) {
-        // LOGGER.info("ClientPullResponseStreamObserver.onNext()");
+        // logger.info("ClientPullResponseStreamObserver.onNext()");
         pipe.write(packet);
         ackCount.incrementAndGet();
 
@@ -101,14 +101,14 @@ public class ClientUnaryCallResponseStreamObserver implements StreamObserver<Pro
             streamStat.increment(value.size());
         }
 
-        // LOGGER.info("[UNARYCALL][OBSERVER][ONNEXT] result: {}", packet.getBody().getValue().toStringUtf8());
+        // logger.info("[UNARYCALL][OBSERVER][ONNEXT] result: {}", packet.getBody().getValue().toStringUtf8());
     }
 
     @Override
     public void onError(Throwable throwable) {
-        LOGGER.error("[UNARYCALL][OBSERVER][ONERROR] error in unary call response observer: {}, metadata: {}",
+        logger.error("[UNARYCALL][OBSERVER][ONERROR] error in unary call response observer: {}, metadata: {}",
                 Status.fromThrowable(throwable), toStringUtils.toOneLineString(metadata));
-        LOGGER.error(ExceptionUtils.getStackTrace(throwable));
+        logger.error(ExceptionUtils.getStackTrace(throwable));
 
         pipe.onError(throwable);
 
@@ -118,7 +118,7 @@ public class ClientUnaryCallResponseStreamObserver implements StreamObserver<Pro
 
     @Override
     public void onCompleted() {
-        LOGGER.info("[UNARYCALL][OBSERVER][ONCOMPLETE] Client unary call completed. metadata: {}",
+        logger.info("[UNARYCALL][OBSERVER][ONCOMPLETE] Client unary call completed. metadata: {}",
                 toStringUtils.toOneLineString(metadata));
 
         pipe.onComplete();

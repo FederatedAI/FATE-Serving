@@ -1,7 +1,5 @@
 package com.webank.ai.fate.serving.proxy.exceptions;
 
-import com.alibaba.csp.sentinel.slots.block.BlockException;
-
 public class ErrorCode {
 
     public  static  String  PARAM_ERROR ="100";  //参数错误

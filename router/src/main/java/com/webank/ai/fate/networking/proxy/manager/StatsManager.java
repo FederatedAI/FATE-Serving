@@ -23,8 +23,8 @@ import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
 import io.grpc.netty.shaded.io.netty.util.internal.ConcurrentSet;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Component
 public class StatsManager {
     private static final String LOG_TEMPLATE;
-    private static final Logger LOGGER = LogManager.getLogger("stat");
+    private static final Logger logger = LoggerFactory.getLogger("stat");
 
     static {
         LOG_TEMPLATE = "streaming stat: Proxy.Metadata [${metadata}], " +
@@ -73,14 +73,14 @@ public class StatsManager {
             streamStatsRwLock.writeLock().lock();
             streamStats.add(streamStat);
         } catch (Exception e) {
-            LOGGER.error("unexpected error: {}", ExceptionUtils.getStackTrace(e));
+            logger.error("unexpected error: {}", ExceptionUtils.getStackTrace(e));
         } finally {
             streamStatsRwLock.writeLock().unlock();
         }
     }
 
     public void logAllStatus() {
-        LOGGER.info("------------ streaming stat ------------");
+        logger.info("------------ streaming stat ------------");
 
         if (streamStats.size() <= 0) {
             return;
@@ -93,7 +93,7 @@ public class StatsManager {
             oldStreamStats = streamStats;
             streamStats = new ConcurrentSet<>();
         } catch (Exception e) {
-            LOGGER.error(ExceptionUtils.getStackTrace(e));
+            logger.error(ExceptionUtils.getStackTrace(e));
         } finally {
             streamStatsRwLock.writeLock().unlock();
         }
@@ -141,11 +141,11 @@ public class StatsManager {
             valuesMap.put("status", streamStat.getStatus());
 
             String log = stringSubstitutor.replace(LOG_TEMPLATE);
-            LOGGER.info(log);
+            logger.info(log);
             ++logCount;
         }
 
-        LOGGER.info("stream logCount: {}, not finished: {}, not removed: {}",
+        logger.info("stream logCount: {}, not finished: {}, not removed: {}",
                 logCount, notFinishedCount, notRemovedCount);
     }
 }
