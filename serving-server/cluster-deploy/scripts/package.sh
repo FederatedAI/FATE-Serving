@@ -20,6 +20,7 @@ router_jar=fate-serving-router-*.jar
 common=$public_path/fate-serving/common
 router=router
 router_path=$fate_serving_path/router
+
 if [ ! -d $common  ]; then
 	mkdir -p $common
 else
@@ -28,6 +29,7 @@ fi
 cp jdk_install.sh $common
 cp redis_install.sh $common
 cp services.sh $fate_serving_path
+
 cd $common
 echo "[INFO] jdk install"
 #sudo sh jdk_install.sh
@@ -38,6 +40,7 @@ sudo rm -rf redis_install.sh
 cd redis/conf
 sudo sed -i.bak "s/# requirepass foobared/requirepass ${redis_password}/g" ./redis.conf
 sudo sed -i.bak "s/databases 16/databases 50/g" ./redis.conf
+
 cd ${cwd}/../../../
 echo "[INFO] mvn clean package  start"
 mvn clean package -DskipTests
@@ -108,6 +111,7 @@ fi
 	cd $cwd
 	echo "-------zkui_instal start"
 	sh zkui_install.sh
+
 sudo cp redis/service.sh  $common/redis
 cp zk/service.sh  $common/zookeeper*
 cp zkui/service.sh  $common/zkui
