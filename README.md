@@ -107,8 +107,8 @@ Key configuration item description:
 | external.inferenceResultCacheDBIndex | The inference result cache DBIndex for external cache | default 0 |
 | external.processCacheDBIndex | The process cache DBIndex for external cache | default 0 |
 | canCacheRetcode | Caching result by retcode | default 0,102 |
-| acl.username | Zookeeper acl authentication user name | default fate |
-| acl.password | Zookeeper acl authentication user password | default fate |
+| acl.username | Zookeeper acl authentication user name | |
+| acl.password | Zookeeper acl authentication user password |  |
 
 ### proxy.properties
 Key configuration item description:
@@ -121,9 +121,9 @@ Key configuration item description:
 | zk.url | zookeeper url, same as serving configuration | default zookeeper://localhost:2181 |
 | useRegister | Register interface to registry or not | default false |
 | useZkRouter | route request by the interface info which is registered into zookeeper | default false |
-| route.table | router table configuration file absolute path | default conf/route_table.json |
-| acl.username | Zookeeper acl authentication user name | default fate |
-| acl.password | Zookeeper acl authentication user password | default fate |
+| route.table | router table configuration file absolute path | default /data/projects/fate/serving-router/conf/route_table.json |
+| acl.username | Zookeeper acl authentication user name |   |
+| acl.password | Zookeeper acl authentication user password |  |
 
 ### Deploy Serving-Server 
 For detail, Here are some key steps:
