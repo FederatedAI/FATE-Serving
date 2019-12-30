@@ -148,8 +148,9 @@ public class HttpClientPool {
             return null;
         } finally {
             try {
-                if (response != null)
+                if (response != null) {
                     response.close();
+                }
             } catch (IOException ex) {
                 logger.error("get http response failed:", ex);
             }

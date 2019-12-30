@@ -35,14 +35,16 @@ public class StandardScale {
                     double value = Double.parseDouble(inputData.get(key).toString());
                     double upper = standardScale.getColumnUpper();
                     double lower = standardScale.getColumnLower();
-                    if (value > upper)
+                    if (value > upper) {
                         value = upper;
-                    else if (value < lower)
+                    } else if (value < lower) {
                         value = lower;
+                    }
 
                     double std = standardScale.getStd();
-                    if (std == 0)
+                    if (std == 0) {
                         std = 1;
+                    }
 
                     value = (value - standardScale.getMean()) / std;
                     inputData.put(key, value);

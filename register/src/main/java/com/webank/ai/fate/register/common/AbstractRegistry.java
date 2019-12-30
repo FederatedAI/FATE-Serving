@@ -32,10 +32,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,7 +48,10 @@ public abstract class AbstractRegistry implements Registry {
     private static final String URL_SPLIT = "\\s+";
     private static final int MAX_RETRY_TIMES_SAVE_PROPERTIES = 3;
     private final Properties properties = new Properties();
-    private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("FateSaveRegistryCache", true));
+    private final ExecutorService registryCacheExecutor = new ThreadPoolExecutor(1, 1,
+            0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+            new NamedThreadFactory("FateSaveRegistryCache", true));
+
     private final boolean syncSaveFile;
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final AtomicInteger savePropertiesRetryTimes = new AtomicInteger();

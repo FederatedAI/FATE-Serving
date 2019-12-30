@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.google.common.collect.Maps;
-
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelMetaProto.BoostingTreeModelMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.BoostingTreeModelParam;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;

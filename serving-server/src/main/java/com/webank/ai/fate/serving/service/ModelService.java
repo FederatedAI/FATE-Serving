@@ -44,7 +44,9 @@ import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -74,10 +76,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         String  md5;
     }
 
-
     LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
     LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     File publishLoadStoreFile;
     File publishOnlineStoreFile;
