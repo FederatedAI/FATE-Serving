@@ -2,6 +2,8 @@ package com.webank.ai.fate.serving.proxy.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.webank.ai.fate.serving.metrics.api.ICounter;
+import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.common.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.*;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;
@@ -30,6 +32,9 @@ public class ProxyController {
     @Autowired
     ProxyServiceRegister proxyServiceRegister;
 
+    @Autowired
+    IMetricFactory metricFactory;
+
 
     @Value("${coordinator:9999}")
     private String selfCoordinator;
@@ -52,6 +57,7 @@ public class ProxyController {
                              HttpServletRequest httpServletRequest,
                              @RequestHeader HttpHeaders headers
     ) throws Exception {
+        metricFactory.counter("http.inference", "inference request", "request", "all").increment();
 
         return new Callable<String>() {
             @Override
@@ -71,6 +77,9 @@ public class ProxyController {
                     result.getData().remove("warn");
                     result.getData().remove("caseid");
                 }
+
+                metricFactory.counter("http.inference", "inference response", "response", "all").increment();
+
                 return  JSON.toJSONString(result.getData());
 
             }
