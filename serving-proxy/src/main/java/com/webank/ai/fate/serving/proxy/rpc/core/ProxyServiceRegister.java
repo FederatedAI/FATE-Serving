@@ -28,8 +28,9 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
     public ServiceAdaptor getServiceAdaptor(String name) {
         if( serviceAdaptorMap.get(name)!=null){
             return  serviceAdaptorMap.get(name);
-        }else
+        }else {
             return serviceAdaptorMap.get("NotFound");
+        }
 
     }
 

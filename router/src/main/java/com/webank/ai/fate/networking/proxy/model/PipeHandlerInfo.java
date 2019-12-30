@@ -86,13 +86,21 @@ public class PipeHandlerInfo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PipeHandlerInfo)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PipeHandlerInfo)) {
+            return false;
+        }
 
         PipeHandlerInfo that = (PipeHandlerInfo) o;
 
-        if (type != that.type) return false;
-        if (!metadata.equals(that.metadata)) return false;
+        if (type != that.type) {
+            return false;
+        }
+        if (!metadata.equals(that.metadata)) {
+            return false;
+        }
         return pipe.equals(that.pipe);
     }
 

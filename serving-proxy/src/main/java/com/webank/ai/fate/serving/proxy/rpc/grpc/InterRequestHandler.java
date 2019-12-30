@@ -18,10 +18,12 @@ public class InterRequestHandler extends ProxyRequestHandler {
     @Autowired
     ProxyServiceRegister proxyServiceRegister;
 
+    @Override
     public ProxyServiceRegister getProxyServiceRegister(){
         return proxyServiceRegister;
     }
 
+    @Override
     public void setExtraInfo(Context  context, InboundPackage<Proxy.Packet> inboundPackage, Proxy.Packet req){
         context.setGrpcType(GrpcType.INTER_GRPC);
     }

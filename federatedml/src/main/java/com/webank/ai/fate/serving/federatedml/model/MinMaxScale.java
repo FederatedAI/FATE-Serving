@@ -32,11 +32,11 @@ public class MinMaxScale {
                 if (scales.containsKey(key)) {
                     ColumnScaleParam scale = scales.get(key);
                     double value = Double.parseDouble(inputData.get(key).toString());
-                    if (value > scale.getColumnUpper())
+                    if (value > scale.getColumnUpper()) {
                         value = 1;
-                    else if (value < scale.getColumnLower())
+                    } else if (value < scale.getColumnLower()) {
                         value = 0;
-                    else {
+                    } else {
                         double range = scale.getColumnUpper() - scale.getColumnLower();
                         if (range < 0) {
                             logger.warn("min_max_scale range may be error, it should be larger than 0, but is {}, set value to 0 ", range);

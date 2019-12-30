@@ -115,13 +115,21 @@ public class StreamStat {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof StreamStat)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof StreamStat)) {
+            return false;
+        }
 
         StreamStat that = (StreamStat) o;
 
-        if (size != that.size) return false;
-        if (startTimestamp != that.startTimestamp) return false;
+        if (size != that.size) {
+            return false;
+        }
+        if (startTimestamp != that.startTimestamp) {
+            return false;
+        }
         return lastUpdateTimestamp == that.lastUpdateTimestamp;
     }
 

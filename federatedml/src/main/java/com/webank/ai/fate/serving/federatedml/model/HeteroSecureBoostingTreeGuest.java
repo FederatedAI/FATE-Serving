@@ -121,8 +121,9 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 sumWeights[i % this.treeDim] += weights[i] * this.learningRate;
             }
 
-            for (int i = 0; i < this.treeDim; i++)
+            for (int i = 0; i < this.treeDim; i++) {
                 sumWeights[i] += this.initScore.get(i);
+            }
 
             ret = softmax(sumWeights);
         } else {
