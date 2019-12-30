@@ -46,7 +46,7 @@ public class HeteroFeatureBinning extends BaseModel {
                 this.splitPoints.put(key, splitPoints);
             }
         } catch (Exception ex) {
-            LOGGER.error("init model error:", ex);
+            logger.error("init model error:", ex);
             return StatusCode.ILLEGALDATA;
         }
         logger.info("Finish init Feature Binning class");
