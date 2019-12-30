@@ -5,7 +5,13 @@ package com.webank.ai.fate.serving.proxy.rpc.router;
  * @Author
  **/
 public enum RouteType {
+    /**
+     * RANDOM_ROUTE
+     */
     RANDOM_ROUTE,
+    /**
+     * CONSISTENT_HASH_ROUTE
+     */
     CONSISTENT_HASH_ROUTE
 }
 

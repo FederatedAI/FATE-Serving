@@ -80,7 +80,8 @@ public class DataTransferPipedClient {
 
     private BasicMeta.Endpoint endpoint;
     private boolean needSecureChannel;
-    private long MAX_AWAIT_HOURS = 24;
+    private static long MAX_AWAIT_HOURS = 24;
+    private static String SERVICE_ROLE_NAME = "serving-1.0";
 
     public DataTransferPipedClient() {
         needSecureChannel = false;
@@ -112,6 +113,7 @@ public class DataTransferPipedClient {
                 stub.getChannel(), onelineStringMetadata);
 
         int emptyRetryCount = 0;
+        int maxRetryCount = 60;
         Proxy.Packet packet = null;
         do {
             packet = (Proxy.Packet) pipe.read(1, TimeUnit.SECONDS);
@@ -121,7 +123,7 @@ public class DataTransferPipedClient {
                 emptyRetryCount = 0;
             } else {
                 ++emptyRetryCount;
-                if (emptyRetryCount % 60 == 0) {
+                if (emptyRetryCount % maxRetryCount == 0) {
                     logger.info("[PUSH][CLIENT] push stub waiting. empty retry count: {}, metadata: {}",
                             emptyRetryCount, onelineStringMetadata);
                 }
@@ -252,7 +254,7 @@ public class DataTransferPipedClient {
             ConfFileBasedFdnRouter confFileBasedFdnRouter = (ConfFileBasedFdnRouter) fdnRouter;
             Map<String, Map<String, List<BasicMeta.Endpoint>>> routerTable = confFileBasedFdnRouter.getRouteTable();
 
-            if (routerTable.containsKey(to.getPartyId()) &&routerTable.get(to.getPartyId()).get("serving-1.0")!=null&& "serving-1.0".equals(to.getRole())) {
+            if (routerTable.containsKey(to.getPartyId()) &&routerTable.get(to.getPartyId()).get(SERVICE_ROLE_NAME)!=null&& SERVICE_ROLE_NAME.equals(to.getRole())) {
 
                 stub = routerByServiceRegister(from, to, pack);
                 if (stub != null) {
@@ -312,10 +314,10 @@ public class DataTransferPipedClient {
         return stub;
     }
 
-    private static final String modelKeySeparator = "&";
+    private static final String MODEL_KEY_SEPARATOR = "&";
 
     public static String genModelKey(String name, String namespace) {
-        return StringUtils.join(Arrays.asList(name, namespace), modelKeySeparator);
+        return StringUtils.join(Arrays.asList(name, namespace), MODEL_KEY_SEPARATOR);
     }
 
 

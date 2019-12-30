@@ -17,7 +17,16 @@
 package com.webank.ai.fate.serving.core.bean;
 
 public enum InferenceActionType {
+    /**
+     * SYNC_RUN
+     */
     SYNC_RUN,
+    /**
+     * ASYNC_RUN
+     */
     ASYNC_RUN,
+    /**
+     * GET_RESULT
+     */
     GET_RESULT,
 }

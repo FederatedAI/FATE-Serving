@@ -56,7 +56,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     ;
     private final ZookeeperClient zkClient;
     Set<String> registedString = Sets.newHashSet();
-    String DYNAMIC_KEY = "dynamic";
+    private static String DYNAMIC_KEY = "dynamic";
     Set<String> anyServices = new HashSet<String>();
     private String environment;
     private Set<String> dynamicEnvironments = new HashSet<String>();

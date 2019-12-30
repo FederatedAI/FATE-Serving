@@ -45,13 +45,14 @@ public class GetSystemInfo {
         String ip;
 
         try {
-            if (sysType.toLowerCase().startsWith("win")) {
-                String localIP = null;
+            String winOs = "win";
+            if (sysType.toLowerCase().startsWith(winOs)) {
+                String localIp = null;
 
-                localIP = InetAddress.getLocalHost().getHostAddress();
+                localIp = InetAddress.getLocalHost().getHostAddress();
 
-                if (localIP != null) {
-                    return localIP;
+                if (localIp != null) {
+                    return localIp;
                 }
             } else {
                 ip = getIpByEthNum("eth0");
@@ -100,16 +101,16 @@ public class GetSystemInfo {
     public static double getSystemCpuLoad() {
         OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
                 .getOperatingSystemMXBean();
-        double SystemCpuLoad = osmxb.getSystemCpuLoad();
-        return SystemCpuLoad;
+        double systemCpuLoad = osmxb.getSystemCpuLoad();
+        return systemCpuLoad;
     }
 
 
     public static double getProcessCpuLoad() {
         OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
                 .getOperatingSystemMXBean();
-        double ProcessCpuLoad = osmxb.getProcessCpuLoad();
-        return ProcessCpuLoad;
+        double processCpuLoad = osmxb.getProcessCpuLoad();
+        return processCpuLoad;
     }
 
 

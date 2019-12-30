@@ -36,7 +36,7 @@ public class UrlUtils {
      */
     private final static String URL_PARAM_STARTING_SYMBOL = "?";
 
-    public static URL parseURL(String address, Map<String, String> defaults) {
+    public static URL parseUrl(String address, Map<String, String> defaults) {
         if (address == null || address.length() == 0) {
             return null;
         }
@@ -133,17 +133,18 @@ public class UrlUtils {
         return u;
     }
 
-    public static List<URL> parseURLs(String address, Map<String, String> defaults) {
+    public static List<URL> parseUrls(String address, Map<String, String> defaults) {
         if (address == null || address.length() == 0) {
             return null;
         }
         String[] addresses = REGISTRY_SPLIT_PATTERN.split(address);
         if (addresses == null || addresses.length == 0) {
-            return null; //here won't be empty
+            //here won't be empty
+            return null;
         }
         List<URL> registries = new ArrayList<URL>();
         for (String addr : addresses) {
-            registries.add(parseURL(addr, defaults));
+            registries.add(parseUrl(addr, defaults));
         }
         return registries;
     }

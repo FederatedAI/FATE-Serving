@@ -22,7 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import com.webank.ai.fate.serving.proxy.utils.EncryptUtil;
+import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import com.webank.ai.fate.serving.proxy.utils.ToStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -117,8 +117,8 @@ public class AuthUtils implements InitializingBean{
         String encryptText = String.valueOf(timestamp) + "\n"
                 + toStringUtils.toOneLineString(header) + "\n"
                 + toStringUtils.toOneLineString(body);
-        encryptText = new String(encryptText.getBytes(), EncryptUtil.UTF8);
-        signature = Base64.getEncoder().encodeToString(EncryptUtil.HmacSHA1Encrypt(encryptText, appSecret));
+        encryptText = new String(encryptText.getBytes(), EncryptUtils.UTF8);
+        signature = Base64.getEncoder().encodeToString(EncryptUtils.hmacSha1Encrypt(encryptText, appSecret));
         return signature;
     }
 

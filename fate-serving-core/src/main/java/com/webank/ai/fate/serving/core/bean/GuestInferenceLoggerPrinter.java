@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 
 public class GuestInferenceLoggerPrinter implements LoggerPrinter<Request, ReturnResult> {
 
-    static final String logger_NAME = "flow";
+    static final String LOGGER_NAME = "flow";
 
-    private static final Logger logger = LoggerFactory.getLogger(logger_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
 
     @Override
     public void printLog(Context context, Request req, ReturnResult resp) {

@@ -409,7 +409,7 @@ public class ConfFileBasedFdnRouter implements FdnRouter {
         }
 
         if (rules == null) {
-            return result;      // false
+            return result;
         }
 
 

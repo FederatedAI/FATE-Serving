@@ -139,7 +139,7 @@ public class NetUtils {
      *
      * @return true if it is reachable
      */
-    static boolean isPreferIPV6Address() {
+    static boolean isPreferIpv6Address() {
         boolean preferIpv6 = Boolean.getBoolean("java.net.preferIPv6Addresses");
         if (!preferIpv6) {
             return false;
@@ -215,7 +215,7 @@ public class NetUtils {
     private static Optional<InetAddress> toValidAddress(InetAddress address) {
         if (address instanceof Inet6Address) {
             Inet6Address v6Address = (Inet6Address) address;
-            if (isPreferIPV6Address()) {
+            if (isPreferIpv6Address()) {
                 return Optional.ofNullable(normalizeV6Address(v6Address));
             }
         }
@@ -233,12 +233,11 @@ public class NetUtils {
 
         try {
             if (sysType.toLowerCase().startsWith("win")) {
-                String localIP = null;
 
-                localIP = InetAddress.getLocalHost().getHostAddress();
+                String localIp = InetAddress.getLocalHost().getHostAddress();
 
-                if (localIP != null) {
-                    return localIP;
+                if (localIp != null) {
+                    return localIp;
                 }
             } else {
                 ip = getIpByEthNum("eth0");
@@ -370,7 +369,7 @@ public class NetUtils {
         return new InetSocketAddress(host, port);
     }
 
-    public static String toURL(String protocol, String host, int port, String path) {
+    public static String toUrl(String protocol, String host, int port, String path) {
         StringBuilder sb = new StringBuilder();
         sb.append(protocol).append("://");
         sb.append(host).append(':').append(port);

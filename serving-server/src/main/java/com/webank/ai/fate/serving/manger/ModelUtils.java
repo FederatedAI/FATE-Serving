@@ -38,7 +38,7 @@ import java.util.*;
 @Component
 public class ModelUtils {
     private static final Logger logger = LoggerFactory.getLogger(ModelUtils.class);
-    private static final String modelKeySeparator = "&";
+    private static final String MODEL_KEY_SEPARATOR = "&";
 
     private static ModelUtils modelUtils;
 
@@ -121,11 +121,11 @@ public class ModelUtils {
     }
 
     public static String genModelKey(String name, String namespace) {
-        return StringUtils.join(Arrays.asList(name, namespace), modelKeySeparator);
+        return StringUtils.join(Arrays.asList(name, namespace), MODEL_KEY_SEPARATOR);
     }
 
     public static String[] splitModelKey(String key) {
-        return StringUtils.split(key, modelKeySeparator);
+        return StringUtils.split(key, MODEL_KEY_SEPARATOR);
     }
 
 

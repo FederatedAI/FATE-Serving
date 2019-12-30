@@ -18,10 +18,16 @@ package com.webank.ai.fate.register.common;
 
 
 public enum ConfigChangeType {
-
+    /**
+     * add config
+     */
     ADDED,
-
+    /**
+     * modify config
+     */
     MODIFIED,
-
+    /**
+     * delete
+     */
     DELETED
 }

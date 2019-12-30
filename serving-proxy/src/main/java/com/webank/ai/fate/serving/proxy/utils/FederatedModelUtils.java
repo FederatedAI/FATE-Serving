@@ -12,10 +12,10 @@ import java.util.Arrays;
 
 public class FederatedModelUtils {
 
-    private static final String modelKeySeparator = "&";
+    private static final String MODEL_KEY_SEPARATOR = "&";
 
     public static String genModelKey(String name, String namespace) {
-        return StringUtils.join(Arrays.asList(name, namespace), modelKeySeparator);
+        return StringUtils.join(Arrays.asList(name, namespace), MODEL_KEY_SEPARATOR);
     }
 
     public static String getModelRouteKey(Proxy.Packet  packet) {

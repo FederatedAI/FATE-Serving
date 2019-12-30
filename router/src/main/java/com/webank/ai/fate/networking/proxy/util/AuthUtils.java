@@ -24,6 +24,7 @@ import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +112,7 @@ public class AuthUtils {
                 + toStringUtils.toOneLineString(header) + "\n"
                 + toStringUtils.toOneLineString(body);
         encryptText = new String(encryptText.getBytes(), EncryptUtils.UTF8);
-        signature = Base64.getEncoder().encodeToString(EncryptUtils.HmacSHA1Encrypt(encryptText, appSecret));
+        signature = Base64.getEncoder().encodeToString(EncryptUtils.hmacSha1Encrypt(encryptText, appSecret));
         return signature;
     }
 

@@ -60,11 +60,11 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     private final CuratorFramework client;
     private Map<String, TreeCache> treeCacheMap = new ConcurrentHashMap<>();
 
-    private static final List<ACL> acls = new ArrayList<>();
+    private static final List<ACL> ACLS = new ArrayList<>();
 
-    private static final String scheme = "digest";
-    private static final String aclUserName = System.getProperty("acl.username");
-    private static final String aclPassword = System.getProperty("acl.password");
+    private static final String SCHEME = "digest";
+    private static final String ACL_USERNAME = System.getProperty("acl.username");
+    private static final String ACL_PASSWORD = System.getProperty("acl.password");
 
 
     public CuratorZookeeperClient(URL url) {
@@ -76,12 +76,12 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                     .retryPolicy(new RetryNTimes(1, 1000))
                     .connectionTimeoutMs(timeout);
 
-            if (StringUtils.isNotEmpty(aclUserName) && StringUtils.isNotEmpty(aclPassword) ) {
-                builder.authorization(scheme, (aclUserName + ":" + aclPassword).getBytes());
+            if (StringUtils.isNotEmpty(ACL_USERNAME) && StringUtils.isNotEmpty(ACL_PASSWORD) ) {
+                builder.authorization(SCHEME, (ACL_USERNAME + ":" + ACL_PASSWORD).getBytes());
 
-                Id allow = new Id(scheme, DigestAuthenticationProvider.generateDigest(aclUserName + ":" + aclPassword));
+                Id allow = new Id(SCHEME, DigestAuthenticationProvider.generateDigest(ACL_USERNAME + ":" + ACL_PASSWORD));
                 // add more
-                acls.add(new ACL(ZooDefs.Perms.ALL, allow));
+                ACLS.add(new ACL(ZooDefs.Perms.ALL, allow));
             }
 
             client = builder.build();
@@ -102,7 +102,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
             });
             client.start();
 
-            client.setACL().withACL(acls).forPath("/");
+            client.setACL().withACL(ACLS).forPath("/");
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -113,8 +113,8 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
         try {
 
             logger.info("createPersistent {}", path);
-            if (acls.size() > 0) {
-                client.create().withACL(acls).forPath(path);
+            if (ACLS.size() > 0) {
+                client.create().withACL(ACLS).forPath(path);
             } else {
                 client.create().forPath(path);
             }
@@ -128,8 +128,8 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     public void createEphemeral(String path) {
         try {
             logger.info("createEphemeral {}", path);
-            if (acls.size() > 0) {
-                client.create().withMode(CreateMode.EPHEMERAL).withACL(acls).forPath(path);
+            if (ACLS.size() > 0) {
+                client.create().withMode(CreateMode.EPHEMERAL).withACL(ACLS).forPath(path);
             } else {
                 client.create().withMode(CreateMode.EPHEMERAL).forPath(path);
             }
@@ -144,14 +144,14 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
         byte[] dataBytes = data.getBytes(CHARSET);
         try {
             logger.info("createPersistent {} data {}", path, data);
-            if (acls.size() > 0) {
-                client.create().withACL(acls).forPath(path, dataBytes);
+            if (ACLS.size() > 0) {
+                client.create().withACL(ACLS).forPath(path, dataBytes);
             } else {
                 client.create().forPath(path, dataBytes);
             }
         } catch (NodeExistsException e) {
             try {
-                if (acls.size() > 0) {
+                if (ACLS.size() > 0) {
                     Stat stat = client.checkExists().forPath(path);
                     client.setData().withVersion(stat.getAversion()).forPath(path, dataBytes);
                 } else {
@@ -170,14 +170,14 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
         byte[] dataBytes = data.getBytes(CHARSET);
         try {
             logger.info("createEphemeral {} data {}", path, data);
-            if (acls.size() > 0) {
-                client.create().withMode(CreateMode.EPHEMERAL).withACL(acls).forPath(path, dataBytes);
+            if (ACLS.size() > 0) {
+                client.create().withMode(CreateMode.EPHEMERAL).withACL(ACLS).forPath(path, dataBytes);
             } else {
                 client.create().withMode(CreateMode.EPHEMERAL).forPath(path, dataBytes);
             }
         } catch (NodeExistsException e) {
             try {
-                if (acls.size() > 0) {
+                if (ACLS.size() > 0) {
                     Stat stat = client.checkExists().forPath(path);
                     client.setData().withVersion(stat.getAversion()).forPath(path, dataBytes);
                 } else {
@@ -194,7 +194,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
     @Override
     public void delete(String path) {
         try {
-            if (acls.size() > 0) {
+            if (ACLS.size() > 0) {
                 Stat stat = client.checkExists().forPath(path);
                 client.delete().withVersion(stat.getAversion()).forPath(path);
             } else {
@@ -394,7 +394,8 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                     case CONNECTION_SUSPENDED:
                         eventType = EventType.CONNECTION_SUSPENDED;
                         break;
-
+                    default:
+                        break;
                 }
                 dataListener.dataChanged(path, content, eventType);
             }

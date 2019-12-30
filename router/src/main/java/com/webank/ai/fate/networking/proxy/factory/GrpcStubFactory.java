@@ -188,7 +188,7 @@ public class GrpcStubFactory {
                 .maxInboundMessageSize(32 << 20)
                 .enableRetry()
                 .retryBufferSize(16 << 20)
-                .maxRetryAttempts(20);      // todo: configurable
+                .maxRetryAttempts(20);
 
         // if secure client defined and endpoint is not in intranet
         if (serverConf.isSecureClient() &&

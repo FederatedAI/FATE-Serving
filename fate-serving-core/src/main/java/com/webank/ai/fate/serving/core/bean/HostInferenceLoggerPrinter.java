@@ -25,9 +25,9 @@ import java.util.Map;
 
 public class HostInferenceLoggerPrinter implements LoggerPrinter<Map, ReturnResult> {
 
-    static final String logger_NAME = "flow";
+    static final String LOGGER_NAME = "flow";
 
-    private static final Logger logger = LoggerFactory.getLogger(logger_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
 
     @Override
     public void printLog(Context context, Map req, ReturnResult resp) {

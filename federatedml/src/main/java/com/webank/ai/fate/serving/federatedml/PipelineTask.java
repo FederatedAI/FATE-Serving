@@ -45,7 +45,8 @@ public class PipelineTask {
             logger.info("after parse pipeline {}",newModelProtoMap.keySet());
             Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL)!=null);
             PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
-            String dsl = pipeLineProto.getInferenceDsl().toStringUtf8(); //inference_dsl;
+            //inference_dsl
+            String dsl = pipeLineProto.getInferenceDsl().toStringUtf8();
             dslParser.parseDagFromDSL(dsl);
             ArrayList<String> components = dslParser.getAllComponent();
             HashMap<String, String> componentModuleMap = dslParser.getComponentModuleMap();

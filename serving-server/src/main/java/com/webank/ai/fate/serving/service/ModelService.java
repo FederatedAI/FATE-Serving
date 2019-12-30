@@ -25,6 +25,7 @@ import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishRequest;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishResponse;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
@@ -78,7 +79,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
     LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
     LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
-    ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+    ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
 
     File publishLoadStoreFile;
     File publishOnlineStoreFile;
