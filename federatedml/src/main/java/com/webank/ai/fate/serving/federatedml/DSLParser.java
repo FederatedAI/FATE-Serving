@@ -105,7 +105,7 @@ public class DSLParser {
             componentList.add(componentName);
         }
 
-        int inDegree[] = new int[index];
+        int[] inDegree = new int[index];
         HashMap<Integer, ArrayList<Integer>> edges = new HashMap<Integer, ArrayList<Integer>>(8);
 
         for (int i = 0; i < componentList.size(); ++i) {

@@ -5,7 +5,13 @@ package com.webank.ai.fate.serving.proxy.rpc.grpc;
  * @Author
  **/
 public enum GrpcType {
+    /**
+     * INTRA_GRPC
+     */
     INTRA_GRPC,
+    /**
+     * INTRA_GRPC
+     */
     INTER_GRPC
 }
 

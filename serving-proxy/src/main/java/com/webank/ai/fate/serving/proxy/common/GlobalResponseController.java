@@ -26,7 +26,7 @@ public class GlobalResponseController implements ResponseBodyAdvice<Object> {
         Boolean isRest = AnnotationUtils.isAnnotationDeclaredLocally(
                 RestController.class, methodParameter.getContainingClass());
         ResponseBody responseBody = AnnotationUtils.findAnnotation(
-                methodParameter.getMethod(), ResponseBody.class); //得到方法上的注解
+                methodParameter.getMethod(), ResponseBody.class);
 
         if (responseBody != null || isRest) {
             return true;

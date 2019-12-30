@@ -31,7 +31,7 @@ import java.util.Map;
 
 public abstract class HeteroSecureBoost extends BaseModel {
     public static final Logger logger = LoggerFactory.getLogger(HeteroSecureBoost.class);
-    protected List<Map<Integer, Double>> split_maskdict;
+    protected List<Map<Integer, Double>> splitMaskdict;
     protected Map<String, Integer> featureNameFidMapping = Maps.newHashMap();
     protected int treeNum;
     protected List<Double> initScore;

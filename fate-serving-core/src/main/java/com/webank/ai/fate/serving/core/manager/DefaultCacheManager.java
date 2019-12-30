@@ -36,8 +36,6 @@ import redis.clients.jedis.Pipeline;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-//import com.webank.ai.fate.core.utils.ObjectTransform;
-
 @Service
 public class DefaultCacheManager implements CacheManager, InitializingBean {
 
@@ -276,7 +274,6 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         Preconditions.checkNotNull(federatedParams.getFeatureIdMap());
         String namespace = federatedParams.getModelInfo().getNamespace();
         String name = federatedParams.getModelInfo().getName();
-       // Set<String> featureIdKey = federatedParams.getFeatureIdMap();
 
         Map  sortedMap = Maps.newTreeMap();
         federatedParams.getFeatureIdMap().forEach((k,v)->{
@@ -308,8 +305,17 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
     }
 
     private enum CacheType {
+        /**
+         * INFERENCE_RESULT
+         */
         INFERENCE_RESULT,
+        /**
+         * REMOTE_MODEL_INFERENCE_RESULT
+         */
         REMOTE_MODEL_INFERENCE_RESULT,
+        /**
+         * PROCESS_DATA
+         */
         PROCESS_DATA
 
     }

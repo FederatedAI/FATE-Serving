@@ -27,7 +27,8 @@ import java.util.Map;
 
 public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
     private final String site = "host";
-    private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
+    // need to change
+    private final String modelId = "HeteroSecureBoostingTreeHost";
 
 
     // DefaultCacheManager cacheManager = BaseContext.applicationContext.getBean(DefaultCacheManager.class);

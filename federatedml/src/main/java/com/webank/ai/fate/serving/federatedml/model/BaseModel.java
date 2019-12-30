@@ -113,7 +113,6 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             HostFederatedParams hostFederatedParams = new HostFederatedParams();
             hostFederatedParams.setCaseId(guestFederatedParams.getCaseId());
             hostFederatedParams.setSeqNo(guestFederatedParams.getSeqNo());
-//            hostFederatedParams.setFeatureIdMap(guestFederatedParams.getFeatureIdMap());
             hostFederatedParams.getFeatureIdMap().putAll(guestFederatedParams.getFeatureIdMap());
             hostFederatedParams.setLocal(dstParty);
             hostFederatedParams.setPartnerLocal(srcParty);

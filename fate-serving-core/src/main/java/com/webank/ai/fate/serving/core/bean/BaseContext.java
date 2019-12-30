@@ -28,7 +28,7 @@ import java.util.Map;
 
 
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
-    private static final Logger logger = LoggerFactory.getLogger(logger_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static ApplicationContext applicationContext;
     long timestamp;
     LoggerPrinter loggerPrinter;

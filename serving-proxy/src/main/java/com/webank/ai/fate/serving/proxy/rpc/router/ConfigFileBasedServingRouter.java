@@ -68,8 +68,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
     public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage){
         Proxy.Topic dstTopic;
         Proxy.Topic srcTopic;
-        String service_name = context.getServiceName();
-        if("inference".equals(service_name)) {
+        if("inference".equals(context.getServiceName())) {
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
             dstTopic = topicBuilder.setPartyId(selfCoordinator).
                     setRole(inferenceServiceName)
@@ -187,7 +186,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         }
 
         if (rules == null) {
-            return result;      // false
+            return result;
         }
 
         stage = 0;

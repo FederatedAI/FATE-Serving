@@ -33,7 +33,7 @@ public class Scale extends BaseModel {
     private static final Logger logger = LoggerFactory.getLogger(Scale.class);
     private ScaleMeta scaleMeta;
     private ScaleParam scaleParam;
-    private boolean need_run;
+    private boolean needRun;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -41,7 +41,7 @@ public class Scale extends BaseModel {
         try {
             this.scaleMeta = this.parseModel(ScaleMeta.parser(), protoMeta);
             this.scaleParam = this.parseModel(ScaleParam.parser(), protoParam);
-            this.need_run = this.scaleMeta.getNeedRun();
+            this.needRun = this.scaleMeta.getNeedRun();
         } catch (Exception ex) {
             ex.printStackTrace();
             return StatusCode.ILLEGALDATA;
@@ -53,7 +53,7 @@ public class Scale extends BaseModel {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputDatas, FederatedParams predictParams) {
         Map<String, Object> outputData = inputDatas.get(0);
-        if (this.need_run) {
+        if (this.needRun) {
             String scaleMethod = this.scaleMeta.getMethod();
             if (scaleMethod.toLowerCase().equals(Dict.MIN_MAX_SCALE)) {
                 MinMaxScale minMaxScale = new MinMaxScale();

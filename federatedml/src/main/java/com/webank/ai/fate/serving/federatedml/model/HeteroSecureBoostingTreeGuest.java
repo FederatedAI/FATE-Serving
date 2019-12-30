@@ -35,7 +35,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         return 1. / (1. + Math.exp(-x));
     }
 
-    private Map<String, Object> softmax(double weights[]) {
+    private Map<String, Object> softmax(double[] weights) {
         int n = weights.length;
         double max = weights[0];
         int maxIndex = 0;

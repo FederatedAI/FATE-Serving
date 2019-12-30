@@ -53,8 +53,8 @@ public abstract class AbstractRetryTask implements TimerTask {
      * task name for this task
      */
     private final String taskName;
-    int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
-    String REGISTRY_RETRY_TIMES_KEY = "retry.times";
+    private static int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
+    private static String REGISTRY_RETRY_TIMES_KEY = "retry.times";
     /**
      * times of retry.
      * retry task is execute in single thread so that the times is not need volatile.
@@ -127,5 +127,11 @@ public abstract class AbstractRetryTask implements TimerTask {
 
     }
 
+    /**
+     * doRetry
+     * @param url
+     * @param registry
+     * @param timeout
+     */
     protected abstract void doRetry(URL url, FailbackRegistry registry, Timeout timeout);
 }

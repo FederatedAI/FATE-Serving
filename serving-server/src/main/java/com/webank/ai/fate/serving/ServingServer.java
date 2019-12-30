@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.jmx.JmxReporter;
 import com.google.common.collect.Sets;
+import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.router.RouterService;
@@ -45,10 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ServingServer implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(ServingServer.class);
@@ -106,7 +104,8 @@ public class ServingServer implements InitializingBean {
         Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",100);
         Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time",1000);
         Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size",10);
-        Executor executor =   new ThreadPoolExecutor(corePoolSize,maxPoolSize,aliveTime.longValue(),TimeUnit.MILLISECONDS,new ArrayBlockingQueue<>(queueSize));
+        Executor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, aliveTime.longValue(), TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(queueSize), new NamedThreadFactory("ServingServer", true));
 
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);

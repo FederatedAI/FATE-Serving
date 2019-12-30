@@ -138,7 +138,8 @@ class URL implements Serializable {
         int port = 0;
         String path = null;
         Map<String, String> parameters = null;
-        int i = url.indexOf("?"); // separator between body and parameters
+        // separator between body and parameters
+        int i = url.indexOf("?");
         if (i >= 0) {
             String[] parts = url.substring(i + 1).split("&");
             parameters = new HashMap<>(8);
@@ -243,7 +244,8 @@ class URL implements Serializable {
         int port = 0;
         String path = null;
         Map<String, String> parameters = null;
-        int i = url.indexOf("?"); // separator between body and parameters
+        // separator between body and parameters
+        int i = url.indexOf("?");
         if (i >= 0) {
             String[] parts = url.substring(i + 1).split("&");
             parameters = new HashMap<>(8);
@@ -1052,7 +1054,8 @@ class URL implements Serializable {
             return this;
         }
         // if value doesn't change, return immediately
-        if (value.equals(getParameters().get(key))) { // value != null
+        // value != null
+        if (value.equals(getParameters().get(key))) {
             return this;
         }
 
@@ -1223,22 +1226,26 @@ class URL implements Serializable {
         if (string != null) {
             return string;
         }
-        return string = buildString(false, true); // no show username and password
+        // no show username and password
+        return string = buildString(false, true);
     }
 
     public String toString(String... parameters) {
-        return buildString(false, true, parameters); // no show username and password
+        // no show username and password
+        return buildString(false, true, parameters);
     }
 
     public String toIdentityString() {
         if (identity != null) {
             return identity;
         }
-        return identity = buildString(true, false); // only return identity message, see the method "equals" and "hashCode"
+        // only return identity message, see the method "equals" and "hashCode"
+        return identity = buildString(true, false);
     }
 
     public String toIdentityString(String... parameters) {
-        return buildString(true, false, parameters); // only return identity message, see the method "equals" and "hashCode"
+        // only return identity message, see the method "equals" and "hashCode"
+        return buildString(true, false, parameters);
     }
 
     public String toFullString() {

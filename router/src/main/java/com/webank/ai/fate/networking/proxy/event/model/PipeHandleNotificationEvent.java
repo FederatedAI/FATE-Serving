@@ -38,9 +38,18 @@ public class PipeHandleNotificationEvent extends ApplicationEvent {
         return pipeHandlerInfo;
     }
 
-    public static enum Type {
+    public enum Type {
+        /**
+         * PUSH
+         */
         PUSH,
+        /**
+         * PULL
+         */
         PULL,
+        /**
+         * UNARY_CALL
+         */
         UNARY_CALL;
     }
 }
