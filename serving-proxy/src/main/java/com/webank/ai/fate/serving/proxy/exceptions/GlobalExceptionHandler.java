@@ -13,11 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 统一异常样处理类
- *
- * @Author
- */
+
 @RestController
 @ControllerAdvice
 public class GlobalExceptionHandler {

@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.common.Dict;
 import com.webank.ai.fate.serving.proxy.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.proxy.rpc.core.*;
@@ -37,6 +38,9 @@ import java.util.concurrent.TimeUnit;
 
 public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy.Packet> {
     @Autowired
+    IMetricFactory metricFactory;
+
+    @Autowired
     GrpcConnectionPool  grpcConnectionPool;
 
     @Autowired
@@ -64,15 +68,21 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
 
             stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
 
+            metricFactory.counter("grpc.unaryCall", "send out to self serving-server or other proxy", "send", "self serving-server or other proxy").increment();
+
             context.setDownstreamBegin(System.currentTimeMillis());
 
             ListenableFuture<Proxy.Packet> future= stub1.unaryCall(sourcePackage);
 
             Proxy.Packet packet = future.get(timeout,TimeUnit.MILLISECONDS);
 
+            metricFactory.counter("grpc.unaryCall", "receive from self serving-server or other proxy", "receive", "self serving-server or other proxy", "result", "success").increment();
+
             return  packet;
 
         } catch (Exception e) {
+            metricFactory.counter("grpc.unaryCall", "receive from self serving-server or other proxy", "receive", "self serving-server or other proxy", "result", "grpc.error").increment();
+
             e.printStackTrace();
             logger.error("unaryCall error ",e);
         }finally {

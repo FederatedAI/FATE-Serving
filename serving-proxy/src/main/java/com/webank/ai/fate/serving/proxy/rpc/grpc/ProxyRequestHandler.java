@@ -5,14 +5,20 @@ package com.webank.ai.fate.serving.proxy.rpc.grpc;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.common.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.*;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTransferServiceImplBase {
+
+    @Autowired
+    IMetricFactory metricFactory;
+
     private static final Logger logger = LoggerFactory.getLogger(ProxyRequestHandler.class);
 
     public abstract ProxyServiceRegister getProxyServiceRegister();
@@ -23,11 +29,15 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
     @Override
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver)  {
 
+        metricFactory.counter("grpc.unaryCall", "unaryCall request", "request", "all").increment();
+
         logger.info("unaryCall req {}",req);
         ServiceAdaptor unaryCallService = getProxyServiceRegister().getServiceAdaptor("unaryCall");
         Context context  =  new Context();
         InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, req);
         setExtraInfo(context, inboundPackage, req);
+
+        metricFactory.counter("grpc.unaryCall", "unaryCall request", "request", context.getGrpcType().toString()).increment();
 
         OutboundPackage<Proxy.Packet>   outboundPackage = null;
         try {
@@ -39,6 +49,9 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         Proxy.Packet   result = (Proxy.Packet)outboundPackage.getData();
         responseObserver.onNext(result);
         responseObserver.onCompleted();
+
+        metricFactory.counter("grpc.unaryCall", "unaryCall response", "response", context.getGrpcType().toString()).increment();
+        metricFactory.counter("grpc.unaryCall", "unaryCall response", "response", "all").increment();
     }
 
     public InboundPackage<Proxy.Packet> buildInboundPackage(Context  context, Proxy.Packet req){
