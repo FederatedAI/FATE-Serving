@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.proxy.rpc.core;
+package com.webank.ai.fate.serving.core.rpc.core;
 
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;

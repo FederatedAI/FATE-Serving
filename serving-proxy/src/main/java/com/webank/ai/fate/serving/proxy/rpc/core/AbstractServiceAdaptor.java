@@ -6,9 +6,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
+import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
+import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
+import com.webank.ai.fate.serving.core.rpc.core.*;
 import com.webank.ai.fate.serving.proxy.common.ErrorMessageUtil;
-import com.webank.ai.fate.serving.proxy.exceptions.ErrorCode;
-import com.webank.ai.fate.serving.proxy.exceptions.ShowDownRejectException;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
 import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
@@ -116,7 +117,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
      * @throws Exception
      */
     @Override
-    public  OutboundPackage<resp> service( Context context ,InboundPackage<req> data) throws Exception {
+    public  OutboundPackage<resp> service(Context context , InboundPackage<req> data) throws Exception {
 
         OutboundPackage<resp>    outboundPackage= new OutboundPackage<resp>();
         long begin = System.currentTimeMillis();
@@ -127,7 +128,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             /**
              *  系统关闭中 ，直接返回拒绝，关闭线程将等待所有处理完成
              */
-            return  this.serviceFailInner(context,data,new  ShowDownRejectException());
+            return  this.serviceFailInner(context,data,new ShowDownRejectException());
         }
 
         try {
@@ -186,7 +187,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
         result.put(MESSAGE, e.getMessage());
         ErrorMessageUtil.handleException(result,e);
-        context.setReturnCode(result.get(CODE)!=null?result.get(CODE).toString():ErrorCode.SYSTEM_ERROR.toString());
+        context.setReturnCode(result.get(CODE)!=null?result.get(CODE).toString(): ErrorCode.SYSTEM_ERROR.toString());
         Entry entry=null;
         try {
             StringBuilder  sb = new StringBuilder("ERROR_");

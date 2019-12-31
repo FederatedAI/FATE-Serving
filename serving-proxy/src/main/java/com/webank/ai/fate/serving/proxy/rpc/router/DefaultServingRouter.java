@@ -1,10 +1,11 @@
 package com.webank.ai.fate.serving.proxy.rpc.router;
 
-import com.webank.ai.fate.serving.proxy.exceptions.NoRouteInfoException;
-import com.webank.ai.fate.serving.proxy.rpc.core.Context;
-import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.proxy.rpc.core.Interceptor;
-import com.webank.ai.fate.serving.proxy.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
+import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

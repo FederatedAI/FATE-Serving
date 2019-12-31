@@ -1,4 +1,9 @@
 package com.webank.ai.fate.serving.proxy.rpc.core;
+
+import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
+import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
+import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
+import com.webank.ai.fate.serving.core.rpc.core.ServiceRegister;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

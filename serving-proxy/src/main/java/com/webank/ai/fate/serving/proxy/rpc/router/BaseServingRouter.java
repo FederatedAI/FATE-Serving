@@ -1,10 +1,13 @@
 package com.webank.ai.fate.serving.proxy.rpc.router;
 
 import com.google.common.hash.Hashing;
-import com.webank.ai.fate.serving.proxy.exceptions.NoRouteInfoException;
-import com.webank.ai.fate.serving.proxy.rpc.core.Context;
-import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.proxy.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
+import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.rpc.router.RouteType;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 
-public abstract class BaseServingRouter implements RouterInterface{
+public abstract class BaseServingRouter implements RouterInterface {
     private static final Logger logger  = LoggerFactory.getLogger(BaseServingRouter.class);
 
     public abstract List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage);

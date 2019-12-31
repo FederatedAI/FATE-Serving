@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.proxy.rpc.router;
+package com.webank.ai.fate.serving.core.rpc.router;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.proxy.exceptions;
+package com.webank.ai.fate.serving.core.exceptions;
 
 /**
  * @Description 停机时拒绝请求异常

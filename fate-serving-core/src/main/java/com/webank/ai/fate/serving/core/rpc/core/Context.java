@@ -1,7 +1,7 @@
-package com.webank.ai.fate.serving.proxy.rpc.core;
+package com.webank.ai.fate.serving.core.rpc.core;
 
-import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcType;
-import com.webank.ai.fate.serving.proxy.rpc.router.RouterInfo;
+import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 
 /**
  * @Description TODO

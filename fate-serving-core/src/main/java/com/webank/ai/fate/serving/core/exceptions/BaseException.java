@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.proxy.exceptions;
+package com.webank.ai.fate.serving.core.exceptions;
 
 
 public class BaseException extends Exception {
