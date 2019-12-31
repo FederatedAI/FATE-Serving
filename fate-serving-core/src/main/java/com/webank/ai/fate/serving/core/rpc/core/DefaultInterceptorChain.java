@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.core.rpc.core;
 
 import com.google.common.collect.Lists;
+import com.webank.ai.fate.serving.core.bean.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class DefaultInterceptorChain<req,resp> implements InterceptorChain<req,r
      * @throws Exception
      */
     @Override
-    public void doPreProcess(Context context, InboundPackage<req> inboundPackage ,OutboundPackage<resp> outboundPackage) throws Exception {
+    public void doPreProcess(Context context, InboundPackage<req> inboundPackage , OutboundPackage<resp> outboundPackage) throws Exception {
 
         for(Interceptor<req,resp>  interceptor:chain){
             interceptor.doPreProcess(context,inboundPackage,outboundPackage);

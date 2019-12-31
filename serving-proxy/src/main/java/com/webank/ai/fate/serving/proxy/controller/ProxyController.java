@@ -2,7 +2,8 @@ package com.webank.ai.fate.serving.proxy.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.bean.BaseContext;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
@@ -69,7 +70,7 @@ public class ProxyController {
 
                 final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor("inference");
 
-                Context context = new Context();
+                Context context = new BaseContext();
                 context.setVersion(version);
 
                 InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, data, httpServletRequest);

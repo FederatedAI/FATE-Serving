@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.proxy.rpc.router;
 
 import com.google.common.hash.Hashing;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouteType;

@@ -42,8 +42,19 @@ public class Dict {
     public static final String MODEL_FEDERATED_PARTY = "model_federated_party";
     public static final String MODEL_FEDERATED_ROLES = "model_federated_roles";
     public static final String VERSION ="version";
+    public static final String GRPC_TYPE ="grpcType";
+    public static final String ROUTER_INFO ="routerInfo";
+    public static final String RESULT_DATA ="resultData";
+    public static final String RETURN_CODE ="returnCode";
+    public static final String DOWN_STREAM_COST ="downstreamCost";
+    public static final String DOWN_STREAM_BEGIN ="downstreamBegin";
+    public static final String ROUTE_BASIS ="routeBasis";
+    public static final String SOURCE_IP ="sourceIp";
 
-    // configuration property key
+
+    /**
+     * configuration property key
+     */
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL = "remoteModelInferenceResultCacheTTL";
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_MAX_SIZE = "remoteModelInferenceResultCacheMaxSize";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_TTL = "inferenceResultCacheTTL";

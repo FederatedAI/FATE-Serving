@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.proxy.security;
 
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class InferenceParamValidator implements Interceptor{
 
     @Override
-    public void doPreProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotEmpty(context.getCaseId()),"case id is null");
         Preconditions.checkArgument(null != inboundPackage.getHead(),Dict.HEAD + " is null");
         Preconditions.checkArgument(null != inboundPackage.getBody(),Dict.BODY + " is null");
