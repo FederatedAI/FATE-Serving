@@ -72,7 +72,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
 
             stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
 
-            metricFactory.counter("grpc.unaryCall", "send out to self serving-server or other proxy", "send", "self serving-server or other proxy").increment();
+            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "out", "result", "success").increment();
 
             context.setDownstreamBegin(System.currentTimeMillis());
 
@@ -80,12 +80,12 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
 
             Proxy.Packet packet = future.get(timeout,TimeUnit.MILLISECONDS);
 
-            metricFactory.counter("grpc.unaryCall", "receive from self serving-server or other proxy", "receive", "self serving-server or other proxy", "result", "success").increment();
+            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "success").increment();
 
             return  packet;
 
         } catch (Exception e) {
-            metricFactory.counter("grpc.unaryCall", "receive from self serving-server or other proxy", "receive", "self serving-server or other proxy", "result", "grpc.error").increment();
+            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "error").increment();
 
             e.printStackTrace();
             logger.error("unaryCall error ",e);

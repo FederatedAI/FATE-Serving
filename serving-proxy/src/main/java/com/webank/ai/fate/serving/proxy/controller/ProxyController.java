@@ -61,7 +61,7 @@ public class ProxyController {
                              HttpServletRequest httpServletRequest,
                              @RequestHeader HttpHeaders headers
     ) throws Exception {
-        metricFactory.counter("http.inference", "inference request", "request", "all").increment();
+        metricFactory.counter("http.inference.request", "http inference request").increment();
 
         return new Callable<String>() {
             @Override
@@ -82,7 +82,7 @@ public class ProxyController {
                     result.getData().remove("caseid");
                 }
 
-                metricFactory.counter("http.inference", "inference response", "response", "all").increment();
+                metricFactory.counter("http.inference.response", "http inference response").increment();
 
                 return  JSON.toJSONString(result.getData());
 
