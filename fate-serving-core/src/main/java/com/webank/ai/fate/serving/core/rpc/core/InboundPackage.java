@@ -1,11 +1,10 @@
-package com.webank.ai.fate.serving.proxy.rpc.core;
+package com.webank.ai.fate.serving.core.rpc.core;
 
-import com.webank.ai.fate.serving.proxy.rpc.router.RouterInfo;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import io.grpc.ManagedChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -29,7 +28,7 @@ public class InboundPackage<T> {
 
     RouterInfo routerInfo;
 
-    public HttpServletRequest getHttpServletRequest() {
+    /*public HttpServletRequest getHttpServletRequest() {
         return httpServletRequest;
     }
 
@@ -37,7 +36,7 @@ public class InboundPackage<T> {
         this.httpServletRequest = httpServletRequest;
     }
 
-    HttpServletRequest   httpServletRequest;
+    HttpServletRequest   httpServletRequest;*/
 
     public RouterInfo getRouterInfo() {
         return routerInfo;

@@ -1,12 +1,12 @@
 package com.webank.ai.fate.serving.proxy.security;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import com.webank.ai.fate.serving.proxy.exceptions.InvalidRoleInfoException;
-import com.webank.ai.fate.serving.proxy.rpc.core.Context;
-import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.proxy.rpc.core.Interceptor;
-import com.webank.ai.fate.serving.proxy.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcType;
+import com.webank.ai.fate.serving.core.exceptions.InvalidRoleInfoException;
+import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

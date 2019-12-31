@@ -1,11 +1,11 @@
 package com.webank.ai.fate.serving.proxy.security;
 
 import com.google.common.base.Preconditions;
+import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.proxy.common.Dict;
-import com.webank.ai.fate.serving.proxy.rpc.core.Context;
-import com.webank.ai.fate.serving.proxy.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.proxy.rpc.core.Interceptor;
-import com.webank.ai.fate.serving.proxy.rpc.core.OutboundPackage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 

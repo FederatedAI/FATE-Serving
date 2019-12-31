@@ -2,10 +2,13 @@ package com.webank.ai.fate.serving.proxy.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.webank.ai.fate.serving.metrics.api.ICounter;
+import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.common.Dict;
-import com.webank.ai.fate.serving.proxy.rpc.core.*;
+import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +74,7 @@ public class ProxyController {
 
                 InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, data, httpServletRequest);
 
-                OutboundPackage<Map>  result  =   serviceAdaptor.service(context,inboundPackage );
+                OutboundPackage<Map> result  =   serviceAdaptor.service(context,inboundPackage );
                 if(result!=null&&result.getData()!=null) {
                     result.getData().remove("log");
                     result.getData().remove("warn");
@@ -106,7 +109,7 @@ public class ProxyController {
         InboundPackage<Map> inboundPackage = new InboundPackage<Map>();
         inboundPackage.setBody(body);
         inboundPackage.setHead(head);
-        inboundPackage.setHttpServletRequest(httpServletRequest);
+//        inboundPackage.setHttpServletRequest(httpServletRequest);
         return inboundPackage;
     }
 

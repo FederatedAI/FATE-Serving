@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.proxy.rpc.grpc;
+package com.webank.ai.fate.serving.core.rpc.grpc;
 
 /**
  * @Description TODO

@@ -5,9 +5,13 @@ package com.webank.ai.fate.serving.proxy.rpc.grpc;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.common.Dict;
-import com.webank.ai.fate.serving.proxy.rpc.core.*;
+import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,7 +27,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
 
     public abstract ProxyServiceRegister getProxyServiceRegister();
 
-    public abstract void setExtraInfo(Context  context, InboundPackage<Proxy.Packet> inboundPackage, Proxy.Packet req);
+    public abstract void setExtraInfo(Context context, InboundPackage<Proxy.Packet> inboundPackage, Proxy.Packet req);
 
     @RegisterService(serviceName = "unaryCall")
     @Override
@@ -39,7 +43,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
 
         metricFactory.counter("grpc.unaryCall", "unaryCall request", "request", context.getGrpcType().toString()).increment();
 
-        OutboundPackage<Proxy.Packet>   outboundPackage = null;
+        OutboundPackage<Proxy.Packet> outboundPackage = null;
         try {
             outboundPackage = unaryCallService.service(context,inboundPackage);
         } catch (Exception e) {

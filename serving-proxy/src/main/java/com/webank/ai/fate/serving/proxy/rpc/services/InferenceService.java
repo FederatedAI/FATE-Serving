@@ -6,12 +6,16 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
+import com.webank.ai.fate.serving.core.exceptions.NoResultException;
+import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.common.Dict;
-import com.webank.ai.fate.serving.proxy.exceptions.NoResultException;
-import com.webank.ai.fate.serving.proxy.rpc.core.*;
+import com.webank.ai.fate.serving.proxy.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
-import com.webank.ai.fate.serving.proxy.rpc.router.RouterInfo;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,7 +39,7 @@ import java.util.concurrent.TimeUnit;
         "inferenceParamValidator",
         "defaultServingRouter"})
 
-public class InferenceService extends AbstractServiceAdaptor<Map,Map >   {
+public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
 
     Logger logger  = LoggerFactory.getLogger(InferenceService.class);
 
