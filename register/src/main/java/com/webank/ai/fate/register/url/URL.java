@@ -17,8 +17,8 @@
 package com.webank.ai.fate.register.url;
 
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -141,7 +141,7 @@ class URL implements Serializable {
         int i = url.indexOf("?"); // separator between body and parameters
         if (i >= 0) {
             String[] parts = url.substring(i + 1).split("&");
-            parameters = new HashMap<>();
+            parameters = new HashMap<>(8);
             for (String part : parts) {
                 part = part.trim();
                 if (part.length() > 0) {
@@ -246,7 +246,7 @@ class URL implements Serializable {
         int i = url.indexOf("?"); // separator between body and parameters
         if (i >= 0) {
             String[] parts = url.substring(i + 1).split("&");
-            parameters = new HashMap<>();
+            parameters = new HashMap<>(8);
             for (String part : parts) {
                 part = part.trim();
                 if (part.length() > 0) {
@@ -343,7 +343,7 @@ class URL implements Serializable {
     }
 
     public static URL valueOf(URL url, String[] reserveParams, String[] reserveParamPrefixs) {
-        Map<String, String> newMap = new HashMap<>();
+        Map<String, String> newMap = new HashMap<>(8);
         Map<String, String> oldMap = url.getParameters();
         if (reserveParamPrefixs != null && reserveParamPrefixs.length != 0) {
             for (Map.Entry<String, String> entry : oldMap.entrySet()) {
@@ -453,7 +453,7 @@ class URL implements Serializable {
             host = url.substring(0, i);
         }
 
-        return new URL(protocol, project, environment, host, port, path, new HashMap<>());
+        return new URL(protocol, project, environment, host, port, path, new HashMap<>(8));
     }
 
     public String getEnvironment() {
@@ -620,12 +620,12 @@ class URL implements Serializable {
 
     private Map<String, Number> getNumbers() {
         // concurrent initialization is tolerant
-        return numbers == null ? new ConcurrentHashMap<>() : numbers;
+        return numbers == null ? new ConcurrentHashMap<>(8) : numbers;
     }
 
     private Map<String, URL> getUrls() {
         // concurrent initialization is tolerant
-        return urls == null ? new ConcurrentHashMap<>() : urls;
+        return urls == null ? new ConcurrentHashMap<>(8) : urls;
     }
 
     public URL getUrlParameter(String key) {
@@ -1133,7 +1133,7 @@ class URL implements Serializable {
         if (pairs.length % 2 != 0) {
             throw new IllegalArgumentException("Map pairs can not be odd number.");
         }
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(8);
         int len = pairs.length / 2;
         for (int i = 0; i < len; i++) {
             map.put(pairs[2 * i], pairs[2 * i + 1]);
@@ -1170,7 +1170,7 @@ class URL implements Serializable {
     }
 
     public URL clearParameters() {
-        return new URL(protocol, project, environment, host, port, path, new HashMap<>());
+        return new URL(protocol, project, environment, host, port, path, new HashMap<>(8));
     }
 
     public String getRawParameter(String key) {

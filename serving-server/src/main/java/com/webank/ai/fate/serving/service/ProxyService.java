@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.service;
 
 import com.alibaba.fastjson.JSON;
+import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -37,30 +38,25 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
     private static final Logger logger = LogManager.getLogger();
     @Autowired
     HostInferenceProvider hostInferenceProvider;
-
+    @Autowired
+    MetricRegistry  metricRegistry;
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
         ReturnResult responseResult = null;
-        Context context = new BaseContext(new HostInferenceLoggerPrinter());
+        String actionType =  req.getHeader().getCommand().getName();
+
+        Context context = new BaseContext(new HostInferenceLoggerPrinter(),actionType,metricRegistry);
         context.setActionType(req.getHeader().getCommand().getName());
         context.preProcess();
-        //Map<String, Object> requestData=null;
         HostFederatedParams requestData = null;
 
         try {
-            //requestData = (Map<String, Object>) ObjectTransform.json2Bean(req.getBody().getValue().toStringUtf8(), HashMap.class);
-            //{"caseId":"73aca9d0dec811e9a0af5254005e961b","featureIdMap":{"device_id":"xxxxxxxxxx","phone_num":""},"local":{"partyId":"10000","role":"host"},
-            // "partnerLocal":{"partyId":"9999","role":"guest"},"partnerModelInfo":{"name":"201909241953242070093","namespace":"guest#9999#guest-9999#host-10000#model"},
-            // "role":{"allRole":{"host":["10000"],"guest":["9999"]}},"seqNo":"1b91bb3621704dc3bf4e63a1ed22e81d"}
-
 
             String data = req.getBody().getValue().toStringUtf8();
             logger.info("unaryCall {} head {}", data,req.getHeader().getCommand().getName());
-
             requestData = JSON.parseObject(data, HostFederatedParams.class);
-
             context.setCaseId(requestData.getCaseId() != null ? requestData.getCaseId() : Dict.NONE);
 
             switch (req.getHeader().getCommand().getName()) {
@@ -84,16 +80,10 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
 
             Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
-
             FederatedParty partnerParty = requestData.getPartnerLocal();
             FederatedParty party = requestData.getLocal();
-
             context.putData(Dict.GUEST_APP_ID, partnerParty.getPartyId());
             context.putData(Dict.HOST_APP_ID, party.getPartyId());
-
-
-//            FederatedParty partnerParty = (FederatedParty) ObjectTransform.json2Bean(requestData.get("partner_local").toString(), FederatedParty.class);
-//            FederatedParty party = (FederatedParty) ObjectTransform.json2Bean(requestData.get("local").toString(), FederatedParty.class);
 
             metaDataBuilder.setSrc(
                     topicBuilder.setPartyId(String.valueOf(party.getPartyId()))

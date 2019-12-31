@@ -102,11 +102,13 @@ Key configuration item description:
 | redis.maxTotal | The maximum number of objects that can be allocated by the pool | default 100 |
 | redis.maxIdle | The maximum number of "idle" instances that can be held in the pool or a negative value if there is no limit | default 100 |
 | external.remoteModelInferenceResultCacheTTL | The remote model inference result cache expire after access  for external cache | default 86400 |
-| external.remoteModelInferenceResultCacheDBIndex | The remote model inference result cache DBIndex for external | default 1,10 |
+| external.remoteModelInferenceResultCacheDBIndex | The remote model inference result cache DBIndex for external | default 0 |
 | external.inferenceResultCacheTTL | The inference result cache expire after access for external cache | default 300 |
 | external.inferenceResultCacheDBIndex | The inference result cache DBIndex for external cache | default 0 |
-| external.processCacheDBIndex | The process cache DBIndex for external cache | default 3 |
+| external.processCacheDBIndex | The process cache DBIndex for external cache | default 0 |
 | canCacheRetcode | Caching result by retcode | default 0,102 |
+| acl.username | Zookeeper acl authentication user name | |
+| acl.password | Zookeeper acl authentication user password |  |
 
 ### proxy.properties
 Key configuration item description:
@@ -119,8 +121,9 @@ Key configuration item description:
 | zk.url | zookeeper url, same as serving configuration | default zookeeper://localhost:2181 |
 | useRegister | Register interface to registry or not | default false |
 | useZkRouter | route request by the interface info which is registered into zookeeper | default false |
-| route.table | router table configuration file absolute path | default conf/route_table.json |
-
+| route.table | router table configuration file absolute path | default /data/projects/fate/serving-router/conf/route_table.json |
+| acl.username | Zookeeper acl authentication user name |   |
+| acl.password | Zookeeper acl authentication user password |  |
 
 ### Deploy Serving-Server 
 For detail, Here are some key steps:
@@ -129,23 +132,22 @@ For detail, Here are some key steps:
     1.git clone https://github.com/FederatedAI/FATE-Serving.git
     2.cd  FATE-Serving
     3.mvn clean package
-    4.copy serving-server/target/fate-serving-server-1.1-release.zip to your deploy location and unzip it
+    4.copy serving-server/target/fate-serving-server-1.1.2-release.zip to your deploy location and unzip it
     5.modify the configuration file conf/serving-server.properties according to your own requirements
     6.confirm whether Java is installed. You can check through the java -version command.
-    7.ln -s fate-serving-server-1.1.jar fate-serving-server.jar, creating soft links for jar.
-    8.sh service.sh restart
+    7.sh service.sh restart
 
    
+
 
 ### Deploy Serving-Router
 
 For detail, Here are some key steps:
 
     1.Same as serving-server deploy steps 1/2/3, if it has been executed, you can skip
-    2.copy router/target/fate-serving-router-1.1-release.zip to your deploy location and unzip it
+    2.copy router/target/fate-serving-router-1.1.2-release.zip to your deploy location and unzip it
     3.modify the configuration file conf/proxy.properties and conf/route_table.json according to your own requirements
     5.confirm whether Java is installed. You can check through the java -version command.
-    6.ln -s fate-serving-router-1.1.jar fate-serving-router.jar, creating soft links for jar.
     6.sh service.sh restart
 
 

@@ -69,10 +69,21 @@ message Data {
     bytes value = 2;    // actual value
 }
 
+// authentication info
+message AuthInfo {
+    int64 timestamp = 1;   // timestamp of request, millisecond
+    string appKey = 2;
+    string signature = 3;    // signature
+    string applyId = 4;
+    string nonce = 5;
+    string version = 6;
+}
+
 // data streaming packet
 message Packet {
     Metadata header = 1;    // packet header
     Data body = 2;          // packet body
+    AuthInfo auth = 3;      // authentication info, optional
 }
 
 // returned by service heartbeat to decide next operation

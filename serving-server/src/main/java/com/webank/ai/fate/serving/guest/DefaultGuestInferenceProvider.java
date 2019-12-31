@@ -72,8 +72,15 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         inferenceResult.setCaseid(inferenceRequest.getCaseid());
         String modelName = inferenceRequest.getModelVersion();
         String modelNamespace = inferenceRequest.getModelId();
-        if (StringUtils.isEmpty(modelNamespace) && inferenceRequest.haveAppId()) {
-            modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getAppid());
+        String serviceId = inferenceRequest.getServiceId();
+
+
+        if (StringUtils.isEmpty(modelNamespace)  ) {
+            if(StringUtils.isNotEmpty(inferenceRequest.getServiceId())){
+                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getServiceId());
+            }else if(inferenceRequest.haveAppId()) {
+                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getAppid());
+            }
         }
         if (StringUtils.isEmpty(modelNamespace)) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
@@ -91,6 +98,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
             return inferenceResult;
         }
+
         LOGGER.info("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
         Map<String, Object> rawFeatureData = inferenceRequest.getFeatureData();
 
@@ -119,18 +127,20 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             logInference(context, inferenceRequest, modelNamespaceData, inferenceResult, 0, false, false);
             return inferenceResult;
         }
-        Map<String, Object> predictParams = new HashMap<>();
+        Map<String, Object> predictParams = new HashMap<>(8);
         Map<String, Object> modelFeatureData = Maps.newHashMap(featureData);
         FederatedParams federatedParams = new FederatedParams();
-
+        if(inferenceRequest.getSendToRemoteFeatureData()!=null&&federatedParams.getFeatureIdMap()!=null) {
+            federatedParams.getFeatureIdMap().putAll(inferenceRequest.getSendToRemoteFeatureData());
+        }
         federatedParams.setCaseId(inferenceRequest.getCaseid());
         federatedParams.setSeqNo(inferenceRequest.getSeqno());
         federatedParams.setLocal(modelNamespaceData.getLocal());
         federatedParams.setModelInfo(new ModelInfo(modelName, modelNamespace));
         federatedParams.setRole(modelNamespaceData.getRole());
-        federatedParams.setFeatureIdMap(featureIds);
-
-
+        if(featureIds!=null&&featureIds.size()>0) {
+            federatedParams.getFeatureIdMap().putAll(featureIds);
+        }
         Map<String, Object> modelResult = model.predict(context, modelFeatureData, federatedParams);
         PostProcessingResult postProcessingResult;
         try {
@@ -160,19 +170,17 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             if (!getRemotePartyResult) {
                 billing = false;
             } else if (federatedResult != null) {
-
                 if (federatedResult.getRetcode() == InferenceRetCode.GET_FEATURE_FAILED || federatedResult.getRetcode() == InferenceRetCode.INVALID_FEATURE || federatedResult.getRetcode() == InferenceRetCode.NO_FEATURE) {
                     billing = false;
                 }
-
-
                 if (federatedResult.getRetcode() != 0) {
                     partyInferenceRetcode += 2;
                     inferenceResult.setRetcode(federatedResult.getRetcode());
                 }
-
+            }else{
+                partyInferenceRetcode += 2;
             }
-            if (inferenceResult.getRetcode() != 0) {
+            if (inferenceResult.getRetcode() != 0&&partyInferenceRetcode==0) {
                 partyInferenceRetcode += 1;
             }
             inferenceResult.setRetcode(inferenceResult.getRetcode() + partyInferenceRetcode * 1000);

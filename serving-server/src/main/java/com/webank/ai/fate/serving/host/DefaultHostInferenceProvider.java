@@ -39,8 +39,6 @@ import java.util.Map;
 public class DefaultHostInferenceProvider implements HostInferenceProvider {
 
     private static final Logger LOGGER = LogManager.getLogger(DefaultHostInferenceProvider.class);
-
-    //Logger logger =  LoggerFactory.getLogger(DefaultHostInferenceProvider.class);
     @Autowired
     ModelManager modelManager;
 
@@ -67,11 +65,6 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
 
         long startTime = System.currentTimeMillis();
         ReturnResult returnResult = new ReturnResult();
-        //TODO: Very ugly, need to be optimized
-//        FederatedParty party = (FederatedParty) ObjectTransform.json2Bean(federatedParams.get("local").toString(), FederatedParty.class);
-//        FederatedRoles federatedRoles = (FederatedRoles) ObjectTransform.json2Bean(federatedParams.get("role").toString(), FederatedRoles.class);
-//        ModelInfo partnerModelInfo = (ModelInfo) ObjectTransform.json2Bean(federatedParams.get("partner_model_info").toString(), ModelInfo.class);
-//        Map<String, Object> featureIds = (Map<String, Object>) ObjectTransform.json2Bean(federatedParams.get("feature_id").toString(), HashMap.class);
         boolean billing = false;
         FederatedParty party = federatedParams.getLocal();
         FederatedRoles federatedRoles = federatedParams.getRole();
@@ -89,11 +82,10 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
         if (model == null) {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             returnResult.setRetmsg("Can not found model.");
-            //     InferenceUtils.logInference(context ,federatedParams, party, federatedRoles, returnResult, 0, false, false);
             return returnResult;
         }
         LOGGER.info("use model to inference on {} {}, id: {}, version: {}", party.getRole(), party.getPartyId(), modelInfo.getNamespace(), modelInfo.getName());
-        Map<String, Object> predictParams = new HashMap<>();
+        Map<String, Object> predictParams = new HashMap<>(8);
         predictParams.put(Dict.FEDERATED_PARAMS, federatedParams);
 
         try {

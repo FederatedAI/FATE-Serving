@@ -21,6 +21,7 @@
 
 module=serving-server
 main_class=com.webank.ai.fate.serving.ServingServer
+module_version=1.1.2
 
 getpid() {
     pid=`ps aux | grep ${main_class} | grep -v grep | awk '{print $2}'`
@@ -54,6 +55,9 @@ start() {
     getpid
     if [[ $? -eq 0 ]]; then
         mklogsdir
+        if [[ ! -e "fate-${module}.jar" ]]; then
+          ln -s fate-${module}-${module_version}.jar fate-${module}.jar
+        fi
         java  -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/${module}.properties >> logs/console.log 2>>logs/error.log &
         if [[ $? -eq 0 ]]; then
             getpid

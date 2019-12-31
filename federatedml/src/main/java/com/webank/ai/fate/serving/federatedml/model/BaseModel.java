@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -30,6 +31,7 @@ import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -77,7 +79,6 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
     }
 
-    ;
 
     @Override
     public void preprocess(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
@@ -102,49 +103,31 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             FederatedParty srcParty = guestFederatedParams.getLocal();
             FederatedRoles federatedRoles = guestFederatedParams.getRole();
             Map<String, Object> featureIds = (Map<String, Object>) guestFederatedParams.getFeatureIdMap();
-
-            //TODO: foreach
             FederatedParty dstParty = new FederatedParty(Dict.HOST, federatedRoles.getRole(Dict.HOST).get(0));
             if (useCache) {
-                ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(dstParty, federatedRoles, featureIds);
+                ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(guestFederatedParams);
                 if (remoteResultFromCache != null) {
-                    LOGGER.info("caseid {} get remote party model inference result from cache.", context.getCaseId());
-                    //federatedParams.put("getRemotePartyResult", false);
+                    LOGGER.info("caseid {} get remote party model inference result from cache", context.getCaseId());
                     context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
                     context.hitCache(true);
                     remoteResult = remoteResultFromCache;
                     return remoteResult;
                 }
             }
-
-
             HostFederatedParams hostFederatedParams = new HostFederatedParams();
-
-
             hostFederatedParams.setCaseId(guestFederatedParams.getCaseId());
             hostFederatedParams.setSeqNo(guestFederatedParams.getSeqNo());
-            hostFederatedParams.setFeatureIdMap(guestFederatedParams.getFeatureIdMap());
+//            hostFederatedParams.setFeatureIdMap(guestFederatedParams.getFeatureIdMap());
+            hostFederatedParams.getFeatureIdMap().putAll(guestFederatedParams.getFeatureIdMap());
             hostFederatedParams.setLocal(dstParty);
             hostFederatedParams.setPartnerLocal(srcParty);
             hostFederatedParams.setRole(federatedRoles);
             hostFederatedParams.setPartnerModelInfo(guestFederatedParams.getModelInfo());
             hostFederatedParams.setData(guestFederatedParams.getData());
-
-
-//        Map<String, Object> requestData = new HashMap<>();
-//        Arrays.asList("caseid", "seqno").forEach((field -> {
-//            requestData.put(field, federatedParams.get(field));
-//        }));
-//        requestData.put("partner_local", ObjectTransform.bean2Json(srcParty));
-//        requestData.put("partner_model_info", ObjectTransform.bean2Json(federatedParams.get("model_info")));
-//        requestData.put("feature_id", ObjectTransform.bean2Json(federatedParams.get("feature_id")));
-//        requestData.put("local", ObjectTransform.bean2Json(dstParty));
-//        requestData.put("role", ObjectTransform.bean2Json(federatedParams.get("role")));
-//        federatedParams.put("getRemotePartyResult", true);
             context.putData(Dict.GET_REMOTE_PARTY_RESULT, true);
             remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
-            if (useCache) {
-                CacheManager.getInstance().putRemoteModelInferenceResult(dstParty, federatedRoles, featureIds, remoteResult);
+            if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
+                CacheManager.getInstance().putRemoteModelInferenceResult(guestFederatedParams, remoteResult);
                 LOGGER.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
             }
             return remoteResult;
@@ -161,12 +144,6 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
         try {
 
             Proxy.Packet.Builder packetBuilder = Proxy.Packet.newBuilder();
-
-//            packetBuilder.setBody(Proxy.Data.newBuilder()
-//                    .setValue(ByteString.copyFrom(ObjectTransform.bean2Json(requestData).getBytes()))
-//                    .build());
-
-
             packetBuilder.setBody(Proxy.Data.newBuilder()
                     .setValue(ByteString.copyFrom(JSON.toJSONBytes(hostFederatedParams)))
                     .build());
@@ -189,6 +166,12 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             String version =  Configuration.getProperty(Dict.VERSION,"");
             metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
             packetBuilder.setHeader(metaDataBuilder.build());
+			
+			Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
+            authBuilder.setNonce(context.getCaseId());
+            authBuilder.setVersion(version);
+            packetBuilder.setAuth(authBuilder.build());
+			
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
             String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
             boolean routerByzk = Boolean.valueOf(routerByZkString);
@@ -200,13 +183,14 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
                 URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
                 URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
                 List<URL> urls = routerService.router(newUrl);
-                if (urls.size() > 0) {
+                if (urls!=null&&urls.size() > 0) {
                     URL url = urls.get(0);
                     String ip = url.getHost();
                     int port = url.getPort();
                     address = ip + ":" + port;
                 }
             }
+            Preconditions.checkArgument(StringUtils.isNotEmpty(address));
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
             try {
 

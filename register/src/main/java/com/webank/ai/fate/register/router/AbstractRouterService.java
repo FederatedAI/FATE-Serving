@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.register.router;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.register.common.AbstractRegistry;
 import com.webank.ai.fate.register.common.Constants;
@@ -36,10 +37,8 @@ import java.util.List;
 
 public abstract class AbstractRouterService implements RouterService {
 
-
     protected LoadBalancerFactory loadBalancerFactory = new DefaultLoadBalancerFactory();
     protected AbstractRegistry registry;
-    protected LoadBalancer loadBalancer;
     Logger logger = LogManager.getLogger();
 
     public Registry getRegistry() {
@@ -50,23 +49,28 @@ public abstract class AbstractRouterService implements RouterService {
         this.registry = registry;
     }
 
-    public LoadBalancer getLoadBalancer() {
-        return loadBalancer;
-    }
-
-    public void setLoadBalancer(LoadBalancer loadBalancer) {
-        this.loadBalancer = loadBalancer;
-    }
 
     @Override
     public List<URL> router(URL url, LoadBalanceModel loadBalanceModel) {
 
-        this.loadBalancer = loadBalancerFactory.getLoaderBalancer(loadBalanceModel);
+        LoadBalancer loadBalancer = loadBalancerFactory.getLoaderBalancer(loadBalanceModel);
+        return doRouter(url, loadBalancer);
+    }
+    @Override
+    public List<URL> router(String project,String environment ,String  serviceName){
 
-        return doRouter(url, loadBalanceModel);
+        Preconditions.checkArgument(StringUtils.isNotEmpty(project));
+        Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
+        Preconditions.checkArgument(StringUtils.isNotEmpty(serviceName));
+        LoadBalancer loadBalancer = loadBalancerFactory.getLoaderBalancer(LoadBalanceModel.random_with_weight);
+        StringBuilder   stringBuilder = new StringBuilder();
+        stringBuilder.append(project).append("/").append(environment).append("/").append(serviceName);
+        URL paramUrl = URL.valueOf(stringBuilder.toString());
+        return doRouter(paramUrl, loadBalancer);
     }
 
-    public abstract List<URL> doRouter(URL url, LoadBalanceModel loadBalanceModel);
+
+    public abstract List<URL> doRouter(URL url, LoadBalancer loadBalancer);
 
 
     @Override
@@ -75,13 +79,9 @@ public abstract class AbstractRouterService implements RouterService {
     }
 
     protected List<URL> filterVersion(List<URL> urls, String version) {
-
         if(StringUtils.isEmpty(version)){
-
             return urls;
-
         }
-
         final List<URL> resultUrls = Lists.newArrayList();
 
         if (CollectionUtils.isNotEmpty(urls)) {

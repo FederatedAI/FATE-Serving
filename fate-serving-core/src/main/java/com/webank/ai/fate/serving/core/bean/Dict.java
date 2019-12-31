@@ -24,6 +24,7 @@ public class Dict {
     public static final String SCORE = "score";
     public static final String SEQNO = "seqno";
     public static final String NONE = "NONE";
+    public static final String PIPLELINE_IN_MODEL = "pipeline.pipeline:Pipeline";
     public static final String POST_PROCESSING_CONFIG = "InferencePostProcessingAdapter";
     public static final String PRE_PROCESSING_CONFIG = "InferencePreProcessingAdapter";
     public static final String GET_REMOTE_PARTY_RESULT = "getRemotePartyResult";
@@ -41,8 +42,6 @@ public class Dict {
     public static final String MODEL_FEDERATED_PARTY = "model_federated_party";
     public static final String MODEL_FEDERATED_ROLES = "model_federated_roles";
     public static final String VERSION ="version";
-
-    // configuration property key
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL = "remoteModelInferenceResultCacheTTL";
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_MAX_SIZE = "remoteModelInferenceResultCacheMaxSize";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_TTL = "inferenceResultCacheTTL";
@@ -125,13 +124,18 @@ public class Dict {
     public static final String USE_ZK_ROUTER = "useZkRouter";
     public static final String FALSE = "false";
     public static final String USE_REGISTER = "useRegister";
-    public static final String USE_JMX = "useJMX";
-    public static final String JMX_SERVER_NAME = "jmx.server.name";
-    public static final String JMX_PORT = "jmx.port";
-
 
     public  static  final String GUEST_APP_ID = "guestAppId";
     public  static  final String HOST_APP_ID = "hostAppId";
+    public  static  final String SERVICE_ID = "serviceId";
+    public  static  final String CONFIGPATH = "configpath";
+    public  static  final String ACL_USERNAME = "acl.username";
+    public  static  final String ACL_PASSWORD = "acl.password";
+    public  static  final String AUTH_FILE = "authFile";
+    public  static  final String ENCRYPT_TYPE = "encrypt_type";
+
+
+    public  static  final String MD5_SALT = "$1$ML";
 
 
 }
