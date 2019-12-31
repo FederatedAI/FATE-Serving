@@ -34,7 +34,8 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
     @Override
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver)  {
 
-        metricFactory.counter("grpc.unaryCall", "unaryCall request", "request", "all").increment();
+        metricFactory.counter("grpc.unaryCall.request", "grpc unaryCall request",
+                "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
 
         logger.info("unaryCall req {}",req);
         ServiceAdaptor unaryCallService = getProxyServiceRegister().getServiceAdaptor("unaryCall");
@@ -42,7 +43,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, req);
         setExtraInfo(context, inboundPackage, req);
 
-        metricFactory.counter("grpc.unaryCall", "unaryCall request", "request", context.getGrpcType().toString()).increment();
+        metricFactory.counter("grpc.unaryCall", "grpc unaryCall","direction", "request", "grpc.type", context.getGrpcType().toString()).increment();
 
         OutboundPackage<Proxy.Packet> outboundPackage = null;
         try {
@@ -55,8 +56,9 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         responseObserver.onNext(result);
         responseObserver.onCompleted();
 
-        metricFactory.counter("grpc.unaryCall", "unaryCall response", "response", context.getGrpcType().toString()).increment();
-        metricFactory.counter("grpc.unaryCall", "unaryCall response", "response", "all").increment();
+        metricFactory.counter("grpc.unaryCall.response", "grpc unaryCall response",
+                "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
+        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "response", "grpc.type", context.getGrpcType().toString()).increment();
     }
 
     public InboundPackage<Proxy.Packet> buildInboundPackage(Context  context, Proxy.Packet req){

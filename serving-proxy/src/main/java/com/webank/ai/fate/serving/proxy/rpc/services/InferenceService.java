@@ -88,15 +88,15 @@ public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
 
                 InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
 
-                metricFactory.counter("http.inference", "send to self serving server", "send", "self.serving-server").increment();
+                metricFactory.counter("http.inference.service", "in doService", "direction", "to.self.serving-server", "result", "success").increment();
 
                 ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture = futureStub.inference(reqBuilder.build());
                 InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout,TimeUnit.MILLISECONDS);
-                metricFactory.counter("http.inference", "receive from self serving server", "receive", "self.serving-server", "result", "success").increment();
+                metricFactory.counter("http.inference.service", "in doService", "direction", "from.self.serving-server", "result", "success").increment();
                 logger.info("routerinfo {} send {} result {}",routerInfo,inferenceReqMap,result);
                 resultString = new String(result.getBody().toByteArray());
             } catch (Exception e) {
-                metricFactory.counter("http.inference", "receive from self serving server", "receive", "self.serving-server", "result", "grpc.error").increment();
+                metricFactory.counter("http.inference.service", "in doService", "direction", "from.self.serving-server", "result", "grpc.error").increment();
                 logger.error("get grpc result error", e);
                 throw new NoResultException();
             }
