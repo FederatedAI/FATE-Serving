@@ -8,7 +8,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.core.BasicMeta;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouteType;
 import com.webank.ai.fate.serving.core.rpc.router.RouteTypeConvertor;

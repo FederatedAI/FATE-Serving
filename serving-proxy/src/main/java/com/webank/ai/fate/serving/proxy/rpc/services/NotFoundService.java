@@ -2,8 +2,8 @@ package com.webank.ai.fate.serving.proxy.rpc.services;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ProxyService;

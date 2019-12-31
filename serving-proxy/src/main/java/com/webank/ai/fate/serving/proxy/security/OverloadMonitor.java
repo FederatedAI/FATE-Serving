@@ -3,7 +3,7 @@ package com.webank.ai.fate.serving.proxy.security;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -20,7 +20,7 @@ public class OverloadMonitor implements Interceptor{
     Logger logger = LoggerFactory.getLogger(OverloadMonitor.class);
 
     @Override
-    public void doPreProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         Entry entry = null;
         try {
              SphU.entry(context.getServiceName());

@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.proxy.rpc.router;
 
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -26,7 +26,7 @@ public class DefaultServingRouter implements Interceptor{
     private  ConfigFileBasedServingRouter configFileBasedServingRouter;
 
     @Override
-    public void doPreProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         RouterInfo routerInfo =zkServingRouter.route(context, inboundPackage);
         if(null == routerInfo){
             routerInfo = configFileBasedServingRouter.route(context, inboundPackage);

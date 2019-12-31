@@ -1,5 +1,7 @@
 package com.webank.ai.fate.serving.core.rpc.core;
 
+import com.webank.ai.fate.serving.core.bean.Context;
+
 import java.util.List;
 
 public interface ServiceAdaptor<req, rsp> {

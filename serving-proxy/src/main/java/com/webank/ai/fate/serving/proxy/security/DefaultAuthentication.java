@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.proxy.security;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.InvalidRoleInfoException;
-import com.webank.ai.fate.serving.core.rpc.core.Context;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
