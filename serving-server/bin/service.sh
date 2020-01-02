@@ -30,8 +30,7 @@ getpid() {
 		touch ./${module}_pid
 		echo "" >./${module}_pid
 	fi
-	module_pid=`cat ./${module}_pid`
-	pid=`ps aux | grep ${module_pid} | grep -v grep | grep -v $0 | awk '{print $2}'`
+	pid=`cat ./${module}_pid`
 	if [[ -n ${pid} ]]; then
 		return 1
 	else

@@ -26,13 +26,18 @@ main_class=com.webank.ai.fate.networking.Proxy
 module_version=1.2.0
 
 getpid() {
-    pid=`ps aux | grep ${module} | grep -v grep | awk '{print $2}'`
+   # pid=`ps aux | grep ${module} | grep -v grep | awk '{print $2}'`
 
-    if [[ -n ${pid} ]]; then
-        return 1
-    else
-        return 0
-    fi
+	if [ ! -e "./${module}_pid" ];then
+		touch ./${module}_pid
+		echo "" >./${module}_pid
+	fi
+	pid=`cat ./${module}_pid`
+	if [[ -n ${pid} ]]; then
+		return 1
+	else
+		return 0
+	fi
 }
 
 mklogsdir() {
@@ -62,6 +67,8 @@ start() {
         fi
         java -DauthFile=${configpath}/auth_config.json -Drouter_file=${configpath}/route_table.json -cp    "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/proxy.properties >> logs/console.log 2>>logs/error.log &
         if [[ $? -eq 0 ]]; then
+            sleep 2
+            echo $!>./${module}_pid
             getpid
             echo "service start sucessfully. pid: ${pid}"
         else
@@ -79,6 +86,7 @@ stop() {
         `ps aux | grep ${pid} | grep -v grep`"
         kill -9 ${pid}
         if [[ $? -eq 0 ]]; then
+            rm -rf ./${module}_pid
             echo "killed"
         else
             echo "kill error"
