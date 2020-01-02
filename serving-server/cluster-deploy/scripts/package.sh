@@ -74,15 +74,6 @@ elif [ ${apply_zk} = "true" ]
 then
 	echo "---------apply _zk true"
 	cd $router_path/conf
-	sleep 6
-	echo "----------------" ${host_zk_url}
-	echo "----------------" ${host_zk_url}
-	echo "----------------" ${host_zk_url}
-	echo "----------------" ${host_zk_url}
-	echo "----------------" ${host_zk_url}
-	echo "----------------" ${host_zk_url}
-	echo "----------------" pwd
-	echo "----------------" $pwd
 	sed -i "/^zk.url=/czk.url=${host_zk_url}" proxy.properties
 	cd  $sering_path/conf
 	sed -i 's#zk.url=zookeeper://localhost:2181#'zk.url=${host_zk_url}'#' serving-server.properties
