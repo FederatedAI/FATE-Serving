@@ -27,11 +27,16 @@ getpid() {
     sleep 1
     pid=`ps aux | grep ${module} | grep -v grep | awk '{print $2}'`
 
-    if [[ -n ${pid} ]]; then
-        return 1
-    else
-        return 0
-    fi
+	if [ ! -e "./${module}_pid" ];then
+		touch ./${module}_pid
+		echo "" >./${module}_pid
+	fi
+	pid=`cat ./${module}_pid`
+	if [[ -n ${pid} ]]; then
+		return 1
+	else
+		return 0
+	fi
 }
 
 mklogsdir() {
@@ -58,6 +63,8 @@ start() {
         mklogsdir
         java -Dspring.config.location=${configpath}/application.properties -DconfPath=$configpath -Xmx2048m -Xms2048m -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -XX:+HeapDumpOnOutOfMemoryError -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/application.properties >> logs/console.log 2>>logs/error.log &
         if [[ $? -eq 0 ]]; then
+            sleep 2
+            echo $!>./${module}_pid
             getpid
             echo "service start sucessfully. pid: ${pid}"
         else
@@ -75,6 +82,7 @@ stop() {
         `ps aux | grep ${pid} | grep -v grep`"
         kill -9 ${pid}
         if [[ $? -eq 0 ]]; then
+         rm -rf ./${module}_pid
             echo "killed"
         else
             echo "kill error"
