@@ -48,7 +48,7 @@ status() {
     getpid
     if [[ -n ${pid} ]]; then
         echo "status:
-        `ps aux | grep ${pid} | grep -v grep`"
+        `ps -p ${pid} `"
         exit 1
     else
         echo "service not running"
@@ -81,7 +81,7 @@ stop() {
     getpid
     if [[ -n ${pid} ]]; then
         echo "killing:
-        `ps aux | grep ${pid} | grep -v grep`"
+        `ps -p ${pid}`"
         kill -9 ${pid}
         if [[ $? -eq 0 ]]; then
 	    rm -rf ./${module}_pid

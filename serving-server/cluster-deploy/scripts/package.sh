@@ -1,7 +1,4 @@
-#!/bean package -DskipTestsin/bash
-#
-#Copyright 2019 The serving Authors. All Rights Reserved.
-#
+#!/bin/bash
 
 set -e
 source ./allinone_cluster_configurations.sh
