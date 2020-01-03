@@ -16,7 +16,8 @@
 
 package com.webank.ai.fate.serving.bean;
 
-import com.webank.ai.fate.core.bean.ReturnResult;
+
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
 public class PostProcessingResult {
     private ReturnResult processingResult;

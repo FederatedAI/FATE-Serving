@@ -16,44 +16,57 @@
 
 package com.webank.ai.fate.serving.service;
 
+import com.alibaba.fastjson.JSON;
+import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
+import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.api.networking.proxy.Proxy.Packet;
-import com.webank.ai.fate.core.bean.FederatedParty;
-import com.webank.ai.fate.core.bean.ReturnResult;
-import com.webank.ai.fate.core.constant.StatusCode;
-import com.webank.ai.fate.core.utils.ObjectTransform;
+
+import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.bean.BaseContext;
-import com.webank.ai.fate.serving.core.monitor.WatchDog;
-import com.webank.ai.fate.serving.manger.InferenceManager;
+import com.webank.ai.fate.serving.host.HostInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-
+@Service
 public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger();
+    @Autowired
+    HostInferenceProvider hostInferenceProvider;
+    @Autowired
+    MetricRegistry  metricRegistry;
 
     @Override
+    @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
-        ReturnResult responseResult=null;
-        Context context = new BaseContext(new HostInferenceLoggerPrinter());
+        ReturnResult responseResult = null;
+        String actionType =  req.getHeader().getCommand().getName();
+
+        Context context = new BaseContext(new HostInferenceLoggerPrinter(),actionType,metricRegistry);
         context.setActionType(req.getHeader().getCommand().getName());
         context.preProcess();
-        Map<String, Object> requestData=null;
+        HostFederatedParams requestData = null;
 
         try {
-            requestData = (Map<String, Object>) ObjectTransform.json2Bean(req.getBody().getValue().toStringUtf8(), HashMap.class);
-            context.setCaseId(requestData.get(Dict.CASEID)!=null?requestData.get(Dict.CASEID).toString():Dict.NONE);
+
+            String data = req.getBody().getValue().toStringUtf8();
+            logger.info("unaryCall {} head {}", data,req.getHeader().getCommand().getName());
+            requestData = JSON.parseObject(data, HostFederatedParams.class);
+            context.setCaseId(requestData.getCaseId() != null ? requestData.getCaseId() : Dict.NONE);
 
             switch (req.getHeader().getCommand().getName()) {
-                case "federatedInference":
-                    responseResult = InferenceManager.federatedInference(context, requestData);
+                case Dict.FEDERATED_INFERENCE:
+                    responseResult = hostInferenceProvider.federatedInference(context, requestData);
                     break;
+                case Dict.FEDERATED_INFERENCE_FOR_TREE:
+                    responseResult = hostInferenceProvider.federatedInferenceForTree(context, requestData);
+                    break;
+
                 default:
                     responseResult = new ReturnResult();
                     responseResult.setRetcode(StatusCode.PARAMERROR);
@@ -67,24 +80,26 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
 
             Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
-            FederatedParty partnerParty = (FederatedParty) ObjectTransform.json2Bean(requestData.get("partner_local").toString(), FederatedParty.class);
-            FederatedParty party = (FederatedParty) ObjectTransform.json2Bean(requestData.get("local").toString(), FederatedParty.class);
+            FederatedParty partnerParty = requestData.getPartnerLocal();
+            FederatedParty party = requestData.getLocal();
+            context.putData(Dict.GUEST_APP_ID, partnerParty.getPartyId());
+            context.putData(Dict.HOST_APP_ID, party.getPartyId());
 
             metaDataBuilder.setSrc(
                     topicBuilder.setPartyId(String.valueOf(party.getPartyId()))
-                            .setRole("host")
-                            .setName("myPartyName")
+                            .setRole(Dict.HOST)
+                            .setName(Dict.MY_PARTY_NAME)
                             .build());
             metaDataBuilder.setDst(
                     topicBuilder.setPartyId(String.valueOf(partnerParty.getPartyId()))
-                            .setRole("guest")
-                            .setName("partnerPartyName")
+                            .setRole(Dict.GUEST)
+                            .setName(Dict.PARTNER_PARTY_NAME)
                             .build());
             packetBuilder.setHeader(metaDataBuilder.build());
             responseObserver.onNext(packetBuilder.build());
             responseObserver.onCompleted();
-        }finally {
-            context.postProcess(requestData,responseResult);
+        } finally {
+            context.postProcess(requestData, responseResult);
 
         }
     }

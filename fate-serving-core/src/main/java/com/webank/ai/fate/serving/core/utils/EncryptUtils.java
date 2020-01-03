@@ -21,6 +21,10 @@ import com.webank.ai.fate.serving.core.bean.EncryptMethod;
 import java.security.MessageDigest;
 
 public class EncryptUtils {
+
+    public static final String UTF8 = "UTF-8";
+    private static final String HMACSHA1 = "HmacSHA1";
+
     public static String encrypt(String originString, EncryptMethod encryptMethod) {
         try {
             MessageDigest m = MessageDigest.getInstance(getEncryptMethodString(encryptMethod));
@@ -38,9 +42,9 @@ public class EncryptUtils {
         return "";
     }
 
-    private static String getEncryptMethodString(EncryptMethod encryptMethod){
+    private static String getEncryptMethodString(EncryptMethod encryptMethod) {
         String methodString = "";
-        switch (encryptMethod){
+        switch (encryptMethod) {
             case MD5:
                 methodString = "MD5";
                 break;
@@ -50,4 +54,5 @@ public class EncryptUtils {
         }
         return methodString;
     }
+
 }

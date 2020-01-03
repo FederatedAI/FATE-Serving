@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.bean;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.ai.fate.serving.core.bean.Request;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
@@ -24,24 +25,49 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InferenceRequest implements Request{
+public class InferenceRequest implements Request {
     private String appid;
     private String partyId;
     private String modelVersion;
     private String modelId;
     private String seqno;
     private String caseid;
+    private String serviceId;
     private Map<String, Object> featureData;
+    public String getServiceId() {
+        return serviceId;
+    }
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
+    }
+
+    public Map<String, Object> getSendToRemoteFeatureData() {
+        return sendToRemoteFeatureData;
+    }
+
+    public void setSendToRemoteFeatureData(Map<String, Object> sendToRemoteFeatureData) {
+        this.sendToRemoteFeatureData = sendToRemoteFeatureData;
+    }
+
+    private Map<String, Object> sendToRemoteFeatureData;
 
     InferenceRequest() {
         seqno = InferenceUtils.generateSeqno();
         caseid = InferenceUtils.generateCaseid();
         featureData = new HashMap<>();
+        sendToRemoteFeatureData = new HashMap<>();
     }
 
-    public  void  setCaseId(String  caseId){
+    public void setCaseId(String caseId) {
         this.caseid = caseId;
     }
+
     @Override
     public String getSeqno() {
         return seqno;
@@ -52,6 +78,11 @@ public class InferenceRequest implements Request{
         return appid;
     }
 
+    public void setAppid(String appid) {
+        this.appid = appid;
+        this.partyId = appid;
+    }
+
     @Override
     public String getCaseid() {
         return caseid;
@@ -60,6 +91,11 @@ public class InferenceRequest implements Request{
     @Override
     public String getPartyId() {
         return partyId;
+    }
+
+    public void setPartyId(String partyId) {
+        this.partyId = partyId;
+        this.appid = partyId;
     }
 
     @Override
@@ -77,35 +113,19 @@ public class InferenceRequest implements Request{
         return featureData;
     }
 
-    public void setAppid(String appid) {
-        this.appid = appid;
-        this.partyId = appid;
-    }
-
-    public void setPartyId(String partyId) {
-        this.partyId = partyId;
-        this.appid = partyId;
-    }
-
     public boolean haveAppId() {
         return (!StringUtils.isEmpty(appid) || !StringUtils.isEmpty(partyId));
     }
 
     @Override
-    public String toString(){
-        String  result = "";
-        try
-        {
-
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            result = objectMapper.writeValueAsString(this);
-
-        }catch(Throwable e){
+    public String toString() {
+        String result = "";
+        try {
+            result= JSON.toJSONString(this);
+        } catch (Throwable e) {
 
         }
-        return  result;
-
+        return result;
     }
 
 }

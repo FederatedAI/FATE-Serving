@@ -16,10 +16,12 @@
 
 package com.webank.ai.fate.serving.manger;
 
+import com.webank.ai.eggroll.core.storage.dtable.DTable;
+import com.webank.ai.eggroll.core.storage.dtable.DTableFactory;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
-import com.webank.ai.fate.core.bean.FederatedRoles;
-import com.webank.ai.fate.core.storage.dtable.DTable;
-import com.webank.ai.fate.core.storage.dtable.DTableFactory;
+
+import com.webank.ai.fate.serving.core.bean.FederatedRoles;
+import com.webank.ai.fate.serving.core.bean.ModelInfo;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -42,6 +44,7 @@ public class ModelUtils {
     public static PipelineTask loadModel(String name, String namespace) {
         Map<String, byte[]> modelBytes = readModel(name, namespace);
         if (modelBytes == null || modelBytes.size() == 0) {
+            LOGGER.info("loadModel error {} {}",name,namespace);
             return null;
         }
         PipelineTask pipelineTask = new PipelineTask();
@@ -67,9 +70,9 @@ public class ModelUtils {
     }
 
     public static Map<String, Map<String, ModelInfo>> getFederatedRolesModel(Map<String, ModelServiceProto.RoleModelInfo> federatedRolesModelProto) {
-        Map<String, Map<String, ModelInfo>> federatedRolesModel = new HashMap<>();
+        Map<String, Map<String, ModelInfo>> federatedRolesModel = new HashMap<>(8);
         federatedRolesModelProto.forEach((roleName, roleModelInfo) -> {
-            federatedRolesModel.put(roleName, new HashMap<>());
+            federatedRolesModel.put(roleName, new HashMap<>(8));
             roleModelInfo.getRoleModelInfoMap().forEach((partyId, modelInfo) -> {
                 federatedRolesModel.get(roleName).put(partyId, new ModelInfo(modelInfo.getTableName(), modelInfo.getNamespace()));
             });

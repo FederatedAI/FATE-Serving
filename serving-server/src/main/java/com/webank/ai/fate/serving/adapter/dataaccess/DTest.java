@@ -16,10 +16,13 @@
 
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
-import com.webank.ai.fate.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.utils.HttpClientPool;
-import com.webank.ai.fate.core.utils.ObjectTransform;
+import com.webank.ai.eggroll.core.utils.ObjectTransform;
+
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.utils.HttpClientPool;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,20 +36,20 @@ public class DTest implements FeatureData {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public ReturnResult getData(Map<String, Object> featureIds) {
+    public ReturnResult getData(Context context, Map<String, Object> featureIds) {
         ReturnResult returnResult = new ReturnResult();
-        Map<String, Object> requestData = new HashMap<>();
+        Map<String, Object> requestData = new HashMap<>(8);
         requestData.putAll(featureIds);
         String responseBody = HttpClientPool.post("http://127.0.0.1:1234/feature", requestData);
         if (StringUtils.isEmpty(responseBody)) {
             return null;
         }
         Map<String, Object> tmp = (Map<String, Object>) ObjectTransform.json2Bean(responseBody, HashMap.class);
-        if ((int) Optional.ofNullable(tmp.get("status")).orElse(1) != 0) {
+        if ((int) Optional.ofNullable(tmp.get(Dict.STATUS)).orElse(1) != 0) {
             return null;
         }
-        String[] features = StringUtils.split(((List<String>) tmp.get("data")).get(0), "\t");
-        Map<String, Object> featureData = new HashMap<>();
+        String[] features = StringUtils.split(((List<String>) tmp.get(Dict.DATA)).get(0), "\t");
+        Map<String, Object> featureData = new HashMap<>(8);
         for (int i = 1; i < features.length; i++) {
             featureData.put(features[i], i);
         }

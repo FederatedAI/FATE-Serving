@@ -16,7 +16,10 @@
 
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
-import com.webank.ai.fate.core.bean.ReturnResult;
+
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -32,11 +35,11 @@ public class TestFile implements FeatureData {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public ReturnResult getData(Map<String, Object> featureIds) {
+    public ReturnResult getData(Context context, Map<String, Object> featureIds) {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
         try {
-            List<String> lines = Files.readAllLines(Paths.get(System.getProperty("user.dir"), "host_data.csv"));
+            List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
             lines.forEach(line -> {
                 for (String kv : StringUtils.split(line, ",")) {
                     String[] a = StringUtils.split(kv, ":");
