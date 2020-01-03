@@ -1,10 +1,10 @@
 #!/bin/bash
 user=app
-host_guest=(172.16.153.9 172.16.153.113)
-roll_hostAndguest=(172.16.153.9 172.16.153.113)
+host_guest=(192.168.0.1 192.168.0.2)
+roll_hostAndguest=(192.168.0.1 192.168.0.2)
 deploy_dir=/data/projects
 host_redis_ip=127.0.0.1
-host_redis_port=63792
+host_redis_port=6379
 host_redis_password=fate_dev
 guest_redis_ip=127.0.0.1
 guest_redis_port=6379
