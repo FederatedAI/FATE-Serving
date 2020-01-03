@@ -65,7 +65,9 @@ public class ModelUtils {
 
             url = urls.get(0);
             requestUrl = url.toFullString();
-        } else {
+        }
+
+        if (StringUtils.isBlank(requestUrl)) {
             requestUrl = Configuration.getProperty(Dict.MODEL_TRANSFER_URL);
         }
 
