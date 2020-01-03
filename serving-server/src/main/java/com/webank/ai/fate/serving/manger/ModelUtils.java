@@ -60,11 +60,10 @@ public class ModelUtils {
             List<URL> urls = modelUtils.routerService.router(url);
             if (urls == null || urls.isEmpty()) {
                 logger.info("url not found, {}", url);
-                return null;
+            } else {
+                url = urls.get(0);
+                requestUrl = url.toFullString();
             }
-
-            url = urls.get(0);
-            requestUrl = url.toFullString();
         }
 
         if (StringUtils.isBlank(requestUrl)) {
