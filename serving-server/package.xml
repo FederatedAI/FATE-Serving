@@ -37,6 +37,13 @@
                 <include>*</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>../bin</directory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
 
 
         <fileSet>
