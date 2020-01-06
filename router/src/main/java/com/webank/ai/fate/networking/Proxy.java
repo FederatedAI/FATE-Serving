@@ -76,8 +76,9 @@ public class Proxy {
         server.start();
         Properties properties = serverConf.getProperties();
 
-        System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME));
-        System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD));
+        System.setProperty(Dict.ACL_ENABLE, properties.getProperty(Dict.ACL_ENABLE, ""));
+        System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME, ""));
+        System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD, ""));
 
         useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
         useZkRouter = Boolean.valueOf(properties.getProperty("useZkRouter", "false"));
