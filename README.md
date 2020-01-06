@@ -170,6 +170,64 @@ Please use FATE-Flow Client which in the fate-flow to operate, refer to **Online
 
 ### Inference
 
+#### Inference using HTTP
+##### inference
+
+**URL** 
+- ` http://ip:port/federation/v1/inference `
+- where ip:port is the address of guest serving proxy
+  
+**request type**
+- POST 
+- content-application/json
+
+**request parameters** 
+
+|name|allow null|type|desc|
+|:----    |:---|:----- |-----   |
+|head |no  |json object | |
+|body |no  |json object | the elements and features used by the model|
+
+ - **head object**
+ 
+|name|allow null|type|desc|
+|:----    |:---|:----- |-----   |
+|serviceId |yes  |string | the serviceId used when bind model in fate-flow|
+
+
+ **example **
+
+``` 
+  {
+    "head": {
+		"serviceId": "111111111"
+	},
+    "body": {
+    	"device_id": "aaaaa",
+        "phone_num": "122222222"
+    }
+  }
+
+```
+
+ **response** 
+
+|name|type|desc|
+|:-----  |:-----|-----                           |
+|retcode |int   |0: success, otherwise: error.  |
+|retmsg |string   |error message  |
+|data  | json object  | the inference result of model|
+|flag |int   |the reserved field |
+
+ **a simple example of inference**
+```shell
+(venv) [***]$ curl -X POST -H 'Content-Type: application/json' -d ' {"head":{"serviceId":"654321"},"body":{"device_id":"123456","phone_num":"1234567899"}}' 'http://localhost:8086/federation/v1/inference'
+{"flag":0,"data":{"prob":0.30684422824464636,"guestInputDataHitRate:{}":0.0,"guestModelWeightHitRate:{}":0.0,"retcode":0},"retmsg":"success","retcode":0}
+(venv) [***]$      
+```
+
+
+#### Inference using grpc
 Serving currently supports three inference-related interfaces, using the grpc protocol.
 
 - inference: Initiate an inference request and get the result
