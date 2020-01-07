@@ -1,4 +1,5 @@
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
+
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.router.DefaultRouterService;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -35,10 +37,13 @@ public class IntraGrpcServer implements InitializingBean {
     @Value("${useZkRouter:false}")
     private  String  useZkRouter;
 
-    @Value("${acl.username:fate}")
+    @Value("${acl.enable}")
+    private String aclEnable;
+
+    @Value("${acl.username}")
     private String aclUsername;
 
-    @Value("${acl.password:fate}")
+    @Value("${acl.password}")
     private String aclPassword;
 
     ZookeeperRegistry  zookeeperRegistry;
@@ -64,8 +69,9 @@ public class IntraGrpcServer implements InitializingBean {
 
         if("true".equals(useZkRouter)&& StringUtils.isNotEmpty(zkUrl)) {
 
-            System.setProperty("acl.username", aclUsername);
-            System.setProperty("acl.password", aclPassword);
+            System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
+            System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
+            System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
 
             zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, Dict.SELF_PROJECT_NAME, Dict.SELF_ENVIRONMENT, Integer.valueOf(port));
             zookeeperRegistry.register(FateServer.serviceSets);
