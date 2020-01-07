@@ -74,7 +74,7 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
 
     // TODO utu: sucks! have to reconstruct the entire protocol of online serving
     private String getEnvironment(Context context, InboundPackage inboundPackage){
-        if("inference".equals(context.getServiceName())){
+        if(Dict.SERVICENAME_INFERENCE.equals(context.getServiceName())){
             // guest, proxy -> serving
             return (String)inboundPackage.getHead().get(Dict.SERVICE_ID);
         }

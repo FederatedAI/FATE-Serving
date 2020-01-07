@@ -54,23 +54,25 @@ public class ProxyController {
     }
 
 
-    @RequestMapping(value = "/federation/{version}/inference", method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = "/federation/{version}/{callName}", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public Callable<String> federation(@PathVariable String version,
+                                       @PathVariable String callName,
                              @RequestBody String data,
                              HttpServletRequest httpServletRequest,
                              @RequestHeader HttpHeaders headers
     ) throws Exception {
-        metricFactory.counter("http.inference.request", "http inference request").increment();
+        metricFactory.counter("http.inference.request", "http inference request","callName", callName).increment();
 
         return new Callable<String>() {
             @Override
             public String call() throws Exception {
                 logger.info("receive : {} headers {}", data, headers.toSingleValueMap());
 
-                final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor("inference");
+                final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor(Dict.SERVICENAME_INFERENCE);
 
                 Context context = new BaseContext();
+                context.setCallName(callName);
                 context.setVersion(version);
 
                 InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, data, httpServletRequest);
@@ -82,7 +84,7 @@ public class ProxyController {
                     result.getData().remove("caseid");
                 }
 
-                metricFactory.counter("http.inference.response", "http inference response").increment();
+                metricFactory.counter("http.inference.response", "http inference response","callName", callName).increment();
 
                 return  JSON.toJSONString(result.getData());
 
@@ -96,21 +98,21 @@ public class ProxyController {
                                                               HttpServletRequest  httpServletRequest) {
         String sourceIp = WebUtil.getIpAddr(httpServletRequest);
         context.setSourceIp(sourceIp);
-        context.setCaseId(UUID.randomUUID().toString());
         context.setGuestAppId(selfCoordinator);
 
         JSONObject jsonObject =JSON.parseObject(data);
-        Map head = JSON.parseObject(jsonObject.getString(Dict.HEAD), Map.class);
-        Map body = JSON.parseObject(jsonObject.getString(Dict.BODY), Map.class);
+        Map head = JSON.parseObject(jsonObject.getString(Dict.HEAD)!=null?jsonObject.getString(Dict.HEAD):"{}", Map.class);
+        Map body = JSON.parseObject(jsonObject.getString(Dict.BODY)!=null?jsonObject.getString(Dict.BODY):"{}", Map.class);
 
-        if(null != head){
-            context.setHostAppid((String) head.get(Dict.APP_ID));
+        context.setHostAppid( head.get(Dict.APP_ID)!= null?head.getOrDefault(Dict.APP_ID,"").toString():"");
+        context.setCaseId( head.get(Dict.CASE_ID)!= null?head.getOrDefault(Dict.CASE_ID,"").toString():"");
+        if(null == context.getCaseId() || context.getCaseId().isEmpty()){
+            context.setCaseId(UUID.randomUUID().toString());
         }
 
         InboundPackage<Map> inboundPackage = new InboundPackage<Map>();
         inboundPackage.setBody(body);
         inboundPackage.setHead(head);
-//        inboundPackage.setHttpServletRequest(httpServletRequest);
         return inboundPackage;
     }
 

@@ -287,5 +287,13 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
         dataMap.put(Dict.SERVICE_NAME, serviceName);
     }
 
+    @Override
+    public String getCallName() {
+        return (String) dataMap.get(Dict.CALL_NAME);
+    }
 
+    @Override
+    public void setCallName(String callName) {
+        dataMap.put(Dict.CALL_NAME, callName);
+    }
 }

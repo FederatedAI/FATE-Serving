@@ -20,4 +20,7 @@ public class Dict {
     public static final String SELF_ENVIRONMENT = "online";
     public static final String HEAD = "head";
     public static final String BODY = "body";
+    public static final String SERVICENAME_INFERENCE = "inference";
+    public static final String SERVICENAME_START_INFERENCE_JOB = "startInferenceJob";
+    public static final String SERVICENAME_GET_INFERENCE_RESULT = "getInferenceResult";
 }

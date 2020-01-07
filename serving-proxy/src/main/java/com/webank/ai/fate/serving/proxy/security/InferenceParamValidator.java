@@ -20,7 +20,7 @@ public class InferenceParamValidator implements Interceptor{
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotEmpty(context.getCaseId()),"case id is null");
         Preconditions.checkArgument(null != inboundPackage.getHead(),Dict.HEAD + " is null");
-        Preconditions.checkArgument(null != inboundPackage.getBody(),Dict.BODY + " is null");
+        //Preconditions.checkArgument(null != inboundPackage.getBody(),Dict.BODY + " is null");
         //Preconditions.checkArgument(StringUtils.isNotEmpty((String) inboundPackage.getHead().get(Dict.SERVICE_ID)), Dict.SERVICE_ID + " is null");
     }
 

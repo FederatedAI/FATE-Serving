@@ -111,4 +111,7 @@ public interface Context<Req, Resp> {
 
     public void setServiceName(String serviceName);
 
+    public void setCallName(String callName);
+
+    public String getCallName();
 }
