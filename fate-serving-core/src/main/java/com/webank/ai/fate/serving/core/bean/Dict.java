@@ -132,6 +132,7 @@ public class Dict {
     public static final String COMPONENT_NAME = "componentName";
     public static final String TREE_COMPUTE_ROUND = "treeComputeRound";
     public static final String SERVICE_NAME = "serviceName";
+    public static final String CALL_NAME = "callName";
     public static final String TREE_LOCATION = "treeLocation";
 
     public static final String UNARYCALL = "unaryCall";

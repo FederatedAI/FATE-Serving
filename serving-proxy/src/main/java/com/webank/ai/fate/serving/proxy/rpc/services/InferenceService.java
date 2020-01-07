@@ -8,6 +8,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.NoResultException;
+import com.webank.ai.fate.serving.core.exceptions.UnSurpportMethodException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
@@ -34,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 
 // TODO utu: may load from cfg file is a better choice compare to using annotation?
-@ProxyService(name = "inference",preChain = {
+@ProxyService(name = Dict.SERVICENAME_INFERENCE, preChain = {
         "overloadMonitor",
         "inferenceParamValidator",
         "defaultServingRouter"})
@@ -54,6 +55,9 @@ public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
     @Value("${proxy.grpc.inference.timeout:3000}")
     private  int  timeout;
 
+    @Value("${proxy.grpc.inference.async.timeout:3000}")
+    private  int  asyncTimeout;
+
     @Override
     public Map doService(Context context, InboundPackage<Map> data, OutboundPackage<Map> outboundPackage) {
 
@@ -63,6 +67,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
         ManagedChannel  managedChannel = null;
 
         String   resultString=null;
+        String callName = context.getCallName();
         try {
             try {
                 logger.info("try to get grpc connection");
@@ -87,16 +92,31 @@ public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
                 reqBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(inferenceReqMap).getBytes()));
 
                 InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
+                ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
+                int timeWait = timeout;
 
-                metricFactory.counter("http.inference.service", "in doService", "direction", "to.self.serving-server", "result", "success").increment();
+                metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "to.self.serving-server", "result", "success").increment();
 
-                ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture = futureStub.inference(reqBuilder.build());
-                InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout,TimeUnit.MILLISECONDS);
-                metricFactory.counter("http.inference.service", "in doService", "direction", "from.self.serving-server", "result", "success").increment();
+                if(callName.equals(Dict.SERVICENAME_INFERENCE)) {
+                    resultFuture = futureStub.inference(reqBuilder.build());
+                    timeWait = timeout;
+                } else if(callName.equals(Dict.SERVICENAME_GET_INFERENCE_RESULT)){
+                    resultFuture = futureStub.getInferenceResult(reqBuilder.build());
+                    timeWait = asyncTimeout;
+                }else if(callName.equals(Dict.SERVICENAME_START_INFERENCE_JOB)){
+                    resultFuture = futureStub.startInferenceJob(reqBuilder.build());
+                    timeWait = asyncTimeout;
+                }else{
+                    logger.error("unknown callName {}.", callName);
+                    throw  new UnSurpportMethodException();
+                }
+
+                InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait,TimeUnit.MILLISECONDS);
+                metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "success").increment();
                 logger.info("routerinfo {} send {} result {}",routerInfo,inferenceReqMap,result);
                 resultString = new String(result.getBody().toByteArray());
             } catch (Exception e) {
-                metricFactory.counter("http.inference.service", "in doService", "direction", "from.self.serving-server", "result", "grpc.error").increment();
+                metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "grpc.error").increment();
                 logger.error("get grpc result error", e);
                 throw new NoResultException();
             }

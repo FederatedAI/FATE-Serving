@@ -55,7 +55,7 @@ status() {
     getpid $1
     if [[ -n ${pid} ]]; then
         echo "status:
-        `ps -p ${pid} `"
+        `ps -f -p ${pid} `"
         exit 1
     else
         echo "service not running"
