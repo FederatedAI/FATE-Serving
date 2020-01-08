@@ -70,7 +70,7 @@ stop() {
         echo "killing:
         `ps -p ${pid}`"
 	echo "--------------" ${pid}
-        kill -9 ${pid}
+        kill ${pid}
         if [[ $? -eq 0 ]]; then
 	    rm -rf ./${module}_pid
             echo "killed"
