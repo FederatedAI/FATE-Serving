@@ -3,6 +3,7 @@ user=app
 host_guest=(192.168.0.1 192.168.0.2)
 roll_hostAndguest=(192.168.0.1 192.168.0.2)
 deploy_dir=/data/projects
+party_list=(10000 9999)
 host_redis_ip=127.0.0.1
 host_redis_port=6379
 host_redis_password=fate_dev
