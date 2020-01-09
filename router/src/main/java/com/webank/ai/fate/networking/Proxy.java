@@ -22,8 +22,6 @@ import com.webank.ai.fate.networking.proxy.factory.LocalBeanFactory;
 import com.webank.ai.fate.networking.proxy.grpc.client.DataTransferPipedClient;
 import com.webank.ai.fate.networking.proxy.manager.ServerConfManager;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
-import com.webank.ai.fate.register.loadbalance.LoadBalancer;
-import com.webank.ai.fate.register.loadbalance.RandomLoadBalance;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.url.URL;
@@ -37,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import java.util.Set;
 
@@ -80,8 +77,12 @@ public class Proxy {
         server.start();
         Properties properties = serverConf.getProperties();
 
-        System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME));
-        System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD));
+        if(properties.getProperty(Dict.ACL_USERNAME) != null) {
+            System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME));
+        }
+        if(properties.getProperty(Dict.ACL_PASSWORD) != null) {
+            System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD));
+        }
 
         useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
         useZkRouter = Boolean.valueOf(properties.getProperty("useZkRouter", "false"));
