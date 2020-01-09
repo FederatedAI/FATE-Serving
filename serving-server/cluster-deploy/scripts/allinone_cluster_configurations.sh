@@ -1,7 +1,6 @@
 #!/bin/bash
 user=app
 host_guest=(192.168.0.1 192.168.0.2)
-roll_hostAndguest=(192.168.0.1 192.168.0.2)
 deploy_dir=/data/projects
 party_list=(10000 9999)
 host_redis_ip=127.0.0.1
@@ -14,3 +13,5 @@ apply_zk=true
 host_zk_url=zookeeper://localhost:2181
 guest_zk_url=zookeeper://localhost:2181
 workMode=1
+host_model_transfer=http://127.0.0.1:9380
+guest_model_transfer=http://127.0.0.1:9380
