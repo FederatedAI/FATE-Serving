@@ -8,7 +8,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.NoResultException;
-import com.webank.ai.fate.serving.core.exceptions.UnSurpportMethodException;
+import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
@@ -108,7 +108,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
                     timeWait = asyncTimeout;
                 }else{
                     logger.error("unknown callName {}.", callName);
-                    throw  new UnSurpportMethodException();
+                    throw  new UnSupportMethodException();
                 }
 
                 InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait,TimeUnit.MILLISECONDS);

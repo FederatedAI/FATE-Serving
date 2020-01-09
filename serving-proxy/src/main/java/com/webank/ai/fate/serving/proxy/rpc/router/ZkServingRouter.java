@@ -14,6 +14,7 @@ import com.webank.ai.fate.serving.proxy.utils.FederatedModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ import java.util.List;
 
 
 @Service
-public  class ZkServingRouter extends BaseServingRouter implements InitializingBean{
+public class ZkServingRouter extends BaseServingRouter implements InitializingBean{
 
     @Value("${useZkRouter:false}")
     private  String  useZkRouter;
@@ -35,12 +36,8 @@ public  class ZkServingRouter extends BaseServingRouter implements InitializingB
     @Value("${coordinator:9999}")
     private String selfCoordinator;
 
-    public static void setZkRouterService(RouterService zkRouterService) {
-        ZkServingRouter.zkRouterService = zkRouterService;
-    }
-
-    private static RouterService zkRouterService;
-
+    @Autowired
+    private RouterService zkRouterService;
 
     private static final Logger logger = LoggerFactory.getLogger(ZkServingRouter.class);
 
