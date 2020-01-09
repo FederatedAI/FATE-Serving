@@ -252,7 +252,11 @@ public class DataTransferPipedClient {
             ConfFileBasedFdnRouter confFileBasedFdnRouter = (ConfFileBasedFdnRouter) fdnRouter;
             Map<String, Map<String, List<BasicMeta.Endpoint>>> routerTable = confFileBasedFdnRouter.getRouteTable();
 
-            if (routerTable.containsKey(to.getPartyId()) &&routerTable.get(to.getPartyId()).get("serving-1.0")!=null&& "serving-1.0".equals(to.getRole())) {
+            if (routerTable.containsKey(to.getPartyId()) &&
+                    ((routerTable.get(to.getPartyId()).get("serving-1.0")!=null&& "serving-1.0".equals(to.getRole()))||
+                            (routerTable.get(to.getPartyId()).get("serving")!=null&& "serving".equals(to.getRole())))
+
+            ) {
 
                 stub = routerByServiceRegister(from, to, pack);
                 if (stub != null) {
