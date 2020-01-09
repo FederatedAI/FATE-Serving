@@ -71,8 +71,8 @@ then
     sed -i '7c "prot":8000' route_table.json
     sed -i "17a ,\"serving\":[{\"ip\":\"${host_guest[0]}\",\"prot\":8080}]" route_table.json
 	cd  $sering_path/conf
-	sed -i 's#useRegister=true#'useRegister=false'#' serving-server.properties
-	sed -i 's#useZkRouter=true#'useZkRouter=false'#' serving-server.properties
+    sed -i "/^useRegister=/cuseRegister=false" serving-server.properties
+    sed -i "/^useZkRouter=/cuseZkRouter=false" serving-server.properties
 elif [ ${apply_zk} = "true" ]
 then
 	echo "---------apply _zk true"
@@ -85,9 +85,9 @@ then
     sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
 	sed -i 's#10000#'${party_list[0]}'#'  route_table.json
 	cd  $sering_path/conf
-	sed -i 's#zk.url=zookeeper://localhost:2181#'zk.url=${host_zk_url}'#' serving-server.properties
+	sed -i "/^zk.url=/czk.url=${host_zk_url}" serving-server.properties
 	sed -i "/^useRegister=/cuseRegister=true" serving-server.properties
-     sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
+    sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
 else
 		echo ""
 fi
@@ -110,13 +110,13 @@ eeooff
 	tar -zxvf fate-serving.tar.gz
 	rm -rf fate-serving.tar.gz
 	cd ${public_path}/fate-serving/serving/conf
-	sed -i 's#zk.url=${host_zk_url}#'zk.url=${guest_zk_url}'#' serving-server.properties
+	sed -i "/^zk.url=/czk.url=${guest_zk_url}" serving-server.properties
 	sed -i 's#redis.ip=${host_redis_ip}#'redis.ip=${guest_redis_ip}'#' serving-server.properties
 	sed -i 's#redis.port=${host_redis_port}#'redis.port=${guest_redis_port}'#' serving-server.properties
 	sed -i 's#redis.password=${host_redis_password}#'redis.password=${guest_redis_password}'#' serving-server.properties
 	sed -i "/^model.transfer.url=/cmodel.transfer.url=${guest_model_transfer}/v1/model/transfer" serving-server.properties
-	 cd ${serving_proxy_path}/conf
-       	sed -i '/^zk.url=/czk.url=${guest_zk_url}' application.properties
+	cd ${serving_proxy_path}/conf
+    sed -i '/^zk.url=/czk.url=${guest_zk_url}' application.properties
 	sed -i '6c "ip":"${host_guest[0]}",' route_table.json
 	sed -i 's#${party_list[0]}#'${party_list[1]}'#'  route_table.json
 	sed -i '7c "prot":8000' route_table.json
