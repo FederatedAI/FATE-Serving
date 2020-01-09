@@ -128,7 +128,7 @@ eeooff
 	if [ $? -eq 0 ]
 	then
 		sed -i '18d' route_table.json
-		sed -i "18i ,\"serving\":[{\"ip\":\"${host_guest[1]}\",\"prot\":18080}]" route_table.json
+		sed -i "18i ,\"serving\":[{\"ip\":\"${host_guest[1]}\",\"prot\":8080}]" route_table.json
 	fi
 exit
 eeooff
