@@ -57,10 +57,10 @@ sed -i 's#redis.ip=127.0.0.1#'redis.ip=${host_redis_ip}'#' serving-server.proper
 sed -i 's#redis.port=6379#'redis.port=${host_redis_port}'#' serving-server.properties
 sed -i 's#redis.password=fate_dev#'redis.password=${host_redis_password}'#' serving-server.properties
 sed -i "/^workMode=/cworkMode=${workMode}" serving-server.properties
+sed -i "/^model.transfer.url=/cmodel.transfer.url=${host_model_transfer}/v1/model/transfer" serving-server.properties
 cd $cwd
 if [ ${apply_zk} = "false" ]
 then
-
 	cd $serving_proxy_path/conf
 	sed -i "/^useRegister=/cuseRegister=false" application.properties
 	sed -i "/^useZkRouter=/cuseZkRouter=false" application.properties
@@ -91,15 +91,7 @@ then
 else
 		echo ""
 fi
-echo "------------- zk uil"
-if [[ ${host_guest[0]} ]]
-then
-	cd ${public_path}/fate-serving/serving/conf
-	sed -i 's#127.0.0.1:8011#'${roll_hostAndguest[0]}'#' serving-server.properties
-else
-        echo "no have host--------false   no null"
-		exit
-fi
+
 
 init_env() {
         ssh -tt ${user}@${host_guest[1]}  << eeooff
@@ -118,11 +110,11 @@ eeooff
 	tar -zxvf fate-serving.tar.gz
 	rm -rf fate-serving.tar.gz
 	cd ${public_path}/fate-serving/serving/conf
-	sed -i 's#${roll_hostAndguest[0]}#'${roll_hostAndguest[1]}'#' serving-server.properties
 	sed -i 's#zk.url=${host_zk_url}#'zk.url=${guest_zk_url}'#' serving-server.properties
 	sed -i 's#redis.ip=${host_redis_ip}#'redis.ip=${guest_redis_ip}'#' serving-server.properties
 	sed -i 's#redis.port=${host_redis_port}#'redis.port=${guest_redis_port}'#' serving-server.properties
 	sed -i 's#redis.password=${host_redis_password}#'redis.password=${guest_redis_password}'#' serving-server.properties
+	sed -i "/^model.transfer.url=/cmodel.transfer.url=${guest_model_transfer}/v1/model/transfer" serving-server.properties
 	 cd ${serving_proxy_path}/conf
        	sed -i '/^zk.url=/czk.url=${guest_zk_url}' application.properties
 	sed -i '6c "ip":"${host_guest[0]}",' route_table.json
@@ -142,7 +134,7 @@ eeooff
 if [[ ${host_guest[1]} ]]
 then
         echo "------guest hava host_guest1  -----is not null"
-        if [[ ${roll_hostAndguest[1]} != "" ]]; then
+        if [[ ${host_guest[1]} != "" ]]; then
                 init_env
         else
                 echo "please input guest from allinone_cluster_configurations"
