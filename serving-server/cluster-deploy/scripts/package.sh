@@ -60,16 +60,16 @@ sed -i "/^workMode=/cworkMode=${workMode}" serving-server.properties
 cd $cwd
 if [ ${apply_zk} = "false" ]
 then
-	echo "---------- apply_zk false"
+
 	cd $serving_proxy_path/conf
-	sed -i 's#useRegister=true#'useRegister=false'#' application.properties
-	sed -i 's#useZkRouter=true#'useZkRouter=false'#' application.properties
+	sed -i "/^useRegister=/cuseRegister=false" application.properties
+	sed -i "/^useZkRouter=/cuseZkRouter=false" application.properties
 	sed -i "/^route.table=/croute.table=${deploy_dir}/fate-serving/serving-proxy/conf/route_table.json" application.properties
 	sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
 	sed -i "6c \"ip\":\"${host_guest[1]}\"," route_table.json
 	sed -i 's#10000#'${party_list[0]}'#'  route_table.json
-        sed -i '7c "prot":8000' route_table.json
-        sed -i "17a ,\"serving\":[{\"ip\":\"${host_guest[0]}\",\"prot\":8080}]" route_table.json
+    sed -i '7c "prot":8000' route_table.json
+    sed -i "17a ,\"serving\":[{\"ip\":\"${host_guest[0]}\",\"prot\":8080}]" route_table.json
 	cd  $sering_path/conf
 	sed -i 's#useRegister=true#'useRegister=false'#' serving-server.properties
 	sed -i 's#useZkRouter=true#'useZkRouter=false'#' serving-server.properties
@@ -79,11 +79,15 @@ then
 	cd $serving_proxy_path/conf
 	echo "----------------" $pwd
 	sed -i "/^zk.url=/czk.url=${host_zk_url}" application.properties
+	sed -i "/^useRegister=/cuseRegister=true" application.properties
+    sed -i "/^useZkRouter=/cuseZkRouter=true" application.properties
 	sed -i "/^route.table=/croute.table=${deploy_dir}/fate-serving/serving-proxy/conf/route_table.json" application.properties
-        sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
+    sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
 	sed -i 's#10000#'${party_list[0]}'#'  route_table.json
 	cd  $sering_path/conf
 	sed -i 's#zk.url=zookeeper://localhost:2181#'zk.url=${host_zk_url}'#' serving-server.properties
+	sed -i "/^useRegister=/cuseRegister=true" serving-server.properties
+     sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
 else
 		echo ""
 fi
