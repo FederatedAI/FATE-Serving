@@ -57,7 +57,7 @@ sed -i 's#redis.ip=127.0.0.1#'redis.ip=${host_redis_ip}'#' serving-server.proper
 sed -i 's#redis.port=6379#'redis.port=${host_redis_port}'#' serving-server.properties
 sed -i 's#redis.password=fate_dev#'redis.password=${host_redis_password}'#' serving-server.properties
 sed -i "/^workMode=/cworkMode=${workMode}" serving-server.properties
-sed -i "/^model.transfer.url=/cmodel.transfer.url=${host_model_transfer}/v1/model/transfer" serving-server.properties
+sed -i "/^model.transfer.url=/cmodel.transfer.url=${host_fate_flow_url}/v1/model/transfer" serving-server.properties
 cd $cwd
 if [ ${apply_zk} = "false" ]
 then
@@ -114,7 +114,7 @@ eeooff
 	sed -i 's#redis.ip=${host_redis_ip}#'redis.ip=${guest_redis_ip}'#' serving-server.properties
 	sed -i 's#redis.port=${host_redis_port}#'redis.port=${guest_redis_port}'#' serving-server.properties
 	sed -i 's#redis.password=${host_redis_password}#'redis.password=${guest_redis_password}'#' serving-server.properties
-	sed -i "/^model.transfer.url=/cmodel.transfer.url=${guest_model_transfer}/v1/model/transfer" serving-server.properties
+	sed -i "/^model.transfer.url=/cmodel.transfer.url=${guest_fate_flow_url}/v1/model/transfer" serving-server.properties
 	cd ${serving_proxy_path}/conf
     sed -i '/^zk.url=/czk.url=${guest_zk_url}' application.properties
 	sed -i '6c "ip":"${host_guest[0]}",' route_table.json
