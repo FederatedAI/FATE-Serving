@@ -22,7 +22,6 @@ import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 
 public interface Context<Req, Resp> {
 
-
     static final String LOGGER_NAME = "flow";
 
     public void preProcess();
@@ -114,4 +113,8 @@ public interface Context<Req, Resp> {
     public void setCallName(String callName);
 
     public String getCallName();
+
+    public String getServiceId();
+
+    public void setServiceId(String serviceId);
 }

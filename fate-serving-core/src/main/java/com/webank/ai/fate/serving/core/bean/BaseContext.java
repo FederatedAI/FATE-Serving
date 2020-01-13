@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
 
-
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
     private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static ApplicationContext applicationContext;
@@ -295,5 +294,15 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public void setCallName(String callName) {
         dataMap.put(Dict.CALL_NAME, callName);
+    }
+
+    @Override
+    public String getServiceId() {
+        return (String) this.dataMap.getOrDefault(Dict.SERVICE_ID, "");
+    }
+
+    @Override
+    public void setServiceId(String serviceId) {
+        dataMap.put(Dict.SERVICE_ID, serviceId);
     }
 }
