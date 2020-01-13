@@ -72,7 +72,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         String modelName = inferenceRequest.getModelVersion();
         String modelNamespace = inferenceRequest.getModelId();
         String serviceId = inferenceRequest.getServiceId();
-
+        context.setServiceId(serviceId);
 
         if (StringUtils.isEmpty(modelNamespace)  ) {
             if(StringUtils.isNotEmpty(inferenceRequest.getServiceId())){
