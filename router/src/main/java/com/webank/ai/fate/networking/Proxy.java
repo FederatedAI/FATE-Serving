@@ -26,11 +26,12 @@ import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import io.grpc.Server;
 import org.apache.commons.cli.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -39,7 +40,7 @@ import java.util.Set;
 
 public class Proxy {
 
-    private static final Logger logger = LoggerFactory.getLogger(Proxy.class);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public static ZookeeperRegistry zookeeperRegistry;
 
@@ -71,14 +72,17 @@ public class Proxy {
         Server server = serverFactory.createServer(confFilePath);
         ServerConfManager serverConfManager = context.getBean(ServerConfManager.class);
         ServerConf serverConf = serverConfManager.getServerConf();
-        logger.info("Server started listening on port: {}", serverConf.getPort());
-        logger.info("server conf: {}", serverConf);
+        LOGGER.info("Server started listening on port: {}", serverConf.getPort());
+        LOGGER.info("server conf: {}", serverConf);
         server.start();
         Properties properties = serverConf.getProperties();
 
-        System.setProperty(Dict.ACL_ENABLE, properties.getProperty(Dict.ACL_ENABLE, ""));
-        System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME, ""));
-        System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD, ""));
+        if(properties.getProperty(Dict.ACL_USERNAME) != null) {
+            System.setProperty(Dict.ACL_USERNAME, properties.getProperty(Dict.ACL_USERNAME));
+        }
+        if(properties.getProperty(Dict.ACL_PASSWORD) != null) {
+            System.setProperty(Dict.ACL_PASSWORD, properties.getProperty(Dict.ACL_PASSWORD));
+        }
 
         useRegister = Boolean.valueOf(properties.getProperty("useRegister", "false"));
         useZkRouter = Boolean.valueOf(properties.getProperty("useZkRouter", "false"));
@@ -109,7 +113,7 @@ public class Proxy {
                 Set<URL> urls = Sets.newHashSet();
                 urls.addAll(registered);
                 urls.forEach(url -> {
-                    logger.info("unregister {}", url);
+                    LOGGER.info("unregister {}", url);
                     zookeeperRegistry.unregister(url);
                 });
                 zookeeperRegistry.destroy();

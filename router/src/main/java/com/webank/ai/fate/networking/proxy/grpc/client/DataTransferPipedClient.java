@@ -30,9 +30,9 @@ import com.webank.ai.fate.networking.proxy.infra.impl.SingleResultCallback;
 import com.webank.ai.fate.networking.proxy.model.ServerConf;
 import com.webank.ai.fate.networking.proxy.service.ConfFileBasedFdnRouter;
 import com.webank.ai.fate.networking.proxy.service.FdnRouter;
-import com.webank.ai.fate.networking.proxy.util.AuthUtils;
 import com.webank.ai.fate.networking.proxy.util.ErrorUtils;
 import com.webank.ai.fate.networking.proxy.util.ToStringUtils;
+import com.webank.ai.fate.networking.proxy.util.AuthUtils;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.CollectionUtils;
@@ -44,8 +44,8 @@ import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope("prototype")
 public class DataTransferPipedClient {
-    private static final Logger logger = LoggerFactory.getLogger(DataTransferPipedClient.class);
+    private static final Logger LOGGER = LogManager.getLogger(DataTransferPipedClient.class);
     @Autowired
     private GrpcStubFactory grpcStubFactory;
     @Autowired
@@ -80,8 +80,7 @@ public class DataTransferPipedClient {
 
     private BasicMeta.Endpoint endpoint;
     private boolean needSecureChannel;
-    private static long MAX_AWAIT_HOURS = 24;
-    private static String SERVICE_ROLE_NAME = "serving-1.0";
+    private long MAX_AWAIT_HOURS = 24;
 
     public DataTransferPipedClient() {
         needSecureChannel = false;
@@ -89,7 +88,7 @@ public class DataTransferPipedClient {
 
     public void push(Proxy.Metadata metadata, Pipe pipe) {
         String onelineStringMetadata = toStringUtils.toOneLineString(metadata);
-        logger.info("[PUSH][CLIENT] client send push to server: {}",
+        LOGGER.info("[PUSH][CLIENT] client send push to server: {}",
                 onelineStringMetadata);
         DataTransferServiceGrpc.DataTransferServiceStub stub = getStub(metadata.getSrc(), metadata.getDst());
 
@@ -98,7 +97,7 @@ public class DataTransferPipedClient {
             Proxy.Topic to = metadata.getDst();
             stub = getStub(from, to);
         } catch (Exception e) {
-            logger.error("[PUSH][CLIENT] error when creating push stub");
+            LOGGER.error("[PUSH][CLIENT] error when creating push stub");
             pipe.onError(e);
         }
 
@@ -109,11 +108,10 @@ public class DataTransferPipedClient {
                 grpcStreamObserverFactory.createClientPushResponseStreamObserver(resultCallback, finishLatch);
 
         StreamObserver<Proxy.Packet> requestObserver = stub.push(responseObserver);
-        logger.info("[PUSH][CLIENT] push stub: {}, metadata: {}",
+        LOGGER.info("[PUSH][CLIENT] push stub: {}, metadata: {}",
                 stub.getChannel(), onelineStringMetadata);
 
         int emptyRetryCount = 0;
-        int maxRetryCount = 60;
         Proxy.Packet packet = null;
         do {
             packet = (Proxy.Packet) pipe.read(1, TimeUnit.SECONDS);
@@ -123,20 +121,20 @@ public class DataTransferPipedClient {
                 emptyRetryCount = 0;
             } else {
                 ++emptyRetryCount;
-                if (emptyRetryCount % maxRetryCount == 0) {
-                    logger.info("[PUSH][CLIENT] push stub waiting. empty retry count: {}, metadata: {}",
+                if (emptyRetryCount % 60 == 0) {
+                    LOGGER.info("[PUSH][CLIENT] push stub waiting. empty retry count: {}, metadata: {}",
                             emptyRetryCount, onelineStringMetadata);
                 }
             }
         } while ((packet != null || !pipe.isDrained()) && emptyRetryCount < 30 && !pipe.hasError());
 
-        logger.info("[PUSH][CLIENT] break out from loop. Proxy.Packet is null? {} ; pipe.isDrained()? {}" +
+        LOGGER.info("[PUSH][CLIENT] break out from loop. Proxy.Packet is null? {} ; pipe.isDrained()? {}" +
                         ", pipe.hasError? {}, metadata: {}",
                 packet == null, pipe.isDrained(), pipe.hasError(), onelineStringMetadata);
 
         if (pipe.hasError()) {
             Throwable error = pipe.getError();
-            logger.error("[PUSH][CLIENT] push error: {}, metadata: {}",
+            LOGGER.error("[PUSH][CLIENT] push error: {}, metadata: {}",
                     ExceptionUtils.getStackTrace(error), onelineStringMetadata);
             requestObserver.onError(error);
 
@@ -147,7 +145,7 @@ public class DataTransferPipedClient {
         try {
             finishLatch.await(MAX_AWAIT_HOURS, TimeUnit.HOURS);
         } catch (InterruptedException e) {
-            logger.error("[PUSH][CLIENT] client push: finishLatch.await() interrupted");
+            LOGGER.error("[PUSH][CLIENT] client push: finishLatch.await() interrupted");
             requestObserver.onError(errorUtils.toGrpcRuntimeException(e));
             pipe.onError(e);
             Thread.currentThread().interrupt();
@@ -159,19 +157,19 @@ public class DataTransferPipedClient {
             if (resultCallback.hasResult()) {
                 convertedPipe.setResult(resultCallback.getResult());
             } else {
-                logger.warn("No Proxy.Metadata returned in pipe. request metadata: {}",
+                LOGGER.warn("No Proxy.Metadata returned in pipe. request metadata: {}",
                         onelineStringMetadata);
             }
         }
         pipe.onComplete();
 
-        logger.info("[PUSH][CLIENT] push closing pipe. metadata: {}",
+        LOGGER.info("[PUSH][CLIENT] push closing pipe. metadata: {}",
                 onelineStringMetadata);
     }
 
     public void pull(Proxy.Metadata metadata, Pipe pipe) {
         String onelineStringMetadata = toStringUtils.toOneLineString(metadata);
-        logger.info("[PULL][CLIENT] client send pull to server: {}", onelineStringMetadata);
+        LOGGER.info("[PULL][CLIENT] client send pull to server: {}", onelineStringMetadata);
         DataTransferServiceGrpc.DataTransferServiceStub stub = getStub(metadata.getDst(), metadata.getSrc());
 
         final CountDownLatch finishLatch = new CountDownLatch(1);
@@ -180,13 +178,13 @@ public class DataTransferPipedClient {
                 grpcStreamObserverFactory.createClientPullResponseStreamObserver(pipe, finishLatch, metadata);
 
         stub.pull(metadata, responseObserver);
-        logger.info("[PULL][CLIENT] pull stub: {}, metadata: {}",
+        LOGGER.info("[PULL][CLIENT] pull stub: {}, metadata: {}",
                 stub.getChannel(), onelineStringMetadata);
 
         try {
             finishLatch.await(MAX_AWAIT_HOURS, TimeUnit.HOURS);
         } catch (InterruptedException e) {
-            logger.error("[PULL][CLIENT] client pull: finishLatch.await() interrupted");
+            LOGGER.error("[PULL][CLIENT] client pull: finishLatch.await() interrupted");
             responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
             pipe.onError(e);
             Thread.currentThread().interrupt();
@@ -207,7 +205,7 @@ public class DataTransferPipedClient {
 
         try {
             String onelineStringMetadata = toStringUtils.toOneLineString(header);
-            logger.info("[UNARYCALL][CLIENT] client send unary call to server: {}", onelineStringMetadata);
+            LOGGER.info("[UNARYCALL][CLIENT] client send unary call to server: {}", onelineStringMetadata);
 
             packet = authUtils.addAuthInfo(packet);
 
@@ -216,20 +214,20 @@ public class DataTransferPipedClient {
 
             stub.unaryCall(packet, responseObserver);
 
-            logger.info("[UNARYCALL][CLIENT] unary call stub: {}, metadata: {}",
+            LOGGER.info("[UNARYCALL][CLIENT] unary call stub: {}, metadata: {}",
                     stub.getChannel(), onelineStringMetadata);
 
             try {
                 finishLatch.await(MAX_AWAIT_HOURS, TimeUnit.HOURS);
             } catch (InterruptedException e) {
-                logger.error("[UNARYCALL][CLIENT] client unary call: finishLatch.await() interrupted");
+                LOGGER.error("[UNARYCALL][CLIENT] client unary call: finishLatch.await() interrupted");
                 responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
                 pipe.onError(e);
                 Thread.currentThread().interrupt();
                 return;
             }
         } catch (Exception e) {
-            logger.error("[UNARYCALL][CLIENT] client unary call: exception: ", e);
+            LOGGER.error("[UNARYCALL][CLIENT] client unary call: exception: ", e);
             responseObserver.onError(errorUtils.toGrpcRuntimeException(e));
             pipe.onError(e);
             Thread.currentThread().interrupt();
@@ -254,14 +252,18 @@ public class DataTransferPipedClient {
             ConfFileBasedFdnRouter confFileBasedFdnRouter = (ConfFileBasedFdnRouter) fdnRouter;
             Map<String, Map<String, List<BasicMeta.Endpoint>>> routerTable = confFileBasedFdnRouter.getRouteTable();
 
-            if (routerTable.containsKey(to.getPartyId()) &&routerTable.get(to.getPartyId()).get(SERVICE_ROLE_NAME)!=null&& SERVICE_ROLE_NAME.equals(to.getRole())) {
+            if (routerTable.containsKey(to.getPartyId()) &&
+                    ((routerTable.get(to.getPartyId()).get("serving-1.0")!=null&& "serving-1.0".equals(to.getRole()))||
+                            (routerTable.get(to.getPartyId()).get("serving")!=null&& "serving".equals(to.getRole())))
+
+            ) {
 
                 stub = routerByServiceRegister(from, to, pack);
                 if (stub != null) {
-                    logger.info("appid {} register return stub", to.getPartyId());
+                    LOGGER.info("appid {} register return stub", to.getPartyId());
                     return stub;
                 } else {
-                    logger.info("appid {} register not return stub", to.getPartyId());
+                    LOGGER.info("appid {} register not return stub", to.getPartyId());
                     return null;
                 }
 
@@ -280,7 +282,7 @@ public class DataTransferPipedClient {
             stub = grpcStubFactory.getAsyncStub(endpoint);
         }
 
-        logger.info("[ROUTE] route info: {} routed to {}", toStringUtils.toOneLineString(to),
+        LOGGER.info("[ROUTE] route info: {} routed to {}", toStringUtils.toOneLineString(to),
                 toStringUtils.toOneLineString(fdnRouter.route(to)));
 
         fdnRouter.route(from);
@@ -306,7 +308,7 @@ public class DataTransferPipedClient {
             stub = grpcStubFactory.getAsyncStub(endpoint);
         }
 
-        logger.info("[ROUTE] route info: {} routed to {}", toStringUtils.toOneLineString(to),
+        LOGGER.info("[ROUTE] route info: {} routed to {}", toStringUtils.toOneLineString(to),
                 toStringUtils.toOneLineString(fdnRouter.route(to)));
 
         fdnRouter.route(from);
@@ -314,10 +316,10 @@ public class DataTransferPipedClient {
         return stub;
     }
 
-    private static final String MODEL_KEY_SEPARATOR = "&";
+    private static final String modelKeySeparator = "&";
 
     public static String genModelKey(String name, String namespace) {
-        return StringUtils.join(Arrays.asList(name, namespace), MODEL_KEY_SEPARATOR);
+        return StringUtils.join(Arrays.asList(name, namespace), modelKeySeparator);
     }
 
 
@@ -342,7 +344,7 @@ public class DataTransferPipedClient {
         }
 
         List<URL> urls = routerService.router(paramUrl);
-        logger.info("try to find {} returns {}",urlString,urls);
+        LOGGER.info("try to find {} returns {}",urlString,urls);
         if (CollectionUtils.isNotEmpty(urls)) {
             URL url = urls.get(0);
             BasicMeta.Endpoint.Builder builder = BasicMeta.Endpoint.newBuilder();
