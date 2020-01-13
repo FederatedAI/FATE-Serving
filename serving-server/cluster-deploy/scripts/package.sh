@@ -19,18 +19,10 @@ fate_serving_proxy_zip=fate-serving-proxy-*-release.zip
 fate_serving_proxy_jar=fate-serving-proxy-*.jar
 serving_proxy=serving-proxy
 serving_proxy_path=$fate_serving_path/serving-proxy
-echo "--------------------start"
-if [ ! -d $fate_serving_path  ]; then
-	mkdir -p $fate_serving_path
-	if [ ! -d $sering_path  ]; then
-		cd $fate_serving_path
-		mkdir $serving
-		mkdir $serving_proxy
-	else
-		echo [INFO] $fate_serving_path dir exist
-	fi
-fi
-cp services.sh $fate_serving_path
+
+mkdir -p ./${fate_serving}/${serving}
+mkdir -p ./${fate_serving}/${serving_proxy}
+cp services.sh ./${fate_serving}
 cd ${cwd}/../../../
 echo "[INFO] mvn clean package  start"
 mvn clean package -DskipTests
@@ -41,106 +33,175 @@ else
 	exit
 fi
 
-
-cd $cwd/../../target
-cp $fate_serving_zip $sering_path
-cd $sering_path
+#serving
+cd ${cwd}/../../target
+cp ${fate_serving_zip} ${cwd}/${fate_serving}/${serving}
+cd ${cwd}/${fate_serving}/${serving}
 unzip $fate_serving_zip
 ln -s $fate_serving_jar  fate-serving-server.jar
-cd $cwd/../../../$serving_proxy/target
-cp $fate_serving_proxy_zip $serving_proxy_path
-cd $serving_proxy_path
+
+#serving-proxy
+cd ${cwd}/../../../$serving_proxy/target
+cp $fate_serving_proxy_zip ${cwd}/${fate_serving}/${serving_proxy}
+cd ${cwd}/${fate_serving}/${serving_proxy}
 unzip $fate_serving_proxy_zip
 ln -s $fate_serving_proxy_jar fate-serving-proxy.jar
-cd  $sering_path/conf
-sed -i 's#redis.ip=127.0.0.1#'redis.ip=${host_redis_ip}'#' serving-server.properties
-sed -i 's#redis.port=6379#'redis.port=${host_redis_port}'#' serving-server.properties
-sed -i 's#redis.password=fate_dev#'redis.password=${host_redis_password}'#' serving-server.properties
-sed -i "/^workMode=/cworkMode=${workMode}" serving-server.properties
-sed -i "/^model.transfer.url=/cmodel.transfer.url=${host_fate_flow_url}/v1/model/transfer" serving-server.properties
-cd $cwd
-if [ ${apply_zk} = "false" ]
-then
-	cd $serving_proxy_path/conf
-	sed -i "/^useRegister=/cuseRegister=false" application.properties
-	sed -i "/^useZkRouter=/cuseZkRouter=false" application.properties
-	sed -i "/^route.table=/croute.table=${deploy_dir}/fate-serving/serving-proxy/conf/route_table.json" application.properties
-	sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
-	sed -i "6c \"ip\":\"${host_guest[1]}\"," route_table.json
-	sed -i 's#10000#'${party_list[0]}'#'  route_table.json
-    sed -i '7c "prot":8000' route_table.json
-    sed -i "17a ,\"serving\":[{\"ip\":\"${host_guest[0]}\",\"prot\":8080}]" route_table.json
-	cd  $sering_path/conf
-    sed -i "/^useRegister=/cuseRegister=false" serving-server.properties
-    sed -i "/^useZkRouter=/cuseZkRouter=false" serving-server.properties
-elif [ ${apply_zk} = "true" ]
-then
-	echo "---------apply _zk true"
-	cd $serving_proxy_path/conf
-	echo "----------------" $pwd
-	sed -i "/^zk.url=/czk.url=${host_zk_url}" application.properties
-	sed -i "/^useRegister=/cuseRegister=true" application.properties
-    sed -i "/^useZkRouter=/cuseZkRouter=true" application.properties
-	sed -i "/^route.table=/croute.table=${deploy_dir}/fate-serving/serving-proxy/conf/route_table.json" application.properties
-    sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
-	sed -i 's#10000#'${party_list[0]}'#'  route_table.json
-	cd  $sering_path/conf
-	sed -i "/^zk.url=/czk.url=${host_zk_url}" serving-server.properties
-	sed -i "/^useRegister=/cuseRegister=true" serving-server.properties
-    sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
+
+#cp modify_json.py
+cd ${cwd}
+cp modify_json.py ./fate-serving/serving-proxy/conf
+tar -zcvf fate-serving.tar.gz  fate-serving
+
+cp_serving() {
+	for node_ip in "${host_guest[@]}"; do
+	echo "[INFO] install on ${node_ip}"
+	ssh -tt ${user}@${node_ip} << eeooff
+if [ ! -d ${deploy_dir}  ]; then
+	mkdir -p ${deploy_dir}
+fi
+exit
+eeooff
+scp fate-serving.tar.gz ${user}@${node_ip}:${deploy_dir}
+	ssh -tt ${user}@${node_ip} << eeooff
+	cd ${deploy_dir}
+	tar -zxvf fate-serving.tar.gz
+	rm -rf fate-serving.tar.gz
+	exit
+eeooff
+	done
+}
+cp_serving
+if [ $? -eq 0 ]; then
+	echo  "[INFO]  cp fate-serving.tar.gz success"
 else
-		echo ""
+	echo "[INFO]  cp fate-serving.tar.gz filed"
+	exit
 fi
 
 
-init_env() {
-        ssh -tt ${user}@${host_guest[1]}  << eeooff
-	if [ ! -d ${public_path} ]
-	then
-		mkdir -p ${public_path}
-	fi
-	exit
-eeooff
-		cd ${public_path}
-		tar -zcvf fate-serving.tar.gz  fate-serving/
-		scp ${public_path}/fate-serving.tar.gz ${host_guest[1]}:${public_path}
-        ssh -tt ${user}@${host_guest[1]} << eeooff
-	cd ${public_path}
-	echo "public_path-------" ${public_path}
-	tar -zxvf fate-serving.tar.gz
-	rm -rf fate-serving.tar.gz
-	cd ${public_path}/fate-serving/serving/conf
-	sed -i "/^zk.url=/czk.url=${guest_zk_url}" serving-server.properties
-	sed -i 's#redis.ip=${host_redis_ip}#'redis.ip=${guest_redis_ip}'#' serving-server.properties
-	sed -i 's#redis.port=${host_redis_port}#'redis.port=${guest_redis_port}'#' serving-server.properties
-	sed -i 's#redis.password=${host_redis_password}#'redis.password=${guest_redis_password}'#' serving-server.properties
-	sed -i "/^model.transfer.url=/cmodel.transfer.url=${guest_fate_flow_url}/v1/model/transfer" serving-server.properties
-	cd ${serving_proxy_path}/conf
-    sed -i '/^zk.url=/czk.url=${guest_zk_url}' application.properties
-	sed -i '6c "ip":"${host_guest[0]}",' route_table.json
-	sed -i 's#${party_list[0]}#'${party_list[1]}'#'  route_table.json
-	sed -i '7c "prot":8000' route_table.json
-	grep serving route_table.json >/dev/null
-	if [ $? -eq 0 ]
-	then
-		sed -i '18d' route_table.json
-		sed -i "18i ,\"serving\":[{\"ip\":\"${host_guest[1]}\",\"prot\":8080}]" route_table.json
-	fi
+update_config () {
+    for ((i=0;i<${#host_guest[*]};i++))
+    do
+		#update serving-proxy config path
+		ssh -tt ${user}@${host_guest[i]} << eeooff
+		cd ${deploy_dir}/fate-serving/serving-proxy/conf
+		sed -i "/^route.table=/croute.table=${deploy_dir}/fate-serving/serving-proxy/conf/route_table.json" application.properties
+		sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
 exit
 eeooff
 
+
+		temp=$(( $i % 2 ))
+		if [ $temp = 0 ]
+		then
+		ssh -tt ${user}@${host_guest[i]} << eeooff
+		cd ${deploy_dir}/fate-serving/serving/conf
+		sed -i "/^redis.ip=/credis.ip=${host_redis_ip}" serving-server.properties
+		sed -i "/^redis.port=/credis.port=${host_redis_port}" serving-server.properties
+		sed -i "/^redis.password=/credis.password=${host_redis_password}" serving-server.properties
+		sed -i "/^workMode=/cworkMode=${workMode}" serving-server.properties
+		sed -i "/^model.transfer.url=/cmodel.transfer.url=${host_fate_flow_url}/v1/model/transfer" serving-server.properties
+exit
+eeooff
+		else
+		ssh -tt ${user}@${host_guest[i]} << eeooff
+		cd ${deploy_dir}/fate-serving/serving/conf
+		sed -i "/^redis.ip=/credis.ip=${guest_redis_ip}" serving-server.properties
+		sed -i "/^redis.port=/credis.port=${guest_redis_port}" serving-server.properties
+		sed -i "/^redis.password=/credis.password=${guest_redis_password}" serving-server.properties
+		sed -i "/^workMode=/cworkMode=${workMode}" serving-server.properties
+		sed -i "/^model.transfer.url=/cmodel.transfer.url=${guest_model_transfer}/v1/model/transfer" serving-server.properties
+exit
+eeooff
+		fi
+    done
+
+
+}
+update_config
+
+#apply zookeepre the config
+update_zk_config () {
+	echo "---------apply _zk true"
+	for ((i=0;i<${#host_guest[*]};i++))
+    do
+		temp=$(( $i % 2 ))
+		if [ $temp = 0 ]
+		then
+			ssh -tt ${user}@${host_guest[i]} << eeooff
+				cd ${deploy_dir}/fate-serving/serving/conf
+				sed -i "/^zk.url=/czk.url=${host_zk_url}" serving-server.properties
+				sed -i "/^useRegister=/cuseRegister=true" serving-server.properties
+				sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
+				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				sed -i "/^zk.url=/czk.url=${host_zk_url}" application.properties
+				sed -i "/^useRegister=/cuseRegister=true" application.properties
+				sed -i "/^useZkRouter=/cuseZkRouter=true" application.properties
+exit
+eeooff
+		else
+			ssh -tt ${user}@${host_guest[i]} << eeooff
+				cd ${deploy_dir}/fate-serving/serving/conf
+				sed -i "/^zk.url=/czk.url=${host_zk_url}" serving-server.properties
+				sed -i "/^useRegister=/cuseRegister=true" serving-server.properties
+				sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
+				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				sed -i "/^zk.url=/czk.url=${host_zk_url}" application.properties
+				sed -i "/^useRegister=/cuseRegister=true" application.properties
+				sed -i "/^useZkRouter=/cuseZkRouter=true" application.properties
+exit
+eeooff
+		fi
+	done
 }
 
-if [[ ${host_guest[1]} ]]
-then
-        echo "------guest hava host_guest1  -----is not null"
-        if [[ ${host_guest[1]} != "" ]]; then
-                init_env
-        else
-                echo "please input guest from allinone_cluster_configurations"
-                exit 0
-        fi
+#no zookeepre the config
+update_nozk_config () {
+	for ((i=0;i<${#host_guest[*]};i++))
+    do
+		      	ssh -tt ${user}@${host_guest[i]} << eeooff
+                        cd ${deploy_dir}/fate-serving/serving/conf
+                        sed -i "/^useRegister=/cuseRegister=false" serving-server.properties
+                        sed -i "/^useZkRouter=/cuseZkRouter=false" serving-server.properties
+                        cd ${deploy_dir}/fate-serving/serving-proxy/conf
+                        sed -i "/^useZkRouter=/cuseZkRouter=false" application.properties
+exit
+eeooff
+		temp=$(( $i % 2 ))
+		if [ $temp = 0 ]
+		then
+			ssh -tt ${user}@${host_guest[i]} << eeooff
+			echo "------------------------host----${host_guest[i]} "
+			sed -i "3c default_default_ip=\"${host_guest[i+1]}\"" modify_json.py
+			sed -i "5c party_id=${party_list[i]} " modify_json.py
+			sed -i "8c role_serving_ip=\"${host_guest[i]}\"" modify_json.py
+			sed -i "9c role_serving_port=8080" modify_json.py
+			python modify_json.py route_table.json
+			rm -rf modify_json.py
+exit
+eeooff
+		else
+			ssh -tt ${user}@${host_guest[i]} << eeooff
+			cd ${deploy_dir}/fate-serving/serving-proxy/conf
+			sed -i "3c default_default_ip=\"${host_guest[i-1]}\"" modify_json.py
+			sed -i "5c party_id=${party_list[i]} " modify_json.py
+			sed -i "8c role_serving_ip=\"${host_guest[i]}\"" modify_json.py
+			sed -i "9c role_serving_port=8080" modify_json.py
+			python modify_json.py route_table.json
+			rm -rf modify_json.py
+exit
+eeooff
+		fi
+	done
+}
 
+if [ ${apply_zk} = "true" ]
+then
+	update_zk_config
+elif [ ${apply_zk} = "false" ]
+then
+	update_nozk_config
 else
-        echo "no have guest--------false   no null"
+	echo ""
 fi
+rm -rf fate-serving*
