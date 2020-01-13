@@ -165,6 +165,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 			Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
             authBuilder.setNonce(context.getCaseId());
             authBuilder.setVersion(version);
+            authBuilder.setServiceId(context.getServiceId());
             packetBuilder.setAuth(authBuilder.build());
 			
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
