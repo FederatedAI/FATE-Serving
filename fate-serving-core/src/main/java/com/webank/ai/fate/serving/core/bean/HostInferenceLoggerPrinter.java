@@ -23,19 +23,19 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
-public class HostInferenceLoggerPrinter implements LoggerPrinter<Map, ReturnResult> {
+public class HostInferenceLoggerPrinter implements LoggerPrinter<HostFederatedParams, ReturnResult> {
 
     static final String LOGGER_NAME = "flow";
 
     private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
 
     @Override
-    public void printLog(Context context, Map req, ReturnResult resp) {
+    public void printLog(Context context, HostFederatedParams req, ReturnResult resp) {
 
 
         LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}",
-                GetSystemInfo.getLocalIp(), context.getSeqNo(), req != null ? ((Map) req).get(Dict.CASEID) : Dict.NONE, context.getActionType(), context.getCostTime(),
-                resp != null ? resp.getRetcode() : Dict.NONE, req, resp
+                GetSystemInfo.getLocalIp(), context.getSeqNo(), req != null ? req.getCaseId() : Dict.NONE, context.getActionType(), context.getCostTime(),
+                resp != null ? resp.getRetcode() : Dict.NONE, req.getFeatureIdMap(), resp
         );
 
     }
