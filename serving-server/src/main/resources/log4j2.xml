@@ -124,6 +124,12 @@
 
     <Loggers>
 
+
+        <AsyncLogger name="inferenceAudit" level="info" includeLocation="true" additivity="false">
+            <AppenderRef ref="inferenceAudit"/>
+        </AsyncLogger>
+
+
         <AsyncLogger name="inferenceAudit" level="info" includeLocation="true" additivity="false">
             <AppenderRef ref="inferenceAudit"/>
         </AsyncLogger>

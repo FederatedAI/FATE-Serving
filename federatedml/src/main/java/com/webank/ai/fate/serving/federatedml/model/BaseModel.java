@@ -199,7 +199,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
             return remoteResult;
         } catch (Exception e) {
-            logger.error("getFederatedPredictFromRemote error", e);
+            logger.error("getFederatedPredictFromRemote error", e.getMessage());
             throw new RuntimeException(e);
         } finally {
             long end = System.currentTimeMillis();
