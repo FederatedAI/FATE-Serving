@@ -61,10 +61,14 @@ public class PipelineTask {
                     mlNode.setComponentName(componentName);
                     byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
                     byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
-                    mlNode.initModel(protoMeta, protoParam);
-                    modelMap.put(componentName, mlNode);
-                    pipeLineNode.add(mlNode);
-                    logger.info(" Add class {} to pipeline task list", className);
+                    int returnCode = mlNode.initModel(protoMeta, protoParam);
+                    if (returnCode == StatusCode.OK) {
+                        modelMap.put(componentName, mlNode);
+                        pipeLineNode.add(mlNode);
+                        logger.info(" Add class {} to pipeline task list", className);
+                    } else {
+                        throw new RuntimeException("initModel error");
+                    }
                 } catch (Exception ex) {
                     pipeLineNode.add(null);
                     logger.warn("Can not instance {} class", className);
