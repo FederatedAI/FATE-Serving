@@ -36,7 +36,7 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
     @Value("${coordinator:9999}")
     private String selfCoordinator;
 
-    @Autowired
+    @Autowired(required=false)
     private RouterService zkRouterService;
 
     private static final Logger logger = LoggerFactory.getLogger(ZkServingRouter.class);
