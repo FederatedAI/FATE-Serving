@@ -22,6 +22,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.proxy.common.Dict;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +67,7 @@ public class RegistryConfig {
     }
 
     @Bean
-    public RouterService routerService(ZookeeperRegistry zookeeperRegistry) {
+    public RouterService routerService(@Autowired(required=false) ZookeeperRegistry zookeeperRegistry) {
         if (zookeeperRegistry != null) {
             DefaultRouterService defaultRouterService = new DefaultRouterService();
             defaultRouterService.setRegistry(zookeeperRegistry);
