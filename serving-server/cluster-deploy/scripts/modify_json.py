@@ -20,9 +20,9 @@ def get_new_json(filepath):
             data['route_table']['default']['default'][0]['port'] = default_default_port
         role_default_conf = data['route_table']['10000']['default']
         if role_default_ip:
-            role_default_conf[0]['ip'] = role_def
-            role_default_conf[0]['port'] = role_default_portault_ip
-                                                                    if role_default_port:
+            role_default_conf[0]['ip'] = role_default_ip
+        if role_default_port:
+            role_default_conf[0]['port'] = role_default_port
         if party_id != "10000":
             del data['route_table']['10000']
             data['route_table'][party_id] = {}
