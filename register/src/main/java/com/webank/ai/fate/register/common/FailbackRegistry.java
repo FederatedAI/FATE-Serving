@@ -126,6 +126,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
 
     private void addFailedRegistered(URL url) {
+        logger.info("try to add failed registed url {}",url);
         FailedRegisteredTask oldOne = failedRegistered.get(url);
         if (oldOne != null) {
             return;

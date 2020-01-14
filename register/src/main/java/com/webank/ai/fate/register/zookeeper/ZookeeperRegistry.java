@@ -199,33 +199,41 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     public synchronized void register(Set<RegisterService> sets) {
-
+        logger.info("prepare to register {}",sets);
         String hostAddress = NetUtils.getLocalIp();
         Preconditions.checkArgument(port != 0);
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
 
         Set<URL> registered = this.getRegistered();
         for (RegisterService service : sets) {
-            URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
-            if (service.useDynamicEnvironment()) {
+            try {
+                URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+                if (service.useDynamicEnvironment()) {
 
-                if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
-                    dynamicEnvironments.forEach(environment -> {
-                        URL newServiceUrl = serviceUrl.setEnvironment(environment);
-                        String serviceName = service.serviceName() + environment;
-                        if (!registedString.contains(serviceName)) {
-                            this.register(newServiceUrl);
-                            this.registedString.add(serviceName);
-                        } else {
-                            logger.info("url {} is already registed,will not do anything ", newServiceUrl);
-                        }
-                    });
+                    if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
+                        dynamicEnvironments.forEach(environment -> {
+                            URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                            String serviceName = service.serviceName() + environment;
+                            if (!registedString.contains(serviceName)) {
+                                this.register(newServiceUrl);
+                                this.registedString.add(serviceName);
+                            } else {
+                                logger.info("url {} is already registed,will not do anything ", newServiceUrl);
+                            }
+                        });
+                    }
+                } else {
+                    if (!registedString.contains(service.serviceName())) {
+                        logger.info("try to register url {}", serviceUrl);
+                        this.register(serviceUrl);
+                        this.registedString.add(service.serviceName());
+                    } else {
+                        logger.info("url {} is already registed,will not do anything ", service.serviceName());
+                    }
                 }
-            } else {
-                if (!registedString.contains(service.serviceName())) {
-                    this.register(serviceUrl);
-                    this.registedString.add(service.serviceName());
-                }
+            }catch(Exception e){
+                e.printStackTrace();
+                logger.error("try to register service {} failed",service);
             }
         }
         logger.info("registed urls {}", registered);

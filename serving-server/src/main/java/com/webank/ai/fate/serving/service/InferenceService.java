@@ -103,7 +103,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                     }
 
                     if (returnResult.getRetcode() != InferenceRetCode.OK) {
-                        logger.error("caseid {} inference {} failed: {}  result {}", context.getCaseId(), actionType, req.getBody().toStringUtf8(), returnResult);
+                        logger.info("caseid {} inference {} failed: {}  result {}", context.getCaseId(), actionType, req.getBody().toStringUtf8(), returnResult);
                     }
                 } else {
 
