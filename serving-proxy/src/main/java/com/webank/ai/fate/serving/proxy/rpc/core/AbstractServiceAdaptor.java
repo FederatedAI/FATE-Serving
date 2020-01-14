@@ -168,6 +168,8 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             requestInHandle.decrementAndGet();
             long end = System.currentTimeMillis();
             long cost = end - begin;
+
+
             if(exceptions.size()!=0){
                 try {
                     outboundPackage = this.serviceFail(context, data, exceptions);

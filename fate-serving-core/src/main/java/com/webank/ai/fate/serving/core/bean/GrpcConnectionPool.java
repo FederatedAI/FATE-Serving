@@ -36,7 +36,7 @@ public class GrpcConnectionPool {
     static private GrpcConnectionPool pool = new GrpcConnectionPool();
     ConcurrentHashMap<String, GenericObjectPool<ManagedChannel>> poolMap = new ConcurrentHashMap<String, GenericObjectPool<ManagedChannel>>();
     private Integer maxTotal = 64;
-    private Integer maxIdle = 16;
+    private Integer maxIdle = 64;
 
     private GrpcConnectionPool() {
 
@@ -106,7 +106,7 @@ public class GrpcConnectionPool {
         @Override
         public ManagedChannel create() throws Exception {
 
-
+            logger.info("create ManagedChannel");
             NettyChannelBuilder builder = NettyChannelBuilder
                     .forAddress(ip, port)
                     .keepAliveTime(6, TimeUnit.MINUTES)
