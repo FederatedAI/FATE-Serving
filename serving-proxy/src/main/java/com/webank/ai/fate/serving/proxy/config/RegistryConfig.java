@@ -18,9 +18,9 @@ package com.webank.ai.fate.serving.proxy.config;
 
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
-import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.proxy.common.Dict;
+import com.webank.ai.fate.serving.proxy.rpc.router.ZkServingRouter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -60,18 +60,14 @@ public class RegistryConfig {
                     Dict.SELF_ENVIRONMENT, Integer.valueOf(port));
             zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject("serving");
+
+            DefaultRouterService defaultRouterService = new DefaultRouterService();
+            defaultRouterService.setRegistry(zookeeperRegistry);
+            ZkServingRouter.setZkRouterService(defaultRouterService);
+
             return zookeeperRegistry;
         }
         return null;
     }
 
-    @Bean
-    public RouterService routerService(ZookeeperRegistry zookeeperRegistry) {
-        if (zookeeperRegistry != null) {
-            DefaultRouterService defaultRouterService = new DefaultRouterService();
-            defaultRouterService.setRegistry(zookeeperRegistry);
-            return defaultRouterService;
-        }
-        return null;
-    }
 }
