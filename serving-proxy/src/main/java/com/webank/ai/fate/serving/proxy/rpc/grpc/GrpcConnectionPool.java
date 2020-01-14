@@ -61,23 +61,23 @@ public class GrpcConnectionPool {
 
             poolConfig.setMaxWaitMillis(-1);
 
-            poolConfig.setLifo(true);
+//            poolConfig.setLifo(true);
 
-            poolConfig.setTestOnBorrow(true);
-
-            poolConfig.setTestWhileIdle(true);
-
-            poolConfig.setNumTestsPerEvictionRun(1);
-
-            poolConfig.setTimeBetweenEvictionRunsMillis(1000);
-
-            poolConfig.setEvictionPolicy(new DefaultEvictionPolicy());
-
-            poolConfig.setMinEvictableIdleTimeMillis(3000);
-
-            poolConfig.setSoftMinEvictableIdleTimeMillis(3000);
-
-            poolConfig.setBlockWhenExhausted(true);
+//            poolConfig.setTestOnBorrow(true);
+//
+//            poolConfig.setTestWhileIdle(true);
+//
+//            poolConfig.setNumTestsPerEvictionRun(1);
+//
+//            poolConfig.setTimeBetweenEvictionRunsMillis(1000);
+//
+//            poolConfig.setEvictionPolicy(new DefaultEvictionPolicy());
+//
+//            poolConfig.setMinEvictableIdleTimeMillis(3000);
+//
+//            poolConfig.setSoftMinEvictableIdleTimeMillis(3000);
+//
+//            poolConfig.setBlockWhenExhausted(true);
 
             poolMap.putIfAbsent(key, new GenericObjectPool<ManagedChannel>
                     (new ManagedChannelFactory(host, port), poolConfig));
@@ -87,7 +87,7 @@ public class GrpcConnectionPool {
         GenericObjectPool<ManagedChannel>   objectPool =poolMap.get(key);
 
 
-        logger.info("grpc pool host {} active num {} idle num {}",key,objectPool.getNumActive(),objectPool.getNumIdle());
+        logger.info("grpc pool host {} active num {} idle1 num {}",key,objectPool.getNumActive(),objectPool.getNumIdle());
 
         return objectPool.borrowObject();
     }
@@ -105,7 +105,7 @@ public class GrpcConnectionPool {
 
         @Override
         public ManagedChannel create() throws Exception {
-
+            logger.info("create managedChannel");
 
             ManagedChannelBuilder builder = ManagedChannelBuilder
                     .forAddress(host,port)
@@ -139,7 +139,7 @@ public class GrpcConnectionPool {
 
         @Override
         public void destroyObject(PooledObject<ManagedChannel> p) throws Exception {
-            //System.err.println("destroyObject ================");
+            logger.info("destroyObject ================");
             try {
                 p.getObject().shutdownNow();
 
