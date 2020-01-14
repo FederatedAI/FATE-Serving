@@ -148,6 +148,9 @@ public class ServingServer implements InitializingBean {
 
         }
 
+        ModelService modelService = applicationContext.getBean(ModelService.class);
+        modelService.restore();
+
         ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
         reporter.start(1, TimeUnit.SECONDS);
 

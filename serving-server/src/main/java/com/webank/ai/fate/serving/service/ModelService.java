@@ -348,10 +348,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         return null;
     }
 
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
+    public void restore() {
         List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
         List<RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
         if(publishLoadList!=null) {
@@ -392,8 +389,11 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             });
         }
+    }
 
-
+    @Override
+    public void afterPropertiesSet() throws Exception {
+//        restore();
     }
 
 
