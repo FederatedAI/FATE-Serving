@@ -1,7 +1,6 @@
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.register.provider.FateServerBuilder;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -25,9 +24,6 @@ public class IntraGrpcServer implements InitializingBean {
 
     @Value("${proxy.grpc.intra.port:8867}")
     private Integer port;
-
-    @Autowired
-    ZookeeperRegistry zookeeperRegistry;
 
     @Autowired
     IntraRequestHandler intraRequestHandler;
