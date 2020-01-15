@@ -34,7 +34,7 @@ def get_new_json(filepath):
             }]
     f.close()
     return json_data
-2
+
 
 def rewrite_json_file(filepath, json_data):
     with open(filepath, 'w') as f:
