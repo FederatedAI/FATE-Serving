@@ -90,11 +90,12 @@ public class ServingServer implements InitializingBean {
             ServingServer a = new ServingServer(cmd.getOptionValue("c"));
             a.start(args);
         } catch (Exception ex) {
+            logger.error("server start error",ex);
             ex.printStackTrace();
         }
     }
 
-    private void start(String[] args) throws IOException {
+    private void start(String[] args) throws Exception {
         this.initialize();
         applicationContext = SpringApplication.run(SpringConfig.class, args);
         ApplicationHolder.applicationContext = applicationContext;

@@ -63,7 +63,6 @@ public class RegistryConfig {
             System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
             System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
             System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
-
             ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, Dict.SELF_PROJECT_NAME,
                     Dict.SELF_ENVIRONMENT, Integer.valueOf(port));
             logger.info("registe zk , {}",FateServer.serviceSets);
