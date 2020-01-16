@@ -66,7 +66,6 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         long startTime = System.currentTimeMillis();
 
         context.setCaseId(inferenceRequest.getCaseid());
-
         ReturnResult inferenceResult = new ReturnResult();
         inferenceResult.setCaseid(inferenceRequest.getCaseid());
         String modelName = inferenceRequest.getModelVersion();

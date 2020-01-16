@@ -161,11 +161,16 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             String version =  Configuration.getProperty(Dict.VERSION,"");
             metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
             packetBuilder.setHeader(metaDataBuilder.build());
-			
 			Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
-            authBuilder.setNonce(context.getCaseId());
-            authBuilder.setVersion(version);
-            authBuilder.setServiceId(context.getServiceId());
+			if(context.getCaseId()!=null) {
+                authBuilder.setNonce(context.getCaseId());
+            }
+            if(version!=null) {
+                authBuilder.setVersion(version);
+            }
+            if(context.getServiceId()!=null) {
+                authBuilder.setServiceId(  context.getServiceId());
+            }
             packetBuilder.setAuth(authBuilder.build());
 			
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
