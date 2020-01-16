@@ -238,7 +238,12 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public long getDownstreamCost() {
-        return (long) dataMap.get(Dict.DOWN_STREAM_COST);
+
+        if(dataMap.get(Dict.DOWN_STREAM_COST)!=null) {
+
+            return (long) dataMap.get(Dict.DOWN_STREAM_COST);
+        }
+        return 0;
     }
 
     @Override

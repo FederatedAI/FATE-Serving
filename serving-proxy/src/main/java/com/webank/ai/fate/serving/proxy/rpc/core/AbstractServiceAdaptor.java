@@ -2,10 +2,12 @@ package com.webank.ai.fate.serving.proxy.rpc.core;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.webank.ai.fate.serving.proxy.common.Dict.CODE;
@@ -31,13 +34,17 @@ import static com.webank.ai.fate.serving.proxy.common.Dict.MESSAGE;
 
 public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor<req,resp> {
 
-    Logger logger;
+    Logger flowLogger = LoggerFactory.getLogger( "flow");
+
+    Logger logger =  LoggerFactory.getLogger( this.getClass().getName());
+
+
 
     public  AbstractServiceAdaptor(){
         /**
          *
          */
-        logger =  LoggerFactory.getLogger( this.getClass().getName());
+
     }
 
 
@@ -168,7 +175,17 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             requestInHandle.decrementAndGet();
             long end = System.currentTimeMillis();
             long cost = end - begin;
-
+            try {
+                logger.info("kaideng test");
+                flowLogger.info("{}|{}|{}|{}|" +
+                                "{}|{}|{}|{}|" +
+                                "{}|{}|{}",
+                        begin, context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
+                        context.getHostAppid(), context.getReturnCode(), end - begin,
+                        context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
+            }catch(Exception e){
+                logger.error("print flow log error",e);
+            }
 
             if(exceptions.size()!=0){
                 try {
@@ -184,30 +201,14 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
     private  OutboundPackage<resp>  serviceFailInner(Context context, InboundPackage<req> data, Throwable e) throws Exception{
 
-
-
         Map result = new HashMap();
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
         result.put(MESSAGE, e.getMessage());
         ErrorMessageUtil.handleException(result,e);
         context.setReturnCode(result.get(CODE)!=null?result.get(CODE).toString(): ErrorCode.SYSTEM_ERROR.toString());
-        Entry entry=null;
-        try {
-            StringBuilder  sb = new StringBuilder("ERROR_");
-            sb.append(serviceName);
-            String errResourceName= sb.append("_").append(result.get(CODE).toString()).toString();
-            entry = SphU.entry(errResourceName);
-        }
-        finally {
-            if(entry!=null){
-                entry.exit();
-            }
-        }
         resp  rsp = transformErrorMap(context ,result);
         outboundPackage.setData(rsp);
         return  outboundPackage;
-
-
     }
 
 
@@ -225,6 +226,20 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
     private String objectToJson(Object obj) {
         return JSONObject.toJSONString(obj, SerializerFeature.WriteEnumUsingToString);
     }
+
+
+    public  static  void  main(String[] args){
+
+        while(true) {
+            try (Entry entry = SphU.entry("mytest")) {
+
+            } catch (BlockException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 
 
 }
