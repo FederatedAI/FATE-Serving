@@ -171,6 +171,7 @@ git clone https://github.com/FederatedAI/FATE-Serving.git
 进入到FATE-Serving目录下的FATE-Serving/serving-server/cluster-deploy/scripts目录下，修改配置文件allinone_cluster_configurations.sh.
 
 配置文件allinone_cluster_configurations.sh说明：
+
 | 配置项             | 配置项意义                                   | 配置项值                                                     | 说明                                                         |
 | -------------------| -------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | user               | 操作用户                                     | 默认为app                                                    | 使用默认值                                                   |
