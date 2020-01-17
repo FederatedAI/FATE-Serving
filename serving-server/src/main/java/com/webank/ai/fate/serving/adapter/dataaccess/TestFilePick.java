@@ -52,7 +52,7 @@ public class TestFilePick implements FeatureData {
                             String[] a = StringUtils.split(kv, ":");
                             data.put(a[0], Double.valueOf(a[1]));
                         }
-                        featureIds.put(idFeats[0], data);
+                        featureMaps.put(idFeats[0], data);
                     }
                 });
             }
