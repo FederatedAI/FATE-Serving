@@ -33,7 +33,7 @@ start() {
         	java  -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/${module}.properties >> logs/console.log 2>>logs/error.log &
 	elif [ ${module} = "serving-proxy" ]
 	then
-		        java -Dspring.config.location=${configpath}/application.properties -DconfPath=$configpath -Xmx2048m -Xms2048m -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -XX:+HeapDumpOnOutOfMemoryError -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/application.properties >> logs/console.log 2>>logs/error.log &
+		        java -Dspring.config.location=${configpath}/application.properties  -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/application.properties >> logs/console.log 2>>logs/error.log &
 
 	else 
 		echo ""
