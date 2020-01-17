@@ -81,4 +81,3 @@ stop() {
         echo "service not running"
     fi
 }
-
