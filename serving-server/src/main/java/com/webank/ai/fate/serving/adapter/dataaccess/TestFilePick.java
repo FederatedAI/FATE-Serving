@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class TestFilePick implements FeatureData {
     private static final Logger logger = LoggerFactory.getLogger(TestFilePick.class);
-    private Map<String, Map<String, Object> > featureMaps = null;
+    private static final Map<String, Map<String, Object> > featureMaps = new HashMap<>();
 
 
     @Override
@@ -41,8 +41,7 @@ public class TestFilePick implements FeatureData {
         ReturnResult returnResult = new ReturnResult();
 
         try {
-            if(null == featureMaps){
-                featureMaps = new HashMap<>();
+            if(featureMaps.isEmpty()){
                 List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
                 lines.forEach(line -> {
                     String[] idFeats = StringUtils.split(line, ",");
