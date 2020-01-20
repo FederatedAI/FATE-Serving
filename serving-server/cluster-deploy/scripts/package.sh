@@ -115,8 +115,6 @@ exit
 eeooff
 		fi
     done
-
-
 }
 update_config
 
@@ -154,43 +152,57 @@ eeooff
 	done
 }
 
+update_route_table () {
+    	for ((i=0;i<${#host_guest[*]};i++))
+        do
+        		temp=$(( $i % 2 ))
+        		if [ $temp = 0 ]
+        		then
+				ssh -tt ${user}@${host_guest[i]} << eeooff
+				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				sed -i "3c default_default_ip=\"${host_guest[i+1]}\"" modify_json.py
+				sed -i "4c default_default_port=8869" modify_json.py
+				sed -i "5c party_id=${party_list[i]}" modify_json.py
+				sed -i "6c role_default_ip=\"${host_guest[i]}\"" modify_json.py
+				sed -i "7c role_default_port=8867" modify_json.py
+				sed -i "8c role_serving_ip=\"${host_guest[i]}\"" modify_json.py
+				sed -i "9c role_serving_port=8000" modify_json.py
+				python modify_json.py route_table.json
+				rm -rf modify_json.py
+exit
+eeooff
+        		else
+				ssh -tt ${user}@${host_guest[i]} << eeooff
+				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				sed -i "3c default_default_ip=\"${host_guest[i-1]}\"" modify_json.py
+				sed -i "4c default_default_port=8869" modify_json.py
+				sed -i "5c party_id=${party_list[i]}" modify_json.py
+				sed -i "6c role_default_ip=\"${host_guest[i]}\"" modify_json.py
+				sed -i "7c role_default_port=8867" modify_json.py
+				sed -i "8c role_serving_ip=\"${host_guest[i]}\"" modify_json.py
+				sed -i "9c role_serving_port=8000" modify_json.py
+				python modify_json.py route_table.json
+				rm -rf modify_json.py
+exit
+eeooff
+        		fi
+        done
+
+}
+update_route_table
+
 #no zookeepre the config
 update_nozk_config () {
 	for ((i=0;i<${#host_guest[*]};i++))
     do
-		      	ssh -tt ${user}@${host_guest[i]} << eeooff
-                        cd ${deploy_dir}/fate-serving/serving/conf
-                        sed -i "/^useRegister=/cuseRegister=false" serving-server.properties
-                        sed -i "/^useZkRouter=/cuseZkRouter=false" serving-server.properties
-                        cd ${deploy_dir}/fate-serving/serving-proxy/conf
-                        sed -i "/^useZkRouter=/cuseZkRouter=false" application.properties
+	ssh -tt ${user}@${host_guest[i]} << eeooff
+		cd ${deploy_dir}/fate-serving/serving/conf
+		sed -i "/^useRegister=/cuseRegister=false" serving-server.properties
+		sed -i "/^useZkRouter=/cuseZkRouter=false" serving-server.properties
+		cd ${deploy_dir}/fate-serving/serving-proxy/conf
+		sed -i "/^useZkRouter=/cuseZkRouter=false" application.properties
 exit
 eeooff
-		temp=$(( $i % 2 ))
-		if [ $temp = 0 ]
-		then
-			ssh -tt ${user}@${host_guest[i]} << eeooff
-			cd ${deploy_dir}/fate-serving/serving-proxy/conf
-			sed -i "3c default_default_ip=\"${host_guest[i+1]}\"" modify_json.py
-			sed -i "5c party_id=${party_list[i]}" modify_json.py
-			sed -i "8c role_serving_ip=\"${host_guest[i]}\"" modify_json.py
-			sed -i "9c role_serving_port=8080" modify_json.py
-			python modify_json.py route_table.json
-			rm -rf modify_json.py
-exit
-eeooff
-		else
-			ssh -tt ${user}@${host_guest[i]} << eeooff
-			cd ${deploy_dir}/fate-serving/serving-proxy/conf
-			sed -i "3c default_default_ip=\"${host_guest[i-1]}\"" modify_json.py
-			sed -i "5c party_id=${party_list[i]}" modify_json.py
-			sed -i "8c role_serving_ip=\"${host_guest[i]}\"" modify_json.py
-			sed -i "9c role_serving_port=8080" modify_json.py
-			python modify_json.py route_table.json
-			rm -rf modify_json.py
-exit
-eeooff
-		fi
 	done
 }
 
