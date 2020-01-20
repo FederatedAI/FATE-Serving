@@ -179,7 +179,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
                 logger.info("kaideng test");
                 flowLogger.info("{}|{}|{}|{}|" +
                                 "{}|{}|{}|{}|" +
-                                "{}|{}|{}",
+                                "{}|{}",
                         begin, context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
                         context.getHostAppid(), context.getReturnCode(), end - begin,
                         context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");

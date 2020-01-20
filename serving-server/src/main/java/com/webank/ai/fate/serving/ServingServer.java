@@ -92,6 +92,7 @@ public class ServingServer implements InitializingBean {
         } catch (Exception ex) {
             logger.error("server start error",ex);
             ex.printStackTrace();
+            System.exit(1);
         }
     }
 
