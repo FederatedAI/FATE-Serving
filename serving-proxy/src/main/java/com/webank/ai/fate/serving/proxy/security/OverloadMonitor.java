@@ -23,7 +23,7 @@ public class OverloadMonitor implements Interceptor{
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         Entry entry = null;
         try {
-             SphU.entry(context.getServiceName());
+            entry=  SphU.entry(context.getServiceName());
         } catch (BlockException ex){
             logger.warn("request was block by overload monitor, serviceName:{}.", context.getServiceName());
             throw ex;
