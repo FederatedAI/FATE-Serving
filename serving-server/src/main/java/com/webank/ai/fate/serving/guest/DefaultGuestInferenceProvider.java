@@ -75,22 +75,22 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
 
         if (StringUtils.isEmpty(modelNamespace)  ) {
             if(StringUtils.isNotEmpty(inferenceRequest.getServiceId())){
-                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getServiceId());
+                modelNamespace = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getServiceId());
             }else if(inferenceRequest.haveAppId()) {
-                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getAppid());
+                modelNamespace = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getAppid());
             }
         }
         if (StringUtils.isEmpty(modelNamespace)) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
             return inferenceResult;
         }
-        ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(modelNamespace);
+        ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(context,modelNamespace);
         PipelineTask model;
         if (StringUtils.isEmpty(modelName)) {
             modelName = modelNamespaceData.getUsedModelName();
             model = modelNamespaceData.getUsedModel();
         } else {
-            model = modelManager.getModel(modelName, modelNamespace);
+            model = modelManager.getModel(context,modelName, modelNamespace);
         }
         if (model == null) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);

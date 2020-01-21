@@ -71,14 +71,14 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
         ModelInfo partnerModelInfo = federatedParams.getPartnerModelInfo();
         Map<String, Object> featureIds = federatedParams.getFeatureIdMap();
 
-        ModelInfo modelInfo = modelManager.getModelInfoByPartner(partnerModelInfo.getName(), partnerModelInfo.getNamespace());
+        ModelInfo modelInfo = modelManager.getModelInfoByPartner(context,partnerModelInfo.getName(), partnerModelInfo.getNamespace());
         if (modelInfo == null) {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             returnResult.setRetmsg("Can not found model.");
             //   logInference(context,federatedParams, party, federatedRoles, returnResult, 0, false, false);
             return returnResult;
         }
-        PipelineTask model = modelManager.getModel(modelInfo.getName(), modelInfo.getNamespace());
+        PipelineTask model = modelManager.getModel(context,modelInfo.getName(), modelInfo.getNamespace());
         if (model == null) {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             returnResult.setRetmsg("Can not found model.");
@@ -129,7 +129,7 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
         ModelInfo partnerModelInfo = federatedParams.getPartnerModelInfo();
         Map<String, Object> featureIds = federatedParams.getFeatureIdMap();
 
-        ModelInfo modelInfo = modelManager.getModelInfoByPartner(partnerModelInfo.getName(), partnerModelInfo.getNamespace());
+        ModelInfo modelInfo = modelManager.getModelInfoByPartner(context,partnerModelInfo.getName(), partnerModelInfo.getNamespace());
         if (modelInfo == null) {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             returnResult.setRetmsg("Can not found model.");
@@ -138,7 +138,7 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
         }
 
 
-        PipelineTask model = modelManager.getModel(modelInfo.getName(), modelInfo.getNamespace());
+        PipelineTask model = modelManager.getModel(context,modelInfo.getName(), modelInfo.getNamespace());
 
         //   Preconditions.checkArgument(federatedParams.getData().get(Dict.TAG)!=null);
 
