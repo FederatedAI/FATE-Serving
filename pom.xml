@@ -29,7 +29,6 @@
         <module>federatedml</module>
         <module>fate-serving-core</module>
         <module>register</module>
-        <module>router</module>
         <module>serving-proxy</module>
         <module>fate-metrics-api</module>
         <module>fate-metrics-micrometer</module>

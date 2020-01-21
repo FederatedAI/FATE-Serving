@@ -20,7 +20,7 @@ import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.proxy.common.Dict;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.InterGrpcServer;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -7,14 +7,15 @@ import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
+import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
-import com.webank.ai.fate.serving.proxy.common.Dict;
-import com.webank.ai.fate.serving.proxy.rpc.core.AbstractServiceAdaptor;
+
 import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
 import io.grpc.ManagedChannel;
