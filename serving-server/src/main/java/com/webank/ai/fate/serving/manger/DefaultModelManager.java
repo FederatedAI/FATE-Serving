@@ -55,6 +55,8 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
     private ModelCache modelCache;
     private ConcurrentHashMap<String, ModelInfo> partnerModelData;
     private File modelFile;
+    @Autowired
+    private ModelLoader  modelLoader;
 
 
     public DefaultModelManager() {
@@ -66,7 +68,6 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
         partnerModelData = new ConcurrentHashMap<>();
         modelFederatedParty = new HashMap<>();
         modelFederatedRoles = new HashMap<>();
-
 
         String filename = System.getProperty(Dict.PROPERTY_USER_HOME) + "/.fate/fate-model.cache";
         File file = null;
@@ -106,7 +107,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                 returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
                 return returnResult;
             }
-            PipelineTask model = pushModelIntoPool(modelInfo.getName(), modelInfo.getNamespace());
+            PipelineTask model = pushModelIntoPool(context,modelInfo.getName(), modelInfo.getNamespace());
             if (model == null) {
                 returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
                 return returnResult;
@@ -114,7 +115,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             federatedRolesModel.forEach((roleName, roleModelInfo) -> {
                 roleModelInfo.forEach((p, m) -> {
                     if (!p.equals(partyId) || (p.equals(partyId) && !role.equals(roleName))) {
-                        String partnerModelKey = ModelUtils.genModelKey(m.getName(), m.getNamespace());
+                        String partnerModelKey = ModelUtil.genModelKey(m.getName(), m.getNamespace());
                         partnerModelData.put(partnerModelKey, modelInfo);
                         logger.info("Create model index({}) for partner({}, {})", partnerModelKey, roleName, p);
                     }
@@ -127,16 +128,12 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                         zookeeperRegistry.addDynamicEnvironment(serviceId);
                     }
                     partnerModelData.forEach((key,v)->{
-
-
                         String keyMd5 = EncryptUtils.encrypt(key,EncryptMethod.MD5);
                         logger.info("transform key {} to md5key {}",key,keyMd5);
                         zookeeperRegistry.addDynamicEnvironment(keyMd5);
                         zookeeperRegistry.register(FateServer.serviceSets);
 
                     });
-
-
 
                 }
 
@@ -170,8 +167,8 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             return returnResult;
         }
 
-        String modelKey = ModelUtils.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
-        PipelineTask model = modelCache.get(modelKey);
+        String modelKey = ModelUtil.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
+        PipelineTask model = modelCache.get(context,modelKey);
         if (model == null) {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             returnResult.setRetmsg("Can not found model by these information.");
@@ -213,35 +210,35 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
     }
 
     @Override
-    public PipelineTask getModel(String name, String namespace) {
-        return modelCache.get(ModelUtils.genModelKey(name, namespace));
+    public PipelineTask getModel(Context context,String name, String namespace) {
+        return modelCache.get(context,ModelUtil.genModelKey(name, namespace));
     }
 
     @Override
-    public ModelNamespaceData getModelNamespaceData(String namespace) {
+    public ModelNamespaceData getModelNamespaceData(Context context,String namespace) {
         return modelNamespaceDataMapPool.get(namespace);
     }
 
     @Override
-    public String getModelNamespaceByPartyId(String partyId) {
+    public String getModelNamespaceByPartyId(Context context,String partyId) {
         return appNamespaceMapPool.get(partyId);
     }
 
     @Override
-    public ModelInfo getModelInfoByPartner(String partnerModelName, String partnerModelNamespace) {
-        return partnerModelData.get(ModelUtils.genModelKey(partnerModelName, partnerModelNamespace));
+    public ModelInfo getModelInfoByPartner(Context context,String partnerModelName, String partnerModelNamespace) {
+        return partnerModelData.get(ModelUtil.genModelKey(partnerModelName, partnerModelNamespace));
     }
 
 
 
 
     @Override
-    public PipelineTask pushModelIntoPool(String name, String namespace) {
-        PipelineTask model = ModelUtils.loadModel(name, namespace);
+    public PipelineTask pushModelIntoPool(Context  context ,String name, String namespace) {
+        PipelineTask model = modelLoader.loadModel(context,name, namespace);
         if (model == null) {
             return null;
         }
-        modelCache.put(ModelUtils.genModelKey(name, namespace), model);
+        modelCache.put(context,ModelUtil.genModelKey(name, namespace), model);
         logger.info("Load model success, name: {}, namespace: {}, model cache size is {}", name, namespace, modelCache.getSize());
         return model;
     }

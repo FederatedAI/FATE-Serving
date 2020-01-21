@@ -26,6 +26,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.ApplicationHolder;
+import com.webank.ai.fate.serving.core.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
@@ -65,7 +66,6 @@ public class ServingServer implements InitializingBean {
         this.confPath = new File(confPath).getAbsolutePath();
         System.setProperty(Dict.CONFIGPATH, confPath);
         new Configuration(confPath).load();
-
         System.setProperty(Dict.ACL_ENABLE, Configuration.getProperty(Dict.ACL_ENABLE, ""));
         System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME, ""));
         System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD, ""));
@@ -151,7 +151,6 @@ public class ServingServer implements InitializingBean {
 
         ModelService  modelService = applicationContext.getBean(ModelService.class);
         modelService.restore();
-
         ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
         reporter.start(1, TimeUnit.SECONDS);
 
@@ -182,11 +181,24 @@ public class ServingServer implements InitializingBean {
                 });
 
                 zookeeperRegistry.destroy();
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                int retryCount=0;
+                long requestInProcess = BaseContext.requestInProcess.get();
+                do{
+                    if(requestInProcess>0&&retryCount<3) {
+                        try {
+                            logger.info("try to stop server,there is {} request in process", requestInProcess);
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        retryCount++;
+                        requestInProcess = BaseContext.requestInProcess.get();
+                    }else{
+                        break;
+                    }
+
+                }while(requestInProcess>0&&retryCount<3);
+
             }
             server.shutdown();
         }

@@ -20,11 +20,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.webank.ai.fate.serving.core.bean.Configuration;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -35,27 +37,30 @@ import java.util.concurrent.TimeUnit;
 public class DefaultModelCache implements ModelCache {
     private static final Logger logger = LoggerFactory.getLogger(DefaultModelCache.class);
     private LoadingCache<String, PipelineTask> modelCache;
+    @Autowired
+    private ModelLoader modelLoader;
 
     public DefaultModelCache() {
         modelCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_ACCESS_TTL), TimeUnit.HOURS)
                 .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_MAX_SIZE))
-                .build(new CacheLoader<String, PipelineTask>() {
+                .build(
+                        new CacheLoader<String, PipelineTask>() {
                     @Override
                     public PipelineTask load(String s) throws Exception {
-                        return loadModel(s);
+                        return loadModel(null,s);
                     }
                 });
     }
 
     @Override
-    public PipelineTask loadModel(String modelKey) {
-        String[] modelKeyFields = ModelUtils.splitModelKey(modelKey);
-        return ModelUtils.loadModel(modelKeyFields[0], modelKeyFields[1]);
+    public PipelineTask loadModel(Context context, String modelKey) {
+        String[] modelKeyFields = ModelUtil.splitModelKey(modelKey);
+        return modelLoader.loadModel(context,modelKeyFields[0], modelKeyFields[1]);
     }
 
     @Override
-    public PipelineTask get(String modelKey) {
+    public PipelineTask get(Context  context,String modelKey) {
         try {
             return modelCache.get(modelKey);
         } catch (ExecutionException ex) {
@@ -65,7 +70,7 @@ public class DefaultModelCache implements ModelCache {
     }
 
     @Override
-    public void put(String modelKey, PipelineTask model) {
+    public void put(Context  context,String modelKey, PipelineTask model) {
         modelCache.put(modelKey, model);
     }
 
