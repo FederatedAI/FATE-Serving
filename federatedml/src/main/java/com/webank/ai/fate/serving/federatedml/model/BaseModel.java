@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public abstract class BaseModel implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>> {
 
@@ -193,15 +195,18 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             }
             Preconditions.checkArgument(StringUtils.isNotEmpty(address));
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
+            ListenableFuture<Proxy.Packet> future= null;
             try {
-
-                DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
-                Proxy.Packet packet = stub1.unaryCall(packetBuilder.build());
-                remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
+                //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
+                DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
+                future =stub1.unaryCall(packetBuilder.build());
             } finally {
                 grpcConnectionPool.returnPool(channel1, address);
             }
-
+            if(future!=null){
+                Proxy.Packet packet = future.get(Configuration.getPropertyInt("rpc.time.out",3000), TimeUnit.MILLISECONDS);
+                remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
+            }
             return remoteResult;
         } catch (Exception e) {
             logger.error("getFederatedPredictFromRemote error", e.getMessage());

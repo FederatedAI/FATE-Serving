@@ -47,10 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ServingServer implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(ServingServer.class);
@@ -100,12 +97,14 @@ public class ServingServer implements InitializingBean {
         int port = Integer.parseInt(Configuration.getProperty(Dict.PROPERTY_SERVER_PORT));
         //TODO: Server custom configuration
 
-        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size",10);
-        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",100);
+        int processors = Runtime.getRuntime().availableProcessors();
+
+        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size",processors);
+        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",processors * 2);
         Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time",1000);
         Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size",10);
         Executor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, aliveTime.longValue(), TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(queueSize), new NamedThreadFactory("ServingServer", true));
+                new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
