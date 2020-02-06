@@ -162,6 +162,7 @@ Zookeeper 3.5.5+
 进入执行节点的/data/projects/目录，执行：
 
 cd /data/projects/
+
 git clone https://github.com/FederatedAI/FATE-Serving.git
 
 4.2 配置文件修改和示例
