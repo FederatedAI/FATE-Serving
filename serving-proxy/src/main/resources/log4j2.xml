@@ -20,8 +20,6 @@
         <Property name="project">fate</Property>
         <Property name="module">serving-proxy</Property>
     </Properties>
-
-
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout charset="UTF-8" pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %c{1.}(%F:%L) - %m%n"/>
@@ -55,8 +53,6 @@
         <AsyncLogger name="flow" level="info" includeLocation="true" additivity="false">
             <AppenderRef ref="flow"/>
         </AsyncLogger>
-
-
         <AsyncRoot level="info" includeLocation="true">
             <AppenderRef ref="info" level="info"/>
             <AppenderRef ref="error" level="error"/>

@@ -29,7 +29,19 @@ FATE-Serving is a high-performance, industrialized serving system for federated 
 
 ## Architecture
 
-![fate_serving_arch](./images/fate_serving_arch.png)
+
+![fate_serving_arch](./images/fate-serving-infrastructure.jpg)
+
+
+
+As shown in the figure above，fate-serving includes the following modules:
+- serving-server
+- serving-proxy
+
+Now we will explain the architecture and function of each module in turn.
+first,the serving-server:
+
+
 
 
 
@@ -140,6 +152,8 @@ For detail, Here are some key steps:
    
 
 
+
+
 ### Deploy Serving-Router
 
 For detail, Here are some key steps:
@@ -177,6 +191,7 @@ Please use FATE-Flow Client which in the fate-flow to operate, refer to **Online
 - ` http://ip:port/federation/v1/inference `
 - where ip:port is the address of guest serving proxy
   
+
 **request type**
 - POST 
 - content-application/json
@@ -189,7 +204,7 @@ Please use FATE-Flow Client which in the fate-flow to operate, refer to **Online
 |body |no  |json object | the elements and features used by the model|
 
  - **head object**
- 
+
 |name|allow null|type|desc|
 |:----    |:---|:----- |-----   |
 |serviceId |yes  |string | the serviceId used when bind model in fate-flow|

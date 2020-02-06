@@ -51,6 +51,7 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
                     result.put(k,base64String);
             });
 
+
             return  JSON.toJSONString(result).getBytes();
         }
         return null;
@@ -82,11 +83,10 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
     @Override
     protected    Map<String, byte[]> doLoadModel(Context context,String name, String namespace) {
 
-
         logger.info("read model, name: {} namespace: {}", name, namespace);
         try {
             String requestUrl = "";
-            boolean useRegister = Boolean.valueOf(Configuration.getProperty(Dict.USE_REGISTER));
+            boolean useRegister = Boolean.valueOf(Configuration.getProperty(Dict.USE_REGISTER,"true"));
             if (useRegister) {
                 URL url = URL.valueOf("flow/online/transfer");
                 List<URL> urls = routerService.router(url);
