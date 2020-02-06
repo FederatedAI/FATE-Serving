@@ -37,7 +37,6 @@ public class SpringConfig {
 
     @Bean
     ZookeeperRegistry getServiceRegistry() {
-
         String useRegisterString = com.webank.ai.fate.serving
                 .core.bean.Configuration.getProperty("useRegister");
         if (Boolean.valueOf(useRegisterString)) {
@@ -46,7 +45,6 @@ public class SpringConfig {
         } else {
             return null;
         }
-
     }
 
     @Bean
@@ -54,13 +52,10 @@ public class SpringConfig {
         return new MetricRegistry();
     }
 
-
     @Bean
     public Meter requestMeter(MetricRegistry metrics) {
         return metrics.meter("request");
     }
-
-
 
     @Bean
     public Counter pendingJobs(MetricRegistry metrics) {
@@ -69,7 +64,6 @@ public class SpringConfig {
 
     @Bean
     public ConsoleReporter consoleReporter(MetricRegistry metrics) {
-
         return ConsoleReporter.forRegistry(metrics)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
@@ -86,13 +80,6 @@ public class SpringConfig {
         DefaultRouterService routerService = new DefaultRouterService();
         routerService.setRegistry(zookeeperRegistry);
         return routerService;
-
     }
-
-
-
-
-
-
 
 }

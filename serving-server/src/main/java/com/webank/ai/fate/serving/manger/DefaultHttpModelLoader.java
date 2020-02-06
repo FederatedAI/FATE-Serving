@@ -91,7 +91,7 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
                 URL url = URL.valueOf("flow/online/transfer");
                 List<URL> urls = routerService.router(url);
                 if (urls == null || urls.isEmpty()) {
-                    logger.info("url not found, {}", url);
+                    logger.info("register url not found, {}", url);
                 } else {
                     url = urls.get(0);
                     requestUrl = url.toFullString();
@@ -100,6 +100,7 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
 
             if (StringUtils.isBlank(requestUrl)) {
                 requestUrl = Configuration.getProperty(Dict.MODEL_TRANSFER_URL);
+                logger.info("use profile model.transfer.url, {}", requestUrl);
             }
 
             if (StringUtils.isBlank(requestUrl)) {
@@ -115,7 +116,9 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
             String responseBody = HttpClientPool.transferPost(requestUrl, requestData);
             long end = System.currentTimeMillis();
 
-            logger.info("{}|{}|{}|{}", requestUrl, start, end, (end - start) + " ms");
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}|{}|{}|{}", requestUrl, start, end, (end - start) + " ms");
+            }
 
             if (StringUtils.isEmpty(responseBody)) {
                 logger.info("read model fail, {}, {}", name, namespace);
@@ -140,8 +143,8 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
             }
 
             return resultMap;
-        }catch(Exception e){
-            logger.info("get mode info from fateflow error" ,e);
+        } catch (Exception e) {
+            logger.error("get model info from fateflow error", e);
         }
         return null;
     }

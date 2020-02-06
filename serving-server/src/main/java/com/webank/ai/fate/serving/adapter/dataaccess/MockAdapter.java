@@ -43,7 +43,10 @@ public class MockAdapter implements FeatureData {
             }
             returnResult.setData(data);
             returnResult.setRetcode(InferenceRetCode.OK);
-            logger.info("MockAdapter result, {}", JSONObject.toJSONString(returnResult));
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("MockAdapter result, {}", JSONObject.toJSONString(returnResult));
+            }
         } catch (Exception ex) {
             logger.error(ex.getMessage());
             returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);

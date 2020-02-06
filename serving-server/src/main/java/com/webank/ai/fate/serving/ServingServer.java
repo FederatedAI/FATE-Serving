@@ -84,7 +84,7 @@ public class ServingServer implements InitializingBean {
             ServingServer a = new ServingServer(cmd.getOptionValue("c"));
             a.start(args);
         } catch (Exception ex) {
-            logger.error("server start error",ex);
+            System.err.println("server start error, " + ex.getMessage());
             ex.printStackTrace();
             System.exit(1);
         }
@@ -115,9 +115,11 @@ public class ServingServer implements InitializingBean {
         server = serverBuilder.build();
         logger.info("server started listening on port: {}, use configuration: {}", port, this.confPath);
         server.start();
+
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
         logger.info("serving useRegister {}", useRegister);
+
         if (useRegister) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
@@ -147,12 +149,12 @@ public class ServingServer implements InitializingBean {
 
         ModelService  modelService = applicationContext.getBean(ModelService.class);
         modelService.restore();
+
         ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
-        reporter.start(1, TimeUnit.SECONDS);
+        reporter.start(1, TimeUnit.MINUTES);
 
         JmxReporter jmxReporter = applicationContext.getBean(JmxReporter.class);
         jmxReporter.start();
-
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

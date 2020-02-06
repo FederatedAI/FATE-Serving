@@ -126,7 +126,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 subEnvironments(path, project, childrens);
             }
         });
-        logger.info("environments {}", environments);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("environments {}", environments);
+        }
         if (environments == null) {
             logger.info("environment is null,maybe zk is not started");
             throw new RuntimeException("environment is null");
@@ -147,7 +150,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
 
                     if (StringUtils.isNotEmpty(parent)) {
-                        logger.info("fire services changes {}", childrens);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("fire services changes {}", childrens);
+                        }
 
                         subServices(project, environment, childrens);
                     }
@@ -166,10 +171,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
             for (String service : services) {
 
                 String subString = project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR + service;
-                logger.info("subServices sub {}", subString);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("subServices sub {}", subString);
+                }
                 subscribe(URL.valueOf(subString), urls -> {
-
-                    logger.info("change services urls =" + urls);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("change services urls =" + urls);
+                    }
                 });
             }
         }
@@ -199,7 +207,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     public synchronized void register(Set<RegisterService> sets) {
-        logger.info("prepare to register {}",sets);
+        if (logger.isDebugEnabled()) {
+            logger.debug("prepare to register {}",sets);
+        }
         String hostAddress = NetUtils.getLocalIp();
         Preconditions.checkArgument(port != 0);
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
@@ -218,17 +228,19 @@ public class ZookeeperRegistry extends FailbackRegistry {
                                 this.register(newServiceUrl);
                                 this.registedString.add(serviceName);
                             } else {
-                                logger.info("url {} is already registed,will not do anything ", newServiceUrl);
+                                logger.info("url {} is already registed, will not do anything ", newServiceUrl);
                             }
                         });
                     }
                 } else {
                     if (!registedString.contains(service.serviceName())) {
-                        logger.info("try to register url {}", serviceUrl);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("try to register url {}", serviceUrl);
+                        }
                         this.register(serviceUrl);
                         this.registedString.add(service.serviceName());
                     } else {
-                        logger.info("url {} is already registed,will not do anything ", service.serviceName());
+                        logger.info("url {} is already registed, will not do anything ", service.serviceName());
                     }
                 }
             }catch(Exception e){
@@ -263,7 +275,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
 
             String urlPath = toUrlPath(url);
-            logger.info("create urlpath {} ", urlPath);
+            if (logger.isDebugEnabled()) {
+                logger.debug("create urlpath {} ", urlPath);
+            }
             zkClient.create(urlPath, true);
         } catch (Throwable e) {
             throw new RuntimeException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);

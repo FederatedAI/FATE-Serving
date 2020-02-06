@@ -41,7 +41,7 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
 
                     super.onHalfClose();
                 } catch (Exception e) {
-                    logger.info("ServiceException:", e);
+                    logger.error("ServiceException:", e);
                     serverCall.close(Status.CANCELLED.withCause(e).withDescription(e.getMessage()), metadata);
                 }
             }

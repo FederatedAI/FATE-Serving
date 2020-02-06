@@ -18,77 +18,75 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractModelLoader<MODELDATA> implements   ModelLoader{
+public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
 
     Logger logger = LoggerFactory.getLogger(AbstractModelLoader.class);
 
     @Override
     public PipelineTask loadModel(Context context, String name, String namespace) {
-
-        MODELDATA modelData = doLoadModel(context ,name, namespace);
+        MODELDATA modelData = doLoadModel(context, name, namespace);
         if (modelData == null) {
-            logger.info("load model error, name {} namespace {} ,try to restore from local cache",name,namespace);
-            modelData = restore(context,name,namespace);
-            if(modelData ==null){
-                logger.info("load model from local cache error, name {} namespace {}",name,namespace);
+            logger.info("load model error, name {} namespace {} ,try to restore from local cache", name, namespace);
+            modelData = restore(context, name, namespace);
+            if (modelData == null) {
+                logger.info("load model from local cache error, name {} namespace {}", name, namespace);
             }
-        }else{
-            this.store(context,name,namespace,modelData);
+        } else {
+            this.store(context, name, namespace, modelData);
         }
         return this.initPipeLine(context, modelData);
     }
 
-
-    protected  void  store(Context  context,String  name,String  namespace,MODELDATA  data){
+    protected void store(Context context, String name, String namespace, MODELDATA data) {
         try {
             String cachePath = getCachePath(context, name, namespace);
             if (cachePath != null) {
-               byte[]  bytes = this.serialize(context,data);
-               if(bytes==null){
-                   throw  new ModelSerializeException();
-               }
-               File  file  = new File(cachePath);
-               this.doStore(context,bytes,file);
+                byte[] bytes = this.serialize(context, data);
+                if (bytes == null) {
+                    throw new ModelSerializeException();
+                }
+                File file = new File(cachePath);
+                this.doStore(context, bytes, file);
             }
-        }catch(ModelSerializeException e){
-            logger.error("serialize mode data error",e);
-
-        }catch(Exception e){
-            logger.error("store mode data error",e);
-
+        } catch (ModelSerializeException e) {
+            logger.error("serialize mode data error", e);
+        } catch (Exception e) {
+            logger.error("store mode data error", e);
         }
     }
 
-    protected  abstract   byte[]  serialize(Context  context,MODELDATA data);
-    protected  abstract   MODELDATA  unserialize(Context  context,byte[] data);
+    protected abstract byte[] serialize(Context context, MODELDATA data);
 
-    protected MODELDATA restore(Context context,String name,String namespace){
+    protected abstract MODELDATA unserialize(Context context, byte[] data);
+
+    protected MODELDATA restore(Context context, String name, String namespace) {
         try {
             String cachePath = getCachePath(context, name, namespace);
-            if (cachePath!=null) {
+            if (cachePath != null) {
 
-                byte[]  bytes = doRestore(new File(cachePath));
-                MODELDATA  modelData = this.unserialize(context,bytes);
+                byte[] bytes = doRestore(new File(cachePath));
+                MODELDATA modelData = this.unserialize(context, bytes);
                 return modelData;
             }
-        }catch(Throwable e){
-            logger.error("restore model data error",e);
+        } catch (Throwable e) {
+            logger.error("restore model data error", e);
         }
         return null;
     }
-    protected  abstract PipelineTask  initPipeLine(Context  context,MODELDATA modeldata);
-    private String getCachePath(Context context,String name,String namespace){
-        StringBuilder  sb =  new StringBuilder();
+
+    protected abstract PipelineTask initPipeLine(Context context, MODELDATA modeldata);
+
+    private String getCachePath(Context context, String name, String namespace) {
+        StringBuilder sb = new StringBuilder();
         String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
-        if (StringUtils.isNotEmpty(locationPre)&&StringUtils.isNotEmpty(name)&&StringUtils.isNotEmpty(namespace)) {
-            String cachFilePath =sb.append( locationPre).append ("/.fate/model_").append(name).append("_").append(namespace).append("_").append("cache").toString();
+        if (StringUtils.isNotEmpty(locationPre) && StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(namespace)) {
+            String cachFilePath = sb.append(locationPre).append("/.fate/model_").append(name).append("_").append(namespace).append("_").append("cache").toString();
             return cachFilePath;
         }
-        return  null;
+        return null;
     }
 
-    protected void doStore(Context context ,byte[] data, File file) {
-
+    protected void doStore(Context context, byte[] data, File file) {
         if (file == null) {
             return;
         }
@@ -121,30 +119,23 @@ public abstract class AbstractModelLoader<MODELDATA> implements   ModelLoader{
     }
 
     protected byte[] doRestore(File file) {
-
         if (file != null && file.exists()) {
-
-            try ( InputStream in = new FileInputStream(file)){
-                    Long filelength = file.length();
-                    byte[] filecontent = new byte[filelength.intValue()];
-                    int readCount = in.read(filecontent);
-                    if(readCount>0){
-                        return   filecontent;
-                    }else {
-                        return null;
-                    }
-            }
-            catch (Throwable e) {
+            try (InputStream in = new FileInputStream(file)) {
+                Long filelength = file.length();
+                byte[] filecontent = new byte[filelength.intValue()];
+                int readCount = in.read(filecontent);
+                if (readCount > 0) {
+                    return filecontent;
+                } else {
+                    return null;
+                }
+            } catch (Throwable e) {
                 logger.error("failed to doRestore file ", e);
             }
-
         }
         return null;
     }
 
-
-
-    protected abstract MODELDATA  doLoadModel(Context context, String name, String namespace);
-
+    protected abstract MODELDATA doLoadModel(Context context, String name, String namespace);
 
 }

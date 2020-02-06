@@ -39,7 +39,9 @@ public class DefaultRouterService extends AbstractRouterService {
             urls = filterVersion(urls, version);
         }
         List<URL> resultUrls = loadBalancer.select(urls);
-        logger.info("router service return urls {}", resultUrls);
+        if (logger.isDebugEnabled()) {
+            logger.debug("router service return urls {}", resultUrls);
+        }
         return resultUrls;
     }
 

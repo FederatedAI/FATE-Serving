@@ -106,7 +106,9 @@ public class GrpcConnectionPool {
         @Override
         public ManagedChannel create() throws Exception {
 
-            logger.info("create ManagedChannel");
+            if (logger.isDebugEnabled()) {
+                logger.debug("create ManagedChannel");
+            }
             NettyChannelBuilder builder = NettyChannelBuilder
                     .forAddress(ip, port)
                     .keepAliveTime(6, TimeUnit.MINUTES)

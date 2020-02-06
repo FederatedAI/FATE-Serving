@@ -37,7 +37,9 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         metricFactory.counter("grpc.unaryCall.request", "grpc unaryCall request",
                 "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
 
-        logger.info("unaryCall req {}",req);
+        if (logger.isDebugEnabled()) {
+            logger.debug("unaryCall req {}", req);
+        }
         ServiceAdaptor unaryCallService = getProxyServiceRegister().getServiceAdaptor("unaryCall");
         Context context  =  new BaseContext();
         InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, req);
