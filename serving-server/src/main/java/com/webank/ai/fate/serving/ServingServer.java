@@ -58,7 +58,6 @@ public class ServingServer implements InitializingBean {
     private Server server;
     private boolean useRegister = false;
     private String confPath = "";
-
     public ServingServer() {
 
     }
@@ -73,8 +72,6 @@ public class ServingServer implements InitializingBean {
 
     public static void main(String[] args) {
         try {
-
-
             Options options = new Options();
             Option option = Option.builder("c")
                     .longOpt("config")
@@ -179,27 +176,27 @@ public class ServingServer implements InitializingBean {
                     logger.info("unregister {}", url);
                     zookeeperRegistry.unregister(url);
                 });
-
                 zookeeperRegistry.destroy();
-                int retryCount=0;
-                long requestInProcess = BaseContext.requestInProcess.get();
-                do{
-                    if(requestInProcess>0&&retryCount<3) {
-                        try {
-                            logger.info("try to stop server,there is {} request in process", requestInProcess);
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        retryCount++;
-                        requestInProcess = BaseContext.requestInProcess.get();
-                    }else{
-                        break;
-                    }
-
-                }while(requestInProcess>0&&retryCount<3);
-
             }
+            int retryCount=0;
+            long requestInProcess = BaseContext.requestInProcess.get();
+            do{
+
+                logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess,retryCount+1);
+                if(requestInProcess>0&&retryCount<30) {
+                    try {
+
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    retryCount++;
+                    requestInProcess = BaseContext.requestInProcess.get();
+                }else{
+                    break;
+                }
+
+            }while(requestInProcess>0&&retryCount<3);
             server.shutdown();
         }
     }
