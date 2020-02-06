@@ -248,13 +248,17 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         initRouteTable(confJson.getAsJsonObject("route_table"));
         initPermission(confJson.getAsJsonObject("permission"));
 
-        logger.info("refreshed route table at: {}", routeTableFile);
+        if (logger.isDebugEnabled()) {
+            logger.debug("refreshed route table at: {}", routeTableFile);
+        }
     }
 
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        logger.debug("in ConfigFileBasedServingRouter:afterPropertiesSet");
+        if (logger.isDebugEnabled()) {
+            logger.debug("in ConfigFileBasedServingRouter:afterPropertiesSet");
+        }
         routeType = RouteTypeConvertor.string2RouteType(routeTypeString);
         routeTable = new ConcurrentHashMap<>();
         topicEndpointMapping = new WeakHashMap<>();

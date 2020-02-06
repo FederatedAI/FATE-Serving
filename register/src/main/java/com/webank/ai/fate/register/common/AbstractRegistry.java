@@ -144,7 +144,9 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     public void doSaveProperties(long version) {
-        logger.info("doSaveProperties {} {}", version, properties);
+        if (logger.isDebugEnabled()) {
+            logger.debug("doSaveProperties {} {}", version, properties);
+        }
 
         if (version < lastCacheChanged.get()) {
             return;
@@ -422,7 +424,9 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     private void saveProperties(URL url) {
-        logger.info("saveProperties url {}", url);
+        if (logger.isDebugEnabled()) {
+            logger.debug("saveProperties url {}", url);
+        }
 
         if (file == null) {
             return;
@@ -442,7 +446,9 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
 
-            logger.info("properties set property key {} value {}", url.getServiceKey(), buf.toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("properties set property key {} value {}", url.getServiceKey(), buf.toString());
+            }
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
             if (syncSaveFile) {

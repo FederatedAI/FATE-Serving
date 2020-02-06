@@ -84,7 +84,10 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
             returnResult.setRetmsg("Can not found model.");
             return returnResult;
         }
-        logger.info("use model to inference on {} {}, id: {}, version: {}", party.getRole(), party.getPartyId(), modelInfo.getNamespace(), modelInfo.getName());
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("use model to inference on {} {}, id: {}, version: {}", party.getRole(), party.getPartyId(), modelInfo.getNamespace(), modelInfo.getName());
+        }
         Map<String, Object> predictParams = new HashMap<>(8);
         predictParams.put(Dict.FEDERATED_PARAMS, federatedParams);
 
@@ -112,7 +115,9 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
         long endTime = System.currentTimeMillis();
         long federatedInferenceElapsed = endTime - startTime;
         //   InferenceUtils.logInference(context ,federatedParams, party, federatedRoles, returnResult, federatedInferenceElapsed, false, billing);
-        logger.info(JSONObject.toJSONString(returnResult.getData()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(JSONObject.toJSONString(returnResult.getData()));
+        }
         return returnResult;
 
 

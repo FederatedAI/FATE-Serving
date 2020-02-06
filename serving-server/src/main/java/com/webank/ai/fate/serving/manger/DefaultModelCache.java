@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultModelCache implements ModelCache {
     private static final Logger logger = LoggerFactory.getLogger(DefaultModelCache.class);
     private LoadingCache<String, PipelineTask> modelCache;
+
     @Autowired
     private ModelLoader modelLoader;
 
@@ -81,8 +82,6 @@ public class DefaultModelCache implements ModelCache {
 
     @Override
     public Set<String> getKeys() {
-
         return modelCache.asMap().keySet();
-
     }
 }

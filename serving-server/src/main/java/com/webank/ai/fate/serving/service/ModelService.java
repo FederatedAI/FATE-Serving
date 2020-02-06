@@ -153,7 +153,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
-            logger.info("receive service id {}",req.getServiceId());
+            if (logger.isDebugEnabled()) {
+                logger.debug("receive service id {}", req.getServiceId());
+            }
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
@@ -184,7 +186,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
-            logger.info("publishBind receive service id {}",context.getData(Dict.SERVICE_ID));
+            if (logger.isDebugEnabled()) {
+                logger.debug("publishBind receive service id {}", context.getData(Dict.SERVICE_ID));
+            }
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
@@ -360,7 +364,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 try {
                     byte[] data = decoder.decode(v.content.getBytes());
                     PublishRequest req = PublishRequest.parseFrom(data);
-                    logger.info("restore publishLoadModel req {}", req);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("restore publishLoadModel req {}", req);
+                    }
                     Context context = new BaseContext();
                     context.putData(Dict.SERVICE_ID, req.getServiceId());
                     modelManager.publishLoadModel(context,
@@ -378,8 +384,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 try {
                     byte[] data = decoder.decode(v.content.getBytes());
                     PublishRequest req = PublishRequest.parseFrom(data);
-
-                    logger.info("restore publishOnlineModel req {} base64 {}", req, v);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("restore publishOnlineModel req {} base64 {}", req, v);
+                    }
                     Context context = new BaseContext();
                     context.putData(Dict.SERVICE_ID, req.getServiceId());
                     modelManager.publishOnlineModel(context,
@@ -393,15 +400,11 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             });
         }
-
-
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
        // restore();
-
     }
 
 

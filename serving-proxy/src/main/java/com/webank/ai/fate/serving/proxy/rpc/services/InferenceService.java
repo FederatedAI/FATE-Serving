@@ -125,7 +125,9 @@ public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
             try{
                 InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait,TimeUnit.MILLISECONDS);
                 metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "success").increment();
-                logger.info("routerinfo {} send {} result {}",routerInfo,inferenceReqMap,result);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("routerinfo {} send {} result {}",routerInfo,inferenceReqMap,result);
+                }
                 resultString = new String(result.getBody().toByteArray());
             } catch (Exception e) {
                 metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "grpc.error").increment();

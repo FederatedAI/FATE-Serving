@@ -50,7 +50,9 @@ public abstract class BaseServingRouter implements RouterInterface {
 
         context.setRouterInfo(routerInfo);
 
-        logger.info("caseid {} get route info {}:{}", context.getCaseId(),routerInfo.getHost(),routerInfo.getPort());
+        if (logger.isDebugEnabled()) {
+            logger.debug("caseid {} get route info {}:{}", context.getCaseId(),routerInfo.getHost(),routerInfo.getPort());
+        }
         return routerInfo;
     }
 
