@@ -44,7 +44,7 @@ public class RegistryConfig {
     @Value("${zk.url:zookeeper://localhost:2181}")
     private String zkUrl;
 
-    @Value("${useZkRouter:false}")
+    @Value("${useZkRouter:true}")
     private String useZkRouter;
 
     @Value("${acl.enable}")

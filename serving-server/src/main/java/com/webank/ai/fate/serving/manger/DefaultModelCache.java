@@ -42,7 +42,7 @@ public class DefaultModelCache implements ModelCache {
 
     public DefaultModelCache() {
         modelCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_ACCESS_TTL), TimeUnit.HOURS)
+               // .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_ACCESS_TTL), TimeUnit.HOURS)
                 .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_MAX_SIZE))
                 .build(
                         new CacheLoader<String, PipelineTask>() {

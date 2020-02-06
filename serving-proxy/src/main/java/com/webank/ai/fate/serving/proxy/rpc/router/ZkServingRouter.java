@@ -25,7 +25,7 @@ import java.util.List;
 @Service
 public class ZkServingRouter extends BaseServingRouter implements InitializingBean{
 
-    @Value("${useZkRouter:false}")
+    @Value("${useZkRouter:true}")
     private  String  useZkRouter;
 
     @Value("${routeType:random}")
