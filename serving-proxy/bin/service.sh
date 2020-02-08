@@ -16,7 +16,7 @@
 #  limitations under the License.
 #
 set -e
-source ./common.sh
+source ./bin/common.sh
 basepath=$(cd `dirname $0`;pwd)
 export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
 export PATH=$PATH:$JAVA_HOME/bin
