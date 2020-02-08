@@ -58,6 +58,7 @@ public class DataIO extends BaseModel {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            logger.error("init DataIo error",ex);
             return StatusCode.ILLEGALDATA;
         }
         logger.info("Finish init DataIO class");

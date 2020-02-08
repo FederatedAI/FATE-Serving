@@ -35,7 +35,6 @@ public class Imputer {
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
         if(inputData!=null) {
-            logger.info("start imputer transform task");
             for (String key : inputData.keySet()) {
                 if(inputData.get(key)!=null) {
                     String value = inputData.get(key).toString();
@@ -43,7 +42,7 @@ public class Imputer {
                         try {
                             inputData.put(key, this.missingReplaceValues.get(key));
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            logger.error("Imputer transform error",ex);
                             inputData.put(key, 0.);
                         }
                     }

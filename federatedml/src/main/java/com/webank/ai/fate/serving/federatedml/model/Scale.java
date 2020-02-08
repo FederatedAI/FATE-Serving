@@ -43,7 +43,7 @@ public class Scale extends BaseModel {
             this.scaleParam = this.parseModel(ScaleParam.parser(), protoParam);
             this.needRun = this.scaleMeta.getNeedRun();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Scale initModel error",ex);
             return StatusCode.ILLEGALDATA;
         }
         logger.info("Finish init Scale class");

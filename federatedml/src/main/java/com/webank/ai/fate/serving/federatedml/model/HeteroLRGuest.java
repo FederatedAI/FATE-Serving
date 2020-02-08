@@ -43,15 +43,19 @@ public class HeteroLRGuest extends HeteroLR {
         Map<String, Object> result = new HashMap<>(8);
         Map<String, Double> forwardRet = forward(inputData);
         double score = forwardRet.get(Dict.SCORE);
-        logger.info("caseid {} guest score:{}", context.getCaseId(),score);
+        if(logger.isDebugEnabled()) {
+            logger.debug("caseid {} guest score:{}", context.getCaseId(), score);
+        }
         try {
             ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
             if(hostPredictResponse !=null) {
                 result.put(Dict.RET_CODE,hostPredictResponse.getRetcode());
-                logger.info("caseid {} host response is {}",context.getCaseId(),hostPredictResponse.getData());
+                if(logger.isDebugEnabled()) {
+                    logger.debug("caseid {} host response is {}", context.getCaseId(), hostPredictResponse.getData());
+                }
                 if (hostPredictResponse.getData() != null && hostPredictResponse.getData().get(Dict.SCORE) != null) {
                     double hostScore = ((Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
-                    logger.info("caseid {} host score:{}",context.getCaseId(), hostScore);
+                    logger.info("caseid {} host score:{}", context.getCaseId(), hostScore);
                     score += hostScore;
                 }
             }else{
