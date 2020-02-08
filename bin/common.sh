@@ -3,11 +3,9 @@ set -e
 getpid() {
    # pid=`ps aux | grep ${main_class} | grep -v grep | awk '{print $2}'`
 	module=$1
-	if [ ! -e "./${module}_pid" ];then
-		touch ./${module}_pid
-		echo "" >./${module}_pid
+	if [ -e "./${module}_pid" ]; then
+		pid=`cat ./${module}_pid`
 	fi
-	pid=`cat ./${module}_pid`
 	if [[ -n ${pid} ]]; then
 		break 1
 	else
@@ -36,21 +34,22 @@ start() {
 	then
 		        java -Dspring.config.location=${configpath}/application.properties  -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/application.properties >> logs/console.log 2>>logs/error.log &
 
-	else 
+	else
 		echo ""
 	fi
-        if [[ $? -eq 0 ]]; then
-                sleep 2   
-                echo $!>./${module}_pid
+	sleep 5
+	id=`ps -p $!| awk '{print $1}'|sed -n '2p'`
+        if [[ ${#id} -ne 0 ]]; then
+            echo $!>./${module}_pid
             getpid $module
             echo "service start sucessfully. pid: ${pid}"
         else
             echo "service start failed"
-        fi   
+        fi
     else
         echo "service already started. pid: ${pid}"
-    fi 
-}  
+    fi
+}
 
 status() {
     getpid $1
