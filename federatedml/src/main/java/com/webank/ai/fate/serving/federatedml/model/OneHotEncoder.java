@@ -47,12 +47,11 @@ public class OneHotEncoder extends BaseModel {
             OneHotMeta oneHotMeta = this.parseModel(OneHotMeta.parser(), protoMeta);
             OneHotParam oneHotParam = this.parseModel(OneHotParam.parser(), protoParam);
             this.needRun = oneHotMeta.getNeedRun();
-
             this.cols = oneHotMeta.getTransformColNamesList();
             this.colsMapMap = oneHotParam.getColMapMap();
         } catch (Exception ex) {
-            ex.printStackTrace();
-             return StatusCode.ILLEGALDATA;
+            logger.error("OneHotEncoder initModel error",ex);
+            return StatusCode.ILLEGALDATA;
         }
         logger.info("Finish init OneHot Encoder class");
         return StatusCode.OK;
@@ -60,13 +59,11 @@ public class OneHotEncoder extends BaseModel {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        logger.info("Start OneHot Encoder transform");
-        logger.info("First time need run");
+
         HashMap<String, Object> outputData = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
-        logger.info("Need run is ", this.needRun);
+
         if (!this.needRun) {
-            logger.info("Return firstData :", firstData);
             return firstData;
         }
         for (String colName : firstData.keySet()) {
@@ -80,7 +77,6 @@ public class OneHotEncoder extends BaseModel {
 
                 List<String> values = colsMap.getValuesList();
                 List<String> encodedVariables = colsMap.getTransformedHeadersList();
-//                Integer inputValue = new Integer(firstData.get(colName).toString());
 
                 Integer inputValue = 0;
                 try {
@@ -108,7 +104,6 @@ public class OneHotEncoder extends BaseModel {
                 logger.error("HeteroFeatureBinning error" ,e);
             }
         }
-        logger.info("OneHotEncoder output {}",outputData);
         return outputData;
     }
 

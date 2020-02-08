@@ -26,7 +26,9 @@ public class MinMaxScale {
     private static final Logger logger = LoggerFactory.getLogger(MinMaxScale.class);
 
     public Map<String, Object> transform(Map<String, Object> inputData, Map<String, ColumnScaleParam> scales) {
-        logger.info("Start MinMaxScale transform");
+        if(logger.isDebugEnabled()) {
+            logger.info("Start MinMaxScale transform");
+        }
         for (String key : inputData.keySet()) {
             try {
                 if (scales.containsKey(key)) {
@@ -39,7 +41,9 @@ public class MinMaxScale {
                     } else {
                         double range = scale.getColumnUpper() - scale.getColumnLower();
                         if (range < 0) {
-                            logger.warn("min_max_scale range may be error, it should be larger than 0, but is {}, set value to 0 ", range);
+                            if(logger.isDebugEnabled()) {
+                                logger.warn("min_max_scale range may be error, it should be larger than 0, but is {}, set value to 0 ", range);
+                            }
                             value = 0;
                         } else {
                             if (Math.abs(range - 0) < 1e-6) {
@@ -51,10 +55,12 @@ public class MinMaxScale {
 
                     inputData.put(key, value);
                 } else {
-                    logger.warn("feature {} is not in scale, maybe missing or do not need to be scaled", key);
-                }
+                    if(logger.isDebugEnabled()) {
+                        logger.warn("feature {} is not in scale, maybe missing or do not need to be scaled", key);
+                    } }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                //ex.printStackTrace();
+                logger.error("MinMaxScale transform error",ex);
             }
         }
         return inputData;

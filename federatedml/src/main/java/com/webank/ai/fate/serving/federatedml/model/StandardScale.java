@@ -26,7 +26,6 @@ public class StandardScale {
     private static final Logger logger = LoggerFactory.getLogger(StandardScale.class);
 
     public Map<String, Object> transform(Map<String, Object> inputData, Map<String, ColumnScaleParam> standardScalesMap) {
-        logger.info("Start StandardScale transform");
         for (String key : inputData.keySet()) {
             try {
                 if (standardScalesMap.containsKey(key)) {
@@ -45,15 +44,16 @@ public class StandardScale {
                     if (std == 0) {
                         std = 1;
                     }
-
                     value = (value - standardScale.getMean()) / std;
                     inputData.put(key, value);
                 } else {
-                    logger.warn("feature {} is not in scale, maybe missing or do not need to be scaled");
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("feature {} is not in scale, maybe missing or do not need to be scaled");
+                    }
                 }
 
             } catch (Exception ex) {
-                ex.printStackTrace();
+                logger.error("StandardScale transform error",ex);
             }
         }
         return inputData;

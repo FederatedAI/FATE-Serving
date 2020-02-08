@@ -71,7 +71,9 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             long cost = endTime - beginTime;
             String caseId = context.getCaseId();
             String className = this.getClass().getSimpleName();
-            logger.info("model {} caseid {} predict cost time {}", className, caseId, cost);
+            if(logger.isDebugEnabled()) {
+                logger.debug("model {} caseid {} predict cost time {}", className, caseId, cost);
+            }
         }
 
 
@@ -105,7 +107,9 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             if (useCache) {
                 ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(guestFederatedParams);
                 if (remoteResultFromCache != null) {
-                    logger.info("caseid {} get remote party model inference result from cache", context.getCaseId());
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("caseid {} get remote party model inference result from cache", context.getCaseId());
+                    }
                     context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
                     context.hitCache(true);
                     remoteResult = remoteResultFromCache;
@@ -125,7 +129,9 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
             if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
                 CacheManager.getInstance().putRemoteModelInferenceResult(guestFederatedParams, remoteResult);
-                logger.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
+                if(logger.isDebugEnabled()) {
+                    logger.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
+                }
             }
             return remoteResult;
         } finally {

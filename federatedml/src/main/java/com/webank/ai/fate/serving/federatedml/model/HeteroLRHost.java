@@ -33,13 +33,12 @@ public class HeteroLRHost extends HeteroLR {
 
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 
-
-        logger.info("hetero lr host begin to predict");
         HashMap<String, Object> result = new HashMap<>(8);
         Map<String, Double> ret = forward(inputData);
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
-
-        logger.info("hetero lr host predict ends, result is {}", result);
+        if(logger.isDebugEnabled()) {
+            logger.debug("hetero lr host predict ends, result is {}", result);
+        }
 
         return result;
     }
