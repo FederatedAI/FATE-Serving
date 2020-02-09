@@ -202,13 +202,11 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             Preconditions.checkArgument(StringUtils.isNotEmpty(address));
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
             ListenableFuture<Proxy.Packet> future= null;
-            try {
+
                 //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
-                DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
-                future =stub1.unaryCall(packetBuilder.build());
-            } finally {
-                grpcConnectionPool.returnPool(channel1, address);
-            }
+            DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
+            future =stub1.unaryCall(packetBuilder.build());
+
             if(future!=null){
                 Proxy.Packet packet = future.get(Configuration.getPropertyInt("rpc.time.out",3000), TimeUnit.MILLISECONDS);
                 remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);

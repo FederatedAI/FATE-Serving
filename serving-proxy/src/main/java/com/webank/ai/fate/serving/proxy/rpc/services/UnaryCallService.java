@@ -8,6 +8,7 @@ import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -16,7 +17,7 @@ import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 
-import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
+
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
 import io.grpc.ManagedChannel;
 import org.slf4j.Logger;
@@ -45,8 +46,8 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     @Autowired
     IMetricFactory metricFactory;
 
-    @Autowired
-    GrpcConnectionPool  grpcConnectionPool;
+
+    GrpcConnectionPool grpcConnectionPool= GrpcConnectionPool.getPool();
 
     @Autowired
     AuthUtils authUtils;
@@ -90,9 +91,6 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
             e.printStackTrace();
             logger.error("unaryCall error ",e);
         }finally {
-            if(managedChannel!=null){
-                grpcConnectionPool.returnPool(managedChannel, routerInfo.getHost(), routerInfo.getPort());
-            }
             long  end =  System.currentTimeMillis();
             context.setDownstreamCost(end - context.getDownstreamBegin());
         }
