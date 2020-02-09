@@ -1,7 +1,8 @@
 package com.webank.ai.fate.serving.proxy.rpc.core;
 
+import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.rpc.core.*;
-import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -47,9 +48,7 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
 
     }
 
-
-    @Autowired
-    GrpcConnectionPool grpcConnectionPool;
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
 
     @Override

@@ -8,6 +8,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.exceptions.NoResultException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
@@ -16,8 +17,6 @@ import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
-
-import com.webank.ai.fate.serving.proxy.rpc.grpc.GrpcConnectionPool;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,114 +40,106 @@ import java.util.concurrent.TimeUnit;
         "inferenceParamValidator",
         "defaultServingRouter"})
 
-public class InferenceService extends AbstractServiceAdaptor<Map,Map > {
+public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
-    Logger logger  = LoggerFactory.getLogger(InferenceService.class);
+    Logger logger = LoggerFactory.getLogger(InferenceService.class);
 
     @Autowired
     IMetricFactory metricFactory;
 
-    @Autowired
-    GrpcConnectionPool   grpcConnectionPool;
 
-    public InferenceService() {}
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+
+    public InferenceService() {
+    }
 
     @Value("${proxy.grpc.inference.timeout:3000}")
-    private  int  timeout;
+    private int timeout;
 
     @Value("${proxy.grpc.inference.async.timeout:3000}")
-    private  int  asyncTimeout;
+    private int asyncTimeout;
 
     @Override
     public Map doService(Context context, InboundPackage<Map> data, OutboundPackage<Map> outboundPackage) {
 
-        Map  resultMap = Maps.newHashMap();
+        Map resultMap = Maps.newHashMap();
         RouterInfo routerInfo = data.getRouterInfo();
 
-        ManagedChannel  managedChannel = null;
+        ManagedChannel managedChannel = null;
 
-        String   resultString=null;
+        String resultString = null;
         String callName = context.getCallName();
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
+
         try {
-            try {
-                if(logger.isDebugEnabled()) {
-                    logger.debug("try to get grpc connection");
-                }
-                managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
-
-            } catch (Exception e) {
-                logger.error("get grpc channel error", e);
-                throw new NoResultException();
+            if (logger.isDebugEnabled()) {
+                logger.debug("try to get grpc connection");
             }
+            managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
 
-            Map reqBodyMap = data.getBody();
-            Map reqHeadMap = data.getHead();
-
-            Map inferenceReqMap = Maps.newHashMap();
-            inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
-            inferenceReqMap.putAll(reqHeadMap);
-            inferenceReqMap.put(Dict.FEATURE_DATA, Maps.newHashMap(reqBodyMap));
-            int  timeWait = timeout;
-            try {
-
-                if(logger.isDebugEnabled()) {
-                    logger.debug("inference req : {}", JSON.toJSONString(inferenceReqMap));
-                }
-                InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
-                reqBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(inferenceReqMap).getBytes()));
-
-                InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-
-                metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "to.self.serving-server", "result", "success").increment();
-
-                if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
-                    resultFuture = futureStub.inference(reqBuilder.build());
-                    timeWait = timeout;
-                } else if (callName.equals(Dict.SERVICENAME_GET_INFERENCE_RESULT)) {
-                    resultFuture = futureStub.getInferenceResult(reqBuilder.build());
-                    timeWait = asyncTimeout;
-                } else if (callName.equals(Dict.SERVICENAME_START_INFERENCE_JOB)) {
-                    resultFuture = futureStub.startInferenceJob(reqBuilder.build());
-                    timeWait = asyncTimeout;
-                } else {
-                    logger.error("unknown callName {}.", callName);
-                    throw new UnSupportMethodException();
-                }
-
-            }finally {
-
-                if(managedChannel!=null) {
-                    grpcConnectionPool.returnPool(managedChannel, routerInfo.getHost(), routerInfo.getPort());
-                }
-            }
-            try{
-                InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait,TimeUnit.MILLISECONDS);
-                metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "success").increment();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("routerinfo {} send {} result {}",routerInfo,inferenceReqMap,result);
-                }
-                resultString = new String(result.getBody().toByteArray());
-            } catch (Exception e) {
-                metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "grpc.error").increment();
-                logger.error("get grpc result error", e);
-                throw new NoResultException();
-            }
+        } catch (Exception e) {
+            logger.error("get grpc channel error", e);
+            throw new NoResultException();
         }
-        finally {
-            if(managedChannel!=null) {
-                grpcConnectionPool.returnPool(managedChannel, routerInfo.getHost(), routerInfo.getPort());
+
+        Map reqBodyMap = data.getBody();
+        Map reqHeadMap = data.getHead();
+
+        Map inferenceReqMap = Maps.newHashMap();
+        inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
+        inferenceReqMap.putAll(reqHeadMap);
+        inferenceReqMap.put(Dict.FEATURE_DATA, Maps.newHashMap(reqBodyMap));
+        int timeWait = timeout;
+
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("inference req : {}", JSON.toJSONString(inferenceReqMap));
+        }
+        InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
+        reqBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(inferenceReqMap).getBytes()));
+
+        InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
+
+        metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "to.self.serving-server", "result", "success").increment();
+
+        if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
+            resultFuture = futureStub.inference(reqBuilder.build());
+            timeWait = timeout;
+        } else if (callName.equals(Dict.SERVICENAME_GET_INFERENCE_RESULT)) {
+            resultFuture = futureStub.getInferenceResult(reqBuilder.build());
+            timeWait = asyncTimeout;
+        } else if (callName.equals(Dict.SERVICENAME_START_INFERENCE_JOB)) {
+            resultFuture = futureStub.startInferenceJob(reqBuilder.build());
+            timeWait = asyncTimeout;
+        } else {
+            logger.error("unknown callName {}.", callName);
+            throw new UnSupportMethodException();
+        }
+
+
+        try {
+            InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait, TimeUnit.MILLISECONDS);
+            metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "success").increment();
+            if (logger.isDebugEnabled()) {
+                logger.debug("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
             }
+            resultString = new String(result.getBody().toByteArray());
+        } catch (Exception e) {
+            metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "grpc.error").increment();
+            logger.error("get grpc result error", e);
+            throw new NoResultException();
         }
-        if(StringUtils.isNotEmpty(resultString)){
-          resultMap =  JSON.parseObject(resultString,Map.class);
+
+
+        if (StringUtils.isNotEmpty(resultString)) {
+            resultMap = JSON.parseObject(resultString, Map.class);
         }
-        return  resultMap;
+        return resultMap;
     }
 
     @Override
-    protected Map transformErrorMap(Context context,Map data) {
-        return  data;
+    protected Map transformErrorMap(Context context, Map data) {
+        return data;
     }
 }
 
