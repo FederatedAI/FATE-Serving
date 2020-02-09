@@ -202,9 +202,11 @@ cd /data/projects/fate-serving
 
 sh services.sh all start
 如果是两台进各自的分别执行一个
-4)查看所有状态
+
+3)查看所有状态
 sh services.sh all status
-5)关闭所有
+
+4)关闭所有
 sh services.sh all stop
 
 5.5.配置文件详解

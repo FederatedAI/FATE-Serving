@@ -19,7 +19,7 @@
 #export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
 #export PATH=$PATH:$JAVA_HOME/bin
 set -e 
-source ./common.sh
+source ./bin/common.sh
 module=serving-server
 main_class=com.webank.ai.fate.serving.ServingServer
 module_version=1.2.0

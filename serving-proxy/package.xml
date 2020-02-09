@@ -36,7 +36,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/bin</outputDirectory>
             <directory>../bin</directory>
             <includes>
                 <include>*</include>
