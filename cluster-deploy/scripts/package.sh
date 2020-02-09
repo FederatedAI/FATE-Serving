@@ -84,7 +84,7 @@ update_config () {
     do
 		#update serving-proxy config path
 		ssh -tt ${user}@${host_guest[i]} << eeooff
-		cd ${deploy_dir}/${fate_serving}/${serving_proxy/conf
+		cd ${deploy_dir}/${fate_serving}/${serving_proxy}/conf
 		sed -i "/^route.table=/croute.table=${deploy_dir}/${fate_serving}/${serving_proxy}/conf/route_table.json" application.properties
 		sed -i "/^auth.file=/cauth.file=${deploy_dir}/${fate_serving}/${serving_proxy}/conf/auth_config.json" application.properties
 exit
