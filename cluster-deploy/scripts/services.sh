@@ -16,7 +16,7 @@
 #  limitations under the License.
 #
 
-modules=(serving-proxy serving)
+modules=(serving-proxy serving-server)
 
 cwd=`pwd`
 
