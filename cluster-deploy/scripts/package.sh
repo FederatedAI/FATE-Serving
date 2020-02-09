@@ -12,7 +12,7 @@ package_path=$cwd/FATE-Serving
 fate_serving_path=$public_path/fate-serving
 sering_path=$fate_serving_path/serving
 fate_serving=fate-serving
-serving=serving
+serving=serving-server
 fate_serving_zip=fate-serving-server-*-release.zip
 fate_serving_jar=fate-serving-server-*.jar
 fate_serving_proxy_zip=fate-serving-proxy-*-release.zip
@@ -23,7 +23,7 @@ serving_proxy_path=$fate_serving_path/serving-proxy
 mkdir -p ./${fate_serving}/${serving}
 mkdir -p ./${fate_serving}/${serving_proxy}
 cp services.sh ./${fate_serving}
-cd ${cwd}/../../../
+cd ${cwd}/../../
 echo "[INFO] mvn clean package  start"
 mvn clean package -DskipTests
 if [ $? -eq 0 ]; then
@@ -34,14 +34,14 @@ else
 fi
 
 #serving
-cd ${cwd}/../../target
+cd ./${serving}/target
 cp ${fate_serving_zip} ${cwd}/${fate_serving}/${serving}
 cd ${cwd}/${fate_serving}/${serving}
 unzip $fate_serving_zip
 ln -s $fate_serving_jar  fate-serving-server.jar
 
 #serving-proxy
-cd ${cwd}/../../../$serving_proxy/target
+cd ${cwd}/../../$serving_proxy/target
 cp $fate_serving_proxy_zip ${cwd}/${fate_serving}/${serving_proxy}
 cd ${cwd}/${fate_serving}/${serving_proxy}
 unzip $fate_serving_proxy_zip
@@ -49,8 +49,8 @@ ln -s $fate_serving_proxy_jar fate-serving-proxy.jar
 
 #cp modify_json.py
 cd ${cwd}
-cp modify_json.py ./fate-serving/serving-proxy/conf
-tar -zcvf fate-serving.tar.gz  fate-serving
+cp modify_json.py ./${fate_serving}/${serving_proxy}/conf
+tar -zcvf fate-serving.tar.gz  ${fate_serving}
 
 cp_serving() {
 	for node_ip in "${host_guest[@]}"; do
@@ -84,9 +84,9 @@ update_config () {
     do
 		#update serving-proxy config path
 		ssh -tt ${user}@${host_guest[i]} << eeooff
-		cd ${deploy_dir}/fate-serving/serving-proxy/conf
-		sed -i "/^route.table=/croute.table=${deploy_dir}/fate-serving/serving-proxy/conf/route_table.json" application.properties
-		sed -i "/^auth.file=/cauth.file=${deploy_dir}/fate-serving/serving-proxy/conf/auth_config.json" application.properties
+		cd ${deploy_dir}/${fate_serving}/${serving_proxy/conf
+		sed -i "/^route.table=/croute.table=${deploy_dir}/${fate_serving}/${serving_proxy}/conf/route_table.json" application.properties
+		sed -i "/^auth.file=/cauth.file=${deploy_dir}/${fate_serving}/${serving_proxy}/conf/auth_config.json" application.properties
 exit
 eeooff
 
@@ -95,7 +95,7 @@ eeooff
 		if [ $temp = 0 ]
 		then
 		ssh -tt ${user}@${host_guest[i]} << eeooff
-		cd ${deploy_dir}/fate-serving/serving/conf
+		cd ${deploy_dir}/${fate_serving}/${serving}/conf
 		sed -i "/^redis.ip=/credis.ip=${host_redis_ip}" serving-server.properties
 		sed -i "/^redis.port=/credis.port=${host_redis_port}" serving-server.properties
 		sed -i "/^redis.password=/credis.password=${host_redis_password}" serving-server.properties
@@ -105,7 +105,7 @@ exit
 eeooff
 		else
 		ssh -tt ${user}@${host_guest[i]} << eeooff
-		cd ${deploy_dir}/fate-serving/serving/conf
+		cd ${deploy_dir}/${fate_serving}/${serving}/conf
 		sed -i "/^redis.ip=/credis.ip=${guest_redis_ip}" serving-server.properties
 		sed -i "/^redis.port=/credis.port=${guest_redis_port}" serving-server.properties
 		sed -i "/^redis.password=/credis.password=${guest_redis_password}" serving-server.properties
@@ -126,11 +126,11 @@ update_zk_config () {
 		if [ $temp = 0 ]
 		then
 			ssh -tt ${user}@${host_guest[i]} << eeooff
-				cd ${deploy_dir}/fate-serving/serving/conf
+				cd ${deploy_dir}/${fate_serving}/${serving}/conf
 				sed -i "/^zk.url=/czk.url=${host_zk_url}" serving-server.properties
 				sed -i "/^useRegister=/cuseRegister=true" serving-server.properties
 				sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
-				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				cd ${deploy_dir}/${fate_serving}/${serving_proxy}/conf
 				sed -i "/^zk.url=/czk.url=${host_zk_url}" application.properties
 				sed -i "/^useRegister=/cuseRegister=true" application.properties
 				sed -i "/^useZkRouter=/cuseZkRouter=true" application.properties
@@ -138,11 +138,11 @@ exit
 eeooff
 		else
 			ssh -tt ${user}@${host_guest[i]} << eeooff
-				cd ${deploy_dir}/fate-serving/serving/conf
+				cd ${deploy_dir}/${fate_serving}/${serving}/conf
 				sed -i "/^zk.url=/czk.url=${guest_zk_url}" serving-server.properties
 				sed -i "/^useRegister=/cuseRegister=true" serving-server.properties
 				sed -i "/^useZkRouter=/cuseZkRouter=true" serving-server.properties
-				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				cd ${deploy_dir}/${fate_serving}/${serving_proxy}/conf
 				sed -i "/^zk.url=/czk.url=${guest_zk_url}" application.properties
 				sed -i "/^useRegister=/cuseRegister=true" application.properties
 				sed -i "/^useZkRouter=/cuseZkRouter=true" application.properties
@@ -159,7 +159,7 @@ update_route_table () {
         		if [ $temp = 0 ]
         		then
 				ssh -tt ${user}@${host_guest[i]} << eeooff
-				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				cd ${deploy_dir}/${fate_serving}/${serving_proxy}/conf
 				sed -i "3c default_default_ip=\"${host_guest[i+1]}\"" modify_json.py
 				sed -i "4c default_default_port=8869" modify_json.py
 				sed -i "5c party_id=${party_list[i]}" modify_json.py
@@ -173,7 +173,7 @@ exit
 eeooff
         		else
 				ssh -tt ${user}@${host_guest[i]} << eeooff
-				cd ${deploy_dir}/fate-serving/serving-proxy/conf
+				cd ${deploy_dir}/${fate_serving}/${serving_proxy}/conf
 				sed -i "3c default_default_ip=\"${host_guest[i-1]}\"" modify_json.py
 				sed -i "4c default_default_port=8869" modify_json.py
 				sed -i "5c party_id=${party_list[i]}" modify_json.py
@@ -196,7 +196,7 @@ update_nozk_config () {
 	for ((i=0;i<${#host_guest[*]};i++))
     do
 	ssh -tt ${user}@${host_guest[i]} << eeooff
-		cd ${deploy_dir}/fate-serving/serving/conf
+		cd ${deploy_dir}/${fate_serving}/${serving}/conf
 		sed -i "/^useRegister=/cuseRegister=false" serving-server.properties
 		sed -i "/^useZkRouter=/cuseZkRouter=false" serving-server.properties
 		cd ${deploy_dir}/fate-serving/serving-proxy/conf
