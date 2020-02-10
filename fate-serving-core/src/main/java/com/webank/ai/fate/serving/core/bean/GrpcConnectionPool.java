@@ -102,7 +102,6 @@ public class GrpcConnectionPool {
         int channelSize  = channelResource.getChannels().size();
         long now = System.currentTimeMillis();
         long loadFactor = ((requestCount - preCount) * 1000) / (channelSize * (now - latestTimestamp));
-        //System.out.println("channel size : "+channelSize+" load factor : "+loadFactor +" time "+(now-latestTimestamp)+" req "+(requestCount - preCount) );
         channelResource.setLatestChecktimestamp(now);
         channelResource.setPreCheckCount(requestCount);
         if(channelSize>maxTotalPerAddress){
@@ -134,6 +133,8 @@ public class GrpcConnectionPool {
 
                         poolMap.forEach((k, v) -> {
                             try {
+                                logger.info("grpc pool {} channel size {} req count {}",k,v.getChannels().size(),v.getRequestCount().get()-v.getPreCheckCount());
+
                                 if (needAddChannel(v)) {
                                     String[] ipPort = k.split(":");
                                     String ip = ipPort[0];
