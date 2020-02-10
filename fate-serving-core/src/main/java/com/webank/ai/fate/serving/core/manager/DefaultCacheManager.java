@@ -126,8 +126,10 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
             String inferenceResultCacheKey = generateInferenceResultCacheKey(partyId, caseid);
             boolean putCacheSuccess = putIntoCache(inferenceResultCacheKey, CacheType.INFERENCE_RESULT, returnResult);
             if (putCacheSuccess) {
-                logger.info("Put {} inference result into cache", inferenceResultCacheKey);
-            }
+                if(logger.isDebugEnabled()) {
+                    logger.info("put {} inference result into cache", inferenceResultCacheKey);
+                }
+                }
         } finally {
             long end = System.currentTimeMillis();
             if (logger.isDebugEnabled()) {
@@ -142,8 +144,10 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String inferenceResultCacheKey = generateInferenceResultCacheKey(partyId, caseid);
         ReturnResult returnResult = getFromCache(inferenceResultCacheKey, CacheType.INFERENCE_RESULT);
         if (returnResult != null) {
-            logger.info("Get {} inference result from cache.", inferenceResultCacheKey);
-        }
+            if(logger.isDebugEnabled()) {
+                logger.info("get {} inference result from cache.", inferenceResultCacheKey);
+            }
+            }
         return returnResult;
     }
 
@@ -155,8 +159,10 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
         boolean putCacheSuccess = putIntoCache(remoteModelInferenceResultCacheKey, CacheType.REMOTE_MODEL_INFERENCE_RESULT, returnResult);
         if (putCacheSuccess) {
-            logger.info("put {} remote model inference result into cache", remoteModelInferenceResultCacheKey);
-        }
+            if(logger.isDebugEnabled()) {
+                logger.debug("put {} remote model inference result into cache", remoteModelInferenceResultCacheKey);
+            }
+            }
     }
 
 
@@ -168,8 +174,10 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
         ReturnResult returnResult = getFromCache(remoteModelInferenceResultCacheKey, CacheType.REMOTE_MODEL_INFERENCE_RESULT);
         if (returnResult != null) {
-            logger.info("get {} remote model inference result from cache", remoteModelInferenceResultCacheKey);
-        }
+            if(logger.isDebugEnabled()) {
+                logger.debug("get {} remote model inference result from cache", remoteModelInferenceResultCacheKey);
+            }
+            }
         return returnResult;
     }
 
