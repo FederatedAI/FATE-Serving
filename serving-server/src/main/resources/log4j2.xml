@@ -64,10 +64,13 @@
         <AsyncLogger name="flow" level="info" includeLocation="true" additivity="false">
             <AppenderRef ref="flow"/>
         </AsyncLogger>
+        <AsyncLogger name="debug" level="debug" includeLocation="true" additivity="false">
+            <AppenderRef ref="debug"/>
+        </AsyncLogger>
+
         <AsyncRoot level="info" includeLocation="true">
             <AppenderRef ref="info"  level="info"/>
             <AppenderRef ref="error" level="error"/>
-            <AppenderRef ref="debug" level="debug"/>
         </AsyncRoot>
     </Loggers>
 </Configuration>
