@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.proxy.exceptions;
 
 
-import com.webank.ai.fate.serving.proxy.common.ErrorMessageUtil;
+import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;

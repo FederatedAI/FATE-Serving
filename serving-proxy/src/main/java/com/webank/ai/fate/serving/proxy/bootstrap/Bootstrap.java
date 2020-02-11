@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.proxy.rpc.core.AbstractServiceAdaptor;
+import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
