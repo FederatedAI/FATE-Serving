@@ -56,7 +56,9 @@ public class InferenceWorkerManager {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(r, "inference-worker-thread-" + mThreadNum.getAndIncrement());
-            logger.info("{} thead has ben created.", t.getName());
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} thead has ben created.", t.getName());
+            }
             return t;
         }
     }
@@ -64,7 +66,9 @@ public class InferenceWorkerManager {
     public static class InferenceWorkerThreadRejectedPolicy implements RejectedExecutionHandler {
         @Override
         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-            logger.info("{} rejected.", r.toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} rejected.", r.toString());
+            }
         }
     }
 }

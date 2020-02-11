@@ -27,13 +27,17 @@ public class ProtobufUtils {
         T messageV3;
         try {
             messageV3 = protoParser.parseFrom(protoString);
-            logger.info("parse {} proto object normal", messageV3.getClass().getSimpleName());
+            if (logger.isDebugEnabled()) {
+                logger.debug("parse {} proto object normal", messageV3.getClass().getSimpleName());
+            }
             return messageV3;
         } catch (Exception ex1) {
             try {
                 DefaultEmptyFillProto.DefaultEmptyFillMessage defaultEmptyFillMessage = DefaultEmptyFillProto.DefaultEmptyFillMessage.parseFrom(protoString);
                 messageV3 = protoParser.parseFrom(new byte[0]);
-                logger.info("parse {} proto object with default values", messageV3.getClass().getSimpleName());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("parse {} proto object with default values", messageV3.getClass().getSimpleName());
+                }
                 return messageV3;
             } catch (Exception ex2) {
                 throw ex1;

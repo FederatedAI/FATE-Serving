@@ -17,7 +17,7 @@ public class ServiceExceptionHandler implements ServerInterceptor {
                 try {
                     super.onHalfClose();
                 } catch (Exception e) {
-                    logger.info("ServiceException:", e);
+                    logger.error("ServiceException:", e);
                     call.close(Status.INTERNAL
                             .withCause(e)
                             .withDescription(e.getMessage()), new Metadata());

@@ -51,7 +51,6 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     @Autowired
     AuthUtils authUtils;
 
-
     @Value("${proxy.grpc.unaryCall.timeout:3000}")
     private  int  timeout;
 

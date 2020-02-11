@@ -29,7 +29,8 @@ import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
-import com.webank.ai.fate.serving.manger.ModelUtils;
+import com.webank.ai.fate.serving.manger.ModelUtil;
+
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.StringUtils;
@@ -123,8 +124,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             context.putData(Dict.SERVICE_ID,req.getServiceId());
             returnResult = modelManager.publishLoadModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtils.getFederatedRoles(req.getRoleMap()),
-                    ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                    ModelUtil.getFederatedRoles(req.getRoleMap()),
+                    ModelUtil.getFederatedRolesModel(req.getModelMap()));
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
@@ -152,11 +153,13 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
-            logger.info("receive service id {}",req.getServiceId());
+            if (logger.isDebugEnabled()) {
+                logger.debug("receive service id {}", req.getServiceId());
+            }
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtils.getFederatedRoles(req.getRoleMap()),
-                    ModelUtils.getFederatedRolesModel(req.getModelMap())
+                    ModelUtil.getFederatedRoles(req.getRoleMap()),
+                    ModelUtil.getFederatedRolesModel(req.getModelMap())
             );
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
@@ -183,11 +186,13 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
-            logger.info("publishBind receive service id {}",context.getData(Dict.SERVICE_ID));
+            if (logger.isDebugEnabled()) {
+                logger.debug("publishBind receive service id {}", context.getData(Dict.SERVICE_ID));
+            }
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtils.getFederatedRoles(req.getRoleMap()),
-                    ModelUtils.getFederatedRolesModel(req.getModelMap())
+                    ModelUtil.getFederatedRoles(req.getRoleMap()),
+                    ModelUtil.getFederatedRolesModel(req.getModelMap())
             );
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
@@ -359,13 +364,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 try {
                     byte[] data = decoder.decode(v.content.getBytes());
                     PublishRequest req = PublishRequest.parseFrom(data);
-                    logger.info("restore publishLoadModel req {}", req);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("restore publishLoadModel req {}", req);
+                    }
                     Context context = new BaseContext();
                     context.putData(Dict.SERVICE_ID, req.getServiceId());
                     modelManager.publishLoadModel(context,
                             new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                            ModelUtils.getFederatedRoles(req.getRoleMap()),
-                            ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                            ModelUtil.getFederatedRoles(req.getRoleMap()),
+                            ModelUtil.getFederatedRolesModel(req.getModelMap()));
                 } catch (Exception e) {
                     logger.error("restore publishLoadModel error", e);
                     e.printStackTrace();
@@ -377,14 +384,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 try {
                     byte[] data = decoder.decode(v.content.getBytes());
                     PublishRequest req = PublishRequest.parseFrom(data);
-
-                    logger.info("restore publishOnlineModel req {} base64 {}", req, v);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("restore publishOnlineModel req {} base64 {}", req, v);
+                    }
                     Context context = new BaseContext();
                     context.putData(Dict.SERVICE_ID, req.getServiceId());
                     modelManager.publishOnlineModel(context,
                             new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                            ModelUtils.getFederatedRoles(req.getRoleMap()),
-                            ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                            ModelUtil.getFederatedRoles(req.getRoleMap()),
+                            ModelUtil.getFederatedRolesModel(req.getModelMap()));
                 } catch (Exception e) {
                     logger.error("restore publishOnlineModel error", e);
                     e.printStackTrace();
@@ -392,15 +400,11 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             });
         }
-
-
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
        // restore();
-
     }
 
 

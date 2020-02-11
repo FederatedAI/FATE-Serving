@@ -29,15 +29,15 @@ public interface ModelManager {
 
     public ReturnResult publishOnlineModel(Context context,FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel);
 
-    public PipelineTask getModel(String name, String namespace);
+    public PipelineTask getModel(Context context, String name, String namespace);
 
-    public ModelNamespaceData getModelNamespaceData(String namespace);
+    public ModelNamespaceData getModelNamespaceData(Context context,String namespace);
 
-    public String getModelNamespaceByPartyId(String partyId);
+    public String getModelNamespaceByPartyId(Context  context,String partyId);
 
-    public ModelInfo getModelInfoByPartner(String partnerModelName, String partnerModelNamespace);
+    public ModelInfo getModelInfoByPartner(Context context,String partnerModelName, String partnerModelNamespace);
 
-    public PipelineTask pushModelIntoPool(String name, String namespace);
+    public PipelineTask pushModelIntoPool(Context context,String name, String namespace);
 
 
 }

@@ -26,6 +26,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.ApplicationHolder;
+import com.webank.ai.fate.serving.core.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
@@ -46,10 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ServingServer implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(ServingServer.class);
@@ -57,7 +55,6 @@ public class ServingServer implements InitializingBean {
     private Server server;
     private boolean useRegister = false;
     private String confPath = "";
-
     public ServingServer() {
 
     }
@@ -65,7 +62,6 @@ public class ServingServer implements InitializingBean {
         this.confPath = new File(confPath).getAbsolutePath();
         System.setProperty(Dict.CONFIGPATH, confPath);
         new Configuration(confPath).load();
-
         System.setProperty(Dict.ACL_ENABLE, Configuration.getProperty(Dict.ACL_ENABLE, ""));
         System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME, ""));
         System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD, ""));
@@ -73,8 +69,6 @@ public class ServingServer implements InitializingBean {
 
     public static void main(String[] args) {
         try {
-
-
             Options options = new Options();
             Option option = Option.builder("c")
                     .longOpt("config")
@@ -90,7 +84,7 @@ public class ServingServer implements InitializingBean {
             ServingServer a = new ServingServer(cmd.getOptionValue("c"));
             a.start(args);
         } catch (Exception ex) {
-            logger.error("server start error",ex);
+            System.err.println("server start error, " + ex.getMessage());
             ex.printStackTrace();
             System.exit(1);
         }
@@ -103,12 +97,14 @@ public class ServingServer implements InitializingBean {
         int port = Integer.parseInt(Configuration.getProperty(Dict.PROPERTY_SERVER_PORT));
         //TODO: Server custom configuration
 
-        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size",10);
-        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",100);
+        int processors = Runtime.getRuntime().availableProcessors();
+
+        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size",processors);
+        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",processors * 2);
         Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time",1000);
         Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size",10);
         Executor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, aliveTime.longValue(), TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(queueSize), new NamedThreadFactory("ServingServer", true));
+                new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
@@ -119,9 +115,11 @@ public class ServingServer implements InitializingBean {
         server = serverBuilder.build();
         logger.info("server started listening on port: {}, use configuration: {}", port, this.confPath);
         server.start();
+
         String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
         useRegister = Boolean.valueOf(userRegisterString);
         logger.info("serving useRegister {}", useRegister);
+
         if (useRegister) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
@@ -153,11 +151,10 @@ public class ServingServer implements InitializingBean {
         modelService.restore();
 
         ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
-        reporter.start(1, TimeUnit.SECONDS);
+        reporter.start(1, TimeUnit.MINUTES);
 
         JmxReporter jmxReporter = applicationContext.getBean(JmxReporter.class);
         jmxReporter.start();
-
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -180,14 +177,27 @@ public class ServingServer implements InitializingBean {
                     logger.info("unregister {}", url);
                     zookeeperRegistry.unregister(url);
                 });
-
                 zookeeperRegistry.destroy();
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
+            int retryCount=0;
+            long requestInProcess = BaseContext.requestInProcess.get();
+            do{
+
+                logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess,retryCount+1);
+                if(requestInProcess>0&&retryCount<30) {
+                    try {
+
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    retryCount++;
+                    requestInProcess = BaseContext.requestInProcess.get();
+                }else{
+                    break;
+                }
+
+            }while(requestInProcess>0&&retryCount<3);
             server.shutdown();
         }
     }

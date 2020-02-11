@@ -98,8 +98,9 @@ public abstract class AbstractRetryTask implements TimerTask {
 
     @Override
     public void run(Timeout timeout) throws Exception {
-
-        logger.info("retry task begin");
+        if (logger.isDebugEnabled()) {
+            logger.debug("retry task begin");
+        }
         long begin = System.currentTimeMillis();
         if (timeout.isCancelled() || timeout.timer().isStop() || isCancel()) {
             // other thread cancel this timeout or stop the timer.

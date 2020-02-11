@@ -54,7 +54,9 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
         try {
 
             String data = req.getBody().getValue().toStringUtf8();
-            logger.info("unaryCall {} head {}", data,req.getHeader().getCommand().getName());
+            if (logger.isDebugEnabled()) {
+                logger.debug("unaryCall {} head {}", data, req.getHeader().getCommand().getName());
+            }
             requestData = JSON.parseObject(data, HostFederatedParams.class);
             context.setCaseId(requestData.getCaseId() != null ? requestData.getCaseId() : Dict.NONE);
 

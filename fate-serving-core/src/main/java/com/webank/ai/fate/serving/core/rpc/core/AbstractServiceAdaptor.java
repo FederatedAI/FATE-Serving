@@ -138,14 +138,21 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         }
         catch (Throwable e) {
             exceptions.add(e);
-            logger.info(e.getMessage());
+            logger.error(e.getMessage());
         } finally {
 
             requestInHandle.decrementAndGet();
             long end = System.currentTimeMillis();
             long cost = end - begin;
+
+            if(exceptions.size()!=0){
+                try {
+                    outboundPackage = this.serviceFail(context, data, exceptions);
+                }catch(Throwable e){
+                    logger.error("handle serviceFail error",e);
+                }
+            }
             try {
-                logger.info("kaideng test");
                 flowLogger.info("{}|{}|{}|{}|" +
                                 "{}|{}|{}|{}|" +
                                 "{}|{}",
@@ -156,13 +163,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
                 logger.error("print flow log error",e);
             }
 
-            if(exceptions.size()!=0){
-                try {
-                    outboundPackage = this.serviceFail(context, data, exceptions);
-                }catch(Throwable e){
-                    logger.error("handle serviceFail error",e);
-                }
-            }
+
         }
         return outboundPackage;
 

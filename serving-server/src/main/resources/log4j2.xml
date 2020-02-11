@@ -20,8 +20,6 @@
         <Property name="project">fate</Property>
         <Property name="module">serving-server</Property>
     </Properties>
-
-
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout charset="UTF-8"

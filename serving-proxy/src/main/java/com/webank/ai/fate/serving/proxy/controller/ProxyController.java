@@ -39,7 +39,6 @@ public class ProxyController {
     @Autowired
     IMetricFactory metricFactory;
 
-
     @Value("${coordinator:9999}")
     private String selfCoordinator;
 
@@ -67,7 +66,9 @@ public class ProxyController {
         return new Callable<String>() {
             @Override
             public String call() throws Exception {
-                logger.info("receive : {} headers {}", data, headers.toSingleValueMap());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("receive : {} headers {}", data, headers.toSingleValueMap());
+                }
 
                 final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor(Dict.SERVICENAME_INFERENCE);
 

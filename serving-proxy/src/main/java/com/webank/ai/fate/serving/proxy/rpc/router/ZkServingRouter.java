@@ -25,7 +25,7 @@ import java.util.List;
 @Service
 public class ZkServingRouter extends BaseServingRouter implements InitializingBean{
 
-    @Value("${useZkRouter:false}")
+    @Value("${useZkRouter:true}")
     private  String  useZkRouter;
 
     @Value("${routeType:random}")
@@ -52,8 +52,10 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
             return null;
         }
         String environment = getEnvironment(context, inboundPackage);
-        List<URL>   list = zkRouterService.router("serving", environment, context.getServiceName());
-        logger.info("try to find zk ,{}:{}:{}, result {}", "serving", environment, context.getServiceName(), list);
+        List<URL> list = zkRouterService.router("serving", environment, context.getServiceName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("try to find zk ,{}:{}:{}, result {}", "serving", environment, context.getServiceName(), list);
+        }
         if(null == list || list.isEmpty()){
             return null;
         }

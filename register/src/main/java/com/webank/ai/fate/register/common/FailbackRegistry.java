@@ -64,8 +64,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     @Override
     public void subProject(String project) {
-
-        logger.info("try to subProject: {}", project);
+        if (logger.isDebugEnabled()) {
+            logger.debug("try to subProject: {}", project);
+        }
         super.subProject(project);
         failedSubProject.remove(project);
         try {
@@ -106,7 +107,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     public void addFailedSubscribedProjectTask(String project) {
 
-        logger.info("try to add failed subscribed project {}",project);
+        if (logger.isDebugEnabled()) {
+            logger.debug("try to add failed subscribed project {}",project);
+        }
 
         FailedSubProjectTask oldOne = failedSubProject.get(project);
         if (oldOne != null) {
@@ -126,7 +129,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
 
     private void addFailedRegistered(URL url) {
-        logger.info("try to add failed registed url {}",url);
+        if (logger.isDebugEnabled()) {
+            logger.debug("try to add failed registed url {}",url);
+        }
         FailedRegisteredTask oldOne = failedRegistered.get(url);
         if (oldOne != null) {
             return;
@@ -314,7 +319,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     @Override
     public void subscribe(URL url, NotifyListener listener) {
-        logger.info("prepare to subscribe " + url);
+        if (logger.isDebugEnabled()) {
+            logger.debug("prepare to subscribe " + url);
+        }
         super.subscribe(url, listener);
         removeFailedSubscribed(url, listener);
         try {
@@ -399,7 +406,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     @Override
     protected void recover() throws Exception {
         // register
-        logger.info("prepare to recover registed......{}", getRegistered());
+        if (logger.isDebugEnabled()) {
+            logger.debug("prepare to recover registed......{}", getRegistered());
+        }
 
         Set<URL> recoverRegistered = new HashSet<URL>(getRegistered());
         if (!recoverRegistered.isEmpty()) {
@@ -411,7 +420,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             }
         }
 
-        logger.info("prepare to recover registed.project.....{}", projectSets);
+        if (logger.isDebugEnabled()) {
+            logger.debug("prepare to recover registed.project.....{}", projectSets);
+        }
 
         Set<String>  subjectSets = new HashSet(this.projectSets);
         if(!subjectSets.isEmpty()) {
@@ -426,7 +437,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             });
         }
 
-        logger.info("prepare to recover subscribed......{}", getSubscribed());
+        if (logger.isDebugEnabled()) {
+            logger.debug("prepare to recover subscribed......{}", getSubscribed());
+        }
         // subscribe
         Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<URL, Set<NotifyListener>>(getSubscribed());
         if (!recoverSubscribed.isEmpty()) {
@@ -440,7 +453,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 }
             }
         }
-        logger.info("recover over !!!!!!");
+        if (logger.isDebugEnabled()) {
+            logger.debug("recover over !!!!!!");
+        }
     }
 
     @Override

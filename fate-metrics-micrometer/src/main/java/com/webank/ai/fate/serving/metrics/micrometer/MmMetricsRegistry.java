@@ -26,7 +26,9 @@ public class MmMetricsRegistry implements MeterBinder {
     public void bindTo(MeterRegistry registry) {
         if (this.registry == null) {
             this.registry = registry;
-            logger.info("MeterRegistry is set...");
+            if (logger.isDebugEnabled()) {
+                logger.debug("MeterRegistry is set...");
+            }
         }
     }
 

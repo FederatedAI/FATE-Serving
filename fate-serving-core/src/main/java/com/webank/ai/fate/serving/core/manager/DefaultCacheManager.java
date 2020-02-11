@@ -97,8 +97,9 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     @Override
     public void store(Context context, String key, Object object) {
-
-        logger.info("store key {} value {}", key, object);
+        if (logger.isDebugEnabled()) {
+            logger.debug("store key {} value {}", key, object);
+        }
         CacheValueConfig cacheValueConfig = getCacheValueConfig(key, CacheType.PROCESS_DATA);
         putIntoRedisCache(key, cacheValueConfig, object);
 
@@ -110,7 +111,9 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
         CacheValueConfig cacheValueConfig = getCacheValueConfig(key, CacheType.PROCESS_DATA);
         T result = getFromRedisCache(key, cacheValueConfig, dataType);
-        logger.info("restore key {} value {}", key, result);
+        if (logger.isDebugEnabled()) {
+            logger.debug("restore key {} value {}", key, result);
+        }
         return result;
     }
 
@@ -127,7 +130,9 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
             }
         } finally {
             long end = System.currentTimeMillis();
-            logger.info("caseid {} putInferenceResultCache cost {}", context.getCaseId(), end - beginTime);
+            if (logger.isDebugEnabled()) {
+                logger.debug("caseid {} putInferenceResultCache cost {}", context.getCaseId(), end - beginTime);
+            }
 
         }
     }
@@ -144,7 +149,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     @Override
     public void putRemoteModelInferenceResult(FederatedParams guestFederatedParams, ReturnResult returnResult) {
-        if (!Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))) {
+        if (!Boolean.parseBoolean(Configuration.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH))) {
             return;
         }
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
@@ -157,7 +162,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     @Override
     public ReturnResult getRemoteModelInferenceResult(FederatedParams guestFederatedParams) {
-        if (!Boolean.parseBoolean(Configuration.getProperty("remoteModelInferenceResultCacheSwitch"))) {
+        if (!Boolean.parseBoolean(Configuration.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH))) {
             return null;
         }
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
@@ -300,7 +305,9 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         String featureIdString = StringUtils.join(featureIdItemString, "_");
         String cacheKey;
         cacheKey = StringUtils.join(Arrays.asList(remotePartyKey, featureIdString), "#");
-        logger.info(cacheKey);
+        if (logger.isDebugEnabled()) {
+            logger.debug(cacheKey);
+        }
         return cacheKey;
     }
 
