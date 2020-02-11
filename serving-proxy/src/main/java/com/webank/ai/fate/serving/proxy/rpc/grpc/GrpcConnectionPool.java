@@ -30,7 +30,9 @@ public class GrpcConnectionPool {
 
     public void returnPool(ManagedChannel channel, String host, int port) {
         try {
-            logger.info("return grpc pool {}:{}",host,port);
+            if (logger.isDebugEnabled()) {
+                logger.debug("return grpc pool {}:{}", host, port);
+            }
             String key = host + ":" + port;
             poolMap.get(key).returnObject(channel);
             // logger.info("pool active size {}",poolMap.get(key).());
@@ -47,7 +49,9 @@ public class GrpcConnectionPool {
 
     public ManagedChannel getManagedChannel(String host, int port) throws Exception {
         String key = host + ":" + port;
-        logger.info("try to get grpc channel {}",key);
+        if (logger.isDebugEnabled()) {
+            logger.debug("try to get grpc channel {}",key);
+        }
         GenericObjectPool<ManagedChannel> pool = poolMap.get(key);
         if (pool == null) {
 
@@ -86,8 +90,9 @@ public class GrpcConnectionPool {
         }
         GenericObjectPool<ManagedChannel>   objectPool =poolMap.get(key);
 
-
-        logger.info("grpc pool host {} active num {} idle1 num {}",key,objectPool.getNumActive(),objectPool.getNumIdle());
+        if (logger.isDebugEnabled()) {
+            logger.debug("grpc pool host {} active num {} idle1 num {}",key,objectPool.getNumActive(),objectPool.getNumIdle());
+        }
 
         return objectPool.borrowObject();
     }
@@ -105,7 +110,10 @@ public class GrpcConnectionPool {
 
         @Override
         public ManagedChannel create() throws Exception {
-            logger.info("create managedChannel");
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("create managedChannel");
+            }
 
             ManagedChannelBuilder builder = ManagedChannelBuilder
                     .forAddress(host,port)
@@ -139,7 +147,9 @@ public class GrpcConnectionPool {
 
         @Override
         public void destroyObject(PooledObject<ManagedChannel> p) throws Exception {
-            logger.info("destroyObject ================");
+            if (logger.isDebugEnabled()) {
+                logger.debug("destroyObject ================");
+            }
             try {
                 p.getObject().shutdownNow();
 

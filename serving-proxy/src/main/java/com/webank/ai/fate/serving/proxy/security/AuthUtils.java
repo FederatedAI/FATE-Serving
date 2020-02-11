@@ -96,7 +96,10 @@ public class AuthUtils implements InitializingBean{
             KEY_SECRET_MAP.put(allowKey.get("app_key").toString(), allowKey.get("app_secret").toString());
             PARTYID_KEY_MAP.put(allowKey.get("party_id").toString(), allowKey.get("app_key").toString());
         }
-        logger.info("refreshed auth cfg using file {}.", confFilePath);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("refreshed auth cfg using file {}.", confFilePath);
+        }
     }
 
     private String getSecret(String appKey) {

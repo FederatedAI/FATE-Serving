@@ -75,29 +75,32 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
 
         if (StringUtils.isEmpty(modelNamespace)  ) {
             if(StringUtils.isNotEmpty(inferenceRequest.getServiceId())){
-                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getServiceId());
+                modelNamespace = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getServiceId());
             }else if(inferenceRequest.haveAppId()) {
-                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getAppid());
+                modelNamespace = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getAppid());
             }
         }
         if (StringUtils.isEmpty(modelNamespace)) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
             return inferenceResult;
         }
-        ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(modelNamespace);
+        ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(context,modelNamespace);
         PipelineTask model;
         if (StringUtils.isEmpty(modelName)) {
             modelName = modelNamespaceData.getUsedModelName();
             model = modelNamespaceData.getUsedModel();
         } else {
-            model = modelManager.getModel(modelName, modelNamespace);
+            model = modelManager.getModel(context,modelName, modelNamespace);
         }
         if (model == null) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
             return inferenceResult;
         }
 
-        logger.info("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
+        }
+
         Map<String, Object> rawFeatureData = inferenceRequest.getFeatureData();
 
         if (rawFeatureData == null) {
@@ -199,7 +202,9 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return preProcessing.getResult(context, ObjectTransform.bean2Json(originFeatureData));
         } finally {
             long endTime = System.currentTimeMillis();
-            logger.info("preprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            if (logger.isDebugEnabled()) {
+                logger.debug("preprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            }
         }
 
     }
@@ -210,7 +215,9 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return postProcessing.getResult(context, featureData, modelResult);
         } finally {
             long endTime = System.currentTimeMillis();
-            logger.info("postprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            if (logger.isDebugEnabled()) {
+                logger.debug("postprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            }
         }
     }
 
@@ -224,7 +231,10 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         }
 
         ReturnResult inferenceResultFromCache = cacheManager.getInferenceResultCache(inferenceRequest.getAppid(), inferenceRequest.getCaseid());
-        logger.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+        }
         if (inferenceResultFromCache != null) {
             logger.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
             return inferenceResultFromCache;
@@ -242,10 +252,13 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
     private ReturnResult getReturnResultFromCache(Context context, InferenceRequest inferenceRequest) {
         long inferenceBeginTime = System.currentTimeMillis();
         ReturnResult inferenceResultFromCache = cacheManager.getInferenceResultCache(inferenceRequest.getAppid(), inferenceRequest.getCaseid());
-        logger.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+        }
+
         if (inferenceResultFromCache != null) {
             logger.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
-
         }
         return inferenceResultFromCache;
     }

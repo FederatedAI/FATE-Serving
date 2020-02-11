@@ -55,6 +55,8 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
     private ModelCache modelCache;
     private ConcurrentHashMap<String, ModelInfo> partnerModelData;
     private File modelFile;
+    @Autowired
+    private ModelLoader modelLoader;
 
 
     public DefaultModelManager() {
@@ -67,7 +69,6 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
         modelFederatedParty = new HashMap<>();
         modelFederatedRoles = new HashMap<>();
 
-
         String filename = System.getProperty(Dict.PROPERTY_USER_HOME) + "/.fate/fate-model.cache";
         File file = null;
         if (StringUtils.isNotEmpty(filename)) {
@@ -79,18 +80,15 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             }
         }
         this.modelFile = file;
-
     }
 
-
-
     @Override
-    public ReturnResult publishLoadModel(Context context,FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
+    public ReturnResult publishLoadModel(Context context, FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
         String role = federatedParty.getRole();
         String partyId = federatedParty.getPartyId();
         String serviceId = null;
-        if(context.getData(Dict.SERVICE_ID)!=null) {
-            serviceId  = context.getData(Dict.SERVICE_ID).toString();
+        if (context.getData(Dict.SERVICE_ID) != null) {
+            serviceId = context.getData(Dict.SERVICE_ID).toString();
         }
 
         ReturnResult returnResult = new ReturnResult();
@@ -106,42 +104,43 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                 returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
                 return returnResult;
             }
-            PipelineTask model = pushModelIntoPool(modelInfo.getName(), modelInfo.getNamespace());
+
+            PipelineTask model = pushModelIntoPool(context, modelInfo.getName(), modelInfo.getNamespace());
             if (model == null) {
                 returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
                 return returnResult;
             }
+
             federatedRolesModel.forEach((roleName, roleModelInfo) -> {
                 roleModelInfo.forEach((p, m) -> {
                     if (!p.equals(partyId) || (p.equals(partyId) && !role.equals(roleName))) {
-                        String partnerModelKey = ModelUtils.genModelKey(m.getName(), m.getNamespace());
+                        String partnerModelKey = ModelUtil.genModelKey(m.getName(), m.getNamespace());
                         partnerModelData.put(partnerModelKey, modelInfo);
-                        logger.info("Create model index({}) for partner({}, {})", partnerModelKey, roleName, p);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Create model index({}) for partner({}, {})", partnerModelKey, roleName, p);
+                        }
                     }
                 });
             });
 
-            if(Dict.HOST.equals(role)){
+            if (Dict.HOST.equals(role)) {
                 if (zookeeperRegistry != null) {
-                    if(StringUtils.isNotEmpty(serviceId)){
+                    if (StringUtils.isNotEmpty(serviceId)) {
                         zookeeperRegistry.addDynamicEnvironment(serviceId);
                     }
-                    partnerModelData.forEach((key,v)->{
-
-
-                        String keyMd5 = EncryptUtils.encrypt(key,EncryptMethod.MD5);
-                        logger.info("transform key {} to md5key {}",key,keyMd5);
+                    partnerModelData.forEach((key, v) -> {
+                        String keyMd5 = EncryptUtils.encrypt(key, EncryptMethod.MD5);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("transform key {} to md5key {}", key, keyMd5);
+                        }
                         zookeeperRegistry.addDynamicEnvironment(keyMd5);
                         zookeeperRegistry.register(FateServer.serviceSets);
-
                     });
-
-
-
                 }
-
             }
-            logger.info("load the model successfully");
+            if (logger.isDebugEnabled()) {
+                logger.debug("load the model successfully");
+            }
             return returnResult;
         } catch (Exception ex) {
             logger.error(ex.getMessage());
@@ -152,14 +151,14 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
     }
 
     @Override
-    public ReturnResult publishOnlineModel(Context context,FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
+    public ReturnResult publishOnlineModel(Context context, FederatedParty federatedParty, FederatedRoles federatedRoles, Map<String, Map<String, ModelInfo>> federatedRolesModel) {
         String role = federatedParty.getRole();
         String partyId = federatedParty.getPartyId();
         String serviceId = null;
 
-        if(context.getData(Dict.SERVICE_ID)!=null&&StringUtils.isNotEmpty(context.getData(Dict.SERVICE_ID).toString().trim())) {
-            serviceId  = context.getData(Dict.SERVICE_ID).toString();
-        }else{
+        if (context.getData(Dict.SERVICE_ID) != null && StringUtils.isNotEmpty(context.getData(Dict.SERVICE_ID).toString().trim())) {
+            serviceId = context.getData(Dict.SERVICE_ID).toString();
+        } else {
             logger.info("service id is null");
         }
         ReturnResult returnResult = new ReturnResult();
@@ -170,8 +169,8 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             return returnResult;
         }
 
-        String modelKey = ModelUtils.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
-        PipelineTask model = modelCache.get(modelKey);
+        String modelKey = ModelUtil.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
+        PipelineTask model = modelCache.get(context, modelKey);
         if (model == null) {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             returnResult.setRetmsg("Can not found model by these information.");
@@ -187,16 +186,18 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             String modelName = modelInfo.getName();
             modelNamespaceDataMapPool.put(modelNamespace, new ModelNamespaceData(modelNamespace, federatedParty, federatedRoles, modelName, model));
             appNamespaceMapPool.put(partyId, modelNamespace);
-            if(StringUtils.isNotEmpty(serviceId)){
-                logger.info("put serviceId {} input pool",serviceId);
+            if (StringUtils.isNotEmpty(serviceId)) {
+                logger.info("put serviceId {} input pool", serviceId);
                 appNamespaceMapPool.put(serviceId, modelNamespace);
             }
 
-            logger.info("Enable model {} for namespace {} success", modelName, modelNamespace);
-            logger.info("Get model namespace {} for app {}", modelNamespace, partyId);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Enable model {} for namespace {} success", modelName, modelNamespace);
+                logger.debug("Get model namespace {} for app {}", modelNamespace, partyId);
+            }
             returnResult.setRetcode(InferenceRetCode.OK);
             if (zookeeperRegistry != null) {
-                if(StringUtils.isNotEmpty(serviceId)){
+                if (StringUtils.isNotEmpty(serviceId)) {
                     zookeeperRegistry.addDynamicEnvironment(serviceId);
                 }
 
@@ -204,7 +205,6 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                 zookeeperRegistry.register(FateServer.serviceSets);
             }
 //            zookeeperRegistry.register();
-
         } catch (Exception ex) {
             returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
             returnResult.setRetmsg(ex.getMessage());
@@ -213,71 +213,53 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
     }
 
     @Override
-    public PipelineTask getModel(String name, String namespace) {
-        return modelCache.get(ModelUtils.genModelKey(name, namespace));
+    public PipelineTask getModel(Context context, String name, String namespace) {
+        return modelCache.get(context, ModelUtil.genModelKey(name, namespace));
     }
 
     @Override
-    public ModelNamespaceData getModelNamespaceData(String namespace) {
+    public ModelNamespaceData getModelNamespaceData(Context context, String namespace) {
         return modelNamespaceDataMapPool.get(namespace);
     }
 
     @Override
-    public String getModelNamespaceByPartyId(String partyId) {
+    public String getModelNamespaceByPartyId(Context context, String partyId) {
         return appNamespaceMapPool.get(partyId);
     }
 
     @Override
-    public ModelInfo getModelInfoByPartner(String partnerModelName, String partnerModelNamespace) {
-        return partnerModelData.get(ModelUtils.genModelKey(partnerModelName, partnerModelNamespace));
+    public ModelInfo getModelInfoByPartner(Context context, String partnerModelName, String partnerModelNamespace) {
+        return partnerModelData.get(ModelUtil.genModelKey(partnerModelName, partnerModelNamespace));
     }
 
-
-
-
     @Override
-    public PipelineTask pushModelIntoPool(String name, String namespace) {
-        PipelineTask model = ModelUtils.loadModel(name, namespace);
+    public PipelineTask pushModelIntoPool(Context context, String name, String namespace) {
+        PipelineTask model = modelLoader.loadModel(context, name, namespace);
         if (model == null) {
             return null;
         }
-        modelCache.put(ModelUtils.genModelKey(name, namespace), model);
+        modelCache.put(context, ModelUtil.genModelKey(name, namespace), model);
         logger.info("Load model success, name: {}, namespace: {}, model cache size is {}", name, namespace, modelCache.getSize());
         return model;
     }
 
     private FederatedRoles parseFederatedRoles(Map data) {
-
         return null;
-
     }
 
     private FederatedParty parseFederatedParty(Map data) {
-
         return null;
-
-
     }
 
     private ModelInfo parseModelInfo(Map data) {
-
         return null;
     }
 
-
-
     private ModelNamespaceData parseModelNamespaceData(Map data) {
-
-
         return null;
-
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
-        //  test();
-
-
     }
 }

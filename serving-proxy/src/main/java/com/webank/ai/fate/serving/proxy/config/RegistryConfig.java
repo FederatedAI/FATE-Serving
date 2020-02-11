@@ -37,14 +37,13 @@ public class RegistryConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(GrpcConfigration.class);
 
-
     @Value("${proxy.grpc.intra.port:8867}")
     private Integer port;
 
     @Value("${zk.url:zookeeper://localhost:2181}")
     private String zkUrl;
 
-    @Value("${useZkRouter:false}")
+    @Value("${useZkRouter:true}")
     private String useZkRouter;
 
     @Value("${acl.enable}")
@@ -58,7 +57,9 @@ public class RegistryConfig {
 
     @Bean
     public ZookeeperRegistry zookeeperRegistry(InterGrpcServer  interGrpcServer) {
-        logger.info("prepare to create zookeeper registry ,use zk {}",useZkRouter);
+        if (logger.isDebugEnabled()) {
+            logger.info("prepare to create zookeeper registry ,use zk {}", useZkRouter);
+        }
         if ("true".equals(useZkRouter) && StringUtils.isNotEmpty(zkUrl)) {
             System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
             System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));

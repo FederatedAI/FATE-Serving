@@ -27,10 +27,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
     private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static ApplicationContext applicationContext;
+    public static AtomicLong  requestInProcess= new AtomicLong(0);
     long timestamp;
     LoggerPrinter loggerPrinter;
     String actionType;
@@ -69,6 +71,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public void preProcess() {
         try {
+            requestInProcess.addAndGet(1);
             Timer timer = metricRegistry.timer(actionType + "_timer");
             Counter counter = metricRegistry.counter(actionType + "_couter");
             counter.inc();
@@ -116,6 +119,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public void postProcess(Req req, Resp resp) {
         try {
+            requestInProcess.decrementAndGet();
             if (timerContext != null) {
                 costTime = timerContext.stop() / 1000000;
             } else {
