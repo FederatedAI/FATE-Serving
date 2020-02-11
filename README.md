@@ -215,11 +215,20 @@ Please use FATE-Flow Client which in the fate-flow to operate, refer to **Online
 ``` 
   {
     "head": {
-		"serviceId": "111111111"
-	},
+      "serviceId": "111111111"
+    },
     "body": {
-    	"device_id": "aaaaa",
+      "featureData": {
+        "x0": 1.88669,
+        "x1": -1.359293,
+        "x2": 2.303601,
+        "x3": 2.00137,
+        "x4": 1.307686
+      },
+      "sendToRemoteFeatureData": {
+        "device_id": "aaaaa",
         "phone_num": "122222222"
+      }
     }
   }
 

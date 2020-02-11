@@ -88,9 +88,9 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         Map inferenceReqMap = Maps.newHashMap();
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
         inferenceReqMap.putAll(reqHeadMap);
-        inferenceReqMap.put(Dict.FEATURE_DATA, Maps.newHashMap(reqBodyMap));
-        int timeWait = timeout;
+        inferenceReqMap.putAll(reqBodyMap);
 
+        int timeWait = timeout;
 
         if (logger.isDebugEnabled()) {
             logger.debug("inference req : {}", JSON.toJSONString(inferenceReqMap));
