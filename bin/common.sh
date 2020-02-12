@@ -3,8 +3,8 @@ set -e
 getpid() {
    # pid=`ps aux | grep ${main_class} | grep -v grep | awk '{print $2}'`
 	module=$1
-	if [ -e "./${module}_pid" ]; then
-		pid=`cat ./${module}_pid`
+	if [ -e "./bin/${module}.pid" ]; then
+		pid=`cat ./bin/${module}.pid`
 	fi
 	if [[ -n ${pid} ]]; then
 		break 1
@@ -20,6 +20,7 @@ mklogsdir() {
 }
 
 start() {
+    echo "try to start ${module}"
     getpid ${module}
     if [[ $? -eq 0 ]]; then
         mklogsdir
@@ -39,7 +40,7 @@ start() {
 	sleep 5
 	id=`ps -p $!| awk '{print $1}'|sed -n '2p'`
         if [[ ${#id} -ne 0 ]]; then
-            echo $!>./${module}_pid
+            echo $!>./bin/${module}.pid
             getpid $module
             echo "service start sucessfully. pid: ${pid}"
         else
@@ -68,14 +69,20 @@ stop() {
     if [[ -n ${pid} ]]; then
         echo "killing:
         `ps -p ${pid}`"
-	echo "--------------" ${pid}
-        kill ${pid}
-        if [[ $? -eq 0 ]]; then
-	    rm -rf ./${module}_pid
-            echo "killed"
+	    echo "try to kill" ${pid}
+        pidCount=`ps -p ${pid}|grep ${pid}|wc -l`
+#        `ps -p ${pid}|grep ${pid}|wc -l`
+	    if [[ $pidCount -ne 0 ]]; then
+	        kill ${pid}
+	         if [[ $? -eq 0 ]]; then
+	            rm -rf ./bin/${module}.pid
+                echo "killed"
+            else
+                echo "kill error"
+            fi
         else
-            echo "kill error"
-        fi
+            echo "pid ${pid} is not exist"
+	    fi
     else
         echo "service not running"
     fi

@@ -20,8 +20,8 @@
         <Property name="project">fate</Property>
         <Property name="module">serving-server</Property>
     </Properties>
-    <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
+    <Appenders>c
+        <Console name="console" target="SYSTEM_OUT">
             <PatternLayout charset="UTF-8"
                            pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %c{1.}(%F:%L) - %m%n"/>
         </Console>
@@ -49,14 +49,27 @@
             <DefaultRolloverStrategy max="24"/>
         </RollingFile>
 
+
+        <RollingFile name="debug" fileName="${logdir}/${project}-${module}-debug.log" filePattern="${logdir}/${project}-${module}-debug.log.%d{yyyy-MM-dd}.log">
+            <PatternLayout charset="UTF-8" pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %c{1.}(%F:%L) - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy max="24"/>
+        </RollingFile>
+
     </Appenders>
 
     <Loggers>
         <AsyncLogger name="flow" level="info" includeLocation="true" additivity="false">
             <AppenderRef ref="flow"/>
         </AsyncLogger>
+        <AsyncLogger name="debug" level="debug" includeLocation="true" additivity="false">
+            <AppenderRef ref="debug"/>
+        </AsyncLogger>
+
         <AsyncRoot level="info" includeLocation="true">
-            <AppenderRef ref="info" level="info"/>
+            <AppenderRef ref="info"  level="info"/>
             <AppenderRef ref="error" level="error"/>
         </AsyncRoot>
     </Loggers>

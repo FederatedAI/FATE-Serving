@@ -72,9 +72,9 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-
-        logger.info("HeteroSecureBoostingTreeHost FederatedParams {}", predictParams);
-
+        if(logger.isDebugEnabled()) {
+            logger.debug("HeteroSecureBoostingTreeHost FederatedParams {}", predictParams);
+        }
         Map<String, Object> input = inputData.get(0);
 
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;

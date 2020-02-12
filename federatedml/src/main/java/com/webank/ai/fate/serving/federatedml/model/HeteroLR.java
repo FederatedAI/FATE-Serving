@@ -57,9 +57,10 @@ public abstract class HeteroLR extends BaseModel {
         int inputDataHitCount = 0;
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
-        logger.info("model weight number:{}", weightNum);
-        logger.info("input data features number:{}", inputFeaturesNum);
-
+        if(logger.isDebugEnabled()) {
+            logger.debug("model weight number:{}", weightNum);
+            logger.debug("input data features number:{}", inputFeaturesNum);
+        }
         double score = 0;
         for (String key : inputData.keySet()) {
             if (this.weight.containsKey(key)) {
@@ -68,7 +69,9 @@ public abstract class HeteroLR extends BaseModel {
                 score += w * x;
                 modelWeightHitCount += 1;
                 inputDataHitCount += 1;
-                logger.info("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
+                if(logger.isDebugEnabled()) {
+                    logger.debug("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
+                }
             }
         }
         score += this.intercept;
@@ -81,9 +84,10 @@ public abstract class HeteroLR extends BaseModel {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
-        logger.info("model weight hit rate:{}", modelWeightHitRate);
-        logger.info("input data features hit rate:{}", inputDataHitRate);
+        if(logger.isDebugEnabled()) {
+            logger.debug("model weight hit rate:{}", modelWeightHitRate);
+            logger.debug("input data features hit rate:{}", inputDataHitRate);
+        }
 
         Map<String, Double> ret = new HashMap<>(8);
         ret.put(Dict.SCORE, score);

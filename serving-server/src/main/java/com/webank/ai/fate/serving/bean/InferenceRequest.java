@@ -33,6 +33,13 @@ public class InferenceRequest implements Request {
     private String caseid;
     private String serviceId;
     private Map<String, Object> featureData;
+    private String applyId;
+    public String getApplyId() {
+        return applyId;
+    }
+    public void setApplyId(String applyId) {
+        this.applyId = applyId;
+    }
     public String getServiceId() {
         return serviceId;
     }

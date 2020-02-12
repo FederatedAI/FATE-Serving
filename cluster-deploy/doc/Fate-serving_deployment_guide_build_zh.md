@@ -169,7 +169,7 @@ git clone https://github.com/FederatedAI/FATE-Serving.git
 ------------
 **在目标服务器（192.168.0.1）app用户下执行**
 
-进入到FATE-Serving目录下的FATE-Serving/serving-server/cluster-deploy/scripts目录下，修改配置文件allinone_cluster_configurations.sh.
+进入到FATE-Serving目录下的FATE-Serving/cluster-deploy/scripts目录下，修改配置文件allinone_cluster_configurations.sh.
 
 配置文件allinone_cluster_configurations.sh说明：
 
@@ -196,15 +196,17 @@ git clone https://github.com/FederatedAI/FATE-Serving.git
 ------------
 1）打包
 按照上述配置含义修改allinone_cluster_configurations.sh文件对应的配置项后，然后在
-FATE-Serving/serving-server/cluster-deploy/scripts目录下执行部署脚本 : sh package.sh
+FATE-Serving/cluster-deploy/scripts目录下执行部署脚本 : sh package.sh
 2）启动项目
 cd /data/projects/fate-serving
 
 sh services.sh all start
 如果是两台进各自的分别执行一个
-4)查看所有状态
+
+3)查看所有状态
 sh services.sh all status
-5)关闭所有
+
+4)关闭所有
 sh services.sh all stop
 
 5.5.配置文件详解

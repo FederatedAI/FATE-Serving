@@ -117,4 +117,8 @@ public interface Context<Req, Resp> {
     public String getServiceId();
 
     public void setServiceId(String serviceId);
+
+    public String getApplyId();
+
+    public void setApplyId(String applyId);
 }

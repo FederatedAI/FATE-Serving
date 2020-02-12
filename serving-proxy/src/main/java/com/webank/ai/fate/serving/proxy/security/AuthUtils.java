@@ -46,6 +46,7 @@ public class AuthUtils implements InitializingBean{
     private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
     private static boolean ifUseAuth = false;
+    private static String applyId = "";
 
     @Autowired
     private ToStringUtils toStringUtils;
@@ -85,6 +86,7 @@ public class AuthUtils implements InitializingBean{
             }
         }
         selfPartyId = jsonObject.get("self_party_id").getAsString();
+        applyId = jsonObject.get("apply_id").getAsString();
         ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
         validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
 
@@ -136,6 +138,13 @@ public class AuthUtils implements InitializingBean{
             authBuilder.setAppKey(appKey);
             String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp, appKey);
             authBuilder.setSignature(signature);
+            authBuilder.setServiceId(packet.getAuth().getServiceId());
+            if(! ("".equals(packet.getAuth().getApplyId()))) {
+                authBuilder.setApplyId(packet.getAuth().getApplyId());
+            }
+            else{
+                authBuilder.setApplyId(applyId);
+            }
 
             packetBuilder.setAuth(authBuilder.build());
             return packetBuilder.build();
