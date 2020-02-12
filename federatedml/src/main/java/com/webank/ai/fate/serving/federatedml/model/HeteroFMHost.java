@@ -38,7 +38,7 @@ public class HeteroFMHost extends HeteroFM {
         result.put(Dict.FM_CROSS, ret.get(Dict.FM_CROSS));
 
         if(logger.isDebugEnabled()) {
-            logger.info("hetero fm host predict ends, result is {}", result);
+            logger.debug("hetero fm host predict ends, result is {}", result);
         }
 
         return result;

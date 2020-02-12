@@ -63,8 +63,8 @@ public abstract class HeteroFM extends BaseModel {
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
         if(logger.isDebugEnabled()) {
-            logger.info("model weight number:{}", weightNum);
-            logger.info("input data features number:{}", inputFeaturesNum);
+            logger.debug("model weight number:{}", weightNum);
+            logger.debug("input data features number:{}", inputFeaturesNum);
         }
 
         double score = 0;
@@ -76,7 +76,7 @@ public abstract class HeteroFM extends BaseModel {
                 modelWeightHitCount += 1;
                 inputDataHitCount += 1;
                 if(logger.isDebugEnabled()) {
-                    logger.info("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
+                    logger.debug("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
                 }
             }
         }
@@ -110,8 +110,8 @@ public abstract class HeteroFM extends BaseModel {
         }
 
         if(logger.isDebugEnabled()) {
-            logger.info("model weight hit rate:{}", modelWeightHitRate);
-            logger.info("input data features hit rate:{}", inputDataHitRate);
+            logger.debug("model weight hit rate:{}", modelWeightHitRate);
+            logger.debug("input data features hit rate:{}", inputDataHitRate);
         }
 
         Map<String, Object> ret = new HashMap<>();
