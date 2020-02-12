@@ -32,13 +32,14 @@ public class HeteroFMHost extends HeteroFM {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 
-        logger.info("hetero fm host begin to predict");
         HashMap<String, Object> result = new HashMap<>();
         Map<String, Object> ret = forward(inputData);
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
         result.put(Dict.FM_CROSS, ret.get(Dict.FM_CROSS));
 
-        logger.info("hetero fm host predict ends, result is {}", result);
+        if(logger.isDebugEnabled()) {
+            logger.info("hetero fm host predict ends, result is {}", result);
+        }
 
         return result;
     }
