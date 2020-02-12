@@ -179,6 +179,9 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             if(context.getServiceId()!=null) {
                 authBuilder.setServiceId(  context.getServiceId());
             }
+            if(context.getApplyId()!=null) {
+                authBuilder.setApplyId(  context.getApplyId());
+            }
             packetBuilder.setAuth(authBuilder.build());
 			
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();

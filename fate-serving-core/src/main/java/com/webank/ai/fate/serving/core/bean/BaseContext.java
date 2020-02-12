@@ -314,4 +314,14 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public void setServiceId(String serviceId) {
         dataMap.put(Dict.SERVICE_ID, serviceId);
     }
+
+    @Override
+    public String getApplyId() {
+        return (String) this.dataMap.getOrDefault(Dict.APPLY_ID, "");
+    }
+
+    @Override
+    public void setApplyId(String applyId) {
+        dataMap.put(Dict.APPLY_ID, applyId);
+    }
 }
