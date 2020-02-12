@@ -55,7 +55,6 @@ public class HeteroFeatureBinning extends BaseModel {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        logger.info("Start Feature Binning predict");
         HashMap<String, Object> outputData = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
@@ -86,9 +85,9 @@ public class HeteroFeatureBinning extends BaseModel {
 		        logger.error("HeteroFeatureBinning error" ,e);
             }
         }
-
-        logger.info("HeteroFeatureBinning output {}",outputData);
-
+        if(logger.isDebugEnabled()) {
+            logger.debug("HeteroFeatureBinning output {}", outputData);
+        }
         return outputData;
     }
 

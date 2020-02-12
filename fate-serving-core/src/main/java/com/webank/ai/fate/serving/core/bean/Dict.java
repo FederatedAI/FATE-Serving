@@ -146,6 +146,7 @@ public class Dict {
     public  static  final String GUEST_APP_ID = "guestAppId";
     public  static  final String HOST_APP_ID = "hostAppId";
     public  static  final String SERVICE_ID = "serviceId";
+    public  static  final String APPLY_ID = "applyId";
     public  static  final String CONFIGPATH = "configpath";
     public  static  final String ACL_ENABLE = "acl.enable";
     public  static  final String ACL_USERNAME = "acl.username";

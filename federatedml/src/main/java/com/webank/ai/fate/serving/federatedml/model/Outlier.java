@@ -34,14 +34,12 @@ public class Outlier {
     }
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
-        logger.info("start outlier transform task");
         if(inputData!=null) {
             for (String key : inputData.keySet()) {
                 if(inputData.get(key)!=null) {
                     String value = inputData.get(key).toString();
                     if (this.outlierValueSet.contains(value.toLowerCase())) {
                         try {
-                            logger.info("value:{}", value);
                             inputData.put(key, outlierReplaceValues.get(key));
                         } catch (Exception ex) {
                             ex.printStackTrace();

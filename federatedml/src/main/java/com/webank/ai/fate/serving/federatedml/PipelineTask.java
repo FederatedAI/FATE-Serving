@@ -75,8 +75,8 @@ public class PipelineTask {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.info("initModel error:{}", ex);
+           // ex.printStackTrace();
+            logger.info("PipelineTask initModel error:{}", ex);
             throw  new  RuntimeException("initModel error");
         }
         logger.info("Finish init Pipeline");
@@ -85,13 +85,15 @@ public class PipelineTask {
 
 
     public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {
-        logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
+        //logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
         List<Map<String, Object>> outputData = new ArrayList<>();
         for (int i = 0; i < this.pipeLineNode.size(); i++) {
-            if (this.pipeLineNode.get(i) != null) {
-                logger.info("component class is {}", this.pipeLineNode.get(i).getClass().getName());
-            } else {
-                logger.info("component class is {}", this.pipeLineNode.get(i));
+            if(logger.isDebugEnabled()) {
+                if (this.pipeLineNode.get(i) != null) {
+                    logger.debug("component class is {}", this.pipeLineNode.get(i).getClass().getName());
+                } else {
+                    logger.debug("component class is {}", this.pipeLineNode.get(i));
+                }
             }
             List<Map<String, Object>> inputs = new ArrayList<>();
             HashSet<Integer> upInputComponents = this.dslParser.getUpInputComponents(i);
@@ -119,8 +121,6 @@ public class PipelineTask {
         if (federatedResult != null) {
             inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
         }
-
-        logger.info("Finish Pipeline predict");
 
         if(outputData.size()>0){
             return outputData.get(outputData.size() - 1);
