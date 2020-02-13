@@ -86,7 +86,7 @@ public class AuthUtils implements InitializingBean{
             }
         }
         selfPartyId = jsonObject.get("self_party_id").getAsString();
-        applyId = jsonObject.get("apply_id").getAsString();
+        applyId = jsonObject.get("apply_id") != null ? jsonObject.get("apply_id").getAsString() : "";
         ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
         validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
 
