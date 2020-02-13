@@ -20,7 +20,7 @@
         <Property name="project">fate</Property>
         <Property name="module">serving-server</Property>
     </Properties>
-    <Appenders>c
+    <Appenders>
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout charset="UTF-8"
                            pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %c{1.}(%F:%L) - %m%n"/>
