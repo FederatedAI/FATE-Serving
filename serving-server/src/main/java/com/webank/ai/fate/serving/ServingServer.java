@@ -30,7 +30,7 @@ import com.webank.ai.fate.serving.core.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
-import com.webank.ai.fate.serving.manger.InferenceWorkerManager;
+import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
 import com.webank.ai.fate.serving.service.*;
 import com.webank.ai.fate.serving.utils.HttpClientPool;
 import io.grpc.Server;
@@ -44,7 +44,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -107,6 +106,7 @@ public class ServingServer implements InitializingBean {
                 new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
+        serverBuilder.keepAliveTime(100,TimeUnit.MILLISECONDS);
         serverBuilder.executor(executor);
         //new ServiceOverloadProtectionHandle()
         serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(InferenceService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), InferenceService.class);

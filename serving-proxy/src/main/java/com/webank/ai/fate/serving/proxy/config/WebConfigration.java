@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class WebConfigration implements WebMvcConfigurer {
 
+    int processors = Runtime.getRuntime().availableProcessors();
 
     private final Logger logger = LoggerFactory.getLogger(WebConfigration.class);
 
@@ -29,19 +30,18 @@ public class WebConfigration implements WebMvcConfigurer {
     @Value("${proxy.async.timeout:5000}")
     long  timeout;
 
-    @Value("${proxy.async.coresize:10}")
+    @Value("${proxy.async.coresize}")
     int  coreSize;
 
-    @Value("${proxy.async.maxsize:100}")
+    @Value("${proxy.async.maxsize}")
     int  maxSize;
 
     @Override
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(coreSize);
-        executor.setMaxPoolSize(maxSize);
+        executor.setCorePoolSize(coreSize>0?coreSize:processors);
+        executor.setMaxPoolSize(maxSize>0?maxSize:2*processors);
         executor.setThreadNamePrefix("ProxyAsync");
-
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.initialize();
         configurer.setTaskExecutor(executor);

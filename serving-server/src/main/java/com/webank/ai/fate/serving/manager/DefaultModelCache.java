@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.manger;
+package com.webank.ai.fate.serving.manager;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class DefaultModelCache implements ModelCache {
@@ -57,7 +56,11 @@ public class DefaultModelCache implements ModelCache {
     @Override
     public PipelineTask loadModel(Context context, String modelKey) {
         String[] modelKeyFields = ModelUtil.splitModelKey(modelKey);
-        return modelLoader.loadModel(context,modelKeyFields[0], modelKeyFields[1]);
+        PipelineTask pipelineTask = modelLoader.loadModel(context,modelKeyFields[0], modelKeyFields[1]);
+        if(pipelineTask==null){
+            logger.error("load model {} error,model loader return null",modelKey);
+        }
+        return  pipelineTask;
     }
 
     @Override
