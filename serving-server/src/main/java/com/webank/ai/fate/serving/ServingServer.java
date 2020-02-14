@@ -67,7 +67,7 @@ public class ServingServer implements InitializingBean {
         System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD, ""));
     }
 
-    //Server Start
+
     public static void main(String[] args) {
         try {
             Options options = new Options();
