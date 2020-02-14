@@ -20,20 +20,18 @@ package com.webank.ai.fate.register.loadbalance;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class DefaultLoadBalancerFactory implements LoadBalancerFactory {
+public class DefaultLoadBalanceFactory implements LoadBalancerFactory {
 
-    static ConcurrentMap<LoadBalanceModel, LoadBalancer> loaderBalancerRegister;
-
+    private static ConcurrentMap<LoadBalanceModel, LoadBalancer> loaderBalanceRegister;
 
     static {
-        loaderBalancerRegister = new ConcurrentHashMap();
-        loaderBalancerRegister.put(LoadBalanceModel.random_with_weight, new RandomLoadBalance());
-        loaderBalancerRegister.put(LoadBalanceModel.random, new RandomLoadBalance());
+        loaderBalanceRegister = new ConcurrentHashMap();
+        loaderBalanceRegister.put(LoadBalanceModel.random_with_weight, new RandomLoadBalance());
+        loaderBalanceRegister.put(LoadBalanceModel.random, new RandomLoadBalance());
     }
 
     @Override
     public LoadBalancer getLoaderBalancer(LoadBalanceModel model) {
-
-        return loaderBalancerRegister.get(model);
+        return loaderBalanceRegister.get(model);
     }
 }

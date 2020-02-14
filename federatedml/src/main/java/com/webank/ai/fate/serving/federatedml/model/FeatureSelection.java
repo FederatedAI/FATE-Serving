@@ -30,9 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-;
-
-
 public class FeatureSelection extends BaseModel {
     private static final Logger logger = LoggerFactory.getLogger(FeatureSelection.class);
     private FeatureSelectionParam featureSelectionParam;
