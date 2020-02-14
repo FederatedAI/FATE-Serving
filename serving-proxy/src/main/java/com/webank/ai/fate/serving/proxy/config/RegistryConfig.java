@@ -46,7 +46,7 @@ public class RegistryConfig {
     @Value("${useZkRouter:true}")
     private String useZkRouter;
 
-    @Value("${acl.enable}")
+    @Value("${acl.enable:false}")
     private String aclEnable;
 
     @Value("${acl.username}")

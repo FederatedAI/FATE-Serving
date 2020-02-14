@@ -1,11 +1,10 @@
-package com.webank.ai.fate.serving.manger;
+package com.webank.ai.fate.serving.manager;
 
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.ModelSerializeException;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
-import com.webank.ai.fate.serving.service.ModelService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
 
