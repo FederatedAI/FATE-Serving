@@ -55,9 +55,11 @@ public class ServingServer implements InitializingBean {
     private Server server;
     private boolean useRegister = false;
     private String confPath = "";
+
     public ServingServer() {
 
     }
+
     public ServingServer(String confPath) {
         this.confPath = new File(confPath).getAbsolutePath();
         System.setProperty(Dict.CONFIGPATH, confPath);
@@ -100,10 +102,10 @@ public class ServingServer implements InitializingBean {
 
         int processors = Runtime.getRuntime().availableProcessors();
 
-        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size",processors);
-        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size",processors * 2);
-        Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time",1000);
-        Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size",10);
+        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size", processors);
+        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size", processors * 2);
+        Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time", 1000);
+        Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size", 10);
         Executor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, aliveTime.longValue(), TimeUnit.MILLISECONDS,
                 new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
@@ -148,7 +150,7 @@ public class ServingServer implements InitializingBean {
 
         }
 
-        ModelService  modelService = applicationContext.getBean(ModelService.class);
+        ModelService modelService = applicationContext.getBean(ModelService.class);
         modelService.restore();
 
         ConsoleReporter reporter = applicationContext.getBean(ConsoleReporter.class);
@@ -180,12 +182,12 @@ public class ServingServer implements InitializingBean {
                 });
                 zookeeperRegistry.destroy();
             }
-            int retryCount=0;
+            int retryCount = 0;
             long requestInProcess = BaseContext.requestInProcess.get();
-            do{
+            do {
 
-                logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess,retryCount+1);
-                if(requestInProcess>0&&retryCount<30) {
+                logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess, retryCount + 1);
+                if (requestInProcess > 0 && retryCount < 30) {
                     try {
 
                         Thread.sleep(100);
@@ -194,11 +196,11 @@ public class ServingServer implements InitializingBean {
                     }
                     retryCount++;
                     requestInProcess = BaseContext.requestInProcess.get();
-                }else{
+                } else {
                     break;
                 }
 
-            }while(requestInProcess>0&&retryCount<3);
+            } while (requestInProcess > 0 && retryCount < 3);
             server.shutdown();
         }
     }

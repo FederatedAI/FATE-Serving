@@ -76,7 +76,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         jedisPoolConfig.setMaxIdle(Configuration.getPropertyInt("redis.maxIdle",10));
         jedisPool = new JedisPool(jedisPoolConfig,
                 Configuration.getProperty("redis.ip"),
-                Configuration.getPropertyInt("redis.port",3306),
+                Configuration.getPropertyInt("redis.port",6379),
                 Configuration.getPropertyInt("redis.timeout",2000),
                 Configuration.getProperty("redis.password",""));
 
