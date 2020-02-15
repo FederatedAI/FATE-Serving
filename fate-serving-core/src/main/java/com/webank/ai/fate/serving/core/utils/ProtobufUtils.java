@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.core.utils;
 
-import com.webank.ai.fate.core.mlmodel.buffer.DefaultEmptyFillProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,6 @@ public class ProtobufUtils {
             return messageV3;
         } catch (Exception ex1) {
             try {
-                DefaultEmptyFillProto.DefaultEmptyFillMessage defaultEmptyFillMessage = DefaultEmptyFillProto.DefaultEmptyFillMessage.parseFrom(protoString);
                 messageV3 = protoParser.parseFrom(new byte[0]);
                 if (logger.isDebugEnabled()) {
                     logger.debug("parse {} proto object with default values", messageV3.getClass().getSimpleName());
