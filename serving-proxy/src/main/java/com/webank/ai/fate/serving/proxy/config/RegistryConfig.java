@@ -40,7 +40,7 @@ public class RegistryConfig {
     @Value("${proxy.grpc.intra.port:8867}")
     private Integer port;
 
-    @Value("${zk.url:zookeeper://localhost:2181}")
+    @Value("${zk.url:}")
     private String zkUrl;
 
     @Value("${useZkRouter:true}")
@@ -49,10 +49,10 @@ public class RegistryConfig {
     @Value("${acl.enable:false}")
     private String aclEnable;
 
-    @Value("${acl.username}")
+    @Value("${acl.username:}")
     private String aclUsername;
 
-    @Value("${acl.password}")
+    @Value("${acl.password:}")
     private String aclPassword;
 
     @Bean
@@ -60,7 +60,12 @@ public class RegistryConfig {
         if (logger.isDebugEnabled()) {
             logger.info("prepare to create zookeeper registry ,use zk {}", useZkRouter);
         }
-        if ("true".equals(useZkRouter) && StringUtils.isNotEmpty(zkUrl)) {
+        if ("true".equals(useZkRouter)) {
+
+            if(StringUtils.isEmpty(zkUrl)){
+                logger.error("useZkRouter is true,but zkUrl is empty,please check zk.url in the config file");
+                throw  new   RuntimeException("wrong zk url");
+            }
             System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
             System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
             System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
