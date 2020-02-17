@@ -68,11 +68,12 @@ public class Dict {
     public static final String PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_DB_INDEX = "external.inferenceResultCacheDBIndex";
     public static final String PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_TTL = "external.inferenceResultCacheTTL";
     public static final String PROPERTY_EXTERNAL_REMOTE_MODEL_INFERENCE_RESULT_CACHE_DB_INDEX = "external.remoteModelInferenceResultCacheDBIndex";
+    public static final String PROPERTY_EXTERNAL_PROCESS_CACHE_DB_INDEX = "external.processCacheDBIndex";
     public static final String PROPERTY_EXTERNAL_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL = "external.remoteModelInferenceResultCacheTTL";
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = "remoteModelInferenceResultCacheSwitch";
     public static final String PROPERTY_CAN_CACHE_RET_CODE = "canCacheRetcode";
     public static final String PROPERTY_SERVICE_ROLE_NAME = "serviceRoleName";
-    public static final String PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE = "serving-1.0";
+    public static final String PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE = "serving";
     public static final String PROPERTY_ONLINE_DATA_ACCESS_ADAPTER = "OnlineDataAccessAdapter";
     public static final String PROPERTY_MODEL_CACHE_ACCESS_TTL = "modelCacheAccessTTL";
     public static final String PROPERTY_MODEL_CACHE_MAX_SIZE = "modelCacheMaxSize";
@@ -85,6 +86,7 @@ public class Dict {
     public static final String PROPERTY_SERVER_PORT = "port";
     public static final String PROPERTY_USER_DIR = "user.dir";
     public static final String PROPERTY_USER_HOME = "user.home";
+    public static final String PROPERTY_FILE_SEPARATOR = "file.separator";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 

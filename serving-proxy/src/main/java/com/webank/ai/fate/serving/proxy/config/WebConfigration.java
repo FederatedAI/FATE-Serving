@@ -30,10 +30,10 @@ public class WebConfigration implements WebMvcConfigurer {
     @Value("${proxy.async.timeout:5000}")
     long  timeout;
 
-    @Value("${proxy.async.coresize}")
+    @Value("${proxy.async.coresize:0}")
     int  coreSize;
 
-    @Value("${proxy.async.maxsize}")
+    @Value("${proxy.async.maxsize:0}")
     int  maxSize;
 
     @Override

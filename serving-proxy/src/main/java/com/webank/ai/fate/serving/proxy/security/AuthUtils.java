@@ -52,18 +52,18 @@ public class AuthUtils implements InitializingBean{
 
     private final String  userDir =  System.getProperty(Dict.PROPERTY_USER_DIR);
 
-    private final String DEFAULT_AUTH_FILE="conf/auth_config.json";
+    private final String DEFAULT_AUTH_FILE="conf"+System.getProperty(Dict.PROPERTY_FILE_SEPARATOR)+"auth_config.json";
 
 
     @Autowired
     private ToStringUtils toStringUtils;
 
-    @Value("${auth.file}")
+    @Value("${auth.file:}")
     private String confFilePath;
     @Value("${auth.open:false}")
     private String openAuth;
 
-    private final String  fileSeparator = System.getProperty("file.separator");
+    private final String  fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
 
 
     @Value("${coordinator}")
@@ -74,14 +74,14 @@ public class AuthUtils implements InitializingBean{
     @Scheduled(fixedRate = 10000)
     public void loadConfig(){
         if(Boolean.valueOf(openAuth)) {
-            logger.debug("start refreshed auth config...");
+
             String filePath = "";
             if (StringUtils.isNotEmpty(confFilePath)) {
                 filePath = confFilePath;
             } else {
                 filePath = userDir + this.fileSeparator + DEFAULT_AUTH_FILE;
             }
-
+            logger.info("start refreshed auth config ,file path is {}",filePath);
             String fileMd5 = FileUtils.fileMd5(filePath);
             if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
                 return;
@@ -99,7 +99,7 @@ public class AuthUtils implements InitializingBean{
                 jsonReader = new JsonReader(new FileReader(filePath));
                 jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
             } catch (FileNotFoundException e) {
-                logger.error("File not found: {}", filePath);
+                logger.error("auth file not found: {}", filePath);
                 throw new RuntimeException(e);
             } finally {
                 if (jsonReader != null) {

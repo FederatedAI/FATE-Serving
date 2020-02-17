@@ -38,7 +38,7 @@ public class SpringConfig {
     @Bean
     ZookeeperRegistry getServiceRegistry() {
         String useRegisterString = com.webank.ai.fate.serving
-                .core.bean.Configuration.getProperty("useRegister");
+                .core.bean.Configuration.getProperty(Dict.USE_REGISTER,"true");
         if (Boolean.valueOf(useRegisterString)) {
             return ZookeeperRegistry.getRegistery(com.webank.ai.fate.serving.core.bean.Configuration.getProperty("zk.url"), "serving",
                     "online", com.webank.ai.fate.serving.core.bean.Configuration.getPropertyInt(Dict.PORT));

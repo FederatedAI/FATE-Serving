@@ -55,8 +55,8 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     DefaultCacheManager() {
         remoteModelInferenceResultCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(Configuration.getPropertyInt("remoteModelInferenceResultCacheTTL",30), TimeUnit.SECONDS)
-                .maximumSize(Configuration.getPropertyInt("remoteModelInferenceResultCacheMaxSize",1000))
+                .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL,30), TimeUnit.SECONDS)
+                .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_MAX_SIZE,1000))
                 .build();
 
 
@@ -67,25 +67,32 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
 
         inferenceResultCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(Configuration.getPropertyInt("inferenceResultCacheTTL",30), TimeUnit.SECONDS)
-                .maximumSize(Configuration.getPropertyInt("inferenceResultCacheCacheMaxSize",1000))
+                .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_RESULT_CACHE_TTL,30), TimeUnit.SECONDS)
+                .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_RESULT_CACHE_CACHE_MAX_SIZE,1000))
                 .build();
 
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(Configuration.getPropertyInt("redis.maxTotal",10));
         jedisPoolConfig.setMaxIdle(Configuration.getPropertyInt("redis.maxIdle",10));
+
+        String password = null;
+
+        String passowrdString = Configuration.getProperty("redis.password","");
+        if(StringUtils.isNotEmpty(passowrdString)){
+            password = passowrdString;
+        }
         jedisPool = new JedisPool(jedisPoolConfig,
                 Configuration.getProperty("redis.ip"),
                 Configuration.getPropertyInt("redis.port",6379),
                 Configuration.getPropertyInt("redis.timeout",2000),
-                Configuration.getProperty("redis.password",""));
+                password
+                );
 
-
-        inferenceResultCacheDBIndex = Configuration.getPropertyInt("external.inferenceResultCacheDBIndex",0);
-        externalInferenceResultCacheTTL = Configuration.getPropertyInt("external.inferenceResultCacheTTL");
-        remoteModelInferenceResultCacheDBIndex = Configuration.getPropertyInt("external.remoteModelInferenceResultCacheDBIndex",0);
-        processCacheDBIndex = Configuration.getPropertyInt("external.processCacheDBIndex",0);
-        externalRemoteModelInferenceResultCacheTTL = Configuration.getPropertyInt("external.remoteModelInferenceResultCacheTTL");
+        inferenceResultCacheDBIndex = Configuration.getPropertyInt(Dict.PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_DB_INDEX,0);
+        externalInferenceResultCacheTTL = Configuration.getPropertyInt(Dict.PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_TTL,300);
+        remoteModelInferenceResultCacheDBIndex = Configuration.getPropertyInt(Dict.PROPERTY_EXTERNAL_REMOTE_MODEL_INFERENCE_RESULT_CACHE_DB_INDEX,0);
+        processCacheDBIndex = Configuration.getPropertyInt(Dict.PROPERTY_EXTERNAL_PROCESS_CACHE_DB_INDEX,0);
+        externalRemoteModelInferenceResultCacheTTL = Configuration.getPropertyInt(Dict.PROPERTY_EXTERNAL_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL,86400);
         canCacheRetcode = initializeCanCacheRetcode();
     }
 
@@ -153,7 +160,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     @Override
     public void putRemoteModelInferenceResult(FederatedParams guestFederatedParams, ReturnResult returnResult) {
-        if (!Boolean.parseBoolean(Configuration.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH))) {
+        if (!Boolean.parseBoolean(Configuration.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH,"true"))) {
             return;
         }
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
@@ -168,7 +175,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     @Override
     public ReturnResult getRemoteModelInferenceResult(FederatedParams guestFederatedParams) {
-        if (!Boolean.parseBoolean(Configuration.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH))) {
+        if (!Boolean.parseBoolean(Configuration.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH,"true"))) {
             return null;
         }
         String remoteModelInferenceResultCacheKey = generateRemoteModelInferenceResultCacheKey(guestFederatedParams);
@@ -246,7 +253,7 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
 
     private Set<Integer> initializeCanCacheRetcode() {
         Set<Integer> retcodes = new HashSet<>();
-        String[] retcodeString = Configuration.getProperty("canCacheRetcode").split(",");
+        String[] retcodeString = Configuration.getProperty(Dict.PROPERTY_CAN_CACHE_RET_CODE,"0,102").split(",");
         for (int i = 0; i < retcodeString.length; i++) {
             retcodes.add(Integer.parseInt(retcodeString[i]));
         }
@@ -334,6 +341,27 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
         PROCESS_DATA
 
     }
+
+
+    public   static  void  main(String[] args){
+
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        System.err.println("oooooooooooo");
+        jedisPoolConfig.setMaxTotal(10);
+        jedisPoolConfig.setMaxIdle(10);
+        System.err.println("11111111");
+        JedisPool jedisPool = new JedisPool(jedisPoolConfig,
+                "localhost",
+          6379,
+        2000,
+                null
+        );
+
+        jedisPool.getResource();
+
+    }
+
+
 
 
 }

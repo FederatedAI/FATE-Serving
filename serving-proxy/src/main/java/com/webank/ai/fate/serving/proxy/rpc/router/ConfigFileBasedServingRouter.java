@@ -40,14 +40,14 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
 
     private String userDir=System.getProperty(Dict.PROPERTY_USER_DIR);
 
-    @Value("${route.table}")
+    @Value("${route.table:}")
     private String routeTableFile;
 
-    private final String DEFAULT_ROUTER_FILE = "conf/route_table.json";
+    private final String DEFAULT_ROUTER_FILE = "conf"+System.getProperty(Dict.PROPERTY_FILE_SEPARATOR)+"route_table.json";
 
-    private final String  fileSeparator = System.getProperty("file.separator");
+    private final String  fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
 
-    @Value("${coordinator:9999}")
+    @Value("${coordinator}")
     private String selfCoordinator;
 
     @Value("${inference.service.name:serving}")
@@ -242,7 +242,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
             logger.error("router table {} is not exist",filePath);
             return;
         }
-        String fileMd5 = FileUtils.fileMd5(routeTableFile);
+        String fileMd5 = FileUtils.fileMd5(filePath);
         if(null != fileMd5 && fileMd5.equals(lastFileMd5)){
             return;
         }
@@ -250,10 +250,12 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         JsonReader jsonReader = null;
         JsonObject confJson = null;
         try {
-            jsonReader = new JsonReader(new FileReader(routeTableFile));
+            jsonReader = new JsonReader(new FileReader(filePath));
             confJson = jsonParser.parse(jsonReader).getAsJsonObject();
+            logger.info("load router table {}",confJson);
+
         } catch (Exception e) {
-            logger.error("parse router table error: {}", routeTableFile);
+            logger.error("parse router table error: {}", filePath);
             throw new RuntimeException(e);
         } finally {
             if (jsonReader != null) {
@@ -266,7 +268,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         }
         initRouteTable(confJson.getAsJsonObject("route_table"));
         initPermission(confJson.getAsJsonObject("permission"));
-        logger.info("refreshed route table at: {}", routeTableFile);
+        logger.info("refreshed route table at: {}", filePath);
         lastFileMd5 = fileMd5;
     }
 

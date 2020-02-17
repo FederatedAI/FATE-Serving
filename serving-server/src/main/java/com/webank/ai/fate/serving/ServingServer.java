@@ -52,7 +52,7 @@ public class ServingServer implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(ServingServer.class);
     static ApplicationContext applicationContext;
     private Server server;
-    private boolean useRegister = false;
+    private boolean useRegister = true;
     private String confPath = "";
 
     public ServingServer() {
@@ -118,11 +118,14 @@ public class ServingServer implements InitializingBean {
         server = serverBuilder.build();
         logger.info("server started listening on port: {}, use configuration: {}", port, this.confPath);
         server.start();
-
-        String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER);
+        String userRegisterString = Configuration.getProperty(Dict.USE_REGISTER,"true");
         useRegister = Boolean.valueOf(userRegisterString);
-        logger.info("serving useRegister {}", useRegister);
-
+        if(useRegister) {
+            logger.info("serving-server is using register center");
+        }
+        else{
+            logger.warn("serving-server not use register center");
+        }
         if (useRegister) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
