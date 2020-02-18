@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.federatedml;
 
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
@@ -86,8 +87,11 @@ public class PipelineTask {
 
     public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {
         //logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
-        List<Map<String, Object>> outputData = new ArrayList<>();
-        for (int i = 0; i < this.pipeLineNode.size(); i++) {
+        List<Map<String, Object>> outputData = Lists.newArrayList();
+
+        List<Map<String,Object>>  result = Lists.newArrayList();
+        int pipelineSize = this.pipeLineNode.size();
+        for (int i = 0; i < pipelineSize; i++) {
             if(logger.isDebugEnabled()) {
                 if (this.pipeLineNode.get(i) != null) {
                     logger.debug("component class is {}", this.pipeLineNode.get(i).getClass().getName());
@@ -111,9 +115,13 @@ public class PipelineTask {
                 inputs.add(inputData);
             }
             if (this.pipeLineNode.get(i) != null) {
-                outputData.add(this.pipeLineNode.get(i).handlePredict(context, inputs, predictParams));
+                Map<String, Object>  modelResult = this.pipeLineNode.get(i).handlePredict(context, inputs, predictParams);
+                outputData.add(modelResult);
+                result.add(modelResult);
+
             } else {
                 outputData.add(inputs.get(0));
+
             }
 
         }
@@ -122,8 +130,8 @@ public class PipelineTask {
             inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
         }
 
-        if(outputData.size()>0){
-            return outputData.get(outputData.size() - 1);
+        if(result.size()>0){
+            return result.get(result.size() - 1);
         }else{
             return Maps.newHashMap();
         }
