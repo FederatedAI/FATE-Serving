@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.manger;
+package com.webank.ai.fate.serving.manager;
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.interfaces.Cache;
