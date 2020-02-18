@@ -129,7 +129,6 @@ public class PipelineTask {
         if (federatedResult != null) {
             inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
         }
-
         if(result.size()>0){
             return result.get(result.size() - 1);
         }else{
