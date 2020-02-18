@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.manger;
+package com.webank.ai.fate.serving.manager;
 
 
 import com.webank.ai.fate.serving.core.bean.Configuration;
@@ -29,11 +29,14 @@ public class InferenceWorkerManager {
     private static final Logger logger = LoggerFactory.getLogger(InferenceWorkerManager.class);
     private static ThreadPoolExecutor threadPoolExecutor;
 
+
     static {
+
+        int coreNum = Runtime.getRuntime().availableProcessors();
         LinkedBlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>(10);
         threadPoolExecutor = new ThreadPoolExecutor(
-                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM),
-                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM),
+                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM,coreNum),
+                Configuration.getPropertyInt(Dict.PROPERTY_INFERENCE_WORKER_THREAD_NUM,2*coreNum),
                 60,
                 TimeUnit.SECONDS,
                 taskQueue,

@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import com.webank.ai.fate.serving.proxy.utils.ToStringUtils;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -48,59 +50,83 @@ public class AuthUtils implements InitializingBean{
     private static boolean ifUseAuth = false;
     private static String applyId = "";
 
+    private final String  userDir =  System.getProperty(Dict.PROPERTY_USER_DIR);
+
+    private final String DEFAULT_AUTH_FILE="conf"+System.getProperty(Dict.PROPERTY_FILE_SEPARATOR)+"auth_config.json";
+
+
     @Autowired
     private ToStringUtils toStringUtils;
 
-    @Value("${auth.file:conf/auth_config.json}")
+    @Value("${auth.file:}")
     private String confFilePath;
+    @Value("${auth.open:false}")
+    private String openAuth;
 
-    @Value("${coordinator:9999}")
+    private final String  fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
+
+
+    @Value("${coordinator}")
     private String selfPartyId;
 
-    private String lastFileMd5;
+    private String lastFileMd5="";
 
     @Scheduled(fixedRate = 10000)
     public void loadConfig(){
-        logger.debug("start refreshed auth config...");
-        String fileMd5 = FileUtils.fileMd5(confFilePath);
-        if(null != fileMd5 && fileMd5.equals(lastFileMd5)){
-            return;
-        }
-        lastFileMd5 = fileMd5;
+        if(Boolean.valueOf(openAuth)) {
 
-        JsonParser jsonParser = new JsonParser();
-        JsonReader jsonReader = null;
-        JsonObject jsonObject = null;
-        try {
-            jsonReader = new JsonReader(new FileReader(confFilePath));
-            jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
-        } catch (FileNotFoundException e) {
-            logger.error("File not found: {}", confFilePath);
-            throw new RuntimeException(e);
-        } finally {
-            if (jsonReader != null) {
-                try {
-                    jsonReader.close();
-                } catch (IOException ignore) {
+            String filePath = "";
+            if (StringUtils.isNotEmpty(confFilePath)) {
+                filePath = confFilePath;
+            } else {
+                filePath = userDir + this.fileSeparator + DEFAULT_AUTH_FILE;
+            }
+            logger.info("start refreshed auth config ,file path is {}",filePath);
+            String fileMd5 = FileUtils.fileMd5(filePath);
+            if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
+                return;
+            }
+            File file = new File(filePath);
+            if (!file.exists()) {
+                logger.error("auth table {} is not exist", filePath);
+                return;
+            }
+
+            JsonParser jsonParser = new JsonParser();
+            JsonReader jsonReader = null;
+            JsonObject jsonObject = null;
+            try {
+                jsonReader = new JsonReader(new FileReader(filePath));
+                jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
+            } catch (FileNotFoundException e) {
+                logger.error("auth file not found: {}", filePath);
+                throw new RuntimeException(e);
+            } finally {
+                if (jsonReader != null) {
+                    try {
+                        jsonReader.close();
+                    } catch (IOException ignore) {
+                    }
                 }
             }
-        }
-        selfPartyId = jsonObject.get("self_party_id").getAsString();
-        applyId = jsonObject.get("apply_id").getAsString();
-        ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
-        validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
+            selfPartyId = jsonObject.get("self_party_id").getAsString();
+            applyId = jsonObject.get("apply_id") != null ? jsonObject.get("apply_id").getAsString() : "";
+            ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
+            validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
 
-        JsonArray jsonArray = jsonObject.getAsJsonArray("access_keys");
-        Gson gson = new Gson();
-        List<Map> allowKeys = gson.fromJson(jsonArray, ArrayList.class);
-        KEY_SECRET_MAP.clear();
-        for (Map allowKey : allowKeys) {
-            KEY_SECRET_MAP.put(allowKey.get("app_key").toString(), allowKey.get("app_secret").toString());
-            PARTYID_KEY_MAP.put(allowKey.get("party_id").toString(), allowKey.get("app_key").toString());
-        }
+            JsonArray jsonArray = jsonObject.getAsJsonArray("access_keys");
+            Gson gson = new Gson();
+            List<Map> allowKeys = gson.fromJson(jsonArray, ArrayList.class);
+            KEY_SECRET_MAP.clear();
+            for (Map allowKey : allowKeys) {
+                KEY_SECRET_MAP.put(allowKey.get("app_key").toString(), allowKey.get("app_secret").toString());
+                PARTYID_KEY_MAP.put(allowKey.get("party_id").toString(), allowKey.get("app_key").toString());
+            }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("refreshed auth cfg using file {}.", confFilePath);
+            if (logger.isDebugEnabled()) {
+                logger.debug("refreshed auth cfg using file {}.", filePath);
+            }
+            lastFileMd5 = fileMd5;
         }
     }
 
@@ -128,7 +154,7 @@ public class AuthUtils implements InitializingBean{
     }
 
     public Proxy.Packet addAuthInfo(Proxy.Packet packet) throws Exception {
-        if(ifUseAuth && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
+        if(Boolean.valueOf(openAuth) && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
             Proxy.Packet.Builder packetBuilder = packet.toBuilder();
 
             Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
@@ -153,7 +179,7 @@ public class AuthUtils implements InitializingBean{
     }
 
     public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
-        if(ifUseAuth) {
+        if(Boolean.valueOf(openAuth)) {
             // check timestamp
             long currentTimeMillis = System.currentTimeMillis();
             long requestTimeMillis = packet.getAuth().getTimestamp();
@@ -174,7 +200,6 @@ public class AuthUtils implements InitializingBean{
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        lastFileMd5 = "";
         try {
             loadConfig();
         } catch (Throwable e) {
