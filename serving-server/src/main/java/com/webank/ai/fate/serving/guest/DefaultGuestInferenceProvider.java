@@ -29,7 +29,7 @@ import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
-import com.webank.ai.fate.serving.manger.InferenceWorkerManager;
+import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

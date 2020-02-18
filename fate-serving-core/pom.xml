@@ -26,66 +26,21 @@
 
     <artifactId>fate-serving-core</artifactId>
 
-    <properties>
-        <jackson.version>2.10.0</jackson.version>
-        <jedis.version>2.9.0</jedis.version>
-    </properties>
     <dependencies>
-        <!--<dependency>
-            <groupId>eggroll-core</groupId>
-            <artifactId>eggroll-core</artifactId>
-            <version>${fate.core.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/eggroll-core-1.1.jar</systemPath>
-        </dependency>-->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.25</version>
-
-        </dependency>
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20151123</version>
-            <scope>compile</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>${jedis.version}</version>
         </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.12</version>
-        </dependency>
+
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>4.1.0-rc2</version>
         </dependency>
+
         <dependency>
             <groupId>com.alibaba.csp</groupId>
             <artifactId>sentinel-core</artifactId>
-            <version>1.6.3</version>
         </dependency>
     </dependencies>
-
 
 </project>

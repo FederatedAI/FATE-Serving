@@ -27,6 +27,7 @@ module_version=1.2.0
 
 case "$1" in
     start)
+        stop $module
         start  $module 
         status $module
         ;;
