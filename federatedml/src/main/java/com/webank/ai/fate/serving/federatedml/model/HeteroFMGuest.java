@@ -45,12 +45,16 @@ public class HeteroFMGuest extends HeteroFM {
         Map<String, Object> forwardRet = forward(inputData);
         double score = new Double(forwardRet.get(Dict.SCORE).toString());
         double[] guestCrosses = (double[]) forwardRet.get(Dict.FM_CROSS);
-        logger.info("caseid {} guest score:{}, cross data:{}", context.getCaseId(), score, guestCrosses);
+        if(logger.isDebugEnabled()) {
+            logger.debug("caseid {} guest score:{}, cross data:{}", context.getCaseId(), score, guestCrosses);
+        }
         try {
             ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
             if(hostPredictResponse !=null) {
                 result.put(Dict.RET_CODE,hostPredictResponse.getRetcode());
-                logger.info("caseid {} host response is {}",context.getCaseId(),hostPredictResponse.getData());
+                if(logger.isDebugEnabled()) {
+                    logger.debug("caseid {} host response is {}",context.getCaseId(),hostPredictResponse.getData());
+                }
                 if (hostPredictResponse.getData() != null && hostPredictResponse.getData().get(Dict.SCORE) != null) {
                     double hostScore = ((Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
                     List<Double> hostCrosses = JSON.parseArray(hostPredictResponse.getData().get(Dict.FM_CROSS).toString(),double.class);

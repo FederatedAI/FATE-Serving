@@ -131,7 +131,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             logger.debug("environments {}", environments);
         }
         if (environments == null) {
-            logger.info("environment is null,maybe zk is not started");
+            logger.info("path {} is not exist in zk", path);
             throw new RuntimeException("environment is null");
         }
 

@@ -149,6 +149,7 @@ public class GrpcConnectionPool {
                                             fireChannelError(k,state);
                                         }
                                     } catch (Exception ex) {
+                                        ex.printStackTrace();
                                         logger.error("channel {} check status error", k);
                                     }
 

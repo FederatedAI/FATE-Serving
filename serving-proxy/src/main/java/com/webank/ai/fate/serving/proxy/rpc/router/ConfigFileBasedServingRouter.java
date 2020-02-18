@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -37,10 +38,16 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
 
     private RouteType routeType;
 
-    @Value("${route.table:conf/route_table.json}")
+    private String userDir=System.getProperty(Dict.PROPERTY_USER_DIR);
+
+    @Value("${route.table:}")
     private String routeTableFile;
 
-    @Value("${coordinator:9999}")
+    private final String DEFAULT_ROUTER_FILE = "conf"+System.getProperty(Dict.PROPERTY_FILE_SEPARATOR)+"route_table.json";
+
+    private final String  fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
+
+    @Value("${coordinator}")
     private String selfCoordinator;
 
     @Value("${inference.service.name:serving}")
@@ -220,21 +227,35 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
 
     @Scheduled(fixedRate = 10000)
     public void loadRouteTable() {
-        logger.debug("start refreshed route table...");
-        String fileMd5 = FileUtils.fileMd5(routeTableFile);
+
+
+        String filePath = "";
+        if(StringUtils.isNotEmpty(routeTableFile)) {
+            filePath =  routeTableFile;
+        }else{
+            filePath = userDir+this.fileSeparator+DEFAULT_ROUTER_FILE;
+        }
+        logger.info("start refreshed route table...,try to load {}",filePath);
+
+        File  file = new File(filePath);
+        if(!file.exists()){
+            logger.error("router table {} is not exist",filePath);
+            return;
+        }
+        String fileMd5 = FileUtils.fileMd5(filePath);
         if(null != fileMd5 && fileMd5.equals(lastFileMd5)){
             return;
         }
-        lastFileMd5 = fileMd5;
-
         JsonParser jsonParser = new JsonParser();
         JsonReader jsonReader = null;
         JsonObject confJson = null;
         try {
-            jsonReader = new JsonReader(new FileReader(routeTableFile));
+            jsonReader = new JsonReader(new FileReader(filePath));
             confJson = jsonParser.parse(jsonReader).getAsJsonObject();
-        } catch (FileNotFoundException e) {
-            logger.error("File not found: {}", routeTableFile);
+            logger.info("load router table {}",confJson);
+
+        } catch (Exception e) {
+            logger.error("parse router table error: {}", filePath);
             throw new RuntimeException(e);
         } finally {
             if (jsonReader != null) {
@@ -247,10 +268,8 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         }
         initRouteTable(confJson.getAsJsonObject("route_table"));
         initPermission(confJson.getAsJsonObject("permission"));
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("refreshed route table at: {}", routeTableFile);
-        }
+        logger.info("refreshed route table at: {}", filePath);
+        lastFileMd5 = fileMd5;
     }
 
 
@@ -384,5 +403,14 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         }
 
         return topicBuilder.build();
+    }
+
+
+    public  static  void main(String[] args){
+
+        System.err.println(System.getProperty("java.class.path"));
+        System.err.println(System.getenv());
+        System.err.println(System.getProperty("user.dir"));
+        System.err.println(System.getProperty("file.separator"));
     }
 }

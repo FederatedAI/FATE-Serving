@@ -29,7 +29,7 @@ import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
-import com.webank.ai.fate.serving.manger.ModelUtil;
+import com.webank.ai.fate.serving.manager.ModelUtil;
 
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.codec.digest.Md5Crypt;
@@ -406,6 +406,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     public void afterPropertiesSet() throws Exception {
        // restore();
     }
+
+
 
 
 }
