@@ -123,7 +123,6 @@ public class Dict {
     public static final String INFERENCE = "inference";
     public static final String INFERENCE_REQUEST = "inferenceRequest";
     public static final String INFERENCE_RESULT = "inferenceResult";
-    public static final String FM_CROSS = "fm_cross";
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_TYPE_JSON_UTF8 = "application/json;charset=UTF-8";
