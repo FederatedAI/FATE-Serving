@@ -185,10 +185,10 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             String modelNamespace = modelInfo.getNamespace();
             String modelName = modelInfo.getName();
             modelNamespaceDataMapPool.put(modelNamespace, new ModelNamespaceData(modelNamespace, federatedParty, federatedRoles, modelName, model));
-            appNamespaceMapPool.put(partyId, modelNamespace);
+            //appNamespaceMapPool.put(partyId, modelNamespace);
             if (StringUtils.isNotEmpty(serviceId)) {
                 logger.info("put serviceId {} input pool", serviceId);
-                appNamespaceMapPool.put(serviceId, modelNamespace);
+                appNamespaceMapPool.put(serviceId, modelNamespace+":"+modelName);
             }
 
             if (logger.isDebugEnabled()) {
@@ -200,7 +200,6 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                 if (StringUtils.isNotEmpty(serviceId)) {
                     zookeeperRegistry.addDynamicEnvironment(serviceId);
                 }
-
                 zookeeperRegistry.addDynamicEnvironment(partyId);
                 zookeeperRegistry.register(FateServer.serviceSets);
             }
@@ -235,11 +234,10 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
     @Override
     public PipelineTask pushModelIntoPool(Context context, String name, String namespace) {
         PipelineTask model = modelLoader.loadModel(context, name, namespace);
-        if (model == null) {
-            return null;
+        if (model != null) {
+            modelCache.put(context, ModelUtil.genModelKey(name, namespace), model);
+            logger.info("load model success, name: {}, namespace: {}, model cache size is {}", name, namespace, modelCache.getSize());
         }
-        modelCache.put(context, ModelUtil.genModelKey(name, namespace), model);
-        logger.info("Load model success, name: {}, namespace: {}, model cache size is {}", name, namespace, modelCache.getSize());
         return model;
     }
 

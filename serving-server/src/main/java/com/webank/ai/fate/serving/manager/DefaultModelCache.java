@@ -22,6 +22,7 @@ import com.google.common.cache.LoadingCache;
 import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.exceptions.LoadModelException;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelCache;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ public class DefaultModelCache implements ModelCache {
         PipelineTask pipelineTask = modelLoader.loadModel(context,modelKeyFields[0], modelKeyFields[1]);
         if(pipelineTask==null){
             logger.error("load model {} error,model loader return null",modelKey);
+            throw  new LoadModelException();
         }
         return  pipelineTask;
     }
