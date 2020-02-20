@@ -4,6 +4,13 @@ getpid() {
   if [ -e "./bin/${module}.pid" ]; then
     pid=$(cat ./bin/${module}.pid)
   fi
+  if [[ -n ${pid} ]]; then
+    count=$(ps -ef | grep $pid | grep -v "grep" | wc -l)
+    if [[ ${count} -eq 0 ]]; then
+      rm ./bin/${module}.pid
+      unset pid
+    fi
+  fi
 }
 
 mklogsdir() {
@@ -15,8 +22,7 @@ mklogsdir() {
 start() {
   echo "try to start ${module}"
   getpid
-    count=`ps -ef | grep $pid | grep -v "grep" | wc -l`
-    if [[ ! (($count == '1')) ]]; then
+  if [[ ! -n ${pid} ]]; then
     mklogsdir
     if [[ ! -e "fate-${module}.jar" ]]; then
       ln -s fate-${module}-${module_version}.jar fate-${module}.jar
@@ -46,10 +52,10 @@ status() {
   getpid
   if [[ -n ${pid} ]]; then
     echo "status: $(ps -f -p ${pid})"
-    exit 1
+    exit 0
   else
     echo "service not running"
-    exit 0
+    exit 1
   fi
 }
 
@@ -57,20 +63,11 @@ stop() {
   getpid
   if [[ -n ${pid} ]]; then
     echo "killing: $(ps -p ${pid})"
-    echo "try to kill" ${pid}
-    pidCount=$(ps -p ${pid} | grep ${pid} | wc -l)
-    #        `ps -p ${pid}|grep ${pid}|wc -l`
-    if [[ $pidCount -ne 0 ]]; then
-      kill ${pid}
-      if [[ $? -eq 0 ]]; then
-          pid=0
-        rm -rf ./bin/${module}.pid
-        echo "killed"
-      else
-        echo "kill error"
-      fi
+    kill ${pid}
+    if [[ $? -eq 0 ]]; then
+      echo "killed"
     else
-      echo "pid ${pid} is not exist"
+      echo "kill error"
     fi
   else
     echo "service not running"
