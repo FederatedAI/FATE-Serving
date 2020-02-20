@@ -15,7 +15,8 @@ mklogsdir() {
 start() {
   echo "try to start ${module}"
   getpid
-  if [[ ! -n ${pid} ]]; then
+    count=`ps -ef | grep $pid | grep -v "grep" | wc -l`
+    if [[ ! (($count == '1')) ]]; then
     mklogsdir
     if [[ ! -e "fate-${module}.jar" ]]; then
       ln -s fate-${module}-${module_version}.jar fate-${module}.jar
@@ -62,6 +63,7 @@ stop() {
     if [[ $pidCount -ne 0 ]]; then
       kill ${pid}
       if [[ $? -eq 0 ]]; then
+          pid=0
         rm -rf ./bin/${module}.pid
         echo "killed"
       else
