@@ -15,7 +15,7 @@ public class CommonPreProcessing implements PreProcessing {
         PreProcessingResult preProcessingResult = new PreProcessingResult();
         preProcessingResult.setProcessingResult(preProcessing(paras));
         Map<String, Object> featureIds = new HashMap<>();
-        JSONObject para_obj = new JSONObject(paras);
+        JSONObject paraObj = new JSONObject(paras);
         preProcessingResult.setFeatureIds(featureIds);
         return preProcessingResult;
     }

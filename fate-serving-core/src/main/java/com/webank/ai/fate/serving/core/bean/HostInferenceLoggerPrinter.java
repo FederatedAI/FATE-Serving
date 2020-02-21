@@ -17,9 +17,8 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
-import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.webank.ai.fate.serving.core.utils.GetSystemInfo;import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -27,13 +26,13 @@ public class HostInferenceLoggerPrinter implements LoggerPrinter<HostFederatedPa
 
     static final String LOGGER_NAME = "flow";
 
-    private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
 
     @Override
     public void printLog(Context context, HostFederatedParams req, ReturnResult resp) {
 
 
-        LOGGER.info("{}|{}|{}|{}|{}|{}|{}|{}",
+     logger.info("{}|{}|{}|{}|{}|{}|{}|{}",
                 GetSystemInfo.getLocalIp(), context.getSeqNo(), req != null ? req.getCaseId() : Dict.NONE, context.getActionType(), context.getCostTime(),
                 resp != null ? resp.getRetcode() : Dict.NONE, req.getFeatureIdMap(), resp
         );

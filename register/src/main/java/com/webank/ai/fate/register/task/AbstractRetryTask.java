@@ -24,15 +24,15 @@ import com.webank.ai.fate.register.interfaces.Timeout;
 import com.webank.ai.fate.register.interfaces.Timer;
 import com.webank.ai.fate.register.url.URL;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
 
 public abstract class AbstractRetryTask implements TimerTask {
 
-    public static final Logger logger = LogManager.getLogger();
+    public static final Logger logger = LoggerFactory.getLogger(AbstractRetryTask.class);
     /**
      * url for retry task
      */
@@ -53,8 +53,8 @@ public abstract class AbstractRetryTask implements TimerTask {
      * task name for this task
      */
     private final String taskName;
-    int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
-    String REGISTRY_RETRY_TIMES_KEY = "retry.times";
+    private static int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
+    private static String REGISTRY_RETRY_TIMES_KEY = "retry.times";
     /**
      * times of retry.
      * retry task is execute in single thread so that the times is not need volatile.
@@ -98,8 +98,9 @@ public abstract class AbstractRetryTask implements TimerTask {
 
     @Override
     public void run(Timeout timeout) throws Exception {
-
-        logger.info("retry task begin");
+        if (logger.isDebugEnabled()) {
+            logger.debug("retry task begin");
+        }
         long begin = System.currentTimeMillis();
         if (timeout.isCancelled() || timeout.timer().isStop() || isCancel()) {
             // other thread cancel this timeout or stop the timer.
@@ -127,5 +128,11 @@ public abstract class AbstractRetryTask implements TimerTask {
 
     }
 
+    /**
+     * doRetry
+     * @param url
+     * @param registry
+     * @param timeout
+     */
     protected abstract void doRetry(URL url, FailbackRegistry registry, Timeout timeout);
 }

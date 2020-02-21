@@ -18,19 +18,20 @@ package com.webank.ai.fate.serving.federatedml;
 
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 
 public class PipelineTask {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(PipelineTask.class);
     private List<BaseModel> pipeLineNode = new ArrayList<>();
     private Map<String, BaseModel> modelMap = new HashMap<String, BaseModel>();
     private DSLParser dslParser = new DSLParser();
@@ -39,54 +40,69 @@ public class PipelineTask {
         return this.modelMap.get(name);
     }
     public int initModel(Map<String, byte[]> modelProtoMap) {
-        LOGGER.info("start init pipeline,model components {}",modelProtoMap.keySet());
-        try {
-            Map<String, byte[]> newModelProtoMap = changeModelProto(modelProtoMap);
-            LOGGER.info("after parse pipeline {}",newModelProtoMap.keySet());
-            Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL)!=null);
-            PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
-            String dsl = pipeLineProto.getInferenceDsl().toStringUtf8(); //inference_dsl;
-            dslParser.parseDagFromDSL(dsl);
-            ArrayList<String> components = dslParser.getAllComponent();
-            HashMap<String, String> componentModuleMap = dslParser.getComponentModuleMap();
+        if(modelProtoMap!=null) {
+            logger.info("start init pipeline,model components {}", modelProtoMap.keySet());
+            try {
+                Map<String, byte[]> newModelProtoMap = changeModelProto(modelProtoMap);
+                logger.info("after parse pipeline {}", newModelProtoMap.keySet());
+                Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL) != null);
+                PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
+                //inference_dsl
+                String dsl = pipeLineProto.getInferenceDsl().toStringUtf8();
+                dslParser.parseDagFromDSL(dsl);
+                ArrayList<String> components = dslParser.getAllComponent();
+                HashMap<String, String> componentModuleMap = dslParser.getComponentModuleMap();
 
-            for (int i = 0; i < components.size(); ++i) {
-                String componentName = components.get(i);
-                String className = componentModuleMap.get(componentName);
-                LOGGER.info("try to get class:{}", className);
-                try {
-                    Class modelClass = Class.forName(this.modelPackage + "." + className);
-                    BaseModel mlNode = (BaseModel) modelClass.getConstructor().newInstance();
-                    mlNode.setComponentName(componentName);
-                    byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
-                    byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
-                    mlNode.initModel(protoMeta, protoParam);
-                    modelMap.put(componentName, mlNode);
-                    pipeLineNode.add(mlNode);
-                    LOGGER.info(" Add class {} to pipeline task list", className);
-                } catch (Exception ex) {
-                    pipeLineNode.add(null);
-                    LOGGER.warn("Can not instance {} class", className);
+                for (int i = 0; i < components.size(); ++i) {
+                    String componentName = components.get(i);
+                    String className = componentModuleMap.get(componentName);
+                    logger.info("try to get class:{}", className);
+                    try {
+                        Class modelClass = Class.forName(this.modelPackage + "." + className);
+                        BaseModel mlNode = (BaseModel) modelClass.getConstructor().newInstance();
+                        mlNode.setComponentName(componentName);
+                        byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
+                        byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
+                        int returnCode = mlNode.initModel(protoMeta, protoParam);
+                        if (returnCode == StatusCode.OK) {
+                            modelMap.put(componentName, mlNode);
+                            pipeLineNode.add(mlNode);
+                            logger.info(" Add class {} to pipeline task list", className);
+                        } else {
+                            throw new RuntimeException("initModel error");
+                        }
+                    } catch (Exception ex) {
+                        pipeLineNode.add(null);
+                        logger.warn("Can not instance {} class", className);
+                    }
                 }
+            } catch (Exception ex) {
+                // ex.printStackTrace();
+                logger.info("PipelineTask initModel error:{}", ex);
+                throw new RuntimeException("initModel error");
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            LOGGER.info("initModel error:{}", ex);
-            throw  new  RuntimeException("initModel error");
+            logger.info("Finish init Pipeline");
+            return StatusCode.OK;
+        }else{
+            logger.error("model content is null ");
+            throw new RuntimeException("model content is null");
         }
-        LOGGER.info("Finish init Pipeline");
-        return StatusCode.OK;
     }
 
 
     public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {
-        LOGGER.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
-        List<Map<String, Object>> outputData = new ArrayList<>();
-        for (int i = 0; i < this.pipeLineNode.size(); i++) {
-            if (this.pipeLineNode.get(i) != null) {
-                LOGGER.info("component class is {}", this.pipeLineNode.get(i).getClass().getName());
-            } else {
-                LOGGER.info("component class is {}", this.pipeLineNode.get(i));
+        //logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
+        List<Map<String, Object>> outputData = Lists.newArrayList();
+
+        List<Map<String,Object>>  result = Lists.newArrayList();
+        int pipelineSize = this.pipeLineNode.size();
+        for (int i = 0; i < pipelineSize; i++) {
+            if(logger.isDebugEnabled()) {
+                if (this.pipeLineNode.get(i) != null) {
+                    logger.debug("component class is {}", this.pipeLineNode.get(i).getClass().getName());
+                } else {
+                    logger.debug("component class is {}", this.pipeLineNode.get(i));
+                }
             }
             List<Map<String, Object>> inputs = new ArrayList<>();
             HashSet<Integer> upInputComponents = this.dslParser.getUpInputComponents(i);
@@ -104,9 +120,13 @@ public class PipelineTask {
                 inputs.add(inputData);
             }
             if (this.pipeLineNode.get(i) != null) {
-                outputData.add(this.pipeLineNode.get(i).handlePredict(context, inputs, predictParams));
+                Map<String, Object>  modelResult = this.pipeLineNode.get(i).handlePredict(context, inputs, predictParams);
+                outputData.add(modelResult);
+                result.add(modelResult);
+
             } else {
                 outputData.add(inputs.get(0));
+
             }
 
         }
@@ -114,11 +134,8 @@ public class PipelineTask {
         if (federatedResult != null) {
             inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
         }
-
-        LOGGER.info("Finish Pipeline predict");
-
-        if(outputData.size()>0){
-            return outputData.get(outputData.size() - 1);
+        if(result.size()>0){
+            return result.get(result.size() - 1);
         }else{
             return Maps.newHashMap();
         }

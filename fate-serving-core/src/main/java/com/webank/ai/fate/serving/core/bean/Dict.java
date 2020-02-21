@@ -42,6 +42,19 @@ public class Dict {
     public static final String MODEL_FEDERATED_PARTY = "model_federated_party";
     public static final String MODEL_FEDERATED_ROLES = "model_federated_roles";
     public static final String VERSION ="version";
+    public static final String GRPC_TYPE ="grpcType";
+    public static final String ROUTER_INFO ="routerInfo";
+    public static final String RESULT_DATA ="resultData";
+    public static final String RETURN_CODE ="returnCode";
+    public static final String DOWN_STREAM_COST ="downstreamCost";
+    public static final String DOWN_STREAM_BEGIN ="downstreamBegin";
+    public static final String ROUTE_BASIS ="routeBasis";
+    public static final String SOURCE_IP ="sourceIp";
+
+
+    /**
+     * configuration property key
+     */
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL = "remoteModelInferenceResultCacheTTL";
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_MAX_SIZE = "remoteModelInferenceResultCacheMaxSize";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_TTL = "inferenceResultCacheTTL";
@@ -55,11 +68,12 @@ public class Dict {
     public static final String PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_DB_INDEX = "external.inferenceResultCacheDBIndex";
     public static final String PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_TTL = "external.inferenceResultCacheTTL";
     public static final String PROPERTY_EXTERNAL_REMOTE_MODEL_INFERENCE_RESULT_CACHE_DB_INDEX = "external.remoteModelInferenceResultCacheDBIndex";
+    public static final String PROPERTY_EXTERNAL_PROCESS_CACHE_DB_INDEX = "external.processCacheDBIndex";
     public static final String PROPERTY_EXTERNAL_REMOTE_MODEL_INFERENCE_RESULT_CACHE_TTL = "external.remoteModelInferenceResultCacheTTL";
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = "remoteModelInferenceResultCacheSwitch";
     public static final String PROPERTY_CAN_CACHE_RET_CODE = "canCacheRetcode";
     public static final String PROPERTY_SERVICE_ROLE_NAME = "serviceRoleName";
-    public static final String PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE = "serving-1.0";
+    public static final String PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE = "serving";
     public static final String PROPERTY_ONLINE_DATA_ACCESS_ADAPTER = "OnlineDataAccessAdapter";
     public static final String PROPERTY_MODEL_CACHE_ACCESS_TTL = "modelCacheAccessTTL";
     public static final String PROPERTY_MODEL_CACHE_MAX_SIZE = "modelCacheMaxSize";
@@ -67,10 +81,12 @@ public class Dict {
     public static final String PROPERTY_PROXY_ADDRESS = "proxy";
     public static final String ONLINE_ENVIROMMENT = "online";
     public static final String PROPERTY_ROLL_ADDRESS = "roll";
+    public static final String PROPERTY_FLOW_ADDRESS = "flow";
     public static final String PROPERTY_USE_ZOOKEEPER = "useZookeeper";
     public static final String PROPERTY_SERVER_PORT = "port";
     public static final String PROPERTY_USER_DIR = "user.dir";
     public static final String PROPERTY_USER_HOME = "user.home";
+    public static final String PROPERTY_FILE_SEPARATOR = "file.separator";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 
@@ -118,17 +134,22 @@ public class Dict {
     public static final String COMPONENT_NAME = "componentName";
     public static final String TREE_COMPUTE_ROUND = "treeComputeRound";
     public static final String SERVICE_NAME = "serviceName";
+    public static final String CALL_NAME = "callName";
     public static final String TREE_LOCATION = "treeLocation";
 
     public static final String UNARYCALL = "unaryCall";
     public static final String USE_ZK_ROUTER = "useZkRouter";
     public static final String FALSE = "false";
     public static final String USE_REGISTER = "useRegister";
+    public static final String MODEL_TRANSFER_URL = "model.transfer.url";
+
 
     public  static  final String GUEST_APP_ID = "guestAppId";
     public  static  final String HOST_APP_ID = "hostAppId";
     public  static  final String SERVICE_ID = "serviceId";
+    public  static  final String APPLY_ID = "applyId";
     public  static  final String CONFIGPATH = "configpath";
+    public  static  final String ACL_ENABLE = "acl.enable";
     public  static  final String ACL_USERNAME = "acl.username";
     public  static  final String ACL_PASSWORD = "acl.password";
     public  static  final String AUTH_FILE = "authFile";
@@ -136,6 +157,25 @@ public class Dict {
 
 
     public  static  final String MD5_SALT = "$1$ML";
+
+
+    public static final String CASE_ID="caseid";
+    public static final String  CODE ="code";
+    public static final String  MESSAGE ="message";
+    public static final String MODEL_ID = "modelId";
+    public static final String MODEL_VERSION = "modelVersion";
+    public static final String APP_ID = "appid";
+    public static final String PARTY_ID = "partyId";
+    public static final  String  FEATURE_DATA = "featureData";
+
+    public static final String DEFAULT_VERSION = "1.0";
+    public static final String SELF_PROJECT_NAME = "proxy";
+    public static final String SELF_ENVIRONMENT = "online";
+    public static final String HEAD = "head";
+    public static final String BODY = "body";
+    public static final String SERVICENAME_INFERENCE = "inference";
+    public static final String SERVICENAME_START_INFERENCE_JOB = "startInferenceJob";
+    public static final String SERVICENAME_GET_INFERENCE_RESULT = "getInferenceResult";
 
 
 }

@@ -18,8 +18,8 @@ package com.webank.ai.fate.serving.core.utils;
 
 
 import com.sun.management.OperatingSystemMXBean;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
@@ -30,7 +30,7 @@ import java.util.Enumeration;
 
 public class GetSystemInfo {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(GetSystemInfo.class);
 
 
     public static String localIp;
@@ -45,13 +45,14 @@ public class GetSystemInfo {
         String ip;
 
         try {
-            if (sysType.toLowerCase().startsWith("win")) {
-                String localIP = null;
+            String winOs = "win";
+            if (sysType.toLowerCase().startsWith(winOs)) {
+                String localIp = null;
 
-                localIP = InetAddress.getLocalHost().getHostAddress();
+                localIp = InetAddress.getLocalHost().getHostAddress();
 
-                if (localIP != null) {
-                    return localIP;
+                if (localIp != null) {
+                    return localIp;
                 }
             } else {
                 ip = getIpByEthNum("eth0");
@@ -62,7 +63,7 @@ public class GetSystemInfo {
                 }
             }
         } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
         return "";
     }
@@ -84,7 +85,7 @@ public class GetSystemInfo {
                 }
             }
         } catch (SocketException e) {
-            LOGGER.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
         return "";
     }
@@ -100,16 +101,16 @@ public class GetSystemInfo {
     public static double getSystemCpuLoad() {
         OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
                 .getOperatingSystemMXBean();
-        double SystemCpuLoad = osmxb.getSystemCpuLoad();
-        return SystemCpuLoad;
+        double systemCpuLoad = osmxb.getSystemCpuLoad();
+        return systemCpuLoad;
     }
 
 
     public static double getProcessCpuLoad() {
         OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
                 .getOperatingSystemMXBean();
-        double ProcessCpuLoad = osmxb.getProcessCpuLoad();
-        return ProcessCpuLoad;
+        double processCpuLoad = osmxb.getProcessCpuLoad();
+        return processCpuLoad;
     }
 
 

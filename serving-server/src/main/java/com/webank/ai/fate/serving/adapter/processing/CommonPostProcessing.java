@@ -6,17 +6,16 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
-import com.webank.ai.fate.serving.host.DefaultHostInferenceProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CommonPostProcessing implements PostProcessing {
 
 
-    private static final Logger LOGGER = LogManager.getLogger(CommonPostProcessing.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommonPostProcessing.class);
 
     @Override
     public PostProcessingResult getResult(Context context, Map<String, Object> featureData, Map<String, Object> modelResult) {
