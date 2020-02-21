@@ -29,7 +29,6 @@ module_version=1.2.0
 
 case "$1" in
     start)
-        stop $module
         start  $module
         status $module
         ;;
@@ -43,7 +42,7 @@ case "$1" in
 
     restart)
         stop $module
-        sleep 5
+        sleep 0.5
         start  $module
         status $module
         ;;

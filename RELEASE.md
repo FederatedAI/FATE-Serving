@@ -1,7 +1,7 @@
 # Release 1.2.0
 ## Major Features and Improvements
+* Replace serving-router with a brand new service called serving-proxy, which supports authentication and inference request with HTTP or gRPC
 * Decouple FATE-Serving and Eggroll, model is read directly from FATE-Flow
-* Serving router supports authentication
 * Fixed a bug that got the remote inference result cache
 
 # Release 1.1.2

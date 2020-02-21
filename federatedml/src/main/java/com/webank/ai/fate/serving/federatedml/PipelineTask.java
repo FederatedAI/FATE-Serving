@@ -40,48 +40,53 @@ public class PipelineTask {
         return this.modelMap.get(name);
     }
     public int initModel(Map<String, byte[]> modelProtoMap) {
-        logger.info("start init pipeline,model components {}",modelProtoMap.keySet());
-        try {
-            Map<String, byte[]> newModelProtoMap = changeModelProto(modelProtoMap);
-            logger.info("after parse pipeline {}",newModelProtoMap.keySet());
-            Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL)!=null);
-            PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
-            //inference_dsl
-            String dsl = pipeLineProto.getInferenceDsl().toStringUtf8();
-            dslParser.parseDagFromDSL(dsl);
-            ArrayList<String> components = dslParser.getAllComponent();
-            HashMap<String, String> componentModuleMap = dslParser.getComponentModuleMap();
+        if(modelProtoMap!=null) {
+            logger.info("start init pipeline,model components {}", modelProtoMap.keySet());
+            try {
+                Map<String, byte[]> newModelProtoMap = changeModelProto(modelProtoMap);
+                logger.info("after parse pipeline {}", newModelProtoMap.keySet());
+                Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL) != null);
+                PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
+                //inference_dsl
+                String dsl = pipeLineProto.getInferenceDsl().toStringUtf8();
+                dslParser.parseDagFromDSL(dsl);
+                ArrayList<String> components = dslParser.getAllComponent();
+                HashMap<String, String> componentModuleMap = dslParser.getComponentModuleMap();
 
-            for (int i = 0; i < components.size(); ++i) {
-                String componentName = components.get(i);
-                String className = componentModuleMap.get(componentName);
-                logger.info("try to get class:{}", className);
-                try {
-                    Class modelClass = Class.forName(this.modelPackage + "." + className);
-                    BaseModel mlNode = (BaseModel) modelClass.getConstructor().newInstance();
-                    mlNode.setComponentName(componentName);
-                    byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
-                    byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
-                    int returnCode = mlNode.initModel(protoMeta, protoParam);
-                    if (returnCode == StatusCode.OK) {
-                        modelMap.put(componentName, mlNode);
-                        pipeLineNode.add(mlNode);
-                        logger.info(" Add class {} to pipeline task list", className);
-                    } else {
-                        throw new RuntimeException("initModel error");
+                for (int i = 0; i < components.size(); ++i) {
+                    String componentName = components.get(i);
+                    String className = componentModuleMap.get(componentName);
+                    logger.info("try to get class:{}", className);
+                    try {
+                        Class modelClass = Class.forName(this.modelPackage + "." + className);
+                        BaseModel mlNode = (BaseModel) modelClass.getConstructor().newInstance();
+                        mlNode.setComponentName(componentName);
+                        byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
+                        byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
+                        int returnCode = mlNode.initModel(protoMeta, protoParam);
+                        if (returnCode == StatusCode.OK) {
+                            modelMap.put(componentName, mlNode);
+                            pipeLineNode.add(mlNode);
+                            logger.info(" Add class {} to pipeline task list", className);
+                        } else {
+                            throw new RuntimeException("initModel error");
+                        }
+                    } catch (Exception ex) {
+                        pipeLineNode.add(null);
+                        logger.warn("Can not instance {} class", className);
                     }
-                } catch (Exception ex) {
-                    pipeLineNode.add(null);
-                    logger.warn("Can not instance {} class", className);
                 }
+            } catch (Exception ex) {
+                // ex.printStackTrace();
+                logger.info("PipelineTask initModel error:{}", ex);
+                throw new RuntimeException("initModel error");
             }
-        } catch (Exception ex) {
-           // ex.printStackTrace();
-            logger.info("PipelineTask initModel error:{}", ex);
-            throw  new  RuntimeException("initModel error");
+            logger.info("Finish init Pipeline");
+            return StatusCode.OK;
+        }else{
+            logger.error("model content is null ");
+            throw new RuntimeException("model content is null");
         }
-        logger.info("Finish init Pipeline");
-        return StatusCode.OK;
     }
 
 
