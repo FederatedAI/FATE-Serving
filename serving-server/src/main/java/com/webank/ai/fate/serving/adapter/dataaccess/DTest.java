@@ -16,16 +16,15 @@
 
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
-
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.utils.HttpClientPool;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class DTest implements FeatureData {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(DTest.class);
 
     @Override
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {

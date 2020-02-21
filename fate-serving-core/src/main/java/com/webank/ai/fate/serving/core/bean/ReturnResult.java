@@ -16,17 +16,14 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;
-
 public class ReturnResult {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ReturnResult.class);
     private int retcode;
     private String retmsg = "";
     private String caseid = "";

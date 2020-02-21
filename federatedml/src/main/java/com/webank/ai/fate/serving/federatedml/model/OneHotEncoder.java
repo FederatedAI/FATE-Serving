@@ -18,13 +18,13 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
-import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
+import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class OneHotEncoder extends BaseModel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(OneHotEncoder.class);
 
     private List<String> cols;
     private Map<String, ColsMap> colsMapMap;
@@ -42,31 +42,28 @@ public class OneHotEncoder extends BaseModel {
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        LOGGER.info("start init OneHot Encoder class");
+        logger.info("start init OneHot Encoder class");
         try {
             OneHotMeta oneHotMeta = this.parseModel(OneHotMeta.parser(), protoMeta);
             OneHotParam oneHotParam = this.parseModel(OneHotParam.parser(), protoParam);
             this.needRun = oneHotMeta.getNeedRun();
-
             this.cols = oneHotMeta.getTransformColNamesList();
             this.colsMapMap = oneHotParam.getColMapMap();
         } catch (Exception ex) {
-            ex.printStackTrace();
-             return StatusCode.ILLEGALDATA;
+            logger.error("OneHotEncoder initModel error",ex);
+            return StatusCode.ILLEGALDATA;
         }
-        LOGGER.info("Finish init OneHot Encoder class");
+        logger.info("Finish init OneHot Encoder class");
         return StatusCode.OK;
     }
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        LOGGER.info("Start OneHot Encoder transform");
-        LOGGER.info("First time need run");
+
         HashMap<String, Object> outputData = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
-        LOGGER.info("Need run is ", this.needRun);
+
         if (!this.needRun) {
-            LOGGER.info("Return firstData :", firstData);
             return firstData;
         }
         for (String colName : firstData.keySet()) {
@@ -80,7 +77,6 @@ public class OneHotEncoder extends BaseModel {
 
                 List<String> values = colsMap.getValuesList();
                 List<String> encodedVariables = colsMap.getTransformedHeadersList();
-//                Integer inputValue = new Integer(firstData.get(colName).toString());
 
                 Integer inputValue = 0;
                 try {
@@ -92,7 +88,7 @@ public class OneHotEncoder extends BaseModel {
                         inputValue = Integer.valueOf(thisInputValue);
                     }
                 }catch (Throwable e){
-                    LOGGER.error("Onehot component accept number input value only");
+                    logger.error("Onehot component accept number input value only");
                 }
 
                 for (int i = 0; i < values.size(); i ++) {
@@ -105,10 +101,9 @@ public class OneHotEncoder extends BaseModel {
                     }
                 }
             }catch(Throwable e){
-                LOGGER.error("HeteroFeatureBinning error" ,e);
+                logger.error("HeteroFeatureBinning error" ,e);
             }
         }
-        LOGGER.info("OneHotEncoder output {}",outputData);
         return outputData;
     }
 

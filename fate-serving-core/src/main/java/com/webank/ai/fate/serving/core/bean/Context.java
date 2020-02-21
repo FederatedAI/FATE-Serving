@@ -17,9 +17,10 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
+import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 
 public interface Context<Req, Resp> {
-
 
     static final String LOGGER_NAME = "flow";
 
@@ -40,8 +41,6 @@ public interface Context<Req, Resp> {
     public default void postProcess(Req req, Resp resp) {
     }
 
-    ;
-
     public ReturnResult getFederatedResult();
 
     public void setFederatedResult(ReturnResult returnResult);
@@ -60,5 +59,66 @@ public interface Context<Req, Resp> {
 
     public long getCostTime();
 
+    /**
+     * proxy
+     */
+    public GrpcType getGrpcType();
 
+    public void setGrpcType(GrpcType grpcType);
+
+    public String getVersion();
+
+    public void setVersion(String version);
+
+    public String getGuestAppId();
+
+    public void setGuestAppId(String guestAppId);
+
+    public String getHostAppid();
+
+    public void setHostAppid(String hostAppid);
+
+    public RouterInfo getRouterInfo();
+
+    public void setRouterInfo(RouterInfo routerInfo);
+
+    public Object getResultData();
+
+    public void setResultData(Object resultData);
+
+    public String getReturnCode();
+
+    public void setReturnCode(String returnCode);
+
+    public long getDownstreamCost();
+
+    public void setDownstreamCost(long downstreamCost);
+
+    public long getDownstreamBegin();
+
+    public void setDownstreamBegin(long downstreamBegin);
+
+    public long getRouteBasis();
+
+    public void setRouteBasis(long routeBasis);
+
+    public String getSourceIp();
+
+    public void setSourceIp(String sourceIp);
+
+    public String getServiceName();
+
+    public void setServiceName(String serviceName);
+
+    public void setCallName(String callName);
+
+    public String getCallName();
+
+    public String getServiceId();
+
+    public void setServiceId(String serviceId);
+
+    public String getApplyId();
+
+    public void setApplyId(String applyId);
 }

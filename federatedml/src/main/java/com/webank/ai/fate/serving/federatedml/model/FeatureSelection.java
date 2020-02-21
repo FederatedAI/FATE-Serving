@@ -23,18 +23,15 @@ import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.LeftCol
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-;
-
-
 public class FeatureSelection extends BaseModel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(FeatureSelection.class);
     private FeatureSelectionParam featureSelectionParam;
     private FeatureSelectionMeta featureSelectionMeta;
     private LeftCols finalLeftCols;
@@ -42,7 +39,7 @@ public class FeatureSelection extends BaseModel {
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        LOGGER.info("start init Feature Selection class");
+        logger.info("start init Feature Selection class");
         this.needRun = false;
         try {
             this.featureSelectionMeta = this.parseModel(FeatureSelectionMeta.parser(), protoMeta);
@@ -53,13 +50,12 @@ public class FeatureSelection extends BaseModel {
             ex.printStackTrace();
             return StatusCode.ILLEGALDATA;
         }
-        LOGGER.info("Finish init Feature Selection class");
+        logger.info("Finish init Feature Selection class");
         return StatusCode.OK;
     }
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        LOGGER.info("Start Feature Selection predict");
         HashMap<String, Object> outputData = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
 

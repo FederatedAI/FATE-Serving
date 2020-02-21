@@ -38,8 +38,10 @@ public final class StringUtils {
     public static final int INDEX_NOT_FOUND = -1;
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-
-    private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)"); //key value pair pattern.
+    /**
+     * key value pair pattern.
+     */
+    private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)");
     private static final Pattern INT_PATTERN = Pattern.compile("^\\d+$");
     private static final int PAD_LIMIT = 8192;
 
@@ -789,7 +791,7 @@ public final class StringUtils {
         return str == null ? null : str.trim();
     }
 
-    public static String toURLKey(String key) {
+    public static String toUrlKey(String key) {
         return key.toLowerCase().replaceAll(SEPARATOR_REGEX, HIDE_KEY_PREFIX);
     }
 

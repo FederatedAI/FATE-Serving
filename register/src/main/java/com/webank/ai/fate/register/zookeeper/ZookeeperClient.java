@@ -59,4 +59,6 @@ public interface ZookeeperClient {
 
     String getContent(String path);
 
+    void clearAcl(String path);
+
 }

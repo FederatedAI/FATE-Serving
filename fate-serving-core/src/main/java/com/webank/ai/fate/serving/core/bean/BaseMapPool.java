@@ -19,12 +19,16 @@ package com.webank.ai.fate.serving.core.bean;
 import java.util.Map;
 
 public abstract class BaseMapPool<K, V> implements MapPool<K, V> {
+    @Override
     public abstract void put(K key, V value);
 
+    @Override
     public abstract void putIfAbsent(K key, V value);
 
+    @Override
     public abstract void putAll(Map<K, V> kv);
 
+    @Override
     public abstract V get(K key);
 
     @Override

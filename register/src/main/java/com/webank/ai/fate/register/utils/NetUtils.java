@@ -17,8 +17,8 @@
 package com.webank.ai.fate.register.utils;
 
 import com.webank.ai.fate.register.url.URL;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.*;
@@ -44,7 +44,7 @@ public class NetUtils {
         System.out.println(NetUtils.getLocalAddress0("127.0.0.1"));
     }
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
     // returned port range is [30000, 39999]
     private static final int RND_PORT_START = 30000;
     private static final int RND_PORT_RANGE = 10000;
@@ -139,7 +139,7 @@ public class NetUtils {
      *
      * @return true if it is reachable
      */
-    static boolean isPreferIPV6Address() {
+    static boolean isPreferIpv6Address() {
         boolean preferIpv6 = Boolean.getBoolean("java.net.preferIPv6Addresses");
         if (!preferIpv6) {
             return false;
@@ -215,7 +215,7 @@ public class NetUtils {
     private static Optional<InetAddress> toValidAddress(InetAddress address) {
         if (address instanceof Inet6Address) {
             Inet6Address v6Address = (Inet6Address) address;
-            if (isPreferIPV6Address()) {
+            if (isPreferIpv6Address()) {
                 return Optional.ofNullable(normalizeV6Address(v6Address));
             }
         }
@@ -233,12 +233,11 @@ public class NetUtils {
 
         try {
             if (sysType.toLowerCase().startsWith("win")) {
-                String localIP = null;
 
-                localIP = InetAddress.getLocalHost().getHostAddress();
+                String localIp = InetAddress.getLocalHost().getHostAddress();
 
-                if (localIP != null) {
-                    return localIP;
+                if (localIp != null) {
+                    return localIp;
                 }
             } else {
                 ip = getIpByEthNum("eth0");
@@ -293,7 +292,7 @@ public class NetUtils {
                 return addressOp.get();
             }
         } catch (Throwable e) {
-            logger.warn(e);
+            logger.warn(e.getMessage());
         }
 
         try {
@@ -326,15 +325,15 @@ public class NetUtils {
                                 }
                             }
                         } catch (Throwable e) {
-                            logger.warn(e);
+                            logger.warn(e.getMessage());
                         }
                     }
                 } catch (Throwable e) {
-                    logger.warn(e);
+                    logger.warn(e.getMessage());
                 }
             }
         } catch (Throwable e) {
-            logger.warn(e);
+            logger.warn(e.getMessage());
         }
         return localAddress;
     }
@@ -370,7 +369,7 @@ public class NetUtils {
         return new InetSocketAddress(host, port);
     }
 
-    public static String toURL(String protocol, String host, int port, String path) {
+    public static String toUrl(String protocol, String host, int port, String path) {
         StringBuilder sb = new StringBuilder();
         sb.append(protocol).append("://");
         sb.append(host).append(':').append(port);

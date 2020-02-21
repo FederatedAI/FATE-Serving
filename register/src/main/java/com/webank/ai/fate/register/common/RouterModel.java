@@ -17,10 +17,25 @@
 package com.webank.ai.fate.register.common;
 
 public enum RouterModel {
+    /**
+     * VERSION_BIGER
+     */
     VERSION_BIGER,
+    /**
+     * VERSION_BIGTHAN_OR_EQUAL
+     */
     VERSION_BIGTHAN_OR_EQUAL,
+    /**
+     * VERSION_SMALLER
+     */
     VERSION_SMALLER,
+    /**
+     * VERSION_EQUALS
+     */
     VERSION_EQUALS,
+    /**
+     * ALL_ALLOWED
+     */
     ALL_ALLOWED
 
 }

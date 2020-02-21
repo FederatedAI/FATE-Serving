@@ -16,24 +16,26 @@
 
 package com.webank.ai.fate.serving.core.utils;
 
-import com.webank.ai.fate.core.mlmodel.buffer.DefaultEmptyFillProto;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProtobufUtils {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ProtobufUtils.class);
 
     public static <T> T parseProtoObject(com.google.protobuf.Parser<T> protoParser, byte[] protoString) throws com.google.protobuf.InvalidProtocolBufferException {
         T messageV3;
         try {
             messageV3 = protoParser.parseFrom(protoString);
-            LOGGER.info("parse {} proto object normal", messageV3.getClass().getSimpleName());
+            if (logger.isDebugEnabled()) {
+                logger.debug("parse {} proto object normal", messageV3.getClass().getSimpleName());
+            }
             return messageV3;
         } catch (Exception ex1) {
             try {
-                DefaultEmptyFillProto.DefaultEmptyFillMessage defaultEmptyFillMessage = DefaultEmptyFillProto.DefaultEmptyFillMessage.parseFrom(protoString);
                 messageV3 = protoParser.parseFrom(new byte[0]);
-                LOGGER.info("parse {} proto object with default values", messageV3.getClass().getSimpleName());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("parse {} proto object with default values", messageV3.getClass().getSimpleName());
+                }
                 return messageV3;
             } catch (Exception ex2) {
                 throw ex1;

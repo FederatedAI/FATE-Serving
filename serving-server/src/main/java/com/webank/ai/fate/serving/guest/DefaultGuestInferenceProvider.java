@@ -17,9 +17,8 @@
 package com.webank.ai.fate.serving.guest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.adapter.processing.PostProcessing;
 import com.webank.ai.fate.serving.adapter.processing.PreProcessing;
 import com.webank.ai.fate.serving.bean.InferenceRequest;
@@ -28,13 +27,14 @@ import com.webank.ai.fate.serving.bean.PostProcessingResult;
 import com.webank.ai.fate.serving.bean.PreProcessingResult;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
-import com.webank.ai.fate.serving.manger.InferenceWorkerManager;
+import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ import java.util.Map;
 
 @Service
 public class DefaultGuestInferenceProvider implements GuestInferenceProvider, InitializingBean {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(DefaultGuestInferenceProvider.class);
     @Autowired
     ModelManager modelManager;
     @Autowired
@@ -67,45 +67,62 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         long startTime = System.currentTimeMillis();
 
         context.setCaseId(inferenceRequest.getCaseid());
-
         ReturnResult inferenceResult = new ReturnResult();
         inferenceResult.setCaseid(inferenceRequest.getCaseid());
         String modelName = inferenceRequest.getModelVersion();
         String modelNamespace = inferenceRequest.getModelId();
         String serviceId = inferenceRequest.getServiceId();
-
-
-        if (StringUtils.isEmpty(modelNamespace)  ) {
+        context.setServiceId(serviceId);
+        context.setApplyId(inferenceRequest.getApplyId());
+        String modelKey = "";
+        if (StringUtils.isEmpty(modelNamespace)&& StringUtils.isEmpty(modelName) ) {
             if(StringUtils.isNotEmpty(inferenceRequest.getServiceId())){
-                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getServiceId());
-            }else if(inferenceRequest.haveAppId()) {
-                modelNamespace = modelManager.getModelNamespaceByPartyId(inferenceRequest.getAppid());
+                modelKey = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getServiceId());
             }
+
+            if (StringUtils.isEmpty(modelKey)) {
+                inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
+                return inferenceResult;
+            }
+            String[]  modelKeyElement = modelKey.split(":");
+            Preconditions.checkArgument(modelKeyElement!=null&&modelKeyElement.length==2);
+            modelName = modelKeyElement[1];
+            modelNamespace = modelKeyElement[0];
+
+//            else if(inferenceRequest.haveAppId()) {
+//                modelKey = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getAppid());
+//            }
         }
-        if (StringUtils.isEmpty(modelNamespace)) {
-            inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
-            return inferenceResult;
-        }
-        ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(modelNamespace);
+
+
+
+        ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(context,modelNamespace);
         PipelineTask model;
-        if (StringUtils.isEmpty(modelName)) {
-            modelName = modelNamespaceData.getUsedModelName();
-            model = modelNamespaceData.getUsedModel();
-        } else {
-            model = modelManager.getModel(modelName, modelNamespace);
-        }
+//        if (StringUtils.isEmpty(modelName)) {
+//            modelName = modelNamespaceData.getUsedModelName();
+//            model = modelNamespaceData.getUsedModel();
+//        } else {
+//            model = modelManager.getModel(context,modelName, modelNamespace);
+//        }
+        Preconditions.checkArgument(StringUtils.isNotEmpty(modelName));
+        Preconditions.checkArgument(StringUtils.isNotEmpty(modelNamespace));
+        Preconditions.checkArgument(modelNamespaceData!=null);
+        model =  modelManager.getModel(context,modelName, modelNamespace);
+
         if (model == null) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
             return inferenceResult;
         }
 
-        LOGGER.info("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("use model to inference for {}, id: {}, version: {}", inferenceRequest.getAppid(), modelNamespace, modelName);
+        }
+
         Map<String, Object> rawFeatureData = inferenceRequest.getFeatureData();
 
         if (rawFeatureData == null) {
             inferenceResult.setRetcode(InferenceRetCode.EMPTY_DATA + 1000);
             inferenceResult.setRetmsg("Can not parse data json.");
-            logInference(context, inferenceRequest, modelNamespaceData, inferenceResult, 0, false, false);
             return inferenceResult;
         }
 
@@ -114,7 +131,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
 
             preProcessingResult = getPreProcessingFeatureData(context, rawFeatureData);
         } catch (Exception ex) {
-            LOGGER.error("feature data preprocessing failed", ex);
+            logger.error("feature data preprocessing failed", ex);
             inferenceResult.setRetcode(InferenceRetCode.INVALID_FEATURE + 1000);
             inferenceResult.setRetmsg(ex.getMessage());
             return inferenceResult;
@@ -124,7 +141,6 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         if (featureData == null) {
             inferenceResult.setRetcode(InferenceRetCode.NUMERICAL_ERROR + 1000);
             inferenceResult.setRetmsg("Can not preprocessing data");
-            logInference(context, inferenceRequest, modelNamespaceData, inferenceResult, 0, false, false);
             return inferenceResult;
         }
         Map<String, Object> predictParams = new HashMap<>(8);
@@ -147,14 +163,13 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             postProcessingResult = getPostProcessedResult(context, featureData, modelResult);
             inferenceResult = postProcessingResult.getProcessingResult();
         } catch (Exception ex) {
-            LOGGER.error("model result postprocessing failed", ex);
+            logger.error("model result postprocessing failed", ex);
             if(inferenceResult!=null) {
                 inferenceResult.setRetcode(InferenceRetCode.COMPUTE_ERROR);
                 inferenceResult.setRetmsg(ex.getMessage());
             }
         }
         inferenceResult = handleResult(context, inferenceRequest, modelNamespaceData, inferenceResult);
-
 
         return inferenceResult;
     }
@@ -201,7 +216,9 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return preProcessing.getResult(context, ObjectTransform.bean2Json(originFeatureData));
         } finally {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("preprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            if (logger.isDebugEnabled()) {
+                logger.debug("preprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            }
         }
 
     }
@@ -212,7 +229,9 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             return postProcessing.getResult(context, featureData, modelResult);
         } finally {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("postprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            if (logger.isDebugEnabled()) {
+                logger.debug("postprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
+            }
         }
     }
 
@@ -226,9 +245,12 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         }
 
         ReturnResult inferenceResultFromCache = cacheManager.getInferenceResultCache(inferenceRequest.getAppid(), inferenceRequest.getCaseid());
-        LOGGER.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+        }
         if (inferenceResultFromCache != null) {
-            LOGGER.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+            logger.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
             return inferenceResultFromCache;
         }
 
@@ -244,10 +266,13 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
     private ReturnResult getReturnResultFromCache(Context context, InferenceRequest inferenceRequest) {
         long inferenceBeginTime = System.currentTimeMillis();
         ReturnResult inferenceResultFromCache = cacheManager.getInferenceResultCache(inferenceRequest.getAppid(), inferenceRequest.getCaseid());
-        LOGGER.info("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
-        if (inferenceResultFromCache != null) {
-            LOGGER.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("caseid {} query cache cost {}", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
+        }
+
+        if (inferenceResultFromCache != null) {
+            logger.info("request caseId {} cost time {}  hit cache true", inferenceRequest.getCaseid(), System.currentTimeMillis() - inferenceBeginTime);
         }
         return inferenceResultFromCache;
     }
@@ -273,7 +298,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
                         cacheManager.putInferenceResultCache(subContext, inferenceRequest.getAppid(), inferenceRequest.getCaseid(), inferenceResult);
                     }
                 } catch (Throwable e) {
-                    LOGGER.error("asynInference error", e);
+                    logger.error("asynInference error", e);
                 } finally {
                     subContext.postProcess(inferenceRequest, inferenceResult);
                 }
@@ -308,7 +333,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             String preClassPath = classPathPre + "." + Configuration.getProperty(Dict.PRE_PROCESSING_CONFIG);
             preProcessing = (PreProcessing) InferenceUtils.getClassByName(preClassPath);
         } catch (Throwable e) {
-            LOGGER.error("load post/pre processing error", e);
+            logger.error("load post/pre processing error", e);
         }
 
     }
