@@ -17,6 +17,12 @@
 package com.webank.ai.fate.register.loadbalance;
 
 public enum LoadBalanceModel {
+    /**
+     * random
+     */
     random,
+    /**
+     * random_with_weight
+     */
     random_with_weight
 }

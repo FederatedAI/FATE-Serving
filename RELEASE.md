@@ -1,8 +1,15 @@
+# Release 1.2.0
+## Major Features and Improvements
+* Replace serving-router with a brand new service called serving-proxy, which supports authentication and inference request with HTTP or gRPC
+* Decouple FATE-Serving and Eggroll, model is read directly from FATE-Flow
+* Fixed a bug that got the remote inference result cache
+
 # Release 1.1.2
 ## Major Features and Improvements
 * Using metrics components and providing monitoring through JMX
 * Host supports binding grpc interface with model information and registering it in zookeeper, and supports routing to different instances through model information.
 * Guest adds a grpc interface for model binding. It supports model binding service id and registering it in zookeeper. The caller can route to different instances through service id. The service id is specified by fate_flow, which can uniquely represent a model.
+
 # Release 1.1.1
 ## Major Features and Improvements
 * Support indicating partial columns in Onehot Encoder

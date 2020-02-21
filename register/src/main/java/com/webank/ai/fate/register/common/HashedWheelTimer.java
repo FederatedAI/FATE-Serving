@@ -19,8 +19,8 @@ package com.webank.ai.fate.register.common;
 
 import com.webank.ai.fate.register.interfaces.Timeout;
 import com.webank.ai.fate.register.interfaces.Timer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -36,7 +36,7 @@ import static com.webank.ai.fate.register.common.Constants.OS_NAME_WIN;
 public class HashedWheelTimer implements Timer {
 
     public static final String NAME = "hased";
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(HashedWheelTimer.class);
 
     private static final AtomicInteger INSTANCE_COUNTER = new AtomicInteger();
     private static final AtomicBoolean WARNED_TOO_MANY_INSTANCES = new AtomicBoolean();

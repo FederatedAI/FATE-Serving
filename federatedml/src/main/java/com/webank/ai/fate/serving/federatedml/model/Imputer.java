@@ -16,15 +16,15 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 public class Imputer {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(Imputer.class);
     public HashSet<String> missingValueSet;
     public Map<String, String> missingReplaceValues;
 
@@ -35,7 +35,6 @@ public class Imputer {
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
         if(inputData!=null) {
-            LOGGER.info("start imputer transform task");
             for (String key : inputData.keySet()) {
                 if(inputData.get(key)!=null) {
                     String value = inputData.get(key).toString();
@@ -43,7 +42,7 @@ public class Imputer {
                         try {
                             inputData.put(key, this.missingReplaceValues.get(key));
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            logger.error("Imputer transform error",ex);
                             inputData.put(key, 0.);
                         }
                     }

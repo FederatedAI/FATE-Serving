@@ -1,0 +1,29 @@
+{
+  "route_table": {
+    "default": {
+      "default": [
+        {
+          "ip": "127.0.0.1",
+          "port": 9999
+        }
+      ]
+    },
+    "10000": {
+      "default": [
+        {
+          "ip": "127.0.0.1",
+          "port": 8889
+        }
+      ],
+      "serving": [
+        {
+          "ip": "127.0.0.1",
+          "port": 8080
+        }
+      ]
+    }
+  },
+  "permission": {
+    "default_allow": true
+  }
+}

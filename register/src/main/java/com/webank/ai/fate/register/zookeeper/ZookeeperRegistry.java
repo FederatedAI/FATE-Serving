@@ -28,8 +28,8 @@ import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.NetUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,7 +45,7 @@ import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
 public class ZookeeperRegistry extends FailbackRegistry {
 
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ZookeeperRegistry.class);
     private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
     private final static String DEFAULT_ROOT = "FATE-SERVICES";
     private final static String ROOT_KEY = "root";
@@ -56,7 +56,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     ;
     private final ZookeeperClient zkClient;
     Set<String> registedString = Sets.newHashSet();
-    String DYNAMIC_KEY = "dynamic";
+    private static String DYNAMIC_KEY = "dynamic";
     Set<String> anyServices = new HashSet<String>();
     private String environment;
     private Set<String> dynamicEnvironments = new HashSet<String>();
@@ -126,9 +126,12 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 subEnvironments(path, project, childrens);
             }
         });
-        logger.info("environments {}", environments);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("environments {}", environments);
+        }
         if (environments == null) {
-            logger.info("environment is null,maybe zk is not started");
+            logger.info("path {} is not exist in zk", path);
             throw new RuntimeException("environment is null");
         }
 
@@ -147,7 +150,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
 
                     if (StringUtils.isNotEmpty(parent)) {
-                        logger.info("fire services changes {}", childrens);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("fire services changes {}", childrens);
+                        }
 
                         subServices(project, environment, childrens);
                     }
@@ -166,10 +171,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
             for (String service : services) {
 
                 String subString = project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR + service;
-                logger.info("subServices sub {}", subString);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("subServices sub {}", subString);
+                }
                 subscribe(URL.valueOf(subString), urls -> {
-
-                    logger.info("change services urls =" + urls);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("change services urls =" + urls);
+                    }
                 });
             }
         }
@@ -199,33 +207,45 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     public synchronized void register(Set<RegisterService> sets) {
-
+        if (logger.isDebugEnabled()) {
+            logger.debug("prepare to register {}",sets);
+        }
         String hostAddress = NetUtils.getLocalIp();
         Preconditions.checkArgument(port != 0);
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
 
         Set<URL> registered = this.getRegistered();
         for (RegisterService service : sets) {
-            URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
-            if (service.useDynamicEnvironment()) {
+            try {
+                URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+                if (service.useDynamicEnvironment()) {
 
-                if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
-                    dynamicEnvironments.forEach(environment -> {
-                        URL newServiceUrl = serviceUrl.setEnvironment(environment);
-                        String serviceName = service.serviceName() + environment;
-                        if (!registedString.contains(serviceName)) {
-                            this.register(newServiceUrl);
-                            this.registedString.add(serviceName);
-                        } else {
-                            logger.info("url {} is already registed,will not do anything ", newServiceUrl);
+                    if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
+                        dynamicEnvironments.forEach(environment -> {
+                            URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                            String serviceName = service.serviceName() + environment;
+                            if (!registedString.contains(serviceName)) {
+                                this.register(newServiceUrl);
+                                this.registedString.add(serviceName);
+                            } else {
+                                logger.info("url {} is already registed, will not do anything ", newServiceUrl);
+                            }
+                        });
+                    }
+                } else {
+                    if (!registedString.contains(service.serviceName())) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("try to register url {}", serviceUrl);
                         }
-                    });
+                        this.register(serviceUrl);
+                        this.registedString.add(service.serviceName());
+                    } else {
+                        logger.info("url {} is already registed, will not do anything ", service.serviceName());
+                    }
                 }
-            } else {
-                if (!registedString.contains(service.serviceName())) {
-                    this.register(serviceUrl);
-                    this.registedString.add(service.serviceName());
-                }
+            }catch(Exception e){
+                e.printStackTrace();
+                logger.error("try to register service {} failed",service);
             }
         }
         logger.info("registed urls {}", registered);
@@ -255,7 +275,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
 
             String urlPath = toUrlPath(url);
-            logger.info("create urlpath {} ", urlPath);
+            if (logger.isDebugEnabled()) {
+                logger.debug("create urlpath {} ", urlPath);
+            }
             zkClient.create(urlPath, true);
         } catch (Throwable e) {
             throw new RuntimeException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);

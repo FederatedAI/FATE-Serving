@@ -25,17 +25,14 @@ import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,12 +43,15 @@ import static com.webank.ai.fate.register.common.Constants.*;
 public abstract class AbstractRegistry implements Registry {
 
 
-    private static final Logger logger = LogManager.getLogger(AbstractRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
     private static final char URL_SEPARATOR = ' ';
     private static final String URL_SPLIT = "\\s+";
     private static final int MAX_RETRY_TIMES_SAVE_PROPERTIES = 3;
     private final Properties properties = new Properties();
-    private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("FateSaveRegistryCache", true));
+    private final ExecutorService registryCacheExecutor = new ThreadPoolExecutor(1, 1,
+            0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+            new NamedThreadFactory("FateSaveRegistryCache", true));
+
     private final boolean syncSaveFile;
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final AtomicInteger savePropertiesRetryTimes = new AtomicInteger();
@@ -144,7 +144,9 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     public void doSaveProperties(long version) {
-        logger.info("doSaveProperties {} {}", version, properties);
+        if (logger.isDebugEnabled()) {
+            logger.debug("doSaveProperties {} {}", version, properties);
+        }
 
         if (version < lastCacheChanged.get()) {
             return;
@@ -422,7 +424,9 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     private void saveProperties(URL url) {
-        logger.info("saveProperties url {}", url);
+        if (logger.isDebugEnabled()) {
+            logger.debug("saveProperties url {}", url);
+        }
 
         if (file == null) {
             return;
@@ -442,7 +446,9 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
 
-            logger.info("properties set property key {} value {}", url.getServiceKey(), buf.toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("properties set property key {} value {}", url.getServiceKey(), buf.toString());
+            }
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
             if (syncSaveFile) {

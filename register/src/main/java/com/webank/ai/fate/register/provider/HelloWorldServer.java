@@ -12,8 +12,8 @@
 //import io.grpc.Server;
 //import io.grpc.ServerBuilder;
 //import io.grpc.stub.StreamObserver;
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
+//import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
 //
 //import java.io.IOException;
 //import java.util.Map;
@@ -21,7 +21,7 @@
 //
 //
 //public class HelloWorldServer {
-//    private static final Logger logger = LogManager.getLogger();
+//    private static final Logger logger = LoggerFactory.getLogger();
 //
 //    /* The port on which the server should run */
 //    private int port = 50051;

@@ -18,21 +18,19 @@ package com.webank.ai.fate.serving.service;
 
 import com.alibaba.fastjson.JSON;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.google.protobuf.ByteString;
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
-
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.GuestInferenceProvider;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import io.grpc.stub.StreamObserver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +38,8 @@ import java.util.Map;
 
 @Service
 public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
-    private static final Logger LOGGER = LogManager.getLogger();
-    private static final Logger accessLOGGER = LogManager.getLogger(Dict.ACCESS);
+    private static final Logger logger = LoggerFactory.getLogger(InferenceService.class);
+    private static final Logger accesslogger = LoggerFactory.getLogger(Dict.ACCESS);
     @Autowired
     GuestInferenceProvider guestInferenceProvider;
     @Autowired
@@ -105,7 +103,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                     }
 
                     if (returnResult.getRetcode() != InferenceRetCode.OK) {
-                        LOGGER.error("caseid {} inference {} failed: {}  result {}", context.getCaseId(), actionType, req.getBody().toStringUtf8(), returnResult);
+                        logger.info("caseid {} inference {} failed: {}  result {}", context.getCaseId(), actionType, req.getBody().toStringUtf8(), returnResult);
                     }
                 } else {
 
@@ -113,7 +111,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                 }
             } catch (Throwable e) {
                 returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
-                LOGGER.error(String.format("inference system error:\n%s", req.getBody().toStringUtf8()), e);
+                logger.error(String.format("inference system error:\n%s", req.getBody().toStringUtf8()), e);
             }
 
             response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));

@@ -20,8 +20,8 @@ import com.webank.ai.fate.register.interfaces.Registry;
 import com.webank.ai.fate.register.interfaces.RegistryService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.utils.URLBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,7 +36,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
 
     // Log output
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AbstractRegistryFactory.class);
 
 
     // The lock for the acquisition process of the registry
@@ -55,8 +55,8 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
      */
 
     public static void destroyAll() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Close all registries " + getRegistries());
+        if (logger.isInfoEnabled()) {
+            logger.info("Close all registries " + getRegistries());
         }
         // Lock up the registry shutdown process
         LOCK.lock();
@@ -65,7 +65,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
                 try {
                     registry.destroy();
                 } catch (Throwable e) {
-                    LOGGER.error(e.getMessage(), e);
+                    logger.error(e.getMessage(), e);
                 }
             }
             REGISTRIES.clear();

@@ -23,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 
 public class SceneUtils {
-    private static final String sceneKeySeparator = "#";
+    private static final String SCENE_KEY_SEPARATOR = "#";
 
     public SceneUtils() {
     }

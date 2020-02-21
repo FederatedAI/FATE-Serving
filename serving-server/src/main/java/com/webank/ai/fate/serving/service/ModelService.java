@@ -19,39 +19,41 @@ package com.webank.ai.fate.serving.service;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishRequest;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishResponse;
-
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
-import com.webank.ai.fate.serving.manger.ModelUtils;
+import com.webank.ai.fate.serving.manager.ModelUtil;
+
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements InitializingBean {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
     @Autowired
     ModelManager modelManager;
     @Autowired
@@ -76,10 +78,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         String  md5;
     }
 
-
     LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
     LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
 
     File publishLoadStoreFile;
     File publishOnlineStoreFile;
@@ -122,8 +124,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             context.putData(Dict.SERVICE_ID,req.getServiceId());
             returnResult = modelManager.publishLoadModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtils.getFederatedRoles(req.getRoleMap()),
-                    ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                    ModelUtil.getFederatedRoles(req.getRoleMap()),
+                    ModelUtil.getFederatedRolesModel(req.getModelMap()));
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
@@ -151,11 +153,13 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
-            logger.info("receive service id {}",req.getServiceId());
+            if (logger.isDebugEnabled()) {
+                logger.debug("receive service id {}", req.getServiceId());
+            }
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtils.getFederatedRoles(req.getRoleMap()),
-                    ModelUtils.getFederatedRolesModel(req.getModelMap())
+                    ModelUtil.getFederatedRoles(req.getRoleMap()),
+                    ModelUtil.getFederatedRolesModel(req.getModelMap())
             );
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
@@ -182,11 +186,13 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
-            logger.info("publishBind receive service id {}",context.getData(Dict.SERVICE_ID));
+            if (logger.isDebugEnabled()) {
+                logger.debug("publishBind receive service id {}", context.getData(Dict.SERVICE_ID));
+            }
             returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtils.getFederatedRoles(req.getRoleMap()),
-                    ModelUtils.getFederatedRolesModel(req.getModelMap())
+                    ModelUtil.getFederatedRoles(req.getRoleMap()),
+                    ModelUtil.getFederatedRolesModel(req.getModelMap())
             );
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
@@ -349,8 +355,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     }
 
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    public  void  restore(){
 
         List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
         List<RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
@@ -359,13 +364,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 try {
                     byte[] data = decoder.decode(v.content.getBytes());
                     PublishRequest req = PublishRequest.parseFrom(data);
-                    logger.info("restore publishLoadModel req {}", req);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("restore publishLoadModel req {}", req);
+                    }
                     Context context = new BaseContext();
                     context.putData(Dict.SERVICE_ID, req.getServiceId());
                     modelManager.publishLoadModel(context,
                             new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                            ModelUtils.getFederatedRoles(req.getRoleMap()),
-                            ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                            ModelUtil.getFederatedRoles(req.getRoleMap()),
+                            ModelUtil.getFederatedRolesModel(req.getModelMap()));
                 } catch (Exception e) {
                     logger.error("restore publishLoadModel error", e);
                     e.printStackTrace();
@@ -377,14 +384,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 try {
                     byte[] data = decoder.decode(v.content.getBytes());
                     PublishRequest req = PublishRequest.parseFrom(data);
-
-                    logger.info("restore publishOnlineModel req {} base64 {}", req, v);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("restore publishOnlineModel req {} base64 {}", req, v);
+                    }
                     Context context = new BaseContext();
                     context.putData(Dict.SERVICE_ID, req.getServiceId());
                     modelManager.publishOnlineModel(context,
                             new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                            ModelUtils.getFederatedRoles(req.getRoleMap()),
-                            ModelUtils.getFederatedRolesModel(req.getModelMap()));
+                            ModelUtil.getFederatedRoles(req.getRoleMap()),
+                            ModelUtil.getFederatedRolesModel(req.getModelMap()));
                 } catch (Exception e) {
                     logger.error("restore publishOnlineModel error", e);
                     e.printStackTrace();
@@ -392,9 +400,14 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             });
         }
-
-
     }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+       // restore();
+    }
+
+
 
 
 }
