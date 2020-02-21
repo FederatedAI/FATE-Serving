@@ -1,10 +1,11 @@
 package com.webank.ai.fate.serving;
 
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
-import com.webank.ai.fate.register.loadbalance.LoadBalancer;
-import com.webank.ai.fate.register.loadbalance.RandomLoadBalance;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
@@ -36,15 +37,14 @@ public class SpringConfig {
 
     @Bean
     ZookeeperRegistry getServiceRegistry() {
-
         String useRegisterString = com.webank.ai.fate.serving
-                .core.bean.Configuration.getProperty("useRegister");
-        if (Boolean.valueOf(useRegisterString))
+                .core.bean.Configuration.getProperty(Dict.USE_REGISTER,"true");
+        if (Boolean.valueOf(useRegisterString)) {
             return ZookeeperRegistry.getRegistery(com.webank.ai.fate.serving.core.bean.Configuration.getProperty("zk.url"), "serving",
                     "online", com.webank.ai.fate.serving.core.bean.Configuration.getPropertyInt(Dict.PORT));
-        else
+        } else {
             return null;
-
+        }
     }
 
     @Bean
@@ -52,13 +52,10 @@ public class SpringConfig {
         return new MetricRegistry();
     }
 
-
     @Bean
     public Meter requestMeter(MetricRegistry metrics) {
         return metrics.meter("request");
     }
-
-
 
     @Bean
     public Counter pendingJobs(MetricRegistry metrics) {
@@ -67,7 +64,6 @@ public class SpringConfig {
 
     @Bean
     public ConsoleReporter consoleReporter(MetricRegistry metrics) {
-
         return ConsoleReporter.forRegistry(metrics)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
@@ -84,13 +80,6 @@ public class SpringConfig {
         DefaultRouterService routerService = new DefaultRouterService();
         routerService.setRegistry(zookeeperRegistry);
         return routerService;
-
     }
-
-
-
-
-
-
 
 }

@@ -1,18 +1,16 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
-import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.FeatureBinningMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.TransformMeta;
-import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningParam;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningResult;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.IVParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +18,7 @@ import java.util.Map;
 
 
 public class HeteroFeatureBinning extends BaseModel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(HeteroFeatureBinning.class);
     private Map<String, List<Double>> splitPoints;
     private List<Long> transformCols;
     private List<String> header;
@@ -28,7 +26,7 @@ public class HeteroFeatureBinning extends BaseModel {
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        LOGGER.info("start init Feature Binning class");
+        logger.info("start init Feature Binning class");
         this.needRun = false;
         this.splitPoints = new HashMap<>(8);
 
@@ -48,16 +46,15 @@ public class HeteroFeatureBinning extends BaseModel {
                 this.splitPoints.put(key, splitPoints);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("init model error:", ex);
             return StatusCode.ILLEGALDATA;
         }
-        LOGGER.info("Finish init Feature Binning class");
+        logger.info("Finish init Feature Binning class");
         return StatusCode.OK;
     }
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        LOGGER.info("Start Feature Binning predict");
         HashMap<String, Object> outputData = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
@@ -85,12 +82,12 @@ public class HeteroFeatureBinning extends BaseModel {
             }
             outputData.put(colName, colIndex);
 		    }catch(Throwable e){
-		        LOGGER.error("HeteroFeatureBinning error" ,e);
+		        logger.error("HeteroFeatureBinning error" ,e);
             }
         }
-
-        LOGGER.info("HeteroFeatureBinning output {}",outputData);
-
+        if(logger.isDebugEnabled()) {
+            logger.debug("HeteroFeatureBinning output {}", outputData);
+        }
         return outputData;
     }
 

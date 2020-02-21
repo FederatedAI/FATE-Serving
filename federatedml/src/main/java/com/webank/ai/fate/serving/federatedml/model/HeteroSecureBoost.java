@@ -17,22 +17,21 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.google.common.collect.Maps;
-
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelMetaProto.BoostingTreeModelMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.BoostingTreeModelParam;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public abstract class HeteroSecureBoost extends BaseModel {
-    public static final Logger LOGGER = LogManager.getLogger();
-    protected List<Map<Integer, Double>> split_maskdict;
+    public static final Logger logger = LoggerFactory.getLogger(HeteroSecureBoost.class);
+    protected List<Map<Integer, Double>> splitMaskdict;
     protected Map<String, Integer> featureNameFidMapping = Maps.newHashMap();
     protected int treeNum;
     protected List<Double> initScore;
@@ -44,7 +43,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        LOGGER.info("start init HeteroLR class");
+        logger.info("start init HeteroLR class");
         try {
 
             BoostingTreeModelParam param = this.parseModel(BoostingTreeModelParam.parser(), protoParam);
@@ -72,7 +71,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
             ex.printStackTrace();
             return StatusCode.ILLEGALDATA;
         }
-        LOGGER.info("Finish init HeteroSecureBoost class");
+        logger.info("Finish init HeteroSecureBoost class");
         return StatusCode.OK;
     }
 

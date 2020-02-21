@@ -22,23 +22,26 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class TestFile implements FeatureData {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(TestFile.class);
+
 
     @Override
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
         try {
+
             List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
             lines.forEach(line -> {
                 for (String kv : StringUtils.split(line, ",")) {
@@ -49,7 +52,7 @@ public class TestFile implements FeatureData {
             returnResult.setData(data);
             returnResult.setRetcode(InferenceRetCode.OK);
         } catch (Exception ex) {
-            LOGGER.error(ex);
+            logger.error(ex.getMessage());
             returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
         }
         return returnResult;

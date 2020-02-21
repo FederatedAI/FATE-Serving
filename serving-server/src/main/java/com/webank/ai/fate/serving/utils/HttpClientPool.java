@@ -16,9 +16,8 @@
 
 package com.webank.ai.fate.serving.utils;
 
-import com.webank.ai.eggroll.core.utils.ObjectTransform;
-
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -39,8 +38,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -50,7 +49,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class HttpClientPool {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(HttpClientPool.class);
     private static PoolingHttpClientConnectionManager poolConnManager;
     private static RequestConfig requestConfig;
     private static CloseableHttpClient httpClient;
@@ -89,7 +88,7 @@ public class HttpClientPool {
                     connectTimeout).build();
             httpClient = getConnection();
         } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException ex) {
-            LOGGER.error("init http client pool failed:", ex);
+            logger.error("init http client pool failed:", ex);
         }
     }
 
@@ -145,15 +144,30 @@ public class HttpClientPool {
             EntityUtils.consume(entity);
             return result;
         } catch (IOException ex) {
-            LOGGER.error("get http response failed:", ex);
+            logger.error("get http response failed:", ex);
             return null;
         } finally {
             try {
-                if (response != null)
+                if (response != null) {
                     response.close();
+                }
             } catch (IOException ex) {
-                LOGGER.error("get http response failed:", ex);
+                logger.error("get http response failed:", ex);
             }
         }
+    }
+
+    public static String transferPost(String url, Map<String, Object> requestData) {
+        HttpPost httpPost = new HttpPost(url);
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(60000)
+                .setConnectTimeout(60000)
+                .setSocketTimeout(60000).build();
+        httpPost.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
+        httpPost.setConfig(requestConfig);
+        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);
+        stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
+        httpPost.setEntity(stringEntity);
+        return getResponse(httpPost);
     }
 }

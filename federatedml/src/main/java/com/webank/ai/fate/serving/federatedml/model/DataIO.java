@@ -22,14 +22,14 @@ import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class DataIO extends BaseModel {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(DataIO.class);
     private DataIOMeta dataIOMeta;
     private DataIOParam dataIOParam;
     private Imputer imputer;
@@ -39,28 +39,29 @@ public class DataIO extends BaseModel {
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        LOGGER.info("start init DataIO class");
+        logger.info("start init DataIO class");
         try {
             this.dataIOMeta = this.parseModel(DataIOMeta.parser(), protoMeta);
             this.dataIOParam = this.parseModel(DataIOParam.parser(), protoParam);
             this.isImputer = this.dataIOMeta.getImputerMeta().getIsImputer();
-            LOGGER.info("data io isImputer {}", this.isImputer);
+            logger.info("data io isImputer {}", this.isImputer);
             if (this.isImputer) {
                 this.imputer = new Imputer(this.dataIOMeta.getImputerMeta().getMissingValueList(),
                         this.dataIOParam.getImputerParam().getMissingReplaceValue());
             }
 
             this.isOutlier = this.dataIOMeta.getOutlierMeta().getIsOutlier();
-            LOGGER.info("data io isOutlier {}", this.isOutlier);
+            logger.info("data io isOutlier {}", this.isOutlier);
             if (this.isOutlier) {
                 this.outlier = new Outlier(this.dataIOMeta.getOutlierMeta().getOutlierValueList(),
                         this.dataIOParam.getOutlierParam().getOutlierReplaceValue());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            logger.error("init DataIo error",ex);
             return StatusCode.ILLEGALDATA;
         }
-        LOGGER.info("Finish init DataIO class");
+        logger.info("Finish init DataIO class");
         return StatusCode.OK;
     }
 

@@ -19,8 +19,8 @@ package com.webank.ai.fate.register.common;
 
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -32,7 +32,7 @@ import java.util.concurrent.Executor;
 public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildListener> implements ZookeeperClient {
 
 
-    private static final Logger logger = LogManager.getLogger(AbstractZookeeperClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractZookeeperClient.class);
 
     private final URL url;
 

@@ -16,36 +16,38 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.atomic.AtomicLong;
 
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
-    private static final Logger LOGGER = LogManager.getLogger(LOGGER_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static ApplicationContext applicationContext;
+    public static AtomicLong  requestInProcess= new AtomicLong(0);
     long timestamp;
     LoggerPrinter loggerPrinter;
     String actionType;
     Map dataMap = Maps.newHashMap();
-    Timer.Context  timerContext;
-    long  costTime;
-    MetricRegistry  metricRegistry;
-    public BaseContext(){
+    Timer.Context timerContext;
+    long costTime;
+    MetricRegistry metricRegistry;
+
+    public BaseContext() {
 
     }
 
-    public BaseContext(LoggerPrinter loggerPrinter,String  actionType,MetricRegistry metricRegistry) {
+    public BaseContext(LoggerPrinter loggerPrinter, String actionType, MetricRegistry metricRegistry) {
         this.loggerPrinter = loggerPrinter;
-        this.metricRegistry =  metricRegistry;
+        this.metricRegistry = metricRegistry;
         timestamp = System.currentTimeMillis();
         this.actionType = actionType;
     }
@@ -69,12 +71,13 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public void preProcess() {
         try {
-            Timer timer = metricRegistry.timer(actionType+"_timer");
-            Counter counter = metricRegistry.counter(actionType+"_couter");
+            requestInProcess.addAndGet(1);
+            Timer timer = metricRegistry.timer(actionType + "_timer");
+            Counter counter = metricRegistry.counter(actionType + "_couter");
             counter.inc();
             timerContext = timer.time();
-        }catch(Exception e){
-            LOGGER.error("preProcess error" ,e);
+        } catch (Exception e) {
+            logger.error("preProcess error", e);
 
         }
     }
@@ -116,18 +119,18 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public void postProcess(Req req, Resp resp) {
         try {
-            if(timerContext!=null){
-               costTime = timerContext.stop()/1000000;
-            }else{
-                costTime = System.currentTimeMillis() -  timestamp;
+            requestInProcess.decrementAndGet();
+            if (timerContext != null) {
+                costTime = timerContext.stop() / 1000000;
+            } else {
+                costTime = System.currentTimeMillis() - timestamp;
             }
             if (loggerPrinter != null) {
                 loggerPrinter.printLog(this, req, resp);
             }
 
         } catch (Throwable e) {
-
-            LOGGER.error("postProcess error" ,e);
+            logger.error("postProcess error", e);
         }
     }
 
@@ -154,7 +157,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public Context subContext() {
         Map newDataMap = Maps.newHashMap(dataMap);
-        return new BaseContext(this.loggerPrinter, this.timestamp, dataMap);
+        return new BaseContext(this.loggerPrinter, this.timestamp, newDataMap);
     }
 
     @Override
@@ -164,9 +167,161 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public long getCostTime() {
-        return  costTime;
+        return costTime;
     }
 
+    @Override
+    public GrpcType getGrpcType() {
+        return (GrpcType) dataMap.get(Dict.GRPC_TYPE);
+    }
 
+    @Override
+    public void setGrpcType(GrpcType grpcType) {
+        dataMap.put(Dict.GRPC_TYPE, grpcType);
+    }
 
+    @Override
+    public String getVersion() {
+        return (String) dataMap.get(Dict.VERSION);
+    }
+
+    @Override
+    public void setVersion(String version) {
+        dataMap.put(Dict.VERSION, version);
+    }
+
+    @Override
+    public String getGuestAppId() {
+        return (String) dataMap.get(Dict.GUEST_APP_ID);
+    }
+
+    @Override
+    public void setGuestAppId(String guestAppId) {
+        dataMap.put(Dict.GUEST_APP_ID, guestAppId);
+    }
+
+    @Override
+    public String getHostAppid() {
+        return (String) dataMap.get(Dict.HOST_APP_ID);
+    }
+
+    @Override
+    public void setHostAppid(String hostAppid) {
+        dataMap.put(Dict.HOST_APP_ID, hostAppid);
+    }
+
+    @Override
+    public RouterInfo getRouterInfo() {
+        return (RouterInfo) dataMap.get(Dict.ROUTER_INFO);
+    }
+
+    @Override
+    public void setRouterInfo(RouterInfo routerInfo) {
+        dataMap.put(Dict.ROUTER_INFO, routerInfo);
+    }
+
+    @Override
+    public Object getResultData() {
+        return dataMap.get(Dict.RESULT_DATA);
+    }
+
+    @Override
+    public void setResultData(Object resultData) {
+        dataMap.put(Dict.RESULT_DATA, resultData);
+    }
+
+    @Override
+    public String getReturnCode() {
+        return (String) dataMap.get(Dict.RETURN_CODE);
+    }
+
+    @Override
+    public void setReturnCode(String returnCode) {
+        dataMap.put(Dict.RETURN_CODE, returnCode);
+    }
+
+    @Override
+    public long getDownstreamCost() {
+
+        if(dataMap.get(Dict.DOWN_STREAM_COST)!=null) {
+
+            return (long) dataMap.get(Dict.DOWN_STREAM_COST);
+        }
+        return 0;
+    }
+
+    @Override
+    public void setDownstreamCost(long downstreamCost) {
+        dataMap.put(Dict.DOWN_STREAM_COST, downstreamCost);
+    }
+
+    @Override
+    public long getDownstreamBegin() {
+        return (long) dataMap.get(Dict.DOWN_STREAM_BEGIN);
+    }
+
+    @Override
+    public void setDownstreamBegin(long downstreamBegin) {
+        dataMap.put(Dict.DOWN_STREAM_BEGIN, downstreamBegin);
+    }
+
+    @Override
+    public long getRouteBasis() {
+        return (long) dataMap.get(Dict.ROUTE_BASIS);
+    }
+
+    @Override
+    public void setRouteBasis(long routeBasis) {
+        dataMap.put(Dict.ROUTE_BASIS, routeBasis);
+    }
+
+    @Override
+    public String getSourceIp() {
+        return (String) dataMap.get(Dict.SOURCE_IP);
+    }
+
+    @Override
+    public void setSourceIp(String sourceIp) {
+        dataMap.put(Dict.SOURCE_IP, sourceIp);
+    }
+
+    @Override
+    public String getServiceName() {
+        return (String) dataMap.get(Dict.SERVICE_NAME);
+    }
+
+    @Override
+    public void setServiceName(String serviceName) {
+        dataMap.put(Dict.SERVICE_NAME, serviceName);
+    }
+
+    @Override
+    public String getCallName() {
+        return (String) dataMap.get(Dict.CALL_NAME);
+    }
+
+    @Override
+    public void setCallName(String callName) {
+        dataMap.put(Dict.CALL_NAME, callName);
+    }
+
+    @Override
+    public String getServiceId() {
+        return (String) this.dataMap.getOrDefault(Dict.SERVICE_ID, "");
+    }
+
+    @Override
+    public void setServiceId(String serviceId) {
+        dataMap.put(Dict.SERVICE_ID, serviceId);
+    }
+
+    @Override
+    public String getApplyId() {
+        return (String) this.dataMap.getOrDefault(Dict.APPLY_ID, "");
+    }
+
+    @Override
+    public void setApplyId(String applyId) {
+        dataMap.put(Dict.APPLY_ID, applyId);
+    }
 }

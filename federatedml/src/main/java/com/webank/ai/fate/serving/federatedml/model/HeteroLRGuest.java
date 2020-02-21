@@ -22,8 +22,8 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.Map;
 import static java.lang.Math.exp;
 
 public class HeteroLRGuest extends HeteroLR {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(HeteroLRGuest.class);
 
     private double sigmod(double x) {
         return 1. / (1. + exp(-x));
@@ -43,32 +43,36 @@ public class HeteroLRGuest extends HeteroLR {
         Map<String, Object> result = new HashMap<>(8);
         Map<String, Double> forwardRet = forward(inputData);
         double score = forwardRet.get(Dict.SCORE);
-        LOGGER.info("caseid {} guest score:{}", context.getCaseId(),score);
+
+        logger.info("caseid {} guest score:{}", context.getCaseId(), score);
+
         try {
             ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
             if(hostPredictResponse !=null) {
                 result.put(Dict.RET_CODE,hostPredictResponse.getRetcode());
-                LOGGER.info("caseid {} host response is {}",context.getCaseId(),hostPredictResponse.getData());
+                if(logger.isDebugEnabled()) {
+                    logger.debug("caseid {} host response is {}", context.getCaseId(), hostPredictResponse.getData());
+                }
                 if (hostPredictResponse.getData() != null && hostPredictResponse.getData().get(Dict.SCORE) != null) {
                     double hostScore = ((Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
-                    LOGGER.info("caseid {} host score:{}",context.getCaseId(), hostScore);
+                    logger.info("caseid {} host score:{}", context.getCaseId(), hostScore);
                     score += hostScore;
                 }
             }else{
-                LOGGER.info("caseid {} host response is null",context.getCaseId());
+                logger.info("caseid {} host response is null",context.getCaseId());
             }
         } catch (io.grpc.StatusRuntimeException ex) {
-            LOGGER.error("get host predict failed:", ex);
+            logger.error("get host predict failed:", ex);
             result.put(Dict.RET_CODE, InferenceRetCode.NETWORK_ERROR);
         }
         catch(Exception ex){
-            LOGGER.error("get host predict failed:", ex);
+            logger.error("get host predict failed:", ex);
             result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
         }
         double prob = sigmod(score);
         result.put(Dict.PROB, prob);
-        result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE + ":{}", forwardRet.get(Dict.MODEL_WRIGHT_HIT_RATE));
-        result.put(Dict.GUEST_INPUT_DATA_HIT_RATE + ":{}", forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
+        //result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE + ":{}", forwardRet.get(Dict.MODEL_WRIGHT_HIT_RATE));
+        //result.put(Dict.GUEST_INPUT_DATA_HIT_RATE + ":{}", forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
         return result;
     }
 }

@@ -27,7 +27,8 @@ import java.util.Map;
 
 public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
     private final String site = "host";
-    private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
+    // need to change
+    private final String modelId = "HeteroSecureBoostingTreeHost";
 
 
     // DefaultCacheManager cacheManager = BaseContext.applicationContext.getBean(DefaultCacheManager.class);
@@ -43,7 +44,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
                 ++featureHit;
             }
         }
-        LOGGER.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
+        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
 
     }
     */
@@ -71,9 +72,9 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-
-        LOGGER.info("HeteroSecureBoostingTreeHost FederatedParams {}", predictParams);
-
+        if(logger.isDebugEnabled()) {
+            logger.debug("HeteroSecureBoostingTreeHost FederatedParams {}", predictParams);
+        }
         Map<String, Object> input = inputData.get(0);
 
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
