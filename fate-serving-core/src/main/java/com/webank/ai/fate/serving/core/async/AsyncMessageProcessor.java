@@ -5,17 +5,8 @@ import com.webank.ai.fate.serving.core.disruptor.AsyncMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AsyncMessageProcessor {
+public class AsyncMessageProcessor extends AbstractAsyncMessageProcessor {
     Logger logger =  LoggerFactory.getLogger(AsyncMessageProcessor.class);
-
-    private static AsyncMessageProcessor instance = null;
-
-    public static AsyncMessageProcessor getInstance() {
-        if (instance == null) {
-            instance = new AsyncMessageProcessor();
-        }
-        return instance;
-    }
 
     @Subscribe(name = Dict.EVENT_INFERENCE)
     public void processInferenceEvent(AsyncMessageEvent event) {

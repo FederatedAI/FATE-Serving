@@ -9,10 +9,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class AsyncSubscribeRegister implements ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
     Logger logger = LoggerFactory.getLogger(AsyncSubscribeRegister.class);
@@ -24,23 +24,25 @@ public class AsyncSubscribeRegister implements ApplicationContextAware, Applicat
         this.applicationContext = context;
     }
 
-    public static final Map<String, List<Method>> SUBSCRIBE_METHOD_MAP = new HashMap<>();
+    public static final Map<String, Set<Method>> SUBSCRIBE_METHOD_MAP = new HashMap<>();
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
-        AsyncMessageProcessor bean = applicationContext.getBean(AsyncMessageProcessor.class);
-
-        Method[] methods = bean.getClass().getMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(Subscribe.class)) {
-                Subscribe subscribe = method.getAnnotation(Subscribe.class);
-                if (subscribe != null) {
-                    List<Method> methodList = SUBSCRIBE_METHOD_MAP.get(subscribe.name());
-                    if (methodList == null) {
-                        methodList = new ArrayList<>();
+        String[] beans = applicationContext.getBeanNamesForType(AbstractAsyncMessageProcessor.class);
+        for (String beanName : beans) {
+            AbstractAsyncMessageProcessor eventProcessor =  applicationContext.getBean(beanName,AbstractAsyncMessageProcessor.class);
+            Method[] methods = eventProcessor.getClass().getMethods();
+            for (Method method : methods) {
+                if (method.isAnnotationPresent(Subscribe.class)) {
+                    Subscribe subscribe = method.getAnnotation(Subscribe.class);
+                    if (subscribe != null) {
+                        Set<Method> methodList = SUBSCRIBE_METHOD_MAP.get(subscribe.name());
+                        if (methodList == null) {
+                            methodList = new HashSet<>();
+                        }
+                        methodList.add(method);
+                        SUBSCRIBE_METHOD_MAP.put(subscribe.name(), methodList);
                     }
-                    methodList.add(method);
-                    SUBSCRIBE_METHOD_MAP.put(subscribe.name(), methodList);
                 }
             }
         }

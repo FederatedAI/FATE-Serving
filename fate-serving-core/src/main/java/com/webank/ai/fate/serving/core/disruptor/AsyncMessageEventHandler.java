@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -30,11 +30,13 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
     public void onEvent(AsyncMessageEvent event, long sequence, boolean endOfBatch) throws Exception {
         String eventName = event.getName();
 
+        logger.info("event: {}, {}", eventName, event);
+
         if (StringUtils.isBlank(eventName)) {
             throw new AsyncMessageException("eventName is blank");
         }
 
-        List<Method> methods = AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP.get(eventName);
+        Set<Method> methods = AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP.get(eventName);
         if (methods == null || methods.size() == 0) {
             throw new AsyncMessageException(eventName + " event not subscribe");
         }
@@ -43,10 +45,13 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
             executorService.submit(() -> {
                 // invoke event processor
                 try {
-                    method.invoke(AsyncMessageProcessor.getInstance(), event);
+                    Class<?> declaringClass = method.getDeclaringClass();
+                    method.invoke(declaringClass.newInstance(), event);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
                     e.printStackTrace();
                 }
             });
