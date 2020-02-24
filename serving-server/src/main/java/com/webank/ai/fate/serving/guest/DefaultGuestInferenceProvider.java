@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.guest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.adapter.processing.PostProcessing;
 import com.webank.ai.fate.serving.adapter.processing.PreProcessing;
@@ -29,7 +30,7 @@ import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
-import com.webank.ai.fate.serving.manger.InferenceWorkerManager;
+import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -73,26 +74,41 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         String serviceId = inferenceRequest.getServiceId();
         context.setServiceId(serviceId);
         context.setApplyId(inferenceRequest.getApplyId());
-
-        if (StringUtils.isEmpty(modelNamespace)  ) {
+        String modelKey = "";
+        if (StringUtils.isEmpty(modelNamespace)&& StringUtils.isEmpty(modelName) ) {
             if(StringUtils.isNotEmpty(inferenceRequest.getServiceId())){
-                modelNamespace = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getServiceId());
-            }else if(inferenceRequest.haveAppId()) {
-                modelNamespace = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getAppid());
+                modelKey = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getServiceId());
             }
+
+            if (StringUtils.isEmpty(modelKey)) {
+                inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
+                return inferenceResult;
+            }
+            String[]  modelKeyElement = modelKey.split(":");
+            Preconditions.checkArgument(modelKeyElement!=null&&modelKeyElement.length==2);
+            modelName = modelKeyElement[1];
+            modelNamespace = modelKeyElement[0];
+
+//            else if(inferenceRequest.haveAppId()) {
+//                modelKey = modelManager.getModelNamespaceByPartyId(context,inferenceRequest.getAppid());
+//            }
         }
-        if (StringUtils.isEmpty(modelNamespace)) {
-            inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
-            return inferenceResult;
-        }
+
+
+
         ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(context,modelNamespace);
         PipelineTask model;
-        if (StringUtils.isEmpty(modelName)) {
-            modelName = modelNamespaceData.getUsedModelName();
-            model = modelNamespaceData.getUsedModel();
-        } else {
-            model = modelManager.getModel(context,modelName, modelNamespace);
-        }
+//        if (StringUtils.isEmpty(modelName)) {
+//            modelName = modelNamespaceData.getUsedModelName();
+//            model = modelNamespaceData.getUsedModel();
+//        } else {
+//            model = modelManager.getModel(context,modelName, modelNamespace);
+//        }
+        Preconditions.checkArgument(StringUtils.isNotEmpty(modelName));
+        Preconditions.checkArgument(StringUtils.isNotEmpty(modelNamespace));
+        Preconditions.checkArgument(modelNamespaceData!=null);
+        model =  modelManager.getModel(context,modelName, modelNamespace);
+
         if (model == null) {
             inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
             return inferenceResult;
@@ -107,7 +123,6 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         if (rawFeatureData == null) {
             inferenceResult.setRetcode(InferenceRetCode.EMPTY_DATA + 1000);
             inferenceResult.setRetmsg("Can not parse data json.");
-            logInference(context, inferenceRequest, modelNamespaceData, inferenceResult, 0, false, false);
             return inferenceResult;
         }
 
@@ -126,7 +141,6 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         if (featureData == null) {
             inferenceResult.setRetcode(InferenceRetCode.NUMERICAL_ERROR + 1000);
             inferenceResult.setRetmsg("Can not preprocessing data");
-            logInference(context, inferenceRequest, modelNamespaceData, inferenceResult, 0, false, false);
             return inferenceResult;
         }
         Map<String, Object> predictParams = new HashMap<>(8);
@@ -156,7 +170,6 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
             }
         }
         inferenceResult = handleResult(context, inferenceRequest, modelNamespaceData, inferenceResult);
-
 
         return inferenceResult;
     }

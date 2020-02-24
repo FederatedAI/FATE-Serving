@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.manger;
+package com.webank.ai.fate.serving.manager;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -22,6 +22,7 @@ import com.google.common.cache.LoadingCache;
 import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.exceptions.LoadModelException;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelCache;
 import org.slf4j.Logger;
@@ -31,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class DefaultModelCache implements ModelCache {
@@ -44,7 +44,7 @@ public class DefaultModelCache implements ModelCache {
     public DefaultModelCache() {
         modelCache = CacheBuilder.newBuilder()
                // .expireAfterAccess(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_ACCESS_TTL), TimeUnit.HOURS)
-                .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_MAX_SIZE))
+                .maximumSize(Configuration.getPropertyInt(Dict.PROPERTY_MODEL_CACHE_MAX_SIZE,100))
                 .build(
                         new CacheLoader<String, PipelineTask>() {
                     @Override
@@ -57,7 +57,12 @@ public class DefaultModelCache implements ModelCache {
     @Override
     public PipelineTask loadModel(Context context, String modelKey) {
         String[] modelKeyFields = ModelUtil.splitModelKey(modelKey);
-        return modelLoader.loadModel(context,modelKeyFields[0], modelKeyFields[1]);
+        PipelineTask pipelineTask = modelLoader.loadModel(context,modelKeyFields[0], modelKeyFields[1]);
+        if(pipelineTask==null){
+            logger.error("load model {} error,model loader return null",modelKey);
+            throw  new LoadModelException();
+        }
+        return  pipelineTask;
     }
 
     @Override

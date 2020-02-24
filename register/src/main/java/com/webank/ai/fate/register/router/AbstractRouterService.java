@@ -22,7 +22,7 @@ import com.webank.ai.fate.register.common.AbstractRegistry;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.common.RouterModel;
 import com.webank.ai.fate.register.interfaces.Registry;
-import com.webank.ai.fate.register.loadbalance.DefaultLoadBalancerFactory;
+import com.webank.ai.fate.register.loadbalance.DefaultLoadBalanceFactory;
 import com.webank.ai.fate.register.loadbalance.LoadBalanceModel;
 import com.webank.ai.fate.register.loadbalance.LoadBalancer;
 import com.webank.ai.fate.register.loadbalance.LoadBalancerFactory;
@@ -37,7 +37,7 @@ import java.util.List;
 
 public abstract class AbstractRouterService implements RouterService {
 
-    protected LoadBalancerFactory loadBalancerFactory = new DefaultLoadBalancerFactory();
+    protected LoadBalancerFactory loadBalancerFactory = new DefaultLoadBalanceFactory();
     protected AbstractRegistry registry;
     Logger logger = LoggerFactory.getLogger(AbstractRouterService.class);
 
