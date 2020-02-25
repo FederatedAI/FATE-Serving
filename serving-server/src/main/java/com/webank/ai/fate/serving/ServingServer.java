@@ -32,7 +32,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
 import com.webank.ai.fate.serving.service.*;
-import com.webank.ai.fate.serving.utils.HttpClientPool;
+import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;

@@ -7,6 +7,10 @@ public class AsyncMessageEvent<T> {
 
     private String name;
 
+    private long timestamp;
+
+    private String ip;
+
     private T data;
 
     public String getName() {
@@ -23,6 +27,22 @@ public class AsyncMessageEvent<T> {
 
     public T getData() {
         return data;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public AsyncMessageEvent() {
