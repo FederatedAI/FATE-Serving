@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.core.disruptor;
 
 import com.lmax.disruptor.EventTranslatorVararg;
 import com.lmax.disruptor.RingBuffer;
-import com.webank.ai.fate.serving.core.disruptor.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 
 /**
