@@ -36,15 +36,16 @@ import static com.webank.ai.fate.register.common.Constants.*;
 public class NetUtils {
 
     public static void main(String[] args) {
-        System.out.println(NetUtils.getLocalHost());
-        System.out.println(NetUtils.getAvailablePort());
-        System.out.println(NetUtils.getLocalAddress());
-        System.out.println(NetUtils.getLocalIp());
-        System.out.println(NetUtils.getIpByHost("127.0.0.1"));
-        System.out.println(NetUtils.getLocalAddress0("127.0.0.1"));
+//        System.out.println(NetUtils.getLocalHost());
+//        System.out.println(NetUtils.getAvailablePort());
+//        System.out.println(NetUtils.getLocalAddress());
+//        System.out.println(NetUtils.getLocalIp());
+//        System.out.println(NetUtils.getIpByHost("127.0.0.1"));
+        System.out.println(NetUtils.getLocalAddress0(""));
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
+    private static final Logger logger = null;
+            //LoggerFactory.getLogger(NetUtils.class);
     // returned port range is [30000, 39999]
     private static final int RND_PORT_START = 30000;
     private static final int RND_PORT_RANGE = 10000;
@@ -207,7 +208,7 @@ public class NetUtils {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
-        InetAddress localAddress = getLocalAddress0("eth0");
+        InetAddress localAddress = getLocalAddress0("");
         LOCAL_ADDRESS = localAddress;
         return localAddress;
     }
@@ -228,25 +229,20 @@ public class NetUtils {
 
     public static String getLocalIp() {
 
-        String sysType = System.getProperties().getProperty("os.name");
-        String ip;
-
         try {
-            if (sysType.toLowerCase().startsWith("win")) {
-
-                String localIp = InetAddress.getLocalHost().getHostAddress();
-
-                if (localIp != null) {
-                    return localIp;
-                }
-            } else {
-                ip = getIpByEthNum("eth0");
-                if (ip != null) {
-                    return ip;
-
-
-                }
+            InetAddress inetAddress = getLocalAddress0("eth0");
+            if(inetAddress!=null){
+                return  inetAddress.getHostAddress();
             }
+            else{
+                inetAddress = getLocalAddress0("");
+            }
+            if(inetAddress!=null){
+                return inetAddress.getHostAddress();
+            }else{
+                throw  new RuntimeException("can not get local ip");
+            }
+
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
         }
@@ -290,6 +286,8 @@ public class NetUtils {
             Optional<InetAddress> addressOp = toValidAddress(localAddress);
             if (addressOp.isPresent()) {
                 return addressOp.get();
+            }else{
+                localAddress=null;
             }
         } catch (Throwable e) {
             logger.warn(e.getMessage());
