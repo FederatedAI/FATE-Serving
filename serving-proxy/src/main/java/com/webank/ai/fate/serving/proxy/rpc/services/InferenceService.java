@@ -91,7 +91,8 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
 
-        DisruptorUtil.producer(Dict.EVENT_INFERENCE, inferenceReqMap);
+        // for async monitor test
+//        DisruptorUtil.producer(Dict.EVENT_INFERENCE, "SYNC_RUN", inferenceReqMap);
 
         int timeWait = timeout;
 

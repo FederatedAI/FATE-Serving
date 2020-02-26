@@ -25,6 +25,7 @@ import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.disruptor.DisruptorUtil;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.GuestInferenceProvider;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
@@ -69,13 +70,17 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
         InferenceRequest inferenceRequest = null;
-        Context context = new BaseContext(new GuestInferenceLoggerPrinter(),actionType.name(),metricRegistry);
+        Context context = new BaseContext(new GuestInferenceLoggerPrinter(), actionType.name(), metricRegistry);
+        context.setInterfaceName(Dict.EVENT_INFERENCE);
         context.preProcess();
 
         try {
             try {
                 context.putData(Dict.ORIGIN_REQUEST, req.getBody().toStringUtf8());
                 inferenceRequest = (InferenceRequest) JSON.parseObject(req.getBody().toStringUtf8(), InferenceRequest.class);
+
+                // for async monitor test
+//                DisruptorUtil.producer(Dict.EVENT_INFERENCE, actionType.name() + "_ERROR", inferenceRequest);
 
                 if (inferenceRequest != null) {
                     if (inferenceRequest.getCaseid().length() == 0) {

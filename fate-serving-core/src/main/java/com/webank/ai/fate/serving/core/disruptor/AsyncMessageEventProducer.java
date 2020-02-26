@@ -18,7 +18,9 @@ public class AsyncMessageEventProducer {
     public static final EventTranslatorVararg<AsyncMessageEvent> TRANSLATOR =
             (event, sequence, args) -> {
                 event.setName(String.valueOf(args[0]));
-                event.setData(args[1]);
+                event.setAction(String.valueOf(args[1]));
+                event.setData(args[2]);
+
                 event.setIp(GetSystemInfo.getLocalIp());
                 event.setTimestamp(System.currentTimeMillis());
             };

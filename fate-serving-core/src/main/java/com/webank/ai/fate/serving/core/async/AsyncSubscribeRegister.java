@@ -27,12 +27,12 @@ public class AsyncSubscribeRegister implements ApplicationListener<ApplicationRe
                 if (method.isAnnotationPresent(Subscribe.class)) {
                     Subscribe subscribe = method.getAnnotation(Subscribe.class);
                     if (subscribe != null) {
-                        Set<Method> methodList = SUBSCRIBE_METHOD_MAP.get(subscribe.name());
+                        Set<Method> methodList = SUBSCRIBE_METHOD_MAP.get(subscribe.value());
                         if (methodList == null) {
                             methodList = new HashSet<>();
                         }
                         methodList.add(method);
-                        SUBSCRIBE_METHOD_MAP.put(subscribe.name(), methodList);
+                        SUBSCRIBE_METHOD_MAP.put(subscribe.value(), methodList);
                     }
                 }
             }

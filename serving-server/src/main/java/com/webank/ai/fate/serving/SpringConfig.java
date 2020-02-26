@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 @ConfigurationProperties
 @PropertySource(value = "file:${user.dir}/conf/serving-server.properties", ignoreResourceNotFound = false)
 @SpringBootApplication
+@EnableScheduling
 @Service
 public class SpringConfig {
 

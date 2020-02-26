@@ -33,6 +33,13 @@ public class DisruptorUtil {
         }
     }
 
+    /**
+     * event producer
+     * args[0] event name, e.g. interface name, use to @Subscribe value
+     * args[1] event action
+     * args[2] params
+     * @param args
+     */
     public static void producer(Object... args){
         RingBuffer<AsyncMessageEvent> ringBuffer = disruptor.getRingBuffer();
         AsyncMessageEventProducer producer = new AsyncMessageEventProducer(ringBuffer);

@@ -51,6 +51,10 @@ public interface Context<Req, Resp> {
 
     public Context subContext();
 
+    public String getInterfaceName();
+
+    public void setInterfaceName(String interfaceName);
+
     public String getActionType();
 
     public void setActionType(String actionType);

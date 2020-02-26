@@ -6,13 +6,18 @@ import lombok.Data;
 @Data
 public class AsyncMessageEvent<T> {
 
+    /**
+     * event name, e.g. interface name, use to @Subscribe value
+     */
     private String name;
 
-    private long timestamp;
+    private String action;
+
+    private T data;
 
     private String ip;
 
-    private T data;
+    private long timestamp;
 
     void clear() {
         data = null;
