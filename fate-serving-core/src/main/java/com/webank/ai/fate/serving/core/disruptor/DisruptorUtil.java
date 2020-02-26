@@ -5,7 +5,9 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class DisruptorUtil {
 
     private static Disruptor<AsyncMessageEvent> disruptor = null;
@@ -25,6 +27,8 @@ public class DisruptorUtil {
 
         // Start the Disruptor, starts all threads running
         disruptor.start();
+
+        log.info("disruptor initialized");
     }
 
     public void shutdown() {
@@ -37,7 +41,7 @@ public class DisruptorUtil {
      * event producer
      * args[0] event name, e.g. interface name, use to @Subscribe value
      * args[1] event action
-     * args[2] params
+     * args[2] data params
      * @param args
      */
     public static void producer(Object... args){

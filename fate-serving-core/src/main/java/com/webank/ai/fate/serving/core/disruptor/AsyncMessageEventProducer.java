@@ -3,10 +3,12 @@ package com.webank.ai.fate.serving.core.disruptor;
 import com.lmax.disruptor.EventTranslatorVararg;
 import com.lmax.disruptor.RingBuffer;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Producer
  */
+@Slf4j
 public class AsyncMessageEventProducer {
 
     private final RingBuffer<AsyncMessageEvent> ringBuffer;

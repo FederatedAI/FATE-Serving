@@ -20,7 +20,11 @@ public class AsyncMessageEvent<T> {
     private long timestamp;
 
     void clear() {
-        data = null;
+        this.name = null;
+        this.action = null;
+        this.data = null;
+        this.ip = null;
+        this.timestamp = 0;
     }
 
     public static final EventFactory<AsyncMessageEvent> FACTORY = () -> new AsyncMessageEvent();
