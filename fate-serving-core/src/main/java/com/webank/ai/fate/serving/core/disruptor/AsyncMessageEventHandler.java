@@ -2,7 +2,7 @@ package com.webank.ai.fate.serving.core.disruptor;
 
 import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;
 import com.lmax.disruptor.EventHandler;
-import com.webank.ai.fate.serving.core.async.AsyncMessageProcessor;
+import com.webank.ai.fate.serving.core.async.DefaultAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncSubscribeRegister;
 import com.webank.ai.fate.serving.core.exceptions.AsyncMessageException;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Consumer
  */
 public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent> {
-    Logger logger =  LoggerFactory.getLogger(AsyncMessageProcessor.class);
+    Logger logger =  LoggerFactory.getLogger(DefaultAsyncMessageProcessor.class);
 
     ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new NamedThreadFactory("AsyncMessage", true));

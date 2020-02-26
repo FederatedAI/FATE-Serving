@@ -1,6 +1,6 @@
 package com.webank.ai.fate.serving.proxy.config;
 
-import com.webank.ai.fate.serving.core.async.AsyncMessageProcessor;
+import com.webank.ai.fate.serving.core.async.DefaultAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncSubscribeRegister;
 import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +20,8 @@ public class AsyncMessageConfig {
     }
 
     @Bean
-    public AsyncMessageProcessor asyncSubscribeProcesser() {
-        return new AsyncMessageProcessor();
+    public DefaultAsyncMessageProcessor defaultAsyncMessageProcessor() {
+        return new DefaultAsyncMessageProcessor();
     }
 
 }
