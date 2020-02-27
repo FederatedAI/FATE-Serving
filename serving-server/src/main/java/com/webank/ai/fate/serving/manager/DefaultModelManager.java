@@ -134,8 +134,8 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
                             logger.debug("transform key {} to md5key {}", key, keyMd5);
                         }
                         zookeeperRegistry.addDynamicEnvironment(keyMd5);
-                        zookeeperRegistry.register(FateServer.serviceSets);
                     });
+                    zookeeperRegistry.register(FateServer.serviceSets);
                 }
             }
             if (logger.isDebugEnabled()) {
