@@ -25,7 +25,6 @@ import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
-import com.webank.ai.fate.serving.core.disruptor.DisruptorUtil;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.GuestInferenceProvider;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
