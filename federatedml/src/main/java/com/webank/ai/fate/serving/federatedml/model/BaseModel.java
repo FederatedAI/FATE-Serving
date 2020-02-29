@@ -185,7 +185,7 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
             packetBuilder.setAuth(authBuilder.build());
 			
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
+            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, "true");
             boolean routerByzk = Boolean.valueOf(routerByZkString);
             String address = null;
             if (!routerByzk) {
