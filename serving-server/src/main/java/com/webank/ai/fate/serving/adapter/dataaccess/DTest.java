@@ -21,7 +21,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.utils.HttpClientPool;
+import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -9,6 +9,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.disruptor.DisruptorUtil;
 import com.webank.ai.fate.serving.core.exceptions.NoResultException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
@@ -90,6 +91,9 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
+
+        // for async monitor test
+//        DisruptorUtil.producer(Dict.EVENT_INFERENCE, "SYNC_RUN", inferenceReqMap);
 
         int timeWait = timeout;
 

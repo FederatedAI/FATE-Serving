@@ -23,7 +23,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
-import com.webank.ai.fate.serving.utils.HttpClientPool;
+import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -180,5 +180,8 @@ public class Dict {
     public static final String SERVICENAME_START_INFERENCE_JOB = "startInferenceJob";
     public static final String SERVICENAME_GET_INFERENCE_RESULT = "getInferenceResult";
 
+    // event
+    public static final String EVENT_INFERENCE = "inference";
+    public static final String EVENT_UNARYCALL = "unaryCall";
 
 }

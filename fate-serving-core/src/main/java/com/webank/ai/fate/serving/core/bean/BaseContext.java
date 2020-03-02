@@ -37,6 +37,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public static AtomicLong  requestInProcess= new AtomicLong(0);
     long timestamp;
     LoggerPrinter loggerPrinter;
+    String interfaceName;
     String actionType;
     Map dataMap = Maps.newHashMap();
     Timer.Context timerContext;
@@ -74,8 +75,8 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public void preProcess() {
         try {
             requestInProcess.addAndGet(1);
-            Timer timer = metricRegistry.timer(actionType + "_timer");
-            Counter counter = metricRegistry.counter(actionType + "_couter");
+            Timer timer = metricRegistry.timer(interfaceName + "#" + actionType + "_timer");
+            Counter counter = metricRegistry.counter(interfaceName + "#" + actionType + "_counter");
             counter.inc();
             timerContext = timer.time();
         } catch (Exception e) {
@@ -160,6 +161,16 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public Context subContext() {
         Map newDataMap = Maps.newHashMap(dataMap);
         return new BaseContext(this.loggerPrinter, this.timestamp, newDataMap);
+    }
+
+    @Override
+    public String getInterfaceName() {
+        return interfaceName;
+    }
+
+    @Override
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
     }
 
     @Override
