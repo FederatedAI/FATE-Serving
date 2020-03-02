@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class OverloadMonitor implements Interceptor{
     Logger logger = LoggerFactory.getLogger(OverloadMonitor.class);
-
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         Entry entry = null;

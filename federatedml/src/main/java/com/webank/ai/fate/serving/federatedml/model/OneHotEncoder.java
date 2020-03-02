@@ -114,4 +114,13 @@ public class OneHotEncoder extends BaseModel {
         return this.doublePattern.matcher(str).matches();
     }
 
+    @Override
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
+        return null;
+    }
 }

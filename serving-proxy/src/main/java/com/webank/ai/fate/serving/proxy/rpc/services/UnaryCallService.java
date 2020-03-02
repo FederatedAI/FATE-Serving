@@ -11,9 +11,9 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
+import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 // TODO utu: may load from cfg file is a better choice compare to using annotation?
-@ProxyService(name = "unaryCall",preChain = {
+@FateService(name = "unaryCall",preChain = {
         "overloadMonitor",
        "federationParamValidator",
        "defaultAuthentication",

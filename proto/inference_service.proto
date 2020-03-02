@@ -6,9 +6,19 @@ option java_outer_classname = "InferenceServiceProto";
 message InferenceMessage {
     bytes header = 1;
     bytes body = 2;
+
+
 }
 
+
+
+
+
+
 service InferenceService {
+
+
+    rpc batchInference(InferenceMessage) returns (InferenceMessage);
     rpc inference (InferenceMessage) returns (InferenceMessage);
     rpc startInferenceJob (InferenceMessage) returns (InferenceMessage);
     rpc getInferenceResult (InferenceMessage) returns (InferenceMessage);

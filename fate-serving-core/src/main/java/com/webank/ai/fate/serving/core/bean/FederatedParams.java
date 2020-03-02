@@ -17,9 +17,11 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -37,10 +39,30 @@ public class FederatedParams {
 
     String seqNo;
 
+    public boolean isBatch() {
+        return isBatch;
+    }
+
+    public void setBatch(boolean batch) {
+        isBatch = batch;
+    }
+
+    boolean isBatch;
+
     FederatedParty local;
     ModelInfo modelInfo;
     FederatedRoles role;
     Map<String, Object> featureIdMap = Maps.newHashMap();
+
+    public List<Map<String, Object>> getBatchFeatureIdMapList() {
+        return batchFeatureIdMapList;
+    }
+
+    public void setBatchFeatureIdMapList(List<Map<String, Object>> batchFeatureIdMapList) {
+        this.batchFeatureIdMapList = batchFeatureIdMapList;
+    }
+
+    List<Map<String,Object>> batchFeatureIdMapList = Lists.newArrayList();
     Map<String, Object> data = Maps.newHashMap();
 
     public ModelInfo getModelInfo() {
@@ -90,6 +112,8 @@ public class FederatedParams {
 //    public void setFeatureIdda(Map<String, Object> featureIdMap) {
 //        this.featureIdMap = featureIdMap;
 //    }
+
+
 
     public Map<String, Object> getData() {
         return data;

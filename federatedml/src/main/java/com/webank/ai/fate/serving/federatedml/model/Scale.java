@@ -65,4 +65,14 @@ public class Scale extends BaseModel {
         }
         return outputData;
     }
+
+    @Override
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
+        return null;
+    }
 }

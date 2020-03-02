@@ -19,18 +19,19 @@ package com.webank.ai.fate.serving.guest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.adapter.processing.PostProcessing;
 import com.webank.ai.fate.serving.adapter.processing.PreProcessing;
-import com.webank.ai.fate.serving.bean.InferenceRequest;
-import com.webank.ai.fate.serving.bean.ModelNamespaceData;
-import com.webank.ai.fate.serving.bean.PostProcessingResult;
-import com.webank.ai.fate.serving.bean.PreProcessingResult;
+import com.webank.ai.fate.serving.bean.*;
+import com.webank.ai.fate.serving.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
 import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
+import com.webank.ai.fate.serving.rpc.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.utils.InferenceUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
     private PostProcessing postProcessing;
     private PreProcessing preProcessing;
 
+    FederatedRpcInvoker federatedRpcInvoker;
 
 
 
@@ -320,6 +322,138 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
         ReturnResult noCacheInferenceResult = new ReturnResult();
         noCacheInferenceResult.setRetcode(InferenceRetCode.NO_RESULT);
         return noCacheInferenceResult;
+
+    }
+
+    @Override
+    public ReturnResult batchInference(Context context, BatchInferenceRequest batchInferenceRequest) {
+
+//
+//
+//        context.setCaseId(batchInferenceRequest.getSeqNo());
+//        ReturnResult inferenceResult = new ReturnResult();
+//        inferenceResult.setCaseid(batchInferenceRequest.getSeqNo());
+//
+//        String serviceId = batchInferenceRequest.getServiceId();
+//        context.setServiceId(serviceId);
+//        context.setApplyId(batchInferenceRequest.getApplyId());
+//        String modelKey = "";
+//
+//        if(StringUtils.isNotEmpty(batchInferenceRequest.getServiceId())){
+//        modelKey = modelManager.getModelNamespaceByPartyId(context,batchInferenceRequest.getServiceId());
+//        }
+//
+////        if (StringUtils.isEmpty(modelKey)) {
+////                inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
+////                return inferenceResult;
+////            }
+//        String[]  modelKeyElement = modelKey.split(":");
+//        Preconditions.checkArgument(modelKeyElement!=null&&modelKeyElement.length==2);
+//        String modelName = modelKeyElement[1];
+//        String modelNamespace = modelKeyElement[0];
+//
+//        ModelNamespaceData modelNamespaceData = modelManager.getModelNamespaceData(context,modelNamespace);
+//        PipelineTask model;
+//        Preconditions.checkArgument(StringUtils.isNotEmpty(modelName));
+//        Preconditions.checkArgument(StringUtils.isNotEmpty(modelNamespace));
+//        Preconditions.checkArgument(modelNamespaceData!=null);
+//        model =  modelManager.getModel(context,modelName, modelNamespace);
+//
+////        if (model == null) {
+////            inferenceResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED + 1000);
+////            return inferenceResult;
+////        }
+//
+//
+//
+//
+//
+//        Map<String, Object> rawFeatureData = inferenceRequest.getFeatureData();
+//
+//        if (rawFeatureData == null) {
+//            inferenceResult.setRetcode(InferenceRetCode.EMPTY_DATA + 1000);
+//            inferenceResult.setRetmsg("Can not parse data json.");
+//            return inferenceResult;
+//        }
+//
+//        PreProcessingResult preProcessingResult;
+//        try {
+//
+//            preProcessingResult = getPreProcessingFeatureData(context, rawFeatureData);
+//        } catch (Exception ex) {
+//            logger.error("feature data preprocessing failed", ex);
+//            inferenceResult.setRetcode(InferenceRetCode.INVALID_FEATURE + 1000);
+//            inferenceResult.setRetmsg(ex.getMessage());
+//            return inferenceResult;
+//        }
+//        Map<String, Object> featureData = preProcessingResult.getProcessingResult();
+//        Map<String, Object> featureIds = preProcessingResult.getFeatureIds();
+//        if (featureData == null) {
+//            inferenceResult.setRetcode(InferenceRetCode.NUMERICAL_ERROR + 1000);
+//            inferenceResult.setRetmsg("Can not preprocessing data");
+//            return inferenceResult;
+//        }
+//        Map<String, Object> predictParams = new HashMap<>(8);
+//        Map<String, Object> modelFeatureData = Maps.newHashMap(featureData);
+//        FederatedParams federatedParams = new FederatedParams();
+//        if(inferenceRequest.getSendToRemoteFeatureData()!=null&&federatedParams.getFeatureIdMap()!=null) {
+//            federatedParams.getFeatureIdMap().putAll(inferenceRequest.getSendToRemoteFeatureData());
+//        }
+//        federatedParams.setCaseId(batchInferenceRequest.getSeqNo());
+//        federatedParams.setSeqNo(batchInferenceRequest.getSeqNo());
+//        federatedParams.setLocal(modelNamespaceData.getLocal());
+//        federatedParams.setModelInfo(new ModelInfo(modelName, modelNamespace));
+//        federatedParams.setRole(modelNamespaceData.getRole());
+//        if(featureIds!=null&&featureIds.size()>0) {
+//            federatedParams.getFeatureIdMap().putAll(featureIds);
+//        }
+//
+//        FederatedParty srcParty = modelNamespaceData.getLocal();
+//
+//        FederatedParty dstParty = new FederatedParty(Dict.HOST, modelNamespaceData.getRole().getRole(Dict.HOST).get(0));
+//=============
+//
+//        ModelInfo  modelInfo =new ModelInfo(modelName, modelNamespace);
+//        HostFederatedParams hostFederatedParams = new HostFederatedParams();
+//        hostFederatedParams.setCaseId(bat);
+//        hostFederatedParams.setSeqNo(guestFederatedParams.getSeqNo());
+//       // hostFederatedParams.getFeatureIdMap().putAll(guestFederatedParams.getFeatureIdMap());
+//        hostFederatedParams.setBatchFeatureIdMapList();
+//        hostFederatedParams.setBatch(true);
+//        hostFederatedParams.setLocal(dstParty);
+//        hostFederatedParams.setPartnerLocal(srcParty);
+//        hostFederatedParams.setRole(modelNamespaceData.getRole());
+//        hostFederatedParams.setPartnerModelInfo(modelInfo);
+//       // hostFederatedParams.setData(guestFederatedParams.getData());
+//
+//
+//        ==========
+//
+//        ListenableFuture<Proxy.Packet>  remoteFuture = federatedRpcInvoker.async(context,srcParty,dstParty,hostFederatedParams,"batch");
+//
+//        context.setRemoteFuture(remoteFuture);
+//
+//
+//
+//
+//
+//
+//        Map<String, Object> modelResult = model.predict(context, modelFeatureData, federatedParams);
+//
+//        PostProcessingResult postProcessingResult;
+//        try {
+//            postProcessingResult = getPostProcessedResult(context, featureData, modelResult);
+//            inferenceResult = postProcessingResult.getProcessingResult();
+//        } catch (Exception ex) {
+//            logger.error("model result postprocessing failed", ex);
+//            if(inferenceResult!=null) {
+//                inferenceResult.setRetcode(InferenceRetCode.COMPUTE_ERROR);
+//                inferenceResult.setRetmsg(ex.getMessage());
+//            }
+//        }
+//        inferenceResult = handleResult(context, inferenceRequest, modelNamespaceData, inferenceResult);
+
+        return null;
 
     }
 

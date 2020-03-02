@@ -41,6 +41,7 @@ public class Dict {
     public static final String PARTNER_MODEL_DATA = "partner_model_index";
     public static final String MODEL_FEDERATED_PARTY = "model_federated_party";
     public static final String MODEL_FEDERATED_ROLES = "model_federated_roles";
+    public static final String MODEL = "model";
     public static final String VERSION ="version";
     public static final String GRPC_TYPE ="grpcType";
     public static final String ROUTER_INFO ="routerInfo";
@@ -149,6 +150,7 @@ public class Dict {
     public  static  final String HOST_APP_ID = "hostAppId";
     public  static  final String SERVICE_ID = "serviceId";
     public  static  final String APPLY_ID = "applyId";
+    public  static  final String FUTURE ="future";
     public  static  final String CONFIGPATH = "configpath";
     public  static  final String ACL_ENABLE = "acl.enable";
     public  static  final String ACL_USERNAME = "acl.username";

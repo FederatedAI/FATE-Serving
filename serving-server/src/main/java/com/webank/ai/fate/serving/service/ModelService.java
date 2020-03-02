@@ -114,6 +114,66 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @RegisterService(serviceName = "publishLoad")
     public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
 
+//        {
+//            role: "guest"
+//            partyId: "9999"
+//        }
+//        role {
+//            key: "guest"
+//            value {
+//                partyId: "9999"
+//            }
+//        }
+//        role {
+//            key: "arbiter"
+//            value {
+//                partyId: "10000"
+//            }
+//        }
+//        role {
+//            key: "host"
+//            value {
+//                partyId: "10000"
+//            }
+//        }
+//        model {
+//            key: "host"
+//            value {
+//                roleModelInfo {
+//                    key: "10000"
+//                    value {
+//                        tableName: "2020022715571644961011"
+//                        namespace: "host#10000#arbiter-10000#guest-9999#host-10000#model"
+//                    }
+//                }
+//            }
+//        }
+//        model {
+//            key: "guest"
+//            value {
+//                roleModelInfo {
+//                    key: "9999"
+//                    value {
+//                        tableName: "2020022715571644961011"
+//                        namespace: "guest#9999#arbiter-10000#guest-9999#host-10000#model"
+//                    }
+//                }
+//            }
+//        }
+//        model {
+//            key: "arbiter"
+//            value {
+//                roleModelInfo {
+//                    key: "10000"
+//                    value {
+//                        tableName: "2020022715571644961011"
+//                        namespace: "arbiter#10000#arbiter-10000#guest-9999#host-10000#model"
+//                    }
+//                }
+//            }
+//        }
+
+
         Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_LOAD.name(),metricRegistry);
 
         context.preProcess();

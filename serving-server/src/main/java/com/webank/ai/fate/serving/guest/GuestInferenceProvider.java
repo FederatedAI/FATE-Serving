@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.guest;
 
 
+import com.webank.ai.fate.serving.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
@@ -29,4 +30,7 @@ public interface GuestInferenceProvider {
     public ReturnResult asynInference(Context context, InferenceRequest inferenceRequest);
 
     public ReturnResult getResult(Context context, InferenceRequest inferenceRequest);
+
+    public ReturnResult batchInference(Context context, BatchInferenceRequest batchInferenceRequest);
+
 }

@@ -3,6 +3,8 @@ package com.webank.ai.fate.serving.manager;
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.ModelPipeline;
+import com.webank.ai.fate.serving.core.bean.ModelProcessor;
 import com.webank.ai.fate.serving.core.exceptions.ModelSerializeException;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +20,7 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
     Logger logger = LoggerFactory.getLogger(AbstractModelLoader.class);
 
     @Override
-    public PipelineTask loadModel(Context context, String name, String namespace) {
+    public ModelProcessor loadModel(Context context, String name, String namespace) {
         MODELDATA modelData = doLoadModel(context, name, namespace);
         if (modelData == null) {
             logger.info("load model error, name {} namespace {} ,try to restore from local cache", name, namespace);
@@ -69,7 +71,7 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
         return null;
     }
 
-    protected abstract PipelineTask initPipeLine(Context context, MODELDATA modeldata);
+    protected abstract ModelProcessor initPipeLine(Context context, MODELDATA modeldata);
 
     private String getCachePath(Context context, String name, String namespace) {
         StringBuilder sb = new StringBuilder();

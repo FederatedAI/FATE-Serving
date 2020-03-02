@@ -23,14 +23,19 @@ import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 
-public class PipelineTask {
+public class PipelineTask implements  ModelProcessor{
     private static final Logger logger = LoggerFactory.getLogger(PipelineTask.class);
     private List<BaseModel> pipeLineNode = new ArrayList<>();
     private Map<String, BaseModel> modelMap = new HashMap<String, BaseModel>();
@@ -88,6 +93,151 @@ public class PipelineTask {
             throw new RuntimeException("model content is null");
         }
     }
+
+
+    public List<Map<String,Object>>  localPredict(Context context,
+                                                  BatchInferenceRequest batchFederatedParams){
+
+        List<BatchInferenceRequest.SingleInferenceData> inputList = batchFederatedParams.getDataList();
+
+
+        List<Map<String,Object>> result =  Lists.newArrayList();
+        for(int i=0;i<inputList.size();i++){
+            BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
+            Map<String, Object> singleResult =   singleLocalPredict(context,input.getFeatureData());
+            if(singleResult!=null){
+                checkResult(singleResult);
+                result.add(singleResult);
+            }else{
+                logger.error("local predict return null");
+            }
+        }
+        return   result;
+
+
+    }
+
+    private class LocalPredictResult{
+
+
+
+        //List<Map<String,Object>>
+    }
+
+
+    /**
+     * 单个返回必须携带能够标记此次请求的caseid
+     * @return
+     */
+    private void checkResult(Map<String,Object>  result){
+       Preconditions.checkArgument( result.get(Dict.CASEID)!=null);
+
+    }
+    public  BatchFederatedResult  mergeRemote(Context context,
+                    List<Map<String, Object>> localData,
+                                              List<Map<String,Object>> remoteData  ){
+
+            return null;
+    }
+
+
+    @Override
+    public BatchFederatedResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
+                                              Future  remoteFuture ){
+
+        List<Map<String,Object>>  localResult = localPredict(context,batchInferenceRequest);
+        BatchFederatedResult batchFederatedResult =null;
+        if(remoteFuture!=null) {
+            Object remoteObject = null;
+            try {
+                remoteObject = remoteFuture.get(3000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+            Preconditions.checkArgument(remoteObject != null);
+            // BatchFederatedResult  batchFederatedResult =  (BatchFederatedResult)  remoteObject;
+            List<Map<String, Object>> remoteList = null;
+            batchFederatedResult= mergeRemote(context, localResult, remoteList);
+        }else{
+
+            /**
+             * host无future
+             */
+
+        }
+        return  batchFederatedResult;
+
+    }
+
+
+
+    public Map<String, Object> singleLocalPredict(Context context, Map<String, Object> inputData) {
+        //logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
+        List<Map<String, Object>> outputData = Lists.newArrayList();
+
+        List<Map<String, Object>>  result = Lists.newArrayList();
+        int pipelineSize = this.pipeLineNode.size();
+        for (int i = 0; i < pipelineSize; i++) {
+            if(logger.isDebugEnabled()) {
+                if (this.pipeLineNode.get(i) != null) {
+                    logger.debug("component class is {}", this.pipeLineNode.get(i).getClass().getName());
+                } else {
+                    logger.debug("component class is {}", this.pipeLineNode.get(i));
+                }
+            }
+            List<Map<String, Object>> inputs = new ArrayList<>();
+            HashSet<Integer> upInputComponents = this.dslParser.getUpInputComponents(i);
+            if (upInputComponents != null) {
+                Iterator<Integer> iters = upInputComponents.iterator();
+                while (iters.hasNext()) {
+                    Integer upInput = iters.next();
+                    if (upInput == -1) {
+                        inputs.add(inputData);
+                    } else {
+                        inputs.add(outputData.get(upInput));
+                    }
+                }
+            } else {
+                inputs.add(inputData);
+            }
+            if (this.pipeLineNode.get(i) != null) {
+
+
+                Map<String, Object>  modelResult = this.pipeLineNode.get(i).localInference(context, inputs);
+                outputData.add(modelResult);
+                result.add(modelResult);
+
+            } else {
+                outputData.add(inputs.get(0));
+
+            }
+
+        }
+//        ReturnResult federatedResult = context.getFederatedResult();
+//        if (federatedResult != null) {
+//            inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
+//        }
+        if(result.size()>0){
+            return result.get(result.size() - 1);
+        }else{
+            return Maps.newHashMap();
+        }
+
+
+    }
+
+    private  LocalInferenceParam buildLocalInferenceParam(){
+
+        LocalInferenceParam  param = new  LocalInferenceParam();
+        return   param;
+    }
+
+
+
 
 
     public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {

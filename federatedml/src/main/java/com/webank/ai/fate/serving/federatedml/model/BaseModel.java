@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public abstract class BaseModel implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>> {
+public abstract class BaseModel implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>>  ,TwoPhaseComponent{
 
     private static final Logger logger = LoggerFactory.getLogger(BaseModel.class);
     public static RouterService routerService;
@@ -50,6 +50,15 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
     public void setComponentName(String componentName) {
         this.componentName = componentName;
     }
+
+//    @Override
+//    public  Map<String,Object>  localInference(Context context,Map<> input){
+//
+//
+//
+//         return null;
+//    };
+
 
     public abstract int initModel(byte[] protoMeta, byte[] protoParam);
 
@@ -75,7 +84,6 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
                 logger.debug("model {} caseid {} predict cost time {}", className, caseId, cost);
             }
         }
-
 
     }
 

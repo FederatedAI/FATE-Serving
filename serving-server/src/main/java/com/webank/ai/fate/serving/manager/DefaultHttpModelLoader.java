@@ -72,7 +72,7 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
     }
 
     @Override
-    protected PipelineTask initPipeLine(Context context, Map<String, byte[]> stringMap) {
+    protected ModelProcessor initPipeLine(Context context, Map<String, byte[]> stringMap) {
         if(stringMap!=null) {
             PipelineTask pipelineTask = new PipelineTask();
             pipelineTask.initModel(stringMap);

@@ -75,4 +75,14 @@ public class HeteroLRGuest extends HeteroLR {
         //result.put(Dict.GUEST_INPUT_DATA_HIT_RATE + ":{}", forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
         return result;
     }
+
+    @Override
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
+        return null;
+    }
 }

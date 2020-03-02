@@ -23,4 +23,6 @@ public interface Predictor<Req_I, Req_P, Res> {
     public void preprocess(Context context, Req_I inputData, Req_P predictParams);
 
     public Res postprocess(Context context, Req_I inputData, Req_P predictParams, Res result);
+
+
 }

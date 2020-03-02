@@ -20,6 +20,8 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
@@ -323,5 +325,27 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public void setApplyId(String applyId) {
         dataMap.put(Dict.APPLY_ID, applyId);
+    }
+
+    @Override
+    public ListenableFuture getRemoteFuture() {
+
+        return (ListenableFuture) this.dataMap.getOrDefault(Dict.FUTURE, null);
+
+    }
+
+    @Override
+    public void setRemoteFuture(ListenableFuture future) {
+        this.dataMap.put(Dict.FUTURE,future);
+    }
+
+    @Override
+    public Model getModel() {
+        return (Model)this.dataMap.get(Dict.MODEL);
+    }
+
+    @Override
+    public void setModel(Model model) {
+        this.dataMap.put(Dict.MODEL,model);
     }
 }

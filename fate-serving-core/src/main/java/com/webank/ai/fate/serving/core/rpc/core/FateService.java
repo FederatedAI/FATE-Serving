@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface ProxyService {
+public @interface FateService {
     String name();
     String[] preChain() default {};
     String[]  postChain() default {};

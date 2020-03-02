@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.proxy.rpc.core;
+package com.webank.ai.fate.serving;
 
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.rpc.core.*;
@@ -23,9 +23,9 @@ import java.util.Map;
  * @Author
  **/
 @Component
-public class ProxyServiceRegister implements ServiceRegister, ApplicationContextAware, ApplicationListener<ApplicationEvent> {
+public class FateServiceRegister implements ServiceRegister, ApplicationContextAware, ApplicationListener<ApplicationEvent> {
 
-    Logger logger = LoggerFactory.getLogger(ProxyServiceRegister.class);
+    Logger logger = LoggerFactory.getLogger(FateServiceRegister.class);
 
     @Override
     public ServiceAdaptor getServiceAdaptor(String name) {

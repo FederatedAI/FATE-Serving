@@ -17,8 +17,12 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+
+import java.util.concurrent.Future;
 
 public interface Context<Req, Resp> {
 
@@ -121,4 +125,15 @@ public interface Context<Req, Resp> {
     public String getApplyId();
 
     public void setApplyId(String applyId);
+
+    public ListenableFuture getRemoteFuture();
+
+    public void  setRemoteFuture(ListenableFuture  future);
+
+    public Model getModel();
+
+    public void  setModel(Model model);
+
+    
+
 }
