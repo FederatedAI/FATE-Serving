@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
@@ -33,15 +35,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Service
-public class NewModelManager implements InitializingBean {
+public class NewModelManager implements InitializingBean, EnvironmentAware {
     @Autowired
     private ModelLoader modelLoader;
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
 
-    @Autowired
-    private RouterService routerService;
+    Environment environment;
 
     private ConcurrentMap<String, String> serviceIdNamespaceMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, Model> namespaceMap = new ConcurrentHashMap<String, Model>();
@@ -289,7 +290,7 @@ public class NewModelManager implements InitializingBean {
 
         // unregister serviceId, name, namespace
         String serviceId = model.getServiceId();
-        boolean useRegister = Boolean.valueOf(Configuration.getProperty(Dict.USE_REGISTER,"true"));
+        boolean useRegister = this.environment.getProperty(Dict.USE_REGISTER, Boolean.class, Boolean.TRUE);
         if (useRegister) {
             String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
             modelKey = EncryptUtils.encrypt(modelKey, EncryptMethod.MD5);
@@ -476,6 +477,11 @@ public class NewModelManager implements InitializingBean {
             }
 
         }
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 
 //    private List<ModelService.RequestWapper> loadProperties(File file, Map<String,ModelService.RequestWapper> properties) {
