@@ -115,18 +115,61 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
 //        }
 
 
+    public synchronized int unbind(Context context, ModelServiceProto.PublishRequest req) {
+        String serviceId = req.getServiceId();
+        Preconditions.checkArgument(serviceId != null);
 
-//    public synchronized  int unbind(Context context,ModelServiceProto.PublishRequest    req){
-//
-//    }
-//
-//
+        if (logger.isDebugEnabled()) {
+            logger.debug("Try to unbind model, service id : {}", serviceId);
+        }
+
+        Model model = this.buildModel(context, req);
+        String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+
+        if (!this.namespaceMap.containsKey(modelKey)) {
+            logger.info("Not found model info, please check if the model is already loaded.");
+            return 1;
+        }
+
+        if (!this.serviceIdNamespaceMap.containsKey(serviceId)) {
+            logger.info("Service ID: {} not bind", serviceId);
+            return 1;
+        }
+
+        // unregister
+        Set<URL> registered = zookeeperRegistry.getRegistered();
+        List<URL> unRegisterUrls = Lists.newArrayList();
+
+        for (URL url : registered) {
+            if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                unRegisterUrls.add(url);
+            }
+        }
+
+        for (URL url : unRegisterUrls) {
+            zookeeperRegistry.unregister(url);
+        }
+
+        logger.info("Unregister urls: {}", unRegisterUrls);
+
+        this.serviceIdNamespaceMap.remove(serviceId);
+        // update cache
+        this.store(serviceIdNamespaceMap, serviceIdFile);
+        logger.info("Unbind model success");
+        return 0;
+    }
+
 //    public synchronized  int unload(Context context,String tableName,String  namespace){
 //
 //
 //
 //
 //    }
+
+    public synchronized void store(Map data, File file) {
+        doSaveCache(data, file, 0);
+        logger.info("Store model cache success, file path: {}", serviceIdFile.getAbsolutePath());
+    }
 
     public synchronized void store() {
 //         for test
@@ -280,7 +323,7 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         return  new  StringBuilder().append(tableName).append("_").append(namespace).toString();
     }
 
-    public void unload(String tableName, String namespace) {
+    public synchronized void unload(String tableName, String namespace) {
         if (logger.isDebugEnabled()) {
             logger.debug("try to unload model, name: {}, namespace: {}", tableName, namespace);
         }
@@ -337,7 +380,7 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
 //    }
 
 
-    public void doSaveProperties(Map data, File file, long version) {
+    /*public void doSaveProperties(Map data, File file, long version) {
 
         if (file == null) {
             return;
@@ -402,7 +445,7 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         } catch (Throwable e) {
             logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
         }
-    }
+    }*/
 
     public void doSaveCache(Map data, File file, long version) {
         if (file == null) {
