@@ -3,32 +3,48 @@ package com.webank.ai.fate.serving.interceptor;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
+import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.HostFederatedParams;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-public class BatchParamInterceptor     implements Interceptor {
+public class GuestBatchParamInterceptor     implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
-        String  body = (String)inboundPackage.getBody();
+        byte[]  reqBody = (byte[])inboundPackage.getBody();
         BatchInferenceRequest batchInferenceRequest =null;
         try {
-             batchInferenceRequest = JSON.parseObject(body, BatchInferenceRequest.class);
+             batchInferenceRequest = JSON.parseObject(reqBody, BatchInferenceRequest.class);
         }catch(Exception e){
             throw new  RuntimeException();
         }
-        Preconditions.checkArgument(batchInferenceRequest!=null);
+        inboundPackage.setBody(batchInferenceRequest);
+        Preconditions.checkArgument(batchInferenceRequest!=null,"");
         Preconditions.checkArgument(batchInferenceRequest.getDataList()!=null);
         Preconditions.checkArgument(StringUtils.isNotEmpty(batchInferenceRequest.getServiceId())&&
                 StringUtils.isNotBlank(batchInferenceRequest.getServiceId()));
-
         context.setServiceId(batchInferenceRequest.getServiceId());
+
+        List<BatchInferenceRequest.SingleInferenceData>  datalist = batchInferenceRequest.getDataList();
+
+        int  batchSizeLimit = Configuration.getPropertyInt("batch.inference.max",50);
+
+        Preconditions.checkArgument(datalist.size()<=batchSizeLimit);
+
+//        for(BatchInferenceRequest.SingleInferenceData  singleInferenceData: datalist){
+//            singleInferenceData.
+//        }
+
+
 
     }
 

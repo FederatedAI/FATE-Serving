@@ -39,7 +39,7 @@ import java.util.Map;
 public class DefaultHostInferenceProvider implements HostInferenceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultHostInferenceProvider.class);
-    @Autowired
+   // @Autowired
     ModelManager modelManager;
 
     private static ReturnResult getFeatureData(Context  context,Map<String, Object> featureIds) {

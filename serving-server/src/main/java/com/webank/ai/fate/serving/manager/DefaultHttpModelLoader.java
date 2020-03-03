@@ -36,7 +36,7 @@ import java.util.*;
 public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byte[]>>{
     private static final Logger logger = LoggerFactory.getLogger(DefaultHttpModelLoader.class);
 
-    @Autowired
+    @Autowired(required=false)
     private RouterService routerService;
 
 
@@ -89,8 +89,8 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
         logger.info("read model, name: {} namespace: {}", name, namespace);
         try {
             String requestUrl = "";
-            boolean useRegister = Boolean.valueOf(Configuration.getProperty(Dict.USE_REGISTER,"true"));
-            if (useRegister) {
+
+            if (routerService!=null) {
                 URL url = URL.valueOf("flow/online/transfer");
                 List<URL> urls = routerService.router(url);
                 if (urls == null || urls.isEmpty()) {

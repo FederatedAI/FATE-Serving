@@ -37,6 +37,9 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
     private static final Logger logger = LoggerFactory.getLogger(ProxyService.class);
     @Autowired
     HostInferenceProvider hostInferenceProvider;
+
+
+
     @Autowired
     MetricRegistry  metricRegistry;
 

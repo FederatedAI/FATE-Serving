@@ -11,7 +11,7 @@ public class BatchHostFederatedParams {
     String  guestPartyId;
     String  hostPartyId;
     String  seqNo;
-    List<SingleBatchHostFederatedParams> dataList;
+    List<SingleBatchHostFederatedParam> dataList;
 
     public String getHostTableName() {
         return hostTableName;
@@ -53,20 +53,38 @@ public class BatchHostFederatedParams {
         this.seqNo = seqNo;
     }
 
-    public List<SingleBatchHostFederatedParams> getDataList() {
+    public List<SingleBatchHostFederatedParam> getDataList() {
         return dataList;
     }
 
-    public void setDataList(List<SingleBatchHostFederatedParams> dataList) {
+    public void setDataList(List<SingleBatchHostFederatedParam> dataList) {
         this.dataList = dataList;
     }
 
 
 
-    public  class  SingleBatchHostFederatedParams{
+    public static class  SingleBatchHostFederatedParam{
 
         String  caseId;
+
         Map<String,Object> sendToRemoteData;
+
+        public String getCaseId() {
+            return caseId;
+        }
+
+        public void setCaseId(String caseId) {
+            this.caseId = caseId;
+        }
+
+        public Map<String, Object> getSendToRemoteData() {
+            return sendToRemoteData;
+        }
+
+        public void setSendToRemoteData(Map<String, Object> sendToRemoteData) {
+            this.sendToRemoteData = sendToRemoteData;
+        }
+
 
     }
 

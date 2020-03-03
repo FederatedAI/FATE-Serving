@@ -24,7 +24,6 @@ import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.adapter.processing.PostProcessing;
 import com.webank.ai.fate.serving.adapter.processing.PreProcessing;
 import com.webank.ai.fate.serving.bean.*;
-import com.webank.ai.fate.serving.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
@@ -43,7 +42,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service
+//@Service
 public class DefaultGuestInferenceProvider implements GuestInferenceProvider, InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(DefaultGuestInferenceProvider.class);
     @Autowired

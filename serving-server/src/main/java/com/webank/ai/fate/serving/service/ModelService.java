@@ -31,6 +31,7 @@ import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.interfaces.ModelManager;
 import com.webank.ai.fate.serving.manager.ModelUtil;
 
+import com.webank.ai.fate.serving.manager.NewModelManager;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -52,34 +55,36 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements InitializingBean {
+public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements InitializingBean,EnvironmentAware {
     private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
     @Autowired
-    ModelManager modelManager;
+    NewModelManager modelManager;
     @Autowired
     MetricRegistry  metricRegistry;
+
+    Environment environment;
 
     Base64.Encoder  encoder = Base64.getEncoder();
     Base64.Decoder  decoder = Base64.getDecoder();
 
-    private static class RequestWapper{
-        public  RequestWapper(String content,long timestamp,String md5){
+//    private static class RequestWapper{
+//        public  RequestWapper(String content,long timestamp,String md5){
+//
+//            this.content= content;
+//            this.timestamp =  timestamp;
+//            this.md5 = md5;
+//        }
+//        @Override
+//        public  String toString(){
+//           return content+":"+timestamp;
+//        }
+//        String  content;
+//        long  timestamp;
+//        String  md5;
+//    }
 
-            this.content= content;
-            this.timestamp =  timestamp;
-            this.md5 = md5;
-        }
-        @Override
-        public  String toString(){
-           return content+":"+timestamp;
-        }
-        String  content;
-        long  timestamp;
-        String  md5;
-    }
-
-    LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
-    LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
+//    LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
+//    LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
     ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
 
@@ -182,6 +187,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
+
+            modelManager.load(context,req);
             returnResult = modelManager.publishLoadModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
@@ -468,6 +475,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     }
 
 
-
-
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 }

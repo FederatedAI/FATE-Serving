@@ -60,12 +60,12 @@ public class ServingServer implements InitializingBean {
     }
 
     public ServingServer(String confPath) {
-        this.confPath = new File(confPath).getAbsolutePath();
-        System.setProperty(Dict.CONFIGPATH, confPath);
-        new Configuration(confPath).load();
-        System.setProperty(Dict.ACL_ENABLE, Configuration.getProperty(Dict.ACL_ENABLE, ""));
-        System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME, ""));
-        System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD, ""));
+//        this.confPath = new File(confPath).getAbsolutePath();
+//        System.setProperty(Dict.CONFIGPATH, confPath);
+//        new Configuration(confPath).load();
+//        System.setProperty(Dict.ACL_ENABLE, Configuration.getProperty(Dict.ACL_ENABLE, ""));
+//        System.setProperty(Dict.ACL_USERNAME, Configuration.getProperty(Dict.ACL_USERNAME, ""));
+//        System.setProperty(Dict.ACL_PASSWORD, Configuration.getProperty(Dict.ACL_PASSWORD, ""));
     }
 
 

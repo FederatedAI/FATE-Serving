@@ -6,5 +6,5 @@ public interface ModelProcessor {
 
 
 
-    public BatchFederatedResult  batchPredict(Context  context, BatchInferenceRequest batchFederatedParams, Future remoteFuture );
+    public BatchFederatedResult  batchPredict(Context  context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture );
 }

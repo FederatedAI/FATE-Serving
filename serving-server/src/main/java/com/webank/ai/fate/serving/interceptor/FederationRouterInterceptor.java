@@ -5,7 +5,6 @@ import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
@@ -14,24 +13,24 @@ import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class FederationRouterInterceptor    implements Interceptor {
+public class FederationRouterInterceptor  extends  AbstractInterceptor {
 
-    @Autowired
+    @Autowired(required = false)
     RouterService   routerService;
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        String version =  Configuration.getProperty(Dict.VERSION,"");
-        String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, "true");
-        boolean routerByzk = Boolean.valueOf(routerByZkString);
+        String version =  environment.getProperty(Dict.VERSION,"");
         RouterInfo   routerInfo =  new RouterInfo();
         String address = null;
-        if (!routerByzk) {
-                address = Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+        if (routerService==null) {
+                address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
                 if(address.indexOf(":")<0){
                     throw  new NoRouteInfoException();
                 }
@@ -54,4 +53,6 @@ public class FederationRouterInterceptor    implements Interceptor {
             }
         context.setRouterInfo(routerInfo);
     }
+
+
 }

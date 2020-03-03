@@ -69,6 +69,7 @@
         </AsyncLogger>
 
         <AsyncRoot level="info" includeLocation="true">
+            <AppenderRef ref="console"  level="info"/>
             <AppenderRef ref="info"  level="info"/>
             <AppenderRef ref="error" level="error"/>
         </AsyncRoot>

@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.proxy.bootstrap;
+package com.webank.ai.fate.serving;
 
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.url.URL;
@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
@@ -21,8 +22,11 @@ import java.util.Set;
  * @Author
  **/
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.webank.ai.fate.serving.proxy.*"})
-@PropertySource("classpath:application.properties")
+@ComponentScan(basePackages = {"com.webank.ai.fate.serving.*"})
+@ConfigurationProperties
+//value = "file:${user.dir}/conf/serving-server.properties"
+@PropertySource(value = "serving-server.properties",
+        ignoreResourceNotFound = false)
 @EnableScheduling
 public class Bootstrap {
 
@@ -31,7 +35,9 @@ public class Bootstrap {
     private static ApplicationContext applicationContext;
 
     public void start(String[] args) {
-        applicationContext = SpringApplication.run(new Bootstrap.class, args);
+
+        System.err.println("iiiiiiiiiiiiiiiii");
+        applicationContext = SpringApplication.run(new Class[]{Bootstrap.class,SpringConfig.class}, args);
     }
 
     public void stop() {
