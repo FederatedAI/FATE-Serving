@@ -296,37 +296,18 @@ public class NewModelManager implements InitializingBean {
 
             logger.info("Unregister environments: {}", StringUtils.join(modelKey, ",", serviceId));
 
+            Set<URL> registered = zookeeperRegistry.getRegistered();
             List<URL> unRegisterUrls = Lists.newArrayList();
             if (Dict.HOST.equals(model.getRole())) {
-                List<URL> urls = null;
-                for (RegisterService service : FateServer.serviceSets) {
-                    if (service.useDynamicEnvironment()) {
-                        urls = routerService.router(URL.valueOf("serving/" + modelKey + "/" + service.serviceName()));
-                        if (urls != null && urls.size() > 0) {
-                            unRegisterUrls.addAll(urls);
-                        }
-                        if (StringUtils.isNotEmpty(serviceId)) {
-                            urls = routerService.router(URL.valueOf("serving/" + serviceId + "/" + service.serviceName()));
-                            if (urls != null && urls.size() > 0) {
-                                unRegisterUrls.addAll(urls);
-                            }
-                        }
+                for (URL url : registered) {
+                    if (modelKey.equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                        unRegisterUrls.add(url);
                     }
                 }
             } else if (Dict.GUEST.equals(model.getRole())) {
-                List<URL> urls = null;
-                for (RegisterService service : FateServer.serviceSets) {
-                    if (service.useDynamicEnvironment()) {
-                        urls = routerService.router(URL.valueOf("serving/" + model.getPartId() + "/" + service.serviceName()));
-                        if (urls != null && urls.size() > 0) {
-                            unRegisterUrls.addAll(urls);
-                        }
-                        if (StringUtils.isNotEmpty(serviceId)) {
-                            urls = routerService.router(URL.valueOf("serving/" + serviceId + "/" + service.serviceName()));
-                            if (urls != null && urls.size() > 0) {
-                                unRegisterUrls.addAll(urls);
-                            }
-                        }
+                for (URL url : registered) {
+                    if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                        unRegisterUrls.add(url);
                     }
                 }
             }
