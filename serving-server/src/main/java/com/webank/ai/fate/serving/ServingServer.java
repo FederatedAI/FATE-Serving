@@ -32,6 +32,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
+import com.webank.ai.fate.serving.manager.NewModelManager;
 import com.webank.ai.fate.serving.service.*;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -133,7 +134,6 @@ public class ServingServer implements InitializingBean {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
-            zookeeperRegistry.subProject(Dict.PROPERTY_SERVING_ADDRESS);
 
             BaseModel.routerService = applicationContext.getBean(RouterService.class);
             FateServer.serviceSets.forEach(servie -> {
