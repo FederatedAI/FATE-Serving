@@ -1,8 +1,7 @@
-package com.webank.ai.fate.serving.core.disruptor;
+package com.webank.ai.fate.serving.core.async;
 
 import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;
 import com.lmax.disruptor.EventHandler;
-import com.webank.ai.fate.serving.core.async.AsyncSubscribeRegister;
 import com.webank.ai.fate.serving.core.exceptions.AsyncMessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

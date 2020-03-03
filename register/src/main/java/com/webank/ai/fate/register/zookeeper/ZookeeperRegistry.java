@@ -31,10 +31,7 @@ import com.webank.ai.fate.register.utils.URLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -255,6 +252,12 @@ public class ZookeeperRegistry extends FailbackRegistry {
         dynamicEnvironments.add(environment);
     }
 
+    public void addDynamicEnvironment(Collection collection) {
+        if(collection != null && !collection.isEmpty()) {
+            dynamicEnvironments.addAll(collection);
+        }
+    }
+
     @Override
     public boolean isAvailable() {
         return zkClient.isConnected();
@@ -288,6 +291,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     public void doUnregister(URL url) {
         try {
             zkClient.delete(toUrlPath(url));
+            registedString.remove(url.getServiceInterface() + url.getEnvironment());
         } catch (Throwable e) {
             throw new RuntimeException("Failed to unregister " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }

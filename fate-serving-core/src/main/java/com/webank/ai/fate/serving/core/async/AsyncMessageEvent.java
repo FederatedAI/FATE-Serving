@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.core.disruptor;
+package com.webank.ai.fate.serving.core.async;
 
 import com.lmax.disruptor.EventFactory;
 import lombok.Data;

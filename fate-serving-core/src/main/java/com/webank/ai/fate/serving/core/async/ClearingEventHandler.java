@@ -1,7 +1,6 @@
-package com.webank.ai.fate.serving.core.disruptor;
+package com.webank.ai.fate.serving.core.async;
 
 import com.lmax.disruptor.EventHandler;
-import com.webank.ai.fate.serving.core.disruptor.AsyncMessageEvent;
 
 public class ClearingEventHandler<T> implements EventHandler<AsyncMessageEvent<T>> {
     @Override

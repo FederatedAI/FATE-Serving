@@ -29,10 +29,10 @@ import com.webank.ai.fate.serving.core.bean.ApplicationHolder;
 import com.webank.ai.fate.serving.core.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import com.webank.ai.fate.serving.manager.InferenceWorkerManager;
 import com.webank.ai.fate.serving.service.*;
-import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -46,7 +46,10 @@ import org.springframework.context.ApplicationContext;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class ServingServer implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(ServingServer.class);
@@ -130,6 +133,7 @@ public class ServingServer implements InitializingBean {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
+            zookeeperRegistry.subProject(Dict.PROPERTY_SERVING_ADDRESS);
 
             BaseModel.routerService = applicationContext.getBean(RouterService.class);
             FateServer.serviceSets.forEach(servie -> {

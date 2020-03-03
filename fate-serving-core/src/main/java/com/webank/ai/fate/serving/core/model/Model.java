@@ -20,7 +20,9 @@ package com.webank.ai.fate.serving.core.model;
 import com.alibaba.fastjson.JSON;
 import com.webank.ai.fate.serving.core.bean.ModelProcessor;
 
-public class Model implements Comparable<Model> {
+import java.io.Serializable;
+
+public class Model implements Comparable<Model>, Serializable {
 
     private  long timestamp;
 
@@ -45,6 +47,8 @@ public class Model implements Comparable<Model> {
      * 实例化好的模型处理类
      */
     private transient ModelProcessor modelProcessor;
+
+    private String serviceId;
 
 
     public long getTimestamp() {
@@ -107,6 +111,14 @@ public class Model implements Comparable<Model> {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 
     @Override

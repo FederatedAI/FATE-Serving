@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.core.async;
+package com.webank.ai.fate.serving.core.annotation;
 
 import org.springframework.core.annotation.AliasFor;
 
