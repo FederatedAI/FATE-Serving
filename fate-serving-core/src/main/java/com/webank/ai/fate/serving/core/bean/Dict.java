@@ -83,6 +83,7 @@ public class Dict {
     public static final String ONLINE_ENVIROMMENT = "online";
     public static final String PROPERTY_ROLL_ADDRESS = "roll";
     public static final String PROPERTY_FLOW_ADDRESS = "flow";
+    public static final String PROPERTY_SERVING_ADDRESS = "serving";
     public static final String PROPERTY_USE_ZOOKEEPER = "useZookeeper";
     public static final String PROPERTY_SERVER_PORT = "port";
     public static final String PROPERTY_USER_DIR = "user.dir";
