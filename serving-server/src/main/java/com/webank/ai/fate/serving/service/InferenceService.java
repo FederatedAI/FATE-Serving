@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
+import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.bean.InferenceRequest;
@@ -78,19 +79,43 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 //    }
 
     @Override
-    public void batchInference(com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage req,
-                               io.grpc.stub.StreamObserver<com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage> responseObserver) {
+    @RegisterService(useDynamicEnvironment = true, serviceName = "batchInference")
+    public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
+        InferenceMessage.Builder response = InferenceMessage.newBuilder();
+        ReturnResult returnResult = new ReturnResult();
+
         Context context = new BaseContext(new GuestInferenceLoggerPrinter(), InferenceActionType.BATCH.name(), metricRegistry);
+        context.preProcess();
+        try {
+            try {
+                byte[] reqbody = req.getBody().toByteArray();
 
-        byte[] reqbody = req.getBody().toByteArray();
+                InboundPackage inboundPackage = new InboundPackage();
 
-        InboundPackage inboundPackage = new InboundPackage();
+                // TODO: 2020/3/4
+//            OutboundPackage outboundPackage = new OutboundPackage();
 
-        OutboundPackage outboundPackage = new OutboundPackage();
+                inboundPackage.setBody(reqbody);
 
-        inboundPackage.setBody(reqbody);
+                OutboundPackage outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
 
-        this.batchGuestInferenceProvider.doService(context,inboundPackage, outboundPackage);
+                returnResult = (ReturnResult) outboundPackage.getData();
+
+                if (returnResult.getRetcode() != InferenceRetCode.OK) {
+                    logger.info("caseid {} batch inference failed: {}  result {}", context.getCaseId(), req.getBody().toStringUtf8(), returnResult);
+                }
+
+            } catch (Throwable e) {
+                returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
+                logger.error("inference system error: {}", req.getBody().toStringUtf8());
+            }
+
+            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+        } finally {
+            context.postProcess(req, returnResult);
+        }
     }
 
 

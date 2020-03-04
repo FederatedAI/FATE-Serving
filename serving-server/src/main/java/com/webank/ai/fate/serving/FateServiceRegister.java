@@ -60,7 +60,7 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
             for (String beanName : beans) {
                 AbstractServiceAdaptor serviceAdaptor =  applicationContext.getBean(beanName,AbstractServiceAdaptor.class);
 
-                FateService proxyService = (FateService) serviceAdaptor.getClass().getAnnotation(FateService.class);
+                FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
 
                 if (proxyService != null) {
 

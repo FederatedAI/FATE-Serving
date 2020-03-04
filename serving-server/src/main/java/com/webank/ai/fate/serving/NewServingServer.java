@@ -77,6 +77,7 @@ public class NewServingServer implements InitializingBean{
         serverBuilder.addService(ServerInterceptors.intercept(modelService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
         serverBuilder.addService(ServerInterceptors.intercept(proxyService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
         server = serverBuilder.build();
+        server.start();
 
         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
         if (useRegister) {
