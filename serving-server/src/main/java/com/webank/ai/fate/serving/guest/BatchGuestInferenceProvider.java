@@ -34,10 +34,8 @@ import java.util.Map;
 @Service
 public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInferenceRequest,ReturnResult>{
 
-
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
-
 
     private  BatchHostFederatedParams  buildBatchHostFederatedParams(Context  context,BatchInferenceRequest  batchInferenceRequest){
         Model model = context.getModel();
@@ -46,11 +44,11 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
         String seqNo = batchInferenceRequest.getSeqNo();
         batchHostFederatedParams.setGuestPartyId(model.getPartId());
         batchHostFederatedParams.setHostPartyId(model.getFederationModel().getPartId());
-        List<BatchHostFederatedParams.SingleBatchHostFederatedParam> sendToHostDataList= Lists.newArrayList();
+        List<BatchHostFederatedParams.SingleInferenceData> sendToHostDataList= Lists.newArrayList();
 
         List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getDataList();
         for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
-            BatchHostFederatedParams.SingleBatchHostFederatedParam singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleBatchHostFederatedParam();
+            BatchHostFederatedParams.SingleBatchHostFederatedParam singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
             singleBatchHostFederatedParam.setCaseId(singleInferenceData.getCaseId());
             singleBatchHostFederatedParam.setSendToRemoteData(singleInferenceData.getSendToRemoteFeatureData());
             sendToHostDataList.add(singleBatchHostFederatedParam);

@@ -11,6 +11,7 @@ public class BatchInferenceRequest {
     public static  class  SingleInferenceData{
 
         int  index;
+        
         Map<String,Object>  featureData;
 
         public int getIndex() {
