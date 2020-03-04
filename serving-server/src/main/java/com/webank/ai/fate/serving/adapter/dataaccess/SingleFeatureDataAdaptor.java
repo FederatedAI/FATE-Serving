@@ -23,6 +23,6 @@ import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
 import java.util.Map;
 
-public interface FeatureData {
+public interface SingleFeatureDataAdaptor {
     ReturnResult getData(Context context , Map<String, Object> featureIds);
 }

@@ -264,11 +264,10 @@ public class NewModelManager implements InitializingBean {
      * @return
      */
     List<Model>  listAllModel(){
-
         return  new ArrayList(this.namespaceMap.values());
     }
 
-    Model getModelByTableNameAndNamespace(String  tableName ,String  namespace){
+    public Model getModelByTableNameAndNamespace(String  tableName ,String  namespace){
         String key =  getNameSpaceKey(tableName, namespace);
         return namespaceMap.get(key);
     }

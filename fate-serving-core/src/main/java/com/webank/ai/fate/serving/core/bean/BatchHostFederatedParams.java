@@ -4,14 +4,14 @@ package com.webank.ai.fate.serving.core.bean;
 import java.util.List;
 import java.util.Map;
 
-public class BatchHostFederatedParams {
+public class BatchHostFederatedParams extends  BatchInferenceRequest{
 
     String  hostTableName;
     String  hostNamespace;
     String  guestPartyId;
     String  hostPartyId;
-    String  seqNo;
-    List<SingleBatchHostFederatedParam> dataList;
+    String  caseId;
+
 
     public String getHostTableName() {
         return hostTableName;
@@ -45,48 +45,44 @@ public class BatchHostFederatedParams {
         this.hostPartyId = hostPartyId;
     }
 
-    public String getSeqNo() {
-        return seqNo;
+    public String getCaseId() {
+        return caseId;
     }
 
-    public void setSeqNo(String seqNo) {
-        this.seqNo = seqNo;
-    }
-
-    public List<SingleBatchHostFederatedParam> getDataList() {
-        return dataList;
-    }
-
-    public void setDataList(List<SingleBatchHostFederatedParam> dataList) {
-        this.dataList = dataList;
+    public void setCaseId(String caseId) {
+        this.caseId = caseId;
     }
 
 
 
-    public static class  SingleBatchHostFederatedParam{
-
-        String  caseId;
-
-        Map<String,Object> sendToRemoteData;
-
-        public String getCaseId() {
-            return caseId;
-        }
-
-        public void setCaseId(String caseId) {
-            this.caseId = caseId;
-        }
-
-        public Map<String, Object> getSendToRemoteData() {
-            return sendToRemoteData;
-        }
-
-        public void setSendToRemoteData(Map<String, Object> sendToRemoteData) {
-            this.sendToRemoteData = sendToRemoteData;
-        }
 
 
-    }
+
+
+//    public static class  SingleBatchHostFederatedParam{
+//
+//
+//        String  index;
+//
+//        Map<String,Object> sendToRemoteData;
+//
+//        public Map<String, Object> getSendToRemoteData() {
+//            return sendToRemoteData;
+//        }
+//
+//        public void setSendToRemoteData(Map<String, Object> sendToRemoteData) {
+//            this.sendToRemoteData = sendToRemoteData;
+//        }
+//        public String getIndex() {
+//            return index;
+//        }
+//
+//        public void setIndex(String index) {
+//            this.index = index;
+//        }
+//
+//
+//    }
 
 
 

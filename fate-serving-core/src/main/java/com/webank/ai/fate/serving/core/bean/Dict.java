@@ -76,6 +76,7 @@ public class Dict {
     public static final String PROPERTY_SERVICE_ROLE_NAME = "serviceRoleName";
     public static final String PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE = "serving";
     public static final String PROPERTY_ONLINE_DATA_ACCESS_ADAPTER = "OnlineDataAccessAdapter";
+    public static final String PROPERTY_ONLINE_DATA_BATCH_ACCESS_ADAPTER = "OnlineDataBatchAccessAdapter";
     public static final String PROPERTY_MODEL_CACHE_ACCESS_TTL = "modelCacheAccessTTL";
     public static final String PROPERTY_MODEL_CACHE_MAX_SIZE = "modelCacheMaxSize";
     public static final String PROPERTY_INFERENCE_WORKER_THREAD_NUM = "inferenceWorkerThreadNum";
