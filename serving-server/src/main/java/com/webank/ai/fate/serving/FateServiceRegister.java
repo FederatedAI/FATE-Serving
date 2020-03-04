@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
@@ -23,7 +24,7 @@ import java.util.Map;
  * @Author
  **/
 @Component
-public class FateServiceRegister implements ServiceRegister, ApplicationContextAware, ApplicationListener<ApplicationEvent> {
+public class FateServiceRegister implements ServiceRegister, ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
 
     Logger logger = LoggerFactory.getLogger(FateServiceRegister.class);
 
@@ -52,9 +53,9 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
 
 
     @Override
-    public void onApplicationEvent(ApplicationEvent applicationEvent) {
+    public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
 
-        if (applicationEvent instanceof ContextRefreshedEvent) {
+//        if (applicationEvent instanceof ContextRefreshedEvent) {
             String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
             for (String beanName : beans) {
                 AbstractServiceAdaptor serviceAdaptor =  applicationContext.getBean(beanName,AbstractServiceAdaptor.class);
@@ -82,7 +83,7 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
 
             }
             logger.info("service register info {}",this.serviceAdaptorMap);
-        }
+//        }
 
 
 

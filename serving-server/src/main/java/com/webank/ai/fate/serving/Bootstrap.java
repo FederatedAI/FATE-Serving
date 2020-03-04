@@ -5,6 +5,7 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -22,11 +23,10 @@ import java.util.Set;
  * @Author
  **/
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.webank.ai.fate.serving.*"})
+//@ComponentScan(basePackages = {"com.webank.ai.fate.serving.*"})
 @ConfigurationProperties
 //value = "file:${user.dir}/conf/serving-server.properties"
-@PropertySource(value = "serving-server.properties",
-        ignoreResourceNotFound = false)
+@PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
 @EnableScheduling
 public class Bootstrap {
 
@@ -77,10 +77,16 @@ public class Bootstrap {
     }
 
     public static void main(String[] args) {
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.start(args);
+        try {
+            Bootstrap bootstrap = new Bootstrap();
+            bootstrap.start(args);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
+        } catch (Exception ex) {
+            System.err.println("server start error, " + ex.getMessage());
+            ex.printStackTrace();
+            System.exit(1);
+        }
     }
 
 }

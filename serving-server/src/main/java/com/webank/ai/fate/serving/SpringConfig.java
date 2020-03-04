@@ -37,7 +37,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-
 public class SpringConfig {
 
 //    @Autowired(required = false)
@@ -53,11 +52,10 @@ public class SpringConfig {
 
     @Bean
     @Conditional({UseZkCondition.class})
-    ZookeeperRegistry getServiceRegistry( @Value("${useRegister:false}")  boolean useZk  ) {
-        String  zkUrl = environment.getProperty("zk.url");
+    ZookeeperRegistry getServiceRegistry(@Value("${useRegister:false}") boolean useZk) {
+        String zkUrl = environment.getProperty("zk.url");
         Preconditions.checkArgument(StringUtils.isNotEmpty(zkUrl));
-        return ZookeeperRegistry.getRegistery(zkUrl, "serving",
-                    "online", com.webank.ai.fate.serving.core.bean.Configuration.getPropertyInt(Dict.PORT));
+        return ZookeeperRegistry.getRegistery(zkUrl, Dict.PROPERTY_SERVING_ADDRESS, Dict.SELF_ENVIRONMENT, port);
     }
 
     @Bean

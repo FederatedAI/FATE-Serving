@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestFile implements FeatureData {
+public class TestFile implements SingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(TestFile.class);
 
 

@@ -134,7 +134,7 @@ public class PipelineModelProcessor implements ModelProcessor{
     }
 
 
-    @Override
+//    @Override
     public BatchFederatedResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
                                               Future  remoteFuture ){
 

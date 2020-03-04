@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 
 import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 
-public class PipelineTask implements  ModelProcessor{
+public class PipelineTask implements ModelProcessor {
     private static final Logger logger = LoggerFactory.getLogger(PipelineTask.class);
     private List<BaseModel> pipeLineNode = new ArrayList<>();
     private Map<String, BaseModel> modelMap = new HashMap<String, BaseModel>();
@@ -117,6 +118,16 @@ public class PipelineTask implements  ModelProcessor{
 
     }
 
+    @Override
+    public BatchFederatedResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture) {
+        return null;
+    }
+
+    @Override
+    public BatchFederatedResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams) {
+        return null;
+    }
+
     private class LocalPredictResult{
 
 
@@ -141,7 +152,6 @@ public class PipelineTask implements  ModelProcessor{
     }
 
 
-    @Override
     public BatchFederatedResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
                                               Future  remoteFuture ){
 

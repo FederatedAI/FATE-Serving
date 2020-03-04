@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import org.apache.commons.lang3.StringUtils;

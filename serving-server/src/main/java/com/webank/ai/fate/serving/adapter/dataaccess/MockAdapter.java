@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MockAdapter implements FeatureData {
+public class MockAdapter implements SingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(MockAdapter.class);
 
     @Override

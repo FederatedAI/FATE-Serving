@@ -31,7 +31,7 @@ public class Bootstrap {
     private static ApplicationContext applicationContext;
 
     public void start(String[] args) {
-        applicationContext = SpringApplication.run(new Bootstrap.class, args);
+        applicationContext = SpringApplication.run(Bootstrap.class, args);
     }
 
     public void stop() {

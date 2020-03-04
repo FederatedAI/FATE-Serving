@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.core.model;
 
 
 import com.alibaba.fastjson.JSON;
-import com.webank.ai.fate.serving.core.bean.ModelProcessor;
 
 import java.io.Serializable;
 

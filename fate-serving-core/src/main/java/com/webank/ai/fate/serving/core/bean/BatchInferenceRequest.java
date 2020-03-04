@@ -8,10 +8,11 @@ import java.util.Map;
 
 public class BatchInferenceRequest {
 
-    public static  class  SingleInferenceData{
-
-        int  index;
-        Map<String,Object>  featureData;
+    public static class SingleInferenceData {
+        String caseId;
+        int index;
+        Map<String, Object> featureData;
+        Map<String, Object> sendToRemoteFeatureData;
 
         public int getIndex() {
             return index;
@@ -36,7 +37,14 @@ public class BatchInferenceRequest {
         public void setSendToRemoteFeatureData(Map<String, Object> sendToRemoteFeatureData) {
             this.sendToRemoteFeatureData = sendToRemoteFeatureData;
         }
-        Map<String,Object>  sendToRemoteFeatureData;
+
+        public String getCaseId() {
+            return caseId;
+        }
+
+        public void setCaseId(String caseId) {
+            this.caseId = caseId;
+        }
     }
 
     private List<SingleInferenceData> dataList;
@@ -48,26 +56,40 @@ public class BatchInferenceRequest {
     public void setDataList(List<SingleInferenceData> dataList) {
         this.dataList = dataList;
     }
+
     private String serviceId;
     private String applyId;
+    private String seqNo;
+
     public String getApplyId() {
         return applyId;
     }
+
     public void setApplyId(String applyId) {
         this.applyId = applyId;
     }
+
     public String getServiceId() {
         return serviceId;
     }
+
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public String getSeqNo() {
+        return seqNo;
+    }
+
+    public void setSeqNo(String seqNo) {
+        this.seqNo = seqNo;
     }
 
     @Override
     public String toString() {
         String result = "";
         try {
-            result= JSON.toJSONString(this);
+            result = JSON.toJSONString(this);
         } catch (Throwable e) {
 
         }

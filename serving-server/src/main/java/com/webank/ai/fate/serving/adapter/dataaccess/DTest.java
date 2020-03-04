@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class DTest implements FeatureData {
+public class DTest implements SingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(DTest.class);
 
     @Override
