@@ -29,4 +29,20 @@ public class SpringContextUtil implements ApplicationContextAware {
         return applicationContext.getBeanNamesForType(type);
     }
 
+    public static String getProperty(String key) {
+        return applicationContext.getEnvironment().getProperty(key);
+    }
+
+    public static String getProperty(String key, String defaultValue) {
+        return applicationContext.getEnvironment().getProperty(key, defaultValue);
+    }
+
+    public static <T> T getProperty(String key, Class<T> targetType) {
+        return applicationContext.getEnvironment().getProperty(key, targetType);
+    }
+
+    public static <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+        return applicationContext.getEnvironment().getProperty(key, targetType, defaultValue);
+    }
+
 }
