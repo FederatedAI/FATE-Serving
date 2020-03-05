@@ -21,17 +21,22 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
-import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
+import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byte[]>>{
@@ -40,6 +45,8 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
     @Autowired(required=false)
     private RouterService routerService;
 
+    @Autowired
+    private Environment environment;
 
     @Override
     protected byte[] serialize(Context context, Map<String, byte[]> data) {
@@ -103,7 +110,7 @@ public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byt
             }
 
             if (StringUtils.isBlank(requestUrl)) {
-                requestUrl = Configuration.getProperty(Dict.MODEL_TRANSFER_URL);
+                requestUrl = environment.getProperty(Dict.MODEL_TRANSFER_URL);
                 logger.info("use profile model.transfer.url, {}", requestUrl);
             }
 

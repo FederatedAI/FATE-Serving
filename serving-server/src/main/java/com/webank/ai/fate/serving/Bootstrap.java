@@ -5,14 +5,12 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
-import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -36,7 +34,6 @@ public class Bootstrap {
 
     public void start(String[] args) {
 
-        System.err.println("iiiiiiiiiiiiiiiii");
         applicationContext = SpringApplication.run(new Class[]{Bootstrap.class,SpringConfig.class}, args);
     }
 

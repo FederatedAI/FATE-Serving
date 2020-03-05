@@ -1,14 +1,12 @@
 package com.webank.ai.fate.serving;
 
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
-import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
-import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import com.webank.ai.fate.serving.service.*;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -21,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -51,21 +48,22 @@ public class NewServingServer implements InitializingBean{
     ZookeeperRegistry zookeeperRegistry;
 
     @Autowired
-    RouterService routerService;
-
-    @Autowired
     Environment environment;
 
+    @Autowired
+    ConsoleReporter consoleReporter;
 
+    @Autowired
+    JmxReporter jmxReporter;
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
         int processors = Runtime.getRuntime().availableProcessors();
-        Integer corePoolSize = Configuration.getPropertyInt("serving.core.pool.size", processors);
-        Integer maxPoolSize = Configuration.getPropertyInt("serving.max.pool.size", processors * 2);
-        Integer aliveTime = Configuration.getPropertyInt("serving.pool.alive.time", 1000);
-        Integer queueSize = Configuration.getPropertyInt("serving.pool.queue.size", 10);
+        Integer corePoolSize = environment.getProperty("serving.core.pool.size", int.class, processors);
+        Integer maxPoolSize = environment.getProperty("serving.max.pool.size", int.class, processors * 2);
+        Integer aliveTime = environment.getProperty("serving.pool.alive.time", int.class, 1000);
+        Integer queueSize = environment.getProperty("serving.pool.queue.size", int.class, 10);
         Executor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, aliveTime.longValue(), TimeUnit.MILLISECONDS,
                 new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
@@ -102,5 +100,9 @@ public class NewServingServer implements InitializingBean{
         } else {
             logger.warn("serving-server not use register center");
         }
+
+        // metrics
+        consoleReporter.start(1, TimeUnit.MINUTES);
+        jmxReporter.start();
     }
 }

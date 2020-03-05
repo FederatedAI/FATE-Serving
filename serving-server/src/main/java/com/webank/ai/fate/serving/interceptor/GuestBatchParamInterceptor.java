@@ -3,19 +3,22 @@ package com.webank.ai.fate.serving.interceptor;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.Configuration;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.HostFederatedParams;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class GuestBatchParamInterceptor     implements Interceptor {
+
+    @Autowired
+    Environment environment;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
@@ -36,7 +39,7 @@ public class GuestBatchParamInterceptor     implements Interceptor {
 
         List<BatchInferenceRequest.SingleInferenceData>  datalist = batchInferenceRequest.getDataList();
 
-        int  batchSizeLimit = Configuration.getPropertyInt("batch.inference.max",50);
+        int  batchSizeLimit = environment.getProperty("batch.inference.max", int.class, 50);
 
         Preconditions.checkArgument(datalist.size()<=batchSizeLimit);
 

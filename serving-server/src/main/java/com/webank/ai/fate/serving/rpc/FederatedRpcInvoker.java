@@ -5,28 +5,30 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
+import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
-import com.webank.ai.fate.api.networking.proxy.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 @Service
 public class FederatedRpcInvoker {
     @Autowired
     public RouterService routerService;
+
+    @Autowired
+    private Environment environment;
 
     private static final Logger logger = LoggerFactory.getLogger(FederatedRpcInvoker.class);
 
@@ -47,18 +49,18 @@ public class FederatedRpcInvoker {
 
             metaDataBuilder.setSrc(
                     topicBuilder.setPartyId(String.valueOf(srcParty.getPartyId())).
-                            setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                            setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
                             .setName(Dict.PARTNER_PARTY_NAME)
                             .build());
             metaDataBuilder.setDst(
                     topicBuilder.setPartyId(String.valueOf(dstParty.getPartyId()))
-                            .setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                            .setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
                             .setName(Dict.PARTY_NAME)
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
-            String version =  Configuration.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
+            String version =  environment.getProperty(Dict.VERSION,"");
+            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION,""));
             packetBuilder.setHeader(metaDataBuilder.build());
             Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
             if(context.getCaseId()!=null) {
@@ -76,13 +78,11 @@ public class FederatedRpcInvoker {
             packetBuilder.setAuth(authBuilder.build());
 
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
-            boolean routerByzk = Boolean.valueOf(routerByZkString);
+            boolean routerByzk = environment.getProperty(Dict.USE_ZK_ROUTER, boolean.class, Boolean.TRUE);
             String address = null;
             if (!routerByzk) {
-                address = Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+                address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             } else {
-
                 URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
                 URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
                 List<URL> urls = routerService.router(newUrl);
@@ -102,7 +102,7 @@ public class FederatedRpcInvoker {
             future =stub1.unaryCall(packetBuilder.build());
 
             if(future!=null){
-                Proxy.Packet packet = future.get(Configuration.getPropertyInt("rpc.time.out",3000), TimeUnit.MILLISECONDS);
+                Proxy.Packet packet = future.get(environment.getProperty("rpc.time.out", int.class, 3000), TimeUnit.MILLISECONDS);
                 remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
             }
             return remoteResult;
@@ -132,18 +132,18 @@ public class FederatedRpcInvoker {
 
             metaDataBuilder.setSrc(
                     topicBuilder.setPartyId(String.valueOf(batchHostFederatedParams.getGuestPartyId())).
-                            setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                            setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
                             .setName(Dict.PARTNER_PARTY_NAME)
                             .build());
             metaDataBuilder.setDst(
                     topicBuilder.setPartyId(String.valueOf(batchHostFederatedParams.getHostPartyId()))
-                            .setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                            .setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
                             .setName(Dict.PARTY_NAME)
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName("batch").build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
-            String version =  Configuration.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
+            String version =  environment.getProperty(Dict.VERSION,"");
+            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION,""));
             packetBuilder.setHeader(metaDataBuilder.build());
             Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
             if(context.getCaseId()!=null) {
@@ -228,18 +228,18 @@ public class FederatedRpcInvoker {
 
             metaDataBuilder.setSrc(
                     topicBuilder.setPartyId(String.valueOf(srcParty.getPartyId())).
-                            setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                            setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
                             .setName(Dict.PARTNER_PARTY_NAME)
                             .build());
             metaDataBuilder.setDst(
                     topicBuilder.setPartyId(String.valueOf(dstParty.getPartyId()))
-                            .setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                            .setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
                             .setName(Dict.PARTY_NAME)
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
-            String version =  Configuration.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
+            String version =  environment.getProperty(Dict.VERSION,"");
+            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION,""));
             packetBuilder.setHeader(metaDataBuilder.build());
             Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
             if(context.getCaseId()!=null) {
@@ -257,11 +257,10 @@ public class FederatedRpcInvoker {
             packetBuilder.setAuth(authBuilder.build());
 
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
-            boolean routerByzk = Boolean.valueOf(routerByZkString);
+            boolean routerByzk = environment.getProperty(Dict.USE_ZK_ROUTER, boolean.class, Boolean.TRUE);
             String address = null;
             if (!routerByzk) {
-                address = Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+                address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             } else {
 
                 URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);

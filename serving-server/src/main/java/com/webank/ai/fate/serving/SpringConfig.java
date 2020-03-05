@@ -7,33 +7,20 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.register.common.NamedThreadFactory;
-import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.service.InferenceService;
-import com.webank.ai.fate.serving.service.ModelService;
-import com.webank.ai.fate.serving.service.ProxyService;
-import io.grpc.ServerBuilder;
-import io.grpc.ServerInterceptors;
+import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -94,6 +81,11 @@ public class SpringConfig {
         return routerService;
     }
 
+    @Bean
+    @ConditionalOnBean
+    public SpringContextUtil springContextUtil() {
+        return new SpringContextUtil();
+    }
 
 
 //    public
