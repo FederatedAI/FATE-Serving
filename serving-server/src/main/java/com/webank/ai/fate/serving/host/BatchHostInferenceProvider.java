@@ -164,9 +164,9 @@ public class BatchHostInferenceProvider  extends AbstractServiceAdaptor{
 
         Model model =context.getModel();
 
-        BatchFederatedResult batchFederatedResult = model.getModelProcessor().hostBatchInference(context,batchHostFederatedParams);
+        BatchInferenceResult batchInferenceResult = model.getModelProcessor().hostBatchInference(context,batchHostFederatedParams);
 
-        return batchFederatedResult;
+        return batchInferenceResult;
     }
 
     @Override
