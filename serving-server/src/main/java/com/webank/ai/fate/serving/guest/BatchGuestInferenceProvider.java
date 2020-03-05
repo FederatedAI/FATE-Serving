@@ -36,7 +36,7 @@ import java.util.Map;
         "defaultPostProcess"
 })
 @Service
-public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInferenceRequest,ReturnResult>{
+public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInferenceRequest,BatchInferenceResult>{
 
 
     @Autowired
@@ -87,7 +87,7 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
     }
 
     @Override
-    public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
+    public BatchInferenceResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
 
         Model  model = context.getModel();
 
@@ -128,20 +128,20 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
         ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.asyncBatch(context,batchHostFederatedParams);
 
 //        BatchFederatedResult    batchFederatedResult = modelProcessor.batchPredict(context,batchInferenceRequest,originBatchResultFuture);
-        BatchFederatedResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, originBatchResultFuture);
+        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, originBatchResultFuture);
 
-        return buildReturnResult(context,batchFederatedResult);
+        return  batchFederatedResult;
     }
 
-    private  ReturnResult  buildReturnResult(Context  context,BatchFederatedResult batchFederatedResult){
-
-
-        return  null;
-    }
+//    private  ReturnResult  buildReturnResult(Context  context,BatchFederatedResult batchFederatedResult){
+//
+//
+//        return  null;
+//    }
 
 
     @Override
-    protected ReturnResult transformErrorMap(Context context, Map data) {
+    protected BatchInferenceResult transformErrorMap(Context context, Map data) {
         return null;
     }
 }
