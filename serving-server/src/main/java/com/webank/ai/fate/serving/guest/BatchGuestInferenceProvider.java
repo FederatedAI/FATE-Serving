@@ -8,6 +8,7 @@ import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.bean.ModelInfo;
 import com.webank.ai.fate.serving.core.model.Model;
+import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -25,17 +26,22 @@ import java.util.Map;
  **/
 @FateService(name ="batchInferenece",  preChain= {
 //        "overloadMonitor",
-        "batchParamInterceptor",
-        "federationModelInterceptor",
-        "federationRouterService"
+//        "batchParamInterceptor",
+        "guestBatchParamInterceptor",
+//        "federationModelInterceptor",
+        "guestModelInterceptor",
+//        "federationRouterService"
+        "federationRouterInterceptor"
       },postChain = {
         "defaultPostProcess"
 })
 @Service
 public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInferenceRequest,ReturnResult>{
 
+
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
+
 
     private  BatchHostFederatedParams  buildBatchHostFederatedParams(Context  context,BatchInferenceRequest  batchInferenceRequest){
         Model model = context.getModel();
@@ -48,9 +54,9 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
 
         List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getDataList();
         for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
-            BatchHostFederatedParams.SingleBatchHostFederatedParam singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
+            BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
             singleBatchHostFederatedParam.setCaseId(singleInferenceData.getCaseId());
-            singleBatchHostFederatedParam.setSendToRemoteData(singleInferenceData.getSendToRemoteFeatureData());
+            singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
             sendToHostDataList.add(singleBatchHostFederatedParam);
         }
         batchHostFederatedParams.setDataList(sendToHostDataList);
@@ -121,7 +127,8 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
 
         ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.asyncBatch(context,batchHostFederatedParams);
 
-        BatchFederatedResult    batchFederatedResult = modelProcessor.batchPredict(context,batchInferenceRequest,originBatchResultFuture);
+//        BatchFederatedResult    batchFederatedResult = modelProcessor.batchPredict(context,batchInferenceRequest,originBatchResultFuture);
+        BatchFederatedResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, originBatchResultFuture);
 
         return buildReturnResult(context,batchFederatedResult);
     }

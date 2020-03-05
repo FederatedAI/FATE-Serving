@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.host;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.adapter.dataaccess.FeatureData;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.model.Model;
@@ -28,7 +27,7 @@ import java.util.Map;
 
         "hostBatchParamInterceptor",
         "federationModelInterceptor",
-        "federationRouterService"
+      //  "federationRouterService"
 },postChain = {
         "defaultPostProcess"
 })

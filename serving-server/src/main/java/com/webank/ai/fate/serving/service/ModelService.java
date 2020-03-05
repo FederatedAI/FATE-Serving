@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements InitializingBean,EnvironmentAware {
+public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements /*InitializingBean,*/EnvironmentAware {
     private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
     @Autowired
     NewModelManager modelManager;
@@ -64,8 +64,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
     Environment environment;
 
-    Base64.Encoder  encoder = Base64.getEncoder();
-    Base64.Decoder  decoder = Base64.getDecoder();
+//    Base64.Encoder  encoder = Base64.getEncoder();
+//    Base64.Decoder  decoder = Base64.getDecoder();
 
 //    private static class RequestWapper{
 //        public  RequestWapper(String content,long timestamp,String md5){
@@ -85,13 +85,13 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
 //    LinkedHashMap<String, RequestWapper> publishLoadReqMap = new LinkedHashMap();
 //    LinkedHashMap<String, RequestWapper> publicOnlineReqMap = new LinkedHashMap();
-    ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
+//    ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+//            new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
 
-    File publishLoadStoreFile;
-    File publishOnlineStoreFile;
+//    File publishLoadStoreFile;
+//    File publishOnlineStoreFile;
 
-    public ModelService() {
+    /*public ModelService() {
 
         String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
         if (StringUtils.isNotEmpty(locationPre)) {
@@ -113,7 +113,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
         }
 
-    }
+    }*/
 
     @Override
     @RegisterService(serviceName = "publishLoad")
@@ -188,22 +188,21 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             PublishResponse.Builder builder = PublishResponse.newBuilder();
             context.putData(Dict.SERVICE_ID,req.getServiceId());
 
-            modelManager.load(context,req);
-            returnResult = modelManager.publishLoadModel(context,
+            returnResult = modelManager.load(context,req);
+            /*returnResult = modelManager.publishLoadModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
-                    ModelUtil.getFederatedRolesModel(req.getModelMap()));
+                    ModelUtil.getFederatedRolesModel(req.getModelMap()));*/
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-            builder.setStatusCode(returnResult.getRetcode());
 
-            if (returnResult.getRetcode() == 0) {
-                RequestWapper  requestWapper =new RequestWapper(new String(encoder.encode(req.toByteArray())),System.currentTimeMillis(),md5Crypt(req));
+             /*if (returnResult.getRetcode() == 0) {
+               RequestWapper  requestWapper =new RequestWapper(new String(encoder.encode(req.toByteArray())),System.currentTimeMillis(),md5Crypt(req));
                 publishLoadReqMap.put(requestWapper.md5,requestWapper);
 
                 fireStoreEvent();
-            }
+            }*/
             responseStreamObserver.onNext(builder.build());
             responseStreamObserver.onCompleted();
         } finally {
@@ -223,20 +222,23 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             if (logger.isDebugEnabled()) {
                 logger.debug("receive service id {}", req.getServiceId());
             }
-            returnResult = modelManager.publishOnlineModel(context,
+
+            returnResult = modelManager.bind(context, req);
+
+            /*returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
                     ModelUtil.getFederatedRolesModel(req.getModelMap())
-            );
+            );*/
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-            if (returnResult.getRetcode() == 0) {
+            /*if (returnResult.getRetcode() == 0) {
                 String content = new String(encoder.encode(req.toByteArray()));
                 RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
                 publicOnlineReqMap.put(requestWapper.md5, requestWapper);
                 fireStoreEvent();
-            }
+            }*/
             responseStreamObserver.onNext(builder.build());
             responseStreamObserver.onCompleted();
         } finally {
@@ -256,15 +258,18 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             if (logger.isDebugEnabled()) {
                 logger.debug("publishBind receive service id {}", context.getData(Dict.SERVICE_ID));
             }
-            returnResult = modelManager.publishOnlineModel(context,
+
+            returnResult = modelManager.bind(context, req);
+
+            /*returnResult = modelManager.publishOnlineModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
                     ModelUtil.getFederatedRolesModel(req.getModelMap())
-            );
+            );*/
             builder.setStatusCode(returnResult.getRetcode())
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-            if (returnResult.getRetcode() == 0) {
+            /*if (returnResult.getRetcode() == 0) {
 
                 String content = new String(encoder.encode(req.toByteArray()));
 
@@ -277,7 +282,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
                 publicOnlineReqMap.put(requestWapper.md5, requestWapper);
                 fireStoreEvent();
-            }
+            }*/
             responseStreamObserver.onNext(builder.build());
             responseStreamObserver.onCompleted();
         } finally {
@@ -285,14 +290,14 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         }
     }
 
-    private String md5Crypt(PublishRequest req) {
+    /*private String md5Crypt(PublishRequest req) {
         char[] encryptArray = StringUtils.join(req.getLocal(), req.getRoleMap(), req.getModelMap()).toCharArray();
         Arrays.sort(encryptArray);
         String key = Md5Crypt.md5Crypt(String.valueOf(encryptArray).getBytes(), Dict.MD5_SALT);
         return key;
-    }
+    }*/
 
-    public static   List<RequestWapper>  sortRequest(Map<String,RequestWapper>  data){
+    /*public static   List<RequestWapper>  sortRequest(Map<String,RequestWapper>  data){
 
         List<RequestWapper>  list = Lists.newArrayList();
         data.forEach((k,v)->{
@@ -305,27 +310,27 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
             }
         });
         return  list;
-    }
+    }*/
 
-    public void fireStoreEvent() {
+    /*public void fireStoreEvent() {
 
         executorService.submit(() -> {
 
             store();
 
         });
-    }
+    }*/
 
 
-    public void store() {
+    /*public void store() {
 
         doSaveProperties(publishLoadReqMap, publishLoadStoreFile, 0);
         doSaveProperties(publicOnlineReqMap, publishOnlineStoreFile, 0);
 
-    }
+    }*/
 
 
-    public void doSaveProperties(Map<String,RequestWapper> data, File file, long version) {
+    /*public void doSaveProperties(Map<String,RequestWapper> data, File file, long version) {
 
         if (file == null) {
             return;
@@ -374,9 +379,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         } catch (Throwable e) {
             logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
         }
-    }
+    }*/
 
-    private List<RequestWapper> loadProperties(File file, Map<String,RequestWapper> properties) {
+    /*private List<RequestWapper> loadProperties(File file, Map<String,RequestWapper> properties) {
 
         if (file != null && file.exists()) {
             InputStream in = null;
@@ -419,12 +424,12 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
         }
         return null;
-    }
+    }*/
 
 
     public  void  restore(){
-
-        List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
+        modelManager.restore();
+        /*List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
         List<RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
         if(publishLoadList!=null) {
             publishLoadList.forEach((v) -> {
@@ -466,13 +471,13 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 }
 
             });
-        }
+        }*/
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
        // restore();
-    }
+    }*/
 
 
     @Override

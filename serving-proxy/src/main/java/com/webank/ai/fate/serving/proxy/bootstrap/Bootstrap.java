@@ -31,7 +31,7 @@ public class Bootstrap {
     private static ApplicationContext applicationContext;
 
     public void start(String[] args) {
-        applicationContext = SpringApplication.run(new Bootstrap.class, args);
+        applicationContext = SpringApplication.run(Bootstrap.class, args);
     }
 
     public void stop() {
@@ -71,10 +71,16 @@ public class Bootstrap {
     }
 
     public static void main(String[] args) {
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.start(args);
+        try {
+            Bootstrap bootstrap = new Bootstrap();
+            bootstrap.start(args);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
+        } catch (Exception ex) {
+            System.err.println("server start error, " + ex.getMessage());
+            ex.printStackTrace();
+            System.exit(1);
+        }
     }
 
 }

@@ -18,7 +18,7 @@ package com.webank.ai.fate.serving.host;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.adapter.dataaccess.FeatureData;
+import com.webank.ai.fate.serving.adapter.dataaccess.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.federatedml.PipelineTask;
@@ -44,8 +44,8 @@ public class DefaultHostInferenceProvider implements HostInferenceProvider {
 
     private static ReturnResult getFeatureData(Context  context,Map<String, Object> featureIds) {
         ReturnResult defaultReturnResult = new ReturnResult();
-        String classPath = FeatureData.class.getPackage().getName() + "." + Configuration.getProperty(Dict.PROPERTY_ONLINE_DATA_ACCESS_ADAPTER);
-        FeatureData featureData = (FeatureData) InferenceUtils.getClassByName(classPath);
+        String classPath = SingleFeatureDataAdaptor.class.getPackage().getName() + "." + Configuration.getProperty(Dict.PROPERTY_ONLINE_DATA_ACCESS_ADAPTER);
+        SingleFeatureDataAdaptor featureData = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(classPath);
         if (featureData == null) {
             defaultReturnResult.setRetcode(InferenceRetCode.ADAPTER_ERROR);
             return defaultReturnResult;

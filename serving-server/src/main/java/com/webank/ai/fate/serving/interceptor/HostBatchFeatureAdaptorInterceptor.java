@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.serving.adapter.dataaccess.AdaptorDescriptor;
 import com.webank.ai.fate.serving.adapter.dataaccess.BatchFeatureDataAdaptor;
-import com.webank.ai.fate.serving.adapter.dataaccess.FeatureData;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -50,7 +49,7 @@ public class HostBatchFeatureAdaptorInterceptor extends  AbstractInterceptor imp
             throw  new  RuntimeException();
         }
 
-        Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult>  batchHostFeatureAdaptorResult.();
+//        Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult>  batchHostFeatureAdaptorResult.();
 
 
 

@@ -21,13 +21,53 @@ import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 
 public class PipelineModelProcessor implements ModelProcessor{
     @Override
-    public BatchFederatedResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture) {
-        return null;
+    public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture) {
+        BatchInferenceResult batchFederatedResult = new BatchInferenceResult() ;
+        Map<Integer ,Map<String,Object>>  localResult = localPredict(context,batchInferenceRequest);
+
+        try {
+            remoteFuture.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+
+        return  batchFederatedResult;
+
+
     }
 
+    /**
+     *  host 端只需要本地预测即可
+     * @param context
+     * @param batchHostFederatedParams
+     * @return
+     */
     @Override
-    public BatchFederatedResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams) {
-        return null;
+    public BatchInferenceResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams) {
+
+        Map<Integer ,Map<String,Object>>  localResult = localPredict(context,batchHostFederatedParams);
+        BatchInferenceResult batchFederatedResult = new BatchInferenceResult() ;
+        localResult.forEach((k,v)->{
+
+            BatchInferenceResult.SingleInferenceResult singleInferenceResult=  new  BatchInferenceResult.SingleInferenceResult();
+
+            // TODO: 2020/3/4  这里需要添加对每个返回的结果是否成功的判断逻辑，目前只是简单用是否返回数据来表示
+            if(v!=null){
+                singleInferenceResult.setData(v);
+                singleInferenceResult.setIndex(k);
+                singleInferenceResult.setRetcode("0");
+            }
+
+            batchFederatedResult.getDataList().add(singleInferenceResult);
+
+        });
+
+        batchFederatedResult.setRetcode("0");
+
+        return  batchFederatedResult;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(PipelineTask.class);
@@ -89,20 +129,27 @@ public class PipelineModelProcessor implements ModelProcessor{
     }
 
 
-    public List<Map<String,Object>>  localPredict(Context context,
+
+
+    public Map<Integer ,Map<String,Object>>  localPredict(Context context,
                                                   BatchInferenceRequest batchFederatedParams){
 
         List<BatchInferenceRequest.SingleInferenceData> inputList = batchFederatedParams.getDataList();
+        Map<Integer ,Map<String,Object>> result = new HashMap<>();
 
-        List<Map<String,Object>> result =  Lists.newArrayList();
         for(int i=0;i<inputList.size();i++){
-            BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
-            Map<String, Object> singleResult =   singleLocalPredict(context,input.getFeatureData());
-            if(singleResult!=null){
-                checkResult(singleResult);
-                result.add(singleResult);
-            }else{
-                logger.error("local predict return null");
+            try {
+                BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
+
+                Map<String, Object> singleResult = singleLocalPredict(context, input.getFeatureData());
+                if (singleResult != null) {
+                    checkResult(singleResult);
+                    result.put(input.getIndex(), singleResult);
+                } else {
+                    logger.error("local predict return null");
+                }
+            }catch (Throwable e){
+                logger.error("localPredict error",e);
             }
         }
         return   result;
@@ -110,12 +157,7 @@ public class PipelineModelProcessor implements ModelProcessor{
 
     }
 
-    private class LocalPredictResult{
 
-
-
-        //List<Map<String,Object>>
-    }
 
 
     /**
@@ -126,45 +168,45 @@ public class PipelineModelProcessor implements ModelProcessor{
         Preconditions.checkArgument( result.get(Dict.CASEID)!=null);
 
     }
-    public  BatchFederatedResult  mergeRemote(Context context,
-                                              List<Map<String, Object>> localData,
-                                              List<Map<String,Object>> remoteData  ){
+    public  BatchInferenceResult  mergeHostResult(Context context,
+                                              Map<Integer ,Map<String, Object>> localData,
+                                                  Map<Integer ,Map<String,Object>> remoteData  ){
 
         return null;
     }
 
 
-    @Override
-    public BatchFederatedResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
-                                              Future  remoteFuture ){
-
-        List<Map<String,Object>>  localResult = localPredict(context,batchInferenceRequest);
-        BatchFederatedResult batchFederatedResult =null;
-        if(remoteFuture!=null) {
-            Object remoteObject = null;
-            try {
-                remoteObject = remoteFuture.get(3000, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-            }
-            Preconditions.checkArgument(remoteObject != null);
-            // BatchFederatedResult  batchFederatedResult =  (BatchFederatedResult)  remoteObject;
-            List<Map<String, Object>> remoteList = null;
-            batchFederatedResult= mergeRemote(context, localResult, remoteList);
-        }else{
-
-            /**
-             * host无future
-             */
-
-        }
-        return  batchFederatedResult;
-
-    }
+////    @Override
+//    public BatchInferenceResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
+//                                              Future  remoteFuture ){
+//
+//        Map<Integer ,Map<String,Object>>  localResult = localPredict(context,batchInferenceRequest);
+//        BatchInferenceResult batchFederatedResult =null;
+//        if(remoteFuture!=null) {
+//            Object remoteObject = null;
+//            try {
+//                remoteObject = remoteFuture.get(3000, TimeUnit.MILLISECONDS);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            } catch (TimeoutException e) {
+//                e.printStackTrace();
+//            }
+//            Preconditions.checkArgument(remoteObject != null);
+//            // BatchFederatedResult  batchFederatedResult =  (BatchFederatedResult)  remoteObject;
+//            List<Map<String, Object>> remoteList = null;
+//            batchFederatedResult= mergeRemote(context, localResult, remoteList);
+//        }else{
+//
+//            /**
+//             * host无future
+//             */
+//
+//        }
+//        return  batchFederatedResult;
+//
+//    }
 
 
 

@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class FederatedRpcInvoker {
     @Autowired
-    public static RouterService routerService;
+    public RouterService routerService;
 
     private static final Logger logger = LoggerFactory.getLogger(FederatedRpcInvoker.class);
 
