@@ -55,7 +55,6 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
         List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getDataList();
         for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
             BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
-            singleBatchHostFederatedParam.setCaseId(singleInferenceData.getCaseId());
             singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
             sendToHostDataList.add(singleBatchHostFederatedParam);
         }
@@ -63,7 +62,7 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
         batchHostFederatedParams.setHostTableName(hostModel.getTableName());
         batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
         batchHostFederatedParams.setSeqNo(seqNo);
-
+        batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
 
 
 

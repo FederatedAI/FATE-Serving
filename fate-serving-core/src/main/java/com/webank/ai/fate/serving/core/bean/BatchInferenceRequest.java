@@ -9,7 +9,6 @@ import java.util.Map;
 public class BatchInferenceRequest {
 
     public static class SingleInferenceData {
-        String caseId;
         int index;
         Map<String, Object> featureData;
         Map<String, Object> sendToRemoteFeatureData;
@@ -37,16 +36,12 @@ public class BatchInferenceRequest {
         public void setSendToRemoteFeatureData(Map<String, Object> sendToRemoteFeatureData) {
             this.sendToRemoteFeatureData = sendToRemoteFeatureData;
         }
-
-        public String getCaseId() {
-            return caseId;
-        }
-
-        public void setCaseId(String caseId) {
-            this.caseId = caseId;
-        }
     }
 
+    private String serviceId;
+    private String applyId;
+    private String seqNo;
+    private String caseId;
     private List<SingleInferenceData> dataList;
 
     public List<SingleInferenceData> getDataList() {
@@ -57,9 +52,13 @@ public class BatchInferenceRequest {
         this.dataList = dataList;
     }
 
-    private String serviceId;
-    private String applyId;
-    private String seqNo;
+    public String getCaseId() {
+        return caseId;
+    }
+
+    public void setCaseId(String caseId) {
+        this.caseId = caseId;
+    }
 
     public String getApplyId() {
         return applyId;

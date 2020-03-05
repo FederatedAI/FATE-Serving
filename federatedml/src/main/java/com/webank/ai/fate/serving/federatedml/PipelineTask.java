@@ -119,12 +119,12 @@ public class PipelineTask implements ModelProcessor {
     }
 
     @Override
-    public BatchFederatedResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture) {
+    public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture) {
         return null;
     }
 
     @Override
-    public BatchFederatedResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams) {
+    public BatchInferenceResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams) {
         return null;
     }
 
@@ -144,7 +144,7 @@ public class PipelineTask implements ModelProcessor {
        Preconditions.checkArgument( result.get(Dict.CASEID)!=null);
 
     }
-    public  BatchFederatedResult  mergeRemote(Context context,
+    public  BatchInferenceResult  mergeRemote(Context context,
                     List<Map<String, Object>> localData,
                                               List<Map<String,Object>> remoteData  ){
 
@@ -152,11 +152,11 @@ public class PipelineTask implements ModelProcessor {
     }
 
 
-    public BatchFederatedResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
+    public BatchInferenceResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
                                               Future  remoteFuture ){
 
         List<Map<String,Object>>  localResult = localPredict(context,batchInferenceRequest);
-        BatchFederatedResult batchFederatedResult =null;
+        BatchInferenceResult batchFederatedResult =null;
         if(remoteFuture!=null) {
             Object remoteObject = null;
             try {
