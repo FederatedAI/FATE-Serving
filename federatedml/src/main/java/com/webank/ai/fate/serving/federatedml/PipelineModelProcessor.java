@@ -4,9 +4,12 @@ package com.webank.ai.fate.serving.federatedml;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,21 +25,30 @@ import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 public class PipelineModelProcessor implements ModelProcessor{
     @Override
     public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture) {
-        BatchInferenceResult batchFederatedResult = new BatchInferenceResult() ;
-        Map<Integer ,Map<String,Object>>  localResult = localPredict(context,batchInferenceRequest);
+        BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
+        Map<Integer, Map<String, Object>> localResult = localPredict(context, batchInferenceRequest);
 
         try {
-            remoteFuture.get();
+            Proxy.Packet packet = (Proxy.Packet) remoteFuture.get();
+            if (packet != null) {
+                BatchInferenceResult remoteInferenceResult = (BatchInferenceResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), BatchInferenceResult.class);
+                if (remoteInferenceResult.getRetcode() != InferenceRetCode.OK) {
+                    logger.info("get remote inference result error");
+                    batchFederatedResult.setRetcode(remoteInferenceResult.getRetcode());
+                    batchFederatedResult.setDataList(remoteInferenceResult.getDataList());
+                    return batchFederatedResult;
+                }
+                batchFederatedResult = mergeHostResult(context, localResult, remoteInferenceResult);
+            } else {
+                batchFederatedResult.setRetcode(InferenceRetCode.NETWORK_ERROR);
+                logger.error("can not get future result");
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-
-
-        return  batchFederatedResult;
-
-
+        return batchFederatedResult;
     }
 
     /**
@@ -58,14 +70,14 @@ public class PipelineModelProcessor implements ModelProcessor{
             if(v!=null){
                 singleInferenceResult.setData(v);
                 singleInferenceResult.setIndex(k);
-                singleInferenceResult.setRetcode("0");
+                singleInferenceResult.setRetcode(InferenceRetCode.OK);
             }
 
             batchFederatedResult.getDataList().add(singleInferenceResult);
 
         });
 
-        batchFederatedResult.setRetcode("0");
+        batchFederatedResult.setRetcode(InferenceRetCode.OK);
 
         return  batchFederatedResult;
     }
@@ -128,9 +140,6 @@ public class PipelineModelProcessor implements ModelProcessor{
         }
     }
 
-
-
-
     public Map<Integer ,Map<String,Object>>  localPredict(Context context,
                                                   BatchInferenceRequest batchFederatedParams){
 
@@ -158,6 +167,38 @@ public class PipelineModelProcessor implements ModelProcessor{
     }
 
 
+    private BatchInferenceResult mergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, BatchInferenceResult remoteResult) {
+        Preconditions.checkArgument(localResult != null);
+        Preconditions.checkArgument(remoteResult != null);
+        Preconditions.checkArgument(remoteResult.getDataList() != null);
+
+        BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
+
+        if (localResult.size() != remoteResult.getDataList().size()) {
+            logger.info("The number of local prediction results is not consistent with the number of remote prediction results");
+            batchFederatedResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
+            return batchFederatedResult;
+        }
+
+        int dataSize = localResult.size();
+        for (int i = 0; i < dataSize; i++) {
+            BatchInferenceResult.SingleInferenceResult singleRemoteResult = remoteResult.getDataList().get(i);
+            int index = singleRemoteResult.getIndex();
+            Map<String, Object> localData = localResult.get(index);
+            Map<String, Object> remoteData = singleRemoteResult.getData();
+
+            Map<String, Object> input = new HashMap<>();
+            input.put(Dict.LOCAL_INFERENCE_DATA, localData.get(Dict.SCORE));
+            input.put(Dict.REMOTE_INFERENCE_DATA, remoteData.get(Dict.SCORE));
+
+            for (BaseModel model : this.pipeLineNode) {
+                Map<String, Object> mergeResult = model.mergeRemoteInference(context, input);
+                batchFederatedResult.getDataList().set(index, new BatchInferenceResult.SingleInferenceResult(index, InferenceRetCode.OK, Dict.SUCCESS, mergeResult));
+            }
+        }
+
+        return batchFederatedResult;
+    }
 
 
     /**
@@ -168,12 +209,12 @@ public class PipelineModelProcessor implements ModelProcessor{
         Preconditions.checkArgument( result.get(Dict.CASEID)!=null);
 
     }
-    public  BatchInferenceResult  mergeHostResult(Context context,
+/*    public  BatchInferenceResult  mergeHostResult(Context context,
                                               Map<Integer ,Map<String, Object>> localData,
                                                   Map<Integer ,Map<String,Object>> remoteData  ){
 
         return null;
-    }
+    }*/
 
 
 ////    @Override

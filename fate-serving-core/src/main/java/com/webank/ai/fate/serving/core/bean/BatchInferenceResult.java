@@ -1,31 +1,31 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class BatchInferenceResult {
 
-    String  retcode;
+    int  retcode;
 
     List<SingleInferenceResult> dataList;
-
 
     static public  class  SingleInferenceResult  {
 
         Integer  index;
 
-        String  retcode;
+        int  retcode;
 
         String  msg;
 
         Map<String ,Object> data;
 
-        public String getRetcode() {
+        public int getRetcode() {
             return retcode;
         }
 
-        public void setRetcode(String retcode) {
+        public void setRetcode(int retcode) {
             this.retcode = retcode;
         }
 
@@ -37,7 +37,6 @@ public class BatchInferenceResult {
             this.data = data;
         }
 
-
         public Integer getIndex() {
             return index;
         }
@@ -46,17 +45,29 @@ public class BatchInferenceResult {
             this.index = index;
         }
 
+        public SingleInferenceResult() {
+        }
+
+        public SingleInferenceResult(Integer index, int retcode, String msg, Map<String, Object> data) {
+            this.index = index;
+            this.retcode = retcode;
+            this.msg = msg;
+            this.data = data;
+        }
     }
 
-    public String getRetcode() {
+    public int getRetcode() {
         return retcode;
     }
 
-    public void setRetcode(String retcode) {
+    public void setRetcode(int retcode) {
         this.retcode = retcode;
     }
 
     public List<SingleInferenceResult> getDataList() {
+        if (dataList == null) {
+            dataList = new ArrayList<>();
+        }
         return dataList;
     }
 

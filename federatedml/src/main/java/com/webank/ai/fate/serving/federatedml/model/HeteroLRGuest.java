@@ -78,11 +78,30 @@ public class HeteroLRGuest extends HeteroLR {
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
+        Map<String, Object> result = new HashMap<>(8);
+        Map<String, Double> forwardRet = forward(input);
+        double score = forwardRet.get(Dict.SCORE);
+
+        logger.info("caseid {} score:{}", context.getCaseId(), score);
+        result.put(Dict.SCORE, score);
+        return result;
     }
 
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
+        Map<String, Object> result = new HashMap<>(8);
+
+        double score;
+        double localScore = (double) input.get(Dict.LOCAL_INFERENCE_DATA);
+        double remoteScore = (double) input.get(Dict.REMOTE_INFERENCE_DATA);
+
+        logger.info("merge inference result, caseid {} local score:{} remote scope:{}", context.getCaseId(), localScore, remoteScore);
+        score = localScore;
+        score += remoteScore;
+
+        double prob = sigmod(score);
+        result.put(Dict.PROB, prob);
+
+        return result;
     }
 }
