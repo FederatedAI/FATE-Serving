@@ -27,6 +27,10 @@ public class InterGrpcServer implements InitializingBean {
 
     Server server ;
 
+    public Server getServer() {
+        return server;
+    }
+
     @Autowired
     InterRequestHandler interRequestHandler;
 
