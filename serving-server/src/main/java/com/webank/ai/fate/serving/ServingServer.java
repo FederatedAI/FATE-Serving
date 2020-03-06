@@ -174,25 +174,14 @@ public class ServingServer implements InitializingBean {
 
     private void stop() {
         if (server != null) {
-            if (useRegister) {
-                ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-                Set<URL> registered = zookeeperRegistry.getRegistered();
-                Set<URL> urls = Sets.newHashSet();
-                urls.addAll(registered);
-                urls.forEach(url -> {
-                    logger.info("unregister {}", url);
-                    zookeeperRegistry.unregister(url);
-                });
-                zookeeperRegistry.destroy();
-            }
+            logger.info("try to shutdown server ==============!!!!!!!!!!!!!!!!!!!!!");
+
             int retryCount = 0;
             long requestInProcess = BaseContext.requestInProcess.get();
             do {
-
                 logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess, retryCount + 1);
                 if (requestInProcess > 0 && retryCount < 30) {
                     try {
-
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -203,7 +192,13 @@ public class ServingServer implements InitializingBean {
                     break;
                 }
 
-            } while (requestInProcess > 0 && retryCount < 3);
+            } while (requestInProcess > 0 && retryCount < 30);
+
+            if (useRegister) {
+                ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
+                zookeeperRegistry.destroy();
+            }
+
             server.shutdown();
         }
     }
