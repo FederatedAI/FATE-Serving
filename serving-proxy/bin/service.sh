@@ -42,7 +42,7 @@ case "$1" in
 
     restart)
         stop $module
-        sleep 0.5
+        sleep 4
         start  $module
         status $module
         ;;
