@@ -35,29 +35,25 @@ public class Bootstrap {
     public void stop() {
         logger.info("try to shutdown server ==============!!!!!!!!!!!!!!!!!!!!!");
 
-        AbstractServiceAdaptor.isOpen = false;
-        int retryCount = 0;
-        long requestInProcess = AbstractServiceAdaptor.requestInHandle.get();
-        do {
-            logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess, retryCount + 1);
-            if (requestInProcess > 0 && retryCount < 30) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                retryCount++;
-                requestInProcess = AbstractServiceAdaptor.requestInHandle.get();
-            } else {
-                break;
-            }
-        } while (requestInProcess > 0 && retryCount < 30);
-
         boolean useZkRouter = Boolean.parseBoolean(applicationContext.getEnvironment().getProperty(Dict.USE_ZK_ROUTER, "false"));
         if (useZkRouter) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.destroy();
         }
+
+        AbstractServiceAdaptor.isOpen = false;
+        int retryCount = 0;
+        long requestInProcess = AbstractServiceAdaptor.requestInHandle.get();
+        do {
+            logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess, retryCount + 1);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            retryCount++;
+            requestInProcess = AbstractServiceAdaptor.requestInHandle.get();
+        } while (requestInProcess > 0 && retryCount < 30);
 
         IntraGrpcServer intraGrpcServer = applicationContext.getBean(IntraGrpcServer.class);
         intraGrpcServer.getServer().shutdown();
