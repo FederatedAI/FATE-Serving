@@ -33,6 +33,10 @@ public class IntraGrpcServer implements InitializingBean {
 
     Server server;
 
+    public Server getServer() {
+        return server;
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);

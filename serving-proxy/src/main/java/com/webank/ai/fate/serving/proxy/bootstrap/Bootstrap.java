@@ -1,10 +1,10 @@
 package com.webank.ai.fate.serving.proxy.bootstrap;
 
-import com.google.common.collect.Sets;
-import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
+import com.webank.ai.fate.serving.proxy.rpc.grpc.InterGrpcServer;
+import com.webank.ai.fate.serving.proxy.rpc.grpc.IntraGrpcServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -13,8 +13,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import java.util.Set;
 
 /**
  * @Description TODO
@@ -36,38 +34,36 @@ public class Bootstrap {
 
     public void stop() {
         logger.info("try to shutdown server ==============!!!!!!!!!!!!!!!!!!!!!");
+
         AbstractServiceAdaptor.isOpen = false;
-        int tryNum = 0;
-        /**
-         * 3秒
-         */
-        while (AbstractServiceAdaptor.requestInHandle.get() > 0 && tryNum < 30) {
-            logger.info("try to shundown,try count {}, remain {}", tryNum, AbstractServiceAdaptor.requestInHandle.get());
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        int retryCount = 0;
+        long requestInProcess = AbstractServiceAdaptor.requestInHandle.get();
+        do {
+            logger.info("try to stop server,there is {} request in process,try count {}", requestInProcess, retryCount + 1);
+            if (requestInProcess > 0 && retryCount < 30) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                retryCount++;
+                requestInProcess = AbstractServiceAdaptor.requestInHandle.get();
+            } else {
+                break;
             }
-        }
+        } while (requestInProcess > 0 && retryCount < 30);
 
         boolean useZkRouter = Boolean.parseBoolean(applicationContext.getEnvironment().getProperty(Dict.USE_ZK_ROUTER, "false"));
         if (useZkRouter) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-            Set<URL> registered = zookeeperRegistry.getRegistered();
-            Set<URL> urls = Sets.newHashSet();
-            urls.addAll(registered);
-            urls.forEach(url -> {
-                logger.info("unregister {}", url);
-                zookeeperRegistry.unregister(url);
-            });
-
             zookeeperRegistry.destroy();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
+
+        IntraGrpcServer intraGrpcServer = applicationContext.getBean(IntraGrpcServer.class);
+        intraGrpcServer.getServer().shutdown();
+
+        InterGrpcServer interGrpcServer = applicationContext.getBean(InterGrpcServer.class);
+        interGrpcServer.getServer().shutdown();
     }
 
     public static void main(String[] args) {
