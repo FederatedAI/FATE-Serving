@@ -4,9 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-
+import com.webank.ai.fate.serving.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.bean.ModelInfo;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
@@ -21,22 +20,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description TODO
- * @Author kaideng
+ *  主要兼容host为1.2.x版本的接口
+ *
  **/
-@FateService(name ="batchInferenece",  preChain= {
-//        "overloadMonitor",
-//        "batchParamInterceptor",
+@FateService(name ="singleInference",  preChain= {
         "guestBatchParamInterceptor",
-//        "federationModelInterceptor",
         "guestModelInterceptor",
-//        "federationRouterService"
         "federationRouterInterceptor"
       },postChain = {
         "defaultPostProcess"
 })
 @Service
-public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInferenceRequest,BatchInferenceResult>{
+public class OldVersionInferenceProvider extends AbstractServiceAdaptor<InferenceRequest,ReturnResult>{
+
 
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
@@ -53,24 +49,27 @@ public class BatchGuestInferenceProvider extends AbstractServiceAdaptor<BatchInf
         ModelProcessor modelProcessor = model.getModelProcessor();
 
 
-        BatchInferenceRequest   batchInferenceRequest =(BatchInferenceRequest)inboundPackage.getBody();
+        InferenceRequest   inferenceRequest =(InferenceRequest)inboundPackage.getBody();
+
+
         /**
          *  发往对端的参数
          */
         BatchHostFederatedParams  batchHostFederatedParams = buildBatchHostFederatedParams( context,batchInferenceRequest);
 
+        //==========
         /**
          * guest 端与host同步预测，再合并结果
          */
 
+       // federatedRpcInvoker.async();
+
         ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.asyncBatch(context,batchHostFederatedParams);
 
-//        BatchFederatedResult    batchFederatedResult = modelProcessor.batchPredict(context,batchInferenceRequest,originBatchResultFuture);
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, originBatchResultFuture);
 
         return  batchFederatedResult;
     }
-
 
 
 

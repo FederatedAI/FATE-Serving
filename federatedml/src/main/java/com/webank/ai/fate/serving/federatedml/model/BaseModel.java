@@ -210,6 +210,9 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
                     address = ip + ":" + port;
                 }
             }
+
+
+            logger.info("send to remote address {}",address);
             Preconditions.checkArgument(StringUtils.isNotEmpty(address));
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
             ListenableFuture<Proxy.Packet> future= null;

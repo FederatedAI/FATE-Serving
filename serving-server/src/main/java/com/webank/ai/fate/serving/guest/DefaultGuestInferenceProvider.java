@@ -221,7 +221,6 @@ public class DefaultGuestInferenceProvider implements GuestInferenceProvider, In
                 logger.debug("preprocess caseid {} cost time {}", context.getCaseId(), endTime - beginTime);
             }
         }
-
     }
 
     private PostProcessingResult getPostProcessedResult(Context context, Map<String, Object> featureData, Map<String, Object> modelResult) {

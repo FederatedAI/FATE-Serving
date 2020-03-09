@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 @FateService(name ="batchInferenece",  preChain= {
 //        "overloadMonitor",
-
-
         "hostBatchParamInterceptor",
         "federationModelInterceptor",
       //  "federationRouterService"

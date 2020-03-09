@@ -188,6 +188,7 @@ public class ServingServer implements InitializingBean {
                     zookeeperRegistry.unregister(url);
                 });
                 zookeeperRegistry.destroy();
+
             }
             int retryCount = 0;
             long requestInProcess = BaseContext.requestInProcess.get();
