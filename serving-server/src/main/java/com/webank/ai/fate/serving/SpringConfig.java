@@ -16,6 +16,7 @@ import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -82,7 +83,7 @@ public class SpringConfig {
     }
 
     @Bean
-    @ConditionalOnBean
+    @ConditionalOnMissingBean
     public SpringContextUtil springContextUtil() {
         return new SpringContextUtil();
     }
