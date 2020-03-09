@@ -38,7 +38,7 @@ public class OldVersionInferenceProvider extends AbstractServiceAdaptor<Inferenc
     FederatedRpcInvoker federatedRpcInvoker;
 
     @Override
-    public BatchInferenceResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
+    public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
 
         Model  model = context.getModel();
 
@@ -55,7 +55,7 @@ public class OldVersionInferenceProvider extends AbstractServiceAdaptor<Inferenc
         /**
          *  发往对端的参数
          */
-        BatchHostFederatedParams  batchHostFederatedParams = buildBatchHostFederatedParams( context,batchInferenceRequest);
+        BatchHostFederatedParams  batchHostFederatedParams = buildBatchHostFederatedParams( context,null);
 
         //==========
         /**
@@ -66,15 +66,14 @@ public class OldVersionInferenceProvider extends AbstractServiceAdaptor<Inferenc
 
         ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.asyncBatch(context,batchHostFederatedParams);
 
-        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, originBatchResultFuture);
+        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, null, originBatchResultFuture);
 
-        return  batchFederatedResult;
+        return  null;
     }
 
 
-
     @Override
-    protected BatchInferenceResult transformErrorMap(Context context, Map data) {
+    protected ReturnResult transformErrorMap(Context context, Map data) {
         return null;
     }
 }
