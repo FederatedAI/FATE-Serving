@@ -90,18 +90,25 @@ public class HeteroLRGuest extends HeteroLR {
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
         Map<String, Object> result = new HashMap<>(8);
+        result.put(Dict.RET_CODE,InferenceRetCode.OK);
+        try {
+            Map<String, Object> localData = (Map<String, Object>) input.get(Dict.LOCAL_INFERENCE_DATA);
+            Map<String, Object> remoteData = (Map<String, Object>) input.get(Dict.REMOTE_INFERENCE_DATA);
 
-        double score;
-        double localScore = (double) input.get(Dict.LOCAL_INFERENCE_DATA);
-        double remoteScore = (double) input.get(Dict.REMOTE_INFERENCE_DATA);
+            double score;
+            double localScore = (double) localData.get(Dict.SCORE);
+            double remoteScore = (double) remoteData.get(Dict.SCORE);
 
-        logger.info("merge inference result, caseid {} local score:{} remote scope:{}", context.getCaseId(), localScore, remoteScore);
-        score = localScore;
-        score += remoteScore;
+            logger.info("merge inference result, caseid {} local score:{} remote scope:{}", context.getCaseId(), localScore, remoteScore);
+            score = localScore;
+            score += remoteScore;
 
-        double prob = sigmod(score);
-        result.put(Dict.PROB, prob);
-
+            double prob = sigmod(score);
+            result.put(Dict.PROB, prob);
+        } catch (Exception ex) {
+            logger.error("get host predict failed:", ex);
+            result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
+        }
         return result;
     }
 }

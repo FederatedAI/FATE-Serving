@@ -188,8 +188,8 @@ public class PipelineModelProcessor implements ModelProcessor{
             Map<String, Object> remoteData = singleRemoteResult.getData();
 
             Map<String, Object> input = new HashMap<>();
-            input.put(Dict.LOCAL_INFERENCE_DATA, localData.get(Dict.SCORE));
-            input.put(Dict.REMOTE_INFERENCE_DATA, remoteData.get(Dict.SCORE));
+            input.put(Dict.LOCAL_INFERENCE_DATA, localData);
+            input.put(Dict.REMOTE_INFERENCE_DATA, remoteData);
 
             for (BaseModel model : this.pipeLineNode) {
                 Map<String, Object> mergeResult = model.mergeRemoteInference(context, input);
