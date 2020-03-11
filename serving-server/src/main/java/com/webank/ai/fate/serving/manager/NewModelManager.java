@@ -2,12 +2,9 @@ package com.webank.ai.fate.serving.manager;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
-import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
-import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.*;
@@ -15,8 +12,8 @@ import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
-import com.webank.ai.fate.serving.service.ModelService;
-import io.netty.handler.codec.base64.Base64;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +27,6 @@ import org.springframework.util.SerializationUtils;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,18 +45,25 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
     private ConcurrentMap<String, String> serviceIdNamespaceMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, Model> namespaceMap = new ConcurrentHashMap<String, Model>();
 
-    java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
-    java.util.Base64.Decoder decoder = java.util.Base64.getDecoder();
-
     File serviceIdFile;
-
     File namespaceFile;
+
+    // old version cache file
+    File publishLoadStoreFile;
+    File publishOnlineStoreFile;
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
 
+    @Data
+    @AllArgsConstructor
+    private static class RequestWapper {
+        String content;
+        long timestamp;
+        String md5;
+    }
     //        {
 //            role: "guest"
 //            partyId: "9999"
@@ -165,13 +168,6 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         return 0;
     }
 
-//    public synchronized  int unload(Context context,String tableName,String  namespace){
-//
-//
-//
-//
-//    }
-
     public synchronized void store(Map data, File file) {
         executorService.submit(() -> {
             doSaveCache(data, file, 0);
@@ -200,10 +196,111 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         logger.info("Store model cache success");
     }
 
+    private List<RequestWapper> doLoadOldVersionCache(File file) {
+        Map<String, RequestWapper> properties = new HashMap<>();
+        if (file != null && file.exists()) {
+            try (InputStream in = new FileInputStream(file)) {
+                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in))) {
+                    final AtomicInteger count = new AtomicInteger(0);
+                    bufferedReader.lines().forEach(temp -> {
+                        count.addAndGet(1);
+                        int index = temp.indexOf("=");
+                        if (index > 0) {
+                            String key = temp.substring(0, index);
+                            String value = temp.substring(index + 1);
+                            String[] args = value.split(":");
+                            String content = args[0];
+                            long timestamp = count.longValue();
+                            ;
+                            if (args.length >= 2) {
+                                timestamp = new Long(args[1]);
+                            }
+                            properties.put(key, new RequestWapper(content, timestamp, key));
+                        }
+                    });
+                }
+                if (logger.isInfoEnabled()) {
+                    logger.info("Load model cache file " + file + ", data: " + properties);
+                }
+
+                List<RequestWapper> list = Lists.newArrayList();
+                properties.forEach((k, v) -> {
+                    list.add(v);
+                });
+                Collections.sort(list, (o1, o2) -> o1.timestamp - o2.timestamp > 0 ? 1 : -1);
+                return list;
+            } catch (Throwable e) {
+                logger.error("failed to load cache file {} ", file);
+            }
+
+        }
+        return null;
+    }
+
+    private void restoreOldVersionCache() {
+        // restore 1.2.x model cache
+        if (!namespaceFile.exists() && publishLoadStoreFile.exists()) {
+            List<RequestWapper> requestWappers = doLoadOldVersionCache(publishLoadStoreFile);
+            if(requestWappers!=null && !requestWappers.isEmpty()) {
+                requestWappers.forEach((v) -> {
+                    try {
+                        byte[] data = Base64.getDecoder().decode(v.content.getBytes());
+                        ModelServiceProto.PublishRequest req = ModelServiceProto.PublishRequest.parseFrom(data);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("restore publishLoadModel req {}", req);
+                        }
+                        this.load(new BaseContext(), req);
+                    } catch (Exception e) {
+                        logger.error("restore publishLoadModel error", e);
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            try {
+                // Create new cache file after restore
+                generateParent(namespaceFile);
+                namespaceFile.createNewFile();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Invalid model cache file " + namespaceFile + ", cause: Failed to create file " + namespaceFile.getAbsolutePath() + "!");
+            }
+        }
+
+        if (!serviceIdFile.exists() && publishOnlineStoreFile.exists()) {
+            List<RequestWapper> requestWappers = doLoadOldVersionCache(publishOnlineStoreFile);
+            if(requestWappers!=null && !requestWappers.isEmpty()) {
+                requestWappers.forEach((v) -> {
+                    try {
+                        byte[] data = Base64.getDecoder().decode(v.content.getBytes());
+                        ModelServiceProto.PublishRequest req = ModelServiceProto.PublishRequest.parseFrom(data);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("restore publishOnlineModel req {} base64 {}", req, v);
+                        }
+                        this.bind(new BaseContext(), req);
+                    } catch (Exception e) {
+                        logger.error("restore publishOnlineModel error", e);
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            try {
+                // Create new cache file after restore
+                generateParent(serviceIdFile);
+                serviceIdFile.createNewFile();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Invalid model cache file " + serviceIdFile + ", cause: Failed to create file " + serviceIdFile.getAbsolutePath() + "!");
+            }
+        }
+    }
+
     public synchronized void restore() {
         if (logger.isDebugEnabled()) {
             logger.debug("Try to restore model cache");
         }
+
+        // compatible 1.2.x
+        restoreOldVersionCache();
 
         doLoadCache(namespaceMap, namespaceFile);
         doLoadCache(serviceIdNamespaceMap, serviceIdFile);
@@ -419,81 +516,6 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         this.store();
     }
 
-//    public void store() {
-//
-//        doSaveProperties(namespaceMap, namespaceFile, 0);
-//        doSaveProperties(serviceIdNamespaceMap, serviceIdFile, 0);
-//
-//    }
-
-
-    /*public void doSaveProperties(Map data, File file, long version) {
-
-        if (file == null) {
-            return;
-        }
-        // Save
-        try {
-            File lockfile = new File(file.getAbsolutePath() + ".lock");
-            if (!lockfile.exists()) {
-                lockfile.createNewFile();
-            }
-            try (RandomAccessFile raf = new RandomAccessFile(lockfile, "rw");
-                 FileChannel channel = raf.getChannel()) {
-                FileLock lock = channel.tryLock();
-                if (lock == null) {
-                    throw new IOException("can not lock the model cache file " + file.getAbsolutePath() + ", ignore and retry later, maybe multi java process use the file");
-                }
-                try {
-                    if (!file.exists()) {
-                        file.createNewFile();
-                    }
-                    try (FileOutputStream outputFile = new FileOutputStream(file)) {
-                        try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputFile, Charset.forName("UTF-8")))) {
-                            bufferedWriter.newLine();
-                          //  List<ModelService.RequestWapper> sortedList = sortRequest(data);
-//                            sortedList.forEach(( v) -> {
-//                                try {
-//                                    String content = v.md5 + "=" + v.toString();
-//                                    bufferedWriter.write(content);
-//                                    bufferedWriter.newLine();
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                    logger.error("write mode file error", e);
-//                                }
-//
-//
-//                            });
-
-                            data.forEach((k,v)->{
-                                try{
-                                    StringBuilder  sb = new StringBuilder();
-                                    String lineContent = sb.append(k.toString()).append("=").append(encoder.encode(v.toString().getBytes())).toString();
-                                    bufferedWriter.write(lineContent);
-                                    bufferedWriter.newLine();
-                                }
-                                catch (IOException e) {
-                                    e.printStackTrace();
-                                    logger.error("write mode file error", e);
-                                }
-
-
-
-                            });
-
-                        }
-
-
-                    }
-                } finally {
-                    lock.release();
-                }
-            }
-        } catch (Throwable e) {
-            logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
-        }
-    }*/
-
     public void doSaveCache(Map data, File file, long version) {
         if (file == null) {
             return;
@@ -544,28 +566,33 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         }
     }
 
+    private void generateParent(File file) {
+        if (!file.exists() && file.getParentFile() != null && !file.getParentFile().exists()) {
+            if (!file.getParentFile().mkdirs()) {
+                throw new IllegalArgumentException("Invalid model cache file " + file + ", cause: Failed to create directory " + file.getParentFile() + "!");
+            }
+        }
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
         if (StringUtils.isNotEmpty(locationPre)) {
-//            String publishLoadFileName = locationPre + "/.fate/publishLoadStore.cache";
-//            String publishOnlineFileName = locationPre + "/.fate/publishOnlineStore.cache";
+            // new version
             String loadModelStoreFileName = locationPre + "/.fate/loadModelStore.cache";
             String bindModelStoreFileName = locationPre + "/.fate/bindModelStore.cache";
 
             namespaceFile = new File(loadModelStoreFileName);
-            if (!namespaceFile.exists() && namespaceFile.getParentFile() != null && !namespaceFile.getParentFile().exists()) {
-                if (!namespaceFile.getParentFile().mkdirs()) {
-                    throw new IllegalArgumentException("Invalid model cache file " + namespaceFile + ", cause: Failed to create directory " + namespaceFile.getParentFile() + "!");
-                }
-            }
-            serviceIdFile = new File(bindModelStoreFileName);
-            if (!serviceIdFile.exists() && serviceIdFile.getParentFile() != null && !serviceIdFile.getParentFile().exists()) {
-                if (!serviceIdFile.getParentFile().mkdirs()) {
-                    throw new IllegalArgumentException("Invalid model cache file " + serviceIdFile + ", cause: Failed to create directory " + serviceIdFile.getParentFile() + "!");
-                }
-            }
+            generateParent(namespaceFile);
 
+            serviceIdFile = new File(bindModelStoreFileName);
+            generateParent(serviceIdFile);
+
+            // compatible 1.2.x
+            String publishLoadFileName = locationPre + "/.fate/publishLoadStore.cache";
+            String publishOnlineFileName = locationPre + "/.fate/publishOnlineStore.cache";
+            publishLoadStoreFile = new File(publishLoadFileName);
+            publishOnlineStoreFile = new File(publishOnlineFileName);
         }
     }
 
@@ -574,96 +601,4 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         this.environment = environment;
     }
 
-//    private List<ModelService.RequestWapper> loadProperties(File file, Map<String,ModelService.RequestWapper> properties) {
-//
-//        if (file != null && file.exists()) {
-//            InputStream in = null;
-//            try {
-//                in = new FileInputStream(file);
-//                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in))) {
-//                    final AtomicInteger count= new AtomicInteger(0);
-//
-//                    bufferedReader.lines().forEach(temp -> {
-//                        count.addAndGet(1);
-//                        int index = temp.indexOf("=");
-//                        if (index > 0) {
-//                            String key = temp.substring(0, index);
-//                            String value = temp.substring(index + 1);
-//                            String[] args =value.split(":");
-//                            String content = args[0];
-//                            long timestamp = count.longValue();;
-//                            if(args.length>=2){
-//                                timestamp =  new Long(args[1]);
-//                            }
-//                            properties.put(key, new ModelService.RequestWapper(content,timestamp,key));
-//                        }
-//                    });
-//                }
-//                if (logger.isInfoEnabled()) {
-//                    logger.info("Load model cache file " + file + ", data: " + properties);
-//                }
-//                return  sortRequest(properties);
-//            } catch (Throwable e) {
-//                logger.error("failed to load cache file {} ", file);
-//            } finally {
-//                if (in != null) {
-//                    try {
-//                        in.close();
-//                    } catch (IOException e) {
-//                        logger.warn(e.getMessage(), e);
-//                    }
-//                }
-//            }
-//
-//        }
-//        return null;
-//    }
-
-
-//    public  void  restore(){
-//
-//        List<ModelService.RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
-//        List<ModelService.RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
-//        if(publishLoadList!=null) {
-//            publishLoadList.forEach((v) -> {
-//                try {
-//                    byte[] data = decoder.decode(v.content.getBytes());
-//                    ModelServiceProto.PublishRequest req = ModelServiceProto.PublishRequest.parseFrom(data);
-//                    if (logger.isDebugEnabled()) {
-//                        logger.debug("restore publishLoadModel req {}", req);
-//                    }
-//                    Context context = new BaseContext();
-//                    context.putData(Dict.SERVICE_ID, req.getServiceId());
-//                    modelManager.publishLoadModel(context,
-//                            new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-//                            ModelUtil.getFederatedRoles(req.getRoleMap()),
-//                            ModelUtil.getFederatedRolesModel(req.getModelMap()));
-//                } catch (Exception e) {
-//                    logger.error("restore publishLoadModel error", e);
-//                    e.printStackTrace();
-//                }
-//            });
-//        }
-//        if(publishOnlineList!=null) {
-//            publishOnlineList.forEach((v) -> {
-//                try {
-//                    byte[] data = decoder.decode(v.content.getBytes());
-//                    ModelServiceProto.PublishRequest req = ModelServiceProto.PublishRequest.parseFrom(data);
-//                    if (logger.isDebugEnabled()) {
-//                        logger.debug("restore publishOnlineModel req {} base64 {}", req, v);
-//                    }
-//                    Context context = new BaseContext();
-//                    context.putData(Dict.SERVICE_ID, req.getServiceId());
-//                    modelManager.publishOnlineModel(context,
-//                            new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-//                            ModelUtil.getFederatedRoles(req.getRoleMap()),
-//                            ModelUtil.getFederatedRolesModel(req.getModelMap()));
-//                } catch (Exception e) {
-//                    logger.error("restore publishOnlineModel error", e);
-//                    e.printStackTrace();
-//                }
-//
-//            });
-//        }
-//    }
 }
