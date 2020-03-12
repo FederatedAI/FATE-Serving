@@ -1,9 +1,7 @@
 package com.webank.ai.fate.serving.core.async;
 
 import com.lmax.disruptor.EventFactory;
-import lombok.Data;
 
-@Data
 public class AsyncMessageEvent<T> {
 
     /**
@@ -18,6 +16,46 @@ public class AsyncMessageEvent<T> {
     private String ip;
 
     private long timestamp;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     void clear() {
         this.name = null;

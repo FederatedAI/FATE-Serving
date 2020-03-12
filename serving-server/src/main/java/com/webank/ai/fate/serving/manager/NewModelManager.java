@@ -12,8 +12,6 @@ import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,12 +55,45 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
     ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
 
-    @Data
-    @AllArgsConstructor
     private static class RequestWapper {
         String content;
         long timestamp;
         String md5;
+
+        public RequestWapper(String content, long timestamp, String md5) {
+            this.content = content;
+            this.timestamp = timestamp;
+            this.md5 = md5;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        public String getMd5() {
+            return md5;
+        }
+
+        public void setMd5(String md5) {
+            this.md5 = md5;
+        }
+
+        @Override
+        public String toString() {
+            return content + ":" + timestamp;
+        }
     }
     //        {
 //            role: "guest"

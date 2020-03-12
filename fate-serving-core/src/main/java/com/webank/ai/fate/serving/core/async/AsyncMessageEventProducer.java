@@ -3,13 +3,15 @@ package com.webank.ai.fate.serving.core.async;
 import com.lmax.disruptor.EventTranslatorVararg;
 import com.lmax.disruptor.RingBuffer;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Producer
  */
-@Slf4j
 public class AsyncMessageEventProducer {
+
+    private static Logger logger = LoggerFactory.getLogger(AsyncMessageEventProducer.class);
 
     private final RingBuffer<AsyncMessageEvent> ringBuffer;
 

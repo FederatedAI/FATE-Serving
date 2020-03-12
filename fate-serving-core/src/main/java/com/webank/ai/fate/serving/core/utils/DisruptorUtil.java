@@ -6,10 +6,12 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import com.webank.ai.fate.serving.core.async.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class DisruptorUtil {
+
+    private static Logger logger = LoggerFactory.getLogger(DisruptorUtil.class);
 
     private static Disruptor<AsyncMessageEvent> disruptor = null;
 
@@ -29,7 +31,7 @@ public class DisruptorUtil {
         // Start the Disruptor, starts all threads running
         disruptor.start();
 
-        log.info("disruptor initialized");
+        logger.info("disruptor initialized");
     }
 
     public void shutdown() {
