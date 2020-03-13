@@ -26,6 +26,8 @@ message PublishRequest{
     map<string, Party> role = 2;
     map<string, RoleModelInfo> model = 3;
     string serviceId = 4;
+    string tableName = 5;
+    string namespace = 6;
 }
 
 message PublishResponse{
@@ -40,4 +42,9 @@ service ModelService{
     rpc publishLoad(PublishRequest) returns (PublishResponse);
     rpc publishBind(PublishRequest) returns (PublishResponse);
     rpc publishOnline(PublishRequest) returns (PublishResponse);
+    rpc unload(PublishRequest) returns (PublishResponse);
+    rpc unbind(PublishRequest) returns (PublishResponse);
+    rpc listAllModel(PublishRequest) returns (PublishResponse);
+    rpc getModelByTableNameAndNamespace(PublishRequest) returns (PublishResponse);
+    rpc getModelByServiceId(PublishRequest) returns (PublishResponse);
 }

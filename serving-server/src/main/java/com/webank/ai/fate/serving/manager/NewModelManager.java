@@ -155,7 +155,7 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
 //        }
 
 
-    public synchronized int unbind(Context context, ModelServiceProto.PublishRequest req) {
+    public synchronized ReturnResult unbind(Context context, ModelServiceProto.PublishRequest req) {
         String serviceId = req.getServiceId();
         Preconditions.checkArgument(serviceId != null);
 
@@ -163,17 +163,24 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
             logger.debug("Try to unbind model, service id : {}", serviceId);
         }
 
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(InferenceRetCode.OK);
+
         Model model = this.buildModel(context, req);
         String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
 
         if (!this.namespaceMap.containsKey(modelKey)) {
             logger.info("Not found model info, please check if the model is already loaded.");
-            return 1;
+            returnResult.setRetmsg("Not found model info, please check if the model is already loaded.");
+            returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
+            return returnResult;
         }
 
         if (!this.serviceIdNamespaceMap.containsKey(serviceId)) {
             logger.info("Service ID: {} not bind", serviceId);
-            return 1;
+            returnResult.setRetmsg("Service ID not bind");
+            returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
+            return returnResult;
         }
 
         // unregister
@@ -196,7 +203,7 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         // update cache
         this.store(serviceIdNamespaceMap, serviceIdFile);
         logger.info("Unbind model success");
-        return 0;
+        return returnResult;
     }
 
     public synchronized void store(Map data, File file) {
@@ -473,8 +480,6 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
 
 
     public Model  getModelByServiceId(String serviceId){
-
-
         String  namespaceKey =  serviceIdNamespaceMap.get(serviceId);
         return this.namespaceMap.get(namespaceKey);
     }
@@ -483,8 +488,8 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
      * 获取所有模型信息
      * @return
      */
-    List<Model>  listAllModel(){
-        return  new ArrayList(this.namespaceMap.values());
+    public List<Model> listAllModel() {
+        return new ArrayList(this.namespaceMap.values());
     }
 
     public Model getModelByTableNameAndNamespace(String  tableName ,String  namespace){
@@ -498,13 +503,22 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         return  new  StringBuilder().append(tableName).append("_").append(namespace).toString();
     }
 
-    public synchronized void unload(String tableName, String namespace) {
+    public synchronized ReturnResult unload(String tableName, String namespace) {
         if (logger.isDebugEnabled()) {
             logger.debug("try to unload model, name: {}, namespace: {}", tableName, namespace);
         }
 
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(InferenceRetCode.OK);
+
         Model model = this.getModelByTableNameAndNamespace(tableName, namespace);
-        Preconditions.checkArgument(model != null);
+//        Preconditions.checkArgument(model != null);
+        if (model == null) {
+            logger.info("model not loaded");
+            returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
+            returnResult.setRetmsg("model not loaded");
+            return returnResult;
+        }
 
         // unregister serviceId, name, namespace
         String serviceId = model.getServiceId();
@@ -545,6 +559,8 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
 
         // update store
         this.store();
+
+        return returnResult;
     }
 
     public void doSaveCache(Map data, File file, long version) {
