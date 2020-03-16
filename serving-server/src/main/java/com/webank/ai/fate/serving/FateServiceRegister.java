@@ -1,23 +1,34 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving;
 
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.rpc.core.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * @Description TODO
@@ -30,62 +41,49 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
 
     @Override
     public ServiceAdaptor getServiceAdaptor(String name) {
-        if( serviceAdaptorMap.get(name)!=null){
-            return  serviceAdaptorMap.get(name);
-        }else {
+        if (serviceAdaptorMap.get(name) != null) {
+            return serviceAdaptorMap.get(name);
+        } else {
             return serviceAdaptorMap.get("NotFound");
         }
-
     }
 
-    Map<String, ServiceAdaptor> serviceAdaptorMap = new HashMap<String, ServiceAdaptor>();
+    Map<String, ServiceAdaptor> serviceAdaptorMap = new HashMap<>();
 
     ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-
         this.applicationContext = context;
-
     }
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
-
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
+        String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
+        for (String beanName : beans) {
+            AbstractServiceAdaptor serviceAdaptor = applicationContext.getBean(beanName, AbstractServiceAdaptor.class);
 
-//        if (applicationEvent instanceof ContextRefreshedEvent) {
-            String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
-            for (String beanName : beans) {
-                AbstractServiceAdaptor serviceAdaptor =  applicationContext.getBean(beanName,AbstractServiceAdaptor.class);
+            FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
 
-                FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
-
-                if (proxyService != null) {
-
-                    serviceAdaptor.setServiceName(proxyService.name());
-                    // TODO utu: may load from cfg file is a better choice?
-                    String [] postChain = proxyService.postChain();
-                    String [] preChain = proxyService.preChain();
-                    for(String post:postChain){
-                        Interceptor postInterceptor = applicationContext.getBean(post,Interceptor.class);
-                        serviceAdaptor.addPostProcessor(postInterceptor);
-                    }
-                    for(String pre:preChain){
-                        Interceptor preInterceptor = applicationContext.getBean(pre,Interceptor.class);
-                        serviceAdaptor.addPreProcessor(preInterceptor);
-                    }
-
-                    this.serviceAdaptorMap.put(proxyService.name(), serviceAdaptor);
+            if (proxyService != null) {
+                serviceAdaptor.setServiceName(proxyService.name());
+                // TODO utu: may load from cfg file is a better choice?
+                String[] postChain = proxyService.postChain();
+                String[] preChain = proxyService.preChain();
+                for (String post : postChain) {
+                    Interceptor postInterceptor = applicationContext.getBean(post, Interceptor.class);
+                    serviceAdaptor.addPostProcessor(postInterceptor);
+                }
+                for (String pre : preChain) {
+                    Interceptor preInterceptor = applicationContext.getBean(pre, Interceptor.class);
+                    serviceAdaptor.addPreProcessor(preInterceptor);
                 }
 
-
+                this.serviceAdaptorMap.put(proxyService.name(), serviceAdaptor);
             }
-            logger.info("service register info {}",this.serviceAdaptorMap);
-//        }
-
-
-
+        }
+        logger.info("service register info {}", this.serviceAdaptorMap);
     }
 }

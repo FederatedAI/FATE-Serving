@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.guest;
 
 import com.google.common.base.Preconditions;
@@ -21,19 +37,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  主要兼容host为1.2.x版本的接口
- *
+ * 主要兼容host为1.2.x版本的接口
  **/
-@FateService(name ="singleInference",  preChain= {
+@FateService(name = "singleInference", preChain = {
         "guestSingleParamInterceptor",
         "guestModelInterceptor",
         "federationRouterInterceptor"
-      },postChain = {
+}, postChain = {
         "defaultPostProcess"
 })
 @Service
-public class OldVersionInferenceProvider extends AbstractServiceAdaptor<InferenceRequest,ReturnResult>{
-
+public class OldVersionInferenceProvider extends AbstractServiceAdaptor<InferenceRequest, ReturnResult> {
 
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
@@ -41,31 +55,26 @@ public class OldVersionInferenceProvider extends AbstractServiceAdaptor<Inferenc
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
 
-        Model  model = context.getModel();
+        Model model = context.getModel();
 
-        Preconditions.checkArgument(model!=null);
+        Preconditions.checkArgument(model != null);
         /**
          * 用于替代原来的pipelineTask
          */
         ModelProcessor modelProcessor = model.getModelProcessor();
 
-
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
-//        BatchInferenceRequest batchInferenceRequest = (BatchInferenceRequest)inboundPackage.getBody();
+
         BatchInferenceRequest batchInferenceRequest = convertToBatchInferenceRequest(context, inferenceRequest);
 
         /**
          *  发往对端的参数
          */
-//        BatchHostFederatedParams  batchHostFederatedParams = buildBatchHostFederatedParams( context,batchInferenceRequest);
         HostFederatedParams hostFederatedParams = buildHostFederatedParams(context, inferenceRequest);
 
-
-        //==========
         /**
          * guest 端与host同步预测，再合并结果
          */
-
         ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, hostFederatedParams.getPartnerLocal(), hostFederatedParams.getLocal(), hostFederatedParams, Dict.FEDERATED_INFERENCE);
 
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, future);

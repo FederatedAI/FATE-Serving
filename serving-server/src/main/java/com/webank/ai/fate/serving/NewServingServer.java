@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving;
 
 import com.codahale.metrics.ConsoleReporter;
@@ -29,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * @Author kaideng
  **/
 @Service
-public class NewServingServer implements InitializingBean{
+public class NewServingServer implements InitializingBean {
 
     Logger logger = LoggerFactory.getLogger(NewServingServer.class);
 
@@ -37,12 +53,15 @@ public class NewServingServer implements InitializingBean{
     int port;
 
     private Server server;
+
     @Autowired
-    InferenceService  inferenceService;
+    InferenceService inferenceService;
+
     @Autowired
-    ModelService  modelService;
+    ModelService modelService;
+
     @Autowired
-    ProxyService  proxyService;
+    ProxyService proxyService;
 
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
@@ -68,9 +87,8 @@ public class NewServingServer implements InitializingBean{
                 new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
-        serverBuilder.keepAliveTime(100,TimeUnit.MILLISECONDS);
+        serverBuilder.keepAliveTime(100, TimeUnit.MILLISECONDS);
         serverBuilder.executor(executor);
-        //new ServiceOverloadProtectionHandle()
         serverBuilder.addService(ServerInterceptors.intercept(inferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), InferenceService.class);
         serverBuilder.addService(ServerInterceptors.intercept(modelService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
         serverBuilder.addService(ServerInterceptors.intercept(proxyService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);

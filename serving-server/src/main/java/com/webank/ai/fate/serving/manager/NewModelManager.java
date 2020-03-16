@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.manager;
 
 import com.google.common.base.Preconditions;
@@ -154,7 +170,6 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
 //            }
 //        }
 
-
     public synchronized ReturnResult unbind(Context context, ModelServiceProto.PublishRequest req) {
         String serviceId = req.getServiceId();
         Preconditions.checkArgument(serviceId != null);
@@ -215,17 +230,6 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
     }
 
     public synchronized void store() {
-//         for test
-//        Model  model =  new  Model();
-//        model.setPartId("10000");
-//        model.setRole(Dict.HOST);
-//        model.setServiceId("test02");
-//        model.setTableName("202003021604");
-//        model.setNamespace("9999#guest#10000#host");
-//        String  namespaceKey =   this.getNameSpaceKey(model.getTableName(),model.getNamespace());
-//        namespaceMap.put(namespaceKey, model);
-//        serviceIdNamespaceMap.put("test02", namespaceKey);
-        // ==========
         executorService.submit(() -> {
             doSaveCache(namespaceMap, namespaceFile, 0);
             doSaveCache(serviceIdNamespaceMap, serviceIdFile, 0);
@@ -279,7 +283,7 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         // restore 1.2.x model cache
         if (!namespaceFile.exists() && publishLoadStoreFile.exists()) {
             List<RequestWapper> requestWappers = doLoadOldVersionCache(publishLoadStoreFile);
-            if(requestWappers!=null && !requestWappers.isEmpty()) {
+            if (requestWappers != null && !requestWappers.isEmpty()) {
                 requestWappers.forEach((v) -> {
                     try {
                         byte[] data = Base64.getDecoder().decode(v.content.getBytes());
@@ -306,7 +310,7 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
 
         if (!serviceIdFile.exists() && publishOnlineStoreFile.exists()) {
             List<RequestWapper> requestWappers = doLoadOldVersionCache(publishOnlineStoreFile);
-            if(requestWappers!=null && !requestWappers.isEmpty()) {
+            if (requestWappers != null && !requestWappers.isEmpty()) {
                 requestWappers.forEach((v) -> {
                     try {
                         byte[] data = Base64.getDecoder().decode(v.content.getBytes());
@@ -406,42 +410,43 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         return returnResult;
     }
 
-
-    private  Model  buildModel(Context  context, ModelServiceProto.PublishRequest    req){
-        Model  model =  new  Model();
-        String  role = req.getLocal().getRole();
+    private Model buildModel(Context context, ModelServiceProto.PublishRequest req) {
+        Model model = new Model();
+        String role = req.getLocal().getRole();
         model.setPartId(req.getLocal().getPartyId());
-        model.setRole(Dict.GUEST.equals(role)?Dict.GUEST:Dict.HOST);
-        String  serviceId =req.getServiceId();
+        model.setRole(Dict.GUEST.equals(role) ? Dict.GUEST : Dict.HOST);
+        String serviceId = req.getServiceId();
         model.setServiceId(serviceId);
-        Map<String ,ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
-        ModelServiceProto.RoleModelInfo roleModelInfo= modelMap.get(model.getRole().toString());
-        Map<String,ModelServiceProto.ModelInfo> modelInfoMap=  roleModelInfo.getRoleModelInfoMap();
+        Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
+        ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole().toString());
+        Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
 
-        if(model.getRole().equals(Dict.GUEST)) {
+        if (model.getRole().equals(Dict.GUEST)) {
 
             ModelServiceProto.Party hostParty = roleMap.get(Dict.HOST);
-            String  hostPartyId = hostParty.getPartyIdList().get(0);
+            String hostPartyId = hostParty.getPartyIdList().get(0);
             ModelServiceProto.ModelInfo hostModelInfo = modelInfoMap.get(hostPartyId);
-            String  hostNamespace = hostModelInfo.getNamespace();
-            String  hostTableName  = hostModelInfo.getTableName();
-            Model  hostModel =  new  Model();
+            String hostNamespace = hostModelInfo.getNamespace();
+            String hostTableName = hostModelInfo.getTableName();
+            Model hostModel = new Model();
             hostModel.setPartId(hostPartyId);
             hostModel.setNamespace(hostNamespace);
             hostModel.setTableName(hostTableName);
             model.setFederationModel(hostModel);
 
         }
-        ModelServiceProto.Party selfParty  = roleMap.get(model.getRole().toString());
+        ModelServiceProto.Party selfParty = roleMap.get(model.getRole().toString());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
         String selfNamespace = selfModelInfo.getNamespace();
         String selfTableName = selfModelInfo.getTableName();
         model.setNamespace(selfNamespace);
         model.setTableName(selfTableName);
-        return  model;
-    };
+        return model;
+    }
+
+    ;
 
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
         ReturnResult returnResult = new ReturnResult();
@@ -475,32 +480,29 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         this.store(namespaceMap, namespaceFile);
 
         return returnResult;
-
     }
 
-
-    public Model  getModelByServiceId(String serviceId){
-        String  namespaceKey =  serviceIdNamespaceMap.get(serviceId);
+    public Model getModelByServiceId(String serviceId) {
+        String namespaceKey = serviceIdNamespaceMap.get(serviceId);
         return this.namespaceMap.get(namespaceKey);
     }
 
     /**
      * 获取所有模型信息
+     *
      * @return
      */
     public List<Model> listAllModel() {
         return new ArrayList(this.namespaceMap.values());
     }
 
-    public Model getModelByTableNameAndNamespace(String  tableName ,String  namespace){
-        String key =  getNameSpaceKey(tableName, namespace);
+    public Model getModelByTableNameAndNamespace(String tableName, String namespace) {
+        String key = getNameSpaceKey(tableName, namespace);
         return namespaceMap.get(key);
     }
 
-
-    private  String getNameSpaceKey (String tableName,String namespace ){
-
-        return  new  StringBuilder().append(tableName).append("_").append(namespace).toString();
+    private String getNameSpaceKey(String tableName, String namespace) {
+        return new StringBuilder().append(tableName).append("_").append(namespace).toString();
     }
 
     public synchronized ReturnResult unload(String tableName, String namespace) {

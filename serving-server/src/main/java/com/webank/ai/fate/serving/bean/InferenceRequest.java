@@ -34,21 +34,35 @@ public class InferenceRequest implements Request {
     private String serviceId;
     private Map<String, Object> featureData;
     private String applyId;
+    private Map<String, Object> sendToRemoteFeatureData;
+
+    InferenceRequest() {
+        seqno = InferenceUtils.generateSeqno();
+        caseid = InferenceUtils.generateCaseid();
+        featureData = new HashMap<>();
+        sendToRemoteFeatureData = new HashMap<>();
+    }
+
     public String getApplyId() {
         return applyId;
     }
+
     public void setApplyId(String applyId) {
         this.applyId = applyId;
     }
+
     public String getServiceId() {
         return serviceId;
     }
+
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
     }
+
     public void setModelId(String modelId) {
         this.modelId = modelId;
     }
+
     public void setModelVersion(String modelVersion) {
         this.modelVersion = modelVersion;
     }
@@ -59,15 +73,6 @@ public class InferenceRequest implements Request {
 
     public void setSendToRemoteFeatureData(Map<String, Object> sendToRemoteFeatureData) {
         this.sendToRemoteFeatureData = sendToRemoteFeatureData;
-    }
-
-    private Map<String, Object> sendToRemoteFeatureData;
-
-    InferenceRequest() {
-        seqno = InferenceUtils.generateSeqno();
-        caseid = InferenceUtils.generateCaseid();
-        featureData = new HashMap<>();
-        sendToRemoteFeatureData = new HashMap<>();
     }
 
     public void setCaseId(String caseId) {
@@ -127,7 +132,7 @@ public class InferenceRequest implements Request {
     public String toString() {
         String result = "";
         try {
-            result= JSON.toJSONString(this);
+            result = JSON.toJSONString(this);
         } catch (Throwable e) {
 
         }

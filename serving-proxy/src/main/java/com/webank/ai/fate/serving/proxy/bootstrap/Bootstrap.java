@@ -50,7 +50,7 @@ public class Bootstrap {
             }
         }
 
-        boolean useZkRouter = Boolean.parseBoolean(applicationContext.getEnvironment().getProperty(Dict.USE_ZK_ROUTER, "false"));
+        boolean useZkRouter = applicationContext.getEnvironment().getProperty(Dict.USE_ZK_ROUTER, boolean.class, Boolean.TRUE);
         if (useZkRouter) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             Set<URL> registered = zookeeperRegistry.getRegistered();
