@@ -45,10 +45,12 @@ public class BatchHostFederatedParams extends  BatchInferenceRequest{
         this.hostPartyId = hostPartyId;
     }
 
+    @Override
     public String getCaseId() {
         return caseId;
     }
 
+    @Override
     public void setCaseId(String caseId) {
         this.caseId = caseId;
     }

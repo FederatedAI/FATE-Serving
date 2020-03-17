@@ -13,6 +13,9 @@ import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
+import com.webank.ai.fate.serving.core.cache.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -25,13 +28,13 @@ import org.springframework.core.env.Environment;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-public class SpringConfig {
+public class ServingConfig {
 
-//    @Autowired(required = false)
-//    ZookeeperRegistry zookeeperRegistry;
-//
-//    @Autowired
-//    RouterService routerService;
+    public static  final  int  version=200;
+
+
+    Logger logger = LoggerFactory.getLogger(ServingConfig.class);
+
     @Autowired
     Environment environment;
 
@@ -40,7 +43,7 @@ public class SpringConfig {
 
     @Bean
     @Conditional({UseZkCondition.class})
-    ZookeeperRegistry getServiceRegistry(@Value("${useRegister:false}") boolean useZk) {
+    ZookeeperRegistry getServiceRegistry() {
         String zkUrl = environment.getProperty("zk.url");
         Preconditions.checkArgument(StringUtils.isNotEmpty(zkUrl));
         return ZookeeperRegistry.getRegistery(zkUrl, Dict.PROPERTY_SERVING_ADDRESS, Dict.SELF_ENVIRONMENT, port);
@@ -89,24 +92,45 @@ public class SpringConfig {
     }
 
 
-//    public
-//
-//    int processors = Runtime.getRuntime().availableProcessors();
-//
-//    Integer corePoolSize = com.webank.ai.fate.serving.core.bean.Configuration.getPropertyInt("serving.core.pool.size", processors);
-//    Integer maxPoolSize = com.webank.ai.fate.serving.core.bean.Configuration.getPropertyInt("serving.max.pool.size", processors * 2);
-//    Integer aliveTime = com.webank.ai.fate.serving.core.bean.Configuration.getPropertyInt("serving.pool.alive.time", 1000);
-//    Integer queueSize = com.webank.ai.fate.serving.core.bean.Configuration.getPropertyInt("serving.pool.queue.size", 10);
-//    Executor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, aliveTime.longValue(), TimeUnit.MILLISECONDS,
-//            new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
-//
-//    FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
-//        serverBuilder.keepAliveTime(100,TimeUnit.MILLISECONDS);
-//        serverBuilder.executor(executor);
-//    //new ServiceOverloadProtectionHandle()
-//        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(InferenceService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), InferenceService.class);
-//        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ModelService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
-//        serverBuilder.addService(ServerInterceptors.intercept(applicationContext.getBean(ProxyService.class), new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
-//    server = serverBuilder.build();
+    @Bean
+    public Cache getCache(){
+
+        String  cacheType =  environment.getProperty("cache.type","local");
+        logger.info("cache type is {},prepare to build cache",cacheType);
+        Cache  cache = null;
+        switch(cacheType){
+            case "redis" :
+                RedisCache   redisCache =   new RedisCache();
+                String  ip = environment.getProperty("redis.ip");
+                String  password = environment.getProperty("redis.password");
+                Integer port = environment.getProperty("redis.port",Integer.class);
+                Integer timeout = environment.getProperty("redis.timeout",Integer.class,2000);
+                Integer maxTotal = environment.getProperty("redis.maxTotal",Integer.class,20);
+                Integer maxIdle = environment.getProperty("redis.maxIdle",Integer.class,20);
+                Integer expire = environment.getProperty("redis.expire",Integer.class);
+                redisCache.setExpireTime(timeout);
+                redisCache.setMaxTotal(maxTotal);
+                redisCache.setMaxIdel(maxIdle);
+                redisCache.setHost(ip);
+                redisCache.setPort(port);
+                redisCache.setExpireTime(expire!=null?expire:-1);
+                redisCache.setPassword(password);
+                redisCache.init();
+                cache =  redisCache;
+                break;
+            case "local" :
+                Integer maxSize = environment.getProperty("local.cache.maxsize",Integer.class,10000);
+                Integer expireTime  = environment.getProperty("local.cache.expire",Integer.class,30);
+                Integer interval = environment.getProperty("local.cache.interval",Integer.class,3);
+                ExpiringLRUCache  lruCache = new  ExpiringLRUCache(maxSize,expireTime,interval);
+                cache =  lruCache;
+                break;
+            default :
+
+        }
+
+        return cache;
+    }
+
 
 }

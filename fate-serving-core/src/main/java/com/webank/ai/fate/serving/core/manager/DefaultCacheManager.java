@@ -229,8 +229,6 @@ public class DefaultCacheManager implements CacheManager, InitializingBean {
             redisPipeline.set(cacheKey, JSON.toJSONString(returnResult));
             redisPipeline.expire(cacheKey, cacheValueConfig.getTtl());
             redisPipeline.sync();
-
-
         }
     }
 

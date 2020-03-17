@@ -1,25 +1,17 @@
 package com.webank.ai.fate.serving.host;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import com.webank.ai.fate.serving.federatedml.model.BaseModel;
-import com.webank.ai.fate.serving.federatedml.model.HeteroSecureBoostingTreeHost;
-import com.webank.ai.fate.serving.interfaces.ModelManager;
-import com.webank.ai.fate.serving.manager.NewModelManager;
-import com.webank.ai.fate.serving.utils.InferenceUtils;
+import com.webank.ai.fate.serving.model.NewModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 @FateService(name ="batchInferenece",  preChain= {
 //        "overloadMonitor",

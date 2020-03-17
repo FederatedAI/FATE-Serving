@@ -18,6 +18,17 @@ public class ErrorMessageUtil {
 
    static Logger logger = LoggerFactory.getLogger(ErrorMessageUtil.class);
 
+   public static Map  handleExceptionV1_3(Throwable e){
+        if(e instanceof BaseException){
+            BaseException  baseException =(BaseException)e;
+            result.put(Dict.CODE, baseException.getRetcode());
+            result.put(Dict.MESSAGE,baseException.getMessage());
+        }
+
+
+   };
+
+
    public static  Map handleException(Map result,Throwable e){
 
        if (e instanceof IllegalArgumentException) {

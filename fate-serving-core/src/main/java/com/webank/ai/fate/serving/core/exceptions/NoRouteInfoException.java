@@ -1,8 +1,12 @@
 package com.webank.ai.fate.serving.core.exceptions;
 
-/**
- * @Description TODO
- * @Author
- **/
-public class NoRouteInfoException  extends   RuntimeException{
+
+public class NoRouteInfoException  extends   BaseException{
+    public NoRouteInfoException(int retCode, String message) {
+        super(retCode, message);
+    }
+
+
+
+
 }

@@ -16,100 +16,99 @@
 
 package com.webank.ai.fate.serving.service;
 
-import com.alibaba.fastjson.JSON;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
-import com.webank.ai.fate.serving.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.BatchGuestInferenceProvider;
-import com.webank.ai.fate.serving.guest.GuestInferenceProvider;
-import com.webank.ai.fate.serving.utils.InferenceUtils;
+import com.webank.ai.fate.serving.guest.OldVersionInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
-
 @Service
 public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
     private static final Logger logger = LoggerFactory.getLogger(InferenceService.class);
-    private static final Logger accesslogger = LoggerFactory.getLogger(Dict.ACCESS);
-//    @Autowired
-//    GuestInferenceProvider guestInferenceProvider;
-
     @Autowired
     BatchGuestInferenceProvider batchGuestInferenceProvider;
     @Autowired
+    OldVersionInferenceProvider oldVersionInferenceProvider;
+    @Autowired
     MetricRegistry metricRegistry;
+    @Override
+    @RegisterService(useDynamicEnvironment = true, serviceName = "inference")
+    public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
+        InferenceMessage.Builder response = InferenceMessage.newBuilder();
+        ReturnResult returnResult = new ReturnResult();
+        Context  context = prepareContext();
+        try {
+            try {
+                byte[] reqbody = req.getBody().toByteArray();
+                InboundPackage inboundPackage = new InboundPackage();
+                inboundPackage.setBody(reqbody);
+                OutboundPackage outboundPackage = this.oldVersionInferenceProvider.service(context, inboundPackage);
+                returnResult = (ReturnResult) outboundPackage.getData();
+            } catch (Throwable e) {
+                returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
+                logger.error("inference system error: {}", req.getBody().toStringUtf8());
+            }
+            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+        } finally {
+            context.postProcess(req, returnResult);
+        }
 
-//    @Override
-//    @RegisterService(useDynamicEnvironment = true, serviceName = "inference")
-//    public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
-//        inferenceServiceAction(req, responseObserver, InferenceActionType.SYNC_RUN);
-//    }
+
+    }
 
 
 
 
 
-//    @Override
-//    @RegisterService(serviceName = "getInferenceResult" ,useDynamicEnvironment = true)
-//    @Deprecated
-//    public void getInferenceResult(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
-//        inferenceServiceAction(req, responseObserver, InferenceActionType.GET_RESULT);
-//    }
-//
-//    @Override
-//    @RegisterService(useDynamicEnvironment = true, serviceName = "")
-//    public void startInferenceJob(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
-//        inferenceServiceAction(req, responseObserver, InferenceActionType.ASYNC_RUN);
-//
-//    }
+    @Override
+    @RegisterService(serviceName = "getInferenceResult" ,useDynamicEnvironment = true)
+    @Deprecated
+    public void getInferenceResult(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
+        
+    }
+
+    @Override
+    @RegisterService(useDynamicEnvironment = true, serviceName = "")
+    public void startInferenceJob(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
+
+
+    }
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = "batchInference")
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        ReturnResult returnResult = new ReturnResult();
-
-        Context context = new BaseContext(new GuestInferenceLoggerPrinter(), InferenceActionType.BATCH.name(), metricRegistry);
-        context.preProcess();
+        BatchInferenceResult returnResult = new BatchInferenceResult();
+        Context  context = prepareContext();
         try {
+            byte[] reqbody = req.getBody().toByteArray();
+            InboundPackage inboundPackage = new InboundPackage();
+            inboundPackage.setBody(reqbody);
+            OutboundPackage outboundPackage = null;
             try {
-                byte[] reqbody = req.getBody().toByteArray();
+                outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
+                returnResult = (BatchInferenceResult) outboundPackage.getData();
 
-                InboundPackage inboundPackage = new InboundPackage();
-
-                // TODO: 2020/3/4
-//            OutboundPackage outboundPackage = new OutboundPackage();
-
-                inboundPackage.setBody(reqbody);
-
-                OutboundPackage outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
-
-                returnResult = (ReturnResult) outboundPackage.getData();
-
-                if (returnResult.getRetcode() != InferenceRetCode.OK) {
-                    logger.info("caseid {} batch inference failed: {}  result {}", context.getCaseId(), req.getBody().toStringUtf8(), returnResult);
-                }
-
-            } catch (Throwable e) {
+            } catch (Exception e) {
+                logger.error("batchGuestInferenceProvider get error",e);
                 returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
-                logger.error("inference system error: {}", req.getBody().toStringUtf8());
+                returnResult.setMsg(e.getMessage());
             }
-
             response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
             responseObserver.onNext(response.build());
             responseObserver.onCompleted();
@@ -179,6 +178,18 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 //        } finally {
 //
 //            context.postProcess(inferenceRequest, returnResult);
-//        }
+//
+//
+//  }
 //    }
+
+
+    private  Context  prepareContext(){
+
+        Context context = new BaseContext(new GuestInferenceLoggerPrinter(), InferenceActionType.BATCH.name(), metricRegistry);
+        context.preProcess();
+        return  context;
+    }
+
+
 }

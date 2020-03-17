@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.bean;
+package com.webank.ai.fate.serving.pojo;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.ai.fate.serving.core.bean.Request;

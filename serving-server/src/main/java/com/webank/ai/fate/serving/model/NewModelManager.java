@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.manager;
+package com.webank.ai.fate.serving.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;

@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.manager;
+package com.webank.ai.fate.serving.model;
 
 import com.webank.ai.fate.serving.core.bean.ModelPipeline;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;

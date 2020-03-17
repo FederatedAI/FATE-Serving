@@ -32,7 +32,8 @@ public class FederationRouterInterceptor  extends  AbstractInterceptor {
         if (routerService==null) {
                 address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
                 if(address.indexOf(":")<0){
-                    throw  new NoRouteInfoException();
+                    // TODO: 2020/3/16   这里错误另外定制
+                    throw  new NoRouteInfoException(333333333,"");
                 }
                 String[] args  =address.split(":");
                 routerInfo.setHost(args[0]);
@@ -48,7 +49,8 @@ public class FederationRouterInterceptor  extends  AbstractInterceptor {
                     routerInfo.setHost(ip);
                     routerInfo.setPort(port);
                 }else{
-                    throw new NoRouteInfoException();
+                    // TODO: 2020/3/16   这里错误另外定制
+                    throw new NoRouteInfoException(333333333,"");
                 }
             }
         context.setRouterInfo(routerInfo);

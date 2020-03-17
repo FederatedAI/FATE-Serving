@@ -7,7 +7,12 @@ import java.util.Map;
 
 public class BatchInferenceResult {
 
-    int  retcode;
+
+    Integer version;
+
+    String  retcode;
+
+    String  msg;
 
     List<SingleInferenceResult> dataList;
 
@@ -15,17 +20,17 @@ public class BatchInferenceResult {
 
         Integer  index;
 
-        int  retcode;
+        String  retcode;
 
         String  msg;
 
         Map<String ,Object> data;
 
-        public int getRetcode() {
+        public String getRetcode() {
             return retcode;
         }
 
-        public void setRetcode(int retcode) {
+        public void setRetcode(String retcode) {
             this.retcode = retcode;
         }
 
@@ -56,7 +61,7 @@ public class BatchInferenceResult {
         public SingleInferenceResult() {
         }
 
-        public SingleInferenceResult(Integer index, int retcode, String msg, Map<String, Object> data) {
+        public SingleInferenceResult(Integer index, String retcode, String msg, Map<String, Object> data) {
             this.index = index;
             this.retcode = retcode;
             this.msg = msg;
@@ -64,11 +69,11 @@ public class BatchInferenceResult {
         }
     }
 
-    public int getRetcode() {
+    public String getRetcode() {
         return retcode;
     }
 
-    public void setRetcode(int retcode) {
+    public void setRetcode(String retcode) {
         this.retcode = retcode;
     }
 
@@ -78,6 +83,26 @@ public class BatchInferenceResult {
         }
         return dataList;
     }
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }8
+
+
+
 
     public void setDataList(List<SingleInferenceResult> dataList) {
         this.dataList = dataList;

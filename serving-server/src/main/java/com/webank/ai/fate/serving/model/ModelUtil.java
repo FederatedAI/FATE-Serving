@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.manager;
+package com.webank.ai.fate.serving.model;
 
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.core.bean.FederatedRoles;

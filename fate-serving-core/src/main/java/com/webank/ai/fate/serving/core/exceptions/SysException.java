@@ -1,14 +1,11 @@
 package com.webank.ai.fate.serving.core.exceptions;
 
-import org.springframework.core.NestedRuntimeException;
 
-public class SysException extends NestedRuntimeException {
 
-    public SysException(String msg) {
-        super(msg);
-    }
+public class SysException extends BaseException {
 
-    public SysException(String msg, Throwable ex) {
-        super(msg, ex);
+
+    public SysException(int retCode, String message) {
+        super(retCode, message);
     }
 }

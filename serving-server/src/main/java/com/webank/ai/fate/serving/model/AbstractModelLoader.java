@@ -1,12 +1,10 @@
-package com.webank.ai.fate.serving.manager;
+package com.webank.ai.fate.serving.model;
 
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.ModelPipeline;
 import com.webank.ai.fate.serving.core.exceptions.ModelSerializeException;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
-import com.webank.ai.fate.serving.federatedml.PipelineTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

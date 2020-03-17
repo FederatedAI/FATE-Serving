@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.manager;
+package com.webank.ai.fate.serving.model;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class DefaultHttpModelLoader extends   AbstractModelLoader<Map<String,byte[]>>{
+public class DefaultHttpModelLoader extends AbstractModelLoader<Map<String,byte[]>> {
     private static final Logger logger = LoggerFactory.getLogger(DefaultHttpModelLoader.class);
 
     @Autowired(required=false)

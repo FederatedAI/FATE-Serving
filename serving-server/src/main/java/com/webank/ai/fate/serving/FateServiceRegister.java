@@ -19,10 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/**
- * @Description TODO
- * @Author
- **/
+
 @Component
 public class FateServiceRegister implements ServiceRegister, ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
 
