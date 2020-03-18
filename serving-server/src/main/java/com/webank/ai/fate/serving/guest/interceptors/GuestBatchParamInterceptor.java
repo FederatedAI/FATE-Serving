@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.interceptor;
+package com.webank.ai.fate.serving.guest.interceptors;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.service;
+package com.webank.ai.fate.serving.grpc.service;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
@@ -27,8 +27,8 @@ import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.guest.BatchGuestInferenceProvider;
-import com.webank.ai.fate.serving.guest.OldVersionInferenceProvider;
+import com.webank.ai.fate.serving.guest.provider.BatchGuestInferenceProvider;
+import com.webank.ai.fate.serving.guest.provider.OldVersionInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

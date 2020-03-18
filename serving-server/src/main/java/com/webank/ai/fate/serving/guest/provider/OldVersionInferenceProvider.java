@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.guest;
+package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -49,16 +49,17 @@ public class OldVersionInferenceProvider extends AbstractServiceAdaptor<Inferenc
         ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, hostFederatedParams.getPartnerLocal(), hostFederatedParams.getLocal(), hostFederatedParams, Dict.FEDERATED_INFERENCE);
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, future);
         ReturnResult returnResult = new ReturnResult();
-        if (batchFederatedResult.getRetcode() == InferenceRetCode.OK) {
-            List<BatchInferenceResult.SingleInferenceResult> dataList = batchFederatedResult.getDataList();
-            if (dataList != null && dataList.size() > 0) {
-                returnResult.setRetcode(dataList.get(0).getRetcode());
-                returnResult.setRetmsg(dataList.get(0).getMsg());
-                returnResult.setData(dataList.get(0).getData());
-            }
-        } else {
-            returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
-        }
+        // TODO: 2020/3/18  这里要补充
+//        if (batchFederatedResult.getRetcode() == InferenceRetCode.OK) {
+//            List<BatchInferenceResult.SingleInferenceResult> dataList = batchFederatedResult.getDataList();
+//            if (dataList != null && dataList.size() > 0) {
+//                returnResult.setRetcode(dataList.get(0).getRetcode());
+//                returnResult.setRetmsg(dataList.get(0).getMsg());
+//                returnResult.setData(dataList.get(0).getData());
+//            }
+//        } else {
+//            returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
+//        }
         return returnResult;
     }
 

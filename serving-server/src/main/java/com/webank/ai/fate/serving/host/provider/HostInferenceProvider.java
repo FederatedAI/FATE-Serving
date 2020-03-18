@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.bean;
+package com.webank.ai.fate.serving.host.provider;
 
-import java.util.Map;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.HostFederatedParams;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
-public interface MapPool<K, V> {
-    void put(K key, V value);
 
-    void put(K key, V value, boolean onlyIfAbsent);
+public interface HostInferenceProvider {
 
-    void putIfAbsent(K key, V value);
+    public ReturnResult federatedInference(Context context, HostFederatedParams federatedParams);
 
-    void putAll(Map<K, V> kv);
+    public ReturnResult federatedInferenceForTree(Context context, HostFederatedParams federatedParams);
 
-    V get(K key);
+
 }

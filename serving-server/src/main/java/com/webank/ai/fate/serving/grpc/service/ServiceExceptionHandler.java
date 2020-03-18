@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.service;
+package com.webank.ai.fate.serving.grpc.service;
 
 import io.grpc.*;
 import org.slf4j.Logger;

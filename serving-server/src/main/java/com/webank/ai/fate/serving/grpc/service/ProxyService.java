@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.service;
+package com.webank.ai.fate.serving.grpc.service;
 
 import com.alibaba.fastjson.JSON;
 import com.codahale.metrics.MetricRegistry;
@@ -25,7 +25,7 @@ import com.webank.ai.fate.api.networking.proxy.Proxy.Packet;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.host.HostInferenceProvider;
+import com.webank.ai.fate.serving.host.provider.HostInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

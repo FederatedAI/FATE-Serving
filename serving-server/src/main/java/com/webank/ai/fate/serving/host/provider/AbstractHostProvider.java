@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.host;
+package com.webank.ai.fate.serving.host.provider;
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;

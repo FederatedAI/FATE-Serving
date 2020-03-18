@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.host;
+package com.webank.ai.fate.serving.host.provider;
 
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.model.Model;
@@ -6,7 +6,6 @@ import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.federatedml.model.BaseModel;
 import com.webank.ai.fate.serving.model.NewModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

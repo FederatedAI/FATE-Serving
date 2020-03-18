@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.bean;
+package com.webank.ai.fate.serving.common.interceptors;
 
-public interface Predictor<Req_I, Req_P, Res> {
+import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 
-    public Res predict(Context context, Req_I inputData, Req_P predictParams);
+/**
+ * @Description TODO
+ * @Author kaideng
+ **/
+public class AbstractInterceptor implements Interceptor, EnvironmentAware {
 
-    public void preprocess(Context context, Req_I inputData, Req_P predictParams);
+    protected Environment environment;
 
-    public Res postprocess(Context context, Req_I inputData, Req_P predictParams, Res result);
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
 
 }

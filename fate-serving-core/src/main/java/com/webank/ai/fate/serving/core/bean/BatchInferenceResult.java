@@ -99,11 +99,7 @@ public class BatchInferenceResult {
 
     public void setVersion(Integer version) {
         this.version = version;
-    }8
-
-
-
-
+    }
     public void setDataList(List<SingleInferenceResult> dataList) {
         this.dataList = dataList;
     }

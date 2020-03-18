@@ -1,12 +1,9 @@
-package com.webank.ai.fate.serving.guest;
+package com.webank.ai.fate.serving.guest.provider;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.bean.ModelInfo;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.model.Model;
@@ -17,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 

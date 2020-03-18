@@ -7,6 +7,7 @@ import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.grpc.service.*;
 import com.webank.ai.fate.serving.service.*;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -34,11 +35,11 @@ public class ServingServer implements InitializingBean{
 
     private Server server;
     @Autowired
-    InferenceService  inferenceService;
+    InferenceService inferenceService;
     @Autowired
-    ModelService  modelService;
+    ModelService modelService;
     @Autowired
-    ProxyService  proxyService;
+    ProxyService proxyService;
 
     @Autowired
     ZookeeperRegistry zookeeperRegistry;

@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.host;
+package com.webank.ai.fate.serving.guest.provider;
 
+
+
+import com.webank.ai.fate.serving.pojo.InferenceRequest;
+import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.HostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
 
-public interface HostInferenceProvider {
+public interface GuestInferenceProvider {
 
-    public ReturnResult federatedInference(Context context, HostFederatedParams federatedParams);
+    public ReturnResult syncInference(Context context, InferenceRequest inferenceRequest);
 
-    public ReturnResult federatedInferenceForTree(Context context, HostFederatedParams federatedParams);
+    public ReturnResult asynInference(Context context, InferenceRequest inferenceRequest);
 
+    public ReturnResult getResult(Context context, InferenceRequest inferenceRequest);
+
+    public ReturnResult batchInference(Context context, BatchInferenceRequest batchInferenceRequest);
 
 }

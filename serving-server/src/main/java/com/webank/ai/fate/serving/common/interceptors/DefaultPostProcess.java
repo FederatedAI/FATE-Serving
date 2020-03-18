@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.bean;
+package com.webank.ai.fate.serving.common.interceptors;
 
-import com.google.common.cache.Cache;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import org.springframework.stereotype.Component;
 
-public class CacheValueConfig<KT, VT> {
-    private int dbIndex;
-    private int ttl;
-    private Cache<KT, VT> inProcessCache;
+@Component
+public class DefaultPostProcess extends AbstractInterceptor {
 
-    public CacheValueConfig(int dbIndex, int ttl, Cache<KT, VT> inProcessCache) {
-        this.dbIndex = dbIndex;
-        this.ttl = ttl;
-        this.inProcessCache = inProcessCache;
-    }
+    @Override
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
-    public int getDbIndex() {
-        return dbIndex;
-    }
-
-    public int getTtl() {
-        return ttl;
-    }
-
-    public Cache<KT, VT> getInProcessCache() {
-        return inProcessCache;
     }
 }

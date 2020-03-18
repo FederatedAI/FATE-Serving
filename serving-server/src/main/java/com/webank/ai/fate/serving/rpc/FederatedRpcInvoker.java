@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.rpc;
 
 import com.alibaba.fastjson.JSON;
@@ -22,8 +38,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 @Service
 public class FederatedRpcInvoker {
+
     @Autowired
     public RouterService routerService;
 
@@ -32,9 +50,7 @@ public class FederatedRpcInvoker {
 
     private static final Logger logger = LoggerFactory.getLogger(FederatedRpcInvoker.class);
 
-    public  ReturnResult sync(Context context, FederatedParty srcParty, FederatedParty dstParty, HostFederatedParams hostFederatedParams, String remoteMethodName) {
-
-
+    public ReturnResult sync(Context context, FederatedParty srcParty, FederatedParty dstParty, HostFederatedParams hostFederatedParams, String remoteMethodName) {
         long beginTime = System.currentTimeMillis();
         ReturnResult remoteResult = null;
         try {
@@ -59,21 +75,21 @@ public class FederatedRpcInvoker {
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
-            String version =  environment.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION,""));
+            String version = environment.getProperty(Dict.VERSION, "");
+            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION, ""));
             packetBuilder.setHeader(metaDataBuilder.build());
             Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
-            if(context.getCaseId()!=null) {
+            if (context.getCaseId() != null) {
                 authBuilder.setNonce(context.getCaseId());
             }
-            if(version!=null) {
+            if (version != null) {
                 authBuilder.setVersion(version);
             }
-            if(context.getServiceId()!=null) {
-                authBuilder.setServiceId(  context.getServiceId());
+            if (context.getServiceId() != null) {
+                authBuilder.setServiceId(context.getServiceId());
             }
-            if(context.getApplyId()!=null) {
-                authBuilder.setApplyId(  context.getApplyId());
+            if (context.getApplyId() != null) {
+                authBuilder.setApplyId(context.getApplyId());
             }
             packetBuilder.setAuth(authBuilder.build());
 
@@ -84,9 +100,9 @@ public class FederatedRpcInvoker {
                 address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             } else {
                 URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
-                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
+                URL newUrl = paramUrl.addParameter(Constants.VERSION_KEY, version);
                 List<URL> urls = routerService.router(newUrl);
-                if (urls!=null&&urls.size() > 0) {
+                if (urls != null && urls.size() > 0) {
                     URL url = urls.get(0);
                     String ip = url.getHost();
                     int port = url.getPort();
@@ -95,13 +111,13 @@ public class FederatedRpcInvoker {
             }
             Preconditions.checkArgument(StringUtils.isNotEmpty(address));
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
-            ListenableFuture<Proxy.Packet> future= null;
+            ListenableFuture<Proxy.Packet> future = null;
 
             //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
-            future =stub1.unaryCall(packetBuilder.build());
+            future = stub1.unaryCall(packetBuilder.build());
 
-            if(future!=null){
+            if (future != null) {
                 Proxy.Packet packet = future.get(environment.getProperty("rpc.time.out", int.class, 3000), TimeUnit.MILLISECONDS);
                 remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
             }
@@ -117,9 +133,7 @@ public class FederatedRpcInvoker {
 
     }
 
-
-    public     ListenableFuture<Proxy.Packet> asyncBatch(Context context,BatchHostFederatedParams batchHostFederatedParams) {
-
+    public ListenableFuture<Proxy.Packet> asyncBatch(Context context, BatchHostFederatedParams batchHostFederatedParams) {
         ReturnResult remoteResult = null;
         try {
 
@@ -142,21 +156,21 @@ public class FederatedRpcInvoker {
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName("batch").build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
-            String version =  environment.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION,""));
+            String version = environment.getProperty(Dict.VERSION, "");
+            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION, ""));
             packetBuilder.setHeader(metaDataBuilder.build());
             Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
-            if(context.getCaseId()!=null) {
+            if (context.getCaseId() != null) {
                 authBuilder.setNonce(context.getCaseId());
             }
-            if(version!=null) {
+            if (version != null) {
                 authBuilder.setVersion(version);
             }
-            if(context.getServiceId()!=null) {
-                authBuilder.setServiceId(  context.getServiceId());
+            if (context.getServiceId() != null) {
+                authBuilder.setServiceId(context.getServiceId());
             }
-            if(context.getApplyId()!=null) {
-                authBuilder.setApplyId(  context.getApplyId());
+            if (context.getApplyId() != null) {
+                authBuilder.setApplyId(context.getApplyId());
             }
             packetBuilder.setAuth(authBuilder.build());
 
@@ -165,10 +179,7 @@ public class FederatedRpcInvoker {
              */
             RouterInfo routerInfo = context.getRouterInfo();
 
-            Preconditions.checkArgument(routerInfo!=null);
-
-
-
+            Preconditions.checkArgument(routerInfo != null);
 
             GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 //            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, "true");
@@ -189,31 +200,26 @@ public class FederatedRpcInvoker {
 //            }
 
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(routerInfo.toString());
-            ListenableFuture<Proxy.Packet> future= null;
+            ListenableFuture<Proxy.Packet> future = null;
 
             //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
-            future =stub1.unaryCall(packetBuilder.build());
+            future = stub1.unaryCall(packetBuilder.build());
 
 //            if(future!=null){
 //                Proxy.Packet packet = future.get(Configuration.getPropertyInt("rpc.time.out",3000), TimeUnit.MILLISECONDS);
 //                remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
 //            }
 //            return remoteResult;
-            return  future;
+            return future;
 
         } catch (Exception e) {
             logger.error("getFederatedPredictFromRemote error", e.getMessage());
             throw new RuntimeException(e);
         }
-
     }
 
-
-
-    public     ListenableFuture<Proxy.Packet> async(Context context, FederatedParty srcParty, FederatedParty dstParty, HostFederatedParams hostFederatedParams, String remoteMethodName) {
-
-
+    public ListenableFuture<Proxy.Packet> async(Context context, FederatedParty srcParty, FederatedParty dstParty, HostFederatedParams hostFederatedParams, String remoteMethodName) {
         long beginTime = System.currentTimeMillis();
         ReturnResult remoteResult = null;
         try {
@@ -238,21 +244,21 @@ public class FederatedRpcInvoker {
                             .build());
             metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
             metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
-            String version =  environment.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION,""));
+            String version = environment.getProperty(Dict.VERSION, "");
+            metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION, ""));
             packetBuilder.setHeader(metaDataBuilder.build());
             Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
-            if(context.getCaseId()!=null) {
+            if (context.getCaseId() != null) {
                 authBuilder.setNonce(context.getCaseId());
             }
-            if(version!=null) {
+            if (version != null) {
                 authBuilder.setVersion(version);
             }
-            if(context.getServiceId()!=null) {
-                authBuilder.setServiceId(  context.getServiceId());
+            if (context.getServiceId() != null) {
+                authBuilder.setServiceId(context.getServiceId());
             }
-            if(context.getApplyId()!=null) {
-                authBuilder.setApplyId(  context.getApplyId());
+            if (context.getApplyId() != null) {
+                authBuilder.setApplyId(context.getApplyId());
             }
             packetBuilder.setAuth(authBuilder.build());
 
@@ -264,9 +270,9 @@ public class FederatedRpcInvoker {
             } else {
 
                 URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
-                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
+                URL newUrl = paramUrl.addParameter(Constants.VERSION_KEY, version);
                 List<URL> urls = routerService.router(newUrl);
-                if (urls!=null&&urls.size() > 0) {
+                if (urls != null && urls.size() > 0) {
                     URL url = urls.get(0);
                     String ip = url.getHost();
                     int port = url.getPort();
@@ -275,26 +281,23 @@ public class FederatedRpcInvoker {
             }
             Preconditions.checkArgument(StringUtils.isNotEmpty(address));
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
-            ListenableFuture<Proxy.Packet> future= null;
+            ListenableFuture<Proxy.Packet> future = null;
 
             //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
-            future =stub1.unaryCall(packetBuilder.build());
+            future = stub1.unaryCall(packetBuilder.build());
 
 //            if(future!=null){
 //                Proxy.Packet packet = future.get(Configuration.getPropertyInt("rpc.time.out",3000), TimeUnit.MILLISECONDS);
 //                remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
 //            }
 //            return remoteResult;
-            return  future;
+            return future;
 
         } catch (Exception e) {
             logger.error("getFederatedPredictFromRemote error", e.getMessage());
             throw new RuntimeException(e);
         }
-
     }
-
-
 
 }
