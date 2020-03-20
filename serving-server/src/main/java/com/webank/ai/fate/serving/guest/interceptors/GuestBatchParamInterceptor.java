@@ -36,14 +36,14 @@ public class GuestBatchParamInterceptor     implements Interceptor {
         try {
             batchInferenceRequest = JSON.parseObject(reqBody, BatchInferenceRequest.class);
             inboundPackage.setBody(batchInferenceRequest);
-            Preconditions.checkArgument(batchInferenceRequest != null, "");
-            Preconditions.checkArgument(batchInferenceRequest.getDataList() != null);
+            Preconditions.checkArgument(batchInferenceRequest != null, "batch inference request parse error");
+            Preconditions.checkArgument(batchInferenceRequest.getDataList() != null, "no inference data");
             Preconditions.checkArgument(StringUtils.isNotEmpty(batchInferenceRequest.getServiceId()) &&
-                    StringUtils.isNotBlank(batchInferenceRequest.getServiceId()));
+                    StringUtils.isNotBlank(batchInferenceRequest.getServiceId()), "no service id");
             context.setServiceId(batchInferenceRequest.getServiceId());
             List<BatchInferenceRequest.SingleInferenceData> datalist = batchInferenceRequest.getDataList();
             int batchSizeLimit = environment.getProperty("batch.inference.max", int.class, 50);
-            Preconditions.checkArgument(datalist.size() <= batchSizeLimit);
+            Preconditions.checkArgument(datalist.size() <= batchSizeLimit, "max batch inference data size cannot be greater than " + batchSizeLimit);
         }catch(Exception e){
             logger.error("invalid param",e);
             throw  new GuestInvalidParamException(e.getMessage());

@@ -26,7 +26,7 @@ public class GuestModelInterceptor implements Interceptor {
         String serviceId = context.getServiceId();
         try {
             Model model = modelManager.getModelByServiceId(serviceId);
-            Preconditions.checkArgument(model != null);
+            Preconditions.checkArgument(model != null, "model is null");
             context.setModel(model);
         }catch (Exception  e){
             if(e instanceof IllegalArgumentException) {
