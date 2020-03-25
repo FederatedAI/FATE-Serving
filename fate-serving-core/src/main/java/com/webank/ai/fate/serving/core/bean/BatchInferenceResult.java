@@ -5,16 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BatchInferenceResult {
+public class BatchInferenceResult extends  ReturnResult{
 
-
-    Integer version;
-
-    String  retcode;
-
-    String  msg;
-
-    List<SingleInferenceResult> dataList;
+    List<SingleInferenceResult> batchDataList;
 
     static public  class  SingleInferenceResult  {
 
@@ -69,38 +62,19 @@ public class BatchInferenceResult {
         }
     }
 
-    public String getRetcode() {
-        return retcode;
-    }
 
-    public void setRetcode(String retcode) {
-        this.retcode = retcode;
-    }
-
-    public List<SingleInferenceResult> getDataList() {
-        if (dataList == null) {
-            dataList = new ArrayList<>();
+    public List<SingleInferenceResult> getBatchDataList() {
+        if (batchDataList == null) {
+            batchDataList = new ArrayList<>();
         }
-        return dataList;
-    }
-    public String getMsg() {
-        return msg;
+        return batchDataList;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+
+    public void setBatchDataList(List<SingleInferenceResult> batchDataList) {
+        this.batchDataList = batchDataList;
     }
 
 
 
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-    public void setDataList(List<SingleInferenceResult> dataList) {
-        this.dataList = dataList;
-    }
 }

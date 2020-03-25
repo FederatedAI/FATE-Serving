@@ -350,13 +350,5 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
         this.dataMap.put(Dict.FUTURE,future);
     }
 
-    @Override
-    public Model getModel() {
-        return (Model)this.dataMap.get(Dict.MODEL);
-    }
 
-    @Override
-    public void setModel(Model model) {
-        this.dataMap.put(Dict.MODEL,model);
-    }
 }

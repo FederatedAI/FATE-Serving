@@ -22,7 +22,6 @@ import com.webank.ai.fate.core.mlmodel.buffer.fm.FMModelParamProto.FMModelParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class HeteroFM extends BaseModel {
+public abstract class HeteroFM extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(HeteroFM.class);
     private Map<String, Double> weight;
     private Double intercept;
@@ -42,17 +41,16 @@ public abstract class HeteroFM extends BaseModel {
         logger.info("start init HeteroFM class");
         try {
             FMModelParam fmModelParam = this.parseModel(FMModelParam.parser(), protoParam);
-
             this.weight = fmModelParam.getWeightMap();
             this.intercept = fmModelParam.getIntercept();
             this.embedding = fmModelParam.getEmbeddingMap();
             this.embedSize = fmModelParam.getEmbedSize();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return StatusCode.ILLEGALDATA;
+            return ILLEGALDATA;
         }
         logger.info("Finish init HeteroFM class, model weight is {}, model embedding is {}", this.weight, this.embedding);
-        return StatusCode.OK;
+        return OK;
     }
 
     Map<String, Object> forward(List<Map<String, Object>> inputDatas) {
@@ -66,7 +64,6 @@ public abstract class HeteroFM extends BaseModel {
             logger.debug("model weight number:{}", weightNum);
             logger.debug("input data features number:{}", inputFeaturesNum);
         }
-
         double score = 0;
         for (String key : inputData.keySet()) {
             if (this.weight.containsKey(key)) {
@@ -123,6 +120,4 @@ public abstract class HeteroFM extends BaseModel {
         return ret;
     }
 
-    @Override
-    public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);
 }

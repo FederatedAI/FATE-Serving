@@ -21,8 +21,7 @@ import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
+import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class OneHotEncoder extends BaseModel {
+public class OneHotEncoder extends BaseComponent implements LocalInferenceAware{
     private static final Logger logger = LoggerFactory.getLogger(OneHotEncoder.class);
 
     private List<String> cols;
@@ -51,15 +50,23 @@ public class OneHotEncoder extends BaseModel {
             this.colsMapMap = oneHotParam.getColMapMap();
         } catch (Exception ex) {
             logger.error("OneHotEncoder initModel error",ex);
-            return StatusCode.ILLEGALDATA;
+            return ILLEGALDATA;
         }
         logger.info("Finish init OneHot Encoder class");
-        return StatusCode.OK;
+        return OK;
+    }
+
+
+
+    private boolean isDouble(String str) {
+        if (null == str || "".equals(str)) {
+            return false;
+        }
+        return this.doublePattern.matcher(str).matches();
     }
 
     @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> outputData = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
 
@@ -105,22 +112,7 @@ public class OneHotEncoder extends BaseModel {
             }
         }
         return outputData;
+
     }
 
-    private boolean isDouble(String str) {
-        if (null == str || "".equals(str)) {
-            return false;
-        }
-        return this.doublePattern.matcher(str).matches();
     }
-
-    @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
-    }
-}

@@ -9,7 +9,6 @@ import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.*;
-import com.webank.ai.fate.serving.rpc.FederatedRpcInvoker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,7 @@ import java.util.Map;
         "federationRouterInterceptor"
       },postChain = {
         "cache",
-        ""
+
 })
 @Service
 public class BatchGuestInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest,BatchInferenceResult>{
@@ -32,10 +31,13 @@ public class BatchGuestInferenceProvider extends AbstractServingServiceProvider<
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
 
+    final long DEFAULT_TIME_OUT = 3000;
+
+
     @Override
     public BatchInferenceResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
 
-        Model  model = context.getModel();
+        Model  model =((ServingServerContext) context).getModel();
 
         ModelProcessor modelProcessor = model.getModelProcessor();
 
@@ -51,9 +53,11 @@ public class BatchGuestInferenceProvider extends AbstractServingServiceProvider<
         /**
          * guest 端与host同步预测，再合并结果
          */
-        ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.asyncBatch(context,batchHostFederatedParams);
-
-        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, originBatchResultFuture);
+        ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.async(context,batchHostFederatedParams,Dict.REMOTE_METHOD_BATCH);
+        /**
+         *  超时时间需要根据实际情况调整
+         */
+        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, originBatchResultFuture,DEFAULT_TIME_OUT);
 
         return  batchFederatedResult;
     }
@@ -67,18 +71,17 @@ public class BatchGuestInferenceProvider extends AbstractServingServiceProvider<
         if(e instanceof BaseException){
             BaseException  baseException = (BaseException) e;
             batchInferenceResult.setRetcode(baseException.getRetcode());
-            batchInferenceResult.setMsg(e.getMessage());
+            batchInferenceResult.setRetmsg(e.getMessage());
         }else{
             batchInferenceResult.setRetcode(ErrorCode.SYSTEM_ERROR);
         }
         outboundPackage.setData(batchInferenceResult);
         return  outboundPackage;
-
     }
 
-    @Override
-    protected BatchInferenceResult transformErrorMap(Context context, Map data) {
-
-            return null;
-    }
+//    @Override
+//    protected BatchInferenceResult transformErrorMap(Context context, Map data) {
+//
+//            return null;
+//    }
 }

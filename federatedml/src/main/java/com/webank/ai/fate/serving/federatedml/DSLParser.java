@@ -18,7 +18,7 @@ package com.webank.ai.fate.serving.federatedml;
 
 
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -88,7 +88,7 @@ public class DSLParser {
             logger.info("DSLParser init catch error:{}", ex);
         }
         logger.info("Finish init DSLParser");
-        return StatusCode.OK;
+        return 0;
     }
 
     public void topoSort(JSONObject components, ArrayList<String> topoRankComponent) {

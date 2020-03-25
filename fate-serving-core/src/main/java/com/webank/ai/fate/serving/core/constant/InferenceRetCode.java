@@ -17,7 +17,7 @@
 package com.webank.ai.fate.serving.core.constant;
 
 public class InferenceRetCode {
-    public static final int OK = 0;
+    public static final String OK = "0";
     public static final int EMPTY_DATA = 100;
     public static final int NUMERICAL_ERROR = 101;
     public static final int INVALID_FEATURE = 102;

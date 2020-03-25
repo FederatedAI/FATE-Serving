@@ -20,6 +20,7 @@ package com.webank.ai.fate.serving.core.model;
 import com.alibaba.fastjson.JSON;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Model implements Comparable<Model>, Serializable {
 
@@ -36,11 +37,10 @@ public class Model implements Comparable<Model>, Serializable {
 
     private String partId;
 
-
     /**
      *  对端模型信息
      */
-    private Model  federationModel;
+    private Model federationModel;
 
     /**
      * 实例化好的模型处理类

@@ -21,14 +21,13 @@ import com.webank.ai.fate.core.mlmodel.buffer.DataIOMetaProto.DataIOMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
-public class DataIO extends BaseModel {
+public class DataIO extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(DataIO.class);
     private DataIOMeta dataIOMeta;
     private DataIOParam dataIOParam;
@@ -59,14 +58,19 @@ public class DataIO extends BaseModel {
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.error("init DataIo error",ex);
-            return StatusCode.ILLEGALDATA;
+            return ILLEGALDATA;
         }
         logger.info("Finish init DataIO class");
-        return StatusCode.OK;
+        return OK;
     }
 
+
+
     @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
+
+
+
         Map<String, Object> input = inputData.get(0);
 
         if (this.isImputer) {
@@ -78,15 +82,8 @@ public class DataIO extends BaseModel {
         }
 
         return input;
-    }
 
-    @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
-    }
 
-    @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
+
+        }
     }
-}

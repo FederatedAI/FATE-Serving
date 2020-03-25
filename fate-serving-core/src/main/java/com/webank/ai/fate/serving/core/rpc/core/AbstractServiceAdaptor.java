@@ -7,10 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
-import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
 
@@ -203,24 +200,25 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
 
     protected BatchHostFederatedParams buildBatchHostFederatedParams(Context  context, BatchInferenceRequest batchInferenceRequest){
-        Model model = context.getModel();
+
+        Model model =  ((ServingServerContext) context).getModel();
         Model hostModel  = model.getFederationModel();
         BatchHostFederatedParams  batchHostFederatedParams = new  BatchHostFederatedParams();
-        String seqNo = batchInferenceRequest.getSeqNo();
+        String seqNo = batchInferenceRequest.getSeqno();
         batchHostFederatedParams.setGuestPartyId(model.getPartId());
         batchHostFederatedParams.setHostPartyId(model.getFederationModel().getPartId());
         List<BatchHostFederatedParams.SingleInferenceData> sendToHostDataList= Lists.newArrayList();
 
-        List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getDataList();
+        List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getBatchDataList();
         for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
             BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
             singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
             sendToHostDataList.add(singleBatchHostFederatedParam);
         }
-        batchHostFederatedParams.setDataList(sendToHostDataList);
+        batchHostFederatedParams.setBatchDataList(sendToHostDataList);
         batchHostFederatedParams.setHostTableName(hostModel.getTableName());
         batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
-        batchHostFederatedParams.setSeqNo(seqNo);
+        //batchHostFederatedParams.setS(seqNo);
         batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
 
         return  batchHostFederatedParams;

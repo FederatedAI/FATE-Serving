@@ -25,7 +25,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
-import com.webank.ai.fate.serving.federatedml.PipelineTask;
+import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +56,6 @@ public class DefaultHttpModelLoader extends AbstractModelLoader<Map<String,byte[
                     String base64String = new String(Base64.getEncoder().encode(v));
                     result.put(k,base64String);
             });
-
-
             return  JSON.toJSONString(result).getBytes();
         }
         return null;
@@ -82,9 +80,9 @@ public class DefaultHttpModelLoader extends AbstractModelLoader<Map<String,byte[
     @Override
     protected ModelProcessor initPipeLine(Context context, Map<String, byte[]> stringMap) {
         if(stringMap!=null) {
-            PipelineTask pipelineTask = new PipelineTask();
-            pipelineTask.initModel(stringMap);
-            return pipelineTask;
+            PipelineModelProcessor  modelProcessor =  new PipelineModelProcessor();
+            modelProcessor.initModel(stringMap);
+            return modelProcessor;
         }
         else{
             return  null;

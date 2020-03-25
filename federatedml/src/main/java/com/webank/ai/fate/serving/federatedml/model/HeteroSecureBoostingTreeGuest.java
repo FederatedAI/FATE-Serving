@@ -16,18 +16,20 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
+import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
+import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
+public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements MergeInferenceAware,LocalInferenceAware,PrepareRemoteable {
 
     private final String site = "guest";
 
@@ -35,7 +37,9 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         return 1. / (1. + Math.exp(-x));
     }
 
-    private Map<String, Object> softmax(double[] weights) {
+    private boolean fastMode = true;
+
+    private Map<String, Object> softmax(double weights[]) {
         int n = weights.length;
         double max = weights[0];
         int maxIndex = 0;
@@ -99,6 +103,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
     }
 
     private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
+
         while (!this.isLocateInLeaf(treeId, treeNodeId) && this.getSite(treeId, treeNodeId).equals(this.site)) {
             treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
         }
@@ -106,6 +111,28 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         return treeNodeId;
     }
 
+    private int fastTraverseTree(int treeId, int treeNodeId, Map<String, Object> input, Map<String, Object> lookUpTable) {
+
+        while(!this.isLocateInLeaf(treeId, treeNodeId)){
+            if(this.getSite(treeId, treeNodeId).equals(this.site)){
+                treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
+            }
+            else{
+                Map<String, Boolean> lookUp = (Map<String, Boolean>) lookUpTable.get(String.valueOf(treeId));
+                if(lookUp.get(String.valueOf(treeNodeId))){
+                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
+                }
+                else {
+                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
+                }
+            }
+            if(logger.isDebugEnabled()) {
+                logger.info("tree id is {}, tree node is {}", treeId, treeNodeId);
+            }
+        }
+
+        return treeNodeId;
+    }
 
     private Map<String, Object> getFinalPredict(double[] weights) {
         Map<String, Object> ret = new HashMap<String, Object>(8);
@@ -137,16 +164,141 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         return ret;
     }
 
+//    private  double[]  handleTree(){
+//
+//    }
+
+//    @Override
+//    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
+//
+//        logger.info("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
+//
+//        Map<String, Object> input = inputData.get(0);
+//        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
+//
+//        ReturnResult returnResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
+//
+//        int featureHit = 0;
+//        for (String key : input.keySet()) {
+//            if (this.featureNameFidMapping.containsKey(key)) {
+//                fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
+//                ++featureHit;
+//            }
+//        }
+//
+//        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
+//        int[] treeNodeIds = new int[this.treeNum];
+//        double[] weights = new double[this.treeNum];
+//        int communicationRound = 0;
+//        while (true) {
+//            HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
+//            for (int i = 0; i < this.treeNum; ++i) {
+//                if (this.isLocateInLeaf(i, treeNodeIds[i])) {
+//                    continue;
+//                }
+//                treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
+//                if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
+//                    treeLocation.put(String.valueOf(i), treeNodeIds[i]);
+//                }
+//            }
+//            if (treeLocation.size() == 0) {
+//                break;
+//            }
+//            //  String tag = this.generateTag(predictParams.getCaseId(), this.componentName, communicationRound++);
+//
+//            // predictParams.getData().put(Dict.TAG,tag);
+//
+//            predictParams.getData().put(Dict.COMPONENT_NAME, this.componentName);
+//
+//            predictParams.getData().put(Dict.TREE_COMPUTE_ROUND, communicationRound++);
+//
+//            predictParams.getData().put(Dict.TREE_LOCATION, treeLocation);
+//
+//            if(logger.isDebugEnabled()) {
+//                logger.info("fast mode is {}", this.fastMode);
+//            }
+//
+//            try {
+//                logger.info("begin to federated");
+//
+//                ReturnResult tempResult = FederatedRpcInvoker.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
+//                Map<String, Object> returnData = tempResult.getData();
+//
+//                boolean getNodeRoute = false;
+//                for(Object obj: returnData.values()){
+//                    if(!(obj instanceof Integer)) getNodeRoute = true; // get node position if value is integer
+//                    break;
+//                }
+//
+//                if(this.fastMode && getNodeRoute){
+//
+//                    if(logger.isDebugEnabled()){
+//                        logger.info("running fast mode, look up table is {}",returnData);
+//                    }
+//
+//                    for(String treeIdx: treeLocation.keySet()){
+//                        int idx = Integer.valueOf(treeIdx);
+//                        int curNodeId = (Integer)treeLocation.get(treeIdx);
+//                        int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping, returnData);
+//                        treeNodeIds[idx] = final_node_id;
+//                    }
+//                }
+//                else{
+//                    Map<String, Object> afterLocation = tempResult.getData();
+//
+//                    if(logger.isDebugEnabled()){
+//                        logger.info("after location is {}", afterLocation);
+//                    }
+//
+//                    for (String location : afterLocation.keySet()) {
+//                        treeNodeIds[new Integer(location)] = ((Number) afterLocation.get(location)).intValue();
+//                    }
+//                    if (afterLocation == null) {
+//                        logger.info("receive predict result of host is null");
+//                        throw new Exception("Null Data");
+//                    }
+//                }
+//
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//                return null;
+//            }
+//        }
+//
+//        for (int i = 0; i < this.treeNum; ++i) {
+//            weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
+//        }
+//
+//        if(logger.isDebugEnabled()){
+//            logger.info("tree leaf ids is {}", treeNodeIds);
+//            logger.info("weights is {}", weights);
+//        }
+//
+//        return getFinalPredict(weights);
+//    }
+
     @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        if(logger.isDebugEnabled()) {
-            logger.debug("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
+        return   inputData.get(0);
+    }
+
+    @Override
+    public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
+
+        Map<String,Object> localData = localDataList.get(0);
+
+        /**
+         *   第一轮不在这里
+         */
+        int[] treeNodeIds  = (int[]) localData.get(Dict.SBT_TREE_NODE_ID_ARRAY);
+        double[] weights = new double[this.treeNum];
+        if(treeNodeIds==null){
+
+            throw  new GuestMergeException("tree node id array is not return from first loop");
         }
 
-        Map<String, Object> input = inputData.get(0);
+        Map<String, Object> input = localData;
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
-
-        ReturnResult returnResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
 
         int featureHit = 0;
         for (String key : input.keySet()) {
@@ -155,12 +307,11 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 ++featureHit;
             }
         }
-        if(logger.isDebugEnabled()) {
-            logger.debug("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
-        }
-        int[] treeNodeIds = new int[this.treeNum];
-        double[] weights = new double[this.treeNum];
-        int communicationRound = 0;
+        /**
+         *   变成从1开始  因为第一轮已经过了
+         */
+
+        int communicationRound = 1;
         while (true) {
             HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
             for (int i = 0; i < this.treeNum; ++i) {
@@ -175,36 +326,61 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
             if (treeLocation.size() == 0) {
                 break;
             }
-            //  String tag = this.generateTag(predictParams.getCaseId(), this.componentName, communicationRound++);
+            Map  remoteParam  = Maps.newHashMap(localData);
 
-            // predictParams.getData().put(Dict.TAG,tag);
-
-            predictParams.getData().put(Dict.COMPONENT_NAME, this.componentName);
-
-            predictParams.getData().put(Dict.TREE_COMPUTE_ROUND, communicationRound++);
-
-            predictParams.getData().put(Dict.TREE_LOCATION, treeLocation);
-
+            remoteData.put(Dict.COMPONENT_NAME, this.componentName);
+            remoteData.put(Dict.TREE_COMPUTE_ROUND, communicationRound++);
+            remoteData.put(Dict.TREE_LOCATION, treeLocation);
+            if(logger.isDebugEnabled()) {
+                logger.info("fast mode is {}", this.fastMode);
+            }
             try {
+                logger.info("begin to federated");
 
-                ReturnResult tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
+                Proxy.Packet returnPacket   = federatedRpcInvoker.sync(context, remoteData, Dict.FEDERATED_INFERENCE_FOR_TREE, 3000);
+                ReturnResult tempResult  = JSON.parseObject(returnPacket.getBody().getValue().toByteArray(),ReturnResult.class);
 
-                Map<String, Object> afterLocation = tempResult.getData();
-                if(logger.isDebugEnabled()) {
-                    logger.debug("after loccation is {}", afterLocation);
+                Map<String, Object> returnData = tempResult.getData();
+
+                boolean getNodeRoute = false;
+                for(Object obj: returnData.values()){
+                    if(!(obj instanceof Integer)) {
+                        getNodeRoute = true;
+                    }// get node position if value is integer
+                    break;
                 }
-                for (String location : afterLocation.keySet()) {
-                    treeNodeIds[new Integer(location)] = ((Number) afterLocation.get(location)).intValue();
-                }
 
-                if (afterLocation == null) {
-                    logger.error("receive predict result of host is null");
-                    throw new Exception("Null Data");
+                if(this.fastMode && getNodeRoute){
+
+                    if(logger.isDebugEnabled()){
+                        logger.info("running fast mode, look up table is {}",returnData);
+                    }
+
+                    for(String treeIdx: treeLocation.keySet()){
+                        int idx = Integer.valueOf(treeIdx);
+                        int curNodeId = (Integer)treeLocation.get(treeIdx);
+                        int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping, returnData);
+                        treeNodeIds[idx] = final_node_id;
+                    }
+                }
+                else{
+                    Map<String, Object> afterLocation = tempResult.getData();
+
+                    if(logger.isDebugEnabled()){
+                        logger.info("after location is {}", afterLocation);
+                    }
+
+                    for (String location : afterLocation.keySet()) {
+                        treeNodeIds[new Integer(location)] = ((Number) afterLocation.get(location)).intValue();
+                    }
+                    if (afterLocation == null) {
+                        logger.info("receive predict result of host is null");
+                        throw new Exception("Null Data");
+                    }
                 }
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                logger.error("HeteroSecureBoostingTreeGuest handle error",ex);
                 return null;
             }
         }
@@ -212,22 +388,53 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         for (int i = 0; i < this.treeNum; ++i) {
             weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
         }
+
         if(logger.isDebugEnabled()){
-            logger.debug("tree leaf ids is {}", treeNodeIds);
-            logger.debug("weights is {}", weights);
+            logger.info("tree leaf ids is {}", treeNodeIds);
+            logger.info("weights is {}", weights);
         }
 
-
         return getFinalPredict(weights);
+
+
+
     }
 
     @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
-    }
+    public Map<String,Object> prepareRemoteData(Context context,Map<String, Object> input) {
+        /**
+         *   准备第一次交互
+         */
+        int[] treeNodeIds = new int[this.treeNum];
 
-    @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
+        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
+
+        HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
+
+
+        for (String key : input.keySet()) {
+            if (this.featureNameFidMapping.containsKey(key)) {
+                fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
+            }
+        }
+
+        for (int i = 0; i < this.treeNum; ++i) {
+            if (this.isLocateInLeaf(i, treeNodeIds[i])) {
+                continue;
+            }
+            treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
+            if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
+                treeLocation.put(String.valueOf(i), treeNodeIds[i]);
+            }
+        }
+        Map <String,Object>  result = Maps.newHashMap();
+
+        result.put(Dict.COMPONENT_NAME, this.componentName);
+
+        result.put(Dict.TREE_COMPUTE_ROUND, 0);
+
+        result.put(Dict.TREE_LOCATION, treeLocation);
+
+        return result;
     }
 }

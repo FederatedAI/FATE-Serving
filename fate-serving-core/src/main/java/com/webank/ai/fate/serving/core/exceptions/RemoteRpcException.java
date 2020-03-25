@@ -1,12 +1,15 @@
 package com.webank.ai.fate.serving.core.exceptions;
 
 
+import com.webank.ai.fate.serving.core.constant.StatusCode;
+
 public class RemoteRpcException  extends  BaseException{
-    public RemoteRpcException(int retCode, String message) {
+
+    public RemoteRpcException(String retCode, String message) {
         super(retCode, message);
     }
 
     public RemoteRpcException( String message) {
-        super(1115, message);
+        super(StatusCode.GUEST_NET_ERROR, message);
     }
 }

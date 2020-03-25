@@ -8,7 +8,7 @@ import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.grpc.service.*;
-import com.webank.ai.fate.serving.service.*;
+
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;

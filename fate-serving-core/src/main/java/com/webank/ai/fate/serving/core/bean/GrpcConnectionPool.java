@@ -36,11 +36,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class GrpcConnectionPool {
+
     private static final Logger logger = LoggerFactory.getLogger(GrpcConnectionPool.class);
+
     static private GrpcConnectionPool pool = new GrpcConnectionPool();
+
     public ConcurrentHashMap<String, ChannelResource> poolMap = new ConcurrentHashMap<String, ChannelResource>();
-    private int maxTotalPerAddress = Configuration.getPropertyInt("rpc.connections.per.address",Runtime.getRuntime().availableProcessors());
-    private long defaultLoadFactor = Configuration.getPropertyInt("rpc.per.channel.loadfactor",10);
+
+    private int maxTotalPerAddress = Runtime.getRuntime().availableProcessors();
+
+
+//            Configuration.getPropertyInt("rpc.connections.per.address",Runtime.getRuntime().availableProcessors());
+//    Configuration.getPropertyInt("rpc.per.channel.loadfactor",10)
+
+    private long defaultLoadFactor = 10;
 
     private void fireChannelError(String k ,ConnectivityState  status) {
         logger.error("grpc channel {} status is {}", k,status);
@@ -50,6 +59,7 @@ public class GrpcConnectionPool {
         public  ChannelResource(String address){
             this.address = address;
         }
+
         String  address;
 
         List<ManagedChannel> channels = Lists.newArrayList();
@@ -71,7 +81,6 @@ public class GrpcConnectionPool {
         public void setRequestCount(AtomicLong requestCount) {
             this.requestCount = requestCount;
         }
-
 
         public long getLatestChecktimestamp() {
             return latestChecktimestamp;

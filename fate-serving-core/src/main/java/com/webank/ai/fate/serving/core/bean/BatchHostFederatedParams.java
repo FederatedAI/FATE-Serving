@@ -12,7 +12,6 @@ public class BatchHostFederatedParams extends  BatchInferenceRequest{
     String  hostPartyId;
     String  caseId;
 
-
     public String getHostTableName() {
         return hostTableName;
     }

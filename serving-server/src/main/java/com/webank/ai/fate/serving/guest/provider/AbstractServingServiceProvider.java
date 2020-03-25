@@ -10,8 +10,15 @@ import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract  class AbstractServingServiceProvider<req,resp>   extends AbstractServiceAdaptor<req,resp>{
+
+        @Override
+        protected resp transformErrorMap(Context context, Map data) {
+
+            return null;
+    }
 
 
 //    public class InferenceRetCode {

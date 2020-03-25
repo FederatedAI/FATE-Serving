@@ -1,17 +1,15 @@
 package com.webank.ai.fate.serving.core.exceptions;
 
-/**
- * @Description TODO
- * @Author
- **/
+import com.webank.ai.fate.serving.core.constant.StatusCode;
+
 public class GuestLoadModelException extends BaseException  {
 
-    public GuestLoadModelException(){
+    public   GuestLoadModelException(String code,String msg){
 
-        super(1104,"guest load model error");
+        super(code,msg);
+
     }
-
     public   GuestLoadModelException(String msg){
-        super(1104,msg);
+        super(StatusCode.GUEST_LOAD_MODEL_ERROR,msg);
     }
 }

@@ -26,29 +26,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeteroLRHost extends HeteroLR {
+public class HeteroLRHost extends HeteroLR implements  Returnable{
+
     private static final Logger logger = LoggerFactory.getLogger(HeteroLRHost.class);
 
     @Override
-
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> result = new HashMap<>(8);
         Map<String, Double> ret = forward(inputData);
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
-
-        logger.info("hetero lr host predict ends, result is {}", result);
-
+        logger.info("hetero lr host local inference result is {}", result);
         return result;
     }
 
-    @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
-    }
 }

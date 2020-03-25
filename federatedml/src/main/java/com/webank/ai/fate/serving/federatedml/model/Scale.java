@@ -22,14 +22,13 @@ import com.webank.ai.fate.core.mlmodel.buffer.ScaleParamProto.ScaleParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
-public class Scale extends BaseModel {
+public class Scale extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(Scale.class);
     private ScaleMeta scaleMeta;
     private ScaleParam scaleParam;
@@ -44,14 +43,32 @@ public class Scale extends BaseModel {
             this.needRun = this.scaleMeta.getNeedRun();
         } catch (Exception ex) {
             logger.error("Scale initModel error",ex);
-            return StatusCode.ILLEGALDATA;
+            return ILLEGALDATA;
         }
         logger.info("Finish init Scale class");
-        return StatusCode.OK;
+        return OK;
     }
 
+//    @Override
+//    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputDatas, FederatedParams predictParams) {
+//        Map<String, Object> outputData = inputDatas.get(0);
+//        if (this.needRun) {
+//            String scaleMethod = this.scaleMeta.getMethod();
+//            if (scaleMethod.toLowerCase().equals(Dict.MIN_MAX_SCALE)) {
+//                MinMaxScale minMaxScale = new MinMaxScale();
+//                outputData = minMaxScale.transform(inputDatas.get(0), this.scaleParam.getColScaleParamMap());
+//            } else if (scaleMethod.toLowerCase().equals(Dict.STANDARD_SCALE)) {
+//                StandardScale standardScale = new StandardScale();
+//                outputData = standardScale.transform(inputDatas.get(0), this.scaleParam.getColScaleParamMap());
+//            }
+//        }
+//        return outputData;
+//    }
+
     @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputDatas, FederatedParams predictParams) {
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputDatas) {
+
+
         Map<String, Object> outputData = inputDatas.get(0);
         if (this.needRun) {
             String scaleMethod = this.scaleMeta.getMethod();
@@ -66,13 +83,4 @@ public class Scale extends BaseModel {
         return outputData;
     }
 
-    @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
-    }
-}
+  }

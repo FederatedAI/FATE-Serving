@@ -3,16 +3,12 @@ package com.webank.ai.fate.serving.guest.provider;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.core.rpc.core.*;
 import com.webank.ai.fate.serving.pojo.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
-import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
-import com.webank.ai.fate.serving.core.rpc.core.FateService;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.rpc.FederatedRpcInvoker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +36,18 @@ public class OldVersionInferenceProvider extends AbstractServiceAdaptor<Inferenc
 
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
-        Model  model = context.getModel();
+        Model  model = ((ServingServerContext)context).getModel();
         Preconditions.checkArgument(model!=null);
         ModelProcessor modelProcessor = model.getModelProcessor();
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
         BatchInferenceRequest batchInferenceRequest = convertToBatchInferenceRequest(context, inferenceRequest);
         HostFederatedParams hostFederatedParams = buildHostFederatedParams(context, inferenceRequest);
-        ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, hostFederatedParams.getPartnerLocal(), hostFederatedParams.getLocal(), hostFederatedParams, Dict.FEDERATED_INFERENCE);
+        ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, inferenceRequest, Dict.FEDERATED_INFERENCE);
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, future);
+
+
+
+
         ReturnResult returnResult = new ReturnResult();
         // TODO: 2020/3/18  这里要补充
 //        if (batchFederatedResult.getRetcode() == InferenceRetCode.OK) {

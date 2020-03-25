@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSON;
 import java.util.List;
 import java.util.Map;
 
-public class BatchInferenceRequest {
+public class BatchInferenceRequest extends InferenceRequest{
 
     public static class SingleInferenceData {
         int index;
@@ -39,50 +39,51 @@ public class BatchInferenceRequest {
     }
 
     private String serviceId;
-    private String applyId;
-    private String seqNo;
-    private String caseId;
-    private List<SingleInferenceData> dataList;
 
-    public List<SingleInferenceData> getDataList() {
-        return dataList;
+
+    private List<SingleInferenceData> batchDataList;
+
+    public List<SingleInferenceData> getBatchDataList() {
+        return batchDataList;
     }
 
-    public void setDataList(List<SingleInferenceData> dataList) {
-        this.dataList = dataList;
+    public void setBatchDataList(List<SingleInferenceData> batchDataList) {
+        this.batchDataList = batchDataList;
     }
+
+
 
     public String getCaseId() {
         return caseId;
     }
 
+    @Override
     public void setCaseId(String caseId) {
         this.caseId = caseId;
     }
 
+    @Override
     public String getApplyId() {
         return applyId;
     }
 
+    @Override
     public void setApplyId(String applyId) {
         this.applyId = applyId;
     }
 
-    public String getServiceId() {
-        return serviceId;
-    }
-
+    @Override
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
     }
 
-    public String getSeqNo() {
-        return seqNo;
-    }
-
-    public void setSeqNo(String seqNo) {
-        this.seqNo = seqNo;
-    }
+//    public String getSeqNo() {
+//        return seqNo;
+//    }
+//
+//    public void setSeqNo(String seqNo) {
+//        this.seqNo = seqNo;
+//    }
 
     @Override
     public String toString() {

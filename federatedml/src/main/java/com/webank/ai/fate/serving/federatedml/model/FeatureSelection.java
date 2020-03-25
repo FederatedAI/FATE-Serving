@@ -22,7 +22,7 @@ import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.Feature
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.LeftCols;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FeatureSelection extends BaseModel {
+public class FeatureSelection extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(FeatureSelection.class);
     private FeatureSelectionParam featureSelectionParam;
     private FeatureSelectionMeta featureSelectionMeta;
@@ -48,14 +48,14 @@ public class FeatureSelection extends BaseModel {
             this.finalLeftCols = featureSelectionParam.getFinalLeftCols();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return StatusCode.ILLEGALDATA;
+            return ILLEGALDATA;
         }
         logger.info("Finish init Feature Selection class");
-        return StatusCode.OK;
+        return OK;
     }
 
     @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> outputData = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
 
@@ -72,15 +72,7 @@ public class FeatureSelection extends BaseModel {
             }
         }
         return outputData;
-    }
 
-    @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
-    }
 
-    @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
     }
 }

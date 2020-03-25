@@ -18,7 +18,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
+import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,31 +26,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeteroFMHost extends HeteroFM {
+public class HeteroFMHost extends HeteroFM implements LocalInferenceAware {
     private static final Logger logger = LoggerFactory.getLogger(HeteroFMHost.class);
 
-    @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
+//    @Override
+//    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
+//
+//        HashMap<String, Object> result = new HashMap<>();
+//        Map<String, Object> ret = forward(inputData);
+//        result.put(Dict.SCORE, ret.get(Dict.SCORE));
+//        result.put(Dict.FM_CROSS, ret.get(Dict.FM_CROSS));
+//
+//        if(logger.isDebugEnabled()) {
+//            logger.debug("hetero fm host predict ends, result is {}", result);
+//        }
+//
+//        return result;
+//    }
 
+    @Override
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> result = new HashMap<>();
         Map<String, Object> ret = forward(inputData);
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
         result.put(Dict.FM_CROSS, ret.get(Dict.FM_CROSS));
-
         if(logger.isDebugEnabled()) {
             logger.debug("hetero fm host predict ends, result is {}", result);
         }
-
         return result;
     }
 
-    @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-        return null;
     }
-
-    @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
-        return null;
-    }
-}

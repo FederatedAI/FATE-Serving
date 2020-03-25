@@ -189,4 +189,10 @@ public class Dict {
     public static final String LOCAL_INFERENCE_DATA = "localInferenceData";
     public static final String REMOTE_INFERENCE_DATA = "remoteInferenceData";
 
+    public static final String  SBT_TREE_NODE_ID_ARRAY = "sbtTreeNodeIdArray";
+
+    public static final String REMOTE_METHOD_BATCH ="batch";
+    public static final String MODEL_NAME_SPACE ="modelNameSpace";
+    public static final String MODEL_TABLE_NAME = "modelTableName";
+
 }

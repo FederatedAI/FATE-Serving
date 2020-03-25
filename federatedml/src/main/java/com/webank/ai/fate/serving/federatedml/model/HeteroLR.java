@@ -21,7 +21,6 @@ import com.webank.ai.fate.core.mlmodel.buffer.LRModelParamProto.LRModelParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class HeteroLR extends BaseModel {
+public abstract class HeteroLR extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(HeteroLR.class);
     private Map<String, Double> weight;
     private Double intercept;
@@ -39,15 +38,14 @@ public abstract class HeteroLR extends BaseModel {
         logger.info("start init HeteroLR class");
         try {
             LRModelParam lrModelParam = this.parseModel(LRModelParam.parser(), protoParam);
-
             this.weight = lrModelParam.getWeightMap();
             this.intercept = lrModelParam.getIntercept();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return StatusCode.ILLEGALDATA;
+            return ILLEGALDATA;
         }
         logger.info("Finish init HeteroLR class, model weight is {}", this.weight);
-        return StatusCode.OK;
+        return OK;
     }
 
     Map<String, Double> forward(List<Map<String, Object>> inputDatas) {
@@ -96,7 +94,4 @@ public abstract class HeteroLR extends BaseModel {
 
         return ret;
     }
-
-    @Override
-    public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);
-}
+    }

@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class ReturnResult {
     private static final Logger logger = LoggerFactory.getLogger(ReturnResult.class);
-    private int retcode;
+    private String retcode;
     private String retmsg = "";
     private String caseid = "";
     private Map<String, Object> data;
@@ -47,11 +47,11 @@ public class ReturnResult {
         this.warn = new HashMap<>();
     }
 
-    public void setRetcode(int retcode) {
+    public void setRetcode(String retcode) {
         this.retcode = retcode;
     }
 
-    public int getRetcode() {
+    public String getRetcode() {
         return retcode;
     }
 

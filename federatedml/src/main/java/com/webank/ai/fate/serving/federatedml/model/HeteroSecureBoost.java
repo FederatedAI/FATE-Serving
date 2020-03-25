@@ -22,14 +22,13 @@ import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.BoostingT
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class HeteroSecureBoost extends BaseModel {
+public abstract class HeteroSecureBoost extends BaseComponent {
     public static final Logger logger = LoggerFactory.getLogger(HeteroSecureBoost.class);
     protected List<Map<Integer, Double>> splitMaskdict;
     protected Map<String, Integer> featureNameFidMapping = Maps.newHashMap();
@@ -45,19 +44,13 @@ public abstract class HeteroSecureBoost extends BaseModel {
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         logger.info("start init HeteroLR class");
         try {
-
             BoostingTreeModelParam param = this.parseModel(BoostingTreeModelParam.parser(), protoParam);
             BoostingTreeModelMeta meta = this.parseModel(BoostingTreeModelMeta.parser(), protoMeta);
-
-            java.util.Map<java.lang.Integer, java.lang.String> featureNameMapping = param.getFeatureNameFidMapping();
+            Map<Integer, String> featureNameMapping = param.getFeatureNameFidMapping();
 
             featureNameMapping.forEach((k, v) -> {
-
                 featureNameFidMapping.put(v, k);
-
-
             });
-
 
             this.treeNum = param.getTreeNum();
             this.initScore = param.getInitScoreList();
@@ -69,10 +62,10 @@ public abstract class HeteroSecureBoost extends BaseModel {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            return StatusCode.ILLEGALDATA;
+            return ILLEGALDATA;
         }
         logger.info("Finish init HeteroSecureBoost class");
-        return StatusCode.OK;
+        return OK;
     }
 
     protected String getSite(int treeId, int treeNodeId) {
@@ -93,6 +86,10 @@ public abstract class HeteroSecureBoost extends BaseModel {
         int fid = this.trees.get(treeId).getTree(treeNodeId).getFid();
         double splitValue = this.trees.get(treeId).getSplitMaskdict().get(treeNodeId);
         String fidStr = String.valueOf(fid);
+        logger.info("treeId {}, treeNodeId {}",treeId, treeNodeId);
+        logger.info("treenode fid {}",fidStr);
+        logger.info("input is {}",input);
+
         if (input.containsKey(fidStr)) {
             if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
@@ -100,6 +97,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
             }
         } else {
+            logger.info("go missing dir");
             if (this.trees.get(treeId).getMissingDirMaskdict().containsKey(treeNodeId)) {
                 int missingDir = this.trees.get(treeId).getMissingDirMaskdict().get(treeNodeId);
                 if (missingDir == 1) {
@@ -116,8 +114,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
 
     }
 
-    @Override
-    public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);
+
 
 
 }

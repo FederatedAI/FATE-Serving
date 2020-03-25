@@ -337,10 +337,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 logger.debug("list all model： {}", models);
             }
 
-            returnResult.setRetcode(InferenceRetCode.OK);
+            returnResult.setRetcode(StatusCode.OK);
             returnResult.setRetmsg(Dict.SUCCESS);
 
-            builder.setStatusCode(InferenceRetCode.OK)
+            builder.setStatusCode(StatusCode.OK)
                     .setMessage(Dict.SUCCESS)
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(models).getBytes()));
             responseObserver.onNext(builder.build());
@@ -364,10 +364,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             Model model = modelManager.getModelByTableNameAndNamespace(request.getTableName(), request.getNamespace());
 
-            returnResult.setRetcode(InferenceRetCode.OK);
+            returnResult.setRetcode(StatusCode.OK);
             returnResult.setRetmsg(Dict.SUCCESS);
 
-            builder.setStatusCode(InferenceRetCode.OK)
+            builder.setStatusCode(StatusCode.OK)
                     .setMessage(Dict.SUCCESS)
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
             responseObserver.onNext(builder.build());
@@ -391,10 +391,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             Model model = modelManager.getModelByServiceId(request.getServiceId());
 
-            returnResult.setRetcode(InferenceRetCode.OK);
+            returnResult.setRetcode(StatusCode.OK);
             returnResult.setRetmsg(Dict.SUCCESS);
 
-            builder.setStatusCode(InferenceRetCode.OK)
+            builder.setStatusCode(StatusCode.OK)
                     .setMessage(Dict.SUCCESS)
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
             responseObserver.onNext(builder.build());

@@ -134,9 +134,7 @@ public interface Context<Req, Resp> {
 
     public void  setRemoteFuture(ListenableFuture  future);
 
-    public Model getModel();
 
-    public void  setModel(Model model);
 
 
     

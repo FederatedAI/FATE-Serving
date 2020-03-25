@@ -16,49 +16,40 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.ByteString;
-import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
-import com.webank.ai.fate.register.common.Constants;
-import com.webank.ai.fate.register.router.RouterService;
-import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.utils.ObjectTransform;
+import com.webank.ai.fate.serving.core.cache.Cache;
+import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
+import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
-import io.grpc.ManagedChannel;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-public abstract class BaseComponent implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>> ,LocalInferenceAware {
+public abstract class BaseComponent implements LocalInferenceAware {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseComponent.class);
-    public static RouterService routerService;
+
     protected String componentName;
 
-    public String getComponentName() {
-        return componentName;
-    }
+    protected int  index;
 
-    public void setComponentName(String componentName) {
-        this.componentName = componentName;
-    }
+    protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;
 
-//    @Override
-//    public  Map<String,Object>  localInference(Context context,Map<> input){
-//
-//
-//
-//         return null;
-//    };
+    protected Cache cache ;
 
+    protected static final int OK = 0;
+    protected static final int UNKNOWNERROR = 1;
+    protected static final int PARAMERROR = 2;
+    protected static final int ILLEGALDATA = 3;
+    protected static final int NOMODEL= 4;
+    protected static final int NOTME = 5;
+    protected static final int FEDERATEDERROR = 6;
+    protected static final int TIMEOUT = -1;
+    protected static final int NOFILE = -2;
+    protected static final int NETWORKERROR = -3;
+    protected static final int IOERROR = -4;
+    protected static final int RUNTIMEERROR = -5;
 
 
 
@@ -68,176 +59,184 @@ public abstract class BaseComponent implements Predictor<List<Map<String, Object
         return ProtobufUtils.parseProtoObject(protoParser, protoString);
     }
 
-    @Override
-    public Map<String, Object> predict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-
-        long beginTime = System.currentTimeMillis();
-        try {
-            this.preprocess(context, inputData, predictParams);
-            Map<String, Object> result = handlePredict(context, inputData, predictParams);
-            result = this.postprocess(context, inputData, predictParams, result);
-            return result;
-        } finally {
-            long endTime = System.currentTimeMillis();
-            long cost = endTime - beginTime;
-            String caseId = context.getCaseId();
-            String className = this.getClass().getSimpleName();
-            if(logger.isDebugEnabled()) {
-                logger.debug("model {} caseid {} predict cost time {}", className, caseId, cost);
-            }
-        }
-
-    }
 
 
-    @Override
-    public void preprocess(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-
-    }
 
 
-    @Override
-    public Map<String, Object> postprocess(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams, Map<String, Object> res) {
-
-        return res;
-
-    }
-
-    public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);
 
 
-    protected ReturnResult getFederatedPredict(Context context, FederatedParams guestFederatedParams, String remoteMethodName, boolean useCache) {
-        ReturnResult remoteResult = null;
-
-        try {
-            FederatedParty srcParty = guestFederatedParams.getLocal();
-            FederatedRoles federatedRoles = guestFederatedParams.getRole();
-            Map<String, Object> featureIds = (Map<String, Object>) guestFederatedParams.getFeatureIdMap();
-            FederatedParty dstParty = new FederatedParty(Dict.HOST, federatedRoles.getRole(Dict.HOST).get(0));
-            if (useCache) {
-                ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(guestFederatedParams);
-                if (remoteResultFromCache != null) {
-                    if(logger.isDebugEnabled()) {
-                        logger.debug("caseid {} get remote party model inference result from cache", context.getCaseId());
-                    }
-                    context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
-                    context.hitCache(true);
-                    remoteResult = remoteResultFromCache;
-                    return remoteResult;
-                }
-            }
-            HostFederatedParams hostFederatedParams = new HostFederatedParams();
-            hostFederatedParams.setCaseId(guestFederatedParams.getCaseId());
-            hostFederatedParams.setSeqNo(guestFederatedParams.getSeqNo());
-            hostFederatedParams.getFeatureIdMap().putAll(guestFederatedParams.getFeatureIdMap());
-            hostFederatedParams.setLocal(dstParty);
-            hostFederatedParams.setPartnerLocal(srcParty);
-            hostFederatedParams.setRole(federatedRoles);
-            hostFederatedParams.setPartnerModelInfo(guestFederatedParams.getModelInfo());
-            hostFederatedParams.setData(guestFederatedParams.getData());
-            context.putData(Dict.GET_REMOTE_PARTY_RESULT, true);
-            remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
-            if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
-                CacheManager.getInstance().putRemoteModelInferenceResult(guestFederatedParams, remoteResult);
-                if(logger.isDebugEnabled()) {
-                    logger.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
-                }
-            }
-            return remoteResult;
-        } finally {
-            context.setFederatedResult(remoteResult);
-        }
-    }
-
-    protected ReturnResult getFederatedPredictFromRemote(Context context, FederatedParty srcParty, FederatedParty dstParty, HostFederatedParams hostFederatedParams, String remoteMethodName) {
 
 
-        long beginTime = System.currentTimeMillis();
-        ReturnResult remoteResult = null;
-        try {
-
-            Proxy.Packet.Builder packetBuilder = Proxy.Packet.newBuilder();
-            packetBuilder.setBody(Proxy.Data.newBuilder()
-                    .setValue(ByteString.copyFrom(JSON.toJSONBytes(hostFederatedParams)))
-                    .build());
-
-            Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
-            Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
-
-            metaDataBuilder.setSrc(
-                    topicBuilder.setPartyId(String.valueOf(srcParty.getPartyId())).
-                            setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
-                            .setName(Dict.PARTNER_PARTY_NAME)
-                            .build());
-            metaDataBuilder.setDst(
-                    topicBuilder.setPartyId(String.valueOf(dstParty.getPartyId()))
-                            .setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
-                            .setName(Dict.PARTY_NAME)
-                            .build());
-            metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
-            metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
-            String version =  Configuration.getProperty(Dict.VERSION,"");
-            metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
-            packetBuilder.setHeader(metaDataBuilder.build());
-			Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
-			if(context.getCaseId()!=null) {
-                authBuilder.setNonce(context.getCaseId());
-            }
-            if(version!=null) {
-                authBuilder.setVersion(version);
-            }
-            if(context.getServiceId()!=null) {
-                authBuilder.setServiceId(  context.getServiceId());
-            }
-            if(context.getApplyId()!=null) {
-                authBuilder.setApplyId(  context.getApplyId());
-            }
-            packetBuilder.setAuth(authBuilder.build());
-			
-            GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
-            boolean routerByzk = Boolean.valueOf(routerByZkString);
-            String address = null;
-            if (!routerByzk) {
-                address = Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
-            } else {
-
-                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
-                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
-                List<URL> urls = routerService.router(newUrl);
-                if (urls!=null&&urls.size() > 0) {
-                    URL url = urls.get(0);
-                    String ip = url.getHost();
-                    int port = url.getPort();
-                    address = ip + ":" + port;
-                }
-            }
+//    @Override
+//    public Map<String, Object> predict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
+//
+//        long beginTime = System.currentTimeMillis();
+//        try {
+//            this.preprocess(context, inputData, predictParams);
+//            Map<String, Object> result = handlePredict(context, inputData, predictParams);
+//            result = this.postprocess(context, inputData, predictParams, result);
+//            return result;
+//        } finally {
+//            long endTime = System.currentTimeMillis();
+//            long cost = endTime - beginTime;
+//            String caseId = context.getCaseId();
+//            String className = this.getClass().getSimpleName();
+//            if(logger.isDebugEnabled()) {
+//                logger.debug("model {} caseid {} predict cost time {}", className, caseId, cost);
+//            }
+//        }
+//
+//    }
 
 
-            logger.info("send to remote address {}",address);
-            Preconditions.checkArgument(StringUtils.isNotEmpty(address));
-            ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
-            ListenableFuture<Proxy.Packet> future= null;
+//    @Override
+//    public void preprocess(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
+//
+//    }
+//
+//
+//    @Override
+//    public Map<String, Object> postprocess(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams, Map<String, Object> res) {
+//
+//        return res;
+//
+//    }
 
-                //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
-            DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
-            future =stub1.unaryCall(packetBuilder.build());
+//    public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);
 
-            if(future!=null){
-                Proxy.Packet packet = future.get(Configuration.getPropertyInt("rpc.time.out",3000), TimeUnit.MILLISECONDS);
-                remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
-            }
-            return remoteResult;
-        } catch (Exception e) {
-            logger.error("getFederatedPredictFromRemote error", e.getMessage());
-            throw new RuntimeException(e);
-        } finally {
-            long end = System.currentTimeMillis();
-            long cost = end - beginTime;
-            logger.info("caseid {} getFederatedPredictFromRemote cost {} remote retcode {}", context.getCaseId(), cost, remoteResult != null ? remoteResult.getRetcode() : Dict.NONE);
-        }
 
-    }
+//    protected ReturnResult getFederatedPredict(Context context, FederatedParams guestFederatedParams, String remoteMethodName, boolean useCache) {
+//        ReturnResult remoteResult = null;
+//
+//        try {
+//            FederatedParty srcParty = guestFederatedParams.getLocal();
+//            FederatedRoles federatedRoles = guestFederatedParams.getRole();
+//            Map<String, Object> featureIds = (Map<String, Object>) guestFederatedParams.getFeatureIdMap();
+//            FederatedParty dstParty = new FederatedParty(Dict.HOST, federatedRoles.getRole(Dict.HOST).get(0));
+//            if (useCache) {
+//                ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(guestFederatedParams);
+//                if (remoteResultFromCache != null) {
+//                    if(logger.isDebugEnabled()) {
+//                        logger.debug("caseid {} get remote party model inference result from cache", context.getCaseId());
+//                    }
+//                    context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
+//                    context.hitCache(true);
+//                    remoteResult = remoteResultFromCache;
+//                    return remoteResult;
+//                }
+//            }
+//            HostFederatedParams hostFederatedParams = new HostFederatedParams();
+//            hostFederatedParams.setCaseId(guestFederatedParams.getCaseId());
+//            hostFederatedParams.setSeqNo(guestFederatedParams.getSeqNo());
+//            hostFederatedParams.getFeatureIdMap().putAll(guestFederatedParams.getFeatureIdMap());
+//            hostFederatedParams.setLocal(dstParty);
+//            hostFederatedParams.setPartnerLocal(srcParty);
+//            hostFederatedParams.setRole(federatedRoles);
+//            hostFederatedParams.setPartnerModelInfo(guestFederatedParams.getModelInfo());
+//            hostFederatedParams.setData(guestFederatedParams.getData());
+//            context.putData(Dict.GET_REMOTE_PARTY_RESULT, true);
+//            remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
+//            if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
+//                CacheManager.getInstance().putRemoteModelInferenceResult(guestFederatedParams, remoteResult);
+//                if(logger.isDebugEnabled()) {
+//                    logger.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
+//                }
+//            }
+//            return remoteResult;
+//        } finally {
+//            context.setFederatedResult(remoteResult);
+//        }
+//    }
+
+//    protected ReturnResult getFederatedPredictFromRemote(Context context, FederatedParty srcParty, FederatedParty dstParty, HostFederatedParams hostFederatedParams, String remoteMethodName) {
+//
+//
+//        long beginTime = System.currentTimeMillis();
+//        ReturnResult remoteResult = null;
+//        try {
+//
+//            Proxy.Packet.Builder packetBuilder = Proxy.Packet.newBuilder();
+//            packetBuilder.setBody(Proxy.Data.newBuilder()
+//                    .setValue(ByteString.copyFrom(JSON.toJSONBytes(hostFederatedParams)))
+//                    .build());
+//
+//            Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
+//            Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
+//
+//            metaDataBuilder.setSrc(
+//                    topicBuilder.setPartyId(String.valueOf(srcParty.getPartyId())).
+//                            setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+//                            .setName(Dict.PARTNER_PARTY_NAME)
+//                            .build());
+//            metaDataBuilder.setDst(
+//                    topicBuilder.setPartyId(String.valueOf(dstParty.getPartyId()))
+//                            .setRole(Configuration.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+//                            .setName(Dict.PARTY_NAME)
+//                            .build());
+//            metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
+//            metaDataBuilder.setConf(Proxy.Conf.newBuilder().setOverallTimeout(60 * 1000));
+//            String version =  Configuration.getProperty(Dict.VERSION,"");
+//            metaDataBuilder.setOperator(Configuration.getProperty(Dict.VERSION,""));
+//            packetBuilder.setHeader(metaDataBuilder.build());
+//			Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
+//			if(context.getCaseId()!=null) {
+//                authBuilder.setNonce(context.getCaseId());
+//            }
+//            if(version!=null) {
+//                authBuilder.setVersion(version);
+//            }
+//            if(context.getServiceId()!=null) {
+//                authBuilder.setServiceId(  context.getServiceId());
+//            }
+//            if(context.getApplyId()!=null) {
+//                authBuilder.setApplyId(  context.getApplyId());
+//            }
+//            packetBuilder.setAuth(authBuilder.build());
+//
+//            GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+//            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
+//            boolean routerByzk = Boolean.valueOf(routerByZkString);
+//            String address = null;
+//            if (!routerByzk) {
+//                address = Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+//            } else {
+//
+//                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
+//                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
+//                List<URL> urls = routerService.router(newUrl);
+//                if (urls!=null&&urls.size() > 0) {
+//                    URL url = urls.get(0);
+//                    String ip = url.getHost();
+//                    int port = url.getPort();
+//                    address = ip + ":" + port;
+//                }
+//            }
+//
+//
+//            logger.info("send to remote address {}",address);
+//            Preconditions.checkArgument(StringUtils.isNotEmpty(address));
+//            ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
+//            ListenableFuture<Proxy.Packet> future= null;
+//
+//                //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
+//            DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
+//            future =stub1.unaryCall(packetBuilder.build());
+//
+//            if(future!=null){
+//                Proxy.Packet packet = future.get(configMap.getOrDefault("rpc.time.out",3000), TimeUnit.MILLISECONDS);
+//                remoteResult = (ReturnResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), ReturnResult.class);
+//            }
+//            return remoteResult;
+//        } catch (Exception e) {
+//            logger.error("getFederatedPredictFromRemote error", e.getMessage());
+//            throw new RuntimeException(e);
+//        } finally {
+//            long end = System.currentTimeMillis();
+//            long cost = end - beginTime;
+//            logger.info("caseid {} getFederatedPredictFromRemote cost {} remote retcode {}", context.getCaseId(), cost, remoteResult != null ? remoteResult.getRetcode() : Dict.NONE);
+//        }
+//
+//    }
 
 
     /*public  static  void main(String[] args){
@@ -267,6 +266,48 @@ public abstract class BaseComponent implements Predictor<List<Map<String, Object
 
     }*/
 
+
+    public String getComponentName() {
+        return componentName;
+    }
+
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
+    }
+
+
+
+    public FederatedRpcInvoker getFederatedRpcInvoker() {
+        return federatedRpcInvoker;
+    }
+
+    public void setFederatedRpcInvoker(FederatedRpcInvoker federatedRpcInvoker) {
+        this.federatedRpcInvoker = federatedRpcInvoker;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public Cache getCache() {
+        return cache;
+    }
+
+    public void setCache(Cache cache) {
+        this.cache = cache;
+    }
+
+//    public Map getConfigMap() {
+//        return configMap;
+//    }
+//
+//    public void setConfigMap(Map configMap) {
+//        this.configMap = configMap;
+//    }
 
 
 

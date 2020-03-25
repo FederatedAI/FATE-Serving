@@ -17,11 +17,10 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+
+import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,82 +30,42 @@ import java.util.Map;
 
 import static java.lang.Math.exp;
 
-public class HeteroLRGuest extends HeteroLR {
+public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware {
+
     private static final Logger logger = LoggerFactory.getLogger(HeteroLRGuest.class);
 
     private double sigmod(double x) {
         return 1. / (1. + exp(-x));
     }
-
     @Override
-    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        Map<String, Object> result = new HashMap<>(8);
-        Map<String, Double> forwardRet = forward(inputData);
-        double score = forwardRet.get(Dict.SCORE);
-
-        logger.info("caseid {} guest score:{}", context.getCaseId(), score);
-
-        try {
-            ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
-            if(hostPredictResponse !=null) {
-                result.put(Dict.RET_CODE,hostPredictResponse.getRetcode());
-                if(logger.isDebugEnabled()) {
-                    logger.debug("caseid {} host response is {}", context.getCaseId(), hostPredictResponse.getData());
-                }
-                if (hostPredictResponse.getData() != null && hostPredictResponse.getData().get(Dict.SCORE) != null) {
-                    double hostScore = ((Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
-                    logger.info("caseid {} host score:{}", context.getCaseId(), hostScore);
-                    score += hostScore;
-                }
-            }else{
-                logger.info("caseid {} host response is null",context.getCaseId());
-            }
-        } catch (io.grpc.StatusRuntimeException ex) {
-            logger.error("get host predict failed:", ex);
-            result.put(Dict.RET_CODE, InferenceRetCode.NETWORK_ERROR);
-        }
-        catch(Exception ex){
-            logger.error("get host predict failed:", ex);
-            result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
-        }
-        double prob = sigmod(score);
-        result.put(Dict.PROB, prob);
-        //result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE + ":{}", forwardRet.get(Dict.MODEL_WRIGHT_HIT_RATE));
-        //result.put(Dict.GUEST_INPUT_DATA_HIT_RATE + ":{}", forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
-        return result;
-    }
-
-    @Override
-    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
+    public Map<String, Object> localInference(Context context, List<Map<String, Object>> input
+                                             ) {
         Map<String, Object> result = new HashMap<>(8);
         Map<String, Double> forwardRet = forward(input);
         double score = forwardRet.get(Dict.SCORE);
-
         logger.info("caseid {} score:{}", context.getCaseId(), score);
         result.put(Dict.SCORE, score);
         return result;
     }
 
     @Override
-    public Map<String, Object> mergeRemoteInference(Context context, Map<String, Object> input) {
+    public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> guestData,
+                                                    Map<String,Object> hostData) {
         Map<String, Object> result = new HashMap<>(8);
         result.put(Dict.RET_CODE,InferenceRetCode.OK);
+
+
         try {
-            Map<String, Object> localData = (Map<String, Object>) input.get(Dict.LOCAL_INFERENCE_DATA);
-            Map<String, Object> remoteData = (Map<String, Object>) input.get(Dict.REMOTE_INFERENCE_DATA);
-
             double score;
-            double localScore = (double) localData.get(Dict.SCORE);
-            double remoteScore = (double) remoteData.get(Dict.SCORE);
-
+            double localScore = (double) guestData.get(0).get(Dict.SCORE);
+            double remoteScore = (double) hostData.get(Dict.SCORE);
             logger.info("merge inference result, caseid {} local score:{} remote scope:{}", context.getCaseId(), localScore, remoteScore);
             score = localScore;
             score += remoteScore;
-
             double prob = sigmod(score);
-            result.put(Dict.PROB, prob);
+            result.put(Dict.SCORE, prob);
         } catch (Exception ex) {
-            logger.error("get host predict failed:", ex);
+            logger.error("hetero lr guest merge error:", ex);
             result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
         }
         return result;
