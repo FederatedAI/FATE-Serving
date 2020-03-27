@@ -166,8 +166,8 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
         ReturnResult returnResult = new ReturnResult();
         returnResult.setRetcode(InferenceRetCode.OK);
 
-        Model model = this.buildModel(context, req);
-        String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+//        Model model = this.buildModel(context, req);
+        String modelKey = this.getNameSpaceKey(req.getTableName(), req.getNamespace());
 
         if (!this.namespaceMap.containsKey(modelKey)) {
             logger.info("Not found model info, please check if the model is already loaded.");
@@ -175,6 +175,8 @@ public class NewModelManager implements InitializingBean, EnvironmentAware {
             returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
             return returnResult;
         }
+
+        Model model = this.namespaceMap.get(modelKey);
 
         if (!this.serviceIdNamespaceMap.containsKey(serviceId)) {
             logger.info("Service ID: {} not bind", serviceId);
