@@ -36,6 +36,16 @@ public enum RouterModel {
     /**
      * ALL_ALLOWED
      */
-    ALL_ALLOWED
+    ALL_ALLOWED;
+
+    public static boolean contains(String routerMode) {
+        RouterModel[] values = RouterModel.values();
+        for (RouterModel value : values) {
+            if (String.valueOf(value).equals(routerMode)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
