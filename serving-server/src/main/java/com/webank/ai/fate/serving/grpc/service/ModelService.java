@@ -25,6 +25,7 @@ import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishResponse;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.model.NewModelManager;
@@ -177,7 +178,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
                     ModelUtil.getFederatedRolesModel(req.getModelMap()));*/
-            builder.setStatusCode(returnResult.getRetcode())
+            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
 
@@ -214,7 +215,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
                     ModelUtil.getFederatedRolesModel(req.getModelMap())
             );*/
-            builder.setStatusCode(returnResult.getRetcode())
+            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             /*if (returnResult.getRetcode() == 0) {
@@ -337,10 +338,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 logger.debug("list all model： {}", models);
             }
 
-            returnResult.setRetcode(StatusCode.OK);
+            returnResult.setRetcode(StatusCode.SUCCESS);
             returnResult.setRetmsg(Dict.SUCCESS);
 
-            builder.setStatusCode(StatusCode.OK)
+            builder.setStatusCode(Integer.valueOf(StatusCode.SUCCESS))
                     .setMessage(Dict.SUCCESS)
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(models).getBytes()));
             responseObserver.onNext(builder.build());

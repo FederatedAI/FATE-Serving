@@ -36,7 +36,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public static ApplicationContext applicationContext;
     public static AtomicLong  requestInProcess= new AtomicLong(0);
     long timestamp;
-    LoggerPrinter loggerPrinter;
+    LoggerPrinter loggerPrinter =new BaseLoggerPrinter();
     String interfaceName;
     String actionType;
     Map dataMap = Maps.newHashMap();
@@ -261,6 +261,15 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
             return (long) dataMap.get(Dict.DOWN_STREAM_COST);
         }
         return 0;
+    }
+
+
+    public MetricRegistry getMetricRegistry() {
+        return metricRegistry;
+    }
+
+    public void setMetricRegistry(MetricRegistry metricRegistry) {
+        this.metricRegistry = metricRegistry;
     }
 
     @Override

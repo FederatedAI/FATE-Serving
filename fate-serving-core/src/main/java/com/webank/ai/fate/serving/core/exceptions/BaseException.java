@@ -45,14 +45,14 @@ package com.webank.ai.fate.serving.core.exceptions;
 
 public class BaseException extends RuntimeException {
 
-    private int retcode;
+    private String  retcode;
 
-    public BaseException(int retCode, String message) {
+    public BaseException(String retCode, String message) {
         super(message);
         this.retcode = retCode;
     }
 
-    public int getRetcode() {
+    public String getRetcode() {
         return retcode;
     }
 }

@@ -24,6 +24,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
@@ -58,7 +59,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
                 OutboundPackage outboundPackage = this.oldVersionInferenceProvider.service(context, inboundPackage);
                 returnResult = (ReturnResult) outboundPackage.getData();
             } catch (Throwable e) {
-                returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
+                returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
                 logger.error("inference system error: {}", req.getBody().toStringUtf8());
             }
             response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
@@ -100,15 +101,11 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
             InboundPackage inboundPackage = new InboundPackage();
             inboundPackage.setBody(reqbody);
             OutboundPackage outboundPackage = null;
-            try {
-                outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
-                returnResult = (BatchInferenceResult) outboundPackage.getData();
 
-            } catch (Exception e) {
-                logger.error("batchGuestInferenceProvider get error",e);
-                returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
-                returnResult.setMsg(e.getMessage());
-            }
+            outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
+            returnResult = (BatchInferenceResult) outboundPackage.getData();
+
+
             response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
             responseObserver.onNext(response.build());
             responseObserver.onCompleted();
@@ -186,7 +183,8 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 
     private  Context  prepareContext(){
 
-        Context context = new BaseContext(new GuestInferenceLoggerPrinter(), InferenceActionType.BATCH.name(), metricRegistry);
+        ServingServerContext context = new ServingServerContext();
+        context.setMetricRegistry(this.metricRegistry);
         context.preProcess();
         return  context;
     }

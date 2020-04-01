@@ -18,9 +18,10 @@ package com.webank.ai.fate.serving.guest.provider;
 
 
 
-import com.webank.ai.fate.serving.pojo.InferenceRequest;
+
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
 

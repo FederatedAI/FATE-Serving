@@ -77,14 +77,6 @@ public class BatchInferenceRequest extends InferenceRequest{
         this.serviceId = serviceId;
     }
 
-//    public String getSeqNo() {
-//        return seqNo;
-//    }
-//
-//    public void setSeqNo(String seqNo) {
-//        this.seqNo = seqNo;
-//    }
-
     @Override
     public String toString() {
         String result = "";

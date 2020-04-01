@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Service
-public class NewModelManager implements InitializingBean, EnvironmentAware {
+public class ModelManager implements InitializingBean, EnvironmentAware {
     @Autowired
     private ModelLoader modelLoader;
 

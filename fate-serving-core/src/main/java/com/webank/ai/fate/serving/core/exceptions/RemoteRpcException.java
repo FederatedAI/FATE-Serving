@@ -10,6 +10,6 @@ public class RemoteRpcException  extends  BaseException{
     }
 
     public RemoteRpcException( String message) {
-        super(StatusCode.GUEST_NET_ERROR, message);
+        super(StatusCode.NET_ERROR, message);
     }
 }

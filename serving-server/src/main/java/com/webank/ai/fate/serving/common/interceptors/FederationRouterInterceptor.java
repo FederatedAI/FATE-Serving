@@ -21,6 +21,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -36,6 +37,9 @@ public class FederationRouterInterceptor  extends  AbstractInterceptor {
     @Autowired(required = false)
     RouterService   routerService;
 
+
+
+
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         String version =  environment.getProperty(Dict.VERSION,"");
@@ -43,17 +47,18 @@ public class FederationRouterInterceptor  extends  AbstractInterceptor {
         String address = null;
         if (routerService==null) {
                 address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
-                if(address.indexOf(":")<0){
-                    // TODO: 2020/3/16   这里错误另外定制
-                    throw  new NoRouteInfoException(333333333,"");
+                if(checkAddress(address)){
+                    throw  new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR,"address is error in config file");
                 }
                 String[] args  =address.split(":");
                 routerInfo.setHost(args[0]);
                 routerInfo.setPort(Integer.getInteger(args[1]));
             } else {
-                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
-                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
-                List<URL> urls = routerService.router(newUrl);
+//                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
+//                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
+//                List<URL> urls = routerService.router(newUrl);
+
+                List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS,Dict.ONLINE_ENVIROMMENT,Dict.UNARYCALL);
                 if (urls!=null&&urls.size() > 0) {
                     URL url = urls.get(0);
                     String ip = url.getHost();
@@ -62,7 +67,7 @@ public class FederationRouterInterceptor  extends  AbstractInterceptor {
                     routerInfo.setPort(port);
                 }else{
                     // TODO: 2020/3/16   这里错误另外定制
-                    throw new NoRouteInfoException(333333333,"");
+                    throw new NoRouteInfoException(Dict.PROPERTY_PROXY_ADDRESS,"address is error");
                 }
             }
         context.setRouterInfo(routerInfo);

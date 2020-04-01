@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class MockAdapter implements SingleFeatureDataAdaptor {
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage());
-            returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
+            returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
         }
         return returnResult;
     }

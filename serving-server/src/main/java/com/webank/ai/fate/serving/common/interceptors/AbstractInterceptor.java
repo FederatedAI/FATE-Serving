@@ -22,10 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-/**
- * @Description TODO
- * @Author kaideng
- **/
 public class AbstractInterceptor implements Interceptor, EnvironmentAware {
 
     protected Environment environment;
@@ -35,6 +31,11 @@ public class AbstractInterceptor implements Interceptor, EnvironmentAware {
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
+    }
+
+    protected  boolean  checkAddress(String  address){
+
+        return  address.indexOf(":")>0;
     }
 
 

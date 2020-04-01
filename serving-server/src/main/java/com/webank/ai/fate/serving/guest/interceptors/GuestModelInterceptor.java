@@ -1,8 +1,12 @@
 package com.webank.ai.fate.serving.guest.interceptors;
 
 import com.google.common.base.Preconditions;
+import com.webank.ai.fate.serving.ServingServer;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.ServingServerContext;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.GuestModelNullException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
@@ -27,15 +31,14 @@ public class GuestModelInterceptor implements Interceptor {
         try {
             Model model = modelManager.getModelByServiceId(serviceId);
             Preconditions.checkArgument(model != null, "model is null");
-            context.setModel(model);
+            ((ServingServerContext)context).setModel(model);
         }catch (Exception  e){
             if(e instanceof IllegalArgumentException) {
-                throw new GuestModelNullException("model is null");
+                throw new GuestModelNullException("can not find model by service id "+serviceId);
             }
             else{
-                throw  new  GuestModelNullException(e.getMessage());
+                throw  new SysException(StatusCode.SYSTEM_ERROR,"get model failed");
             }
-
         }
     }
 }
