@@ -1344,11 +1344,11 @@ class URL implements Serializable {
             path = getPath();
         }
 
-        if (StringUtils.isNotEmpty(project)) {
+        /*if (StringUtils.isNotEmpty(project)) {
 
             buf.append("/");
             buf.append(project);
-        }
+        }*/
         if (StringUtils.isNotEmpty(environment)) {
             buf.append("/");
             buf.append(environment);

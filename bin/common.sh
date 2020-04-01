@@ -34,9 +34,11 @@ start() {
     else
       echo "usage: ${module} {serving-server|serving-proxy}"
     fi
-    sleep 5
-    id=$(ps -p $! | awk '{print $1}' | sed -n '2p')
-    if [[ ${#id} -ne 0 ]]; then
+    #sleep 5
+    #id=$(ps -p $! | awk '{print $1}' | sed -n '2p')
+    inspect_pid 5 $!
+
+    if [[ "$exist" = 1 ]]; then
       echo $! >./bin/${module}.pid
       getpid
       echo "service start sucessfully. pid: ${pid}"
@@ -65,11 +67,39 @@ stop() {
     echo "killing: $(ps -p ${pid})"
     kill ${pid}
     if [[ $? -eq 0 ]]; then
-      echo "killed"
+      #此函数检查进程，判断进程是否存在
+      echo "please wait"
+      inspect_pid 5 ${pid}
+      if [[ "$exist" = 0 ]]; then
+        echo "killed"
+      else
+        echo "please retry"
+      fi
     else
       echo "kill error"
     fi
   else
     echo "service not running"
+  fi
+}
+
+
+inspect_pid() {
+  total=0
+  exist=0
+  #echo "inspect pid: $2,periods: $1"
+  if [[ -n $2 ]]; then
+    while [[ $total -le $1 ]]
+    do
+      count=$(ps -ef | grep $2 | grep -v "grep" | wc -l)
+      total=$(($total+1))
+      if [[ ${count} -ne 0 ]]; then
+        sleep 1
+        exist=1
+       else
+        exist=0
+        return
+       fi
+    done
   fi
 }
