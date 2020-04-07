@@ -10,7 +10,7 @@ import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.federatedml.model.HeteroSecureBoostingTreeHost;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
-import com.webank.ai.fate.serving.model.NewModelManager;
+import com.webank.ai.fate.serving.model.ModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -150,7 +150,7 @@ public class HostSecureBoostTreeInferenceProvider  extends AbstractServingServic
 
         Map params = (Map) data.getBody();
 
-        Model model = context.getModel();
+        Model model = ((ServingServerContext)context).getModel();
 
         Object componentObject = model.getModelProcessor().getComponent(Dict.COMPONENT_NAME);
 

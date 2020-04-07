@@ -23,6 +23,8 @@ import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
 import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
+import com.webank.ai.fate.serving.core.model.Model;
+import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -286,7 +288,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
 
         Map<String,Object> localData = localDataList.get(0);
-
+        Model model =  ((ServingServerContext)context).getModel();
         /**
          *   第一轮不在这里
          */
@@ -336,8 +338,14 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
             }
             try {
                 logger.info("begin to federated");
+                FederatedRpcInvoker.RpcDataWraper   rpcDataWraper = new FederatedRpcInvoker.RpcDataWraper();
+                // TODO: 2020/4/2   这里暂时只考虑单方
+                rpcDataWraper.setData(remoteData);
 
-                Proxy.Packet returnPacket   = federatedRpcInvoker.sync(context, remoteData, Dict.FEDERATED_INFERENCE_FOR_TREE, 3000);
+                rpcDataWraper.setGuestModel(model);
+                //rpcDataWraper.setHostModel(model.getFederationModelMap().values());
+
+                Proxy.Packet returnPacket   = federatedRpcInvoker.sync(context, rpcDataWraper, 3000);
                 ReturnResult tempResult  = JSON.parseObject(returnPacket.getBody().getValue().toByteArray(),ReturnResult.class);
 
                 Map<String, Object> returnData = tempResult.getData();

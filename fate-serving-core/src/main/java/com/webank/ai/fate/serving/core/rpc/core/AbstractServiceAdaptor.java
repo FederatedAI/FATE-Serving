@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
@@ -17,9 +18,11 @@ import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -40,6 +43,16 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
 
     }
+
+    public Map<String, Method> getMethodMap() {
+        return methodMap;
+    }
+
+    public void setMethodMap(Map<String, Method> methodMap) {
+        this.methodMap = methodMap;
+    }
+
+    private  Map<String ,Method>  methodMap= Maps.newHashMap();
 
 
     public  void addPreProcessor(Interceptor interceptor){
@@ -90,7 +103,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
     String serviceName;
 
-    public abstract resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage)  ;
+    protected abstract resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage)  ;
 
     /**
      * @param context
@@ -99,7 +112,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
      * @throws Exception
      */
     @Override
-    public  OutboundPackage<resp> service(Context context , InboundPackage<req> data) throws Exception {
+    public  OutboundPackage<resp> service(Context context , InboundPackage<req> data) throws RuntimeException {
 
         OutboundPackage<resp>    outboundPackage= new OutboundPackage<resp>();
         long begin = System.currentTimeMillis();
@@ -169,7 +182,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
     }
 
-    protected  OutboundPackage<resp>  serviceFailInner(Context context, InboundPackage<req> data, Throwable e) throws Exception{
+    protected  OutboundPackage<resp>  serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {
 
         Map result = new HashMap();
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
@@ -183,7 +196,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
 
     @Override
-    public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws Exception {
+    public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws RuntimeException {
 
         logger.error("serviceFail {}", errors);
         Throwable e = errors.get(0);
@@ -198,28 +211,39 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
     }
 
 
+    /**
+     * 需要支持多方host
+     * @param context
+     * @param batchInferenceRequest
+     * @return
+     */
+    protected BatchHostFederatedParams buildBatchHostFederatedParams(Context  context, BatchInferenceRequest batchInferenceRequest, Model  guestModel,Model hostModel){
 
-    protected BatchHostFederatedParams buildBatchHostFederatedParams(Context  context, BatchInferenceRequest batchInferenceRequest){
+//        Model model =  ((ServingServerContext) context).getModel();
+//
+//        List<BatchHostFederatedParams>  result = Lists.newArrayList();
+    //    model.getFederationModelMap().forEach((hostPartyId,remoteModel)->{
 
-        Model model =  ((ServingServerContext) context).getModel();
-        Model hostModel  = model.getFederationModel();
-        BatchHostFederatedParams  batchHostFederatedParams = new  BatchHostFederatedParams();
-        String seqNo = batchInferenceRequest.getSeqno();
-        batchHostFederatedParams.setGuestPartyId(model.getPartId());
-        batchHostFederatedParams.setHostPartyId(model.getFederationModel().getPartId());
-        List<BatchHostFederatedParams.SingleInferenceData> sendToHostDataList= Lists.newArrayList();
+            BatchHostFederatedParams  batchHostFederatedParams = new  BatchHostFederatedParams();
+            String seqNo = batchInferenceRequest.getSeqno();
+            batchHostFederatedParams.setGuestPartyId(guestModel.getPartId());
+            batchHostFederatedParams.setHostPartyId(hostModel.getPartId());
+            List<BatchHostFederatedParams.SingleInferenceData> sendToHostDataList= Lists.newArrayList();
 
-        List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getBatchDataList();
-        for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
-            BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
-            singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
-            sendToHostDataList.add(singleBatchHostFederatedParam);
-        }
-        batchHostFederatedParams.setBatchDataList(sendToHostDataList);
-        batchHostFederatedParams.setHostTableName(hostModel.getTableName());
-        batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
-        //batchHostFederatedParams.setS(seqNo);
-        batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
+            List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getBatchDataList();
+            for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
+                BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
+                singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
+                sendToHostDataList.add(singleBatchHostFederatedParam);
+            }
+            batchHostFederatedParams.setBatchDataList(sendToHostDataList);
+            batchHostFederatedParams.setHostTableName(hostModel.getTableName());
+            batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
+            //batchHostFederatedParams.setS(seqNo);
+            batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
+
+         //   result.add(batchHostFederatedParams);
+        //});
 
         return  batchHostFederatedParams;
 

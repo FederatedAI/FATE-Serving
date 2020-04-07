@@ -20,15 +20,19 @@ package com.webank.ai.fate.serving.grpc.service;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
+import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishRequest;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishResponse;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.common.provider.ModelServiceProvider;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.Model;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.model.NewModelManager;
+import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +46,11 @@ import java.util.List;
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements /*InitializingBean,*/EnvironmentAware {
     private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
+
     @Autowired
-    NewModelManager modelManager;
+    ModelManager modelManager;
+
+    ModelServiceProvider  modelServiceProvider ;
     @Autowired
     MetricRegistry  metricRegistry;
 
@@ -251,7 +258,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
                     ModelUtil.getFederatedRolesModel(req.getModelMap())
             );*/
-            builder.setStatusCode(returnResult.getRetcode())
+            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             /*if (returnResult.getRetcode() == 0) {
@@ -289,7 +296,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             returnResult = modelManager.unload(request.getTableName(), request.getNamespace());
 
-            builder.setStatusCode(returnResult.getRetcode())
+            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
                     .setMessage(returnResult.getRetmsg())
                     .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
             responseObserver.onNext(builder.build());
@@ -301,26 +308,35 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
     @Override
     @RegisterService(serviceName = "unbind")
-    public synchronized void unbind(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
+    public synchronized void unbind(ModelServiceProto.UnbindRequest request, StreamObserver<ModelServiceProto.UnbindResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNBIND.name(), metricRegistry);
-        context.preProcess();
-        ReturnResult returnResult = null;
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-            if (logger.isDebugEnabled()) {
-                logger.debug("unbind receive service id: {}", request.getServiceId());
-            }
+        InboundPackage<ModelServiceProto.UnbindRequest> inboundPackage = new InboundPackage();
+        OutboundPackage outboundPackage =modelServiceProvider.service(context,inboundPackage);
+        ModelServiceProto.UnbindResponse unbindResponse = (ModelServiceProto.UnbindResponse)outboundPackage.getData();
+        responseObserver.onNext(unbindResponse);
+        responseObserver.onCompleted();
 
-            returnResult = modelManager.unbind(context, request);
-
-            builder.setStatusCode(returnResult.getRetcode())
-                    .setMessage(returnResult.getRetmsg())
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-            responseObserver.onNext(builder.build());
-            responseObserver.onCompleted();
-        } finally {
-            context.postProcess(request, returnResult);
-        }
+//        responseObserver.onNext(builder.build());
+//        responseObserver.onCompleted();
+//
+//        context.preProcess();
+//        ReturnResult returnResult = null;
+//        try {
+//            PublishResponse.Builder builder = PublishResponse.newBuilder();
+//            if (logger.isDebugEnabled()) {
+//                logger.debug("unbind receive service id: {}", request.getServiceId());
+//            }
+//
+//            returnResult = modelManager.unbind(context, request);
+//
+//            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
+//                    .setMessage(returnResult.getRetmsg())
+//                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
+//            responseObserver.onNext(builder.build());
+//            responseObserver.onCompleted();
+//        } finally {
+//            context.postProcess(request, returnResult);
+//        }
     }
 
     @Override
@@ -351,58 +367,55 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         }
     }
 
-    @Override
+
     @RegisterService(serviceName = "getModelByTableNameAndNamespace")
     public void getModelByTableNameAndNamespace(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE.name(), metricRegistry);
-        context.preProcess();
-        ReturnResult returnResult = new ReturnResult();
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-            if (logger.isDebugEnabled()) {
-                logger.debug("get model by tableName: {}, namespace: {}", request.getTableName(), request.getNamespace());
-            }
-
-            Model model = modelManager.getModelByTableNameAndNamespace(request.getTableName(), request.getNamespace());
-
-            returnResult.setRetcode(StatusCode.OK);
-            returnResult.setRetmsg(Dict.SUCCESS);
-
-            builder.setStatusCode(StatusCode.OK)
-                    .setMessage(Dict.SUCCESS)
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
-            responseObserver.onNext(builder.build());
-            responseObserver.onCompleted();
-        } finally {
-            context.postProcess(request, returnResult);
-        }
+//        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE.name(), metricRegistry);
+//        context.preProcess();
+//        ReturnResult returnResult = new ReturnResult();
+//        try {
+//            PublishResponse.Builder builder = PublishResponse.newBuilder();
+//            if (logger.isDebugEnabled()) {
+//                logger.debug("get model by tableName: {}, namespace: {}", request.getTableName(), request.getNamespace());
+//            }
+//
+//            Model model = modelManager.getModelByTableNameAndNamespace(request.getTableName(), request.getNamespace());
+//
+//            returnResult.setRetcode(StatusCode.OK);
+//            returnResult.setRetmsg(Dict.SUCCESS);
+//
+//            builder.setStatusCode(StatusCode.OK)
+//                    .setMessage(Dict.SUCCESS)
+//                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
+//            responseObserver.onNext(builder.build());
+//            responseObserver.onCompleted();
+//        } finally {
+//            context.postProcess(request, returnResult);
+//        }
     }
 
     @Override
     @RegisterService(serviceName = "getModelByServiceId")
     public void getModelByServiceId(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_SERVICE_ID.name(), metricRegistry);
-        context.preProcess();
-        ReturnResult returnResult = new ReturnResult();
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-            if (logger.isDebugEnabled()) {
-                logger.debug("get model by service id: {}", request.getServiceId());
-            }
-
-            Model model = modelManager.getModelByServiceId(request.getServiceId());
-
-            returnResult.setRetcode(StatusCode.OK);
-            returnResult.setRetmsg(Dict.SUCCESS);
-
-            builder.setStatusCode(StatusCode.OK)
-                    .setMessage(Dict.SUCCESS)
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
-            responseObserver.onNext(builder.build());
-            responseObserver.onCompleted();
-        } finally {
-            context.postProcess(request, returnResult);
-        }
+//        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_SERVICE_ID.name(), metricRegistry);
+//        context.preProcess();
+//        ReturnResult returnResult = new ReturnResult();
+//        try {
+//            PublishResponse.Builder builder = PublishResponse.newBuilder();
+//            if (logger.isDebugEnabled()) {
+//                logger.debug("get model by service id: {}", request.getServiceId());
+//            }
+//            Model model = modelManager.getModelByServiceId(request.getServiceId());
+//            returnResult.setRetcode(StatusCode.OK);
+//            returnResult.setRetmsg(Dict.SUCCESS);
+//            builder.setStatusCode(StatusCode.OK)
+//                    .setMessage(Dict.SUCCESS)
+//                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
+//            responseObserver.onNext(builder.build());
+//            responseObserver.onCompleted();
+//        } finally {
+//            context.postProcess(request, returnResult);
+//        }
     }
 
     /*private String md5Crypt(PublishRequest req) {
@@ -551,7 +564,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 try {
                     byte[] data = decoder.decode(v.content.getBytes());
                     PublishRequest req = PublishRequest.parseFrom(data);
-                    if (logger.isDebugEnabled()) {
+                    if (logger.isDebugEnabled()) {v
                         logger.debug("restore publishLoadModel req {}", req);
                     }
                     Context context = new BaseContext();

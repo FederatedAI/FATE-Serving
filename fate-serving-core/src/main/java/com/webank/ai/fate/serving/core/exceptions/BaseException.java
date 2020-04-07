@@ -52,6 +52,10 @@ public class BaseException extends RuntimeException {
         this.retcode = retCode;
     }
 
+    public  BaseException(){
+
+    }
+
     public String getRetcode() {
         return retcode;
     }

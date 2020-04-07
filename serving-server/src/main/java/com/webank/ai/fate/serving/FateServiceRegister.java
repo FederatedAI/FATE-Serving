@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,13 +53,19 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
 
-//        if (applicationEvent instanceof ContextRefreshedEvent) {
+
             String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
             for (String beanName : beans) {
                 AbstractServiceAdaptor serviceAdaptor =  applicationContext.getBean(beanName,AbstractServiceAdaptor.class);
 
                 FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
-
+                Method[]  methods = serviceAdaptor.getClass().getMethods();
+                for(Method  method:methods){
+                    FateServiceMethod  fateServiceMethod = method.getAnnotation(FateServiceMethod.class);
+                    if(fateServiceMethod!=null){
+                        serviceAdaptor.getMethodMap().put(fateServiceMethod.name(),method);
+                    }
+                }
                 if (proxyService != null) {
 
                     serviceAdaptor.setServiceName(proxyService.name());
@@ -78,11 +85,12 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
                 }
 
 
+
             }
             logger.info("service register info {}",this.serviceAdaptorMap);
-//        }
+        }
 
 
 
-    }
+
 }

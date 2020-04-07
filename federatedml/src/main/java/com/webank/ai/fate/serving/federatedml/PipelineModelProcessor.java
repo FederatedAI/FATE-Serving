@@ -10,6 +10,7 @@ import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
@@ -20,37 +21,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 
 public class PipelineModelProcessor implements ModelProcessor{
 
     @Override
-    public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Future remoteFuture,long  timeout) {
+    public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String,Future> remoteFutureMap,long  timeout) {
 
         BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
 
         Map<Integer, Map<String, Object>> localResult = batchLocalInference(context, batchInferenceRequest);
 
-        BatchInferenceResult remoteInferenceResult=  null;
+        Map<String,BatchInferenceResult>  remoteResultMap =  Maps.newHashMap();
 
-        Proxy.Packet packet = null;
+        remoteFutureMap.forEach((partyId,future)->{
 
-        try {
-            packet = (Proxy.Packet) remoteFuture.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (Exception  e) {
-            throw  new RemoteRpcException("get remote result error");
-        }
-        remoteInferenceResult = (BatchInferenceResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), BatchInferenceResult.class);
+            Proxy.Packet packet  =null;
 
-        if (remoteInferenceResult.getRetcode() != InferenceRetCode.OK) {
+            try {
+                packet   = (Proxy.Packet) future.get(timeout, TimeUnit.MILLISECONDS);
 
-            throw  new RemoteRpcException(buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(),remoteInferenceResult.getRetmsg()));
-        }
+                BatchInferenceResult  remoteInferenceResult = (BatchInferenceResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), BatchInferenceResult.class);
 
-        batchFederatedResult = batchMergeHostResult(context, localResult, remoteInferenceResult);
+                if (remoteInferenceResult.getRetcode() != InferenceRetCode.OK) {
+
+                    throw  new RemoteRpcException(buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(),remoteInferenceResult.getRetmsg()));
+                }
+
+                remoteResultMap.put(partyId,remoteInferenceResult);
+
+            }  catch (TimeoutException e) {
+                throw  new  RemoteRpcException("party id "+partyId+ " time out");
+            }catch(Exception e){
+                throw new  SysException(e.getMessage());
+            }
+
+        });
+
+
+
+        batchFederatedResult = batchMergeHostResult(context, localResult, remoteResultMap);
 
         return batchFederatedResult;
     }
@@ -122,7 +137,7 @@ public class PipelineModelProcessor implements ModelProcessor{
     }
 
     @Override
-    public  ReturnResult guestInference(Context context, InferenceRequest inferenceRequest, Future remoteFuture, long timeout) {
+    public  ReturnResult guestInference(Context context, InferenceRequest inferenceRequest, Map<String,Future> futureMap, long timeout) {
 
 
         ReturnResult  returnResult = new ReturnResult();
@@ -132,7 +147,24 @@ public class PipelineModelProcessor implements ModelProcessor{
         ReturnResult  remoteResult = null;
 
         try {
-            remoteResult = (ReturnResult) remoteFuture.get(timeout, TimeUnit.MILLISECONDS);
+            Map<String,ReturnResult>  remoteResultMap = Maps.newHashMap();
+
+            futureMap.forEach((partId,future)->{
+                try {
+                    remoteResultMap.put(partId,(ReturnResult)future.get(timeout, TimeUnit.MILLISECONDS));
+
+                } catch (TimeoutException e) {
+                    throw new RemoteRpcException("host "+partId+" timeout");
+                }
+                catch (Exception e){
+                    throw  new SysException(e.getMessage());
+                }
+            });
+
+
+
+
+           // remoteResult = (ReturnResult) remoteFuture.get(timeout, TimeUnit.MILLISECONDS);
 
             Map<String,Object> remoteData = remoteResult.getData();
 
@@ -235,36 +267,46 @@ public class PipelineModelProcessor implements ModelProcessor{
         return   result;
     }
 
-    private Map changeRemoteResultToMap(BatchInferenceResult  batchInferenceResult){
+//    private Map changeRemoteResultToMap(BatchInferenceResult  batchInferenceResult){
+//
+//        Map result  =  Maps.newHashMap();
+//
+//        List<BatchInferenceResult.SingleInferenceResult>  batchInferences = batchInferenceResult.getBatchDataList();
+//
+//        for(BatchInferenceResult.SingleInferenceResult  singleInferenceResult:batchInferences){
+//
+//            result.put(singleInferenceResult.getIndex(),singleInferenceResult);
+//        }
+//        return  result;
+//    }
 
-        Map result  =  Maps.newHashMap();
-
-        List<BatchInferenceResult.SingleInferenceResult>  batchInferences = batchInferenceResult.getBatchDataList();
-
-        for(BatchInferenceResult.SingleInferenceResult  singleInferenceResult:batchInferences){
-
-            result.put(singleInferenceResult.getIndex(),singleInferenceResult);
-        }
-        return  result;
-    }
-
-    private BatchInferenceResult batchMergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, BatchInferenceResult remoteResult) {
+    private BatchInferenceResult batchMergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, Map<String,BatchInferenceResult> remoteResult) {
 
         try {
 
             Preconditions.checkArgument(localResult != null);
             Preconditions.checkArgument(remoteResult != null);
-            Preconditions.checkArgument(remoteResult.getBatchDataList() != null);
+            //Preconditions.checkArgument(remoteResult.getBatchDataList() != null);
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
-            Map remoteResultMap = changeRemoteResultToMap(remoteResult);
+           // Map remoteResultMap = changeRemoteResultToMap(remoteResult);
             localResult.forEach((index,data )->{
+
+
+                Map<String ,Object>  remoteSingleMap = Maps.newHashMap();
+
+                remoteResult.forEach((partyId,batchResult)->{
+                    if(batchResult.getSingleInferenceResultMap()!=null&& batchResult.getSingleInferenceResultMap().get(index)!=null) {
+                        Map<String,Object> realRemoteData = batchResult.getSingleInferenceResultMap().get(index).getData();
+                        remoteSingleMap.put(partyId,realRemoteData);
+                    }
+                });
 
                 try {
                     Map<String, Object> localData = localResult.get(index);
-                    BatchInferenceResult.SingleInferenceResult singleRemoteResult = (BatchInferenceResult.SingleInferenceResult) remoteResultMap.get(index);
-                    Map<String, Object> remoteData = singleRemoteResult.getData();
+                   // BatchInferenceResult.SingleInferenceResult singleRemoteResult = (BatchInferenceResult.SingleInferenceResult) remoteResultMap.get(index);
+                   // Map<String, Object> remoteData = singleRemoteResult.getData();
 
-                    Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteData);
+                    Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteSingleMap);
                     batchFederatedResult.getBatchDataList().set(index, new BatchInferenceResult.SingleInferenceResult(index, "0", Dict.SUCCESS, mergeResult));
 
 

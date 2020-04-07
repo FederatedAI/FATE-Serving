@@ -36,7 +36,7 @@ public class InferenceRequest implements Request {
     protected String applyId;
     protected Map<String, Object> sendToRemoteFeatureData;
 
-    InferenceRequest() {
+    public InferenceRequest() {
         seqno = InferenceUtils.generateSeqno();
         caseId = InferenceUtils.generateCaseid();
         featureData = new HashMap<>();

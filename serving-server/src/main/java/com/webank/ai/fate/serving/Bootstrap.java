@@ -50,7 +50,7 @@ public class Bootstrap {
 
     public void start(String[] args) {
 
-        applicationContext = SpringApplication.run(new Class[]{Bootstrap.class,ServingServer.class}, args);
+        applicationContext = SpringApplication.run(new Class[]{Bootstrap.class}, args);
     }
 
     public void stop() {

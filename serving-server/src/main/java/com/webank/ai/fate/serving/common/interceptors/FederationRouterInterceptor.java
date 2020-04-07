@@ -47,7 +47,7 @@ public class FederationRouterInterceptor  extends  AbstractInterceptor {
         String address = null;
         if (routerService==null) {
                 address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
-                if(checkAddress(address)){
+                if(!checkAddress(address)){
                     throw  new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR,"address is error in config file");
                 }
                 String[] args  =address.split(":");

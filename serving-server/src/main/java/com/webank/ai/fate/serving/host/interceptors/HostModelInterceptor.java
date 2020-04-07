@@ -5,13 +5,13 @@ import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.ServingServer;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
-import com.webank.ai.fate.serving.core.exceptions.GuestModelNullException;
+import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.model.NewModelManager;
+import com.webank.ai.fate.serving.model.ModelManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class HostModelInterceptor implements Interceptor {
 
     @Autowired
-    NewModelManager   modelManager;
+    ModelManager modelManager;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {

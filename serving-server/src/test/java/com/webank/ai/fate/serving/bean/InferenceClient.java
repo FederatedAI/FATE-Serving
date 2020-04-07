@@ -1,0 +1,63 @@
+package com.webank.ai.fate.serving.bean;
+
+import com.google.protobuf.ByteString;
+import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
+import com.webank.ai.fate.api.serving.InferenceServiceProto;
+import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+
+import java.util.concurrent.TimeUnit;
+
+public class InferenceClient {
+
+
+
+    public static ManagedChannel createManagedChannel(String ip, int port) throws Exception {
+
+
+        NettyChannelBuilder builder = NettyChannelBuilder
+                .forAddress(ip, port)
+                .keepAliveTime(60, TimeUnit.SECONDS)
+                .keepAliveTimeout(60, TimeUnit.SECONDS)
+                .keepAliveWithoutCalls(true)
+                .idleTimeout(60, TimeUnit.SECONDS)
+                .perRpcBufferLimit(128 << 20)
+                .flowControlWindow(32 << 20)
+                .maxInboundMessageSize(32 << 20)
+                .enableRetry()
+                .retryBufferSize(16 << 20)
+                .maxRetryAttempts(20);      // todo: configurable
+        builder.negotiationType(NegotiationType.PLAINTEXT)
+                .usePlaintext();
+
+        return builder.build();
+
+
+    }
+
+
+    public static  InferenceServiceProto.InferenceMessage  inference(String ip,int  port,byte[]  data){
+        ManagedChannel  managedChannel=null;
+        try {
+          managedChannel =  createManagedChannel(ip,port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
+                InferenceServiceProto.InferenceMessage.newBuilder();
+
+        inferenceMessageBuilder.setBody(ByteString.copyFrom(data));
+
+        return  blockingStub.inference(inferenceMessageBuilder.build());
+
+
+
+
+    }
+
+
+
+}

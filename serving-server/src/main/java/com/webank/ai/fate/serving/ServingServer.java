@@ -41,7 +41,7 @@ public class ServingServer implements InitializingBean{
     @Autowired
     ProxyService proxyService;
 
-    @Autowired
+    @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
 
     @Autowired

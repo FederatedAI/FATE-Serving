@@ -35,16 +35,16 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
     Logger logger = LoggerFactory.getLogger(AbstractModelLoader.class);
 
     @Override
-    public ModelProcessor loadModel(Context context, String name, String namespace) {
-        MODELDATA modelData = doLoadModel(context, name, namespace);
+    public ModelProcessor loadModel(Context context, ModelLoaderParam  modelLoaderParam) {
+        MODELDATA modelData = doLoadModel(context, modelLoaderParam);
         if (modelData == null) {
-            logger.info("load model error, name {} namespace {} ,try to restore from local cache", name, namespace);
-            modelData = restore(context, name, namespace);
+            logger.info("load model error, name {} namespace {} ,try to restore from local cache", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
+            modelData = restore(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace);
             if (modelData == null) {
-                logger.info("load model from local cache error, name {} namespace {}", name, namespace);
+                logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace );
             }
         } else {
-            this.store(context, name, namespace, modelData);
+            this.store(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace, modelData);
         }
         return this.initPipeLine(context, modelData);
     }
@@ -148,6 +148,6 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
         return null;
     }
 
-    protected abstract MODELDATA doLoadModel(Context context, String name, String namespace);
+    protected abstract MODELDATA doLoadModel(Context context, ModelLoaderParam  modelLoaderParam);
 
 }

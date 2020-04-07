@@ -18,9 +18,11 @@ package com.webank.ai.fate.serving.core.model;
 
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public class Model implements Comparable<Model>, Serializable {
 
@@ -38,9 +40,9 @@ public class Model implements Comparable<Model>, Serializable {
     private String partId;
 
     /**
-     *  对端模型信息
+     *  对端模型信息,因为需要支持多方,所以设计成Map
      */
-    private Model federationModel;
+    private Map<String,Model> federationModelMap= Maps.newHashMap();
 
     /**
      * 实例化好的模型处理类
@@ -48,7 +50,6 @@ public class Model implements Comparable<Model>, Serializable {
     private transient ModelProcessor modelProcessor;
 
     private String serviceId;
-
 
     public long getTimestamp() {
         return timestamp;
@@ -70,7 +71,6 @@ public class Model implements Comparable<Model>, Serializable {
         this.tableName = tableName;
     }
 
-
     public void setRole(String role) {
         this.role = role;
     }
@@ -83,13 +83,6 @@ public class Model implements Comparable<Model>, Serializable {
         this.partId = partId;
     }
 
-    public Model getFederationModel() {
-        return federationModel;
-    }
-
-    public void setFederationModel(Model federationModel) {
-        this.federationModel = federationModel;
-    }
 
     public ModelProcessor getModelProcessor() {
         return modelProcessor;
@@ -118,6 +111,14 @@ public class Model implements Comparable<Model>, Serializable {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public Map<String, Model> getFederationModelMap() {
+        return federationModelMap;
+    }
+
+    public void setFederationModelMap(Map<String, Model> federationModelMap) {
+        this.federationModelMap = federationModelMap;
     }
 
     @Override

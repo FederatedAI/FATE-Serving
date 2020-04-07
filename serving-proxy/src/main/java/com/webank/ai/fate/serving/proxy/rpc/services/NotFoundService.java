@@ -26,7 +26,7 @@ public class NotFoundService  extends AbstractServiceAdaptor<String, String> {
     }
 
     @Override
-    public OutboundPackage<String> serviceFail(Context context, InboundPackage<String> data, List<Throwable> e) throws Exception {
+    public OutboundPackage<String> serviceFail(Context context, InboundPackage<String> data, List<Throwable> e) {
         return null;
     }
 

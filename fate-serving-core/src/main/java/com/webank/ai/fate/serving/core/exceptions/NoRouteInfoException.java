@@ -6,5 +6,8 @@ public class NoRouteInfoException  extends   BaseException{
         super(retCode, message);
     }
 
+    public NoRouteInfoException(){
+
+    }
 
 }

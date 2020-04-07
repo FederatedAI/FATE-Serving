@@ -24,6 +24,7 @@ import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
+import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor impl
         }
         BatchHostFederatedParams batchHostFederatedParams = (BatchHostFederatedParams) inboundPackage.getBody();
         Preconditions.checkArgument(batchHostFederatedParams != null);
-        List<BatchHostFederatedParams.SingleInferenceData> dataList = batchHostFederatedParams.getDataList();
+        List<BatchHostFederatedParams.SingleInferenceData> dataList = batchHostFederatedParams.getBatchDataList();
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, dataList);
         /**
          *   将特征设回请求中
@@ -65,7 +66,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor impl
 
     private void mergeLocalFeatureToRequest(BatchHostFederatedParams batchHostFederatedParams, BatchHostFeatureAdaptorResult BatchHostFeatureAdaptorResult) {
 
-        List<BatchInferenceRequest.SingleInferenceData> reqDataList = batchHostFederatedParams.getDataList();
+        List<BatchInferenceRequest.SingleInferenceData> reqDataList = batchHostFederatedParams.getBatchDataList();
 
     }
 

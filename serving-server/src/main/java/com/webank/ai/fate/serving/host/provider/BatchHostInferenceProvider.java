@@ -9,7 +9,7 @@ import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
-import com.webank.ai.fate.serving.model.NewModelManager;
+import com.webank.ai.fate.serving.model.ModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class BatchHostInferenceProvider  extends AbstractServingServiceProvider<
 
         BatchHostFederatedParams  batchHostFederatedParams = (BatchHostFederatedParams)data.getBody();
 
-        Model model =context.getModel();
+        Model model =((ServingServerContext)context).getModel();
 
         BatchInferenceResult batchInferenceResult = model.getModelProcessor().hostBatchInference(context,batchHostFederatedParams);
 
@@ -41,17 +41,17 @@ public class BatchHostInferenceProvider  extends AbstractServingServiceProvider<
     }
 
     @Override
-    protected  OutboundPackage<BatchInferenceResult>  serviceFailInner(Context context, InboundPackage<BatchInferenceRequest> data, Throwable e) throws Exception{
+    protected  OutboundPackage<BatchInferenceResult>  serviceFailInner(Context context, InboundPackage<BatchInferenceRequest> data, Throwable e) {
 
         OutboundPackage<BatchInferenceResult> outboundPackage = new OutboundPackage<BatchInferenceResult>();
         BatchInferenceResult  batchInferenceResult = new  BatchInferenceResult();
         if(e instanceof BaseException){
             BaseException  baseException = (BaseException) e;
             batchInferenceResult.setRetcode(baseException.getRetcode());
-            batchInferenceResult.setMsg(e.getMessage());
+            batchInferenceResult.setRetmsg(e.getMessage());
         }else{
             batchInferenceResult.setRetcode(ErrorCode.SYSTEM_ERROR);
-            batchInferenceResult.setMsg(e.getMessage());
+            batchInferenceResult.setRetmsg(e.getMessage());
         }
         outboundPackage.setData(batchInferenceResult);
         return  outboundPackage;

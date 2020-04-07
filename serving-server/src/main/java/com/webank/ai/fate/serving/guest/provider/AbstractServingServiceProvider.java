@@ -4,11 +4,15 @@ import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +23,37 @@ public abstract  class AbstractServingServiceProvider<req,resp>   extends Abstra
 
             return null;
     }
+
+    @Override
+    protected  resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage){
+
+
+        Map<String,Method> methodMap = this.getMethodMap();
+
+        String  actionType = context.getActionType();
+
+        Method method = methodMap.get(actionType);
+
+        try {
+            resp result =  (resp)method.invoke(this,context,data,outboundPackage);
+            return  result;
+        } catch (BaseException e){
+            throw e;
+        }catch(Exception e){
+            throw  new SysException(StatusCode.SYSTEM_ERROR,e.getMessage());
+        }
+
+    }  ;
+
+
+
+
+
+
+
+
+
+
 
 
 //    public class InferenceRetCode {

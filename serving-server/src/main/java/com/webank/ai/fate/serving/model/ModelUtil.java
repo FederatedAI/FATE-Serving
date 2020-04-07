@@ -16,8 +16,8 @@ public class ModelUtil {
     private static final String MODEL_KEY_SEPARATOR = "&";
 
 
-    public static String genModelKey(String name, String namespace) {
-        return StringUtils.join(Arrays.asList(name, namespace), MODEL_KEY_SEPARATOR);
+    public static String genModelKey(String tableName, String namespace) {
+        return StringUtils.join(Arrays.asList(tableName, namespace), MODEL_KEY_SEPARATOR);
     }
 
     public static String[] splitModelKey(String key) {

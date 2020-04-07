@@ -10,8 +10,7 @@ import java.util.List;
 public abstract  class AbstractHostProvider<req,resp>   extends AbstractServiceAdaptor<req,resp>{
 
     @Override
-    public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws Exception {
-
+    public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws RuntimeException{
 
         Throwable e = errors.get(0);
         return  serviceFailInner(context,data,e);

@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class DefaultHttpModelLoader extends AbstractModelLoader<Map<String,byte[]>> {
-    private static final Logger logger = LoggerFactory.getLogger(DefaultHttpModelLoader.class);
+public class FateFlowModelLoader extends AbstractModelLoader<Map<String,byte[]>> {
+    private static final Logger logger = LoggerFactory.getLogger(FateFlowModelLoader.class);
 
     @Autowired(required=false)
     private RouterService routerService;
@@ -90,9 +90,9 @@ public class DefaultHttpModelLoader extends AbstractModelLoader<Map<String,byte[
     }
 
     @Override
-    protected    Map<String, byte[]> doLoadModel(Context context,String name, String namespace) {
+    protected    Map<String, byte[]> doLoadModel(Context context,ModelLoaderParam  modelLoaderParam) {
 
-        logger.info("read model, name: {} namespace: {}", name, namespace);
+        logger.info("read model, name: {} namespace: {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace);
         try {
             String requestUrl = "";
 
@@ -118,8 +118,8 @@ public class DefaultHttpModelLoader extends AbstractModelLoader<Map<String,byte[
             }
 
             Map<String, Object> requestData = new HashMap<>();
-            requestData.put("name", name);
-            requestData.put("namespace", namespace);
+            requestData.put("name", modelLoaderParam.tableName);
+            requestData.put("namespace", modelLoaderParam.nameSpace);
 
             long start = System.currentTimeMillis();
             String responseBody = HttpClientPool.transferPost(requestUrl, requestData);
@@ -130,20 +130,20 @@ public class DefaultHttpModelLoader extends AbstractModelLoader<Map<String,byte[
             }
 
             if (StringUtils.isEmpty(responseBody)) {
-                logger.info("read model fail, {}, {}", name, namespace);
+                logger.info("read model fail, {}, {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace);
                 return null;
             }
 
             JSONObject responseData = JSONObject.parseObject(responseBody);
             if (responseData.getInteger("retcode") != 0) {
-                logger.info("read model fail, {}, {}, {}", name, namespace, responseData.getString("retmsg"));
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace, responseData.getString("retmsg"));
                 return null;
             }
 
             Map<String, byte[]> resultMap = new HashMap<>();
             Map<String, Object> dataMap = responseData.getJSONObject("data");
             if (dataMap == null || dataMap.isEmpty()) {
-                logger.info("read model fail, {}, {}, {}", name, namespace, dataMap);
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace, dataMap);
                 return null;
             }
 

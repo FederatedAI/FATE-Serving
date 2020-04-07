@@ -38,23 +38,24 @@ public class TestFile implements SingleFeatureDataAdaptor {
 
     @Override
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {
-        ReturnResult returnResult = new ReturnResult();
-        Map<String, Object> data = new HashMap<>();
-        try {
-
-            List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
-            lines.forEach(line -> {
-                for (String kv : StringUtils.split(line, ",")) {
-                    String[] a = StringUtils.split(kv, ":");
-                    data.put(a[0], Double.valueOf(a[1]));
-                }
-            });
-            returnResult.setData(data);
-            returnResult.setRetcode(InferenceRetCode.OK);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
-        }
-        return returnResult;
+//        ReturnResult returnResult = new ReturnResult();
+//        Map<String, Object> data = new HashMap<>();
+//        try {
+//
+//            List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
+//            lines.forEach(line -> {
+//                for (String kv : StringUtils.split(line, ",")) {
+//                    String[] a = StringUtils.split(kv, ":");
+//                    data.put(a[0], Double.valueOf(a[1]));
+//                }
+//            });
+//            returnResult.setData(data);
+//            returnResult.setRetcode(InferenceRetCode.OK);
+//        } catch (Exception ex) {
+//            logger.error(ex.getMessage());
+//            returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
+//        }
+//        return returnResult;
+        return null;
     }
 }

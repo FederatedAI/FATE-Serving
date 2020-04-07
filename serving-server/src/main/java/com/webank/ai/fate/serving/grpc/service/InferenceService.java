@@ -51,25 +51,14 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
         Context  context = prepareContext();
-        try {
-            try {
-                byte[] reqbody = req.getBody().toByteArray();
-                InboundPackage inboundPackage = new InboundPackage();
-                inboundPackage.setBody(reqbody);
-                OutboundPackage outboundPackage = this.oldVersionInferenceProvider.service(context, inboundPackage);
-                returnResult = (ReturnResult) outboundPackage.getData();
-            } catch (Throwable e) {
-                returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
-                logger.error("inference system error: {}", req.getBody().toStringUtf8());
-            }
-            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-            responseObserver.onNext(response.build());
-            responseObserver.onCompleted();
-        } finally {
-            context.postProcess(req, returnResult);
-        }
-
-
+        byte[] reqbody = req.getBody().toByteArray();
+        InboundPackage inboundPackage = new InboundPackage();
+        inboundPackage.setBody(reqbody);
+        OutboundPackage outboundPackage = this.oldVersionInferenceProvider.service(context, inboundPackage);
+        returnResult = (ReturnResult) outboundPackage.getData();
+        response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
+        responseObserver.onNext(response.build());
+        responseObserver.onCompleted();
     }
 
 
@@ -96,22 +85,16 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         BatchInferenceResult returnResult = new BatchInferenceResult();
         Context  context = prepareContext();
-        try {
-            byte[] reqbody = req.getBody().toByteArray();
-            InboundPackage inboundPackage = new InboundPackage();
-            inboundPackage.setBody(reqbody);
-            OutboundPackage outboundPackage = null;
+        byte[] reqbody = req.getBody().toByteArray();
+        InboundPackage inboundPackage = new InboundPackage();
+        inboundPackage.setBody(reqbody);
+        OutboundPackage outboundPackage = null;
+        outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
+        returnResult = (BatchInferenceResult) outboundPackage.getData();
+        response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
+        responseObserver.onNext(response.build());
+        responseObserver.onCompleted();
 
-            outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
-            returnResult = (BatchInferenceResult) outboundPackage.getData();
-
-
-            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-            responseObserver.onNext(response.build());
-            responseObserver.onCompleted();
-        } finally {
-            context.postProcess(req, returnResult);
-        }
     }
 
 
@@ -185,7 +168,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 
         ServingServerContext context = new ServingServerContext();
         context.setMetricRegistry(this.metricRegistry);
-        context.preProcess();
+        //context.preProcess();
         return  context;
     }
 

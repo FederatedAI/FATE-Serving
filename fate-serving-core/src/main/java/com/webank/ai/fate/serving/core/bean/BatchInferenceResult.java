@@ -1,6 +1,8 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
+import com.google.common.collect.Maps;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +76,34 @@ public class BatchInferenceResult extends  ReturnResult{
     public void setBatchDataList(List<SingleInferenceResult> batchDataList) {
         this.batchDataList = batchDataList;
     }
+
+    private  Map<Integer,SingleInferenceResult>  singleInferenceResultMap ;
+
+
+    public Map<Integer,SingleInferenceResult>   getSingleInferenceResultMap(){
+
+
+        if(singleInferenceResultMap==null){
+            Map result  =  Maps.newHashMap();
+
+            List<BatchInferenceResult.SingleInferenceResult>  batchInferences = this.getBatchDataList();
+
+            for(BatchInferenceResult.SingleInferenceResult  singleInferenceResult:batchInferences){
+
+                result.put(singleInferenceResult.getIndex(),singleInferenceResult);
+            }
+
+            singleInferenceResultMap =result;
+
+
+        }
+
+        return singleInferenceResultMap;
+
+
+
+
+    };
 
 
 

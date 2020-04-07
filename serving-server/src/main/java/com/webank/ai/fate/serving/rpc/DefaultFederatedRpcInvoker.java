@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Packet> {
 
-    @Autowired
+    @Autowired(required = false)
     public RouterService routerService;
 
     @Autowired
@@ -54,20 +54,22 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
     private static final Logger logger = LoggerFactory.getLogger(FederatedRpcInvoker.class);
 
 
-    private   Proxy.Packet  build(Context  context  ,Object  data  ,String remoteMethodName ){
 
-        Model model = context.getModel();
+
+    private   Proxy.Packet  build(Context  context  ,RpcDataWraper  rpcDataWraper){
+
+        Model model = ((ServingServerContext)context).getModel();
         Preconditions.checkArgument(model!=null);
         Proxy.Packet.Builder packetBuilder = Proxy.Packet.newBuilder();
         packetBuilder.setBody(Proxy.Data.newBuilder()
-                .setValue(ByteString.copyFrom(JSON.toJSONBytes(data)))
+                .setValue(ByteString.copyFrom(JSON.toJSONBytes(rpcDataWraper.getData())))
                 .build());
 
         Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
         Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
 
-        Preconditions.checkArgument(StringUtils.isNotEmpty(context.getGuestAppId()));
-        Preconditions.checkArgument(StringUtils.isNotEmpty(context.getHostAppid()));
+//        Preconditions.checkArgument(StringUtils.isNotEmpty(context.getGuestAppId()));
+//        Preconditions.checkArgument(StringUtils.isNotEmpty(context.getHostAppid()));
 
         metaDataBuilder.setSrc(
                 topicBuilder.setPartyId(String.valueOf(model.getPartId())).
@@ -75,19 +77,19 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                         .setName(Dict.PARTNER_PARTY_NAME)
                         .build());
         metaDataBuilder.setDst(
-                topicBuilder.setPartyId(String.valueOf(model.getFederationModel().getPartId()))
+                topicBuilder.setPartyId(String.valueOf(rpcDataWraper.getHostModel().getPartId()))
                         .setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
                         .setName(Dict.PARTY_NAME)
                         .build());
-        metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(remoteMethodName).build());
+        metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(rpcDataWraper.getRemoteMethodName()).build());
         // TODO: 2020/3/23   这里记得加入版本号
         String version = environment.getProperty(Dict.VERSION, "");
         metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION, ""));
         Proxy.Task.Builder  taskBuilder = com.webank.ai.fate.api.networking.proxy.Proxy.Task.newBuilder();
         Proxy.Model.Builder   modelBuilder =    Proxy.Model.newBuilder();
 
-        modelBuilder.setName(model.getFederationModel().getNamespace());
-        modelBuilder.setDataKey(model.getFederationModel().getTableName());
+        modelBuilder.setNamespace(rpcDataWraper.getHostModel().getNamespace());
+        modelBuilder.setTableName(rpcDataWraper.getHostModel().getTableName());
         taskBuilder.setModel(modelBuilder.build());
 
         metaDataBuilder.setTask(taskBuilder.build());
@@ -138,13 +140,13 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
 
     @Override
-    public Proxy.Packet sync(Context context, Object   data , String remoteMethodName,long  timeout ) {
+    public Proxy.Packet sync(Context context, RpcDataWraper rpcDataWraper,long  timeout ) {
 
 
         Proxy.Packet resultPacket = null;
         try {
 
-            ListenableFuture<Proxy.Packet> future =this.async(context,data,remoteMethodName);
+            ListenableFuture<Proxy.Packet> future =this.async(context,rpcDataWraper);
 
             if (future != null) {
                resultPacket = future.get(timeout, TimeUnit.MILLISECONDS);
@@ -163,12 +165,13 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
 
     @Override
-    public  ListenableFuture<Proxy.Packet> async(Context context, Object   data , String remoteMethodName) {
+    public  ListenableFuture<Proxy.Packet> async(Context context, RpcDataWraper  rpcDataWraper) {
 
         context.setDownstreamBegin(System.currentTimeMillis());
 
         try {
-            Proxy.Packet packet = this.build(context,data,remoteMethodName);
+
+            Proxy.Packet packet = this.build(context,rpcDataWraper);
 
             Proxy.Packet resultPacket = null;
 
@@ -191,6 +194,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
         } catch (Exception e) {
             logger.error("getFederatedPredictFromRemote error", e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 

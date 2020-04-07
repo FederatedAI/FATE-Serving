@@ -19,7 +19,7 @@ public class StatusCode {
     public   static  final String  GUEST_FEATURE_ERROR ="102";
     public   static  final String  HOST_FEATURE_ERROR  ="102";
     public   static  final String  HOST_FEATURE_NOT_EXIST  ="113";
-    public   static  final String  GUEST_MODEL_NULL  ="104";
+    public   static  final String  MODEL_NULL  ="104";
     public   static  final String  HOST_MODEL_NULL   ="104";
     public   static  final String  GUEST_ROUTER_ERROR = "106";
     public   static  final String  NET_ERROR  ="105";
