@@ -18,11 +18,13 @@ import java.util.Map;
 
 public abstract  class AbstractServingServiceProvider<req,resp>   extends AbstractServiceAdaptor<req,resp>{
 
-        @Override
-        protected resp transformErrorMap(Context context, Map data) {
-
-            return null;
+    @Override
+    protected  resp  transformErrorMap(Context context, Map  data)
+    {
+        return  null;
     }
+
+
 
     @Override
     protected  resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage){
@@ -74,7 +76,7 @@ public abstract  class AbstractServingServiceProvider<req,resp>   extends Abstra
 //        public static final int NO_FEATURE = 113;
 //    }
 
-//
+
 //    @Override
 //    public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws Exception {
 //

@@ -1,6 +1,8 @@
 package com.webank.ai.fate.serving.bean;
 
 import com.google.protobuf.ByteString;
+import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
+import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import io.grpc.ManagedChannel;
@@ -11,6 +13,13 @@ import java.util.concurrent.TimeUnit;
 
 public class InferenceClient {
 
+    public   InferenceClient(String ip,Integer port){
+            this.ip = ip;
+            this.port = port;
+    }
+
+    protected  String    ip;
+    protected  Integer   port;
 
 
     public static ManagedChannel createManagedChannel(String ip, int port) throws Exception {
@@ -37,7 +46,7 @@ public class InferenceClient {
     }
 
 
-    public static  InferenceServiceProto.InferenceMessage  inference(String ip,int  port,byte[]  data){
+    public   InferenceServiceProto.InferenceMessage  inference(byte[]  data){
         ManagedChannel  managedChannel=null;
         try {
           managedChannel =  createManagedChannel(ip,port);
@@ -53,10 +62,43 @@ public class InferenceClient {
 
         return  blockingStub.inference(inferenceMessageBuilder.build());
 
+    }
 
 
+
+    public  ModelServiceProto.PublishResponse  load(ModelServiceProto.PublishRequest publishRequest){
+        ManagedChannel  managedChannel=null;
+        try {
+            managedChannel =  createManagedChannel(ip,port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //PublishRequest
+
+        ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
+
+        return  blockingStub.publishLoad(publishRequest);
 
     }
+
+    public  ModelServiceProto.PublishResponse  bind(ModelServiceProto.PublishRequest publishRequest){
+        ManagedChannel  managedChannel=null;
+        try {
+            managedChannel =  createManagedChannel(ip,port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //PublishRequest
+
+        ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
+
+        return  blockingStub.publishBind(publishRequest);
+
+    }
+
+
+
+
 
 
 

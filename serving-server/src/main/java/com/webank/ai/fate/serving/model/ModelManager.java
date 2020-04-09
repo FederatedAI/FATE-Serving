@@ -210,7 +210,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                     });
                 }
                 if (logger.isInfoEnabled()) {
-                    logger.info("Load model cache file " + file + ", data: " + properties);
+                    logger.info("load model cache file " + file + ", data: " + properties);
                 }
 
                 List<RequestWapper> list = Lists.newArrayList();
@@ -284,16 +284,46 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         }
     }
 
-    public synchronized void restore() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Try to restore model cache");
-        }
+    public synchronized void restore(Context  context ) {
 
         // compatible 1.2.x
         restoreOldVersionCache();
 
-        doLoadCache(namespaceMap, namespaceFile);
-        doLoadCache(serviceIdNamespaceMap, serviceIdFile);
+        ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>();
+         ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<String, Model>();
+        doLoadCache(tempNamespaceMap, namespaceFile);
+        doLoadCache(tempServiceIdNamespaceMap, serviceIdFile);
+
+        ModelLoader.ModelLoaderParam modelLoaderParam= new  ModelLoader.ModelLoaderParam();
+
+
+        ModelLoader  modelLoader = this.modelLoaderFactory.getModelLoader(context,ModelLoader.LoadModelType.FATEFLOW);
+
+
+        tempNamespaceMap.forEach((k,model)->{
+            try{
+                modelLoaderParam.setLoadModelType( ModelLoader.LoadModelType.FATEFLOW);
+                modelLoaderParam.setTableName(   model.getTableName());
+                modelLoaderParam.setNameSpace(   model.getNamespace());
+                ModelProcessor modelProcessor = modelLoader.restoreModel(context,  modelLoaderParam);
+                if(modelProcessor!=null) {
+                    model.setModelProcessor(modelProcessor);
+                    logger.info("re");
+                    namespaceMap.put(k,model);
+                    logger.info("restore model {} success ",k);
+                }
+
+            }catch(Exception e){
+                logger.info("restore model {} error {} ",k,e.getMessage());
+            }
+
+        });
+
+        tempServiceIdNamespaceMap.forEach((k,v )->{
+            if(namespaceMap.get(v)!=null){
+                serviceIdNamespaceMap.put(k,v);
+            }
+        });
 
         // register service after restore
         if (namespaceMap != null && namespaceMap.size() > 0) {
@@ -322,12 +352,16 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             this.registerService(environments);
         }
 
-        logger.info("Restore model cache success");
+
+        logger.info("restore model success ");
+
     }
 
     private void registerService(Collection environments) {
-        zookeeperRegistry.addDynamicEnvironment(environments);
-        zookeeperRegistry.register(FateServer.serviceSets);
+        if(zookeeperRegistry!=null) {
+            zookeeperRegistry.addDynamicEnvironment(environments);
+            zookeeperRegistry.register(FateServer.serviceSets);
+        }
     }
 
     public synchronized ReturnResult bind(Context context, ModelServiceProto.PublishRequest req) {
@@ -419,7 +453,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         modelLoaderParam.setNameSpace(   model.getNamespace());
         modelLoaderParam.setFilePath(req.getFilePath());
 
-        ModelLoader  modelLoader = this.modelLoaderFactory.getModelLoader(context,modelLoaderParam);
+        ModelLoader  modelLoader = this.modelLoaderFactory.getModelLoader(context,modelLoaderParam.getLoadModelType());
         Preconditions.checkArgument(modelLoader!=null);
 
         ModelProcessor modelProcessor = modelLoader.loadModel(context,modelLoaderParam);
@@ -597,6 +631,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     @Override
     public void afterPropertiesSet() throws Exception {
         String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
+        logger.info("user home is {} , try to find model cache",locationPre);
         if (StringUtils.isNotEmpty(locationPre)) {
             // new version
             String loadModelStoreFileName = locationPre + "/.fate/loadModelStore.cache";

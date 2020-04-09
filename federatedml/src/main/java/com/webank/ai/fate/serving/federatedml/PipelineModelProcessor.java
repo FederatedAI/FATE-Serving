@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.federatedml;
 
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -17,6 +18,7 @@ import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
 import com.webank.ai.fate.serving.federatedml.model.PrepareRemoteable;
 import com.webank.ai.fate.serving.federatedml.model.Returnable;
+import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,9 +153,17 @@ public class PipelineModelProcessor implements ModelProcessor{
 
             futureMap.forEach((partId,future)->{
                 try {
-                    remoteResultMap.put(partId,(ReturnResult)future.get(timeout, TimeUnit.MILLISECONDS));
 
-                } catch (TimeoutException e) {
+                    Proxy.Packet  packet =   (Proxy.Packet)future.get(timeout, TimeUnit.MILLISECONDS);
+                    ReturnResult   remoteReturnResult  = JSON.parseObject(packet.getBody().toByteArray(),ReturnResult.class);
+                    remoteResultMap.put(partId,remoteReturnResult);
+
+                } catch(StatusRuntimeException e){
+                    throw new RemoteRpcException("host "+partId+" timeout");
+
+                }
+
+                catch (TimeoutException e) {
                     throw new RemoteRpcException("host "+partId+" timeout");
                 }
                 catch (Exception e){
@@ -172,7 +182,8 @@ public class PipelineModelProcessor implements ModelProcessor{
 
 
         }catch (Exception e){
-
+            e.printStackTrace();
+            throw  e;
         }
 
 

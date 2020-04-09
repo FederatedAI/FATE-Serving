@@ -6,9 +6,11 @@ import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.grpc.service.*;
 
+import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -36,6 +38,9 @@ public class ServingServer implements InitializingBean{
     private Server server;
     @Autowired
     InferenceService inferenceService;
+    @Autowired
+    ModelManager modelManager;
+
     @Autowired
     ModelService modelService;
     @Autowired
@@ -73,6 +78,7 @@ public class ServingServer implements InitializingBean{
         serverBuilder.addService(ServerInterceptors.intercept(proxyService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
         server = serverBuilder.build();
         server.start();
+        logger.info("server start =================");
 
         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
         if (useRegister) {
@@ -97,7 +103,7 @@ public class ServingServer implements InitializingBean{
         } else {
             logger.warn("serving-server not use register center");
         }
-
+        modelManager.restore(new BaseContext());
         // metrics
         consoleReporter.start(1, TimeUnit.MINUTES);
         jmxReporter.start();

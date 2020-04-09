@@ -14,10 +14,10 @@ public class SimpleModelLoaderFactory implements   ModelLoaderFactory,Applicatio
 
 
     @Override
-    public ModelLoader getModelLoader(Context context, ModelLoader.ModelLoaderParam modelLoaderParam) {
+    public ModelLoader getModelLoader(Context context,ModelLoader.LoadModelType loadModelType) {
 
 
-                switch(  modelLoaderParam.loadModelType.toString()){
+                switch(  loadModelType.toString()){
 
                     case "FATEFLOW" :
                             return  (ModelLoader)applicationContext.getBean("fateFlowModelLoader");

@@ -49,6 +49,20 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
         return this.initPipeLine(context, modelData);
     }
 
+    @Override
+    public ModelProcessor restoreModel(Context context, ModelLoaderParam  modelLoaderParam) {
+        logger.info("load model error, name {} namespace {} ,try to restore from local cache", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
+        MODELDATA modelData = restore(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace);
+        if (modelData == null) {
+                logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace );
+                return  null;
+        }
+        return this.initPipeLine(context, modelData);
+    }
+
+
+
+
     protected void store(Context context, String name, String namespace, MODELDATA data) {
         try {
             String cachePath = getCachePath(context, name, namespace);
@@ -75,7 +89,6 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
         try {
             String cachePath = getCachePath(context, name, namespace);
             if (cachePath != null) {
-
                 byte[] bytes = doRestore(new File(cachePath));
                 MODELDATA modelData = this.unserialize(context, bytes);
                 return modelData;

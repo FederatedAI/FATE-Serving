@@ -555,8 +555,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     }*/
 
 
-    public  void  restore(){
-        modelManager.restore();
+//    public  void  restore(){
+//        modelManager.restore();
         /*List<RequestWapper> publishLoadList = loadProperties(publishLoadStoreFile, publishLoadReqMap);
         List<RequestWapper> publishOnlineList = loadProperties(publishOnlineStoreFile, publicOnlineReqMap);
         if(publishLoadList!=null) {
@@ -600,7 +600,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             });
         }*/
-    }
+   // }
 
     /*@Override
     public void afterPropertiesSet() throws Exception {

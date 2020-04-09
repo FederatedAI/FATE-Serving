@@ -50,5 +50,7 @@ public interface ModelLoader {
 
     public ModelProcessor loadModel(Context  context,ModelLoaderParam  modelLoaderParam);
 
+    public ModelProcessor restoreModel(Context context, ModelLoaderParam  modelLoaderParam);
+
 
 }

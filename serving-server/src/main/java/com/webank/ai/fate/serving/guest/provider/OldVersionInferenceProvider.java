@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.core.exceptions.BaseException;
+import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -60,6 +63,37 @@ public class OldVersionInferenceProvider extends AbstractServingServiceProvider<
         });
         ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap,timeout);
         return returnResult;
+    }
+
+
+//    @Override
+//    protected ReturnResult transformErrorMap(Context context, Map data) {
+//
+//        ReturnResult  returnResult = new ReturnResult();
+//
+//        returnResult.setRetcode(data.get(Dict.CODE).toString());
+//
+//        returnResult.setRetmsg(data.get(Dict.MESSAGE).toString());
+//
+//        return returnResult;
+//    }
+
+
+    @Override
+    protected  OutboundPackage<ReturnResult>  serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
+
+        Map result = new HashMap();
+        OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
+        ReturnResult  returnResult = new  ReturnResult();
+        if(e instanceof BaseException){
+            BaseException baseException  = (BaseException) e;
+            returnResult.setRetcode(baseException.getRetcode());
+            returnResult.setRetmsg(e.getMessage());
+        }else{
+            returnResult.setRetcode(ErrorCode.SYSTEM_ERROR);
+        }
+        outboundPackage.setData(returnResult);
+        return  outboundPackage;
     }
 
 }
