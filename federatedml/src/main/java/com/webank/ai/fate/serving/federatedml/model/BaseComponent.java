@@ -32,6 +32,9 @@ public abstract class BaseComponent implements LocalInferenceAware {
 
     protected String componentName;
 
+
+    protected String shortName;
+
     protected int  index;
 
     protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;

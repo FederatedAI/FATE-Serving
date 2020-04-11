@@ -215,6 +215,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
                 logger.debug("receive service id {}", req.getServiceId());
             }
 
+
+
             returnResult = modelManager.bind(context, req);
 
             /*returnResult = modelManager.publishOnlineModel(context,

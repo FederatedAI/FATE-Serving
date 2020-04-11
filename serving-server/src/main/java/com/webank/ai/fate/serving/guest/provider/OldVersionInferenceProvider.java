@@ -66,32 +66,10 @@ public class OldVersionInferenceProvider extends AbstractServingServiceProvider<
     }
 
 
-//    @Override
-//    protected ReturnResult transformErrorMap(Context context, Map data) {
-//
-//        ReturnResult  returnResult = new ReturnResult();
-//
-//        returnResult.setRetcode(data.get(Dict.CODE).toString());
-//
-//        returnResult.setRetmsg(data.get(Dict.MESSAGE).toString());
-//
-//        return returnResult;
-//    }
-
-
     @Override
     protected  OutboundPackage<ReturnResult>  serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
-
-        Map result = new HashMap();
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
-        ReturnResult  returnResult = new  ReturnResult();
-        if(e instanceof BaseException){
-            BaseException baseException  = (BaseException) e;
-            returnResult.setRetcode(baseException.getRetcode());
-            returnResult.setRetmsg(e.getMessage());
-        }else{
-            returnResult.setRetcode(ErrorCode.SYSTEM_ERROR);
-        }
+        ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
         outboundPackage.setData(returnResult);
         return  outboundPackage;
     }

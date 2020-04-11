@@ -52,7 +52,7 @@ public class FederationRouterInterceptor  extends  AbstractInterceptor {
                 }
                 String[] args  =address.split(":");
                 routerInfo.setHost(args[0]);
-                routerInfo.setPort(Integer.getInteger(args[1]));
+                routerInfo.setPort(new Integer(args[1]));
             } else {
 //                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
 //                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);

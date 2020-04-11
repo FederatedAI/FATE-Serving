@@ -181,6 +181,8 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
             Preconditions.checkArgument(StringUtils.isNotEmpty(address));
 
+            logger.info("try to send to {}",address);
+
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
 
             ListenableFuture<Proxy.Packet> future = null;

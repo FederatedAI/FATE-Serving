@@ -109,7 +109,7 @@ public class ServingServerTest {
         ///Users/kaideng/work/webank/test
 
 
-        URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache");
+        URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020040111152695637611_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
         String  filePath = resource.getPath();
         filePath = filePath.replaceAll("%23","#");
         System.err.println("filePath "+ filePath);
@@ -140,12 +140,129 @@ public class ServingServerTest {
     }
 
 
+
     @Test
-    public void test_02_guest_Bind(){
+    public void test_01_host_load() {
+
+//        message PublishRequest{
+//            LocalInfo local = 1;
+//            map<string, Party> role = 2;
+//            map<string, RoleModelInfo> model = 3;
+//            string serviceId = 4;
+//            string tableName = 5;
+//            string namespace = 6;
+//            string loadType = 7;
+//            string filePath = 8;
+//        }
+
+
+
+        //Context context, InboundPackage data, OutboundPackage outboundPackage
+
+
+        //        {
+//            role: "guest"
+//            partyId: "9999"
+//        }
+//        role {
+//            key: "guest"
+//            value {
+//                partyId: "9999"
+//            }
+//        }
+//        role {
+//            key: "arbiter"
+//            value {
+//                partyId: "10000"
+//            }
+//        }
+//        role {
+//            key: "host"
+//            value {
+//                partyId: "10000"
+//            }
+//        }
+//        model {
+//            key: "host"
+//            value {
+//                roleModelInfo {
+//                    key: "10000"
+//                    value {
+//                        tableName: "2020022715571644961011"
+//                        namespace: "host#10000#arbiter-10000#guest-9999#host-10000#model"
+//                    }
+//                }
+//            }
+//        }
+//        model {
+//            key: "guest"
+//            value {
+//                roleModelInfo {
+//                    key: "9999"
+//                    value {
+//                        tableName: "2020022715571644961011"
+//                        namespace: "guest#9999#arbiter-10000#guest-9999#host-10000#model"
+//                    }
+//                }
+//            }
+//        }
+//        model {
+//            key: "arbiter"
+//            value {
+//                roleModelInfo {
+//                    key: "10000"
+//                    value {
+//                        tableName: "2020022715571644961011"
+//                        namespace: "arbiter#10000#arbiter-10000#guest-9999#host-10000#model"
+//                    }
+//                }
+//            }
+//        }
+
+        ///Users/kaideng/work/webank/test
+
+
         URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache");
         String  filePath = resource.getPath();
         filePath = filePath.replaceAll("%23","#");
         System.err.println("filePath "+ filePath);
+        // String  filepath =       "/Users/kaideng/work/webank/test/model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
+//        Context  context =  new ServingServerContext();
+//        InboundPackage   inboundPackage = new InboundPackage();
+//        OutboundPackage  outboundPackage = new OutboundPackage();
+        ModelServiceProto.PublishRequest.Builder  publicRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
+        ModelServiceProto.PublishRequest  publishRequest = publicRequestBuilder.setLocal(ModelServiceProto.LocalInfo.newBuilder().
+                setRole("host").setPartyId("10000").build())
+                .putRole("guest",ModelServiceProto.Party.newBuilder().addPartyId("9999").build())
+                .putRole("arbiter",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
+                .putRole("host",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
+                .putModel("guest",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("9999",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .putModel("host",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .putModel("arbiter",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .setLoadType("FILE")
+                .setFilePath(filePath)
+                .build();
+        // inboundPackage.setBody(publishRequest);
+
+        inferenceClient.load(publishRequest);
+
+
+
+    }
+
+
+
+
+
+    @Test
+    public void test_02_guest_Bind(){
+//        URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020040111152695637611_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
+//        String  filePath = resource.getPath();
+//        filePath = filePath.replaceAll("%23","#");
+//        System.err.println("filePath "+ filePath);
         // String  filepath =       "/Users/kaideng/work/webank/test/model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
 //        Context  context =  new ServingServerContext();
 //        InboundPackage   inboundPackage = new InboundPackage();
@@ -163,7 +280,7 @@ public class ServingServerTest {
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .setLoadType("FILE")
                 .setServiceId("my_test_service_id")
-                .setFilePath(filePath)
+             //   .setFilePath(filePath)
                 .build();
      //   inboundPackage.setBody(publishRequest);
 

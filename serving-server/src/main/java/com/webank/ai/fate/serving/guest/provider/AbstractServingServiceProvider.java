@@ -29,21 +29,21 @@ public abstract  class AbstractServingServiceProvider<req,resp>   extends Abstra
     @Override
     protected  resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage){
 
-
         Map<String,Method> methodMap = this.getMethodMap();
-
         String  actionType = context.getActionType();
-
         Method method = methodMap.get(actionType);
-
+        resp result = null;
         try {
-            resp result =  (resp)method.invoke(this,context,data,outboundPackage);
-            return  result;
-        } catch (BaseException e){
-            throw e;
-        }catch(Exception e){
-            throw  new SysException(StatusCode.SYSTEM_ERROR,e.getMessage());
+            result = (resp)method.invoke(this,context,data);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw  new  SysException(e.getMessage());
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+            throw  new  SysException(e.getMessage());
         }
+        return  result;
+
 
     }  ;
 

@@ -16,6 +16,8 @@ public interface ModelProcessor {
 
     public ReturnResult guestInference(Context context, InferenceRequest inferenceRequest,Map<String,Future> remoteFutureMap ,long timeout);
 
+    public ReturnResult hostInference(Context context, InferenceRequest inferenceRequest );
+
     public Object  getComponent(String  name);
 
 }

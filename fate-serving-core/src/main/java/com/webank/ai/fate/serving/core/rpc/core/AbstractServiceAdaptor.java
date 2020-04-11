@@ -151,6 +151,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         }
         catch (Throwable e) {
             exceptions.add(e);
+            e.printStackTrace();
             logger.error(e.getMessage());
         } finally {
 

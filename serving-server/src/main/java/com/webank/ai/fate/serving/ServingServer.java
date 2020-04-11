@@ -31,10 +31,8 @@ import java.util.concurrent.TimeUnit;
 public class ServingServer implements InitializingBean{
 
     Logger logger = LoggerFactory.getLogger(ServingServer.class);
-
     @Value("${port:8000}")
     int port;
-
     private Server server;
     @Autowired
     InferenceService inferenceService;
@@ -105,7 +103,7 @@ public class ServingServer implements InitializingBean{
         }
         modelManager.restore(new BaseContext());
         // metrics
-        consoleReporter.start(1, TimeUnit.MINUTES);
+     //   consoleReporter.start(1, TimeUnit.MINUTES);
         jmxReporter.start();
     }
 }

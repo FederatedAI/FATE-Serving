@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.core.rpc.core;
 
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,19 @@ public class ErrorMessageUtil {
 //
 //
 //   };
+
+    public static ReturnResult  handleExceptionToReturnResult(Throwable e){
+        ReturnResult  returnResult = new  ReturnResult();
+        if(e instanceof BaseException){
+            BaseException baseException  = (BaseException) e;
+            returnResult.setRetcode(baseException.getRetcode());
+            returnResult.setRetmsg(e.getMessage());
+        }else{
+            returnResult.setRetcode(ErrorCode.SYSTEM_ERROR);
+        }
+        return  returnResult;
+
+    }
 
 
    public static  Map handleException(Map result,Throwable e){

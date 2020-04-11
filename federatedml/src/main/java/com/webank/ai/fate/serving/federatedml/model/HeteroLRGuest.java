@@ -30,7 +30,9 @@ import java.util.Map;
 
 import static java.lang.Math.exp;
 
-public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware {
+public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware ,Returnable{
+
+
 
     private static final Logger logger = LoggerFactory.getLogger(HeteroLRGuest.class);
 
@@ -53,21 +55,40 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware {
                                                     Map<String,Object> hostData) {
         Map<String, Object> result = new HashMap<>(8);
         result.put(Dict.RET_CODE,InferenceRetCode.OK);
+        hostData.forEach((k,v)->{
+            try {
+
+                Map<String,Object> onePartyData=(Map<String,Object>) v;
+                double score;
+                Map<String,Object > tempMap =guestData.get(0);
+                logger.info("pppppppppppp  {}  ,{} ",tempMap,this.getComponentName());
+                Map<String,Object> componentData = (Map<String,Object>)tempMap.get(this.getComponentName());
+                logger.info("componentData  {}",componentData);
+                double localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
+                Map<String ,Object >  remoteComopnentData = (Map<String ,Object >)onePartyData.get(this.getComponentName());
+                double remoteScore;
+                if(remoteComopnentData!=null){
+                    remoteScore = ((Number)remoteComopnentData.get(Dict.SCORE)).doubleValue();
+                }else{
+                    /**
+                     *   此处是为兼容老版host
+                     */
+                    remoteScore = ((Number) hostData.get(Dict.SCORE)).doubleValue();
+                }
+
+                logger.info("merge inference result,partid {} caseid {} local score:{} remote scope:{}",k ,context.getCaseId(), localScore, remoteScore);
+                score = localScore;
+                score += remoteScore;
+                double prob = sigmod(score);
+                result.put(Dict.SCORE, prob);
+            } catch (Exception ex) {
+                logger.error("hetero lr guest merge error:", ex);
+                result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
+            }
 
 
-        try {
-            double score;
-            double localScore = (double) guestData.get(0).get(Dict.SCORE);
-            double remoteScore = (double) hostData.get(Dict.SCORE);
-            logger.info("merge inference result, caseid {} local score:{} remote scope:{}", context.getCaseId(), localScore, remoteScore);
-            score = localScore;
-            score += remoteScore;
-            double prob = sigmod(score);
-            result.put(Dict.SCORE, prob);
-        } catch (Exception ex) {
-            logger.error("hetero lr guest merge error:", ex);
-            result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
-        }
+        });
+
         return result;
     }
 }
