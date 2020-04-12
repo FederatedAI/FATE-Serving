@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.core.bean;
 
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 
 import java.util.List;
 import java.util.Map;
@@ -10,8 +11,8 @@ public class BatchInferenceRequest extends InferenceRequest{
 
     public static class SingleInferenceData {
         int index;
-        Map<String, Object> featureData;
-        Map<String, Object> sendToRemoteFeatureData;
+        Map<String, Object> featureData= Maps.newHashMap();
+        Map<String, Object> sendToRemoteFeatureData =Maps.newHashMap();
 
         public int getIndex() {
             return index;
@@ -73,9 +74,16 @@ public class BatchInferenceRequest extends InferenceRequest{
     }
 
     @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    @Override
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
     }
+
+
 
     @Override
     public String toString() {

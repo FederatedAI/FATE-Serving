@@ -46,6 +46,24 @@ public class InferenceClient {
     }
 
 
+    public   InferenceServiceProto.InferenceMessage  batchInference(byte[]  data){
+        ManagedChannel  managedChannel=null;
+        try {
+            managedChannel =  createManagedChannel(ip,port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
+                InferenceServiceProto.InferenceMessage.newBuilder();
+
+        inferenceMessageBuilder.setBody(ByteString.copyFrom(data));
+
+        return  blockingStub.batchInference(inferenceMessageBuilder.build());
+
+    }
+
     public   InferenceServiceProto.InferenceMessage  inference(byte[]  data){
         ManagedChannel  managedChannel=null;
         try {

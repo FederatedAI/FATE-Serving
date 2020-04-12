@@ -1,10 +1,13 @@
 package com.webank.ai.fate.serving.bean;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
+import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
+import org.assertj.core.util.Lists;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -16,6 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 //@RunWith(SpringRunner.class)
 //@SpringBootTest
@@ -315,6 +320,48 @@ public class ServingServerTest {
         System.err.println(inferenceMessage.getBody());
 
         InferenceServiceProto.InferenceMessage     resultMessage = inferenceClient.inference(inferenceMessage.toByteArray());
+
+        System.err.println( "result =================="+new String(resultMessage.getBody().toByteArray()));
+
+    }
+
+    @Test
+    public  void  test_04_BatchInference(){
+
+//        InferenceRequest inferenceRequest  = new  InferenceRequest();
+//
+//        inferenceRequest.setServiceId("my_test_service_id");
+
+        BatchInferenceRequest   batchInferenceRequest = new  BatchInferenceRequest();
+        batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
+        List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
+        for(int i=0;i<10;i++){
+            BatchInferenceRequest.SingleInferenceData  singleInferenceData = new  BatchInferenceRequest.SingleInferenceData();
+            Map temp =Maps.newHashMap();
+            temp.put("phone_test","1399987933");
+            singleInferenceData.setSendToRemoteFeatureData(temp);
+            singleInferenceData.setIndex(i);
+            singleInferenceDataList.add(singleInferenceData);
+
+        }
+        batchInferenceRequest.setBatchDataList(singleInferenceDataList);
+        batchInferenceRequest.setServiceId("my_test_service_id");
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
+                InferenceServiceProto.InferenceMessage.newBuilder();
+        String  contentString = JSON.toJSONString(batchInferenceRequest);
+        System.err.println("send data ==="+contentString);
+        try {
+            inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString,"UTF-8"));
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        InferenceServiceProto.InferenceMessage  inferenceMessage = inferenceMessageBuilder.build();
+
+        System.err.println(inferenceMessage.getBody());
+
+        InferenceServiceProto.InferenceMessage     resultMessage = inferenceClient.batchInference(inferenceMessage.toByteArray());
 
         System.err.println( "result =================="+new String(resultMessage.getBody().toByteArray()));
 

@@ -48,10 +48,12 @@ public class PipelineModelProcessor implements ModelProcessor{
 
             try {
                 packet   = (Proxy.Packet) future.get(timeout, TimeUnit.MILLISECONDS);
+                String   remoteContent =  packet.getBody().getValue().toStringUtf8();
+                logger.info("caseid {} remote result is {} ",context.getCaseId(),remoteContent);
 
-                BatchInferenceResult  remoteInferenceResult = (BatchInferenceResult) ObjectTransform.json2Bean(packet.getBody().getValue().toStringUtf8(), BatchInferenceResult.class);
+                BatchInferenceResult  remoteInferenceResult = (BatchInferenceResult) JSON.parseObject(remoteContent, BatchInferenceResult.class);
 
-                if (remoteInferenceResult.getRetcode() != InferenceRetCode.OK) {
+                if (!remoteInferenceResult.getRetcode() .equals(StatusCode.SUCCESS)) {
 
                     throw  new RemoteRpcException(buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(),remoteInferenceResult.getRetmsg()));
                 }
@@ -61,6 +63,7 @@ public class PipelineModelProcessor implements ModelProcessor{
             }  catch (TimeoutException e) {
                 throw  new  RemoteRpcException("party id "+partyId+ " time out");
             }catch(Exception e){
+                e.printStackTrace();
                 throw new  SysException(e.getMessage());
             }
 
@@ -90,6 +93,8 @@ public class PipelineModelProcessor implements ModelProcessor{
     public BatchInferenceResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams) {
 
         Map<Integer ,Map<String,Object>>  localResult = batchLocalInference(context,batchHostFederatedParams);
+
+        logger.info("caseid {} hostBatchInference result {} ",context.getCaseId(),localResult);
 
         BatchInferenceResult batchFederatedResult = new BatchInferenceResult() ;
 
@@ -276,25 +281,25 @@ public class PipelineModelProcessor implements ModelProcessor{
 
     public Map<Integer ,Map<String,Object>>  batchLocalInference(Context context,
                                                   BatchInferenceRequest batchFederatedParams){
-
         List<BatchInferenceRequest.SingleInferenceData> inputList = batchFederatedParams.getBatchDataList();
         Map<Integer ,Map<String,Object>> result = new HashMap<>();
-
         for(int i=0;i<inputList.size();i++){
             try {
                 BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
 
                 Map<String, Object> singleResult = singleLocalPredict(context, input.getFeatureData());
                 if (singleResult != null) {
-                    checkResult(singleResult);
+//                    checkResult(singleResult);
                     result.put(input.getIndex(), singleResult);
                 } else {
                     logger.error("local predict return null");
                 }
             }catch (Throwable e){
                 logger.error("localPredict error",e);
+
             }
         }
+        logger.info("case id {} return batch local inference result {}",context.getCaseId(),result);
         return   result;
     }
 
@@ -338,9 +343,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                    // Map<String, Object> remoteData = singleRemoteResult.getData();
 
                     Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteSingleMap);
-                    batchFederatedResult.getBatchDataList().set(index, new BatchInferenceResult.SingleInferenceResult(index, "0", Dict.SUCCESS, mergeResult));
-
-
+                    batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, StatusCode.SUCCESS, Dict.SUCCESS, mergeResult));
 //                    Map<String, Object> input = new HashMap<>();
 //                    for (BaseComponent component : this.pipeLineNode) {
 //                        // TODO: 2020/3/16 错误码之后再规整
@@ -354,7 +357,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                 }catch(Exception e){
                     logger.error("merge remote error", e);
                     // TODO: 2020/3/16  错误码之后再定
-                    batchFederatedResult.getBatchDataList().set(index, new BatchInferenceResult.SingleInferenceResult(index, "0000dddd", e.getMessage(), null));
+                    batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, "0000dddd", e.getMessage(), null));
                 }
 
             });
@@ -375,45 +378,9 @@ public class PipelineModelProcessor implements ModelProcessor{
         Preconditions.checkArgument( result.get(Dict.CASEID)!=null);
 
     }
-/*    public  BatchInferenceResult  mergeHostResult(Context context,
-                                              Map<Integer ,Map<String, Object>> localData,
-                                                  Map<Integer ,Map<String,Object>> remoteData  ){
-
-        return null;
-    }*/
 
 
-////    @Override
-//    public BatchInferenceResult  batchPredict(Context  context, BatchInferenceRequest  batchInferenceRequest,
-//                                              Future  remoteFuture ){
-//
-//        Map<Integer ,Map<String,Object>>  localResult = localPredict(context,batchInferenceRequest);
-//        BatchInferenceResult batchFederatedResult =null;
-//        if(remoteFuture!=null) {
-//            Object remoteObject = null;
-//            try {
-//                remoteObject = remoteFuture.get(3000, TimeUnit.MILLISECONDS);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            } catch (TimeoutException e) {
-//                e.printStackTrace();
-//            }
-//            Preconditions.checkArgument(remoteObject != null);
-//            // BatchFederatedResult  batchFederatedResult =  (BatchFederatedResult)  remoteObject;
-//            List<Map<String, Object>> remoteList = null;
-//            batchFederatedResult= mergeRemote(context, localResult, remoteList);
-//        }else{
-//
-//            /**
-//             * host无future
-//             */
-//
-//        }
-//        return  batchFederatedResult;
-//
-//    }
+
 
 
 
@@ -554,12 +521,6 @@ public class PipelineModelProcessor implements ModelProcessor{
 
     }
 
-//    private   String  getComponentResultKey(String  name  ,int  i){
-//       // return new  StringBuilder(name).append("_").append(i).toString();
-//
-//        return  name;
-//    }
-
     private  LocalInferenceParam buildLocalInferenceParam(){
 
         LocalInferenceParam  param = new  LocalInferenceParam();
@@ -568,121 +529,9 @@ public class PipelineModelProcessor implements ModelProcessor{
 
 
 
-//    private Map<String, Object> predictInner(Context context, Map<String, Object> inputData,String  methodType){
-//
-//        List<Map<String, Object>> outputData = Lists.newArrayList();
-//        Map  resultMap = Maps.newHashMap();
-//
-//        List<Map<String,Object>>  result = Lists.newArrayList();
-//        int pipelineSize = this.pipeLineNode.size();
-//        for (int i = 0; i < pipelineSize; i++) {
-//            BaseModel  model =this.pipeLineNode.get(i);
-//            if(logger.isDebugEnabled()) {
-//                if (this.pipeLineNode.get(i) != null) {
-//                    logger.debug("component class is {}", this.pipeLineNode.get(i).getClass().getName());
-//                } else {
-//                    logger.debug("component class is {}", this.pipeLineNode.get(i));
-//                }
-//            }
-//            List<Map<String, Object>> inputs = new ArrayList<>();
-//            HashSet<Integer> upInputComponents = this.dslParser.getUpInputComponents(i);
-//            if (upInputComponents != null) {
-//                Iterator<Integer> iters = upInputComponents.iterator();
-//                while (iters.hasNext()) {
-//                    Integer upInput = iters.next();
-//                    if (upInput == -1) {
-//                        inputs.add(inputData);
-//                    } else {
-//                        inputs.add(outputData.get(upInput));
-//                    }
-//                }
-//            } else {
-//                inputs.add(inputData);
-//            }
-//            if (model != null) {
-//                Map<String, Object>  modelResult = model.localInference(context, inputs, predictParams);
-//                outputData.add(modelResult);
-//                if(model instanceof Returnable) {
-//                    result.add(modelResult);
-//                    resultMap.put(model.getComponentName(),modelResult);
-//                }
-//            } else {
-//                outputData.add(inputs.get(0));
-//
-//            }
-//
-//        }
-////        ReturnResult federatedResult = context.getFederatedResult();
-////        if (federatedResult != null) {
-////            inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
-////        }
-//
-//
-//        if(result.size()>0){
-//            resultMap.putAll(result.get(result.size() - 1));
-//        }
-//        return  resultMap;
-//    }
 
 
 
-
-//    public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {
-//        //logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
-//        List<Map<String, Object>> outputData = Lists.newArrayList();
-//        Map  resultMap = Maps.newHashMap();
-//
-//        List<Map<String,Object>>  result = Lists.newArrayList();
-//        int pipelineSize = this.pipeLineNode.size();
-//        for (int i = 0; i < pipelineSize; i++) {
-//            BaseModel  model =this.pipeLineNode.get(i);
-//            if(logger.isDebugEnabled()) {
-//                if (this.pipeLineNode.get(i) != null) {
-//                    logger.debug("component class is {}", this.pipeLineNode.get(i).getClass().getName());
-//                } else {
-//                    logger.debug("component class is {}", this.pipeLineNode.get(i));
-//                }
-//            }
-//            List<Map<String, Object>> inputs = new ArrayList<>();
-//            HashSet<Integer> upInputComponents = this.dslParser.getUpInputComponents(i);
-//            if (upInputComponents != null) {
-//                Iterator<Integer> iters = upInputComponents.iterator();
-//                while (iters.hasNext()) {
-//                    Integer upInput = iters.next();
-//                    if (upInput == -1) {
-//                        inputs.add(inputData);
-//                    } else {
-//                        inputs.add(outputData.get(upInput));
-//                    }
-//                }
-//            } else {
-//                inputs.add(inputData);
-//            }
-//            if (model != null) {
-//                Map<String, Object>  modelResult = model.handlePredict(context, inputs, predictParams);
-//                outputData.add(modelResult);
-//                if(model instanceof Returnable) {
-//                    result.add(modelResult);
-//                    resultMap.put(model.getComponentName(),modelResult);
-//                }
-//            } else {
-//                outputData.add(inputs.get(0));
-//
-//            }
-//
-//        }
-////        ReturnResult federatedResult = context.getFederatedResult();
-////        if (federatedResult != null) {
-////            inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
-////        }
-//
-//
-//        if(result.size()>0){
-//            resultMap.putAll(result.get(result.size() - 1));
-//        }
-//        return  resultMap;
-//
-//    }
 
     private HashMap<String, byte[]> changeModelProto(Map<String, byte[]> modelProtoMap) {
         HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>(8);

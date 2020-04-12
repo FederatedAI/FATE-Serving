@@ -77,8 +77,7 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
                     result = secureBoostTreeOutboundPackage.getData();
                     break;
                 case Dict.REMOTE_METHOD_BATCH:
-                    BatchInferenceRequest  batchInferenceRequest = JSON.parseObject(data,BatchInferenceRequest.class);
-                    inboundPackage.setBody(batchInferenceRequest);
+                    inboundPackage.setBody(data);
                     OutboundPackage outboundPackage = this.batchHostInferenceProvider.service(context, inboundPackage);
                     ReturnResult responseResult = null;
                     result = (ReturnResult) outboundPackage.getData();

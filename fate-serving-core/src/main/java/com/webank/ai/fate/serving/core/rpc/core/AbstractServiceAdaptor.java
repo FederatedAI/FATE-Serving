@@ -235,6 +235,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
                 BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
                 singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
+                singleBatchHostFederatedParam.setIndex(singleInferenceData.getIndex());
                 sendToHostDataList.add(singleBatchHostFederatedParam);
             }
             batchHostFederatedParams.setBatchDataList(sendToHostDataList);

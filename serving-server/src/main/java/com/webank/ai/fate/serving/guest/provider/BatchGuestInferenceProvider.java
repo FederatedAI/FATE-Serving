@@ -98,9 +98,5 @@ public class BatchGuestInferenceProvider extends AbstractServingServiceProvider<
         return  outboundPackage;
     }
 
-//    @Override
-//    protected BatchInferenceResult transformErrorMap(Context context, Map data) {
-//
-//            return null;
-//    }
+
 }
