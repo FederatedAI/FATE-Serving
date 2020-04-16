@@ -67,7 +67,7 @@ public abstract class AbstractRegistry implements Registry {
         setUrl(url);
         // Start file save timer
         syncSaveFile = url.getParameter(REGISTRY_FILESAVE_SYNC_KEY, false);
-        String filename = url.getParameter(FILE_KEY, System.getProperty(USER_HOME) + "/.fate/fate-registry-" + url.getParameter(PROJECT_KEY) + "-" + url.getAddress() + ".cache");
+        String filename = url.getParameter(FILE_KEY, System.getProperty(USER_HOME) + "/.fate/fate-registry-" + url.getParameter(PROJECT_KEY) + "-" + url.getHost() + "-" + url.getPort() + ".cache");
         File file = null;
         if (StringUtils.isNotEmpty(filename)) {
             file = new File(filename);
@@ -441,7 +441,9 @@ public abstract class AbstractRegistry implements Registry {
                         if (buf.length() > 0) {
                             buf.append(URL_SEPARATOR);
                         }
-                        buf.append(u.toFullString());
+                        if (!EMPTY_PROTOCOL.equals(u.getProtocol())) {
+                            buf.append(u.toFullString());
+                        }
                     }
                 }
             }
@@ -449,7 +451,12 @@ public abstract class AbstractRegistry implements Registry {
             if (logger.isDebugEnabled()) {
                 logger.debug("properties set property key {} value {}", url.getServiceKey(), buf.toString());
             }
-            properties.setProperty(url.getServiceKey(), buf.toString());
+
+            if (buf.length() == 0) {
+                properties.remove(url.getServiceKey());
+            } else {
+                properties.setProperty(url.getServiceKey(), buf.toString());
+            }
             long version = lastCacheChanged.incrementAndGet();
             if (syncSaveFile) {
                 doSaveProperties(version);
