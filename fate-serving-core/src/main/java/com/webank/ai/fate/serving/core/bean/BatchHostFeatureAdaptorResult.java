@@ -1,6 +1,8 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
+import com.google.common.collect.Maps;
+
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +20,7 @@ public class BatchHostFeatureAdaptorResult {
     /**
      *   key 为请求中的index
      */
-    Map <Integer,SingleBatchHostFeatureAdaptorResult> indexResultMap;
+    Map <Integer,SingleBatchHostFeatureAdaptorResult> indexResultMap= Maps.newHashMap();
 
 
     public static class  SingleBatchHostFeatureAdaptorResult{

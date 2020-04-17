@@ -43,13 +43,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
+
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements /*InitializingBean,*/EnvironmentAware {
     private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
 
     @Autowired
     ModelManager modelManager;
-
+    @Autowired
     ModelServiceProvider  modelServiceProvider ;
     @Autowired
     MetricRegistry  metricRegistry;
@@ -608,6 +610,19 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     public void afterPropertiesSet() throws Exception {
        // restore();
     }*/
+
+    @Override
+    public void queryModel(com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.QueryModelRequest request,
+                           io.grpc.stub.StreamObserver<com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.QueryModelResponse> responseObserver) {
+        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNBIND.name(), metricRegistry);
+        InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        context.setActionType("QUERY_MODEL");
+        OutboundPackage outboundPackage =modelServiceProvider.service(context,inboundPackage);
+        ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse)outboundPackage.getData();
+        responseObserver.onNext(queryModelResponse);
+        responseObserver.onCompleted();
+    }
 
 
     @Override

@@ -48,7 +48,9 @@ public class PipelineModelProcessor implements ModelProcessor{
 
             try {
                 packet   = (Proxy.Packet) future.get(timeout, TimeUnit.MILLISECONDS);
+
                 String   remoteContent =  packet.getBody().getValue().toStringUtf8();
+
                 logger.info("caseid {} remote result is {} ",context.getCaseId(),remoteContent);
 
                 BatchInferenceResult  remoteInferenceResult = (BatchInferenceResult) JSON.parseObject(remoteContent, BatchInferenceResult.class);
@@ -288,6 +290,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                 BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
 
                 Map<String, Object> singleResult = singleLocalPredict(context, input.getFeatureData());
+                logger.info("case id {} index {} result {}",context.getCaseId(),input.getIndex(),singleResult);
                 if (singleResult != null) {
 //                    checkResult(singleResult);
                     result.put(input.getIndex(), singleResult);
@@ -296,7 +299,6 @@ public class PipelineModelProcessor implements ModelProcessor{
                 }
             }catch (Throwable e){
                 logger.error("localPredict error",e);
-
             }
         }
         logger.info("case id {} return batch local inference result {}",context.getCaseId(),result);

@@ -59,6 +59,7 @@ message ModelInfoEx{
     string serviceId = 3;
     string content = 4;
     int32    index = 5;
+
 }
 
 
@@ -87,6 +88,8 @@ message PublishResponse{
     string error = 3;
     bytes data = 4;
 }
+
+message QueryModelService
 
 
 service ModelService{

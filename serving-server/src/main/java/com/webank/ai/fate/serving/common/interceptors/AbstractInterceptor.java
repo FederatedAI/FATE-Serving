@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-public class AbstractInterceptor implements Interceptor, EnvironmentAware {
+public class AbstractInterceptor<req,resp> implements Interceptor<req,resp>, EnvironmentAware {
 
     protected Environment environment;
 

@@ -24,7 +24,7 @@ public class BatchFeatureResult {
     String  caseId;
     public  static class   SingleFeatureResult{
         int  retcode;
-        String index;
+        int  index;
         Map<String,Object>  data;
     }
 }

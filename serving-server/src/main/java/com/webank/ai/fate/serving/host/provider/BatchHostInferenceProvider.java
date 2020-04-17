@@ -19,6 +19,7 @@ import java.util.Map;
 //        "overloadMonitor",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
+        "batchFeatureAdaptorInterceptor"
       //  "federationRouterService"
 },postChain = {
         "defaultPostProcess"
