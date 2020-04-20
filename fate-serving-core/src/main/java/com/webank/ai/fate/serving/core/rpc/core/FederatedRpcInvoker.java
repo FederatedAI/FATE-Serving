@@ -14,11 +14,13 @@ import java.util.Map;
 public interface FederatedRpcInvoker<T> {
 
 
+
     public  class RpcDataWraper  {
         Object  data;
         Model guestModel;
         Model   hostModel;
         String  remoteMethodName;
+
 
         public Object getData() {
             return data;

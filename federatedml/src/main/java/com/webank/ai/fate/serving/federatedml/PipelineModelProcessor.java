@@ -421,13 +421,6 @@ public class PipelineModelProcessor implements ModelProcessor{
                 if(component instanceof MergeInferenceAware){
                     logger.info("component {} is instanceof MergeInferenceAware local inputs {}",component,inputs);
                     String  componentResultKey = component.getComponentName();
-//                    Map<String,Object> remoteComponentData = (Map<String,Object> )remoteData.get(componentResultKey);
-//                    if(remoteComponentData==null){
-//                        logger.error("remoteComponentData is null ,key {} remote data {}",componentResultKey,remoteData);
-//                        throw new GuestMergeException("");
-//                    }
-
-
                     mergeResult = ((MergeInferenceAware) component).mergeRemoteInference(context, inputs,remoteData);
                     outputData.add(mergeResult);
                     tempList.add(mergeResult);
@@ -507,17 +500,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                 outputData.add(inputs.get(0));
             }
         }
-//        ReturnResult federatedResult = context.getFederatedResult();
-//        if (federatedResult != null) {
-//            inputData.put(Dict.RET_CODE, federatedResult.getRetcode());
-//        }
 
-        /**
-         *   这里只是实验 ，不再返回最后一个 ，而是返回多个组件的值
-         */
-//        if(tempList.size()>0){
-//             result.putAll(tempList.get(tempList.size() - 1));
-//        }
         return result;
 
 

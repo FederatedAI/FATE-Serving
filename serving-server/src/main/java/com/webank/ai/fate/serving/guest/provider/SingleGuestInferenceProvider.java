@@ -36,8 +36,7 @@ import java.util.concurrent.Future;
 })
 @Service
 @Deprecated
-public class OldVersionInferenceProvider extends AbstractServingServiceProvider<InferenceRequest,ReturnResult>{
-
+public class SingleGuestInferenceProvider extends AbstractServingServiceProvider<InferenceRequest,ReturnResult>{
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
 
@@ -48,23 +47,16 @@ public class OldVersionInferenceProvider extends AbstractServingServiceProvider<
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
         Model  model = ((ServingServerContext)context).getModel();
         ModelProcessor modelProcessor = model.getModelProcessor();
-        Map<String, Model> hostModelMap = model.getFederationModelMap();
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
         Map<String,Future>  futureMap = Maps.newHashMap();
-        hostModelMap.forEach((hostPartId,hostModel)->{
-            FederatedRpcInvoker.RpcDataWraper rpcDataWraper = new  FederatedRpcInvoker.RpcDataWraper();
-            rpcDataWraper.setGuestModel(model);
-            rpcDataWraper.setHostModel(hostModel);
-            rpcDataWraper.setRemoteMethodName(Dict.FEDERATED_INFERENCE);
-            rpcDataWraper.setData(inferenceRequest);
-            ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
-            futureMap.put(hostPartId,future);
-
-        });
+        List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context,Dict.FEDERATED_INFERENCE,inferenceRequest);
+        rpcList.forEach((rpcDataWraper -> {
+                ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
+                futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);
+        }));
         ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap,timeout);
         return returnResult;
     }
-
 
     @Override
     protected  OutboundPackage<ReturnResult>  serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {

@@ -1,18 +1,21 @@
 package com.webank.ai.fate.serving.guest.provider;
 
-import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.google.common.collect.Lists;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
+import com.webank.ai.fate.serving.core.model.Model;
+import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
+import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +49,29 @@ public abstract  class AbstractServingServiceProvider<req,resp>   extends Abstra
 
 
     }  ;
+
+    protected    List<FederatedRpcInvoker.RpcDataWraper>  buildRpcDataWraper(Context context,String   methodName,Object data){
+
+
+
+        List<FederatedRpcInvoker.RpcDataWraper>  result = Lists.newArrayList();
+
+        Model model = ((ServingServerContext)context).getModel();
+
+        Map<String, Model> hostModelMap = model.getFederationModelMap();
+        hostModelMap.forEach((partId,hostModel)->{
+            FederatedRpcInvoker.RpcDataWraper rpcDataWraper = new  FederatedRpcInvoker.RpcDataWraper();
+            rpcDataWraper.setGuestModel(model);
+            rpcDataWraper.setHostModel(hostModel);
+            rpcDataWraper.setRemoteMethodName(Dict.FEDERATED_INFERENCE);
+            result.add(rpcDataWraper);
+        });
+
+
+        return  result;
+
+
+    }
 
 
 

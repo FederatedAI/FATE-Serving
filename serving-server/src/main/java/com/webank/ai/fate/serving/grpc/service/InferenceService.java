@@ -62,9 +62,6 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     }
 
 
-
-
-
     @Override
     @RegisterService(serviceName = "getInferenceResult" ,useDynamicEnvironment = true)
     @Deprecated
@@ -97,71 +94,6 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 
     }
 
-
-//    private void inferenceServiceAction(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver, InferenceActionType actionType) {
-//
-//        InferenceMessage.Builder response = InferenceMessage.newBuilder();
-//        ReturnResult returnResult = new ReturnResult();
-//        InferenceRequest inferenceRequest = null;
-//        Context context = new BaseContext(new GuestInferenceLoggerPrinter(), actionType.name(), metricRegistry);
-//        context.setInterfaceName(Dict.EVENT_INFERENCE);
-//        context.preProcess();
-//
-//        try {
-//            try {
-//                context.putData(Dict.ORIGIN_REQUEST, req.getBody().toStringUtf8());
-//                inferenceRequest = (InferenceRequest) JSON.parseObject(req.getBody().toStringUtf8(), InferenceRequest.class);
-//
-//                // for async monitor test
-////                DisruptorUtil.producer(Dict.EVENT_INFERENCE, actionType.name() + "_ERROR", inferenceRequest);
-//
-//                if (inferenceRequest != null) {
-//                    if (inferenceRequest.getCaseid().length() == 0) {
-//                        inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
-//                    }
-//                    Map<String,Object> sendToRemoteFeatureData = inferenceRequest.getSendToRemoteFeatureData();
-//                    if(sendToRemoteFeatureData!=null) {
-//                        inferenceRequest.getFeatureData().putAll(sendToRemoteFeatureData);
-//                    }
-//                    context.setCaseId(inferenceRequest.getCaseid());
-//
-//
-//                    switch (actionType.name()) {
-//                        case "SYNC_RUN":
-//                            returnResult = guestInferenceProvider.syncInference(context, inferenceRequest);
-//                            break;
-//                        case "GET_RESULT":
-//                            returnResult = guestInferenceProvider.getResult(context, inferenceRequest);
-//                            break;
-//                        case "ASYNC_RUN":
-//                            returnResult = guestInferenceProvider.asynInference(context, inferenceRequest);
-//                            break;
-//                        default:
-//                            throw new Exception();
-//                    }
-//
-//                    if (returnResult.getRetcode() != InferenceRetCode.OK) {
-//                        logger.info("caseid {} inference {} failed: {}  result {}", context.getCaseId(), actionType, req.getBody().toStringUtf8(), returnResult);
-//                    }
-//                } else {
-//
-//                    returnResult.setRetcode(InferenceRetCode.EMPTY_DATA);
-//                }
-//            } catch (Throwable e) {
-//                returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
-//                logger.error(String.format("inference system error:\n%s", req.getBody().toStringUtf8()), e);
-//            }
-//
-//            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-//            responseObserver.onNext(response.build());
-//            responseObserver.onCompleted();
-//        } finally {
-//
-//            context.postProcess(inferenceRequest, returnResult);
-//
-//
-//  }
-//    }
 
 
     private  Context  prepareContext(){
