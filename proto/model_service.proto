@@ -89,7 +89,7 @@ message PublishResponse{
     bytes data = 4;
 }
 
-message QueryModelService
+
 
 
 service ModelService{

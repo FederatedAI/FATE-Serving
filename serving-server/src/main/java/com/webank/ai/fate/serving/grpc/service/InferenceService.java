@@ -29,7 +29,7 @@ import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.provider.BatchGuestInferenceProvider;
-import com.webank.ai.fate.serving.guest.provider.OldVersionInferenceProvider;
+import com.webank.ai.fate.serving.guest.provider.SingleGuestInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     @Autowired
     BatchGuestInferenceProvider batchGuestInferenceProvider;
     @Autowired
-    OldVersionInferenceProvider oldVersionInferenceProvider;
+    SingleGuestInferenceProvider singleGuestInferenceProvider;
     @Autowired
     MetricRegistry metricRegistry;
     @Override
@@ -54,7 +54,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
-        OutboundPackage outboundPackage = this.oldVersionInferenceProvider.service(context, inboundPackage);
+        OutboundPackage outboundPackage = this.singleGuestInferenceProvider.service(context, inboundPackage);
         returnResult = (ReturnResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());
