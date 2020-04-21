@@ -112,7 +112,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
                 else {
                     if (this.trees.get(i).getMissingDirMaskdict().containsKey(j)) {
                         int missingDir = this.trees.get(i).getMissingDirMaskdict().get(j);
-                        direction = (missingDir == 1);
+                        direction = (missingDir != 1);
                     }
                 }
                 treeRoute.put(Integer.toString(j),direction);
