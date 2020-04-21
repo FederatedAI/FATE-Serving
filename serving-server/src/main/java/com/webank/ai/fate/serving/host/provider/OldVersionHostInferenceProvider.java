@@ -70,7 +70,7 @@ public class OldVersionHostInferenceProvider extends AbstractServingServiceProvi
 
         HeteroSecureBoostingTreeHost  heteroSecureBoostingTreeHost = (HeteroSecureBoostingTreeHost)componentObject;
 
-        Map<String, Object> map = heteroSecureBoostingTreeHost.predictSingleRound(context, params);
+        Map<String, Object> map = heteroSecureBoostingTreeHost.predictSingleRound(context, (Map<String, Object>) params.get(Dict.TREE_LOCATION));
 
         ReturnResult  result = new  ReturnResult();
 

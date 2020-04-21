@@ -201,7 +201,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         }
         this.saveData(context, tag, fidValueMapping);
 
-        Map<String,Object>  interactiveData = request.get(0);
+        /*Map<String,Object>  interactiveData = request.get(0);
 
         if(!this.fastMode){
 
@@ -214,7 +214,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         else {
             // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>>
             ret = this.extractHostNodeRoute(fidValueMapping);
-        }
+        }*/
         return ret;
 
 
