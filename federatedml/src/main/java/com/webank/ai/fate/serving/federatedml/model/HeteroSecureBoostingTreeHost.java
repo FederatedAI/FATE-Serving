@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  *
  */
-public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements LocalInferenceAware {
+public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements LocalInferenceAware, Returnable {
 
     private final String site = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
