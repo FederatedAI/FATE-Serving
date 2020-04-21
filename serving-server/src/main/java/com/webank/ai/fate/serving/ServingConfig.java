@@ -93,7 +93,7 @@ public class ServingConfig {
 
 
     @Bean
-    public Cache getCache(){
+    public Cache cache(){
 
         String  cacheType =  environment.getProperty("cache.type","local");
         logger.info("cache type is {},prepare to build cache",cacheType);

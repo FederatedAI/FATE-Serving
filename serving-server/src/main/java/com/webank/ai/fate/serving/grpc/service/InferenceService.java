@@ -70,7 +70,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     }
 
     @Override
-    @RegisterService(useDynamicEnvironment = true, serviceName = "")
+    @RegisterService(useDynamicEnvironment = true, serviceName = "startInferenceJob")
     public void startInferenceJob(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
 
 
@@ -80,14 +80,12 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     @RegisterService(useDynamicEnvironment = true, serviceName = "batchInference")
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        BatchInferenceResult returnResult = new BatchInferenceResult();
         Context  context = prepareContext();
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
-        OutboundPackage outboundPackage = null;
-        outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
-        returnResult = (BatchInferenceResult) outboundPackage.getData();
+        OutboundPackage outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
+        BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();

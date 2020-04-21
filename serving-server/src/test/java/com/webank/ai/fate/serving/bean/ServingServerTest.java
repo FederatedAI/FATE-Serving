@@ -114,7 +114,7 @@ public class ServingServerTest {
         ///Users/kaideng/work/webank/test
 
 
-        URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020040111152695637611_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
+        URL resource = ServingServerTest.class.getClassLoader().getResource("model_202004201033174706226_guest#9999#guest-9999#host-10000#model_cache");
         String  filePath = resource.getPath();
         filePath = filePath.replaceAll("%23","#");
         System.err.println("filePath "+ filePath);
@@ -128,11 +128,11 @@ public class ServingServerTest {
                 .putRole("arbiter",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
                 .putRole("host",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
                 .putModel("guest",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("9999",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("host",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .setLoadType("FILE")
                 .setFilePath(filePath)
         .build();
@@ -227,7 +227,7 @@ public class ServingServerTest {
         ///Users/kaideng/work/webank/test
 
 
-        URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache");
+        URL resource = ServingServerTest.class.getClassLoader().getResource("model_202004201033174706226_host#10000#guest-9999#host-10000#model_cache");
         String  filePath = resource.getPath();
         filePath = filePath.replaceAll("%23","#");
         System.err.println("filePath "+ filePath);
@@ -242,11 +242,11 @@ public class ServingServerTest {
                 .putRole("arbiter",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
                 .putRole("host",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
                 .putModel("guest",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("9999",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("host",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .setLoadType("FILE")
                 .setFilePath(filePath)
                 .build();
@@ -278,13 +278,13 @@ public class ServingServerTest {
                 .putRole("arbiter",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
                 .putRole("host",ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
                 .putModel("guest",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("9999",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("host",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter",ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
-                        ModelServiceProto.ModelInfo.newBuilder().setTableName("2020022715571644961011").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .setLoadType("FILE")
-                .setServiceId("my_test_service_id")
+                .setServiceId("securetboottree")
              //   .setFilePath(filePath)
                 .build();
      //   inboundPackage.setBody(publishRequest);
@@ -302,7 +302,18 @@ public class ServingServerTest {
 
         InferenceRequest inferenceRequest  = new  InferenceRequest();
 
-        inferenceRequest.setServiceId("my_test_service_id");
+        inferenceRequest.setServiceId("securetboottree");
+
+        inferenceRequest.getFeatureData().put("x0", 0.100016);
+        inferenceRequest.getFeatureData().put("x1", 1.210);
+        inferenceRequest.getFeatureData().put("x2", 2.321);
+        inferenceRequest.getFeatureData().put("x3", 3.432);
+        inferenceRequest.getFeatureData().put("x4", 4.543);
+        inferenceRequest.getFeatureData().put("x5", 5.654);
+        inferenceRequest.getFeatureData().put("x6", 5.654);
+        inferenceRequest.getFeatureData().put("x7", 0.102345);
+
+        inferenceRequest.getSendToRemoteFeatureData().putAll(inferenceRequest.getFeatureData());
 
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
                 InferenceServiceProto.InferenceMessage.newBuilder();
@@ -337,15 +348,25 @@ public class ServingServerTest {
         List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
         for(int i=0;i<10;i++){
             BatchInferenceRequest.SingleInferenceData  singleInferenceData = new  BatchInferenceRequest.SingleInferenceData();
-            Map temp =Maps.newHashMap();
-            temp.put("phone_test","1399987933");
-            singleInferenceData.setSendToRemoteFeatureData(temp);
+
+            singleInferenceData.getFeatureData().put("x0", 0.100016);
+            singleInferenceData.getFeatureData().put("x1", 1.210);
+            singleInferenceData.getFeatureData().put("x2", 2.321);
+            singleInferenceData.getFeatureData().put("x3", 3.432);
+            singleInferenceData.getFeatureData().put("x4", 4.543);
+            singleInferenceData.getFeatureData().put("x5", 5.654);
+            singleInferenceData.getFeatureData().put("x6", 5.654);
+            singleInferenceData.getFeatureData().put("x7", 0.102345);
+
+//            Map temp =Maps.newHashMap();
+//            temp.put("phone_test","1399987933");
+            singleInferenceData.getSendToRemoteFeatureData().putAll(singleInferenceData.getFeatureData());
             singleInferenceData.setIndex(i);
             singleInferenceDataList.add(singleInferenceData);
 
         }
         batchInferenceRequest.setBatchDataList(singleInferenceDataList);
-        batchInferenceRequest.setServiceId("my_test_service_id");
+        batchInferenceRequest.setServiceId("securetboottree");
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
                 InferenceServiceProto.InferenceMessage.newBuilder();
         String  contentString = JSON.toJSONString(batchInferenceRequest);

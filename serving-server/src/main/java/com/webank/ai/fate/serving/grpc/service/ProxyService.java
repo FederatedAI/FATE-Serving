@@ -58,6 +58,7 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
         context.setActionType(req.getHeader().getCommand().getName());
         context.setModelNamesapce(namespace);
         context.setModelTableName(tableName);
+        context.setCaseId(req.getAuth().getNonce());
         Object result = null;
         byte[] data = req.getBody().getValue().toByteArray();
 

@@ -15,6 +15,7 @@ import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
+import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
 import com.webank.ai.fate.serving.federatedml.model.PrepareRemoteable;
@@ -121,28 +122,54 @@ public class PipelineModelProcessor implements ModelProcessor{
     /**
      *   目前给  只有sbt 使用到
      * @param context
-     * @param batchInferenceRequest
+     * @param inferenceRequest
      * @return
      */
     @Override
-    public BatchInferenceRequest guestPrepareDataBeforeInference(Context context, BatchInferenceRequest batchInferenceRequest) {
+    public InferenceRequest guestPrepareDataBeforeInference(Context context, InferenceRequest inferenceRequest) {
+        FederatedRpcInvoker federatedRpcInvoker = SpringContextUtil.getBean(FederatedRpcInvoker.class);
+        if (inferenceRequest instanceof BatchInferenceRequest) {
+            List<BatchInferenceRequest.SingleInferenceData> reqDataList = ((BatchInferenceRequest)inferenceRequest).getBatchDataList();
 
-        List<BatchInferenceRequest.SingleInferenceData>  reqDataList = batchInferenceRequest.getBatchDataList();
+            reqDataList.forEach(data -> {
+                        Map<String, Object> prepareRemoteDataMap = Maps.newHashMap();
+                        this.pipeLineNode.forEach(component -> {
+                            try {
+                                if (component != null && component instanceof PrepareRemoteable) {
+                                    PrepareRemoteable prepareRemoteable = (PrepareRemoteable) component;
+                                    Map<String, Object> prepareRemoteData = prepareRemoteable.prepareRemoteData(context, data.getSendToRemoteFeatureData());
+                                    prepareRemoteDataMap.put(component.getComponentName(), prepareRemoteData);
 
-        reqDataList.forEach(data->{
-                    this.pipeLineNode.forEach(component ->{
-                        try{
-                            if(component!=null&&component instanceof PrepareRemoteable){
-                              PrepareRemoteable  prepareRemoteable =  (PrepareRemoteable) component;
-                              prepareRemoteable.prepareRemoteData(context ,data.getSendToRemoteFeatureData());
+                                    if (component.getFederatedRpcInvoker() == null) {
+                                        component.setFederatedRpcInvoker(federatedRpcInvoker);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                // TODO: 2020/3/16   这里需要考虑下异常情况怎么处理
                             }
-                        }catch(Exception e){
-                            // TODO: 2020/3/16   这里需要考虑下异常情况怎么处理
+                        });
+                        data.getFeatureData().putAll(prepareRemoteDataMap);
+                    }
+            );
+        } else {
+            Map<String, Object> prepareRemoteDataMap = Maps.newHashMap();
+            this.pipeLineNode.forEach(component -> {
+                try {
+                    if (component != null && component instanceof PrepareRemoteable) {
+                        PrepareRemoteable prepareRemoteable = (PrepareRemoteable) component;
+                        Map<String, Object> prepareRemoteData = prepareRemoteable.prepareRemoteData(context, inferenceRequest.getSendToRemoteFeatureData());
+                        prepareRemoteDataMap.put(component.getComponentName(), prepareRemoteData);
+
+                        if (component.getFederatedRpcInvoker() == null) {
+                            component.setFederatedRpcInvoker(federatedRpcInvoker);
                         }
-                    });
-                    data.getSendToRemoteFeatureData();
+                    }
+                } catch (Exception e) {
+                    // TODO: 2020/3/16   这里需要考虑下异常情况怎么处理
                 }
-        );
+            });
+            inferenceRequest.getFeatureData().putAll(prepareRemoteDataMap);
+        }
         return null;
     }
 

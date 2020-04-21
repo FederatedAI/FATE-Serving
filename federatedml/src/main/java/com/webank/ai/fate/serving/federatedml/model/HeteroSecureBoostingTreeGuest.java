@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.*;
@@ -31,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements MergeInferenceAware,LocalInferenceAware,PrepareRemoteable {
+public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements MergeInferenceAware,LocalInferenceAware,PrepareRemoteable,Returnable {
 
     private final String site = "guest";
 
@@ -292,14 +293,24 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         /**
          *   第一轮不在这里
          */
-        int[] treeNodeIds  = (int[]) localData.get(Dict.SBT_TREE_NODE_ID_ARRAY);
+        // componentResult = featureData + prepareData
+        Map<String, Object> componentResult = (Map<String, Object>) localData.get(this.componentName);
+        if (componentResult == null) {
+            throw new GuestMergeException("component result is null");
+        }
+        Map<String, Object> prepareRemoteData = (Map<String, Object>) componentResult.get(this.componentName);
+        if (prepareRemoteData == null) {
+            throw new GuestMergeException("prepareRemoteData is null");
+        }
+
+        int[] treeNodeIds  = (int[]) prepareRemoteData.get(Dict.SBT_TREE_NODE_ID_ARRAY);
         double[] weights = new double[this.treeNum];
         if(treeNodeIds==null){
 
             throw  new GuestMergeException("tree node id array is not return from first loop");
         }
 
-        Map<String, Object> input = localData;
+        Map<String, Object> input = componentResult;
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
 
         int featureHit = 0;
@@ -328,11 +339,15 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
             if (treeLocation.size() == 0) {
                 break;
             }
-            Map  remoteParam  = Maps.newHashMap(localData);
+//            Map  remoteParam  = Maps.newHashMap(localData);
 
-            remoteData.put(Dict.COMPONENT_NAME, this.componentName);
-            remoteData.put(Dict.TREE_COMPUTE_ROUND, communicationRound++);
-            remoteData.put(Dict.TREE_LOCATION, treeLocation);
+            Map<String,Model> modelMap = model.getFederationModelMap();
+            Model hostModel = modelMap.get(Lists.newArrayList(modelMap.keySet()).get(0));
+
+            Map hostData = (Map) remoteData.get(hostModel.getPartId());
+            hostData.put(Dict.COMPONENT_NAME, this.componentName);
+            hostData.put(Dict.TREE_COMPUTE_ROUND, communicationRound++);
+            hostData.put(Dict.TREE_LOCATION, treeLocation);
             if(logger.isDebugEnabled()) {
                 logger.info("fast mode is {}", this.fastMode);
             }
@@ -340,8 +355,8 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
                 logger.info("begin to federated");
                 FederatedRpcInvoker.RpcDataWraper   rpcDataWraper = new FederatedRpcInvoker.RpcDataWraper();
                 // TODO: 2020/4/2   这里暂时只考虑单方
-                rpcDataWraper.setData(remoteData);
-
+                rpcDataWraper.setData(hostData);
+                rpcDataWraper.setRemoteMethodName(Dict.FEDERATED_INFERENCE_FOR_TREE);
                 rpcDataWraper.setGuestModel(model);
                 //rpcDataWraper.setHostModel(model.getFederationModelMap().values());
 
@@ -442,6 +457,8 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         result.put(Dict.TREE_COMPUTE_ROUND, 0);
 
         result.put(Dict.TREE_LOCATION, treeLocation);
+
+        result.put(Dict.SBT_TREE_NODE_ID_ARRAY, treeNodeIds);
 
         return result;
     }

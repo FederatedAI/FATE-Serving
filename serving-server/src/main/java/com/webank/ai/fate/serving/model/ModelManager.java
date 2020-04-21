@@ -309,7 +309,6 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                 ModelProcessor modelProcessor = modelLoader.restoreModel(context,  modelLoaderParam);
                 if(modelProcessor!=null) {
                     model.setModelProcessor(modelProcessor);
-                    logger.info("re");
                     namespaceMap.put(k,model);
                     logger.info("restore model {} success ",k);
                 }

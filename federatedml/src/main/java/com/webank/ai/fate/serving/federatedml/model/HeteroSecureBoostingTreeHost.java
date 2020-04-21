@@ -20,6 +20,8 @@ import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionT
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.NodeParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
+import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 
 import java.util.HashMap;
@@ -63,19 +65,24 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         return treeNodeId;
     }
 
+    private void initCache() {
+        Cache cache = SpringContextUtil.getBean("cache", Cache.class);
+        this.cache = cache;
+    }
+
     public void saveData(Context context, String tag, Map<String, Object> data) {
-
+        if (this.cache == null) {
+            initCache();
+        }
         this.cache.put(tag,data);
-
-
     }
 
     public Map<String, Object> getData(Context context, String tag) {
-
-
+        if (this.cache == null) {
+            initCache();
+        }
 
         Map<String,Object> result = (Map<String,Object>)this.cache.get(tag);
-
         return result;
     }
 
@@ -203,14 +210,12 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
                 int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), fidValueMapping);
                 ret.put(treeIdx, nodeId);
             }
-            return ret;
         }
         else {
             // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>>
             ret = this.extractHostNodeRoute(fidValueMapping);
-            return ret;
         }
-
+        return ret;
 
 
     }
