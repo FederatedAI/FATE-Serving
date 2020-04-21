@@ -344,7 +344,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
             Map<String,Model> modelMap = model.getFederationModelMap();
             Model hostModel = modelMap.get(Lists.newArrayList(modelMap.keySet()).get(0));
 
-            Map hostData = (Map) remoteData.get(hostModel.getPartId());
+            Map hostData = (Map) remoteData.getOrDefault(hostModel.getPartId(), Maps.newHashMap());
             hostData.put(Dict.COMPONENT_NAME, this.componentName);
             hostData.put(Dict.TREE_COMPUTE_ROUND, communicationRound++);
             hostData.put(Dict.TREE_LOCATION, treeLocation);
