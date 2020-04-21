@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.NodeParam;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -201,7 +202,8 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         }
         this.saveData(context, tag, fidValueMapping);
 
-        /*Map<String,Object>  interactiveData = request.get(0);
+        Map prepareData = (Map) input.get(this.componentName);
+        Map<String,Object>  interactiveData = (Map<String, Object>) prepareData.getOrDefault(Dict.TREE_LOCATION, Maps.newHashMap());
 
         if(!this.fastMode){
 
@@ -214,7 +216,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         else {
             // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>>
             ret = this.extractHostNodeRoute(fidValueMapping);
-        }*/
+        }
         return ret;
 
 
