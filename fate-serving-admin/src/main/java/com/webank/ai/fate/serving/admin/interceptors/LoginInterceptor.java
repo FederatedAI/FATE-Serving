@@ -2,8 +2,8 @@ package com.webank.ai.fate.serving.admin.interceptors;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.admin.bean.ReturnResult;
-import com.webank.ai.fate.serving.admin.bean.StatusCode;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,9 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         } else {
             logger.info("Session token unavailable");
-            ReturnResult result = ReturnResult.failure(StatusCode.USER_ERROR, "Session token unavailable");
+            ReturnResult result = new ReturnResult();
+            result.setRetcode(StatusCode.PARAM_ERROR);
+            result.setRetmsg("Session token unavailable");
             response.getWriter().write(JSONObject.toJSONString(result));
             response.flushBuffer();
             return false;

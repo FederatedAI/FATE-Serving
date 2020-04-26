@@ -1,9 +1,9 @@
 package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.admin.bean.Dict;
-import com.webank.ai.fate.serving.admin.bean.ReturnResult;
-import com.webank.ai.fate.serving.admin.bean.StatusCode;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +46,7 @@ public class LoginController {
         Preconditions.checkArgument(StringUtils.isNotBlank(username), "parameter username is blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(password), "parameter password is blank");
 
+        ReturnResult result = new ReturnResult();
         if (username.equals(this.username) && password.equals(this.password)) {
             String userInfo = StringUtils.join(Arrays.asList(username, password), "_");
             String token = Md5Crypt.md5Crypt((Dict.USER_CACHE_KEY_PREFIX + userInfo).getBytes(), Dict.MD5_SALT);
@@ -57,25 +57,33 @@ public class LoginController {
             Map data = new HashMap<>();
             data.put("timestamp", System.currentTimeMillis());
             data.put("sessionToken", token);
-            return ReturnResult.success(data);
+
+            result.setRetcode(StatusCode.SUCCESS);
+            result.setData(data);
         } else {
             logger.info("user {} login failure, username or password is wrong.", username);
-            return ReturnResult.failure(StatusCode.USER_ERROR, "username or password is wrong");
+            result.setRetcode(StatusCode.PARAM_ERROR);
+            result.setRetmsg("username or password is wrong");
         }
+        return result;
     }
 
     @PostMapping("/admin/logout")
     public ReturnResult logout(HttpServletRequest request) {
+        ReturnResult result = new ReturnResult();
+
         String sessionToken = request.getHeader("sessionToken");
 //        "Session token unavailable"
         String userInfo = redisTemplate.opsForValue().get(sessionToken);
         if (StringUtils.isNotBlank(userInfo)) {
             redisTemplate.delete(sessionToken);
-            return ReturnResult.success();
+            result.setRetcode(StatusCode.SUCCESS);
         } else {
             logger.info("Session token unavailable");
-            return ReturnResult.failure(StatusCode.USER_ERROR, "Session token unavailable");
+            result.setRetcode(StatusCode.PARAM_ERROR);
+            result.setRetmsg("Session token unavailable");
         }
+        return result;
     }
 
 }

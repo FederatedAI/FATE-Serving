@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.admin.interceptors;
 
-import com.webank.ai.fate.serving.admin.bean.MetricEntity;
 import com.webank.ai.fate.serving.admin.cache.MetricCache;
+import com.webank.ai.fate.serving.core.bean.MetricEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +11,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class RequestInterceptor implements HandlerInterceptor {
 
@@ -31,13 +26,12 @@ public class RequestInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         if (response.getStatus() == HttpStatus.OK.value()) {
 
-            MetricEntity entity = MetricEntity.builder()
-                    .userAuthKey(userAuthKey)
-                    .componentName("serving-server")
-                    .interfaceName(request.getRequestURI())
-                    .passQps(1L)
-                    .timestamp(System.currentTimeMillis())
-                    .build();
+            MetricEntity entity = new MetricEntity();
+            entity.setUserAuthKey(userAuthKey);
+            entity.setComponentName("serving-server");
+            entity.setInterfaceName(request.getRequestURI());
+            entity.setPassQps(1L);
+            entity.setTimestamp(System.currentTimeMillis());
 
             // serving-server__/api/model/publishLoad__1582616571000
             String key = buildMetricKey(entity.getComponentName(), entity.getInterfaceName(), entity.getTimestamp());

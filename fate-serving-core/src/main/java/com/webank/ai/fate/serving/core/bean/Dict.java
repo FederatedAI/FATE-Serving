@@ -162,7 +162,7 @@ public class Dict {
 
 
     public  static  final String MD5_SALT = "$1$ML";
-
+    public static final String USER_CACHE_KEY_PREFIX = "admin_user_";
 
     public static final String CASE_ID="caseid";
     public static final String  CODE ="code";
@@ -199,5 +199,11 @@ public class Dict {
     public static final String SERVICE_SERVING = "serving";
     public static final String SERVICE_PROXY = "proxy";
     public static final String FAILED = "failed";
+
+    // parameters
+    public static final String PARAMS_INITIATOR = "initiator";
+    public static final String PARAMS_ROLE = "role";
+    public static final String PARAMS_JOB_PARAMETERS = "job_parameters";
+    public static final String PARAMS_SERVICE_ID = "service_id";
 
 }

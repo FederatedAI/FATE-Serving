@@ -7,12 +7,14 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
-import com.webank.ai.fate.serving.admin.bean.*;
 import com.webank.ai.fate.serving.admin.config.FateServiceRegister;
-import com.webank.ai.fate.serving.admin.exceptions.RemoteRpcException;
-import com.webank.ai.fate.serving.admin.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.admin.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.admin.rpc.core.ServiceAdaptor;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,7 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -39,12 +44,6 @@ public class ModelController {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelController.class);
 
-    @Autowired
-    private GrpcConnectionPool grpcConnectionPool;
-
-    @Autowired
-    private HttpClientPool httpClientPool;
-
     @Value("${fateflow.load.url}")
     private String loadUrl;
 
@@ -59,6 +58,8 @@ public class ModelController {
 
     @Autowired
     private FateServiceRegister fateServiceRegister;
+
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     /*@RequestMapping(value = "/model/{version}/{callName}", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
@@ -105,7 +106,12 @@ public class ModelController {
         }
     }
 
-    @RequestMapping(value = "/model/{version}/{callName}", method = {RequestMethod.GET, RequestMethod.POST})
+    /**
+     * 实现queryModel
+     * @return
+     * @throws Exception
+     */
+    /*@RequestMapping(value = "/model/{version}/{callName}", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public Callable<ReturnResult> model(@PathVariable String version,
                                         @PathVariable String callName,
@@ -167,10 +173,10 @@ public class ModelController {
                 throw new RemoteRpcException(StatusCode.UNAVAILABLE_REQUEST, "unavailable request: " + callName);
             }
         };
-    }
+    }*/
 
 
-    @GetMapping("/model/listAllModel")
+    /*@GetMapping("/model/listAllModel")
     public ReturnResult listAllModel(String host, int port) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("list all model request, host: {}, port: {}", host, port);
@@ -234,7 +240,7 @@ public class ModelController {
         }
 
         return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
-    }
+    }*/
 
     @PostMapping("/model/publishLoad")
     public Callable<ReturnResult> publishLoad(@RequestBody String requestData) {
@@ -242,21 +248,25 @@ public class ModelController {
             if (logger.isDebugEnabled()) {
                 logger.debug("try to publishLoad, receive : {}", requestData);
             }
+            ReturnResult result = new ReturnResult();
 
             JSONObject data = JSON.parseObject(requestData);
-            Preconditions.checkArgument(data.get(Dict.INITIATOR) != null, "parameter initiator not exist");
-            Preconditions.checkArgument(data.get(Dict.ROLE) != null, "parameter role not exist");
-            Preconditions.checkArgument(data.get(Dict.JOB_PARAMETERS) != null, "parameter job_parameters not exist");
+            Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
+            Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
+            Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
 
-            String resp = httpClientPool.sendPost(loadUrl, requestData, null);
+            String resp = HttpClientPool.post(loadUrl, data, null);
 
             logger.info("publishLoad response : {}", resp);
 
             if (StringUtils.isNotBlank(resp)) {
-                return ReturnResult.success(JSONObject.parseObject(resp));
+                result.setRetcode(StatusCode.SUCCESS);
+                result.setData(JSONObject.parseObject(resp));
+            } else {
+                result.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
+                result.setRetmsg("publishLoad failed");
             }
-
-            return ReturnResult.failure(StatusCode.LOAD_MODEL_ERROR, "publishLoad failed");
+            return result;
         };
     }
 
@@ -266,22 +276,26 @@ public class ModelController {
             if (logger.isDebugEnabled()) {
                 logger.debug("try to publishBind, receive : {}", requestData);
             }
+            ReturnResult result = new ReturnResult();
 
             JSONObject data = JSON.parseObject(requestData);
-            Preconditions.checkArgument(data.get(Dict.INITIATOR) != null, "parameter initiator not exist");
-            Preconditions.checkArgument(data.get(Dict.ROLE) != null, "parameter role not exist");
-            Preconditions.checkArgument(data.get(Dict.JOB_PARAMETERS) != null, "parameter job_parameters not exist");
-            Preconditions.checkArgument(data.get(Dict.SERVICE_ID) != null, "parameter service_id not exist");
+            Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
+            Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
+            Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
+            Preconditions.checkArgument(data.get(Dict.PARAMS_SERVICE_ID) != null, "parameter service_id not exist");
 
-            String resp = httpClientPool.sendPost(bindUrl, requestData, null);
+            String resp = HttpClientPool.post(bindUrl, data);
 
             logger.info("publishBind response : {}", resp);
 
             if (StringUtils.isNotBlank(resp)) {
-                return ReturnResult.success(JSONObject.parseObject(resp));
+                result.setRetcode(StatusCode.SUCCESS);
+                result.setData(JSONObject.parseObject(resp));
+            } else {
+                result.setRetcode(StatusCode.GUEST_BIND_MODEL_ERROR);
+                result.setRetmsg("publishBind failed");
             }
-
-            return ReturnResult.failure(StatusCode.BIND_MODEL_ERROR, "publishBind failed");
+            return result;
         };
     }
 
@@ -290,6 +304,8 @@ public class ModelController {
         return () -> {
             Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
+
+            ReturnResult result = new ReturnResult();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("unload model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", host, port, tableName, namespace);
@@ -309,7 +325,9 @@ public class ModelController {
                 logger.debug("response: {}", response);
             }
 
-            return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
+            result.setRetcode(String.valueOf(response.getStatusCode()));
+            result.setData(JSONObject.parseObject(response.getData().toStringUtf8()));
+            return result;
         };
     }
 
@@ -320,26 +338,30 @@ public class ModelController {
             Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "parameter serviceId is blank");
 
+            ReturnResult result = new ReturnResult();
+
             if (logger.isDebugEnabled()) {
                 logger.debug("unload model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", host, port, tableName, namespace);
             }
 
             ModelServiceGrpc.ModelServiceFutureStub futureStub = getModelServiceFutureStub(host, port);
 
-            ModelServiceProto.PublishRequest publishRequest = ModelServiceProto.PublishRequest.newBuilder()
+            ModelServiceProto.UnbindRequest unbindRequest = ModelServiceProto.UnbindRequest.newBuilder()
                     .setTableName(tableName)
                     .setNamespace(namespace)
                     .setServiceId(serviceId)
                     .build();
 
-            ListenableFuture<ModelServiceProto.PublishResponse> future = futureStub.unbind(publishRequest);
-            ModelServiceProto.PublishResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
+            ListenableFuture<ModelServiceProto.UnbindResponse> future = futureStub.unbind(unbindRequest);
+            ModelServiceProto.UnbindResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", response);
             }
 
-            return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
+            result.setRetcode(String.valueOf(response.getStatusCode()));
+            result.setRetmsg(response.getMessage());
+            return result;
         };
     }
 
@@ -360,23 +382,6 @@ public class ModelController {
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
         return futureStub;
-    }
-
-    @PostMapping("/model/test")
-    public Callable<ReturnResult> test(@RequestBody String requestData) {
-        return () -> {
-            if (logger.isDebugEnabled()) {
-                logger.debug("try to test, receive : {}", requestData);
-            }
-
-            JSONObject data = JSON.parseObject(requestData);
-
-            if (StringUtils.isNotBlank(data.getString("test"))) {
-                return ReturnResult.success(data);
-            } else {
-                throw new RemoteRpcException("data is null");
-            }
-        };
     }
 
 }

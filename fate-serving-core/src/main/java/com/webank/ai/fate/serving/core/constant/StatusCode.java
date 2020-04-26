@@ -26,8 +26,13 @@ public class StatusCode {
     public   static  final String  GUEST_LOAD_MODEL_ERROR  ="107";
     public   static  final String  HOST_LOAD_MODEL_ERROR  ="107";
     public   static  final String  GUEST_MERGE_ERROR =  "108";
+    public   static  final String  GUEST_BIND_MODEL_ERROR =  "109";
+    public   static  final String  HOST_BIND_MODEL_ERROR =  "109";
     public   static  final String  SYSTEM_ERROR = "110";
+    public   static  final String  SHUTDOWN_ERROR = "111";
     public   static  final String  HOST_NOT_SUPPORT_ERROR = "115";
+    public   static  final String  PARAM_ERROR = "120";
+    public   static  final String  UNAUTHORIZED = "121";
 
 
 //    public static final String OK = "0";

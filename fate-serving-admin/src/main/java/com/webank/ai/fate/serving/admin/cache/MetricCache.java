@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.admin.cache;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.webank.ai.fate.serving.admin.bean.MetricEntity;
+import com.webank.ai.fate.serving.core.bean.MetricEntity;
+import com.webank.ai.fate.serving.core.cache.Cache;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -11,9 +11,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class MetricCache implements CommonCache<String, MetricEntity>, InitializingBean {
+public class MetricCache implements Cache<String, MetricEntity>, InitializingBean {
 
-    private Cache<String, MetricEntity> cache;
+    private com.google.common.cache.Cache<String, MetricEntity> cache;
 
     private Set<String> resourceSet = new HashSet<>();
 

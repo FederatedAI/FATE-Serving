@@ -1,6 +1,6 @@
 package com.webank.ai.fate.serving.admin.controller;
 
-import com.webank.ai.fate.serving.admin.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;

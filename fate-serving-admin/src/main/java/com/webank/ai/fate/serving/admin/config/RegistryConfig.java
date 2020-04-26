@@ -19,7 +19,7 @@ package com.webank.ai.fate.serving.admin.config;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.admin.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

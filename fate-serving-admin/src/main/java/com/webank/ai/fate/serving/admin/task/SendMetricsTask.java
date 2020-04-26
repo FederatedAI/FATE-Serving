@@ -1,10 +1,10 @@
 package com.webank.ai.fate.serving.admin.task;
 
 import com.alibaba.fastjson.JSONObject;
-import com.webank.ai.fate.serving.admin.bean.HttpClientPool;
-import com.webank.ai.fate.serving.admin.bean.MetricEntity;
 import com.webank.ai.fate.serving.admin.cache.MetricCache;
 import com.webank.ai.fate.serving.admin.interceptors.RequestInterceptor;
+import com.webank.ai.fate.serving.core.bean.MetricEntity;
+import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,9 +25,6 @@ public class SendMetricsTask implements InitializingBean {
     // serving-server__/api/model/publishLoad__1582616571000
     @Autowired
     private MetricCache metricCache;
-
-    @Autowired
-    private HttpClientPool httpClientPool;
 
     @Value("${monitor.send.metric.url}")
     private String url;
@@ -93,7 +90,7 @@ public class SendMetricsTask implements InitializingBean {
                             logger.debug("entity : {}", entity);
                         }
                         if (entity != null) {
-                            String resp = httpClientPool.sendPost(url, JSONObject.toJSONString(entity), null);
+                            String resp = HttpClientPool.post(url, JSONObject.parseObject(JSONObject.toJSONString(entity), Map.class));
                             if (logger.isDebugEnabled()) {
                                 logger.debug("send metric to monitor, request: {}, response: {}", JSONObject.toJSONString(entity), resp);
                             }

@@ -1,6 +1,6 @@
 package com.webank.ai.fate.serving.admin.config;
 
-import com.webank.ai.fate.serving.admin.rpc.core.*;
+import com.webank.ai.fate.serving.core.rpc.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;

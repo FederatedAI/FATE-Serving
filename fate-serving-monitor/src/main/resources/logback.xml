@@ -2,7 +2,7 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.padual.com/java/logback.xsd"
                debug="false" scan="true" scanPeriod="30 second">
 
-    <property name="ROOT" value="/data/logs/fdn/apigateway/"/>
+    <property name="ROOT" value="/data/logs/fate/serving-monitor/"/>
     <property name="FILESIZE" value="500MB"/>
     <property name="MAXHISTORY" value="100"/>
     <timestamp key="DATETIME" datePattern="yyyy-MM-dd HH:mm:ss"/>

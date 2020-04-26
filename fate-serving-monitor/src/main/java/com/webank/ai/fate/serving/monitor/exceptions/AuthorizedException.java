@@ -1,11 +1,12 @@
 package com.webank.ai.fate.serving.monitor.exceptions;
 
-import com.webank.ai.fate.serving.monitor.bean.StatusCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.BaseException;
 
 public class AuthorizedException extends BaseException {
 
-    public AuthorizedException(int code, String message) {
-        super(code, message);
+    public AuthorizedException(String retCode, String message) {
+        super(retCode, message);
     }
 
     public AuthorizedException(String message) {

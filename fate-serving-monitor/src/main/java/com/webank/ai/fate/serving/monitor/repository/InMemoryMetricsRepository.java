@@ -16,7 +16,7 @@
 package com.webank.ai.fate.serving.monitor.repository;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.webank.ai.fate.serving.monitor.bean.MetricEntity;
+import com.webank.ai.fate.serving.core.bean.MetricEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 

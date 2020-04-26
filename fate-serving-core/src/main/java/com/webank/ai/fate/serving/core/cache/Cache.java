@@ -1,12 +1,10 @@
 
 package com.webank.ai.fate.serving.core.cache;
 
-import java.util.concurrent.TimeUnit;
+public interface Cache<K, V> {
 
-public interface Cache {
+    void put(K key, V value);
 
-    void put(Object key, Object value);
-
-    Object get(Object key);
+    V get(K key);
 
 }

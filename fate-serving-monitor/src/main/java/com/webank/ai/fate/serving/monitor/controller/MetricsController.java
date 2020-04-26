@@ -2,8 +2,10 @@ package com.webank.ai.fate.serving.monitor.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.monitor.bean.MetricEntity;
-import com.webank.ai.fate.serving.monitor.bean.ReturnResult;
+import com.google.common.collect.Maps;
+import com.webank.ai.fate.serving.core.bean.MetricEntity;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.monitor.exceptions.AuthorizedException;
 import com.webank.ai.fate.serving.monitor.repository.MetricsRepository;
 import com.webank.ai.fate.serving.monitor.utils.AllowKeysUtil;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 @RestController
@@ -44,7 +47,9 @@ public class MetricsController {
             // TODO: 2020/4/1 持久化
             repository.save(metricEntity);
 
-            return ReturnResult.success(metricEntity);
+            ReturnResult result = new ReturnResult();
+            result.setRetcode(StatusCode.SUCCESS);
+            return result;
         };
     }
 
@@ -54,6 +59,9 @@ public class MetricsController {
         Preconditions.checkArgument(StringUtils.isNotBlank(componentName));
         Preconditions.checkArgument(StringUtils.isNotBlank(interfaceName));
 
+        ReturnResult result = new ReturnResult();
+        result.setRetcode(StatusCode.SUCCESS);
+
         if (endTime == null) {
             endTime = System.currentTimeMillis();
         }
@@ -61,7 +69,9 @@ public class MetricsController {
             startTime = endTime - 1000 * 60;
         }
         if (endTime - startTime > MAX_QUERY_INTERVAL_MS) {
-            return ReturnResult.failure(-1, "time intervalMs is too big, must <= 1h");
+            result.setRetcode(StatusCode.PARAM_ERROR);
+            result.setRetmsg("time intervalMs is too big, must <= 1h");
+            return result;
         }
 
 //        List<String> interfaceList = repository.listInterfaceOfComponent(componentName);
@@ -69,6 +79,10 @@ public class MetricsController {
 
         Collections.sort(entities);
 
-        return ReturnResult.success(entities);
+        Map data = Maps.newHashMap();
+        data.put("entities", entities);
+        result.setData(data);
+        
+        return result;
     }
 }
