@@ -3,32 +3,26 @@ package com.webank.ai.fate.serving.common.provider;
 
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.ModelActionType;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
-import com.webank.ai.fate.serving.model.ModelManager;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-@FateService(name ="modelService",  preChain= {
+@FateService(name = "modelService", preChain = {
         // "overloadMonitor",
 //        "guestBatchParamInterceptor",
 //        "guestModelInterceptor",
 //        "federationRouterInterceptor"
-},postChain = {
-      //  "cache",
+}, postChain = {
+        //  "cache",
 
 })
 @Service
-public class ModelServiceProvider extends AbstractServingServiceProvider{
+public class ModelServiceProvider extends AbstractServingServiceProvider {
     @Autowired
     ModelManager modelManager;
 
@@ -40,25 +34,25 @@ public class ModelServiceProvider extends AbstractServingServiceProvider{
 //    final  String LIST_ALL_MODEL = ModelActionType.LIST_ALL_MODEL.name();
 //    final  String GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE  = ModelActionType.GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE.name();
 
-    @FateServiceMethod(name ="MODEL_LOAD")
+    @FateServiceMethod(name = "MODEL_LOAD")
     public Object load(Context context, InboundPackage data) {
-        ModelServiceProto.PublishRequest  publishRequest = (ModelServiceProto.PublishRequest)data.getBody();
-        ReturnResult returnResult = modelManager.load(context,publishRequest);
-        return  returnResult;
+        ModelServiceProto.PublishRequest publishRequest = (ModelServiceProto.PublishRequest) data.getBody();
+        ReturnResult returnResult = modelManager.load(context, publishRequest);
+        return returnResult;
     }
 
-    @FateServiceMethod(name="MODEL_PUBLISH_ONLINE")
-    public Object  bind(Context context,InboundPackage  data ){
-        ModelServiceProto.PublishRequest req=  (ModelServiceProto.PublishRequest)data.getBody();
-        ReturnResult returnResult = modelManager.bind(context,req);
-        return  returnResult;
+    @FateServiceMethod(name = "MODEL_PUBLISH_ONLINE")
+    public Object bind(Context context, InboundPackage data) {
+        ModelServiceProto.PublishRequest req = (ModelServiceProto.PublishRequest) data.getBody();
+        ReturnResult returnResult = modelManager.bind(context, req);
+        return returnResult;
     }
 
-    @FateServiceMethod(name="QUERY_MODEL")
-    public ModelServiceProto.QueryModelResponse  queryModel(Context context,InboundPackage  data  ){
-        ModelServiceProto.QueryModelRequest req=  (ModelServiceProto.QueryModelRequest)data.getBody();
-        String  content = modelManager.queryModel(context,req);
-        ModelServiceProto.QueryModelResponse.Builder  builder = ModelServiceProto.QueryModelResponse.newBuilder();
+    @FateServiceMethod(name = "QUERY_MODEL")
+    public ModelServiceProto.QueryModelResponse queryModel(Context context, InboundPackage data) {
+        ModelServiceProto.QueryModelRequest req = (ModelServiceProto.QueryModelRequest) data.getBody();
+        String content = modelManager.queryModel(context, req);
+        ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
 //        for(Model  model :modelList){
 //            ModelServiceProto.ModelInfoEx.Builder modelInfoExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
 //            modelInfoExBuilder.setNamespace(model.getNamespace()).setTableName(model.getTableName()).build();
@@ -66,7 +60,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider{
 //            builder.addModelInfos(modelInfoExBuilder.build());
 //        }
         builder.setMessage(content);
-        return  builder.build();
+        return builder.build();
     }
 
 

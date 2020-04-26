@@ -2,8 +2,6 @@ package com.webank.ai.fate.serving.model;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class ModelManagerTest {
 
     @Test

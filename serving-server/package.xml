@@ -1,4 +1,4 @@
-<assembly xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
           xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/assembly-1.0.0.xsd">
     <id>release</id>
 
@@ -6,7 +6,6 @@
 
         <format>zip</format>
     </formats>
-
 
 
     <includeBaseDirectory>false</includeBaseDirectory>
@@ -61,7 +60,6 @@
                 <include>log4j2.xml</include>
             </includes>
         </fileSet>
-
 
 
     </fileSets>

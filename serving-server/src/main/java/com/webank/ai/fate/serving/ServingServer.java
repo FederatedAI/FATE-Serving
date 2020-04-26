@@ -9,7 +9,6 @@ import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.grpc.service.*;
-
 import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -28,33 +27,28 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class ServingServer implements InitializingBean{
+public class ServingServer implements InitializingBean {
 
     Logger logger = LoggerFactory.getLogger(ServingServer.class);
     @Value("${port:8000}")
     int port;
-    private Server server;
     @Autowired
     InferenceService inferenceService;
     @Autowired
     ModelManager modelManager;
-
     @Autowired
     ModelService modelService;
     @Autowired
     ProxyService proxyService;
-
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
-
     @Autowired
     Environment environment;
-
     @Autowired
     ConsoleReporter consoleReporter;
-
     @Autowired
     JmxReporter jmxReporter;
+    private Server server;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -68,7 +62,7 @@ public class ServingServer implements InitializingBean{
                 new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
-        serverBuilder.keepAliveTime(100,TimeUnit.MILLISECONDS);
+        serverBuilder.keepAliveTime(100, TimeUnit.MILLISECONDS);
         serverBuilder.executor(executor);
         //new ServiceOverloadProtectionHandle()
         serverBuilder.addService(ServerInterceptors.intercept(inferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), InferenceService.class);
@@ -103,7 +97,7 @@ public class ServingServer implements InitializingBean{
         }
         modelManager.restore(new BaseContext());
         // metrics
-     //   consoleReporter.start(1, TimeUnit.MINUTES);
+        //   consoleReporter.start(1, TimeUnit.MINUTES);
         jmxReporter.start();
     }
 }

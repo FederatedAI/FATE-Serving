@@ -14,79 +14,75 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-@FateService(name ="HostInferenceProvider",  preChain= {
+
+@FateService(name = "HostInferenceProvider", preChain = {
 //        "overloadMonitor",
 
         "hostParamInterceptor",
         "hostModelInterceptor"
-},postChain = {
+}, postChain = {
         "defaultPostProcess"
 })
 @Service
-public class OldVersionHostInferenceProvider extends AbstractServingServiceProvider <InferenceRequest,ReturnResult>{
+public class OldVersionHostInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
 
     private static final Logger logger = LoggerFactory.getLogger(BatchHostInferenceProvider.class);
 
     @Override
-    protected  OutboundPackage<ReturnResult>  serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
+    protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
 
         Map result = new HashMap();
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
         outboundPackage.setData(returnResult);
-        return  outboundPackage;
+        return outboundPackage;
     }
 
 
-    @FateServiceMethod(name="federatedInference")
-    public ReturnResult  federatedInference (Context context, InboundPackage<InferenceRequest> data){
+    @FateServiceMethod(name = "federatedInference")
+    public ReturnResult federatedInference(Context context, InboundPackage<InferenceRequest> data) {
 
-        InferenceRequest params =  data.getBody();
+        InferenceRequest params = data.getBody();
 
-        Map<String,Object> featureData = params.getFeatureData();
+        Map<String, Object> featureData = params.getFeatureData();
 
-        Model model = ((ServingServerContext)context).getModel();
+        Model model = ((ServingServerContext) context).getModel();
 
         ModelProcessor modelProcessor = model.getModelProcessor();
 
-        ReturnResult result = modelProcessor.hostInference(context,params);
+        ReturnResult result = modelProcessor.hostInference(context, params);
 
 
-
-        return   result;
+        return result;
 
     }
 
-    @FateServiceMethod(name="federatedInference4Tree")
-    public  ReturnResult  federatedInference4Tree (Context context, InboundPackage<Map> data){
+    @FateServiceMethod(name = "federatedInference4Tree")
+    public ReturnResult federatedInference4Tree(Context context, InboundPackage<Map> data) {
 
         Map params = data.getBody();
 
-        Model model = ((ServingServerContext)context).getModel();
+        Model model = ((ServingServerContext) context).getModel();
 
         Object componentObject = model.getModelProcessor().getComponent(params.get(Dict.COMPONENT_NAME).toString());
 
-        Preconditions.checkArgument(componentObject!=null);
+        Preconditions.checkArgument(componentObject != null);
 
-        HeteroSecureBoostingTreeHost  heteroSecureBoostingTreeHost = (HeteroSecureBoostingTreeHost)componentObject;
+        HeteroSecureBoostingTreeHost heteroSecureBoostingTreeHost = (HeteroSecureBoostingTreeHost) componentObject;
 
         Map<String, Object> map = heteroSecureBoostingTreeHost.predictSingleRound(context, (Map<String, Object>) params.get(Dict.TREE_LOCATION));
 
-        ReturnResult  result = new  ReturnResult();
+        ReturnResult result = new ReturnResult();
 
         result.setRetcode(StatusCode.SUCCESS);
 
         result.setData(map);
 
 
-        return   result;
+        return result;
 
 
     }
-
-
-
-
 
 
 }

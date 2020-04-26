@@ -17,12 +17,11 @@
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
 
-
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
 import java.util.Map;
 
 public interface SingleFeatureDataAdaptor {
-    ReturnResult getData(Context context , Map<String, Object> featureIds);
+    ReturnResult getData(Context context, Map<String, Object> featureIds);
 }

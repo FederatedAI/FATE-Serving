@@ -1,11 +1,8 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
 
-import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.ServingServer;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
-import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -20,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class HostModelInterceptor implements Interceptor {
 
-    Logger logger   = LoggerFactory.getLogger(HostModelInterceptor.class);
+    Logger logger = LoggerFactory.getLogger(HostModelInterceptor.class);
 
     @Autowired
     ModelManager modelManager;
@@ -28,15 +25,15 @@ public class HostModelInterceptor implements Interceptor {
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
-        ServingServerContext   servingServerContext =((ServingServerContext)context);
+        ServingServerContext servingServerContext = ((ServingServerContext) context);
         String tableName = servingServerContext.getModelTableName();
         String nameSpace = servingServerContext.getModelNamesapce();
-        Model model = modelManager.getModelByTableNameAndNamespace(tableName,nameSpace);
-        if(model==null) {
-            logger.error("table name {} namepsace {} is not exist",tableName,nameSpace);
-                throw new  HostModelNullException("mode is null");
-            }
-            servingServerContext.setModel(model);
+        Model model = modelManager.getModelByTableNameAndNamespace(tableName, nameSpace);
+        if (model == null) {
+            logger.error("table name {} namepsace {} is not exist", tableName, nameSpace);
+            throw new HostModelNullException("mode is null");
+        }
+        servingServerContext.setModel(model);
     }
 
 }

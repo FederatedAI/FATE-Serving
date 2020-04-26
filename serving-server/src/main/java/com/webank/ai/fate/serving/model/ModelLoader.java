@@ -1,19 +1,24 @@
 package com.webank.ai.fate.serving.model;
 
-import com.webank.ai.fate.serving.core.bean.ModelPipeline;
-import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.model.ModelProcessor;
+
 public interface ModelLoader {
 
-    public enum LoadModelType{
+    public ModelProcessor loadModel(Context context, ModelLoaderParam modelLoaderParam);
+
+    public ModelProcessor restoreModel(Context context, ModelLoaderParam modelLoaderParam);
+
+    public enum LoadModelType {
         FATEFLOW,
         FILE
     }
-    public class  ModelLoaderParam{
-        String  tableName;
-        String  nameSpace;
-        LoadModelType   loadModelType;
-        String  filePath;
+
+    public class ModelLoaderParam {
+        String tableName;
+        String nameSpace;
+        LoadModelType loadModelType;
+        String filePath;
 
         public String getTableName() {
             return tableName;
@@ -47,10 +52,6 @@ public interface ModelLoader {
             this.filePath = filePath;
         }
     }
-
-    public ModelProcessor loadModel(Context  context,ModelLoaderParam  modelLoaderParam);
-
-    public ModelProcessor restoreModel(Context context, ModelLoaderParam  modelLoaderParam);
 
 
 }

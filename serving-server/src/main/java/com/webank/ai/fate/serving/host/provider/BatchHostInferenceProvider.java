@@ -4,58 +4,55 @@ import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
-import com.webank.ai.fate.serving.model.ModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import java.util.HashMap;
-import java.util.Map;
-@FateService(name ="batchInferenece",  preChain= {
+
+@FateService(name = "batchInferenece", preChain = {
 //        "overloadMonitor",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
         "batchFeatureAdaptorInterceptor"
-      //  "federationRouterService"
-},postChain = {
+        //  "federationRouterService"
+}, postChain = {
         "defaultPostProcess"
 })
 @Service
-public class BatchHostInferenceProvider  extends AbstractServingServiceProvider<BatchInferenceRequest,BatchInferenceResult> {
+public class BatchHostInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {
 
     private static final Logger logger = LoggerFactory.getLogger(BatchHostInferenceProvider.class);
 
     @Override
     public BatchInferenceResult doService(Context context, InboundPackage data, OutboundPackage outboundPackage) {
 
-        BatchHostFederatedParams  batchHostFederatedParams = (BatchHostFederatedParams)data.getBody();
+        BatchHostFederatedParams batchHostFederatedParams = (BatchHostFederatedParams) data.getBody();
 
-        Model model =((ServingServerContext)context).getModel();
+        Model model = ((ServingServerContext) context).getModel();
 
-        BatchInferenceResult batchInferenceResult = model.getModelProcessor().hostBatchInference(context,batchHostFederatedParams);
+        BatchInferenceResult batchInferenceResult = model.getModelProcessor().hostBatchInference(context, batchHostFederatedParams);
 
         return batchInferenceResult;
     }
 
     @Override
-    protected  OutboundPackage<BatchInferenceResult>  serviceFailInner(Context context, InboundPackage<BatchInferenceRequest> data, Throwable e) {
+    protected OutboundPackage<BatchInferenceResult> serviceFailInner(Context context, InboundPackage<BatchInferenceRequest> data, Throwable e) {
 
         OutboundPackage<BatchInferenceResult> outboundPackage = new OutboundPackage<BatchInferenceResult>();
-        BatchInferenceResult  batchInferenceResult = new  BatchInferenceResult();
-        if(e instanceof BaseException){
-            BaseException  baseException = (BaseException) e;
+        BatchInferenceResult batchInferenceResult = new BatchInferenceResult();
+        if (e instanceof BaseException) {
+            BaseException baseException = (BaseException) e;
             batchInferenceResult.setRetcode(baseException.getRetcode());
             batchInferenceResult.setRetmsg(e.getMessage());
-        }else{
+        } else {
             batchInferenceResult.setRetcode(ErrorCode.SYSTEM_ERROR);
             batchInferenceResult.setRetmsg(e.getMessage());
         }
         outboundPackage.setData(batchInferenceResult);
-        return  outboundPackage;
+        return outboundPackage;
     }
 
 }

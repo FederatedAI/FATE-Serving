@@ -35,13 +35,13 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
     Logger logger = LoggerFactory.getLogger(AbstractModelLoader.class);
 
     @Override
-    public ModelProcessor loadModel(Context context, ModelLoaderParam  modelLoaderParam) {
+    public ModelProcessor loadModel(Context context, ModelLoaderParam modelLoaderParam) {
         MODELDATA modelData = doLoadModel(context, modelLoaderParam);
         if (modelData == null) {
             logger.info("load model error, name {} namespace {} ,try to restore from local cache", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
             modelData = restore(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace);
             if (modelData == null) {
-                logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace );
+                logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
             }
         } else {
             this.store(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace, modelData);
@@ -50,17 +50,15 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
     }
 
     @Override
-    public ModelProcessor restoreModel(Context context, ModelLoaderParam  modelLoaderParam) {
+    public ModelProcessor restoreModel(Context context, ModelLoaderParam modelLoaderParam) {
         logger.info("load model error, name {} namespace {} ,try to restore from local cache", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
         MODELDATA modelData = restore(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace);
         if (modelData == null) {
-                logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace );
-                return  null;
+            logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
+            return null;
         }
         return this.initPipeLine(context, modelData);
     }
-
-
 
 
     protected void store(Context context, String name, String namespace, MODELDATA data) {
@@ -161,6 +159,6 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
         return null;
     }
 
-    protected abstract MODELDATA doLoadModel(Context context, ModelLoaderParam  modelLoaderParam);
+    protected abstract MODELDATA doLoadModel(Context context, ModelLoaderParam modelLoaderParam);
 
 }

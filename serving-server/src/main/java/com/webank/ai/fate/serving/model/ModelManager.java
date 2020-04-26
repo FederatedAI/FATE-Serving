@@ -10,7 +10,6 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
-
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.ModelProcessorInitException;
@@ -45,65 +44,17 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
     Environment environment;
     @Autowired
-    ModelLoaderFactory  modelLoaderFactory;
-
-    private ConcurrentMap<String, String> serviceIdNamespaceMap = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, Model> namespaceMap = new ConcurrentHashMap<String, Model>();
-
+    ModelLoaderFactory modelLoaderFactory;
     File serviceIdFile;
     File namespaceFile;
-
     // old version cache file
     File publishLoadStoreFile;
     File publishOnlineStoreFile;
-
     Logger logger = LoggerFactory.getLogger(this.getClass());
-
     ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
-
-    private static class RequestWapper {
-        String content;
-        long timestamp;
-        String md5;
-
-        public RequestWapper(String content, long timestamp, String md5) {
-            this.content = content;
-            this.timestamp = timestamp;
-            this.md5 = md5;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public void setContent(String content) {
-            this.content = content;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        public void setTimestamp(long timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        public String getMd5() {
-            return md5;
-        }
-
-        public void setMd5(String md5) {
-            this.md5 = md5;
-        }
-
-        @Override
-        public String toString() {
-            return content + ":" + timestamp;
-        }
-    }
-
-
+    private ConcurrentMap<String, String> serviceIdNamespaceMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Model> namespaceMap = new ConcurrentHashMap<String, Model>();
 
     public synchronized ModelServiceProto.UnbindResponse unbind(Context context, ModelServiceProto.UnbindRequest req) {
         String serviceId = req.getServiceId();
@@ -112,13 +63,13 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
         logger.info("try to unbind model, service id : {}", serviceId);
 
-        ModelServiceProto.UnbindResponse.Builder  resultBuilder =  ModelServiceProto.UnbindResponse.newBuilder();
+        ModelServiceProto.UnbindResponse.Builder resultBuilder = ModelServiceProto.UnbindResponse.newBuilder();
 
         String modelKey = this.getNameSpaceKey(req.getTableName(), req.getNamespace());
 
         if (!this.namespaceMap.containsKey(modelKey)) {
-            logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.",req.getTableName(),req.getNamespace());
-            throw  new ModelNullException(" found model info, please check if the model is already loaded.");
+            logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", req.getTableName(), req.getNamespace());
+            throw new ModelNullException(" found model info, please check if the model is already loaded.");
 
         }
 
@@ -128,9 +79,9 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
         if (tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
             logger.info("unbind request info is error {}", req);
-            throw  new ModelNullException("unbind request info is error");
+            throw new ModelNullException("unbind request info is error");
         }
-        if(zookeeperRegistry!=null) {
+        if (zookeeperRegistry != null) {
             // unregister
             Set<URL> registered = zookeeperRegistry.getRegistered();
             List<URL> unRegisterUrls = Lists.newArrayList();
@@ -146,7 +97,6 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             }
             logger.info("Unregister urls: {}", unRegisterUrls);
         }
-
 
 
         this.serviceIdNamespaceMap.remove(serviceId);
@@ -232,7 +182,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         // restore 1.2.x model cache
         if (!namespaceFile.exists() && publishLoadStoreFile.exists()) {
             List<RequestWapper> requestWappers = doLoadOldVersionCache(publishLoadStoreFile);
-            if(requestWappers!=null && !requestWappers.isEmpty()) {
+            if (requestWappers != null && !requestWappers.isEmpty()) {
                 requestWappers.forEach((v) -> {
                     try {
                         byte[] data = Base64.getDecoder().decode(v.content.getBytes());
@@ -259,7 +209,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
         if (!serviceIdFile.exists() && publishOnlineStoreFile.exists()) {
             List<RequestWapper> requestWappers = doLoadOldVersionCache(publishOnlineStoreFile);
-            if(requestWappers!=null && !requestWappers.isEmpty()) {
+            if (requestWappers != null && !requestWappers.isEmpty()) {
                 requestWappers.forEach((v) -> {
                     try {
                         byte[] data = Base64.getDecoder().decode(v.content.getBytes());
@@ -285,43 +235,43 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         }
     }
 
-    public synchronized void restore(Context  context ) {
+    public synchronized void restore(Context context) {
 
         // compatible 1.2.x
         restoreOldVersionCache();
 
         ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>();
-         ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<String, Model>();
+        ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<String, Model>();
         doLoadCache(tempNamespaceMap, namespaceFile);
         doLoadCache(tempServiceIdNamespaceMap, serviceIdFile);
 
-        ModelLoader.ModelLoaderParam modelLoaderParam= new  ModelLoader.ModelLoaderParam();
+        ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
 
 
-        ModelLoader  modelLoader = this.modelLoaderFactory.getModelLoader(context,ModelLoader.LoadModelType.FATEFLOW);
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.FATEFLOW);
 
 
-        tempNamespaceMap.forEach((k,model)->{
-            try{
-                modelLoaderParam.setLoadModelType( ModelLoader.LoadModelType.FATEFLOW);
-                modelLoaderParam.setTableName(   model.getTableName());
-                modelLoaderParam.setNameSpace(   model.getNamespace());
-                ModelProcessor modelProcessor = modelLoader.restoreModel(context,  modelLoaderParam);
-                if(modelProcessor!=null) {
+        tempNamespaceMap.forEach((k, model) -> {
+            try {
+                modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+                modelLoaderParam.setTableName(model.getTableName());
+                modelLoaderParam.setNameSpace(model.getNamespace());
+                ModelProcessor modelProcessor = modelLoader.restoreModel(context, modelLoaderParam);
+                if (modelProcessor != null) {
                     model.setModelProcessor(modelProcessor);
-                    namespaceMap.put(k,model);
-                    logger.info("restore model {} success ",k);
+                    namespaceMap.put(k, model);
+                    logger.info("restore model {} success ", k);
                 }
 
-            }catch(Exception e){
-                logger.info("restore model {} error {} ",k,e.getMessage());
+            } catch (Exception e) {
+                logger.info("restore model {} error {} ", k, e.getMessage());
             }
 
         });
 
-        tempServiceIdNamespaceMap.forEach((k,v )->{
-            if(namespaceMap.get(v)!=null){
-                serviceIdNamespaceMap.put(k,v);
+        tempServiceIdNamespaceMap.forEach((k, v) -> {
+            if (namespaceMap.get(v) != null) {
+                serviceIdNamespaceMap.put(k, v);
             }
         });
 
@@ -358,7 +308,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     }
 
     private void registerService(Collection environments) {
-        if(zookeeperRegistry!=null) {
+        if (zookeeperRegistry != null) {
             zookeeperRegistry.addDynamicEnvironment(environments);
             zookeeperRegistry.register(FateServer.serviceSets);
         }
@@ -373,11 +323,11 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
         Model loadedModel = this.namespaceMap.get(modelKey);
         if (loadedModel == null) {
-            throw new ModelNullException("model "+ modelKey+" is not exist ");
+            throw new ModelNullException("model " + modelKey + " is not exist ");
         }
 
         this.serviceIdNamespaceMap.put(serviceId, modelKey);
-        if(zookeeperRegistry!=null) {
+        if (zookeeperRegistry != null) {
             if (StringUtils.isNotEmpty(serviceId)) {
                 zookeeperRegistry.addDynamicEnvironment(serviceId);
             }
@@ -390,75 +340,73 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         return returnResult;
     }
 
-
-    private  Model  buildModel(Context  context, ModelServiceProto.PublishRequest    req){
-        Model  model =  new  Model();
-        String  role = req.getLocal().getRole();
+    private Model buildModel(Context context, ModelServiceProto.PublishRequest req) {
+        Model model = new Model();
+        String role = req.getLocal().getRole();
         model.setPartId(req.getLocal().getPartyId());
-        model.setRole(Dict.GUEST.equals(role)?Dict.GUEST:Dict.HOST);
-        String  serviceId =req.getServiceId();
+        model.setRole(Dict.GUEST.equals(role) ? Dict.GUEST : Dict.HOST);
+        String serviceId = req.getServiceId();
         model.setServiceId(serviceId);
-        Map<String ,ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
-        ModelServiceProto.RoleModelInfo roleModelInfo= modelMap.get(model.getRole().toString());
-        Map<String,ModelServiceProto.ModelInfo> modelInfoMap=  roleModelInfo.getRoleModelInfoMap();
+        Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
+        ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole().toString());
+        Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
 
-        if(model.getRole().equals(Dict.GUEST)) {
+        if (model.getRole().equals(Dict.GUEST)) {
 
             ModelServiceProto.Party hostParty = roleMap.get(Dict.HOST);
-            String  hostPartyId = hostParty.getPartyIdList().get(0);
+            String hostPartyId = hostParty.getPartyIdList().get(0);
 //            ModelServiceProto.RoleModelInfo hostRoleModelInfo= modelMap.get(hostPartyId);
-            ModelServiceProto.RoleModelInfo hostRoleModelInfo= modelMap.get(Dict.HOST);
+            ModelServiceProto.RoleModelInfo hostRoleModelInfo = modelMap.get(Dict.HOST);
 
             ModelServiceProto.ModelInfo hostModelInfo = hostRoleModelInfo.getRoleModelInfoMap().get(hostPartyId);
-            String  hostNamespace = hostModelInfo.getNamespace();
-            String  hostTableName  = hostModelInfo.getTableName();
-            Model  hostModel =  new  Model();
+            String hostNamespace = hostModelInfo.getNamespace();
+            String hostTableName = hostModelInfo.getTableName();
+            Model hostModel = new Model();
             hostModel.setPartId(hostPartyId);
             hostModel.setNamespace(hostNamespace);
             hostModel.setTableName(hostTableName);
-            model.getFederationModelMap().put(hostModel.getPartId(),hostModel);
+            model.getFederationModelMap().put(hostModel.getPartId(), hostModel);
 
         }
-        ModelServiceProto.Party selfParty  = roleMap.get(model.getRole().toString());
+        ModelServiceProto.Party selfParty = roleMap.get(model.getRole().toString());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
         String selfNamespace = selfModelInfo.getNamespace();
         String selfTableName = selfModelInfo.getTableName();
         model.setNamespace(selfNamespace);
         model.setTableName(selfTableName);
-        return  model;
-    };
+        return model;
+    }
 
-
-    public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req ) {
+    public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
         ReturnResult returnResult = new ReturnResult();
         returnResult.setRetcode(InferenceRetCode.OK);
         Model model = this.buildModel(context, req);
 
 
         String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-        ModelLoader.ModelLoaderParam    modelLoaderParam = new ModelLoader.ModelLoaderParam();
+        ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
         // TODO: 2020/4/2  这里没完成
 
-        String  loadType =req.getLoadType();
-        if(StringUtils.isNotEmpty(loadType)){
+        String loadType = req.getLoadType();
+        if (StringUtils.isNotEmpty(loadType)) {
 
-            modelLoaderParam.setLoadModelType( ModelLoader.LoadModelType.valueOf(loadType));
-        }else {
-            modelLoaderParam.setLoadModelType( ModelLoader.LoadModelType.FATEFLOW);
+            modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.valueOf(loadType));
+        } else {
+            modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
         }
 
-        modelLoaderParam.setTableName(   model.getTableName());
-        modelLoaderParam.setNameSpace(   model.getNamespace());
+        modelLoaderParam.setTableName(model.getTableName());
+        modelLoaderParam.setNameSpace(model.getNamespace());
         modelLoaderParam.setFilePath(req.getFilePath());
 
-        ModelLoader  modelLoader = this.modelLoaderFactory.getModelLoader(context,modelLoaderParam.getLoadModelType());
-        Preconditions.checkArgument(modelLoader!=null);
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
+        Preconditions.checkArgument(modelLoader != null);
 
-        ModelProcessor modelProcessor = modelLoader.loadModel(context,modelLoaderParam);
+        ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
         if (modelProcessor == null) {
-                throw  new ModelProcessorInitException();
+            throw new ModelProcessorInitException();
         }
         model.setModelProcessor(modelProcessor);
 
@@ -483,45 +431,46 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
     }
 
-    public String queryModel(Context context,ModelServiceProto.QueryModelRequest  queryModelRequest){
+    ;
 
-        int  queryType = queryModelRequest.getQueryType();
+    public String queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
+
+        int queryType = queryModelRequest.getQueryType();
         String tableName = queryModelRequest.getTableName();
         String namespace = queryModelRequest.getNamespace();
-        switch (queryType){
+        switch (queryType) {
             case 0:
                 return JSON.toJSONString(listAllModel());
             case 1:
                 return JSON.toJSONString(this.serviceIdNamespaceMap);
 
         }
-        return  null;
+        return null;
 
     }
 
-
-    public Model  getModelByServiceId(String serviceId){
-        String  namespaceKey =  serviceIdNamespaceMap.get(serviceId);
+    public Model getModelByServiceId(String serviceId) {
+        String namespaceKey = serviceIdNamespaceMap.get(serviceId);
         return this.namespaceMap.get(namespaceKey);
     }
 
     /**
      * 获取所有模型信息
+     *
      * @return
      */
     public List<Model> listAllModel() {
         return new ArrayList(this.namespaceMap.values());
     }
 
-    public Model getModelByTableNameAndNamespace(String  tableName ,String  namespace){
-        String key =  getNameSpaceKey(tableName, namespace);
+    public Model getModelByTableNameAndNamespace(String tableName, String namespace) {
+        String key = getNameSpaceKey(tableName, namespace);
         return namespaceMap.get(key);
     }
 
+    private String getNameSpaceKey(String tableName, String namespace) {
 
-    private  String getNameSpaceKey (String tableName,String namespace ){
-
-        return  new  StringBuilder().append(tableName).append("_").append(namespace).toString();
+        return new StringBuilder().append(tableName).append("_").append(namespace).toString();
     }
 
     public synchronized ReturnResult unload(String tableName, String namespace) {
@@ -613,7 +562,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                     lock.release();
                 }
             }
-            logger.info("save cache file {} success",file.getAbsolutePath());
+            logger.info("save cache file {} success", file.getAbsolutePath());
         } catch (Throwable e) {
             logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
         }
@@ -647,7 +596,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     @Override
     public void afterPropertiesSet() throws Exception {
         String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
-        logger.info("user home is {} , try to find model cache",locationPre);
+        logger.info("user home is {} , try to find model cache", locationPre);
         if (StringUtils.isNotEmpty(locationPre)) {
             // new version
             String loadModelStoreFileName = locationPre + "/.fate/loadModelStore.cache";
@@ -670,6 +619,47 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
+    }
+
+    private static class RequestWapper {
+        String content;
+        long timestamp;
+        String md5;
+
+        public RequestWapper(String content, long timestamp, String md5) {
+            this.content = content;
+            this.timestamp = timestamp;
+            this.md5 = md5;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        public String getMd5() {
+            return md5;
+        }
+
+        public void setMd5(String md5) {
+            this.md5 = md5;
+        }
+
+        @Override
+        public String toString() {
+            return content + ":" + timestamp;
+        }
     }
 
 }

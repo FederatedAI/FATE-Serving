@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-public class AbstractInterceptor<req,resp> implements Interceptor<req,resp>, EnvironmentAware {
+public class AbstractInterceptor<req, resp> implements Interceptor<req, resp>, EnvironmentAware {
 
     protected Environment environment;
 
@@ -33,9 +33,9 @@ public class AbstractInterceptor<req,resp> implements Interceptor<req,resp>, Env
         this.environment = environment;
     }
 
-    protected  boolean  checkAddress(String  address){
+    protected boolean checkAddress(String address) {
 
-        return  address.indexOf(":")>0;
+        return address.indexOf(":") > 0;
     }
 
 

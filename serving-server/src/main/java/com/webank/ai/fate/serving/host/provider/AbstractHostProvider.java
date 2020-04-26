@@ -7,13 +7,13 @@ import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 
 import java.util.List;
 
-public abstract  class AbstractHostProvider<req,resp>   extends AbstractServiceAdaptor<req,resp>{
+public abstract class AbstractHostProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
 
     @Override
-    public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws RuntimeException{
+    public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws RuntimeException {
 
         Throwable e = errors.get(0);
-        return  serviceFailInner(context,data,e);
+        return serviceFailInner(context, data, e);
 
     }
 }

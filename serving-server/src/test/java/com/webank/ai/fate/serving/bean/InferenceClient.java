@@ -13,14 +13,12 @@ import java.util.concurrent.TimeUnit;
 
 public class InferenceClient {
 
-    public   InferenceClient(String ip,Integer port){
-            this.ip = ip;
-            this.port = port;
+    protected String ip;
+    protected Integer port;
+    public InferenceClient(String ip, Integer port) {
+        this.ip = ip;
+        this.port = port;
     }
-
-    protected  String    ip;
-    protected  Integer   port;
-
 
     public static ManagedChannel createManagedChannel(String ip, int port) throws Exception {
 
@@ -46,10 +44,10 @@ public class InferenceClient {
     }
 
 
-    public   InferenceServiceProto.InferenceMessage  batchInference(byte[]  data){
-        ManagedChannel  managedChannel=null;
+    public InferenceServiceProto.InferenceMessage batchInference(byte[] data) {
+        ManagedChannel managedChannel = null;
         try {
-            managedChannel =  createManagedChannel(ip,port);
+            managedChannel = createManagedChannel(ip, port);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,14 +58,14 @@ public class InferenceClient {
 
         inferenceMessageBuilder.setBody(ByteString.copyFrom(data));
 
-        return  blockingStub.batchInference(inferenceMessageBuilder.build());
+        return blockingStub.batchInference(inferenceMessageBuilder.build());
 
     }
 
-    public   InferenceServiceProto.InferenceMessage  inference(byte[]  data){
-        ManagedChannel  managedChannel=null;
+    public InferenceServiceProto.InferenceMessage inference(byte[] data) {
+        ManagedChannel managedChannel = null;
         try {
-          managedChannel =  createManagedChannel(ip,port);
+            managedChannel = createManagedChannel(ip, port);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,16 +76,15 @@ public class InferenceClient {
 
         inferenceMessageBuilder.setBody(ByteString.copyFrom(data));
 
-        return  blockingStub.inference(inferenceMessageBuilder.build());
+        return blockingStub.inference(inferenceMessageBuilder.build());
 
     }
 
 
-
-    public  ModelServiceProto.PublishResponse  load(ModelServiceProto.PublishRequest publishRequest){
-        ManagedChannel  managedChannel=null;
+    public ModelServiceProto.PublishResponse load(ModelServiceProto.PublishRequest publishRequest) {
+        ManagedChannel managedChannel = null;
         try {
-            managedChannel =  createManagedChannel(ip,port);
+            managedChannel = createManagedChannel(ip, port);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -95,14 +92,14 @@ public class InferenceClient {
 
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
 
-        return  blockingStub.publishLoad(publishRequest);
+        return blockingStub.publishLoad(publishRequest);
 
     }
 
-    public  ModelServiceProto.PublishResponse  bind(ModelServiceProto.PublishRequest publishRequest){
-        ManagedChannel  managedChannel=null;
+    public ModelServiceProto.PublishResponse bind(ModelServiceProto.PublishRequest publishRequest) {
+        ManagedChannel managedChannel = null;
         try {
-            managedChannel =  createManagedChannel(ip,port);
+            managedChannel = createManagedChannel(ip, port);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,14 +107,9 @@ public class InferenceClient {
 
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
 
-        return  blockingStub.publishBind(publishRequest);
+        return blockingStub.publishBind(publishRequest);
 
     }
-
-
-
-
-
 
 
 }

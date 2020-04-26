@@ -21,10 +21,11 @@ import java.util.Map;
 
 public class BatchFeatureResult {
 
-    String  caseId;
-    public  static class   SingleFeatureResult{
-        int  retcode;
-        int  index;
-        Map<String,Object>  data;
+    String caseId;
+
+    public static class SingleFeatureResult {
+        int retcode;
+        int index;
+        Map<String, Object> data;
     }
 }

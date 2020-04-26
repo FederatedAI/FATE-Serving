@@ -22,9 +22,10 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
-import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
@@ -45,12 +46,13 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     SingleGuestInferenceProvider singleGuestInferenceProvider;
     @Autowired
     MetricRegistry metricRegistry;
+
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = "inference")
     public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
-        Context  context = prepareContext();
+        Context context = prepareContext();
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
@@ -63,10 +65,10 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 
 
     @Override
-    @RegisterService(serviceName = "getInferenceResult" ,useDynamicEnvironment = true)
+    @RegisterService(serviceName = "getInferenceResult", useDynamicEnvironment = true)
     @Deprecated
     public void getInferenceResult(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
-        
+
     }
 
     @Override
@@ -80,7 +82,7 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     @RegisterService(useDynamicEnvironment = true, serviceName = "batchInference")
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        Context  context = prepareContext();
+        Context context = prepareContext();
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
@@ -93,13 +95,12 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     }
 
 
-
-    private  Context  prepareContext(){
+    private Context prepareContext() {
 
         ServingServerContext context = new ServingServerContext();
         context.setMetricRegistry(this.metricRegistry);
         //context.preProcess();
-        return  context;
+        return context;
     }
 
 

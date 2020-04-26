@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.exceptions.GuestInvalidParamException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
@@ -18,30 +17,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  *
  */
 @Service
-public class GuestBatchParamInterceptor     implements Interceptor {
+public class GuestBatchParamInterceptor implements Interceptor {
 
     Logger logger = LoggerFactory.getLogger(GuestBatchParamInterceptor.class);
 
     @Autowired
     Environment environment;
+
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
-        byte[]  reqBody = (byte[])inboundPackage.getBody();
-        BatchInferenceRequest batchInferenceRequest =null;
+        byte[] reqBody = (byte[]) inboundPackage.getBody();
+        BatchInferenceRequest batchInferenceRequest = null;
 
         try {
 
-            InferenceServiceProto.InferenceMessage   message=   InferenceServiceProto.InferenceMessage.parseFrom(reqBody);
+            InferenceServiceProto.InferenceMessage message = InferenceServiceProto.InferenceMessage.parseFrom(reqBody);
 
-            batchInferenceRequest = JSON.parseObject(       message.getBody().toByteArray(), BatchInferenceRequest.class);
-            logger.info("batch inference request {}",batchInferenceRequest);
+            batchInferenceRequest = JSON.parseObject(message.getBody().toByteArray(), BatchInferenceRequest.class);
+            logger.info("batch inference request {}", batchInferenceRequest);
             inboundPackage.setBody(batchInferenceRequest);
             Preconditions.checkArgument(batchInferenceRequest != null, "request message parse error");
 //            Preconditions.checkArgument(inferenceRequest.getFeatureData() != null, "no feature data");
@@ -52,8 +50,8 @@ public class GuestBatchParamInterceptor     implements Interceptor {
             }
             context.setCaseId(batchInferenceRequest.getCaseid());
             context.setServiceId(batchInferenceRequest.getServiceId());
-        }catch(Exception e){
-            throw  new GuestInvalidParamException(e.getMessage());
+        } catch (Exception e) {
+            throw new GuestInvalidParamException(e.getMessage());
         }
 
 

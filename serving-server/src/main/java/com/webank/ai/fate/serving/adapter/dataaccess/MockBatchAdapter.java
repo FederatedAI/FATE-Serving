@@ -17,12 +17,9 @@
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
 
-import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,7 +58,7 @@ public class MockBatchAdapter implements BatchFeatureDataAdaptor {
     @Override
     public BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList) {
 
-        BatchHostFeatureAdaptorResult  batchHostFeatureAdaptorResult = new  BatchHostFeatureAdaptorResult();
+        BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = new BatchHostFeatureAdaptorResult();
 
         featureIdList.forEach(singleInferenceData -> {
             Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult> indexMap = batchHostFeatureAdaptorResult.getIndexResultMap();
@@ -71,10 +68,10 @@ public class MockBatchAdapter implements BatchFeatureDataAdaptor {
                 String[] a = StringUtils.split(kv, ":");
                 data.put(a[0], Double.valueOf(a[1]));
             }
-            BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult  singleBatchHostFeatureAdaptorResult = new BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult();
+            BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult singleBatchHostFeatureAdaptorResult = new BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult();
             singleBatchHostFeatureAdaptorResult.setFeatures(data);
             singleBatchHostFeatureAdaptorResult.setRetcode(StatusCode.SUCCESS);
-            indexMap.put(singleInferenceData.getIndex(),singleBatchHostFeatureAdaptorResult);
+            indexMap.put(singleInferenceData.getIndex(), singleBatchHostFeatureAdaptorResult);
 
         });
 

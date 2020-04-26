@@ -15,33 +15,31 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-public abstract  class AbstractServingServiceProvider<req,resp>   extends AbstractServiceAdaptor<req,resp>{
+public abstract class AbstractServingServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
 
     @Override
-    protected  resp  transformErrorMap(Context context, Map  data)
-    {
-        return  null;
+    protected resp transformErrorMap(Context context, Map data) {
+        return null;
     }
 
 
-
     @Override
-    protected  resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage){
+    protected resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage) {
 
-        Map<String,Method> methodMap = this.getMethodMap();
-        String  actionType = context.getActionType();
+        Map<String, Method> methodMap = this.getMethodMap();
+        String actionType = context.getActionType();
         Method method = methodMap.get(actionType);
         resp result = null;
         try {
-            result = (resp)method.invoke(this,context,data);
+            result = (resp) method.invoke(this, context, data);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-            throw  new  SysException(e.getMessage());
+            throw new SysException(e.getMessage());
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-            throw  new  SysException(e.getMessage());
+            throw new SysException(e.getMessage());
         }
-        return  result;
+        return result;
 
 
     }
@@ -63,16 +61,6 @@ public abstract  class AbstractServingServiceProvider<req,resp>   extends Abstra
 
         return result;
     }
-
-
-
-
-
-
-
-
-
-
 
 
 //    public class InferenceRetCode {

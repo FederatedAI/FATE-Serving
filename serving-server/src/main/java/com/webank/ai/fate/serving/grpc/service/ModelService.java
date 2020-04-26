@@ -26,7 +26,6 @@ import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishResponse;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.common.provider.ModelServiceProvider;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -43,8 +42,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
-
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements /*InitializingBean,*/EnvironmentAware {
     private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
@@ -52,9 +49,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Autowired
     ModelManager modelManager;
     @Autowired
-    ModelServiceProvider  modelServiceProvider ;
+    ModelServiceProvider modelServiceProvider;
     @Autowired
-    MetricRegistry  metricRegistry;
+    MetricRegistry metricRegistry;
 
     Environment environment;
 
@@ -173,16 +170,16 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 //        }
 
 
-        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_LOAD.name(),metricRegistry);
+        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_LOAD.name(), metricRegistry);
 
         context.preProcess();
         ReturnResult returnResult = null;
 
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
-            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            context.putData(Dict.SERVICE_ID, req.getServiceId());
 
-            returnResult = modelManager.load(context,req);
+            returnResult = modelManager.load(context, req);
             /*returnResult = modelManager.publishLoadModel(context,
                     new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
                     ModelUtil.getFederatedRoles(req.getRoleMap()),
@@ -207,16 +204,15 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
+        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_PUBLISH_ONLINE.name(), metricRegistry);
         context.preProcess();
         ReturnResult returnResult = null;
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
-            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            context.putData(Dict.SERVICE_ID, req.getServiceId());
             if (logger.isDebugEnabled()) {
                 logger.debug("receive service id {}", req.getServiceId());
             }
-
 
 
             returnResult = modelManager.bind(context, req);
@@ -245,12 +241,12 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "publishBind")
     public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(),ModelActionType.MODEL_PUBLISH_ONLINE.name(),metricRegistry);
+        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_PUBLISH_ONLINE.name(), metricRegistry);
         context.preProcess();
         ReturnResult returnResult = null;
         try {
             PublishResponse.Builder builder = PublishResponse.newBuilder();
-            context.putData(Dict.SERVICE_ID,req.getServiceId());
+            context.putData(Dict.SERVICE_ID, req.getServiceId());
             if (logger.isDebugEnabled()) {
                 logger.debug("publishBind receive service id {}", context.getData(Dict.SERVICE_ID));
             }
@@ -315,8 +311,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     public synchronized void unbind(ModelServiceProto.UnbindRequest request, StreamObserver<ModelServiceProto.UnbindResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNBIND.name(), metricRegistry);
         InboundPackage<ModelServiceProto.UnbindRequest> inboundPackage = new InboundPackage();
-        OutboundPackage outboundPackage =modelServiceProvider.service(context,inboundPackage);
-        ModelServiceProto.UnbindResponse unbindResponse = (ModelServiceProto.UnbindResponse)outboundPackage.getData();
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.UnbindResponse unbindResponse = (ModelServiceProto.UnbindResponse) outboundPackage.getData();
         responseObserver.onNext(unbindResponse);
         responseObserver.onCompleted();
 
@@ -604,7 +600,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
             });
         }*/
-   // }
+    // }
 
     /*@Override
     public void afterPropertiesSet() throws Exception {
@@ -618,8 +614,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         context.setActionType("QUERY_MODEL");
-        OutboundPackage outboundPackage =modelServiceProvider.service(context,inboundPackage);
-        ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse)outboundPackage.getData();
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse) outboundPackage.getData();
         responseObserver.onNext(queryModelResponse);
         responseObserver.onCompleted();
     }

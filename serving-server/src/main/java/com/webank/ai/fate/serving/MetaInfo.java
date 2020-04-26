@@ -6,7 +6,7 @@ import java.util.List;
 
 public class MetaInfo {
 
-    static  long  currentVersion = 200;
+    static long currentVersion = 200;
 
     static List<AdaptorDescriptor.ParamDescriptor> inferenceParamDescriptorList;
 

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.common.interceptors;
 
-import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -32,44 +31,42 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class FederationRouterInterceptor  extends  AbstractInterceptor {
+public class FederationRouterInterceptor extends AbstractInterceptor {
 
     @Autowired(required = false)
-    RouterService   routerService;
-
-
+    RouterService routerService;
 
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        String version =  environment.getProperty(Dict.VERSION,"");
-        RouterInfo   routerInfo =  new RouterInfo();
+        String version = environment.getProperty(Dict.VERSION, "");
+        RouterInfo routerInfo = new RouterInfo();
         String address = null;
-        if (routerService==null) {
-                address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
-                if(!checkAddress(address)){
-                    throw  new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR,"address is error in config file");
-                }
-                String[] args  =address.split(":");
-                routerInfo.setHost(args[0]);
-                routerInfo.setPort(new Integer(args[1]));
-            } else {
+        if (routerService == null) {
+            address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+            if (!checkAddress(address)) {
+                throw new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR, "address is error in config file");
+            }
+            String[] args = address.split(":");
+            routerInfo.setHost(args[0]);
+            routerInfo.setPort(new Integer(args[1]));
+        } else {
 //                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
 //                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
 //                List<URL> urls = routerService.router(newUrl);
 
-                List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS,Dict.ONLINE_ENVIROMMENT,Dict.UNARYCALL);
-                if (urls!=null&&urls.size() > 0) {
-                    URL url = urls.get(0);
-                    String ip = url.getHost();
-                    int port = url.getPort();
-                    routerInfo.setHost(ip);
-                    routerInfo.setPort(port);
-                }else{
-                    // TODO: 2020/3/16   这里错误另外定制
-                    throw new NoRouteInfoException(Dict.PROPERTY_PROXY_ADDRESS,"address is error");
-                }
+            List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIROMMENT, Dict.UNARYCALL);
+            if (urls != null && urls.size() > 0) {
+                URL url = urls.get(0);
+                String ip = url.getHost();
+                int port = url.getPort();
+                routerInfo.setHost(ip);
+                routerInfo.setPort(port);
+            } else {
+                // TODO: 2020/3/16   这里错误另外定制
+                throw new NoRouteInfoException(Dict.PROPERTY_PROXY_ADDRESS, "address is error");
             }
+        }
         context.setRouterInfo(routerInfo);
     }
 }

@@ -22,7 +22,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 
 import java.util.List;
 
-public interface BatchFeatureDataAdaptor  extends  AdaptorDescriptor{
+public interface BatchFeatureDataAdaptor extends AdaptorDescriptor {
 
-    BatchHostFeatureAdaptorResult getFeatures(Context context , List<BatchHostFederatedParams.SingleInferenceData>  featureIdList);
+    BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList);
 }

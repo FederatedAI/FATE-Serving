@@ -20,11 +20,11 @@ import java.util.List;
 
 public interface AdaptorDescriptor {
 
-    public static  class  ParamDescriptor{
-        String  keyName;
-        String  keyType;
+    public List<ParamDescriptor> desc();
+
+    public static class ParamDescriptor {
+        String keyName;
+        String keyType;
         boolean isRequired;
     }
-
-    public List<ParamDescriptor>  desc();
 }

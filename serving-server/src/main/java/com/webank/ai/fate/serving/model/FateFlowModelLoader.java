@@ -39,10 +39,10 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class FateFlowModelLoader extends AbstractModelLoader<Map<String,byte[]>> {
+public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>> {
     private static final Logger logger = LoggerFactory.getLogger(FateFlowModelLoader.class);
 
-    @Autowired(required=false)
+    @Autowired(required = false)
     private RouterService routerService;
 
     @Autowired
@@ -50,28 +50,28 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String,byte[]>>
 
     @Override
     protected byte[] serialize(Context context, Map<String, byte[]> data) {
-        Map<String,String> result = Maps.newHashMap();
-        if(data!=null){
-            data.forEach((k,v)->{
-                    String base64String = new String(Base64.getEncoder().encode(v));
-                    result.put(k,base64String);
+        Map<String, String> result = Maps.newHashMap();
+        if (data != null) {
+            data.forEach((k, v) -> {
+                String base64String = new String(Base64.getEncoder().encode(v));
+                result.put(k, base64String);
             });
-            return  JSON.toJSONString(result).getBytes();
+            return JSON.toJSONString(result).getBytes();
         }
         return null;
     }
 
     @Override
     protected Map<String, byte[]> unserialize(Context context, byte[] data) {
-        Map<String,byte[]> result = Maps.newHashMap();
-        if(data !=null) {
+        Map<String, byte[]> result = Maps.newHashMap();
+        if (data != null) {
             String dataString = new String(data);
-            Map originData = JSON.parseObject(dataString,Map.class);
-            if(originData!=null){
-                originData.forEach((k,v)->{
-                    result.put(k.toString(),Base64.getDecoder().decode(v.toString()));
+            Map originData = JSON.parseObject(dataString, Map.class);
+            if (originData != null) {
+                originData.forEach((k, v) -> {
+                    result.put(k.toString(), Base64.getDecoder().decode(v.toString()));
                 });
-                return  result;
+                return result;
             }
         }
         return null;
@@ -79,24 +79,23 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String,byte[]>>
 
     @Override
     protected ModelProcessor initPipeLine(Context context, Map<String, byte[]> stringMap) {
-        if(stringMap!=null) {
-            PipelineModelProcessor  modelProcessor =  new PipelineModelProcessor();
+        if (stringMap != null) {
+            PipelineModelProcessor modelProcessor = new PipelineModelProcessor();
             modelProcessor.initModel(stringMap);
             return modelProcessor;
-        }
-        else{
-            return  null;
+        } else {
+            return null;
         }
     }
 
     @Override
-    protected    Map<String, byte[]> doLoadModel(Context context,ModelLoaderParam  modelLoaderParam) {
+    protected Map<String, byte[]> doLoadModel(Context context, ModelLoaderParam modelLoaderParam) {
 
-        logger.info("read model, name: {} namespace: {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace);
+        logger.info("read model, name: {} namespace: {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
         try {
             String requestUrl = "";
 
-            if (routerService!=null) {
+            if (routerService != null) {
                 URL url = URL.valueOf("flow/online/transfer");
                 List<URL> urls = routerService.router(url);
                 if (urls == null || urls.isEmpty()) {
@@ -130,20 +129,20 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String,byte[]>>
             }
 
             if (StringUtils.isEmpty(responseBody)) {
-                logger.info("read model fail, {}, {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace);
+                logger.info("read model fail, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
                 return null;
             }
 
             JSONObject responseData = JSONObject.parseObject(responseBody);
             if (responseData.getInteger("retcode") != 0) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace, responseData.getString("retmsg"));
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.getString("retmsg"));
                 return null;
             }
 
             Map<String, byte[]> resultMap = new HashMap<>();
             Map<String, Object> dataMap = responseData.getJSONObject("data");
             if (dataMap == null || dataMap.isEmpty()) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName , modelLoaderParam.nameSpace, dataMap);
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);
                 return null;
             }
 
