@@ -1,0 +1,10 @@
+[
+  {
+    "userAuthKey": "test",
+    "componentName": "serving-server"
+  },
+  {
+    "userAuthKey": "test",
+    "componentName": "serving-proxy"
+  }
+]

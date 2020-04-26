@@ -128,10 +128,9 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
             } else {
                 costTime = System.currentTimeMillis() - timestamp;
             }
-            if (loggerPrinter != null) {
-                loggerPrinter.printLog(this, req, resp);
-            }
-
+//            if (loggerPrinter != null) {
+//                loggerPrinter.printLog(this, req, resp);
+//            }
         } catch (Throwable e) {
             logger.error("postProcess error", e);
         }

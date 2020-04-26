@@ -28,7 +28,6 @@ import java.util.concurrent.Future;
         "monitorInterceptor"
 })
 @Service
-@Deprecated
 public class SingleGuestInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;

@@ -32,6 +32,8 @@
         <module>serving-proxy</module>
         <module>fate-metrics-api</module>
         <module>fate-metrics-micrometer</module>
+        <module>fate-serving-monitor</module>
+        <module>fate-serving-admin</module>
     </modules>
 
     <properties>
@@ -282,6 +284,27 @@
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-devtools</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+
+
+
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>

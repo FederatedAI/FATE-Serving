@@ -185,7 +185,7 @@ public class Dict {
     // event
     public static final String EVENT_INFERENCE = "inference";
     public static final String EVENT_UNARYCALL = "unaryCall";
-
+    
     public static final String LOCAL_INFERENCE_DATA = "localInferenceData";
     public static final String REMOTE_INFERENCE_DATA = "remoteInferenceData";
 
@@ -194,5 +194,10 @@ public class Dict {
     public static final String REMOTE_METHOD_BATCH ="batch";
     public static final String MODEL_NAME_SPACE ="modelNameSpace";
     public static final String MODEL_TABLE_NAME = "modelTableName";
+    public static final String REGISTER_PROJECT = "admin";
+    public static final String REGISTER_ENVIRONMENT = "online";
+    public static final String SERVICE_SERVING = "serving";
+    public static final String SERVICE_PROXY = "proxy";
+    public static final String FAILED = "failed";
 
 }
