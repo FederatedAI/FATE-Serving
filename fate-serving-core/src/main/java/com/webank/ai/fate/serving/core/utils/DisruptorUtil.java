@@ -47,7 +47,7 @@ public class DisruptorUtil {
      * args[2] data params
      * @param args
      */
-    public static void producer(Object... args){
+    public static void producer(AsyncMessageEvent... args){
         RingBuffer<AsyncMessageEvent> ringBuffer = disruptor.getRingBuffer();
         AsyncMessageEventProducer producer = new AsyncMessageEventProducer(ringBuffer);
         producer.publishEvent(args);

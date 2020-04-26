@@ -13,11 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @FateService(name = "batchInferenece", preChain = {
-//        "overloadMonitor",
+        "overloadMonitor",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
         "batchFeatureAdaptorInterceptor"
-        //  "federationRouterService"
 }, postChain = {
         "defaultPostProcess"
 })
@@ -28,19 +27,14 @@ public class BatchHostInferenceProvider extends AbstractServingServiceProvider<B
 
     @Override
     public BatchInferenceResult doService(Context context, InboundPackage data, OutboundPackage outboundPackage) {
-
         BatchHostFederatedParams batchHostFederatedParams = (BatchHostFederatedParams) data.getBody();
-
         Model model = ((ServingServerContext) context).getModel();
-
         BatchInferenceResult batchInferenceResult = model.getModelProcessor().hostBatchInference(context, batchHostFederatedParams);
-
         return batchInferenceResult;
     }
 
     @Override
     protected OutboundPackage<BatchInferenceResult> serviceFailInner(Context context, InboundPackage<BatchInferenceRequest> data, Throwable e) {
-
         OutboundPackage<BatchInferenceResult> outboundPackage = new OutboundPackage<BatchInferenceResult>();
         BatchInferenceResult batchInferenceResult = new BatchInferenceResult();
         if (e instanceof BaseException) {

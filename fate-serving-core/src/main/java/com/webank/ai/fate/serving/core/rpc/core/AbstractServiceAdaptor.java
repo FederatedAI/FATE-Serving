@@ -8,12 +8,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
 
 
 import com.webank.ai.fate.serving.core.model.Model;
+import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
 import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +155,8 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             exceptions.add(e);
             e.printStackTrace();
             logger.error(e.getMessage());
+
+
         } finally {
 
             requestInHandle.decrementAndGet();
@@ -162,6 +166,17 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             if(exceptions.size()!=0){
                 try {
                     outboundPackage = this.serviceFail(context, data, exceptions);
+
+                    AsyncMessageEvent  messageEvent = new AsyncMessageEvent();
+
+                    messageEvent.setName("error");
+                    messageEvent.setTimestamp(end);
+                    messageEvent.setAction(context.getActionType());
+                   // messageEvent.setIp();
+                    messageEvent.setData("");
+                    DisruptorUtil.producer();
+
+
                 }catch(Throwable e){
                     logger.error("handle serviceFail error",e);
                 }
@@ -201,9 +216,14 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
         logger.error("serviceFail {}", errors);
         Throwable e = errors.get(0);
+
         return  serviceFailInner(context,data,e);
 
     }
+
+
+
+
 
     abstract  protected  resp  transformErrorMap(Context context,Map  data);
 

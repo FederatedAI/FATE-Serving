@@ -31,24 +31,20 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
         if (StringUtils.isBlank(serviceName)) {
             serverCall.close(Status.DATA_LOSS, metadata);
         }
-
         ServerCall.Listener<ReqT> delegate = serverCallHandler.startCall(serverCall, metadata);
         return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(delegate) {
 
             @Override
             public void onHalfClose() {
                 try {
-
                     super.onHalfClose();
                 } catch (Exception e) {
                     logger.error("ServiceException:", e);
                     serverCall.close(Status.CANCELLED.withCause(e).withDescription(e.getMessage()), metadata);
                 }
             }
-
             @Override
             public void onCancel() {
-
                 super.onCancel();
             }
 
@@ -56,7 +52,6 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
             public void onComplete() {
 
                 super.onComplete();
-//                WatchDog.getCount();
             }
         };
     }

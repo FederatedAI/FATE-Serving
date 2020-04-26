@@ -16,15 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @FateService(name = "HostInferenceProvider", preChain = {
-//        "overloadMonitor",
-
+        "overloadMonitor",
         "hostParamInterceptor",
         "hostModelInterceptor"
 }, postChain = {
         "defaultPostProcess"
 })
 @Service
-public class OldVersionHostInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
+public class SingleHostInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
 
     private static final Logger logger = LoggerFactory.getLogger(BatchHostInferenceProvider.class);
 
@@ -43,16 +42,10 @@ public class OldVersionHostInferenceProvider extends AbstractServingServiceProvi
     public ReturnResult federatedInference(Context context, InboundPackage<InferenceRequest> data) {
 
         InferenceRequest params = data.getBody();
-
         Map<String, Object> featureData = params.getFeatureData();
-
         Model model = ((ServingServerContext) context).getModel();
-
         ModelProcessor modelProcessor = model.getModelProcessor();
-
         ReturnResult result = modelProcessor.hostInference(context, params);
-
-
         return result;
 
     }
@@ -61,27 +54,15 @@ public class OldVersionHostInferenceProvider extends AbstractServingServiceProvi
     public ReturnResult federatedInference4Tree(Context context, InboundPackage<Map> data) {
 
         Map params = data.getBody();
-
         Model model = ((ServingServerContext) context).getModel();
-
         Object componentObject = model.getModelProcessor().getComponent(params.get(Dict.COMPONENT_NAME).toString());
-
         Preconditions.checkArgument(componentObject != null);
-
         HeteroSecureBoostingTreeHost heteroSecureBoostingTreeHost = (HeteroSecureBoostingTreeHost) componentObject;
-
         Map<String, Object> map = heteroSecureBoostingTreeHost.predictSingleRound(context, (Map<String, Object>) params.get(Dict.TREE_LOCATION));
-
         ReturnResult result = new ReturnResult();
-
         result.setRetcode(StatusCode.SUCCESS);
-
         result.setData(map);
-
-
         return result;
-
-
     }
 
 

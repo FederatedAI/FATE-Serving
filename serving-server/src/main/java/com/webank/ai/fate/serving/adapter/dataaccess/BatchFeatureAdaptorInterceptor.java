@@ -36,7 +36,6 @@ public class BatchFeatureAdaptorInterceptor extends AbstractInterceptor<BatchInf
         });
         logger.info("after get features from local, batchInferenceRequest is {}", batchInferenceRequest);
     }
-
     ;
 
     @Override
