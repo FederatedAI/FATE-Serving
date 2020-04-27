@@ -19,4 +19,9 @@ public class DefaultAsyncMessageProcessor extends AbstractAsyncMessageProcessor 
         logger.info("Process unaryCall event..");
     }
 
+    @Subscribe(Dict.EVENT_ERROR)
+    public void processErrorEvent(AsyncMessageEvent event) {
+        logger.info("Process error event..");
+    }
+
 }

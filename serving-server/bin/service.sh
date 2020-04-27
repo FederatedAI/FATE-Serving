@@ -20,8 +20,10 @@
 #export PATH=$PATH:$JAVA_HOME/bin
 set -e 
 source ./bin/common.sh
+basepath=$(cd `dirname $0`;pwd)
+configpath=$(cd $basepath/conf;pwd)
 module=serving-server
-main_class=com.webank.ai.fate.serving.ServingServer
+main_class=com.webank.ai.fate.serving.Bootstrap
 module_version=1.2.0
 
 

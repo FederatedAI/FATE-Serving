@@ -185,7 +185,8 @@ public class Dict {
     // event
     public static final String EVENT_INFERENCE = "inference";
     public static final String EVENT_UNARYCALL = "unaryCall";
-    
+    public static final String EVENT_ERROR = "error";
+
     public static final String LOCAL_INFERENCE_DATA = "localInferenceData";
     public static final String REMOTE_INFERENCE_DATA = "remoteInferenceData";
 
