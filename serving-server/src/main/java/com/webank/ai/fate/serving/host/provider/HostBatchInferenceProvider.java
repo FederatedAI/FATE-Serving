@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
         "requestOverloadBreaker",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
-        "batchFeatureAdaptorInterceptor"
+        "hostBatchFeatureAdaptorInterceptor"
 }, postChain = {
         "monitorInterceptor"
 })
