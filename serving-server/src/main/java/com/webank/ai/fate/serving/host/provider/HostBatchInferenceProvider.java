@@ -13,17 +13,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @FateService(name = "batchInferenece", preChain = {
-        "overloadMonitor",
+        "monitorInterceptor",
+        "requestOverloadBreaker",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
         "batchFeatureAdaptorInterceptor"
 }, postChain = {
-        "defaultPostProcess"
+        "monitorInterceptor"
 })
 @Service
-public class BatchHostInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {
+public class HostBatchInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {
 
-    private static final Logger logger = LoggerFactory.getLogger(BatchHostInferenceProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(HostBatchInferenceProvider.class);
 
     @Override
     public BatchInferenceResult doService(Context context, InboundPackage data, OutboundPackage outboundPackage) {

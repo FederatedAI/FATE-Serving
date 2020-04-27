@@ -20,16 +20,17 @@ import java.util.Map;
 
 
 @FateService(name = "batchInferenece", preChain = {
-        // "overloadMonitor",
+        "monitorInterceptor",
+        "requestOverloadBreaker",
         "guestBatchParamInterceptor",
         "guestModelInterceptor",
         "federationRouterInterceptor"
 }, postChain = {
-        //"cache",
+        "monitorInterceptor"
 
 })
 @Service
-public class BatchGuestInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {
+public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {
 
     final long DEFAULT_TIME_OUT = 3000;
     @Autowired

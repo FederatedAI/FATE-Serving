@@ -29,8 +29,8 @@ import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.guest.provider.BatchGuestInferenceProvider;
-import com.webank.ai.fate.serving.guest.provider.SingleGuestInferenceProvider;
+import com.webank.ai.fate.serving.guest.provider.GuestBatchInferenceProvider;
+import com.webank.ai.fate.serving.guest.provider.GuestSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,25 +38,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
-    private static final Logger logger = LoggerFactory.getLogger(InferenceService.class);
+public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
+    private static final Logger logger = LoggerFactory.getLogger(GuestInferenceService.class);
     @Autowired
-    BatchGuestInferenceProvider batchGuestInferenceProvider;
+    GuestBatchInferenceProvider guestBatchnferenceProvider;
     @Autowired
-    SingleGuestInferenceProvider singleGuestInferenceProvider;
+    GuestSingleInferenceProvider guestSingleInferenceProvider;
     @Autowired
     MetricRegistry metricRegistry;
 
+    static final String BATCHINFERENCE = "batchInference";
+    static final String INFERENCE = "inference";
+
     @Override
-    @RegisterService(useDynamicEnvironment = true, serviceName = "inference")
+    @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE)
     public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
-        Context context = prepareContext();
+        Context context = prepareContext(INFERENCE);
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
-        OutboundPackage outboundPackage = this.singleGuestInferenceProvider.service(context, inboundPackage);
+        OutboundPackage outboundPackage = this.guestBatchnferenceProvider.service(context, inboundPackage);
         returnResult = (ReturnResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());
@@ -79,14 +82,14 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
     }
 
     @Override
-    @RegisterService(useDynamicEnvironment = true, serviceName = "batchInference")
+    @RegisterService(useDynamicEnvironment = true, serviceName = BATCHINFERENCE)
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        Context context = prepareContext();
+        Context context = prepareContext(BATCHINFERENCE);
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
-        OutboundPackage outboundPackage = this.batchGuestInferenceProvider.service(context, inboundPackage);
+        OutboundPackage outboundPackage = this.guestBatchnferenceProvider.service(context, inboundPackage);
         BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());
@@ -94,12 +97,10 @@ public class InferenceService extends InferenceServiceGrpc.InferenceServiceImplB
 
     }
 
-
-    private Context prepareContext() {
-
+    private Context prepareContext(String   interfaceName) {
         ServingServerContext context = new ServingServerContext();
         context.setMetricRegistry(this.metricRegistry);
-        //context.preProcess();
+        context.setInterfaceName(interfaceName);
         return context;
     }
 

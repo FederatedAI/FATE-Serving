@@ -99,7 +99,4 @@ service ModelService{
     rpc queryModel(QueryModelRequest)  returns (QueryModelResponse);
     rpc unload(PublishRequest) returns (PublishResponse);
     rpc unbind(UnbindRequest) returns (UnbindResponse);
-    rpc listAllModel(PublishRequest) returns (PublishResponse);
-    rpc getModelByTableNameAndNamespace(UnbindRequest) returns (PublishResponse);
-    rpc getModelByServiceId(PublishRequest) returns (PublishResponse);
 }

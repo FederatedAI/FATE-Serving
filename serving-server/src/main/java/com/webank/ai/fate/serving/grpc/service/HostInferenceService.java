@@ -29,8 +29,8 @@ import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.host.provider.BatchHostInferenceProvider;
-import com.webank.ai.fate.serving.host.provider.OldVersionHostInferenceProvider;
+import com.webank.ai.fate.serving.host.provider.HostBatchInferenceProvider;
+import com.webank.ai.fate.serving.host.provider.HostSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +38,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
-    private static final Logger logger = LoggerFactory.getLogger(ProxyService.class);
+public class HostInferenceService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
+    private static final Logger logger = LoggerFactory.getLogger(HostInferenceService.class);
     @Autowired
-    BatchHostInferenceProvider batchHostInferenceProvider;
+    HostBatchInferenceProvider hostBatchInferenceProvider;
     @Autowired
-    OldVersionHostInferenceProvider oldVersionHostInferenceProvider;
-    @Autowired
-    MetricRegistry metricRegistry;
+    HostSingleInferenceProvider hostSingleInferenceProvider;
+
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
@@ -68,18 +67,18 @@ public class ProxyService extends DataTransferServiceGrpc.DataTransferServiceImp
             case Dict.FEDERATED_INFERENCE:
                 context.setActionType(Dict.FEDERATED_INFERENCE);
                 inboundPackage.setBody(data);
-                OutboundPackage singleInferenceOutbound = oldVersionHostInferenceProvider.service(context, inboundPackage);
+                OutboundPackage singleInferenceOutbound = hostSingleInferenceProvider.service(context, inboundPackage);
                 result = singleInferenceOutbound.getData();
                 break;
             case Dict.FEDERATED_INFERENCE_FOR_TREE:
                 context.setActionType(Dict.FEDERATED_INFERENCE_FOR_TREE);
                 inboundPackage.setBody(data);
-                OutboundPackage secureBoostTreeOutboundPackage = oldVersionHostInferenceProvider.service(context, inboundPackage);
+                OutboundPackage secureBoostTreeOutboundPackage = hostSingleInferenceProvider.service(context, inboundPackage);
                 result = secureBoostTreeOutboundPackage.getData();
                 break;
             case Dict.REMOTE_METHOD_BATCH:
                 inboundPackage.setBody(data);
-                OutboundPackage outboundPackage = this.batchHostInferenceProvider.service(context, inboundPackage);
+                OutboundPackage outboundPackage = this.hostBatchInferenceProvider.service(context, inboundPackage);
                 ReturnResult responseResult = null;
                 result = (ReturnResult) outboundPackage.getData();
                 break;

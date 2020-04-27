@@ -1,11 +1,13 @@
 package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.common.RouterModel;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.admin.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +67,13 @@ public class ServiceController {
             logger.debug("registered services: {}", registered);
         }
 
-        return ReturnResult.success(registered);
+        ReturnResult result = new ReturnResult();
+        result.setRetcode(StatusCode.SUCCESS);
+
+        Map data = Maps.newHashMap();
+        data.put("registered", registered);
+        result.setData(data);
+        return result;
     }
 
     // 修改每个接口中的路由信息，权重信息
@@ -106,7 +114,9 @@ public class ServiceController {
         URL newUrl = new URL(originUrl.getProtocol(), originUrl.getProject(), originUrl.getEnvironment(), originUrl.getHost(), originUrl.getPort(), originUrl.getPath(), parameters);
         zookeeperRegistry.register(newUrl);
 
-        return ReturnResult.success();
+        ReturnResult result = new ReturnResult();
+        result.setRetcode(StatusCode.SUCCESS);
+        return result;
     }
 
 }

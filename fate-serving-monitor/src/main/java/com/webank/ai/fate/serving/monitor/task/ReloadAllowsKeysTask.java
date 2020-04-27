@@ -12,7 +12,7 @@ import java.io.*;
 @Component
 public class ReloadAllowsKeysTask {
 
-    private final String DEFAULT_ROUTER_FILE = "conf" + File.separator + "allowKeys.json";
+    private final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "allowKeys.json";
 
     private static final Logger logger = LoggerFactory.getLogger(ReloadAllowsKeysTask.class);
 
@@ -35,7 +35,7 @@ public class ReloadAllowsKeysTask {
 
     @Scheduled(fixedRate = 1000 * 60 * 10)
     public void reload() {
-        String filePath = DEFAULT_ROUTER_FILE;
+        String filePath = DEFAULT_CONFIG_FILE;
         logger.info("start refreshed allow keys...,try to load {}", filePath);
 
         File file = new File(filePath);

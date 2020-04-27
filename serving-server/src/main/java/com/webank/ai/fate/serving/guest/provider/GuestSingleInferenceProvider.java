@@ -20,15 +20,16 @@ import java.util.concurrent.Future;
  **/
 @FateService(name = "singleInference", preChain = {
         "monitorInterceptor",
+        "requestOverloadBreaker",
         "guestSingleParamInterceptor",
         "guestModelInterceptor",
+        "modelOverloadBreaker",
         "federationRouterInterceptor"
 }, postChain = {
-        "defaultPostProcess",
         "monitorInterceptor"
 })
 @Service
-public class SingleGuestInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
+public class GuestSingleInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
 
@@ -41,9 +42,7 @@ public class SingleGuestInferenceProvider extends AbstractServingServiceProvider
         ModelProcessor modelProcessor = model.getModelProcessor();
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
         Map<String, Future> futureMap = Maps.newHashMap();
-
         modelProcessor.guestPrepareDataBeforeInference(context, inferenceRequest);
-
         List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, inferenceRequest);
         rpcList.forEach((rpcDataWraper -> {
             ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
@@ -60,5 +59,4 @@ public class SingleGuestInferenceProvider extends AbstractServingServiceProvider
         outboundPackage.setData(returnResult);
         return outboundPackage;
     }
-
 }

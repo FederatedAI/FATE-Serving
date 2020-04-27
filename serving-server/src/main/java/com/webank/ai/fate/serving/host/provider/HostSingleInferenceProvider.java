@@ -16,16 +16,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 @FateService(name = "HostInferenceProvider", preChain = {
-        "overloadMonitor",
+        "monitorInterceptor",
+        "requestOverloadBreaker",
         "hostParamInterceptor",
         "hostModelInterceptor"
 }, postChain = {
-        "defaultPostProcess"
+        "monitorInterceptor"
 })
 @Service
-public class SingleHostInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
+public class HostSingleInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
 
-    private static final Logger logger = LoggerFactory.getLogger(BatchHostInferenceProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(HostSingleInferenceProvider.class);
 
     @Override
     protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {

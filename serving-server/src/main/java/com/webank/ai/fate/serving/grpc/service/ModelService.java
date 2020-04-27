@@ -229,7 +229,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 //        }
     }
 
-    @Override
+    /*@Override
     @RegisterService(serviceName = "listAllModel")
     public void listAllModel(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.LIST_ALL_MODEL.name(), metricRegistry);
@@ -255,11 +255,11 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         } finally {
             context.postProcess(request, returnResult);
         }
-    }
+    }*/
 
 
-    @RegisterService(serviceName = "getModelByTableNameAndNamespace")
-    public void getModelByTableNameAndNamespace(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
+//    @RegisterService(serviceName = "getModelByTableNameAndNamespace")
+//    public void getModelByTableNameAndNamespace(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
 //        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE.name(), metricRegistry);
 //        context.preProcess();
 //        ReturnResult returnResult = new ReturnResult();
@@ -282,11 +282,11 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 //        } finally {
 //            context.postProcess(request, returnResult);
 //        }
-    }
+//    }
 
-    @Override
-    @RegisterService(serviceName = "getModelByServiceId")
-    public void getModelByServiceId(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
+//    @Override
+//    @RegisterService(serviceName = "getModelByServiceId")
+//    public void getModelByServiceId(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
 //        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_SERVICE_ID.name(), metricRegistry);
 //        context.preProcess();
 //        ReturnResult returnResult = new ReturnResult();
@@ -306,7 +306,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 //        } finally {
 //            context.postProcess(request, returnResult);
 //        }
-    }
+//    }
 
 
 

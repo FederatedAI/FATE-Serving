@@ -33,13 +33,13 @@ public class ServingServer implements InitializingBean {
     @Value("${port:8000}")
     int port;
     @Autowired
-    InferenceService inferenceService;
+    GuestInferenceService guestInferenceService;
     @Autowired
     ModelManager modelManager;
     @Autowired
     ModelService modelService;
     @Autowired
-    ProxyService proxyService;
+    HostInferenceService hostInferenceService;
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
     @Autowired
@@ -65,9 +65,9 @@ public class ServingServer implements InitializingBean {
         serverBuilder.keepAliveTime(100, TimeUnit.MILLISECONDS);
         serverBuilder.executor(executor);
         //new ServiceOverloadProtectionHandle()
-        serverBuilder.addService(ServerInterceptors.intercept(inferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), InferenceService.class);
+        serverBuilder.addService(ServerInterceptors.intercept(guestInferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), GuestInferenceService.class);
         serverBuilder.addService(ServerInterceptors.intercept(modelService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
-        serverBuilder.addService(ServerInterceptors.intercept(proxyService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ProxyService.class);
+        serverBuilder.addService(ServerInterceptors.intercept(hostInferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), HostInferenceService.class);
         server = serverBuilder.build();
         server.start();
         logger.info("server start =================");

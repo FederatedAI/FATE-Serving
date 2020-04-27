@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @FateService(name = "modelService", preChain = {
-        // "overloadMonitor",
+         "requestOverloadBreaker",
 //        "guestBatchParamInterceptor",
 //        "guestModelInterceptor",
-//        "federationRouterInterceptor"
+//        "mo"
 }, postChain = {
         //  "cache",
 
@@ -26,13 +26,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
     @Autowired
     ModelManager modelManager;
 
-//    final  String GET_MODEL_BY_SERVICE_ID = ModelActionType.GET_MODEL_BY_SERVICE_ID.name();
-//    final  String MODEL_LOAD =  ModelActionType.MODEL_LOAD.name();
-//    final  String MODEL_PUBLISH_ONLINE =  ModelActionType.MODEL_PUBLISH_ONLINE.name();
-//    final  String UNLOAD = ModelActionType.UNLOAD.name();
-//    final  String UNBIND = ModelActionType.UNBIND.name();
-//    final  String LIST_ALL_MODEL = ModelActionType.LIST_ALL_MODEL.name();
-//    final  String GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE  = ModelActionType.GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE.name();
 
     @FateServiceMethod(name = "MODEL_LOAD")
     public Object load(Context context, InboundPackage data) {
