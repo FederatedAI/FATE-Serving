@@ -21,11 +21,22 @@ public class AsyncMessageEventProducer {
 
     public static final EventTranslatorVararg<AsyncMessageEvent> TRANSLATOR =
             (event, sequence, args) -> {
-                event.setName(String.valueOf(args[0]));
-                event.setAction(String.valueOf(args[1]));
-                event.setData(args[2]);
-
-                event.setIp(GetSystemInfo.getLocalIp());
+//                event.setName(String.valueOf(args[0]));
+//                event.setAction(String.valueOf(args[1]));
+//                event.setData(args[2]);
+//
+//                event.setIp(GetSystemInfo.getLocalIp());
+//                event.setTimestamp(System.currentTimeMillis());
+                if (args[0] instanceof AsyncMessageEvent) {
+                    AsyncMessageEvent argEvent = (AsyncMessageEvent) args[0];
+                    event.setName(argEvent.getName());
+                    event.setAction(argEvent.getAction());
+                    event.setData(argEvent.getData());
+                    event.setTimestamp(argEvent.getTimestamp());
+                    if (event.getTimestamp() == 0) {
+                        event.setTimestamp(System.currentTimeMillis());
+                    }
+                }
                 event.setTimestamp(System.currentTimeMillis());
             };
 

@@ -23,6 +23,7 @@ import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.api.networking.proxy.Proxy.Packet;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
@@ -45,16 +46,19 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     @Autowired
     HostSingleInferenceProvider hostSingleInferenceProvider;
 
+    @Autowired
+    MetricRegistry metricRegistry;
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
 
         String actionType = req.getHeader().getCommand().getName();
-        ServingServerContext context = new ServingServerContext();
+//        ServingServerContext context = new ServingServerContext();
+        ServingServerContext context = (ServingServerContext) prepareContext(Dict.UNARYCALL);
         String namespace = req.getHeader().getTask().getModel().getNamespace();
         String tableName = req.getHeader().getTask().getModel().getTableName();
-        context.setActionType(req.getHeader().getCommand().getName());
+        context.setActionType(actionType);
         context.setModelNamesapce(namespace);
         context.setModelTableName(tableName);
         context.setCaseId(req.getAuth().getNonce());
@@ -63,7 +67,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
 
         logger.info("unaryCall {} head {}", data, req.getHeader().getCommand().getName());
         InboundPackage inboundPackage = new InboundPackage();
-        switch (req.getHeader().getCommand().getName()) {
+        switch (actionType) {
             case Dict.FEDERATED_INFERENCE:
                 context.setActionType(Dict.FEDERATED_INFERENCE);
                 inboundPackage.setBody(data);
@@ -94,5 +98,12 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
         responseObserver.onNext(packetBuilder.build());
         responseObserver.onCompleted();
 
+    }
+
+    private Context prepareContext(String   interfaceName) {
+        ServingServerContext context = new ServingServerContext();
+        context.setMetricRegistry(this.metricRegistry);
+        context.setInterfaceName(interfaceName);
+        return context;
     }
 }

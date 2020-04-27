@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
     private static final Logger logger = LoggerFactory.getLogger(GuestInferenceService.class);
     @Autowired
-    GuestBatchInferenceProvider guestBatchnferenceProvider;
+    GuestBatchInferenceProvider guestBatchInferenceProvider;
     @Autowired
     GuestSingleInferenceProvider guestSingleInferenceProvider;
     @Autowired
@@ -59,7 +59,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
-        OutboundPackage outboundPackage = this.guestBatchnferenceProvider.service(context, inboundPackage);
+        OutboundPackage outboundPackage = this.guestSingleInferenceProvider.service(context, inboundPackage);
         returnResult = (ReturnResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());
@@ -89,7 +89,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(reqbody);
-        OutboundPackage outboundPackage = this.guestBatchnferenceProvider.service(context, inboundPackage);
+        OutboundPackage outboundPackage = this.guestBatchInferenceProvider.service(context, inboundPackage);
         BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());

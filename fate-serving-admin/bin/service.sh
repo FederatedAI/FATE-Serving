@@ -22,10 +22,9 @@ set -e
 source ./bin/common.sh
 basepath=$(cd `dirname $0`;pwd)
 configpath=$(cd $basepath/conf;pwd)
-module=serving-server
-main_class=com.webank.ai.fate.serving.Bootstrap
-module_version=1.2.0
-
+module=serving-admin
+main_class=com.webank.ai.fate.serving.admin.Bootstrap
+module_version=0.0.1-SNAPSHOT
 
 case "$1" in
     start)

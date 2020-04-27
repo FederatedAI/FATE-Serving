@@ -28,11 +28,16 @@ start() {
       ln -s fate-${module}-${module_version}.jar fate-${module}.jar
     fi
     if [ ${module} = "serving-server" ]; then
-      java -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/${module}.properties >>logs/console.log 2>>logs/error.log &
+      #java -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/${module}.properties >>logs/console.log 2>>logs/error.log &
+      java -Dspring.config.location=${configpath}/serving-server.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
     elif [ ${module} = "serving-proxy" ]; then
-      java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/application.properties >>logs/console.log 2>>logs/error.log &
+      java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
+    elif [ ${module} = "serving-admin" ]; then
+      java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
+    elif [ ${module} = "serving-monitor" ]; then
+      java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
     else
-      echo "usage: ${module} {serving-server|serving-proxy}"
+      echo "usage: ${module} {serving-server|serving-proxy|serving-admin|serving-monitor}"
     fi
     #sleep 5
     #id=$(ps -p $! | awk '{print $1}' | sed -n '2p')

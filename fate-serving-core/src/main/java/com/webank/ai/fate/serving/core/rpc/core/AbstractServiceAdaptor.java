@@ -169,12 +169,12 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
                     AsyncMessageEvent  messageEvent = new AsyncMessageEvent();
 
-                    messageEvent.setName("error");
+                    messageEvent.setName(Dict.EVENT_ERROR);
                     messageEvent.setTimestamp(end);
                     messageEvent.setAction(context.getActionType());
                    // messageEvent.setIp();
                     messageEvent.setData("");
-                    DisruptorUtil.producer();
+                    DisruptorUtil.producer(messageEvent);
 
 
                 }catch(Throwable e){
