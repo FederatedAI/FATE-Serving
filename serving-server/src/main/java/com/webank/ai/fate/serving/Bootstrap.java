@@ -37,9 +37,7 @@ import java.util.Set;
  * @Author
  **/
 @SpringBootApplication
-//@ComponentScan(basePackages = {"com.webank.ai.fate.serving.*"})
 @ConfigurationProperties
-//value = "file:${user.dir}/conf/serving-server.properties"
 @PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
 @EnableScheduling
 public class Bootstrap {
@@ -51,7 +49,6 @@ public class Bootstrap {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.start(args);
-
             Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
         } catch (Exception ex) {
             System.err.println("server start error, " + ex.getMessage());
