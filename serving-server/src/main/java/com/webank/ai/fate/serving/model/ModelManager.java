@@ -317,7 +317,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     public synchronized ReturnResult bind(Context context, ModelServiceProto.PublishRequest req) {
         ReturnResult returnResult = new ReturnResult();
         returnResult.setRetcode(InferenceRetCode.OK);
-        Model model = this.buildModel(context, req);
+        Model model = this.buildModelForBind(context, req);
 
         String serviceId = req.getServiceId();
         String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
@@ -340,7 +340,29 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         return returnResult;
     }
 
-    private Model buildModel(Context context, ModelServiceProto.PublishRequest req) {
+
+    private  Model buildModelForBind(Context context, ModelServiceProto.PublishRequest req){
+        Model model = new Model();
+        String role = req.getLocal().getRole();
+        model.setPartId(req.getLocal().getPartyId());
+        model.setRole(Dict.GUEST.equals(role) ? Dict.GUEST : Dict.HOST);
+        String serviceId = req.getServiceId();
+        model.setServiceId(serviceId);
+        Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
+        ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole().toString());
+        Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
+        Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
+        ModelServiceProto.Party selfParty = roleMap.get(model.getRole().toString());
+        String selfPartyId = selfParty.getPartyIdList().get(0);
+        ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
+        String selfNamespace = selfModelInfo.getNamespace();
+        String selfTableName = selfModelInfo.getTableName();
+        model.setNamespace(selfNamespace);
+        model.setTableName(selfTableName);
+        return model;
+    }
+
+    private Model buildModelForLoad(Context context, ModelServiceProto.PublishRequest req) {
         Model model = new Model();
         String role = req.getLocal().getRole();
         model.setPartId(req.getLocal().getPartyId());
@@ -382,9 +404,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
         ReturnResult returnResult = new ReturnResult();
         returnResult.setRetcode(InferenceRetCode.OK);
-        Model model = this.buildModel(context, req);
-
-
+        Model model = this.buildModelForLoad(context, req);
         String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
         ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
         // TODO: 2020/4/2  这里没完成

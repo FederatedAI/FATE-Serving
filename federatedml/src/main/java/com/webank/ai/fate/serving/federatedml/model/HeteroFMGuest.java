@@ -28,10 +28,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.lang.Math.exp;
 
-public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware {
+public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware ,Returnable{
     private static final Logger logger = LoggerFactory.getLogger(HeteroFMGuest.class);
 
     private double sigmod(double x) {
@@ -97,25 +98,32 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware {
 
 
     @Override
-    public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
+    public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> hostData) {
         Map<String, Object> result = Maps.newHashMap();
-        Map<String, Object> localData = localDataList.get(0);
-        try {
+
+
+        Map<String,Object>  localData = (Map<String,Object>)localDataList.get(0).get(this.getComponentName());
+
+            logger.info("local data {} remote data {}",localData,hostData);
             Preconditions.checkArgument(localData != null);
-            Preconditions.checkArgument(remoteData != null);
+            Preconditions.checkArgument(hostData != null);
             Preconditions.checkArgument(localData.get(Dict.SCORE) != null);
             Preconditions.checkArgument(localData.get(Dict.FM_CROSS) != null);
+            Set<String> set =hostData.keySet();
+            String  partyId = (String)set.toArray()[0];
+            Map<String, Object> remoteData = (Map<String,Object>)hostData.get(partyId);
             Preconditions.checkArgument(remoteData.get(Dict.RET_CODE) != null);
             String remoteCode = remoteData.get(Dict.RET_CODE).toString();
+            Map<String,Object>  dataMap  = (Map<String,Object>) remoteData.get(this.getComponentName());
             double localScore = ((Number) localData.get(Dict.SCORE)).doubleValue();
             double[] guestCrosses = (double[]) localData.get(Dict.FM_CROSS);
             localData.get(Dict.FM_CROSS);
             double score = localScore;
             result.put(Dict.RET_CODE, remoteCode);
             if (remoteCode.equals(InferenceRetCode.OK)) {
-                double hostScore = ((Number) remoteData.get(Dict.SCORE)).doubleValue();
-                Preconditions.checkArgument(remoteData.get(Dict.FM_CROSS) != null);
-                List<Double> hostCrosses = JSON.parseArray(remoteData.get(Dict.FM_CROSS).toString(), double.class);
+                double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
+                Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
+                List<Double> hostCrosses = JSON.parseArray(dataMap.get(Dict.FM_CROSS).toString(), double.class);
                 Preconditions.checkArgument(hostCrosses.size() == guestCrosses.length,"");
                 score += hostScore;
                 for (int i = 0; i < guestCrosses.length; i++) {
@@ -126,12 +134,7 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware {
                 result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE, localData.get(Dict.MODEL_WRIGHT_HIT_RATE));
                 result.put(Dict.GUEST_INPUT_DATA_HIT_RATE, localData.get(Dict.INPUT_DATA_HIT_RATE));
             }
-        }catch (Exception  e){
-            logger.error("hetero fm guest merge remote error",e);
-            // TODO: 2020/3/19    错误码之后再定 ，目前先用这个
-            result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
 
-        }
         return   result;
 
     }

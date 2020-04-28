@@ -62,9 +62,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         Proxy.Metadata.Builder metaDataBuilder = Proxy.Metadata.newBuilder();
         Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
 
-//        Preconditions.checkArgument(StringUtils.isNotEmpty(context.getGuestAppId()));
-//        Preconditions.checkArgument(StringUtils.isNotEmpty(context.getHostAppid()));
-
         metaDataBuilder.setSrc(
                 topicBuilder.setPartyId(String.valueOf(model.getPartId())).
                         setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))

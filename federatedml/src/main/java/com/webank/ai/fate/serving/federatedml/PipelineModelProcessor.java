@@ -10,11 +10,13 @@ import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
+import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
@@ -66,13 +68,10 @@ public class PipelineModelProcessor implements ModelProcessor{
             }  catch (TimeoutException e) {
                 throw  new  RemoteRpcException("party id "+partyId+ " time out");
             }catch(Exception e){
-                e.printStackTrace();
                 throw new  SysException(e.getMessage());
             }
 
         });
-
-
 
         batchFederatedResult = batchMergeHostResult(context, localResult, remoteResultMap);
 
@@ -313,37 +312,27 @@ public class PipelineModelProcessor implements ModelProcessor{
         List<BatchInferenceRequest.SingleInferenceData> inputList = batchFederatedParams.getBatchDataList();
         Map<Integer ,Map<String,Object>> result = new HashMap<>();
         for(int i=0;i<inputList.size();i++){
+            BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
             try {
-                BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
 
                 Map<String, Object> singleResult = singleLocalPredict(context, input.getFeatureData());
-                logger.info("case id {} index {} result {}",context.getCaseId(),input.getIndex(),singleResult);
+                if(logger.isDebugEnabled()) {
+                    logger.debug("case id {} index {} result {}", context.getCaseId(), input.getIndex(), singleResult);
+                }
                 if (singleResult != null) {
-//                    checkResult(singleResult);
                     result.put(input.getIndex(), singleResult);
                 } else {
                     logger.error("local predict return null");
                 }
             }catch (Throwable e){
-                logger.error("localPredict error",e);
+                logger.error("case id {} index {} local predict error",context.getCaseId(),input.getIndex(),e);
             }
         }
         logger.info("case id {} return batch local inference result {}",context.getCaseId(),result);
         return   result;
     }
 
-//    private Map changeRemoteResultToMap(BatchInferenceResult  batchInferenceResult){
-//
-//        Map result  =  Maps.newHashMap();
-//
-//        List<BatchInferenceResult.SingleInferenceResult>  batchInferences = batchInferenceResult.getBatchDataList();
-//
-//        for(BatchInferenceResult.SingleInferenceResult  singleInferenceResult:batchInferences){
-//
-//            result.put(singleInferenceResult.getIndex(),singleInferenceResult);
-//        }
-//        return  result;
-//    }
+
 
     private BatchInferenceResult batchMergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, Map<String,BatchInferenceResult> remoteResult) {
 
@@ -351,49 +340,37 @@ public class PipelineModelProcessor implements ModelProcessor{
 
             Preconditions.checkArgument(localResult != null);
             Preconditions.checkArgument(remoteResult != null);
-            //Preconditions.checkArgument(remoteResult.getBatchDataList() != null);
+
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
            // Map remoteResultMap = changeRemoteResultToMap(remoteResult);
             localResult.forEach((index,data )->{
-
-
                 Map<String ,Object>  remoteSingleMap = Maps.newHashMap();
-
                 remoteResult.forEach((partyId,batchResult)->{
                     if(batchResult.getSingleInferenceResultMap()!=null&& batchResult.getSingleInferenceResultMap().get(index)!=null) {
-                        Map<String,Object> realRemoteData = batchResult.getSingleInferenceResultMap().get(index).getData();
+                        BatchInferenceResult.SingleInferenceResult  singleInferenceResult = batchResult.getSingleInferenceResultMap().get(index);
+                        Map<String,Object> realRemoteData = singleInferenceResult.getData();
+                        realRemoteData.put(Dict.RET_CODE,singleInferenceResult.getRetcode());
                         remoteSingleMap.put(partyId,realRemoteData);
                     }
                 });
 
                 try {
                     Map<String, Object> localData = localResult.get(index);
-                   // BatchInferenceResult.SingleInferenceResult singleRemoteResult = (BatchInferenceResult.SingleInferenceResult) remoteResultMap.get(index);
-                   // Map<String, Object> remoteData = singleRemoteResult.getData();
-
                     Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteSingleMap);
                     batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, StatusCode.SUCCESS, Dict.SUCCESS, mergeResult));
-//                    Map<String, Object> input = new HashMap<>();
-//                    for (BaseComponent component : this.pipeLineNode) {
-//                        // TODO: 2020/3/16 错误码之后再规整
-//                      if (component instanceof MergeInferenceAware) {
-//
-//
-//                                Map<String, Object> mergeResult =((MergeInferenceAware)component).mergeRemoteInference(context, localData,remoteData);
-//                                batchFederatedResult.getBatchDataList().set(index, new BatchInferenceResult.SingleInferenceResult(index, "0", Dict.SUCCESS, mergeResult));
-//                      }
-//                    }
+
                 }catch(Exception e){
                     logger.error("merge remote error", e);
-                    // TODO: 2020/3/16  错误码之后再定
-                    batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, "0000dddd", e.getMessage(), null));
+                    String  retcode = StatusCode.SYSTEM_ERROR;
+                    if(e instanceof BaseException){
+                        retcode= ((BaseException) e).getRetcode();
+                    }
+                    batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, retcode, e.getMessage(), null));
                 }
-
             });
 
             return batchFederatedResult;
         }catch(Exception  e){
-            logger.error("merge remote result error",e);
             throw  new GuestMergeException(e.getMessage());
         }
     }
@@ -411,10 +388,10 @@ public class PipelineModelProcessor implements ModelProcessor{
 
 
 
-
-
     public Map<String, Object> singleMerge(Context context, Map<String, Object> localData,Map<String,Object> remoteData) {
         logger.info("prepare merge local data {} remote data {}",localData,remoteData);
+        Preconditions.checkArgument(localData!=null&&localData.size()>0);
+        Preconditions.checkArgument(remoteData!=null&&remoteData.size()>0);
         List<Map<String, Object>> outputData = Lists.newArrayList();
         List<Map<String, Object>>  tempList = Lists.newArrayList();
         Map<String,Object>  result = Maps.newHashMap();
@@ -454,7 +431,6 @@ public class PipelineModelProcessor implements ModelProcessor{
                 }else{
 
                     outputData.add(inputs.get(0));
-
                 }
 
                 if(component instanceof  Returnable&& mergeResult!=null){

@@ -26,23 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeteroFMHost extends HeteroFM implements LocalInferenceAware {
+public class HeteroFMHost extends HeteroFM implements LocalInferenceAware ,  Returnable{
     private static final Logger logger = LoggerFactory.getLogger(HeteroFMHost.class);
-
-//    @Override
-//    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-//
-//        HashMap<String, Object> result = new HashMap<>();
-//        Map<String, Object> ret = forward(inputData);
-//        result.put(Dict.SCORE, ret.get(Dict.SCORE));
-//        result.put(Dict.FM_CROSS, ret.get(Dict.FM_CROSS));
-//
-//        if(logger.isDebugEnabled()) {
-//            logger.debug("hetero fm host predict ends, result is {}", result);
-//        }
-//
-//        return result;
-//    }
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {

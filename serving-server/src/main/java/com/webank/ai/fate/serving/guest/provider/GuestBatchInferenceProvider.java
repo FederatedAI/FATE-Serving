@@ -53,7 +53,6 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
          */
         Map futureMap = Maps.newHashMap();
 
-
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
 
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);

@@ -37,6 +37,12 @@ public class BatchInferenceRequest extends InferenceRequest{
         public void setSendToRemoteFeatureData(Map<String, Object> sendToRemoteFeatureData) {
             this.sendToRemoteFeatureData = sendToRemoteFeatureData;
         }
+
+        boolean needCheckFeature =false;
+
+
+
+
     }
 
     private String serviceId;
