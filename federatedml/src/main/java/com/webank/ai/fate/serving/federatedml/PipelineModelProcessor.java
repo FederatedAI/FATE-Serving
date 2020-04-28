@@ -72,8 +72,6 @@ public class PipelineModelProcessor implements ModelProcessor{
 
         });
 
-
-
         batchFederatedResult = batchMergeHostResult(context, localResult, remoteResultMap);
 
         return batchFederatedResult;
@@ -332,18 +330,7 @@ public class PipelineModelProcessor implements ModelProcessor{
         return   result;
     }
 
-//    private Map changeRemoteResultToMap(BatchInferenceResult  batchInferenceResult){
-//
-//        Map result  =  Maps.newHashMap();
-//
-//        List<BatchInferenceResult.SingleInferenceResult>  batchInferences = batchInferenceResult.getBatchDataList();
-//
-//        for(BatchInferenceResult.SingleInferenceResult  singleInferenceResult:batchInferences){
-//
-//            result.put(singleInferenceResult.getIndex(),singleInferenceResult);
-//        }
-//        return  result;
-//    }
+
 
     private BatchInferenceResult batchMergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, Map<String,BatchInferenceResult> remoteResult) {
 
@@ -355,34 +342,21 @@ public class PipelineModelProcessor implements ModelProcessor{
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
            // Map remoteResultMap = changeRemoteResultToMap(remoteResult);
             localResult.forEach((index,data )->{
-
-
                 Map<String ,Object>  remoteSingleMap = Maps.newHashMap();
-
                 remoteResult.forEach((partyId,batchResult)->{
                     if(batchResult.getSingleInferenceResultMap()!=null&& batchResult.getSingleInferenceResultMap().get(index)!=null) {
-                        Map<String,Object> realRemoteData = batchResult.getSingleInferenceResultMap().get(index).getData();
+                        BatchInferenceResult.SingleInferenceResult  singleInferenceResult = batchResult.getSingleInferenceResultMap().get(index);
+                        Map<String,Object> realRemoteData = singleInferenceResult.getData();
+                        realRemoteData.put(Dict.RET_CODE,singleInferenceResult.getRetcode());
                         remoteSingleMap.put(partyId,realRemoteData);
                     }
                 });
 
                 try {
                     Map<String, Object> localData = localResult.get(index);
-                   // BatchInferenceResult.SingleInferenceResult singleRemoteResult = (BatchInferenceResult.SingleInferenceResult) remoteResultMap.get(index);
-                   // Map<String, Object> remoteData = singleRemoteResult.getData();
-
                     Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteSingleMap);
                     batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, StatusCode.SUCCESS, Dict.SUCCESS, mergeResult));
-//                    Map<String, Object> input = new HashMap<>();
-//                    for (BaseComponent component : this.pipeLineNode) {
-//                        // TODO: 2020/3/16 错误码之后再规整
-//                      if (component instanceof MergeInferenceAware) {
-//
-//
-//                                Map<String, Object> mergeResult =((MergeInferenceAware)component).mergeRemoteInference(context, localData,remoteData);
-//                                batchFederatedResult.getBatchDataList().set(index, new BatchInferenceResult.SingleInferenceResult(index, "0", Dict.SUCCESS, mergeResult));
-//                      }
-//                    }
+
                 }catch(Exception e){
                     logger.error("merge remote error", e);
                     // TODO: 2020/3/16  错误码之后再定
