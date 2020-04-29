@@ -39,6 +39,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
+    static final String BATCHINFERENCE = "batchInference";
+    static final String INFERENCE = "inference";
     private static final Logger logger = LoggerFactory.getLogger(GuestInferenceService.class);
     @Autowired
     GuestBatchInferenceProvider guestBatchInferenceProvider;
@@ -46,9 +48,6 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     GuestSingleInferenceProvider guestSingleInferenceProvider;
     @Autowired
     MetricRegistry metricRegistry;
-
-    static final String BATCHINFERENCE = "batchInference";
-    static final String INFERENCE = "inference";
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE)
@@ -97,7 +96,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
 
     }
 
-    private Context prepareContext(String   interfaceName) {
+    private Context prepareContext(String interfaceName) {
         ServingServerContext context = new ServingServerContext();
         context.setMetricRegistry(this.metricRegistry);
         context.setInterfaceName(interfaceName);

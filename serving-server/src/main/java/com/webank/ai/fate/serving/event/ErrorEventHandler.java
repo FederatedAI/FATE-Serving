@@ -15,21 +15,24 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 
-public class ErrorEventHandler implements EnvironmentAware ,InitializingBean {
-    Environment   environment;
-    static  final  String  ALTER_CLASS = "alertClass";
-    AlertInfoUploader  alertInfoUploader = null;
+public class ErrorEventHandler implements EnvironmentAware, InitializingBean {
+    static final String ALTER_CLASS = "alertClass";
+    Environment environment;
+    AlertInfoUploader alertInfoUploader = null;
+
     @Subscribe("error")
-    public void handleMetricsEvent(AsyncMessageEvent  event){
+    public void handleMetricsEvent(AsyncMessageEvent event) {
         alertInfoUploader.upload(event);
     }
+
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment =  environment;
+        this.environment = environment;
     }
+
     @Override
     public void afterPropertiesSet() throws Exception {
-        String  clazz = environment.getProperty(ALTER_CLASS,"com.webank.ai.fate.serving.core.upload.MockAlertInfoUploader");
-        alertInfoUploader =(AlertInfoUploader)InferenceUtils.getClassByName(clazz);
+        String clazz = environment.getProperty(ALTER_CLASS, "com.webank.ai.fate.serving.core.upload.MockAlertInfoUploader");
+        alertInfoUploader = (AlertInfoUploader) InferenceUtils.getClassByName(clazz);
     }
 }

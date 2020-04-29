@@ -64,14 +64,13 @@ public class ServingServerTest {
     }
 
 
-
     @Test
     public void test_01_guest_load_fm() {
 
         URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
         //String filePath = resource.getPath();
         String filePath = "/Users/kaideng/work/webank/newLocationFateserving/feature-1.2/FATE-Serving/serving-server/src/main/resources/model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache";
-       // filePath = filePath.replaceAll("%23", "#");
+        // filePath = filePath.replaceAll("%23", "#");
         System.err.println("filePath " + filePath);
         // String  filepath =       "/Users/kaideng/work/webank/test/model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
 //        Context  context =  new ServingServerContext();
@@ -132,7 +131,6 @@ public class ServingServerTest {
     }
 
 
-
     @Test
     public void test_01_host_load() {
 
@@ -165,10 +163,6 @@ public class ServingServerTest {
 
 
     }
-
-
-
-
 
 
     @Test
@@ -249,7 +243,6 @@ public class ServingServerTest {
     public void test_04_BatchInference() {
 
 
-
         BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
         batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
         List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
@@ -265,8 +258,6 @@ public class ServingServerTest {
             singleInferenceData.getFeatureData().put("x6", 5.654);
             singleInferenceData.getFeatureData().put("x7", 0.102345);
 
-//            Map temp =Maps.newHashMap();
-//            temp.put("phone_test","1399987933");
             singleInferenceData.getSendToRemoteFeatureData().putAll(singleInferenceData.getFeatureData());
             singleInferenceData.setIndex(i);
             singleInferenceDataList.add(singleInferenceData);

@@ -7,6 +7,7 @@ import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.exceptions.HostGetFeatureErrorException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
@@ -28,17 +29,19 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
     public void doPreProcess(Context context, InboundPackage<BatchInferenceRequest> inboundPackage, OutboundPackage<BatchInferenceResult> outboundPackage) throws Exception {
         BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
+        if(batchHostFeatureAdaptorResult==null||batchHostFeatureAdaptorResult.getIndexResultMap()==null){
+            throw  new HostGetFeatureErrorException("no feature");
+        }
         Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult> featureResultMap = batchHostFeatureAdaptorResult.getIndexResultMap();
         batchInferenceRequest.getBatchDataList().forEach(request -> {
+            request.setNeedCheckFeature(true);
             BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult featureAdaptorResult = featureResultMap.get(request.getIndex());
-            if (featureAdaptorResult.getFeatures() != null) {
+            if (featureAdaptorResult!=null&&featureAdaptorResult.getFeatures() != null) {
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });
-        if(logger.isDebugEnabled()) {
-            logger.debug("after get features from local, batchInferenceRequest is {}", batchInferenceRequest);
-        }
-    };
+    }
+    ;
 
     @Override
     public void afterPropertiesSet() throws Exception {

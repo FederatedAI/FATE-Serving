@@ -65,7 +65,6 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
         Object result = null;
         byte[] data = req.getBody().getValue().toByteArray();
 
-       // logger.info("unaryCall {} head {}", data, req.getHeader().getCommand().getName());
         InboundPackage inboundPackage = new InboundPackage();
         switch (actionType) {
             case Dict.FEDERATED_INFERENCE:
@@ -100,7 +99,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
 
     }
 
-    private Context prepareContext(String   interfaceName) {
+    private Context prepareContext(String interfaceName) {
         ServingServerContext context = new ServingServerContext();
         context.setMetricRegistry(this.metricRegistry);
         context.setInterfaceName(interfaceName);

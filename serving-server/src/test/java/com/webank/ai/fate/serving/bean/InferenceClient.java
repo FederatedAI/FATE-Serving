@@ -15,6 +15,7 @@ public class InferenceClient {
 
     protected String ip;
     protected Integer port;
+
     public InferenceClient(String ip, Integer port) {
         this.ip = ip;
         this.port = port;

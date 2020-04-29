@@ -43,7 +43,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware ,Retu
         Map<String, Object> result = new HashMap<>(8);
         Map<String, Double> forwardRet = forward(input);
         double score = forwardRet.get(Dict.SCORE);
-        logger.info("caseid {} score:{}", context.getCaseId(), score);
+       // logger.info("caseid {} score:{}", context.getCaseId(), score);
         result.put(Dict.SCORE, score);
         return result;
     }

@@ -43,6 +43,7 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
                     serverCall.close(Status.CANCELLED.withCause(e).withDescription(e.getMessage()), metadata);
                 }
             }
+
             @Override
             public void onCancel() {
                 super.onCancel();

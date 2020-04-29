@@ -19,27 +19,35 @@ public interface ModelLoader {
         String nameSpace;
         LoadModelType loadModelType;
         String filePath;
+
         public String getTableName() {
             return tableName;
         }
+
         public void setTableName(String tableName) {
             this.tableName = tableName;
         }
+
         public String getNameSpace() {
             return nameSpace;
         }
+
         public void setNameSpace(String nameSpace) {
             this.nameSpace = nameSpace;
         }
+
         public LoadModelType getLoadModelType() {
             return loadModelType;
         }
+
         public void setLoadModelType(LoadModelType loadModelType) {
             this.loadModelType = loadModelType;
         }
+
         public String getFilePath() {
             return filePath;
         }
+
         public void setFilePath(String filePath) {
             this.filePath = filePath;
         }

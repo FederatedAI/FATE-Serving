@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @FateService(name = "modelService", preChain = {
-         "requestOverloadBreaker",
+        "requestOverloadBreaker",
 }, postChain = {
 })
 @Service

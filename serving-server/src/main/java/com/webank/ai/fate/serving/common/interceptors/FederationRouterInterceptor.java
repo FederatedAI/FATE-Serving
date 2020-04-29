@@ -51,10 +51,6 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
             routerInfo.setHost(args[0]);
             routerInfo.setPort(new Integer(args[1]));
         } else {
-//                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
-//                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
-//                List<URL> urls = routerService.router(newUrl);
-
             List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIROMMENT, Dict.UNARYCALL);
             if (urls != null && urls.size() > 0) {
                 URL url = urls.get(0);
@@ -63,8 +59,7 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
                 routerInfo.setHost(ip);
                 routerInfo.setPort(port);
             } else {
-                // TODO: 2020/3/16   这里错误另外定制
-                throw new NoRouteInfoException(Dict.PROPERTY_PROXY_ADDRESS, "address is error");
+                throw new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR, "address is error");
             }
         }
         context.setRouterInfo(routerInfo);

@@ -3,7 +3,6 @@ package com.webank.ai.fate.serving.common.interceptors;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.webank.ai.fate.serving.ServingServer;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.model.Model;
@@ -19,22 +18,22 @@ import org.springframework.stereotype.Service;
  * @Author
  **/
 @Service
-public class ModelOverloadBreaker implements Interceptor{
+public class ModelOverloadBreaker implements Interceptor {
     Logger logger = LoggerFactory.getLogger(ModelOverloadBreaker.class);
+
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         Entry entry = null;
         try {
-            context =(ServingServerContext) context;
+            context = (ServingServerContext) context;
             Model model = ((ServingServerContext) context).getModel();
             String namespace = model.getNamespace();
             String tableName = model.getTableName();
-            entry=  SphU.entry(namespace+tableName);
-        } catch (BlockException ex){
+            entry = SphU.entry(namespace + tableName);
+        } catch (BlockException ex) {
             logger.warn("request was block by overload monitor, serviceName:{}.", context.getServiceName());
             throw ex;
-        }
-        finally {
+        } finally {
             if (entry != null) {
                 entry.exit();
             }
@@ -42,7 +41,7 @@ public class ModelOverloadBreaker implements Interceptor{
     }
 
     @Override
-    public void doPostProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
     }
 }

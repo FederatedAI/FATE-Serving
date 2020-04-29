@@ -5,7 +5,6 @@ import com.webank.ai.fate.serving.core.constant.StatusCode;
 
 public class HostModelNullException extends  BaseException{
 
-
     public HostModelNullException( String message) {
         super(StatusCode.HOST_MODEL_NULL, message);
     }

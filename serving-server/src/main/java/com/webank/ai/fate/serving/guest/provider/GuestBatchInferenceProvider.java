@@ -76,7 +76,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
          *  超时时间需要根据实际情况调整
          */
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, DEFAULT_TIME_OUT);
-
+        batchFederatedResult.setCaseid(context.getCaseId());
         return batchFederatedResult;
     }
 

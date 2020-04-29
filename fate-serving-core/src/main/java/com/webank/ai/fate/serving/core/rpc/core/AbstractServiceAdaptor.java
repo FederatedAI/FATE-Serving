@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
 
@@ -36,13 +37,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor<req,resp> {
 
-    Logger flowLogger = LoggerFactory.getLogger( "flow");
+    protected Logger flowLogger = LoggerFactory.getLogger( "flow");
 
     Logger logger =  LoggerFactory.getLogger( this.getClass().getName());
 
-
     public AbstractServiceAdaptor(){
-
 
     }
 
@@ -55,7 +54,6 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
     }
 
     private  Map<String ,Method>  methodMap= Maps.newHashMap();
-
 
     public  void addPreProcessor(Interceptor interceptor){
 
@@ -103,7 +101,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         this.serviceName = serviceName;
     }
 
-    String serviceName;
+    protected  String serviceName;
 
     protected abstract resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage)  ;
 
@@ -118,18 +116,17 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
         OutboundPackage<resp>    outboundPackage= new OutboundPackage<resp>();
         long begin = System.currentTimeMillis();
-
+        context.preProcess();
         List<Throwable> exceptions = Lists.newArrayList();
-        context.setReturnCode("0");
+        context.setReturnCode(StatusCode.SUCCESS);
         if(!isOpen){
             return  this.serviceFailInner(context,data,new ShowDownRejectException());
         }
-
         try {
             requestInHandle.addAndGet(1);
 
-
             resp result=null;
+
             context.setServiceName(this.serviceName);
 
             preChain.doPreProcess(context,data,outboundPackage);
@@ -143,7 +140,6 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
                 /**
                  * 这里catch的原因是，就算发生异常也要走完后处理
                  */
-                e.printStackTrace();
                 exceptions.add(e);
                 logger.error("do service fail, cause by: {}", e.getMessage());
             }
@@ -153,12 +149,8 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         }
         catch (Throwable e) {
             exceptions.add(e);
-            e.printStackTrace();
             logger.error(e.getMessage());
-
-
         } finally {
-
             requestInHandle.decrementAndGet();
             long end = System.currentTimeMillis();
             long cost = end - begin;
@@ -166,37 +158,30 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             if(exceptions.size()!=0){
                 try {
                     outboundPackage = this.serviceFail(context, data, exceptions);
-
                     AsyncMessageEvent  messageEvent = new AsyncMessageEvent();
-
                     messageEvent.setName(Dict.EVENT_ERROR);
                     messageEvent.setTimestamp(end);
                     messageEvent.setAction(context.getActionType());
-                   // messageEvent.setIp();
                     messageEvent.setData("");
                     DisruptorUtil.producer(messageEvent);
-
-
                 }catch(Throwable e){
-                    logger.error("handle serviceFail error",e);
+                    logger.error("error ",e);
                 }
             }
-            try {
-                flowLogger.info("{}|{}|{}|{}|" +
-                                "{}|{}|{}|{}|" +
-                                "{}|{}",
-                        begin, context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
-                        context.getHostAppid(), context.getReturnCode(), cost,
-                        context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
-            }catch(Exception e){
-                logger.error("print flow log error",e);
-            }
-
-
         }
         return outboundPackage;
-
     }
+
+    protected void printFlowLog(Context   context ){
+
+        flowLogger.info("{}|{}|{}|{}|" +
+                        "{}|{}|{}|{}|" +
+                        "{}|{}",
+                 context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
+                context.getHostAppid(), context.getReturnCode(), context.getCostTime(),
+                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
+    }
+
 
     protected  OutboundPackage<resp>  serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {
 
@@ -240,17 +225,11 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
      */
     protected BatchHostFederatedParams buildBatchHostFederatedParams(Context  context, BatchInferenceRequest batchInferenceRequest, Model  guestModel,Model hostModel){
 
-//        Model model =  ((ServingServerContext) context).getModel();
-//
-//        List<BatchHostFederatedParams>  result = Lists.newArrayList();
-    //    model.getFederationModelMap().forEach((hostPartyId,remoteModel)->{
-
             BatchHostFederatedParams  batchHostFederatedParams = new  BatchHostFederatedParams();
             String seqNo = batchInferenceRequest.getSeqno();
             batchHostFederatedParams.setGuestPartyId(guestModel.getPartId());
             batchHostFederatedParams.setHostPartyId(hostModel.getPartId());
             List<BatchHostFederatedParams.SingleInferenceData> sendToHostDataList= Lists.newArrayList();
-
             List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getBatchDataList();
             for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
                 BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
@@ -261,13 +240,8 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             batchHostFederatedParams.setBatchDataList(sendToHostDataList);
             batchHostFederatedParams.setHostTableName(hostModel.getTableName());
             batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
-            //batchHostFederatedParams.setS(seqNo);
             batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
-
-         //   result.add(batchHostFederatedParams);
-        //});
-
-        return  batchHostFederatedParams;
+            return  batchHostFederatedParams;
 
     }
 

@@ -47,14 +47,12 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public BaseContext() {
 
     }
-
     public BaseContext(LoggerPrinter loggerPrinter, String actionType, MetricRegistry metricRegistry) {
         this.loggerPrinter = loggerPrinter;
         this.metricRegistry = metricRegistry;
         timestamp = System.currentTimeMillis();
         this.actionType = actionType;
     }
-
     private BaseContext(LoggerPrinter loggerPrinter, long timestamp, Map dataMap) {
         this.timestamp = timestamp;
         this.dataMap = dataMap;
@@ -128,9 +126,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
             } else {
                 costTime = System.currentTimeMillis() - timestamp;
             }
-            if (loggerPrinter != null) {
-                loggerPrinter.printLog(this, req, resp);
-            }
+
         } catch (Throwable e) {
             logger.error("postProcess error", e);
         }

@@ -24,6 +24,7 @@ import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.serving.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
@@ -73,9 +74,8 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                         .setName(Dict.PARTY_NAME)
                         .build());
         metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(rpcDataWraper.getRemoteMethodName()).build());
-        // TODO: 2020/3/23   这里记得加入版本号
-        String version = environment.getProperty(Dict.VERSION, "");
-        metaDataBuilder.setOperator(environment.getProperty(Dict.VERSION, ""));
+        String version = Long.toString(MetaInfo.currentVersion);
+        metaDataBuilder.setOperator(version);
         Proxy.Task.Builder taskBuilder = com.webank.ai.fate.api.networking.proxy.Proxy.Task.newBuilder();
         Proxy.Model.Builder modelBuilder = Proxy.Model.newBuilder();
 
@@ -104,10 +104,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
     }
 
-    private String getVersion() {
-
-        return "";
-    }
 
     private String route() {
 
@@ -116,9 +112,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         if (!routerByzk) {
             address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
         } else {
-//            URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
-//            URL newUrl = paramUrl.addParameter(Constants.VERSION_KEY, this.getVersion());
-
             List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIROMMENT, Dict.UNARYCALL);
             if (urls != null && urls.size() > 0) {
                 URL url = urls.get(0);
@@ -133,18 +126,13 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
     @Override
     public Proxy.Packet sync(Context context, RpcDataWraper rpcDataWraper, long timeout) {
-
-
         Proxy.Packet resultPacket = null;
         try {
-
             ListenableFuture<Proxy.Packet> future = this.async(context, rpcDataWraper);
-
             if (future != null) {
                 resultPacket = future.get(timeout, TimeUnit.MILLISECONDS);
             }
             return resultPacket;
-
         } catch (Exception e) {
             logger.error("getFederatedPredictFromRemote error", e.getMessage());
             throw new RuntimeException(e);
@@ -178,7 +166,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
             ListenableFuture<Proxy.Packet> future = null;
 
-            //DataTransferServiceGrpc.DataTransferServiceBlockingStub stub1 = DataTransferServiceGrpc.newBlockingStub(channel1);
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
 
             future = stub1.unaryCall(packet);

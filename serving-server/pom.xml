@@ -127,9 +127,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-<!--                    <include>**/*.properties</include>-->
-<!--                    <include>**/*.json</include>-->
-<!--                    <include>**/*.xml</include>-->
+                    <!--                    <include>**/*.properties</include>-->
+                    <!--                    <include>**/*.json</include>-->
+                    <!--                    <include>**/*.xml</include>-->
                     <include>**/*</include>
                 </includes>
                 <filtering>false</filtering>

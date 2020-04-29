@@ -341,7 +341,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     }
 
 
-    private  Model buildModelForBind(Context context, ModelServiceProto.PublishRequest req){
+    private Model buildModelForBind(Context context, ModelServiceProto.PublishRequest req) {
         Model model = new Model();
         String role = req.getLocal().getRole();
         model.setPartId(req.getLocal().getPartyId());
