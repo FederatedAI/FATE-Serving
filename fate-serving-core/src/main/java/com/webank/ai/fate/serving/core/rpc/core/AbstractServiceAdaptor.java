@@ -184,10 +184,10 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             try {
                 flowLogger.info("{}|{}|{}|{}|" +
                                 "{}|{}|{}|{}|" +
-                                "{}|{}|{}",
+                                "{}|{}",
                         begin, context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
                         context.getHostAppid(), context.getReturnCode(), cost,
-                        context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO",outboundPackage.getData());
+                        context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
             }catch(Exception e){
                 logger.error("print flow log error",e);
             }

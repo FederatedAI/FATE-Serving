@@ -14,12 +14,7 @@ import org.springframework.stereotype.Service;
 
 @FateService(name = "modelService", preChain = {
          "requestOverloadBreaker",
-//        "guestBatchParamInterceptor",
-//        "guestModelInterceptor",
-//        "mo"
 }, postChain = {
-        //  "cache",
-
 })
 @Service
 public class ModelServiceProvider extends AbstractServingServiceProvider {
@@ -46,54 +41,9 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.QueryModelRequest req = (ModelServiceProto.QueryModelRequest) data.getBody();
         String content = modelManager.queryModel(context, req);
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
-//        for(Model  model :modelList){
-//            ModelServiceProto.ModelInfoEx.Builder modelInfoExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
-//            modelInfoExBuilder.setNamespace(model.getNamespace()).setTableName(model.getTableName()).build();
-//
-//            builder.addModelInfos(modelInfoExBuilder.build());
-//        }
         builder.setMessage(content);
         return builder.build();
     }
 
 
-//        @Override
-//    public Object doService(Context context, InboundPackage data, OutboundPackage outboundPackage) {
-//
-//        String  actionType  = context.getActionType();
-//
-//        switch (actionType){
-//            case   "GET_MODEL_BY_SERVICE_ID" :
-//
-//                data.getBody();
-//                String  serviceId = null;
-//                modelManager.getModelByServiceId(serviceId);
-//                break;
-//            case   "MODEL_LOAD" :
-//                ModelServiceProto.PublishRequest  publishRequest = (ModelServiceProto.PublishRequest)data.getBody();
-//                ReturnResult returnResult = modelManager.load(context,publishRequest);
-//                return  returnResult;
-//
-//            case   "MODEL_PUBLISH_ONLINE" :
-//                ModelServiceProto.PublishRequest req=  (ModelServiceProto.PublishRequest)data.getBody();
-//                modelManager.bind(context,req);
-////                break;
-////            case  "UNBIND":
-////                modelManager.unbind();
-////                break;
-////
-////            case  "UNLOAD":
-////                modelManager.unload();
-////                break;
-////            case  "LIST_ALL_MODEL":
-////                return  modelManager.listAllModel();
-////                break;
-////            case "GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE":
-////                modelManager.getModelByTableNameAndNamespace()
-////                break;
-//                default:
-//        }
-//
-//        return null;
-//    }
 }

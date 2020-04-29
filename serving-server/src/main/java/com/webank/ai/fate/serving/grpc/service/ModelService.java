@@ -205,108 +205,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         ModelServiceProto.UnbindResponse unbindResponse = (ModelServiceProto.UnbindResponse) outboundPackage.getData();
         responseObserver.onNext(unbindResponse);
         responseObserver.onCompleted();
-
-//        responseObserver.onNext(builder.build());
-//        responseObserver.onCompleted();
-//
-//        context.preProcess();
-//        ReturnResult returnResult = null;
-//        try {
-//            PublishResponse.Builder builder = PublishResponse.newBuilder();
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("unbind receive service id: {}", request.getServiceId());
-//            }
-//
-//            returnResult = modelManager.unbind(context, request);
-//
-//            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
-//                    .setMessage(returnResult.getRetmsg())
-//                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-//            responseObserver.onNext(builder.build());
-//            responseObserver.onCompleted();
-//        } finally {
-//            context.postProcess(request, returnResult);
-//        }
     }
 
-    /*@Override
-    @RegisterService(serviceName = "listAllModel")
-    public void listAllModel(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.LIST_ALL_MODEL.name(), metricRegistry);
-        context.preProcess();
-        ReturnResult returnResult = new ReturnResult();
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-
-            List<Model> models = modelManager.listAllModel();
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("list all model： {}", models);
-            }
-
-            returnResult.setRetcode(StatusCode.SUCCESS);
-            returnResult.setRetmsg(Dict.SUCCESS);
-
-            builder.setStatusCode(Integer.valueOf(StatusCode.SUCCESS))
-                    .setMessage(Dict.SUCCESS)
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(models).getBytes()));
-            responseObserver.onNext(builder.build());
-            responseObserver.onCompleted();
-        } finally {
-            context.postProcess(request, returnResult);
-        }
-    }*/
 
 
-//    @RegisterService(serviceName = "getModelByTableNameAndNamespace")
-//    public void getModelByTableNameAndNamespace(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
-//        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_TABLE_NAME_AND_NAMESPACE.name(), metricRegistry);
-//        context.preProcess();
-//        ReturnResult returnResult = new ReturnResult();
-//        try {
-//            PublishResponse.Builder builder = PublishResponse.newBuilder();
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("get model by tableName: {}, namespace: {}", request.getTableName(), request.getNamespace());
-//            }
-//
-//            Model model = modelManager.getModelByTableNameAndNamespace(request.getTableName(), request.getNamespace());
-//
-//            returnResult.setRetcode(StatusCode.OK);
-//            returnResult.setRetmsg(Dict.SUCCESS);
-//
-//            builder.setStatusCode(StatusCode.OK)
-//                    .setMessage(Dict.SUCCESS)
-//                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
-//            responseObserver.onNext(builder.build());
-//            responseObserver.onCompleted();
-//        } finally {
-//            context.postProcess(request, returnResult);
-//        }
-//    }
-
-//    @Override
-//    @RegisterService(serviceName = "getModelByServiceId")
-//    public void getModelByServiceId(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
-//        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.GET_MODEL_BY_SERVICE_ID.name(), metricRegistry);
-//        context.preProcess();
-//        ReturnResult returnResult = new ReturnResult();
-//        try {
-//            PublishResponse.Builder builder = PublishResponse.newBuilder();
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("get model by service id: {}", request.getServiceId());
-//            }
-//            Model model = modelManager.getModelByServiceId(request.getServiceId());
-//            returnResult.setRetcode(StatusCode.OK);
-//            returnResult.setRetmsg(Dict.SUCCESS);
-//            builder.setStatusCode(StatusCode.OK)
-//                    .setMessage(Dict.SUCCESS)
-//                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(model).getBytes()));
-//            responseObserver.onNext(builder.build());
-//            responseObserver.onCompleted();
-//        } finally {
-//            context.postProcess(request, returnResult);
-//        }
-//    }
 
 
 
