@@ -248,9 +248,7 @@ public class ServingServerTest {
     @Test
     public void test_04_BatchInference() {
 
-//        InferenceRequest inferenceRequest  = new  InferenceRequest();
-//
-//        inferenceRequest.setServiceId("my_test_service_id");
+
 
         BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
         batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
