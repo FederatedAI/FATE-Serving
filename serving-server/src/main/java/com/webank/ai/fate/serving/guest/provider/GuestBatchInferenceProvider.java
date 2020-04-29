@@ -12,7 +12,10 @@ import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -30,9 +33,11 @@ import java.util.Map;
 
 })
 @Service
-public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {
+public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> implements InitializingBean {
 
     final long DEFAULT_TIME_OUT = 3000;
+    long  timeout =  DEFAULT_TIME_OUT;
+
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
 
@@ -75,7 +80,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         /**
          *  超时时间需要根据实际情况调整
          */
-        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, DEFAULT_TIME_OUT);
+        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap,timeout );
         batchFederatedResult.setCaseid(context.getCaseId());
         return batchFederatedResult;
     }
@@ -98,4 +103,8 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
     }
 
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+       timeout = environment.getProperty(Dict.BATCH_PRC_TIMEOUT,Long.class,DEFAULT_TIME_OUT);
+    }
 }

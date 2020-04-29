@@ -200,7 +200,7 @@ public class Dict {
     public static final String SERVICE_SERVING = "serving";
     public static final String SERVICE_PROXY = "proxy";
     public static final String FAILED = "failed";
-
+    public static final String BATCH_PRC_TIMEOUT ="batch.rpc.timeout";
     // parameters
     public static final String PARAMS_INITIATOR = "initiator";
     public static final String PARAMS_ROLE = "role";

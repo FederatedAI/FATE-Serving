@@ -9,18 +9,30 @@ import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractServingServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
+public abstract class AbstractServingServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> implements EnvironmentAware {
 
     @Override
     protected resp transformErrorMap(Context context, Map data) {
         return null;
     }
+    @Override
+    public void setEnvironment(Environment environment){
+        this.environment = environment;
+    }
+
+    Environment environment;
+
+
+
+
 
     @Override
     protected resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage) {
