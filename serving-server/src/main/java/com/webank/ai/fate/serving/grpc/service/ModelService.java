@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.grpc.service;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
@@ -58,118 +59,60 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
     @Override
     @RegisterService(serviceName = "publishLoad")
-    public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
-
+    public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_LOAD.name(), metricRegistry);
+        InboundPackage<ModelServiceProto.PublishRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(req);
+        context.setActionType("MODEL_LOAD");
 
-        context.preProcess();
-        ReturnResult returnResult = null;
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
 
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-            context.putData(Dict.SERVICE_ID, req.getServiceId());
+        PublishResponse.Builder builder = PublishResponse.newBuilder();
+        builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
+        builder.setMessage(returnResult.getRetmsg());
+        builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
 
-            returnResult = modelManager.load(context, req);
-            /*returnResult = modelManager.publishLoadModel(context,
-                    new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtil.getFederatedRoles(req.getRoleMap()),
-                    ModelUtil.getFederatedRolesModel(req.getModelMap()));*/
-            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
-                    .setMessage(returnResult.getRetmsg())
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-
-             /*if (returnResult.getRetcode() == 0) {
-               RequestWapper  requestWapper =new RequestWapper(new String(encoder.encode(req.toByteArray())),System.currentTimeMillis(),md5Crypt(req));
-                publishLoadReqMap.put(requestWapper.md5,requestWapper);
-
-                fireStoreEvent();
-            }*/
-            responseStreamObserver.onNext(builder.build());
-            responseStreamObserver.onCompleted();
-        } finally {
-            context.postProcess(req, returnResult);
-        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
     }
 
     @Override
     @RegisterService(serviceName = "publishOnline")
-    public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
+    public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_PUBLISH_ONLINE.name(), metricRegistry);
-        context.preProcess();
-        ReturnResult returnResult = null;
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-            context.putData(Dict.SERVICE_ID, req.getServiceId());
-            if (logger.isDebugEnabled()) {
-                logger.debug("receive service id {}", req.getServiceId());
-            }
+        InboundPackage<ModelServiceProto.PublishRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(req);
+        context.setActionType("MODEL_PUBLISH_ONLINE");
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
 
+        PublishResponse.Builder builder = PublishResponse.newBuilder();
+        builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
+        builder.setMessage(returnResult.getRetmsg());
+        builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
 
-            returnResult = modelManager.bind(context, req);
-
-            /*returnResult = modelManager.publishOnlineModel(context,
-                    new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtil.getFederatedRoles(req.getRoleMap()),
-                    ModelUtil.getFederatedRolesModel(req.getModelMap())
-            );*/
-            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
-                    .setMessage(returnResult.getRetmsg())
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-            /*if (returnResult.getRetcode() == 0) {
-                String content = new String(encoder.encode(req.toByteArray()));
-                RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
-                publicOnlineReqMap.put(requestWapper.md5, requestWapper);
-                fireStoreEvent();
-            }*/
-            responseStreamObserver.onNext(builder.build());
-            responseStreamObserver.onCompleted();
-        } finally {
-            context.postProcess(req, returnResult);
-        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
     }
 
     @Override
     @RegisterService(serviceName = "publishBind")
-    public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseStreamObserver) {
+    public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_PUBLISH_ONLINE.name(), metricRegistry);
-        context.preProcess();
-        ReturnResult returnResult = null;
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-            context.putData(Dict.SERVICE_ID, req.getServiceId());
-            if (logger.isDebugEnabled()) {
-                logger.debug("publishBind receive service id {}", context.getData(Dict.SERVICE_ID));
-            }
+        InboundPackage<ModelServiceProto.PublishRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(req);
+        context.setActionType("MODEL_PUBLISH_ONLINE");
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
 
-            returnResult = modelManager.bind(context, req);
+        PublishResponse.Builder builder = PublishResponse.newBuilder();
+        builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
+        builder.setMessage(returnResult.getRetmsg());
+        builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
 
-            /*returnResult = modelManager.publishOnlineModel(context,
-                    new FederatedParty(req.getLocal().getRole(), req.getLocal().getPartyId()),
-                    ModelUtil.getFederatedRoles(req.getRoleMap()),
-                    ModelUtil.getFederatedRolesModel(req.getModelMap())
-            );*/
-            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
-                    .setMessage(returnResult.getRetmsg())
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-            /*if (returnResult.getRetcode() == 0) {
-
-                String content = new String(encoder.encode(req.toByteArray()));
-
-                try {
-                    PublishRequest xx= PublishRequest.parseFrom(decoder.decode(content));
-
-                } catch (InvalidProtocolBufferException e) {
-                    e.printStackTrace();
-                }
-                RequestWapper requestWapper = new RequestWapper(content,System.currentTimeMillis(),md5Crypt(req));
-                publicOnlineReqMap.put(requestWapper.md5, requestWapper);
-                fireStoreEvent();
-            }*/
-            responseStreamObserver.onNext(builder.build());
-            responseStreamObserver.onCompleted();
-        } finally {
-            context.postProcess(req, returnResult);
-        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -207,15 +150,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         responseObserver.onCompleted();
     }
 
-
-
-
-
-
     @Override
     public void queryModel(com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.QueryModelRequest request,
                            io.grpc.stub.StreamObserver<com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.QueryModelResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNBIND.name(), metricRegistry);
+        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.QUERY_MODEL.name(), metricRegistry);
         InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         context.setActionType("QUERY_MODEL");

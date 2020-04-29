@@ -17,9 +17,9 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
-
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware ,Retu
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> guestData,
                                                     Map<String,Object> hostData) {
         Map<String, Object> result = new HashMap<>(8);
-        result.put(Dict.RET_CODE,InferenceRetCode.OK);
+        result.put(Dict.RET_CODE, StatusCode.SUCCESS);
         hostData.forEach((k,v)->{
             try {
 
@@ -83,7 +83,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware ,Retu
                 result.put(Dict.SCORE, prob);
             } catch (Exception ex) {
                 logger.error("hetero lr guest merge error:", ex);
-                result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
+                result.put(Dict.RET_CODE, StatusCode.SYSTEM_ERROR);
             }
 
 
