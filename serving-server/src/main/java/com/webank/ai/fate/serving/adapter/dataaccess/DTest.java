@@ -19,7 +19,7 @@ package com.webank.ai.fate.serving.adapter.dataaccess;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +53,7 @@ public class DTest implements SingleFeatureDataAdaptor {
             featureData.put(features[i], i);
         }
         returnResult.setData(featureData);
-        returnResult.setRetcode(InferenceRetCode.OK);
+        returnResult.setRetcode(StatusCode.SUCCESS);
         return returnResult;
     }
 }

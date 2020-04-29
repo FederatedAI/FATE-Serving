@@ -20,8 +20,9 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +121,7 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware ,Retu
             localData.get(Dict.FM_CROSS);
             double score = localScore;
             result.put(Dict.RET_CODE, remoteCode);
-            if (remoteCode.equals(InferenceRetCode.OK)) {
+            if (remoteCode.equals(StatusCode.SUCCESS)) {
                 double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
                 Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
                 List<Double> hostCrosses = JSON.parseArray(dataMap.get(Dict.FM_CROSS).toString(), double.class);

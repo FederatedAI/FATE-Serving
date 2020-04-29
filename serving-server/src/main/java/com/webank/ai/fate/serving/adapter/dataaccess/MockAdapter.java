@@ -20,7 +20,6 @@ package com.webank.ai.fate.serving.adapter.dataaccess;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -43,7 +42,7 @@ public class MockAdapter implements SingleFeatureDataAdaptor {
                 data.put(a[0], Double.valueOf(a[1]));
             }
             returnResult.setData(data);
-            returnResult.setRetcode(InferenceRetCode.OK);
+            returnResult.setRetcode(StatusCode.SUCCESS);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("MockAdapter result, {}", JSONObject.toJSONString(returnResult));

@@ -8,14 +8,12 @@ import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.*;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
-import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
 import com.webank.ai.fate.serving.federatedml.model.PrepareRemoteable;
 import com.webank.ai.fate.serving.federatedml.model.Returnable;
@@ -105,12 +103,12 @@ public class PipelineModelProcessor implements ModelProcessor{
             if(v!=null){
                 singleInferenceResult.setData(v);
                 singleInferenceResult.setIndex(k);
-                singleInferenceResult.setRetcode(InferenceRetCode.OK);
+                singleInferenceResult.setRetcode(StatusCode.SUCCESS);
             }
             batchFederatedResult.getBatchDataList().add(singleInferenceResult);
         });
 
-        batchFederatedResult.setRetcode(InferenceRetCode.OK);
+        batchFederatedResult.setRetcode(StatusCode.SUCCESS);
 
         return  batchFederatedResult;
     }
@@ -277,7 +275,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                         byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
                         byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
                         int returnCode = mlNode.initModel(protoMeta, protoParam);
-                        if (returnCode == Integer.valueOf(InferenceRetCode.OK)) {
+                        if (returnCode == Integer.valueOf(StatusCode.SUCCESS)) {
                             componentMap.put(componentName, mlNode);
                             pipeLineNode.add(mlNode);
                             logger.info(" add class {} to pipeline task list", className);
@@ -295,7 +293,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                 throw new RuntimeException("initModel error");
             }
             logger.info("Finish init Pipeline");
-            return Integer.valueOf(InferenceRetCode.OK);
+            return Integer.valueOf(StatusCode.SUCCESS);
         }else{
             logger.error("model content is null ");
             throw new RuntimeException("model content is null");
@@ -339,7 +337,7 @@ public class PipelineModelProcessor implements ModelProcessor{
             Preconditions.checkArgument(remoteResult != null);
 
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
-            batchFederatedResult.setRetcode(InferenceRetCode.OK);
+            batchFederatedResult.setRetcode(StatusCode.SUCCESS);
            // Map remoteResultMap = changeRemoteResultToMap(remoteResult);
             localResult.forEach((index,data )->{
                 Map<String ,Object>  remoteSingleMap = Maps.newHashMap();
