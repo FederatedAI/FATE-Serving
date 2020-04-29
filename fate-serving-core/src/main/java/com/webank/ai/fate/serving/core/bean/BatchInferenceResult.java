@@ -92,10 +92,7 @@ public class BatchInferenceResult extends  ReturnResult{
 
                 result.put(singleInferenceResult.getIndex(),singleInferenceResult);
             }
-
             singleInferenceResultMap =result;
-
-
         }
 
         return singleInferenceResultMap;

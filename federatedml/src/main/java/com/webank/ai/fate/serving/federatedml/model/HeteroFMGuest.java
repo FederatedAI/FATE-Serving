@@ -104,7 +104,7 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware ,Retu
 
         Map<String,Object>  localData = (Map<String,Object>)localDataList.get(0).get(this.getComponentName());
 
-            logger.info("local data {} remote data {}",localData,hostData);
+       //     logger.info("local data {} remote data {}",localData,hostData);
             Preconditions.checkArgument(localData != null);
             Preconditions.checkArgument(hostData != null);
             Preconditions.checkArgument(localData.get(Dict.SCORE) != null);

@@ -7,6 +7,7 @@ import com.webank.ai.fate.serving.core.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -41,6 +42,19 @@ public class ErrorMessageUtil {
         return  returnResult;
 
     }
+
+    public static Map  handleExceptionToMap(Throwable e){
+        Map  returnResult = new HashMap();
+        if(e instanceof BaseException){
+            BaseException baseException  = (BaseException) e;
+            returnResult.put(Dict.RET_CODE,baseException.getRetcode());
+            returnResult.put(Dict.MESSAGE,baseException.getMessage());
+        }else{
+            returnResult.put(Dict.RET_CODE,ErrorCode.SYSTEM_ERROR);
+        }
+        return  returnResult;
+    }
+
 
 
    public static  Map handleException(Map result,Throwable e){

@@ -10,8 +10,11 @@ import java.util.Map;
 public class BatchInferenceRequest extends InferenceRequest{
 
     public static class SingleInferenceData {
+
         int index;
+
         Map<String, Object> featureData= Maps.newHashMap();
+
         Map<String, Object> sendToRemoteFeatureData =Maps.newHashMap();
 
         public int getIndex() {
@@ -38,15 +41,18 @@ public class BatchInferenceRequest extends InferenceRequest{
             this.sendToRemoteFeatureData = sendToRemoteFeatureData;
         }
 
+        public boolean isNeedCheckFeature() {
+            return needCheckFeature;
+        }
+
+        public void setNeedCheckFeature(boolean needCheckFeature) {
+            this.needCheckFeature = needCheckFeature;
+        }
+
         boolean needCheckFeature =false;
-
-
-
-
     }
 
     private String serviceId;
-
 
     private List<SingleInferenceData> batchDataList;
 
@@ -57,8 +63,6 @@ public class BatchInferenceRequest extends InferenceRequest{
     public void setBatchDataList(List<SingleInferenceData> batchDataList) {
         this.batchDataList = batchDataList;
     }
-
-
 
     public String getCaseId() {
         return caseId;

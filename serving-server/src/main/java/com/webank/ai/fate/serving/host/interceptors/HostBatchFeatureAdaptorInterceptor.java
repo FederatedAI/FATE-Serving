@@ -35,7 +35,9 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });
-        logger.info("after get features from local, batchInferenceRequest is {}", batchInferenceRequest);
+        if(logger.isDebugEnabled()) {
+            logger.debug("after get features from local, batchInferenceRequest is {}", batchInferenceRequest);
+        }
     };
 
     @Override
