@@ -198,6 +198,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                            throw  new  RemoteRpcException(remoteReturnResult.getRetcode(),sb.toString());
                         }
                     }
+
                 } catch(StatusRuntimeException e){
                     throw new RemoteRpcException("host "+partId+" StatusRuntimeException");
                 }
@@ -338,7 +339,8 @@ public class PipelineModelProcessor implements ModelProcessor{
             Preconditions.checkArgument(remoteResult != null);
 
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
-
+            batchFederatedResult.setRetcode(InferenceRetCode.OK);
+           // Map remoteResultMap = changeRemoteResultToMap(remoteResult);
             localResult.forEach((index,data )->{
                 Map<String ,Object>  remoteSingleMap = Maps.newHashMap();
                 remoteResult.forEach((partyId,batchResult)->{
