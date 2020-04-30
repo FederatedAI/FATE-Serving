@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.exceptions.HostInvalidParamException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -37,23 +38,20 @@ public class HostBatchParamInterceptor implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-
-        byte[] reqBody = (byte[]) inboundPackage.getBody();
-        BatchHostFederatedParams batchHostFederatedParams = null;
         try {
+            byte[] reqBody = (byte[]) inboundPackage.getBody();
+            BatchHostFederatedParams batchHostFederatedParams = null;
             batchHostFederatedParams = JSON.parseObject(reqBody, BatchHostFederatedParams.class);
-        } catch (Exception e) {
-
-            throw new RuntimeException();
+            inboundPackage.setBody(batchHostFederatedParams);
+            Preconditions.checkArgument(batchHostFederatedParams != null, "");
+            Preconditions.checkArgument(batchHostFederatedParams.getBatchDataList() != null&&batchHostFederatedParams.getBatchDataList().size()>0);
+            List<BatchHostFederatedParams.SingleInferenceData> datalist = batchHostFederatedParams.getBatchDataList();
+            int batchSizeLimit = environment.getProperty("batch.inference.max", int.class, 500);
+            Preconditions.checkArgument(datalist.size() <= batchSizeLimit,"batch size is big than "+batchSizeLimit);
         }
-        inboundPackage.setBody(batchHostFederatedParams);
-        Preconditions.checkArgument(batchHostFederatedParams != null, "");
-        Preconditions.checkArgument(batchHostFederatedParams.getBatchDataList() != null);
-        List<BatchHostFederatedParams.SingleInferenceData> datalist = batchHostFederatedParams.getBatchDataList();
-        int batchSizeLimit = environment.getProperty("batch.inference.max", int.class, 500);
-        Preconditions.checkArgument(datalist.size() <= batchSizeLimit);
-
-
+        catch(Exception e){
+            throw  new HostInvalidParamException(e.getMessage());
+        }
     }
 
 }

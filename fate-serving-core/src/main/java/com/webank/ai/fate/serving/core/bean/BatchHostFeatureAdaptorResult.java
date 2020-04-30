@@ -11,6 +11,14 @@ import java.util.Map;
  */
 public class BatchHostFeatureAdaptorResult {
 
+    public String getRetcode() {
+        return retcode;
+    }
+
+    public void setRetcode(String retcode) {
+        this.retcode = retcode;
+    }
+
     String  retcode;
 
     String  caseId;

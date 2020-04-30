@@ -7,6 +7,7 @@ import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.HostGetFeatureErrorException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -29,8 +30,11 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
     public void doPreProcess(Context context, InboundPackage<BatchInferenceRequest> inboundPackage, OutboundPackage<BatchInferenceResult> outboundPackage) throws Exception {
         BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
-        if(batchHostFeatureAdaptorResult==null||batchHostFeatureAdaptorResult.getIndexResultMap()==null){
-            throw  new HostGetFeatureErrorException("no feature");
+        if(batchHostFeatureAdaptorResult==null){
+            throw  new HostGetFeatureErrorException("adaptor return null");
+        }
+        if(!batchHostFeatureAdaptorResult.getRetcode().equals(StatusCode.SUCCESS)){
+            throw  new HostGetFeatureErrorException(batchHostFeatureAdaptorResult.getRetcode(),"adaptor return code is invalid");
         }
         Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult> featureResultMap = batchHostFeatureAdaptorResult.getIndexResultMap();
         batchInferenceRequest.getBatchDataList().forEach(request -> {

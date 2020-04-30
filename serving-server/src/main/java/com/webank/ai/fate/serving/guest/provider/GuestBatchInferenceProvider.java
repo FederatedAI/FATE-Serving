@@ -24,7 +24,7 @@ import java.util.Map;
 
 @FateService(name = "batchInferenece", preChain = {
         "monitorInterceptor",
-        "requestOverloadBreaker",
+//        "requestOverloadBreaker",
         "guestBatchParamInterceptor",
         "guestModelInterceptor",
         "federationRouterInterceptor"
@@ -45,41 +45,15 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
     public BatchInferenceResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
 
         Model model = ((ServingServerContext) context).getModel();
-
         ModelProcessor modelProcessor = model.getModelProcessor();
-
         BatchInferenceRequest batchInferenceRequest = (BatchInferenceRequest) inboundPackage.getBody();
-        /**
-         *  有些算法模块如 SBT,需要特殊的处理，会添加数据到sendToRemote ，如果后续有算法模块需要同样的操作，可以实现PrepareRemoteable接口
-         */
         modelProcessor.guestPrepareDataBeforeInference(context, batchInferenceRequest);
-        /**
-         *  准备发往对端的参数  , 因为要考虑之后有可能支持多方 ，
-         */
         Map futureMap = Maps.newHashMap();
-
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
-
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);
-            /**
-             * guest 端与host同步预测，再合并结果
-             */
-            FederatedRpcInvoker.RpcDataWraper rpcDataWraper = new FederatedRpcInvoker.RpcDataWraper();
-            /**
-             *
-             */
-            rpcDataWraper.setGuestModel(model);
-            rpcDataWraper.setHostModel(remoteModel);
-            rpcDataWraper.setData(batchHostFederatedParams);
-            rpcDataWraper.setRemoteMethodName(Dict.REMOTE_METHOD_BATCH);
-
-            ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.async(context, rpcDataWraper);
-
+            ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.async(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams));
             futureMap.put(hostPartyId, originBatchResultFuture);
         });
-        /**
-         *  超时时间需要根据实际情况调整
-         */
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap,timeout );
         batchFederatedResult.setCaseid(context.getCaseId());
         return batchFederatedResult;
@@ -102,6 +76,14 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         return outboundPackage;
     }
 
+    private  FederatedRpcInvoker.RpcDataWraper   buildRpcDataWraper(Model model,Model  remoteModel,Object  batchHostFederatedParams){
+        FederatedRpcInvoker.RpcDataWraper rpcDataWraper = new FederatedRpcInvoker.RpcDataWraper();
+        rpcDataWraper.setGuestModel(model);
+        rpcDataWraper.setHostModel(remoteModel);
+        rpcDataWraper.setData(batchHostFederatedParams);
+        rpcDataWraper.setRemoteMethodName(Dict.REMOTE_METHOD_BATCH);
+        return  rpcDataWraper;
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {

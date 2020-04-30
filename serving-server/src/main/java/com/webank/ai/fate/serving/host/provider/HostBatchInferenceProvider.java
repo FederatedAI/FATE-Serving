@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @FateService(name = "batchInferenece", preChain = {
         "monitorInterceptor",
-        "requestOverloadBreaker",
+//        "requestOverloadBreaker",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
         "hostBatchFeatureAdaptorInterceptor"
