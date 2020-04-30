@@ -145,8 +145,7 @@ public class PipelineModelProcessor implements ModelProcessor{
         ReturnResult  returnResult = new ReturnResult();
         Map<String, Object> localResult = singleLocalPredict(context, inferenceRequest.getFeatureData());
         ReturnResult  remoteResult = new ReturnResult();
-        try {
-            Map<String,Object>  remoteResultMap = Maps.newHashMap();
+        Map<String,Object>  remoteResultMap = Maps.newHashMap();
             futureMap.forEach((partId,future)->{
                 try {
                     Proxy.Packet  packet =   (Proxy.Packet)future.get(timeout, TimeUnit.MILLISECONDS);
@@ -154,16 +153,11 @@ public class PipelineModelProcessor implements ModelProcessor{
                     logger.info("caseid {} remote partid {} return data {}",context.getCaseId() ,partId,remoteContent);
                     ReturnResult   remoteReturnResult  = JSON.parseObject(remoteContent,ReturnResult.class);
                     if(remoteReturnResult!=null) {
-                        if(StatusCode.SUCCESS.equals(remoteReturnResult.getRetcode())) {
-                            Map<String, Object> remoeteData = remoteReturnResult.getData();
-                            remoteResultMap.put(partId, remoeteData);
-                        }else{
-                           StringBuilder  sb = new StringBuilder();
-                           sb.append("host ").append(partId).append(" return code ").append(remoteReturnResult.getRetcode());
-                           throw  new  RemoteRpcException(remoteReturnResult.getRetcode(),sb.toString());
-                        }
+                            Map<String, Object> remoteData = remoteReturnResult.getData();
+                            remoteData.put(Dict.RET_CODE,remoteReturnResult.getRetcode());
+                            remoteData.put(Dict.MESSAGE,remoteReturnResult.getRetmsg());
+                            remoteResultMap.put(partId, remoteData);
                     }
-
                 } catch(StatusRuntimeException e){
                     throw new RemoteRpcException("host "+partId+" StatusRuntimeException");
                 }
@@ -179,14 +173,7 @@ public class PipelineModelProcessor implements ModelProcessor{
             Map<String, Object> tempResult= singleMerge(context,localResult,remoteResultMap );
             remoteResult.setData(tempResult);
             remoteResult.setRetcode(StatusCode.SUCCESS);
-        }catch (Exception e){
-            //e.printStackTrace();
-            throw  e;
-        }
-
         return remoteResult;
-
-
     }
 
     @Override
@@ -277,7 +264,6 @@ public class PipelineModelProcessor implements ModelProcessor{
                 Map<String, Object> singleResult = singleLocalPredict(context, input.getFeatureData());
                 result.put(input.getIndex(), singleResult);
             }catch (Throwable e){
-                logger.error("case id {} index {} local predict error",context.getCaseId(),input.getIndex(),e);
                 result.put(input.getIndex(),ErrorMessageUtil.handleExceptionToMap(e));
             }
         }
@@ -294,7 +280,6 @@ public class PipelineModelProcessor implements ModelProcessor{
             Preconditions.checkArgument(remoteResult != null);
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
             batchFederatedResult.setRetcode(StatusCode.SUCCESS);
-           // Map remoteResultMap = changeRemoteResultToMap(remoteResult);
             localResult.forEach((index,data )->{
                 Map<String ,Object>  remoteSingleMap = Maps.newHashMap();
                 remoteResult.forEach((partyId,batchResult)->{
@@ -356,7 +341,11 @@ public class PipelineModelProcessor implements ModelProcessor{
         }
         if(remoteData.get(Dict.RET_CODE)!=null&&!StatusCode.SUCCESS.equals(remoteData.get(Dict.RET_CODE))){
             String remoteCode = remoteData.get(Dict.RET_CODE).toString();
-            throw  new  BaseException("2"+remoteCode,remoteData.get(Dict.MESSAGE)!=null?remoteData.get(Dict.MESSAGE).toString():"");
+            String remoteMsg = remoteData.get(Dict.MESSAGE)!=null?remoteData.get(Dict.MESSAGE).toString():"";
+            String  errorMsg = ErrorMessageUtil.buildRemoteRpcErrorMsg(remoteCode,remoteMsg);
+            String  retcode  = ErrorMessageUtil.transformRemoteErrorCode(remoteCode);
+            throw  new  RemoteRpcException(retcode,errorMsg);
+
         }
 
 
