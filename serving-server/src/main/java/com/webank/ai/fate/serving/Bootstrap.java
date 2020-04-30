@@ -31,20 +31,13 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Set;
-
-/**
- * @Description TODO
- * @Author
- **/
 @SpringBootApplication
 @ConfigurationProperties
 @PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
 @EnableScheduling
 public class Bootstrap {
-
     private static ApplicationContext applicationContext;
     Logger logger = LoggerFactory.getLogger(Bootstrap.class);
-
     public static void main(String[] args) {
         try {
             Bootstrap bootstrap = new Bootstrap();

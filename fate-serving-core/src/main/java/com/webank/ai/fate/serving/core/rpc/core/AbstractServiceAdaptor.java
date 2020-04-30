@@ -199,9 +199,9 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
     @Override
     public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws RuntimeException {
 
-        logger.error("serviceFail {}", errors);
-        Throwable e = errors.get(0);
 
+        Throwable e = errors.get(0);
+        logger.error("service fail ", e);
         return  serviceFailInner(context,data,e);
 
     }

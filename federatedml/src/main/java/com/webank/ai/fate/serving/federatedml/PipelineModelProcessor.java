@@ -28,7 +28,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
-
+import static com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil.buildRemoteRpcErrorMsg;
+import static com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil.transformRemoteErrorCode;
 public class PipelineModelProcessor implements ModelProcessor{
 
     @Override
@@ -42,14 +43,16 @@ public class PipelineModelProcessor implements ModelProcessor{
                 packet   = (Proxy.Packet) future.get(timeout, TimeUnit.MILLISECONDS);
                 String   remoteContent =  packet.getBody().getValue().toStringUtf8();
                 BatchInferenceResult  remoteInferenceResult = (BatchInferenceResult) JSON.parseObject(remoteContent, BatchInferenceResult.class);
-                if (!remoteInferenceResult.getRetcode() .equals(StatusCode.SUCCESS)) {
-                    throw  new RemoteRpcException(remoteInferenceResult.getRetcode(),buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(),remoteInferenceResult.getRetmsg()));
+                if (!StatusCode.SUCCESS.equals(remoteInferenceResult.getRetcode()) ) {
+                    throw  new RemoteRpcException(transformRemoteErrorCode(remoteInferenceResult.getRetcode()),buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(),remoteInferenceResult.getRetmsg()));
                 }
                 remoteResultMap.put(partyId,remoteInferenceResult);
             }  catch (TimeoutException e) {
                 throw  new  RemoteRpcException("party id "+partyId+ " time out");
-            }catch(Exception e){
-                throw new  SysException(e.getMessage());
+            } catch (InterruptedException e) {
+                throw  new  RemoteRpcException("party id "+partyId+ " InterruptedException");
+            } catch (ExecutionException e) {
+                throw  new  RemoteRpcException("party id "+partyId+ " ExecutionException");
             }
         });
         batchFederatedResult = batchMergeHostResult(context, localResult, remoteResultMap);
@@ -57,11 +60,7 @@ public class PipelineModelProcessor implements ModelProcessor{
     }
 
 
-    private  String  buildRemoteRpcErrorMsg(String  code ,String  msg){
-        return  new StringBuilder().append("host return code ").append(code)
-                .append("host msg :").append(msg).toString();
 
-    }
 
     /**
      *  host 端只需要本地预测即可

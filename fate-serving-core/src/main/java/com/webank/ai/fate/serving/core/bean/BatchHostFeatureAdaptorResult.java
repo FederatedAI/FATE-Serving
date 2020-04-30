@@ -23,8 +23,6 @@ public class BatchHostFeatureAdaptorResult {
 
     String  caseId;
 
-
-
     /**
      *   key 为请求中的index
      */
@@ -32,7 +30,6 @@ public class BatchHostFeatureAdaptorResult {
 
 
     public static class  SingleBatchHostFeatureAdaptorResult{
-
 
         int  index;
 
@@ -49,7 +46,6 @@ public class BatchHostFeatureAdaptorResult {
         }
 
         Map<String,Object> features;
-
 
         public Integer getIndex() {
             return index;
@@ -75,7 +71,6 @@ public class BatchHostFeatureAdaptorResult {
             this.msg = msg;
         }
 
-
     }
 
     public String getCaseId() {
@@ -93,8 +88,5 @@ public class BatchHostFeatureAdaptorResult {
     public void setIndexResultMap(Map<Integer, SingleBatchHostFeatureAdaptorResult> indexResultMap) {
         this.indexResultMap = indexResultMap;
     }
-
-
-
 
 }

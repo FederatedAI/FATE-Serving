@@ -33,8 +33,8 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         if(batchHostFeatureAdaptorResult==null){
             throw  new HostGetFeatureErrorException("adaptor return null");
         }
-        if(!batchHostFeatureAdaptorResult.getRetcode().equals(StatusCode.SUCCESS)){
-            throw  new HostGetFeatureErrorException(batchHostFeatureAdaptorResult.getRetcode(),"adaptor return code is invalid");
+        if(!StatusCode.SUCCESS.equals(batchHostFeatureAdaptorResult.getRetcode())){
+            throw  new HostGetFeatureErrorException("adaptor return code is invalid");
         }
         Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult> featureResultMap = batchHostFeatureAdaptorResult.getIndexResultMap();
         batchInferenceRequest.getBatchDataList().forEach(request -> {
@@ -44,8 +44,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });
-    }
-    ;
+    };
 
     @Override
     public void afterPropertiesSet() throws Exception {

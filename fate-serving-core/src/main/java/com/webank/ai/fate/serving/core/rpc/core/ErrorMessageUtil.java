@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.core.rpc.core;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +21,6 @@ public class ErrorMessageUtil {
 
    static Logger logger = LoggerFactory.getLogger(ErrorMessageUtil.class);
 
-//   public static Map  handleExceptionV1_3(Throwable e){
-//        if(e instanceof BaseException){
-//            BaseException  baseException =(BaseException)e;
-//            result.put(Dict.CODE, baseException.getRetcode());
-//            result.put(Dict.MESSAGE,baseException.getMessage());
-//        }
-//
-//
-//   };
 
     public static ReturnResult  handleExceptionToReturnResult(Throwable e){
         ReturnResult  returnResult = new  ReturnResult();
@@ -42,6 +34,23 @@ public class ErrorMessageUtil {
         return  returnResult;
 
     }
+    public static String  buildRemoteRpcErrorMsg(String  code ,String  msg){
+        return  new StringBuilder().append("host return code ").append(code)
+                .append(" host msg :").append(msg).toString();
+
+    }
+
+    public static String  transformRemoteErrorCode(String  code ){
+        if(code!=null) {
+            return new StringBuilder().append("2").append(code).toString();
+        }
+        else{
+            return new StringBuilder().append("2").append(StatusCode.SYSTEM_ERROR).toString();
+        }
+    }
+
+
+
 
     public static Map  handleExceptionToMap(Throwable e){
         Map  returnResult = new HashMap();
