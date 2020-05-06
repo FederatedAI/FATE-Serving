@@ -36,6 +36,7 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,6 +49,9 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
 
     @Autowired
     MetricRegistry metricRegistry;
+
+    @Autowired
+    Environment environment;
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
@@ -102,6 +106,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     private Context prepareContext(String interfaceName) {
         ServingServerContext context = new ServingServerContext();
         context.setMetricRegistry(this.metricRegistry);
+        context.setEnvironment(environment);
         context.setInterfaceName(interfaceName);
         return context;
     }
