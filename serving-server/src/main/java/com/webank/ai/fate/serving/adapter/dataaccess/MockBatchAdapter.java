@@ -74,6 +74,7 @@ public class MockBatchAdapter implements BatchFeatureDataAdaptor {
             indexMap.put(singleInferenceData.getIndex(), singleBatchHostFeatureAdaptorResult);
 
         });
+        batchHostFeatureAdaptorResult.setRetcode(StatusCode.SUCCESS);
 
         return batchHostFeatureAdaptorResult;
     }

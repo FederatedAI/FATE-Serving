@@ -40,9 +40,11 @@ public class PipelineModelProcessor implements ModelProcessor{
         remoteFutureMap.forEach((partyId,future)->{
             Proxy.Packet packet  =null;
             try {
-                packet   = (Proxy.Packet) future.get(timeout, TimeUnit.MILLISECONDS);
-                String   remoteContent =  packet.getBody().getValue().toStringUtf8();
-                BatchInferenceResult  remoteInferenceResult = (BatchInferenceResult) JSON.parseObject(remoteContent, BatchInferenceResult.class);
+//                packet   = (Proxy.Packet) future.get(timeout, TimeUnit.MILLISECONDS);
+//                String   remoteContent =  packet.getBody().getValue().toStringUtf8();
+//                BatchInferenceResult  remoteInferenceResult = (BatchInferenceResult) JSON.parseObject(remoteContent, BatchInferenceResult.class);
+                BatchInferenceResult  remoteInferenceResult =(BatchInferenceResult)  future.get(timeout, TimeUnit.MILLISECONDS);
+
                 if (!StatusCode.SUCCESS.equals(remoteInferenceResult.getRetcode()) ) {
                     throw  new RemoteRpcException(transformRemoteErrorCode(remoteInferenceResult.getRetcode()),buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(),remoteInferenceResult.getRetmsg()));
                 }
@@ -283,24 +285,25 @@ public class PipelineModelProcessor implements ModelProcessor{
             localResult.forEach((index,data )->{
                 Map<String ,Object>  remoteSingleMap = Maps.newHashMap();
                 remoteResult.forEach((partyId,batchResult)->{
-                    if(batchResult.getSingleInferenceResultMap()!=null&& batchResult.getSingleInferenceResultMap().get(index)!=null) {
-                        BatchInferenceResult.SingleInferenceResult  singleInferenceResult = batchResult.getSingleInferenceResultMap().get(index);
-                        Map<String,Object> realRemoteData = singleInferenceResult.getData();
-                        realRemoteData.put(Dict.RET_CODE,singleInferenceResult.getRetcode());
-                        remoteSingleMap.put(partyId,realRemoteData);
+                    if(batchResult.getSingleInferenceResultMap()!=null ) {
+                        if(batchResult.getSingleInferenceResultMap().get(index)!=null) {
+                            BatchInferenceResult.SingleInferenceResult singleInferenceResult = batchResult.getSingleInferenceResultMap().get(index);
+                            Map<String, Object> realRemoteData = singleInferenceResult.getData();
+                            realRemoteData.put(Dict.RET_CODE, singleInferenceResult.getRetcode());
+                            remoteSingleMap.put(partyId, realRemoteData);
+                        }else{
+                            logger.info("yyyyyyyyyyyyyyyyyyyyyyyy {}",index);
+                        }
                     }
                 });
                 try {
                     Map<String, Object> localData = localResult.get(index);
+                    logger.info("test merge {} : {}",index,remoteSingleMap.size());
                     Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteSingleMap);
                     batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, StatusCode.SUCCESS, Dict.SUCCESS, mergeResult));
-
                 }catch(Exception e){
                     logger.error("merge remote error", e);
-                    String  retcode = StatusCode.SYSTEM_ERROR;
-                    if(e instanceof BaseException){
-                        retcode= ((BaseException) e).getRetcode();
-                    }
+                    String  retcode = ErrorMessageUtil.getLocalExceptionCode(e);
                     batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, retcode, e.getMessage(), null));
                 }
             });

@@ -24,23 +24,24 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String token = request.getHeader("sessionToken");
-        Preconditions.checkArgument(StringUtils.isNotBlank(token), "parameter sessionToken is required");
-
-        String userInfo = redisTemplate.opsForValue().get(token);
-        if (StringUtils.isNotBlank(userInfo)) {
-            // reset ttl
-            redisTemplate.opsForValue().set(token, userInfo, 10, TimeUnit.MINUTES);
-            return true;
-        } else {
-            logger.info("Session token unavailable");
-            ReturnResult result = new ReturnResult();
-            result.setRetcode(StatusCode.PARAM_ERROR);
-            result.setRetmsg("Session token unavailable");
-            response.getWriter().write(JSONObject.toJSONString(result));
-            response.flushBuffer();
-            return false;
-        }
+//        String token = request.getHeader("sessionToken");
+//        Preconditions.checkArgument(StringUtils.isNotBlank(token), "parameter sessionToken is required");
+//
+//        String userInfo = redisTemplate.opsForValue().get(token);
+//        if (StringUtils.isNotBlank(userInfo)) {
+//            // reset ttl
+//            redisTemplate.opsForValue().set(token, userInfo, 10, TimeUnit.MINUTES);
+//            return true;
+//        } else {
+//            logger.info("Session token unavailable");
+//            ReturnResult result = new ReturnResult();
+//            result.setRetcode(StatusCode.PARAM_ERROR);
+//            result.setRetmsg("Session token unavailable");
+//            response.getWriter().write(JSONObject.toJSONString(result));
+//            response.flushBuffer();
+//            return false;
+//        }
+        return true;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.webank.ai.fate.serving.core.async;
 
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.annotation.Subscribe;
 import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import org.slf4j.Logger;
@@ -18,6 +19,8 @@ public class AsyncSubscribeRegister implements ApplicationListener<ApplicationRe
 
     public static final Map<String, Set<Method>> SUBSCRIBE_METHOD_MAP = new HashMap<>();
 
+    public static final Map<Method,Object>  METHOD_INSTANCE_MAP  = Maps.newHashMap();
+
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
         String[] beans = SpringContextUtil.getBeanNamesForType(AbstractAsyncMessageProcessor.class);
@@ -33,6 +36,7 @@ public class AsyncSubscribeRegister implements ApplicationListener<ApplicationRe
                             methodList = new HashSet<>();
                         }
                         methodList.add(method);
+                        METHOD_INSTANCE_MAP.put(method,eventProcessor);
                         SUBSCRIBE_METHOD_MAP.put(subscribe.value(), methodList);
                     }
                 }

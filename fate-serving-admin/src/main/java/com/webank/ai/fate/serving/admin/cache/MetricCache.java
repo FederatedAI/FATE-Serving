@@ -7,6 +7,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +30,11 @@ public class MetricCache implements Cache<String, MetricEntity>, InitializingBea
     @Override
     public MetricEntity get(String key) {
         return this.cache.getIfPresent(key);
+    }
+
+    @Override
+    public List<MetricEntity> get(String... keys) {
+        return null;
     }
 
     public void addResource(String resource) {

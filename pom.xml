@@ -33,7 +33,7 @@
         <module>fate-metrics-api</module>
         <module>fate-metrics-micrometer</module>
         <!--<module>fate-serving-monitor</module>-->
-        <!--<module>fate-serving-admin</module>-->
+        <module>fate-serving-admin</module>
     </modules>
 
     <properties>

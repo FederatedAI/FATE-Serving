@@ -18,19 +18,27 @@ package com.webank.ai.fate.serving.rpc;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.router.RouterService;
+import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.MetaInfo;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.ServingServerContext;
+import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
+import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.cache.Cache;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
+import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
+import com.webank.ai.fate.serving.core.utils.EncryptUtils;
+import com.webank.ai.fate.serving.event.CacheEventData;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,7 +48,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Service
 public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Packet> {
@@ -50,6 +63,8 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
     public RouterService routerService;
     @Autowired
     private Environment environment;
+    @Autowired
+    private Cache cache;
 
     private Proxy.Packet build(Context context, RpcDataWraper rpcDataWraper) {
 
@@ -143,12 +158,162 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
     }
 
 
+    private  String  buildCacheKey(Model guestModel, Model hostModel,Map sendToRemote){
+
+        String  tableName = guestModel.getTableName();
+        String  namespace = guestModel.getNamespace();
+        String  partId = hostModel.getPartId();
+        StringBuilder  sb = new StringBuilder();
+         sb.append(partId).append(tableName).append(namespace).append(JSON.toJSONString(sendToRemote));
+        String key = EncryptUtils.encrypt(sb.toString(), EncryptMethod.MD5);
+        return  key ;
+
+
+    }
+
+    public  ListenableFuture<ReturnResult>   singleInferenceRpcWithCache  (Context  context,
+                                                                           RpcDataWraper  rpcDataWraper,boolean useCache){
+
+        InferenceRequest  inferenceRequest= (InferenceRequest)rpcDataWraper.getData();
+        if(useCache) {
+            Object result = cache.get(buildCacheKey(rpcDataWraper.getGuestModel(),rpcDataWraper.getHostModel(),inferenceRequest.getSendToRemoteFeatureData()));
+            if(result!=null){
+                ReturnResult  returnResult = JSON.parseObject(result.toString(),ReturnResult.class);
+                return   new AbstractFuture<ReturnResult>() {
+                    @Override
+                    public ReturnResult get() throws InterruptedException, ExecutionException {
+                        return returnResult;
+                    }
+                    @Override
+                    public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                        return returnResult;
+                    }
+
+                };
+            }
+
+        }
+        ListenableFuture<Proxy.Packet> future = this.async(context, rpcDataWraper);
+         return new AbstractFuture<ReturnResult>() {
+
+
+                    @Override
+                    public ReturnResult get() throws InterruptedException, ExecutionException {
+                        return parse(future.get());
+                    }
+
+                    @Override
+                    public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                        return parse(future.get(timeout, unit));
+                    }
+
+                    private ReturnResult parse(Proxy.Packet remote) {
+                        if(remote!=null) {
+                            String remoteContent = remote.getBody().getValue().toStringUtf8();
+                            ReturnResult remoteInferenceResult = (ReturnResult) JSON.parseObject(remoteContent, ReturnResult.class);
+                            if(useCache&&StatusCode.SUCCESS.equals(remoteInferenceResult.getRetcode())){
+                                try {
+                                    AsyncMessageEvent  asyncMessageEvent = new AsyncMessageEvent();
+                                    CacheEventData  cacheEventData = new CacheEventData(buildCacheKey(rpcDataWraper.getGuestModel(),rpcDataWraper.getHostModel(),inferenceRequest.getSendToRemoteFeatureData()),remoteInferenceResult.getData());
+                                    asyncMessageEvent.setName(Dict.EVENT_SET_INFERENCE_CACHE);
+                                    asyncMessageEvent.setData(cacheEventData);
+                                    DisruptorUtil.producer();
+                                }catch (Exception e){
+                                    logger.error("send cache event error",e);
+                                }
+                            }
+                            return remoteInferenceResult;
+                        }else{
+                            return null;
+                        }
+                    }
+
+                };
+
+    }
+
+
+
+
+
+    @Override
+    public  ListenableFuture<BatchInferenceResult>   batchInferenceRpcWithCache  (Context  context,
+                                                                                  RpcDataWraper  rpcDataWraper, boolean useCache){
+
+        BatchInferenceRequest  inferenceRequest= (BatchInferenceRequest)rpcDataWraper.getData();
+        Map<Integer, BatchInferenceResult.SingleInferenceResult>  cacheData = Maps.newHashMap();
+        if(useCache) {
+            List<BatchInferenceRequest.SingleInferenceData> listData = inferenceRequest.getBatchDataList();
+            List<String> cacheKeys = Lists.newArrayList();
+            Map<String,List<Integer>  >  keyIndexMap  =Maps.newHashMap();
+            for(int i =0;i<listData.size();i++) {
+                BatchInferenceRequest.SingleInferenceData singleInferenceData =  listData.get(i);
+                String  key = buildCacheKey(rpcDataWraper.getGuestModel(),rpcDataWraper.getHostModel(),singleInferenceData.getSendToRemoteFeatureData());
+                cacheKeys.add(key);
+                if(keyIndexMap.get(key)==null){
+                    keyIndexMap.put(key,Lists.newArrayList(i));
+                }else{
+                    keyIndexMap.get(key).add(i);
+                }
+
+                };
+            if(CollectionUtils.isNotEmpty(cacheKeys)) {
+                List<Cache.DataWrapper<String, String>> dataWrapperList = this.cache.get(cacheKeys.toArray());
+
+                if(dataWrapperList!=null) {
+
+
+                    Set<Integer> prepareToRemove = Sets.newHashSet();
+                    for (Cache.DataWrapper<String, String> cacheDataWrapper : dataWrapperList) {
+                        String key = cacheDataWrapper.getKey();
+                        List<Integer> indexs = keyIndexMap.get(key);
+                        if(indexs!=null) {
+//                        System.err.println("index "+ index);
+//                        BatchInferenceRequest.SingleInferenceData removedRequest = listData.remove(index.intValue());
+                            prepareToRemove.addAll(indexs);
+                          for(Integer  index:indexs) {
+                              String value = cacheDataWrapper.getValue();
+                              System.err.println("nnnnnnnnnnnnnnnnnnnn"+value);
+                              Map data = JSON.parseObject(value, Map.class);
+                              BatchInferenceResult.SingleInferenceResult finalSingleResult = new BatchInferenceResult.SingleInferenceResult();
+                              finalSingleResult.setRetcode(StatusCode.SUCCESS);
+                              finalSingleResult.setData(data);
+                              finalSingleResult.setRetmsg("hit cache");
+                              finalSingleResult.setIndex(listData.get(index).getIndex());
+                              cacheData.put(listData.get(index).getIndex(), finalSingleResult);
+                          }
+                        }
+                    }
+
+                    List<BatchInferenceRequest.SingleInferenceData>  newRequestList = Lists.newArrayList();
+
+                    for(int index=0;index<listData.size();index++){
+                        if(!prepareToRemove.contains(index)) {
+                            newRequestList.add(listData.get(index));
+                        }
+
+                    }
+                    inferenceRequest.getBatchDataList().clear();
+                    inferenceRequest.getBatchDataList().addAll(newRequestList);
+
+                }
+            }
+        }
+
+        ListenableFuture<Proxy.Packet> future = null;
+
+        if(inferenceRequest.getBatchDataList().size()>0) {
+           logger.info("iiiiiiiiiiiiiiiiiiiiii {}", inferenceRequest.getBatchDataList().size());
+            future = this.async(context, rpcDataWraper);
+        }
+        return   new BatchInferenceFuture(future,rpcDataWraper,inferenceRequest,useCache,cacheData);
+    }
+
+
+
+
     @Override
     public ListenableFuture<Proxy.Packet> async(Context context, RpcDataWraper rpcDataWraper) {
-
-        context.setDownstreamBegin(System.currentTimeMillis());
-
-        try {
 
             Proxy.Packet packet = this.build(context, rpcDataWraper);
 
@@ -160,23 +325,16 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
             Preconditions.checkArgument(StringUtils.isNotEmpty(address));
 
-            logger.info("try to send to {}", address);
-
             ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
 
             ListenableFuture<Proxy.Packet> future = null;
 
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
-
+             context.setDownstreamBegin(System.currentTimeMillis());
             future = stub1.unaryCall(packet);
-
             return future;
 
-        } catch (Exception e) {
-            logger.error("getFederatedPredictFromRemote error", e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+
 
     }
 

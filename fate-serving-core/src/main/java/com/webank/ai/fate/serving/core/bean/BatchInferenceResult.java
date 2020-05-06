@@ -17,7 +17,8 @@ public class BatchInferenceResult extends  ReturnResult{
 
         String  retcode;
 
-        String  msg;
+
+        String  retmsg;
 
         Map<String ,Object> data;
 
@@ -44,14 +45,14 @@ public class BatchInferenceResult extends  ReturnResult{
         public void setIndex(Integer index) {
             this.index = index;
         }
-
-        public String getMsg() {
-            return msg;
+        public String getRetmsg() {
+            return retmsg;
         }
 
-        public void setMsg(String msg) {
-            this.msg = msg;
+        public void setRetmsg(String retmsg) {
+            this.retmsg = retmsg;
         }
+
 
         public SingleInferenceResult() {
         }
@@ -59,7 +60,7 @@ public class BatchInferenceResult extends  ReturnResult{
         public SingleInferenceResult(Integer index, String retcode, String msg, Map<String, Object> data) {
             this.index = index;
             this.retcode = retcode;
-            this.msg = msg;
+            this.retmsg = msg;
             this.data = data;
         }
     }
@@ -80,10 +81,10 @@ public class BatchInferenceResult extends  ReturnResult{
     private  Map<Integer,SingleInferenceResult>  singleInferenceResultMap ;
 
 
-    public Map<Integer,SingleInferenceResult>   getSingleInferenceResultMap(){
+    public void  rebuild(){
 
 
-        if(singleInferenceResultMap==null){
+
             Map result  =  Maps.newHashMap();
 
             List<BatchInferenceResult.SingleInferenceResult>  batchInferences = this.getBatchDataList();
@@ -93,6 +94,16 @@ public class BatchInferenceResult extends  ReturnResult{
                 result.put(singleInferenceResult.getIndex(),singleInferenceResult);
             }
             singleInferenceResultMap =result;
+
+    }
+
+
+    public Map<Integer,SingleInferenceResult>   getSingleInferenceResultMap(){
+
+
+        if(singleInferenceResultMap==null){
+
+                rebuild();
         }
 
         return singleInferenceResultMap;

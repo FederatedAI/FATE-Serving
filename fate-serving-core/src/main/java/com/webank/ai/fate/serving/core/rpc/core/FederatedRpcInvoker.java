@@ -62,7 +62,9 @@ public interface FederatedRpcInvoker<T> {
         }
     }
 
-    public T sync(Context context, RpcDataWraper rpcDataWraper,long  timeout );
+    public  ListenableFuture<BatchInferenceResult>   batchInferenceRpcWithCache  (Context  context,
+                                                                                  RpcDataWraper  rpcDataWraper,boolean useCache);
+        public T sync(Context context, RpcDataWraper rpcDataWraper,long  timeout );
     public  ListenableFuture<T> async(Context context, RpcDataWraper rpcDataWraper);
 
 

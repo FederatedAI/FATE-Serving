@@ -21,8 +21,19 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
 
     private static Logger logger = LoggerFactory.getLogger(AsyncMessageEventHandler.class);
 
-    ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(), new NamedThreadFactory("AsyncMessage", true));
+    ExecutorService executorService=null;
+
+    public  AsyncMessageEventHandler(){
+
+        int processors = Runtime.getRuntime().availableProcessors();
+
+         executorService = new ThreadPoolExecutor(processors, processors * 2, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(), new NamedThreadFactory("AsyncMessage", true));
+
+    }
+
+
+
 
     @Override
     public void onEvent(AsyncMessageEvent event, long sequence, boolean endOfBatch) throws Exception {
@@ -36,15 +47,20 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
 
         Set<Method> methods = AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP.get(eventName);
         if (methods == null || methods.size() == 0) {
-            throw new AsyncMessageException(eventName + " event not subscribe");
+            logger.error("event {} not subscribe {}",eventName, AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP);
+            throw new AsyncMessageException(eventName + " event not subscribe {}");
+
         }
+
+        AsyncMessageEvent  another = event.clone();
 
         for (Method method : methods) {
             executorService.submit(() -> {
-                // invoke event processor
                 try {
                     Class<?> declaringClass = method.getDeclaringClass();
-                    method.invoke(declaringClass.newInstance(), event);
+                    logger.info("uuuuuuuuuuuuuuu {}",another);
+                    Object  object = AsyncSubscribeRegister.METHOD_INSTANCE_MAP.get(method);
+                    method.invoke(object, another);
                 } catch (Exception e) {
                     logger.error("invoke event processor, {}", e.getMessage());
                     e.printStackTrace();

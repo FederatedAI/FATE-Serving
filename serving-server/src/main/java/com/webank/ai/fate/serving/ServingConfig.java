@@ -33,7 +33,6 @@ public class ServingConfig {
 
     public static final int version = 200;
 
-
     Logger logger = LoggerFactory.getLogger(ServingConfig.class);
 
     @Autowired

@@ -181,7 +181,7 @@ public class GrpcConnectionPool {
     }
 
 
-    public ManagedChannel getManagedChannel(String key) throws Exception {
+    public ManagedChannel getManagedChannel(String key) {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
             return createInner(key);
@@ -192,7 +192,7 @@ public class GrpcConnectionPool {
     }
 
 
-    public ManagedChannel getManagedChannel(String ip,int port) throws Exception {
+    public ManagedChannel getManagedChannel(String ip,int port){
         String key = new StringBuilder().append(ip).append(":").append(port).toString();
         return this.getManagedChannel(key);
     }
@@ -207,7 +207,7 @@ public class GrpcConnectionPool {
         return  result;
 
     }
-    private synchronized ManagedChannel createInner(String key) throws Exception {
+    private synchronized ManagedChannel createInner(String key) {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
             String[] ipPort = key.split(":");
@@ -231,7 +231,7 @@ public class GrpcConnectionPool {
 
 
 
-    public synchronized ManagedChannel createManagedChannel(String ip, int port) throws Exception {
+    public synchronized ManagedChannel createManagedChannel(String ip, int port)  {
 
         if (logger.isDebugEnabled()) {
             logger.debug("create ManagedChannel");

@@ -8,6 +8,8 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
 
+import java.util.List;
+
 public class RedisCache implements   Cache{
     int     expireTime;
     String  host;
@@ -41,6 +43,16 @@ public class RedisCache implements   Cache{
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.get(key.toString());
         }
+    }
+
+    @Override
+    public List get(Object[] keys) {
+        return null;
+    }
+
+    @Override
+    public void put(List list) {
+
     }
 
 

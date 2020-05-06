@@ -8,7 +8,9 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 public class Bootstrap {
 
     public static void main(String[] args) {
+        System.err.println("=========");
         SpringApplication.run(Bootstrap.class, args);
+
     }
 
 }

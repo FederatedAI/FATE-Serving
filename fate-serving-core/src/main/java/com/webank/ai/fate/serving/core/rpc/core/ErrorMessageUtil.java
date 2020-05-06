@@ -50,6 +50,16 @@ public class ErrorMessageUtil {
     }
 
 
+    public static String  getLocalExceptionCode(Exception  e ){
+        String  retcode = StatusCode.SYSTEM_ERROR;
+        if(e instanceof BaseException){
+            retcode= ((BaseException) e).getRetcode();
+        }
+
+        return  retcode;
+    }
+
+
 
 
     public static Map  handleExceptionToMap(Throwable e){

@@ -1,7 +1,9 @@
 package com.webank.ai.fate.serving.event;
 
 import com.webank.ai.fate.serving.core.annotation.Subscribe;
+import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.upload.AlertInfoUploader;
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -9,22 +11,16 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-/**
- * @Description TODO
- * @Author kaideng
- **/
-@Service
 
-public class ErrorEventHandler implements EnvironmentAware, InitializingBean {
+@Service
+public class ErrorEventHandler extends AbstractAsyncMessageProcessor implements EnvironmentAware, InitializingBean {
     static final String ALTER_CLASS = "alertClass";
     Environment environment;
     AlertInfoUploader alertInfoUploader = null;
-
-    @Subscribe("error")
+    @Subscribe(value=Dict.EVENT_ERROR)
     public void handleMetricsEvent(AsyncMessageEvent event) {
         alertInfoUploader.upload(event);
     }
-
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
