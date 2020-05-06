@@ -33,8 +33,13 @@ public class MetricCache implements Cache<String, MetricEntity>, InitializingBea
     }
 
     @Override
-    public List<MetricEntity> get(String... keys) {
+    public List<DataWrapper> get(String... keys) {
         return null;
+    }
+
+    @Override
+    public void put(List<DataWrapper> dataWrappers) {
+
     }
 
     public void addResource(String resource) {

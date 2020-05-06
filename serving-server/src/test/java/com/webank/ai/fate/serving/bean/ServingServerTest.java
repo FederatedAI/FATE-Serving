@@ -68,9 +68,9 @@ public class ServingServerTest {
     public void test_01_guest_load_fm() {
 
         URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
-        //String filePath = resource.getPath();
-        String filePath = "/Users/kaideng/work/webank/newLocationFateserving/feature-1.2/FATE-Serving/serving-server/src/main/resources/model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache";
-        // filePath = filePath.replaceAll("%23", "#");
+        String filePath = resource.getPath();
+//        String filePath = "/Users/kaideng/work/webank/newLocationFateserving/feature-1.2/FATE-Serving/serving-server/src/main/resources/model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache";
+         filePath = filePath.replaceAll("%23", "#");
         System.err.println("filePath " + filePath);
         // String  filepath =       "/Users/kaideng/work/webank/test/model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
 //        Context  context =  new ServingServerContext();
@@ -101,11 +101,11 @@ public class ServingServerTest {
     public void test_01_host_load_fm() {
 
 
-//        URL resource = ServingServerTest.class.getClassLoader().getResource("model_20200326105636342594212_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
-//        String filePath = resource.getPath();
-//        filePath = filePath.replaceAll("%23", "#");
+        URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020030314574740594812_host#10000#arbiter-10000#guest-9999#host-10000#model_cache");
+        String filePath = resource.getPath();
+        filePath = filePath.replaceAll("%23", "#");
 
-        String filePath = "/Users/kaideng/work/webank/newLocationFateserving/feature-1.2/FATE-Serving/serving-server/src/main/resources/model_2020030314574740594812_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
+//        String filePath = "/Users/kaideng/work/webank/newLocationFateserving/feature-1.2/FATE-Serving/serving-server/src/main/resources/model_2020030314574740594812_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
 
         System.err.println("filePath " + filePath);
         ModelServiceProto.PublishRequest.Builder publicRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
@@ -241,7 +241,6 @@ public class ServingServerTest {
 
     @Test
     public void test_04_BatchInference() {
-
 
         BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
         batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));

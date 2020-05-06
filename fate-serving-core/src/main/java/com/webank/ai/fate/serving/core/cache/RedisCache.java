@@ -1,16 +1,13 @@
 package com.webank.ai.fate.serving.core.cache;
 
-
-import com.alibaba.fastjson.JSON;
-import org.apache.commons.lang3.StringUtils;
+import com.google.common.collect.Lists;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
-
 import java.util.List;
 
-public class RedisCache implements   Cache{
+public class RedisCache implements Cache{
     int     expireTime;
     String  host;
     int     port;
@@ -24,8 +21,8 @@ public class RedisCache implements   Cache{
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(maxTotal);
         jedisPoolConfig.setMaxIdle(maxIdel);
-        JedisPool jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, null);
-        jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, password);
+//        this.jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, null);
+        this.jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, password);
     }
 
     @Override
@@ -47,12 +44,23 @@ public class RedisCache implements   Cache{
 
     @Override
     public List get(Object[] keys) {
-        return null;
+        List<DataWrapper> result = Lists.newArrayList();
+        for (Object key : keys) {
+            Object singleResult = this.get(key);
+            if (singleResult != null) {
+                DataWrapper dataWrapper = new DataWrapper(key, singleResult);
+                result.add(dataWrapper);
+            }
+        }
+        return result;
     }
 
     @Override
     public void put(List list) {
-
+        for (Object object : list) {
+            DataWrapper dataWrapper = (DataWrapper) object;
+            this.put(dataWrapper.getKey(), dataWrapper.getValue());
+        }
     }
 
 
