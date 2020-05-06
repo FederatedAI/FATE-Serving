@@ -205,7 +205,7 @@ public class ServingServerTest {
 
         InferenceRequest inferenceRequest = new InferenceRequest();
 
-        inferenceRequest.setServiceId("securetboottree");
+        inferenceRequest.setServiceId("fm");
 
         inferenceRequest.getFeatureData().put("x0", 0.100016);
         inferenceRequest.getFeatureData().put("x1", 1.210);

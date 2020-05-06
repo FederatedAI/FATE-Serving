@@ -68,4 +68,9 @@ public interface FederatedRpcInvoker<T> {
     public  ListenableFuture<T> async(Context context, RpcDataWraper rpcDataWraper);
 
 
-    }
+    public  ListenableFuture<ReturnResult>   singleInferenceRpcWithCache  (Context  context,
+                                                                           FederatedRpcInvoker.RpcDataWraper rpcDataWraper, boolean useCache) ;
+
+
+
+}

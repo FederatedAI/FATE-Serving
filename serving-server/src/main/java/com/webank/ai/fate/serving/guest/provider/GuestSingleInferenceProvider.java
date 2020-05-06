@@ -45,14 +45,17 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         modelProcessor.guestPrepareDataBeforeInference(context, inferenceRequest);
         List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, inferenceRequest);
         rpcList.forEach((rpcDataWraper -> {
-            ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
+           // ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
+            ListenableFuture<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context,rpcDataWraper,true);
+
             futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);
         }));
         ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap, timeout);
         return returnResult;
     }
 
-    @Override
+
+        @Override
     protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);

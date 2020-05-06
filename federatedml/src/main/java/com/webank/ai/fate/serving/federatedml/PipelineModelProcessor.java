@@ -150,10 +150,10 @@ public class PipelineModelProcessor implements ModelProcessor{
         Map<String,Object>  remoteResultMap = Maps.newHashMap();
             futureMap.forEach((partId,future)->{
                 try {
-                    Proxy.Packet  packet =   (Proxy.Packet)future.get(timeout, TimeUnit.MILLISECONDS);
-                    String   remoteContent = new String(packet.getBody().getValue().toByteArray());
-                    logger.info("caseid {} remote partid {} return data {}",context.getCaseId() ,partId,remoteContent);
-                    ReturnResult   remoteReturnResult  = JSON.parseObject(remoteContent,ReturnResult.class);
+                    ReturnResult  remoteReturnResult =   (ReturnResult)future.get(timeout, TimeUnit.MILLISECONDS);
+//                    String   remoteContent = new String(packet.getBody().getValue().toByteArray());
+//                    logger.info("caseid {} remote partid {} return data {}",context.getCaseId() ,partId,remoteContent);
+//                    ReturnResult   remoteReturnResult  = JSON.parseObject(remoteContent,ReturnResult.class);
                     if(remoteReturnResult!=null) {
                             Map<String, Object> remoteData = remoteReturnResult.getData();
                             remoteData.put(Dict.RET_CODE,remoteReturnResult.getRetcode());
@@ -298,7 +298,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                 });
                 try {
                     Map<String, Object> localData = localResult.get(index);
-                    logger.info("test merge {} : {}",index,remoteSingleMap.size());
+                    //logger.info("test merge {} : {}",index,remoteSingleMap.size());
                     Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteSingleMap);
                     batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, StatusCode.SUCCESS, Dict.SUCCESS, mergeResult));
                 }catch(Exception e){

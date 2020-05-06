@@ -41,6 +41,8 @@ public class AsyncMessageEventProducer {
             };
 
     public void publishEvent(Object... args) {
-        ringBuffer.publishEvent(TRANSLATOR, args);
+        if(args!=null&&args.length>0) {
+            ringBuffer.publishEvent(TRANSLATOR, args);
+        }
     }
 }
