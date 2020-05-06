@@ -30,7 +30,9 @@ public class RedisCache implements Cache{
         try (Jedis jedis = jedisPool.getResource()) {
             Pipeline redisPipeline = jedis.pipelined();
             redisPipeline.set(key.toString(), value.toString());
-            redisPipeline.expire(key.toString(),expireTime);
+            if (expireTime > 0) {
+                redisPipeline.expire(key.toString(),expireTime);
+            }
             redisPipeline.sync();
         }
     }
