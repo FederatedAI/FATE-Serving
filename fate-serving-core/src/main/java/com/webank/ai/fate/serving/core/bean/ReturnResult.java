@@ -101,4 +101,13 @@ public class ReturnResult {
         String  result= JSON.toJSONString(this);
         return  result;
     }
+
+
+    public static  ReturnResult build(String retcode,String retmsg ,Map<String, Object> data){
+        ReturnResult  returnResult = new  ReturnResult();
+        returnResult.setRetcode(retcode);
+        returnResult.setRetmsg(retmsg);
+        returnResult.setData(data);
+        return  returnResult;
+    }
 }

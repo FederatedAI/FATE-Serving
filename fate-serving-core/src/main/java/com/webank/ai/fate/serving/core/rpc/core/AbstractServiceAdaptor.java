@@ -137,9 +137,6 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
                     logger.debug("do service, router info: {}, service name: {}, result: {}", JSON.toJSONString(data.getRouterInfo()), serviceName, result);
                 }
             }catch(Throwable e){
-                /**
-                 * 这里catch的原因是，就算发生异常也要走完后处理
-                 */
                 exceptions.add(e);
                 logger.error("do service fail, cause by: {}", e.getMessage());
             }

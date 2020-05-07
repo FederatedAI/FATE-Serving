@@ -12,7 +12,6 @@ public class ServingServerContext extends BaseContext{
         return (Model)this.dataMap.get(Dict.MODEL);
     }
 
-
     public void setModel(Model model) {
         this.dataMap.put(Dict.MODEL,model);
     }
@@ -32,7 +31,5 @@ public class ServingServerContext extends BaseContext{
     public void setModelNamesapce(String modelNamesapce){
         this.namespace =  modelNamesapce;
     };
-
-
 
 }
