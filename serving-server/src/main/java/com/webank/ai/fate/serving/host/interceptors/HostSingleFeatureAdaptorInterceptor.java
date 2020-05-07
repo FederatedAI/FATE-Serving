@@ -1,16 +1,14 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
-
 import com.webank.ai.fate.register.utils.StringUtils;
-import com.webank.ai.fate.serving.adapter.dataaccess.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.adapter.dataaccess.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
-
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.FeatureDataAdaptorException;
 import com.webank.ai.fate.serving.core.exceptions.HostGetFeatureErrorException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -19,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<InferenceRequest, ReturnResult> implements InitializingBean {
@@ -31,6 +27,9 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
 
     @Override
     public void doPreProcess(Context context, InboundPackage<InferenceRequest> inboundPackage, OutboundPackage<ReturnResult> outboundPackage) throws Exception {
+        if (singleFeatureDataAdaptor == null) {
+            throw new FeatureDataAdaptorException("adaptor not found");
+        }
         InferenceRequest inferenceRequest = inboundPackage.getBody();
         ReturnResult singleFeatureDataAdaptorData = singleFeatureDataAdaptor.getData(context, inboundPackage.getBody().getSendToRemoteFeatureData());
         if(singleFeatureDataAdaptorData==null){
@@ -47,6 +46,10 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
         String adaptorClass = environment.getProperty("feature.single.adaptor");
         if (StringUtils.isNotEmpty(adaptorClass)) {
             singleFeatureDataAdaptor = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
+            if (singleFeatureDataAdaptor == null) {
+                throw new FeatureDataAdaptorException("adaptor not found");
+            }
+
             ServingServerContext context = new ServingServerContext();
             context.setEnvironment(environment);
             singleFeatureDataAdaptor.init(context);

@@ -20,6 +20,7 @@ public class StatusCode {
     public   static  final String  SYSTEM_ERROR = "110";
     public   static  final String  SHUTDOWN_ERROR = "111";
     public   static  final String  HOST_NOT_SUPPORT_ERROR = "115";
+    public   static  final String  FEATURE_DATA_ADAPTOR_ERROR = "116";
     public   static  final String  PARAM_ERROR = "120";
     public   static  final String  UNAUTHORIZED = "121";
 

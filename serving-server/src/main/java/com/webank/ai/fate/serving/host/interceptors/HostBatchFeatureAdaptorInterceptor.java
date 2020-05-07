@@ -5,6 +5,7 @@ import com.webank.ai.fate.serving.adapter.dataaccess.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.FeatureDataAdaptorException;
 import com.webank.ai.fate.serving.core.exceptions.HostGetFeatureErrorException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
@@ -25,10 +26,10 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
 
     @Override
     public void doPreProcess(Context context, InboundPackage<BatchInferenceRequest> inboundPackage, OutboundPackage<BatchInferenceResult> outboundPackage) throws Exception {
-        BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
-        if(batchFeatureDataAdaptor==null){
-
+        if (batchFeatureDataAdaptor == null) {
+            throw new FeatureDataAdaptorException("adaptor not found");
         }
+        BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
         if(batchHostFeatureAdaptorResult==null){
             throw  new HostGetFeatureErrorException("adaptor return null");
@@ -51,6 +52,10 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         String adaptorClass = environment.getProperty("feature.batch.adaptor");
         if (StringUtils.isNotEmpty(adaptorClass)) {
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
+            if (batchFeatureDataAdaptor == null) {
+                throw new FeatureDataAdaptorException("adaptor not found");
+            }
+
             ServingServerContext context = new ServingServerContext();
             context.setEnvironment(environment);
             batchFeatureDataAdaptor.init(context);
