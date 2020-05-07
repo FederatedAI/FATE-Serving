@@ -3,10 +3,7 @@ package com.webank.ai.fate.serving.host.interceptors;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.serving.adapter.dataaccess.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
-import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
-import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.HostGetFeatureErrorException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -29,7 +26,6 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
     @Override
     public void doPreProcess(Context context, InboundPackage<BatchInferenceRequest> inboundPackage, OutboundPackage<BatchInferenceResult> outboundPackage) throws Exception {
         BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
-        batchFeatureDataAdaptor.init(context);
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
         if(batchHostFeatureAdaptorResult==null){
             throw  new HostGetFeatureErrorException("adaptor return null");
@@ -53,6 +49,11 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         if (StringUtils.isNotEmpty(adaptorClass)) {
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
         }
+
+        ServingServerContext context = new ServingServerContext();
+        context.setEnvironment(environment);
+        batchFeatureDataAdaptor.init(context);
+
         logger.info("batch adaptor class is {}", adaptorClass);
     }
 
