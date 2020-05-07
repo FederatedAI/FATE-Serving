@@ -56,6 +56,11 @@ public class MockBatchAdapter implements BatchFeatureDataAdaptor {
 //    }
 
     @Override
+    public void init(Context context) {
+
+    }
+
+    @Override
     public BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList) {
 
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = new BatchHostFeatureAdaptorResult();
