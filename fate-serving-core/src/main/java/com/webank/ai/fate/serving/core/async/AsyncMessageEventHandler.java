@@ -57,8 +57,8 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
         for (Method method : methods) {
             executorService.submit(() -> {
                 try {
-                    Class<?> declaringClass = method.getDeclaringClass();
-                    logger.info("uuuuuuuuuuuuuuu {}",another);
+//                    Class<?> declaringClass = method.getDeclaringClass();
+//                    logger.info("uuuuuuuuuuuuuuu {}",another);
                     Object  object = AsyncSubscribeRegister.METHOD_INSTANCE_MAP.get(method);
                     method.invoke(object, another);
                 } catch (Exception e) {

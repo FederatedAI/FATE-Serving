@@ -11,17 +11,17 @@ public class DefaultAsyncMessageProcessor extends AbstractAsyncMessageProcessor 
 
     @Subscribe(Dict.EVENT_INFERENCE)
     public void processInferenceEvent(AsyncMessageEvent event) {
-        logger.info("Process inference event..");
+//        logger.info("Process inference event..");
     }
 
     @Subscribe(Dict.EVENT_UNARYCALL)
     public void processUnaryCallEvent(AsyncMessageEvent event) {
-        logger.info("Process unaryCall event..");
+//        logger.info("Process unaryCall event..");
     }
 
     @Subscribe(Dict.EVENT_ERROR)
     public void processErrorEvent(AsyncMessageEvent event) {
-        logger.info("Process error event..");
+//        logger.info("Process error event..");
     }
 
 }
