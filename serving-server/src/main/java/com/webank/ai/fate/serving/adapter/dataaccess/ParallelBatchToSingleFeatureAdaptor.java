@@ -46,6 +46,11 @@ public class ParallelBatchToSingleFeatureAdaptor implements BatchFeatureDataAdap
     }
 
     @Override
+    public void init(Context context) {
+
+    }
+
+    @Override
     public BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList) {
 
         BatchHostFeatureAdaptorResult result = new BatchHostFeatureAdaptorResult();

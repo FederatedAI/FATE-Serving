@@ -35,6 +35,11 @@ public class DTest implements SingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(DTest.class);
 
     @Override
+    public void init(Context context) {
+
+    }
+
+    @Override
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> requestData = new HashMap<>(8);
