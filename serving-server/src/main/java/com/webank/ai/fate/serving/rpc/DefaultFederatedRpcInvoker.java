@@ -170,7 +170,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
 
     }
-
+    @Override
     public  ListenableFuture<ReturnResult>   singleInferenceRpcWithCache  (Context  context,
                                                                            RpcDataWraper  rpcDataWraper,boolean useCache){
 
@@ -178,14 +178,19 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         if(useCache) {
             Object result = cache.get(buildCacheKey(rpcDataWraper.getGuestModel(),rpcDataWraper.getHostModel(),inferenceRequest.getSendToRemoteFeatureData()));
             if(result!=null){
-                ReturnResult  returnResult = JSON.parseObject(result.toString(),ReturnResult.class);
+                Map  data = JSON.parseObject(result.toString(),Map.class);
+                ReturnResult  returnResult = new ReturnResult();
+                returnResult.setRetcode(StatusCode.SUCCESS);
+                returnResult.setRetmsg("hit cache");
                 return   new AbstractFuture<ReturnResult>() {
                     @Override
                     public ReturnResult get() throws InterruptedException, ExecutionException {
+                        returnResult.setData(data);
                         return returnResult;
                     }
                     @Override
                     public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                        returnResult.setData(data);
                         return returnResult;
                     }
 
@@ -217,7 +222,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                                     CacheEventData  cacheEventData = new CacheEventData(buildCacheKey(rpcDataWraper.getGuestModel(),rpcDataWraper.getHostModel(),inferenceRequest.getSendToRemoteFeatureData()),remoteInferenceResult.getData());
                                     asyncMessageEvent.setName(Dict.EVENT_SET_INFERENCE_CACHE);
                                     asyncMessageEvent.setData(cacheEventData);
-                                    DisruptorUtil.producer();
+                                    DisruptorUtil.producer(asyncMessageEvent);
                                 }catch (Exception e){
                                     logger.error("send cache event error",e);
                                 }
@@ -273,7 +278,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                             prepareToRemove.addAll(indexs);
                           for(Integer  index:indexs) {
                               String value = cacheDataWrapper.getValue();
-                              System.err.println("nnnnnnnnnnnnnnnnnnnn"+value);
                               Map data = JSON.parseObject(value, Map.class);
                               BatchInferenceResult.SingleInferenceResult finalSingleResult = new BatchInferenceResult.SingleInferenceResult();
                               finalSingleResult.setRetcode(StatusCode.SUCCESS);
