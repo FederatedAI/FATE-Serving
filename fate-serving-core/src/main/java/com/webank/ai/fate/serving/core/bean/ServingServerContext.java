@@ -1,12 +1,15 @@
 package com.webank.ai.fate.serving.core.bean;
 
 import com.webank.ai.fate.serving.core.model.Model;
+import org.springframework.core.env.Environment;
 
 public class ServingServerContext extends BaseContext{
 
     String  tableName;
 
     String  namespace;
+
+    Environment environment;
 
     public Model getModel() {
         return (Model)this.dataMap.get(Dict.MODEL);
@@ -33,6 +36,11 @@ public class ServingServerContext extends BaseContext{
         this.namespace =  modelNamesapce;
     };
 
+    public Environment getEnvironment() {
+        return environment;
+    }
 
-
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 }
