@@ -26,6 +26,9 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
     @Override
     public void doPreProcess(Context context, InboundPackage<BatchInferenceRequest> inboundPackage, OutboundPackage<BatchInferenceResult> outboundPackage) throws Exception {
         BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
+        if(batchFeatureDataAdaptor==null){
+
+        }
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
         if(batchHostFeatureAdaptorResult==null){
             throw  new HostGetFeatureErrorException("adaptor return null");
@@ -48,12 +51,10 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         String adaptorClass = environment.getProperty("feature.batch.adaptor");
         if (StringUtils.isNotEmpty(adaptorClass)) {
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
+            ServingServerContext context = new ServingServerContext();
+            context.setEnvironment(environment);
+            batchFeatureDataAdaptor.init(context);
         }
-
-        ServingServerContext context = new ServingServerContext();
-        context.setEnvironment(environment);
-        batchFeatureDataAdaptor.init(context);
-
         logger.info("batch adaptor class is {}", adaptorClass);
     }
 
