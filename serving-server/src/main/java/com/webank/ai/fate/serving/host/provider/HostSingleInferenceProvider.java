@@ -17,7 +17,7 @@ import java.util.Map;
 
 @FateService(name = "HostInferenceProvider", preChain = {
         "monitorInterceptor",
-        "requestOverloadBreaker",
+//        "requestOverloadBreaker",
         "hostParamInterceptor",
         "hostModelInterceptor"
 }, postChain = {

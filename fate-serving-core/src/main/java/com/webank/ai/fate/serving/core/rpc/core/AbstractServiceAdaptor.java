@@ -9,7 +9,11 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
-import com.webank.ai.fate.serving.core.bean.*;
+
+import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
+import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
@@ -220,7 +224,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
      * @param batchInferenceRequest
      * @return
      */
-    protected BatchHostFederatedParams buildBatchHostFederatedParams(Context  context, BatchInferenceRequest batchInferenceRequest, Model  guestModel,Model hostModel){
+    protected BatchHostFederatedParams buildBatchHostFederatedParams(Context  context, BatchInferenceRequest batchInferenceRequest, Model  guestModel, Model hostModel){
 
             BatchHostFederatedParams  batchHostFederatedParams = new  BatchHostFederatedParams();
             String seqNo = batchInferenceRequest.getSeqno();
