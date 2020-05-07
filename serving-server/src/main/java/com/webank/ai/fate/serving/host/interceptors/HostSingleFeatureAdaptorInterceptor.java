@@ -1,11 +1,15 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
+
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.serving.adapter.dataaccess.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.adapter.dataaccess.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
-import com.webank.ai.fate.serving.core.bean.*;
+
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.InferenceRequest;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.HostGetFeatureErrorException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;

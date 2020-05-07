@@ -19,7 +19,9 @@ import java.util.Map;
         "monitorInterceptor",
 //        "requestOverloadBreaker",
         "hostParamInterceptor",
-        "hostModelInterceptor"
+        "hostModelInterceptor",
+        "hostSingleFeatureAdaptorInterceptor"
+
 }, postChain = {
         "monitorInterceptor"
 })
