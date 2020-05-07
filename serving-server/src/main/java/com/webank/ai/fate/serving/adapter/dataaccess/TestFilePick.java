@@ -31,6 +31,11 @@ public class TestFilePick implements SingleFeatureDataAdaptor {
 
 
     @Override
+    public void init(Context context) {
+
+    }
+
+    @Override
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {
 //        ReturnResult returnResult = new ReturnResult();
 //

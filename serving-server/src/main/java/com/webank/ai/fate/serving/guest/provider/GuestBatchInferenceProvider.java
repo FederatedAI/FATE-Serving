@@ -49,10 +49,13 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         BatchInferenceRequest batchInferenceRequest = (BatchInferenceRequest) inboundPackage.getBody();
         modelProcessor.guestPrepareDataBeforeInference(context, batchInferenceRequest);
         Map futureMap = Maps.newHashMap();
+
+        Boolean useCache = ((ServingServerContext) context).getEnvironment().getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, true);
+
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);
           //  ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.async(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams));
-            ListenableFuture<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams),true);
+            ListenableFuture<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams), useCache);
             futureMap.put(hostPartyId, originBatchResultFuture);
         });
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap,timeout );

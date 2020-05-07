@@ -32,6 +32,11 @@ public class MockAdapter implements SingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(MockAdapter.class);
 
     @Override
+    public void init(Context context) {
+
+    }
+
+    @Override
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
