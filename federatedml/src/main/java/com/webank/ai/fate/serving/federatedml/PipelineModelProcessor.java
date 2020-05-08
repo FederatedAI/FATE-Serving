@@ -158,6 +158,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                             Map<String, Object> remoteData = remoteReturnResult.getData();
                             remoteData.put(Dict.RET_CODE,remoteReturnResult.getRetcode());
                             remoteData.put(Dict.MESSAGE,remoteReturnResult.getRetmsg());
+                            remoteData.put(Dict.DATA,remoteReturnResult.getData());
                             remoteResultMap.put(partId, remoteData);
                     }
                 } catch(StatusRuntimeException e){
