@@ -20,8 +20,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
         try {
-            byte[] reqBody = (byte[]) inboundPackage.getBody();
-            InferenceServiceProto.InferenceMessage message = InferenceServiceProto.InferenceMessage.parseFrom(reqBody);
+            InferenceServiceProto.InferenceMessage   message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
             InferenceRequest inferenceRequest = null;
             inferenceRequest = JSON.parseObject(message.getBody().toByteArray(), InferenceRequest.class);
             inboundPackage.setBody(inferenceRequest);

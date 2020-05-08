@@ -31,10 +31,9 @@ public class GuestBatchParamInterceptor implements Interceptor {
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
-        byte[] reqBody = (byte[]) inboundPackage.getBody();
+        InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
         BatchInferenceRequest batchInferenceRequest = null;
         try {
-            InferenceServiceProto.InferenceMessage message = InferenceServiceProto.InferenceMessage.parseFrom(reqBody);
             batchInferenceRequest = JSON.parseObject(message.getBody().toByteArray(), BatchInferenceRequest.class);
             inboundPackage.setBody(batchInferenceRequest);
             Preconditions.checkArgument(batchInferenceRequest != null, "request message parse error");

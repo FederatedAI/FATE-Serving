@@ -58,9 +58,9 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         ReturnResult returnResult = new ReturnResult();
         Context context = prepareContext(INFERENCE);
-        byte[] reqbody = req.getBody().toByteArray();
+        //byte[] reqbody = req.getBody().toByteArray();
         InboundPackage inboundPackage = new InboundPackage();
-        inboundPackage.setBody(reqbody);
+        inboundPackage.setBody(req);
         OutboundPackage outboundPackage = this.guestSingleInferenceProvider.service(context, inboundPackage);
         returnResult = (ReturnResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
@@ -88,9 +88,9 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
         Context context = prepareContext(BATCHINFERENCE);
-        byte[] reqbody = req.getBody().toByteArray();
+
         InboundPackage inboundPackage = new InboundPackage();
-        inboundPackage.setBody(reqbody);
+        inboundPackage.setBody(req);
         OutboundPackage outboundPackage = this.guestBatchInferenceProvider.service(context, inboundPackage);
         BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));

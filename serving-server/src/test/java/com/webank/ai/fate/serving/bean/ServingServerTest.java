@@ -233,7 +233,7 @@ public class ServingServerTest {
 
         System.err.println(inferenceMessage.getBody());
 
-        InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.inference(inferenceMessage.toByteArray());
+        InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.inference(inferenceMessage);
 
         System.err.println("result ==================" + new String(resultMessage.getBody().toByteArray()));
 
@@ -279,7 +279,7 @@ public class ServingServerTest {
 
         System.err.println(inferenceMessage.getBody());
 
-        InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.batchInference(inferenceMessage.toByteArray());
+        InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.batchInference(inferenceMessage);
 
         System.err.println("result ==================" + new String(resultMessage.getBody().toByteArray()));
 
