@@ -51,6 +51,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
     public void afterPropertiesSet() throws Exception {
         String adaptorClass = environment.getProperty("feature.batch.adaptor");
         if (StringUtils.isNotEmpty(adaptorClass)) {
+            logger.info("try to load adaptor {}",adaptorClass);
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
             if (batchFeatureDataAdaptor == null) {
                 throw new FeatureDataAdaptorException("adaptor not found");

@@ -55,21 +55,18 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware ,Retu
         result.put(Dict.RET_CODE,InferenceRetCode.OK);
         hostData.forEach((k,v)->{
                 Map<String,Object> onePartyData=(Map<String,Object>) v;
+                logger.info("============={}",onePartyData);
                 double score;
                 Map<String,Object > tempMap =guestData.get(0);
-                //logger.info("pppppppppppp  {}  ,{} ",tempMap,this.getComponentName());
                 Map<String,Object> componentData = (Map<String,Object>)tempMap.get(this.getComponentName());
-                //logger.info("componentData  {}",componentData);
+
                 double localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
                 Map<String ,Object >  remoteComopnentData = (Map<String ,Object >)onePartyData.get(this.getComponentName());
                 double remoteScore;
                 if(remoteComopnentData!=null){
                     remoteScore = ((Number)remoteComopnentData.get(Dict.SCORE)).doubleValue();
                 }else{
-                    /**
-                     *   此处是为兼容老版host
-                     */
-                    remoteScore = ((Number) hostData.get(Dict.SCORE)).doubleValue();
+                    remoteScore = ((Number) onePartyData.get(Dict.SCORE)).doubleValue();
                 }
 
                 //logger.info("merge inference result,partid {} caseid {} local score:{} remote scope:{}",k ,context.getCaseId(), localScore, remoteScore);
