@@ -10,16 +10,8 @@ message InferenceMessage {
 
 }
 
-
-
-
-
-
 service InferenceService {
-
-
     rpc batchInference(InferenceMessage) returns (InferenceMessage);
     rpc inference (InferenceMessage) returns (InferenceMessage);
-    rpc startInferenceJob (InferenceMessage) returns (InferenceMessage);
-    rpc getInferenceResult (InferenceMessage) returns (InferenceMessage);
+
 }

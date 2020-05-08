@@ -109,13 +109,15 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
             resultFuture = futureStub.inference(reqBuilder.build());
             timeWait = timeout;
-        } else if (callName.equals(Dict.SERVICENAME_GET_INFERENCE_RESULT)) {
-            resultFuture = futureStub.getInferenceResult(reqBuilder.build());
-            timeWait = asyncTimeout;
-        } else if (callName.equals(Dict.SERVICENAME_START_INFERENCE_JOB)) {
-            resultFuture = futureStub.startInferenceJob(reqBuilder.build());
-            timeWait = asyncTimeout;
-        } else {
+        }
+//        else if (callName.equals(Dict.SERVICENAME_GET_INFERENCE_RESULT)) {
+//            resultFuture = futureStub.getInferenceResult(reqBuilder.build());
+//            timeWait = asyncTimeout;
+//        } else if (callName.equals(Dict.SERVICENAME_START_INFERENCE_JOB)) {
+//            resultFuture = futureStub.startInferenceJob(reqBuilder.build());
+//            timeWait = asyncTimeout;
+//        }
+        else {
             logger.error("unknown callName {}.", callName);
             throw new UnSupportMethodException();
         }

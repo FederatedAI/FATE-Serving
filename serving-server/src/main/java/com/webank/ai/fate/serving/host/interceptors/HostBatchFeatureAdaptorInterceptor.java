@@ -35,7 +35,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
             throw  new HostGetFeatureErrorException("adaptor return null");
         }
         if(!StatusCode.SUCCESS.equals(batchHostFeatureAdaptorResult.getRetcode())){
-            throw  new HostGetFeatureErrorException("adaptor return code is invalid {}",batchHostFeatureAdaptorResult.getRetcode());
+            throw  new HostGetFeatureErrorException(batchHostFeatureAdaptorResult.getRetcode(),"adaptor return error");
         }
         Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult> featureResultMap = batchHostFeatureAdaptorResult.getIndexResultMap();
         batchInferenceRequest.getBatchDataList().forEach(request -> {

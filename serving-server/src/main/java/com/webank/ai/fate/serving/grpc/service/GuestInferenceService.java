@@ -69,19 +69,8 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     }
 
 
-    @Override
-    @RegisterService(serviceName = "getInferenceResult", useDynamicEnvironment = true)
-    @Deprecated
-    public void getInferenceResult(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
-
-    }
-
-    @Override
-    @RegisterService(useDynamicEnvironment = true, serviceName = "startInferenceJob")
-    public void startInferenceJob(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
 
 
-    }
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = BATCHINFERENCE)

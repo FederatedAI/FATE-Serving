@@ -294,8 +294,6 @@ public class PipelineModelProcessor implements ModelProcessor{
                             Map<String, Object> realRemoteData = singleInferenceResult.getData();
                             realRemoteData.put(Dict.RET_CODE, singleInferenceResult.getRetcode());
                             remoteSingleMap.put(partyId, realRemoteData);
-                        }else{
-                            logger.info("yyyyyyyyyyyyyyyyyyyyyyyy {}",index);
                         }
                     }
                 });
