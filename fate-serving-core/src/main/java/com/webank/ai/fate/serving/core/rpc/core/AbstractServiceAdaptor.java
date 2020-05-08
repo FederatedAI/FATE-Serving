@@ -169,6 +169,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
                     logger.error("error ",e);
                 }
             }
+            printFlowLog(context);
         }
         return outboundPackage;
     }
