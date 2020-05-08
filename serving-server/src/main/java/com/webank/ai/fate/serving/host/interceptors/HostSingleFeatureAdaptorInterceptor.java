@@ -39,20 +39,21 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
             throw  new HostGetFeatureErrorException("adaptor return code is invalid {}",singleFeatureDataAdaptorData.getRetcode());
         }
         inferenceRequest.getFeatureData().putAll(singleFeatureDataAdaptorData.getData());
-    };
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         String adaptorClass = environment.getProperty("feature.single.adaptor");
         if (StringUtils.isNotEmpty(adaptorClass)) {
             singleFeatureDataAdaptor = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
-            if (singleFeatureDataAdaptor == null) {
-                throw new FeatureDataAdaptorException("adaptor not found");
-            }
 
             ServingServerContext context = new ServingServerContext();
             context.setEnvironment(environment);
-            singleFeatureDataAdaptor.init(context);
+            try {
+                singleFeatureDataAdaptor.init(context);
+            } catch (Exception e) {
+                logger.error("single adaptor init error");
+            }
             logger.info("single adaptor class is {}", adaptorClass);
         }
     }
