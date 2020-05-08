@@ -16,3 +16,13 @@ __pycache__
 /fate-serving/fate-serving-core/target/
 .idea/*
 .vscode/*
+/fate-metrics-api/target/maven-status/maven-compiler-plugin/compile/default-compile/
+/fate-metrics-micrometer/target/
+/register/target/
+/logs/
+/fate-serving-admin/target/
+/fate-serving-core/target/
+/federatedml/target/
+/serving-proxy/target/
+/serving-server/logs/
+/serving-server/target/
