@@ -45,7 +45,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });
-    };
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -53,13 +53,14 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}",adaptorClass);
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
-            if (batchFeatureDataAdaptor == null) {
-                throw new FeatureDataAdaptorException("adaptor not found");
-            }
 
             ServingServerContext context = new ServingServerContext();
             context.setEnvironment(environment);
-            batchFeatureDataAdaptor.init(context);
+            try {
+                batchFeatureDataAdaptor.init(context);
+            } catch (Exception e) {
+                logger.error("batch adaptor init error");
+            }
         }
         logger.info("batch adaptor class is {}", adaptorClass);
     }
