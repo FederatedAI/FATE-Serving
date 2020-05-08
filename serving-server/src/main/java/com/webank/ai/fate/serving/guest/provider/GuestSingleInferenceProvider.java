@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-/**
- * 主要兼容host为1.2.x版本的接口
- **/
+
 @FateService(name = "singleInference", preChain = {
         "monitorInterceptor",
         "requestOverloadBreaker",

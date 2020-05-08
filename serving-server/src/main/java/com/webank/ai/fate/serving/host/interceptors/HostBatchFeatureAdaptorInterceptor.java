@@ -41,7 +41,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         batchInferenceRequest.getBatchDataList().forEach(request -> {
             request.setNeedCheckFeature(true);
             BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult featureAdaptorResult = featureResultMap.get(request.getIndex());
-            if (featureAdaptorResult!=null&&featureAdaptorResult.getFeatures() != null) {
+            if (featureAdaptorResult!=null&&StatusCode.SUCCESS.equals(featureAdaptorResult.getRetcode())&&featureAdaptorResult.getFeatures() != null) {
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });

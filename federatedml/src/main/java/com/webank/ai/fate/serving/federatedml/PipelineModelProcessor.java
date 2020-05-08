@@ -80,7 +80,7 @@ public class PipelineModelProcessor implements ModelProcessor{
             if(v!=null){
                 singleInferenceResult.setData(v);
                 singleInferenceResult.setIndex(k);
-                singleInferenceResult.setRetcode(StatusCode.SUCCESS);
+                singleInferenceResult.setRetcode(v.get(Dict.RET_CODE).toString());
             }
             batchFederatedResult.getBatchDataList().add(singleInferenceResult);
         });
@@ -300,6 +300,7 @@ public class PipelineModelProcessor implements ModelProcessor{
                 try {
                     Map<String, Object> localData = localResult.get(index);
                     //logger.info("test merge {} : {}",index,remoteSingleMap.size());
+                    logger.info("remote data {}",remoteSingleMap);
                     Map<String, Object> mergeResult =this.singleMerge(context,localData,remoteSingleMap);
                     batchFederatedResult.getBatchDataList().add( new BatchInferenceResult.SingleInferenceResult(index, StatusCode.SUCCESS, Dict.SUCCESS, mergeResult));
                 }catch(Exception e){

@@ -31,6 +31,7 @@ public class HostBatchInferenceProvider extends AbstractServingServiceProvider<B
         BatchHostFederatedParams batchHostFederatedParams = (BatchHostFederatedParams) data.getBody();
         Model model = ((ServingServerContext) context).getModel();
         BatchInferenceResult batchInferenceResult = model.getModelProcessor().hostBatchInference(context, batchHostFederatedParams);
+        logger.info("kkkkkkkkkkkkkkk  {}",batchInferenceResult);
         return batchInferenceResult;
     }
 
