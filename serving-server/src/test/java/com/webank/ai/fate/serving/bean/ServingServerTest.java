@@ -263,7 +263,7 @@ public class ServingServerTest {
 
         }
         batchInferenceRequest.setBatchDataList(singleInferenceDataList);
-        batchInferenceRequest.setServiceId("fm");
+        batchInferenceRequest.setServiceId("my_test_service_id");
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
                 InferenceServiceProto.InferenceMessage.newBuilder();
         String contentString = JSON.toJSONString(batchInferenceRequest);

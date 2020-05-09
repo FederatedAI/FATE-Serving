@@ -19,6 +19,8 @@ package com.webank.ai.fate.serving.core.exceptions;
 //}
 
 
+import java.util.Map;
+
 /**
  *    guest 参数错误   1100   异常  GuestInvalidParamException
  *    host  参数错误   2100   异常  HostInvalidParamException
@@ -46,6 +48,7 @@ package com.webank.ai.fate.serving.core.exceptions;
 public class BaseException extends RuntimeException {
 
     protected String  retcode;
+
 
     public BaseException(String retCode, String message) {
         super(message);

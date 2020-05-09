@@ -100,9 +100,7 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware ,Retu
 
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> hostData) {
-        Map<String, Object> result = Maps.newHashMap();
-
-
+        Map<String, Object> result =  this.handleRemoteReturnData(hostData);
         Map<String,Object>  localData = (Map<String,Object>)localDataList.get(0).get(this.getComponentName());
 
        //     logger.info("local data {} remote data {}",localData,hostData);
@@ -114,14 +112,14 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware ,Retu
             String  partyId = (String)set.toArray()[0];
             Map<String, Object> remoteData = (Map<String,Object>)hostData.get(partyId);
             Preconditions.checkArgument(remoteData.get(Dict.RET_CODE) != null);
-            String remoteCode = remoteData.get(Dict.RET_CODE).toString();
+
             Map<String,Object>  dataMap  = (Map<String,Object>) remoteData.get(this.getComponentName());
             double localScore = ((Number) localData.get(Dict.SCORE)).doubleValue();
             double[] guestCrosses = (double[]) localData.get(Dict.FM_CROSS);
             localData.get(Dict.FM_CROSS);
             double score = localScore;
-            result.put(Dict.RET_CODE, remoteCode);
-            if (remoteCode.equals(StatusCode.SUCCESS)) {
+
+
                 double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
                 Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
                 List<Double> hostCrosses = JSON.parseArray(dataMap.get(Dict.FM_CROSS).toString(), double.class);
@@ -134,7 +132,7 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware ,Retu
                 result.put(Dict.SCORE, prob);
                 result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE, localData.get(Dict.MODEL_WRIGHT_HIT_RATE));
                 result.put(Dict.GUEST_INPUT_DATA_HIT_RATE, localData.get(Dict.INPUT_DATA_HIT_RATE));
-            }
+
 
         return   result;
 

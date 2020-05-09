@@ -20,7 +20,12 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 
+import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
+import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
+import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,35 +53,56 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware ,Retu
         return result;
     }
 
+
+
+
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> guestData,
                                                     Map<String,Object> hostData) {
-        Map<String, Object> result = new HashMap<>(8);
-        result.put(Dict.RET_CODE,InferenceRetCode.OK);
-        hostData.forEach((k,v)->{
-                Map<String,Object> onePartyData=(Map<String,Object>) v;
-                logger.info("============={}",onePartyData);
-                double score;
-                Map<String,Object > tempMap =guestData.get(0);
-                Map<String,Object> componentData = (Map<String,Object>)tempMap.get(this.getComponentName());
 
-                double localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
-                Map<String ,Object >  remoteComopnentData = (Map<String ,Object >)onePartyData.get(this.getComponentName());
-                double remoteScore;
-                if(remoteComopnentData!=null){
-                    remoteScore = ((Number)remoteComopnentData.get(Dict.SCORE)).doubleValue();
-                }else{
-                    remoteScore = ((Number) onePartyData.get(Dict.SCORE)).doubleValue();
+
+            Map<String, Object> result = this.handleRemoteReturnData(hostData);
+            hostData.forEach((k, v) -> {
+                Map<String, Object> onePartyData = (Map<String, Object>) v;
+                double score;
+                if(CollectionUtils.isNotEmpty(guestData)) {
+                    Map<String, Object> tempMap = guestData.get(0);
+                    Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
+                    double localScore = 0;
+                    if(componentData!=null&&componentData.get(Dict.SCORE)!=null){
+                     localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
+                    }else{
+                        throw new  GuestMergeException("local result is invalid ");
+                    }
+                    Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
+                    double remoteScore;
+                    if (remoteComopnentData != null) {
+                        remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
+                    } else {
+                        if (onePartyData.get(Dict.PROB) != null) {
+                                remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
+                        } else {
+                            throw new GuestMergeException("host data score is null");
+                        }
+                    }
+                    score = localScore;
+                    score += remoteScore;
+                    double prob = sigmod(score);
+                    result.put(Dict.SCORE, prob);
                 }
 
-                //logger.info("merge inference result,partid {} caseid {} local score:{} remote scope:{}",k ,context.getCaseId(), localScore, remoteScore);
-                score = localScore;
-                score += remoteScore;
-                double prob = sigmod(score);
-                result.put(Dict.SCORE, prob);
+            });
 
-        });
 
         return result;
     }
+
+
+//         if(partyData.get(Dict.RET_CODE)!=null&&!StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))){
+//        String remoteCode = partyData.get(Dict.RET_CODE).toString();
+//        String remoteMsg = partyData.get(Dict.MESSAGE)!=null?partyData.get(Dict.MESSAGE).toString():"";
+//        String  errorMsg = ErrorMessageUtil.buildRemoteRpcErrorMsg(remoteCode,remoteMsg);
+//        String  retcode  = ErrorMessageUtil.transformRemoteErrorCode(remoteCode);
+//        throw  new RemoteRpcException(retcode,errorMsg);
+//    }
 }

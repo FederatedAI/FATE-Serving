@@ -17,13 +17,18 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.cache.Cache;
+import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
+import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class BaseComponent implements LocalInferenceAware {
@@ -31,8 +36,6 @@ public abstract class BaseComponent implements LocalInferenceAware {
     private static final Logger logger = LoggerFactory.getLogger(BaseComponent.class);
 
     protected String componentName;
-
-
     protected String shortName;
 
     protected int  index;
@@ -62,6 +65,25 @@ public abstract class BaseComponent implements LocalInferenceAware {
         return ProtobufUtils.parseProtoObject(protoParser, protoString);
     }
 
+
+    protected Map<String,Object> handleRemoteReturnData(Map<String,Object> hostData){
+        Map<String, Object> result = new HashMap<>(8);
+        result.put(Dict.RET_CODE, InferenceRetCode.OK);
+        hostData.forEach((partId,partyDataObject)->{
+            Map  partyData =  (Map)partyDataObject;
+            if(partyData.get(Dict.RET_CODE)!=null&&!StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))){
+                String remoteCode = partyData.get(Dict.RET_CODE).toString();
+                String remoteMsg = partyData.get(Dict.MESSAGE)!=null?partyData.get(Dict.MESSAGE).toString():"";
+                String  errorMsg = ErrorMessageUtil.buildRemoteRpcErrorMsg(remoteCode,remoteMsg);
+                String  retcode  = ErrorMessageUtil.transformRemoteErrorCode(remoteCode);
+                result.put(Dict.RET_CODE, retcode);
+                result.put(Dict.MESSAGE, errorMsg);
+                return ;
+            }
+
+        });
+        return  result;
+    }
 
 
 
