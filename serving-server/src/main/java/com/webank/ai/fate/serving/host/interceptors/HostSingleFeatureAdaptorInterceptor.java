@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
 import com.webank.ai.fate.register.utils.StringUtils;
-import com.webank.ai.fate.serving.adapter.dataaccess.SingleFeatureDataAdaptor;
+import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;

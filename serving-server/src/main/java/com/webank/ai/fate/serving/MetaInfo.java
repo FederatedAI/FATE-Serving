@@ -1,6 +1,6 @@
 package com.webank.ai.fate.serving;
 
-import com.webank.ai.fate.serving.adapter.dataaccess.AdaptorDescriptor;
+import com.webank.ai.fate.serving.core.adaptor.AdaptorDescriptor;
 
 import java.util.List;
 

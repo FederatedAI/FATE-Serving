@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.adapter.dataaccess;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;

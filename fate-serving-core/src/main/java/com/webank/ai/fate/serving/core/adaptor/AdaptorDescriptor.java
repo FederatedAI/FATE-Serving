@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.adapter.dataaccess;
-
-import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
-import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
-import com.webank.ai.fate.serving.core.bean.Context;
+package com.webank.ai.fate.serving.core.adaptor;
 
 import java.util.List;
 
-public interface BatchFeatureDataAdaptor extends AdaptorDescriptor {
+public interface AdaptorDescriptor {
 
-    void init(Context context);
+    public List<ParamDescriptor> desc();
 
-    BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList);
+    public static class ParamDescriptor {
+        String keyName;
+        String keyType;
+        boolean isRequired;
+    }
 }

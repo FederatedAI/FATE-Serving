@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.adapter.dataaccess;
 
 
+import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import org.slf4j.Logger;

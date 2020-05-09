@@ -19,6 +19,8 @@ package com.webank.ai.fate.serving.adapter.dataaccess;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.webank.ai.fate.serving.core.adaptor.BatchFeatureDataAdaptor;
+import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;

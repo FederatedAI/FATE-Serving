@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.adapter.dataaccess;
+package com.webank.ai.fate.serving.core.adaptor;
 
-import java.util.List;
 
-public interface AdaptorDescriptor {
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
-    public List<ParamDescriptor> desc();
+import java.util.Map;
 
-    public static class ParamDescriptor {
-        String keyName;
-        String keyType;
-        boolean isRequired;
-    }
+public interface SingleFeatureDataAdaptor {
+
+    void init(Context context);
+
+    ReturnResult getData(Context context, Map<String, Object> featureIds);
 }
