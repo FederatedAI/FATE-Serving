@@ -9,6 +9,7 @@ import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +35,9 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
     @Value("${inference.single.timeout:3000}")
     long timeout;
 
+    @Autowired
+    Environment environment;
+
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
         Model model = ((ServingServerContext) context).getModel();
@@ -43,7 +47,7 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         modelProcessor.guestPrepareDataBeforeInference(context, inferenceRequest);
         List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, inferenceRequest);
 
-        Boolean useCache = ((ServingServerContext) context).getEnvironment().getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, true);
+        Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, true);
 
         rpcList.forEach((rpcDataWraper -> {
            // ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
