@@ -70,7 +70,7 @@ public class ServingServerTest {
         URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
         String filePath = resource.getPath();
 //        String filePath = "/Users/kaideng/work/webank/newLocationFateserving/feature-1.2/FATE-Serving/serving-server/src/main/resources/model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache";
-         filePath = filePath.replaceAll("%23", "#");
+        filePath = filePath.replaceAll("%23", "#");
         System.err.println("filePath " + filePath);
         // String  filepath =       "/Users/kaideng/work/webank/test/model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
 //        Context  context =  new ServingServerContext();

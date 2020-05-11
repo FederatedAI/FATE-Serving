@@ -5,19 +5,20 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
+
 import java.util.List;
 
-public class RedisCache implements Cache{
-    int     expireTime;
-    String  host;
-    int     port;
-    int     timeout;
-    String  password;
-    int     maxTotal;
-    int     maxIdel;
-    JedisPool  jedisPool;
+public class RedisCache implements Cache {
+    int expireTime;
+    String host;
+    int port;
+    int timeout;
+    String password;
+    int maxTotal;
+    int maxIdel;
+    JedisPool jedisPool;
 
-    synchronized  public  void init(){
+    synchronized public void init() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(maxTotal);
         jedisPoolConfig.setMaxIdle(maxIdel);
@@ -31,7 +32,7 @@ public class RedisCache implements Cache{
             Pipeline redisPipeline = jedis.pipelined();
             redisPipeline.set(key.toString(), value.toString());
             if (expireTime > 0) {
-                redisPipeline.expire(key.toString(),expireTime);
+                redisPipeline.expire(key.toString(), expireTime);
             }
             redisPipeline.sync();
         }

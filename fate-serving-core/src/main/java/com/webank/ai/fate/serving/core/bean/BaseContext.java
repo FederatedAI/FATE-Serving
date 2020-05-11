@@ -21,7 +21,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
@@ -34,9 +33,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
     private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static ApplicationContext applicationContext;
-    public static AtomicLong  requestInProcess= new AtomicLong(0);
+    public static AtomicLong requestInProcess = new AtomicLong(0);
     long timestamp;
-    LoggerPrinter loggerPrinter =new BaseLoggerPrinter();
+    LoggerPrinter loggerPrinter = new BaseLoggerPrinter();
     String interfaceName;
     String actionType;
     Map dataMap = Maps.newHashMap();
@@ -47,12 +46,14 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public BaseContext() {
 
     }
+
     public BaseContext(LoggerPrinter loggerPrinter, String actionType, MetricRegistry metricRegistry) {
         this.loggerPrinter = loggerPrinter;
         this.metricRegistry = metricRegistry;
         timestamp = System.currentTimeMillis();
         this.actionType = actionType;
     }
+
     private BaseContext(LoggerPrinter loggerPrinter, long timestamp, Map dataMap) {
         this.timestamp = timestamp;
         this.dataMap = dataMap;
@@ -251,13 +252,17 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     @Override
     public long getDownstreamCost() {
 
-        if(dataMap.get(Dict.DOWN_STREAM_COST)!=null) {
+        if (dataMap.get(Dict.DOWN_STREAM_COST) != null) {
 
             return (long) dataMap.get(Dict.DOWN_STREAM_COST);
         }
         return 0;
     }
 
+    @Override
+    public void setDownstreamCost(long downstreamCost) {
+        dataMap.put(Dict.DOWN_STREAM_COST, downstreamCost);
+    }
 
     public MetricRegistry getMetricRegistry() {
         return metricRegistry;
@@ -265,11 +270,6 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     public void setMetricRegistry(MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
-    }
-
-    @Override
-    public void setDownstreamCost(long downstreamCost) {
-        dataMap.put(Dict.DOWN_STREAM_COST, downstreamCost);
     }
 
     @Override
@@ -351,7 +351,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
 
     @Override
     public void setRemoteFuture(ListenableFuture future) {
-        this.dataMap.put(Dict.FUTURE,future);
+        this.dataMap.put(Dict.FUTURE, future);
     }
 
 

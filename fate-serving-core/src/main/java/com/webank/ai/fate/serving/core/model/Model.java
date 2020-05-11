@@ -21,28 +21,27 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 public class Model implements Comparable<Model>, Serializable {
 
-    private  long timestamp;
+    private long timestamp;
 
     private String tableName;
 
     private String namespace;
 
     /**
-     *  guest or host
+     * guest or host
      */
-    private String   role;
+    private String role;
 
     private String partId;
 
     /**
-     *  对端模型信息,因为需要支持多方,所以设计成Map
+     * 对端模型信息,因为需要支持多方,所以设计成Map
      */
-    private Map<String,Model> federationModelMap= Maps.newHashMap();
+    private Map<String, Model> federationModelMap = Maps.newHashMap();
 
     /**
      * 实例化好的模型处理类
@@ -50,6 +49,10 @@ public class Model implements Comparable<Model>, Serializable {
     private transient ModelProcessor modelProcessor;
 
     private String serviceId;
+
+    public Model() {
+        this.timestamp = System.currentTimeMillis();
+    }
 
     public long getTimestamp() {
         return timestamp;
@@ -63,16 +66,16 @@ public class Model implements Comparable<Model>, Serializable {
         return role;
     }
 
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public String getTableName() {
         return tableName;
     }
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 
     public String getPartId() {
@@ -83,7 +86,6 @@ public class Model implements Comparable<Model>, Serializable {
         this.partId = partId;
     }
 
-
     public ModelProcessor getModelProcessor() {
         return modelProcessor;
     }
@@ -91,11 +93,6 @@ public class Model implements Comparable<Model>, Serializable {
     public void setModelProcessor(ModelProcessor modelProcessor) {
         this.modelProcessor = modelProcessor;
     }
-
-    public Model() {
-        this.timestamp =  System.currentTimeMillis();
-    }
-
 
     public String getNamespace() {
         return namespace;
@@ -123,40 +120,31 @@ public class Model implements Comparable<Model>, Serializable {
 
     @Override
     public int compareTo(Model o) {
-        if(this.timestamp>o.timestamp) {
+        if (this.timestamp > o.timestamp) {
             return 1;
-        }
-            else {
+        } else {
             return -1;
         }
     }
 
 
     @Override
-    public int hashCode()
-    {
-        return (tableName+namespace).intern().hashCode();
+    public int hashCode() {
+        return (tableName + namespace).intern().hashCode();
     }
+
     @Override
-    public boolean equals(Object obj)
-    {
-        Model model =(Model)obj;
-        return  this.namespace.equals(model.namespace)&&this.tableName.equals(model.tableName);
+    public boolean equals(Object obj) {
+        Model model = (Model) obj;
+        return this.namespace.equals(model.namespace) && this.tableName.equals(model.tableName);
     }
 
 
     @Override
-    public  String toString(){
+    public String toString() {
 
         return JSON.toJSONString(this);
     }
-
-
-
-
-
-
-
 
 
 }

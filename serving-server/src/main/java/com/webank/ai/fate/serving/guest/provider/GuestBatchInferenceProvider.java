@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
@@ -14,7 +13,6 @@ import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +34,7 @@ import java.util.Map;
 public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> implements InitializingBean {
 
     final long DEFAULT_TIME_OUT = 3000;
-    long  timeout =  DEFAULT_TIME_OUT;
+    long timeout = DEFAULT_TIME_OUT;
 
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
@@ -57,11 +55,11 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
 
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);
-          //  ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.async(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams));
-            ListenableFuture<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams), useCache);
+            //  ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.async(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams));
+            ListenableFuture<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context, buildRpcDataWraper(model, remoteModel, batchHostFederatedParams), useCache);
             futureMap.put(hostPartyId, originBatchResultFuture);
         });
-        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap,timeout );
+        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, timeout);
         batchFederatedResult.setCaseid(context.getCaseId());
         return batchFederatedResult;
     }
@@ -83,17 +81,17 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         return outboundPackage;
     }
 
-    private  FederatedRpcInvoker.RpcDataWraper   buildRpcDataWraper(Model model,Model  remoteModel,Object  batchHostFederatedParams){
+    private FederatedRpcInvoker.RpcDataWraper buildRpcDataWraper(Model model, Model remoteModel, Object batchHostFederatedParams) {
         FederatedRpcInvoker.RpcDataWraper rpcDataWraper = new FederatedRpcInvoker.RpcDataWraper();
         rpcDataWraper.setGuestModel(model);
         rpcDataWraper.setHostModel(remoteModel);
         rpcDataWraper.setData(batchHostFederatedParams);
         rpcDataWraper.setRemoteMethodName(Dict.REMOTE_METHOD_BATCH);
-        return  rpcDataWraper;
+        return rpcDataWraper;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-       timeout = environment.getProperty(Dict.BATCH_PRC_TIMEOUT,Long.class,DEFAULT_TIME_OUT);
+        timeout = environment.getProperty(Dict.BATCH_PRC_TIMEOUT, Long.class, DEFAULT_TIME_OUT);
     }
 }

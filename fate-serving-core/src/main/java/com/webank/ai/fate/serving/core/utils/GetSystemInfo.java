@@ -24,7 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.*;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -32,30 +35,35 @@ import java.util.regex.Pattern;
 public class GetSystemInfo {
 
     private static final Logger logger = LoggerFactory.getLogger(GetSystemInfo.class);
-
-
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
+    private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
+    private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
+    private static final String SPLIT_IPV4_CHARECTER = "\\.";
+    private static final String SPLIT_IPV6_CHARECTER = ":";
     public static String localIp;
-
+    private static String ANYHOST_KEY = "anyhost";
+    private static String ANYHOST_VALUE = "0.0.0.0";
+    private static String LOCALHOST_KEY = "localhost";
+    private static String LOCALHOST_VALUE = "127.0.0.1";
 
     static {
         localIp = getLocalIp();
-        logger.info("set local ip : {}",localIp);
+        logger.info("set local ip : {}", localIp);
     }
 
     public static String getLocalIp() {
 
         try {
             InetAddress inetAddress = getLocalAddress0("eth0");
-            if(inetAddress!=null){
-                return  inetAddress.getHostAddress();
-            }
-            else{
+            if (inetAddress != null) {
+                return inetAddress.getHostAddress();
+            } else {
                 inetAddress = getLocalAddress0("");
             }
-            if(inetAddress!=null){
+            if (inetAddress != null) {
                 return inetAddress.getHostAddress();
-            }else{
-                throw  new RuntimeException("can not get local ip");
+            } else {
+                throw new RuntimeException("can not get local ip");
             }
 
         } catch (Throwable e) {
@@ -64,7 +72,6 @@ public class GetSystemInfo {
         return "";
     }
 
-
     private static InetAddress getLocalAddress0(String name) {
         InetAddress localAddress = null;
         try {
@@ -72,8 +79,8 @@ public class GetSystemInfo {
             Optional<InetAddress> addressOp = toValidAddress(localAddress);
             if (addressOp.isPresent()) {
                 return addressOp.get();
-            }else{
-                localAddress=null;
+            } else {
+                localAddress = null;
             }
         } catch (Throwable e) {
             logger.warn(e.getMessage());
@@ -122,7 +129,6 @@ public class GetSystemInfo {
         return localAddress;
     }
 
-
     public static String getOsName() {
 
         String osName = System.getProperty("os.name");
@@ -163,19 +169,6 @@ public class GetSystemInfo {
         }
         return Optional.empty();
     }
-    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
-    private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
-    private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
-    private static final String SPLIT_IPV4_CHARECTER = "\\.";
-    private static final String SPLIT_IPV6_CHARECTER = ":";
-    private static String ANYHOST_KEY = "anyhost";
-
-    private static String ANYHOST_VALUE = "0.0.0.0";
-
-    private static String LOCALHOST_KEY = "localhost";
-
-    private static String LOCALHOST_VALUE = "127.0.0.1";
-
 
     static boolean isValidV4Address(InetAddress address) {
         if (address == null || address.isLoopbackAddress()) {

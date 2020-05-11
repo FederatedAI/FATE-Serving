@@ -3,23 +3,32 @@ package com.webank.ai.fate.serving.core.rpc.core;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.api.networking.proxy.*;
+import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.model.Model;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public interface FederatedRpcInvoker<T> {
 
 
+    public ListenableFuture<BatchInferenceResult> batchInferenceRpcWithCache(Context context,
+                                                                             RpcDataWraper rpcDataWraper, boolean useCache);
 
-    public  class RpcDataWraper  {
-        Object  data;
+    public T sync(Context context, RpcDataWraper rpcDataWraper, long timeout);
+
+    public ListenableFuture<T> async(Context context, RpcDataWraper rpcDataWraper);
+
+    public ListenableFuture<ReturnResult> singleInferenceRpcWithCache(Context context,
+                                                                      FederatedRpcInvoker.RpcDataWraper rpcDataWraper, boolean useCache);
+
+    public class RpcDataWraper {
+        Object data;
         Model guestModel;
-        Model   hostModel;
-        String  remoteMethodName;
+        Model hostModel;
+        String remoteMethodName;
 
 
         public Object getData() {
@@ -39,14 +48,14 @@ public interface FederatedRpcInvoker<T> {
         }
 
         public Model getHostModel() {
-            if(hostModel!=null) {
+            if (hostModel != null) {
                 return hostModel;
-            }else if(this.guestModel!=null){
-                Map<String,Model> modelMap = this.getGuestModel().getFederationModelMap();
+            } else if (this.guestModel != null) {
+                Map<String, Model> modelMap = this.getGuestModel().getFederationModelMap();
                 List<String> keys = Lists.newArrayList(modelMap.keySet());
-                return  modelMap.get(keys.get(0));
+                return modelMap.get(keys.get(0));
             }
-            return  null;
+            return null;
         }
 
         public void setHostModel(Model hostModel) {
@@ -61,16 +70,6 @@ public interface FederatedRpcInvoker<T> {
             this.remoteMethodName = remoteMethodName;
         }
     }
-
-    public  ListenableFuture<BatchInferenceResult>   batchInferenceRpcWithCache  (Context  context,
-                                                                                  RpcDataWraper  rpcDataWraper,boolean useCache);
-        public T sync(Context context, RpcDataWraper rpcDataWraper,long  timeout );
-    public  ListenableFuture<T> async(Context context, RpcDataWraper rpcDataWraper);
-
-
-    public  ListenableFuture<ReturnResult>   singleInferenceRpcWithCache  (Context  context,
-                                                                           FederatedRpcInvoker.RpcDataWraper rpcDataWraper, boolean useCache) ;
-
 
 
 }

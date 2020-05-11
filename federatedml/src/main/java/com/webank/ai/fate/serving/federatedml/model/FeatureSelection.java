@@ -21,8 +21,6 @@ import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionMetaProto.FeatureS
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.FeatureSelectionParam;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.LeftCols;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

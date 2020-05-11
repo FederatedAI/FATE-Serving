@@ -23,6 +23,7 @@ public class FederatedParty {
     public FederatedParty() {
 
     }
+
     public FederatedParty(String role, String partyId) {
         this.role = role;
         this.partyId = partyId;

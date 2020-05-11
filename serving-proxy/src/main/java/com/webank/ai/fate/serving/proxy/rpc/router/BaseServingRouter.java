@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public abstract class BaseServingRouter implements RouterInterface {
-    private static final Logger logger  = LoggerFactory.getLogger(BaseServingRouter.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseServingRouter.class);
 
     public abstract List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage);
 
@@ -24,24 +24,24 @@ public abstract class BaseServingRouter implements RouterInterface {
 
     @Override
     public RouterInfo route(Context context, InboundPackage inboundPackage) {
-        List<RouterInfo> routeList =  getRouterInfoList(context,inboundPackage);
+        List<RouterInfo> routeList = getRouterInfoList(context, inboundPackage);
 
-        if(routeList==null
-        || 0 == routeList.size()){
+        if (routeList == null
+                || 0 == routeList.size()) {
             return null;
         }
         int idx = 0;
         RouteType routeType = getRouteType();
-        switch (routeType){
-            case RANDOM_ROUTE:{
+        switch (routeType) {
+            case RANDOM_ROUTE: {
                 idx = ThreadLocalRandom.current().nextInt(routeList.size());
                 break;
             }
-            case CONSISTENT_HASH_ROUTE:{
+            case CONSISTENT_HASH_ROUTE: {
                 idx = Hashing.consistentHash(context.getRouteBasis(), routeList.size());
                 break;
             }
-            default:{
+            default: {
                 // to use the first one.
                 break;
             }
@@ -50,22 +50,22 @@ public abstract class BaseServingRouter implements RouterInterface {
 
         context.setRouterInfo(routerInfo);
 
-        logger.info("caseid {} get route info {}:{}", context.getCaseId(),routerInfo.getHost(),routerInfo.getPort());
+        logger.info("caseid {} get route info {}:{}", context.getCaseId(), routerInfo.getHost(), routerInfo.getPort());
 
         return routerInfo;
     }
 
     @Override
-    public void doPreProcess(Context context, InboundPackage inboundPackage,OutboundPackage  outboundPackage) throws Exception {
-        RouterInfo routerInfo =this.route(context,inboundPackage);
-        if(routerInfo ==null){
-            throw new  NoRouteInfoException();
+    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
+        RouterInfo routerInfo = this.route(context, inboundPackage);
+        if (routerInfo == null) {
+            throw new NoRouteInfoException();
         }
         inboundPackage.setRouterInfo(routerInfo);
     }
 
     @Override
-    public void doPostProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
     }
 }

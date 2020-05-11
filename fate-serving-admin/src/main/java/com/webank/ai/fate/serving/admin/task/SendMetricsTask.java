@@ -21,24 +21,18 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SendMetricsTask implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestInterceptor.class);
-
-    // serving-server__/api/model/publishLoad__1582616571000
-    @Autowired
-    private MetricCache metricCache;
-
-    @Value("${monitor.send.metric.url}")
-    private String url;
-
-    private ScheduledExecutorService scheduleService = Executors.newScheduledThreadPool(1);
-
-    private ExecutorService fetchService = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-            Runtime.getRuntime().availableProcessors(), 0, TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(2048));
-
     // 最近10秒内的统计
     private static final long MAX_LAST_FETCH_INTERVAL_MS = 1000 * 15;
     private static final long FETCH_INTERVAL_SECOND = 6;
-
+    // serving-server__/api/model/publishLoad__1582616571000
+    @Autowired
+    private MetricCache metricCache;
+    @Value("${monitor.send.metric.url}")
+    private String url;
+    private ScheduledExecutorService scheduleService = Executors.newScheduledThreadPool(1);
+    private ExecutorService fetchService = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
+            Runtime.getRuntime().availableProcessors(), 0, TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(2048));
     private Map<String, AtomicLong> appLastFetchTime = new ConcurrentHashMap<>();
 
     public void run() {

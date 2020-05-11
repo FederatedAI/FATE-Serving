@@ -56,14 +56,15 @@ public abstract class AbstractRouterService implements RouterService {
         LoadBalancer loadBalancer = loadBalancerFactory.getLoaderBalancer(loadBalanceModel);
         return doRouter(url, loadBalancer);
     }
+
     @Override
-    public List<URL> router(String project,String environment ,String  serviceName){
+    public List<URL> router(String project, String environment, String serviceName) {
 
         Preconditions.checkArgument(StringUtils.isNotEmpty(project));
         Preconditions.checkArgument(StringUtils.isNotEmpty(environment));
         Preconditions.checkArgument(StringUtils.isNotEmpty(serviceName));
         LoadBalancer loadBalancer = loadBalancerFactory.getLoaderBalancer(LoadBalanceModel.random_with_weight);
-        StringBuilder   stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(project).append("/").append(environment).append("/").append(serviceName);
         URL paramUrl = URL.valueOf(stringBuilder.toString());
         return doRouter(paramUrl, loadBalancer);
@@ -79,7 +80,7 @@ public abstract class AbstractRouterService implements RouterService {
     }
 
     protected List<URL> filterVersion(List<URL> urls, String version) {
-        if(StringUtils.isEmpty(version)){
+        if (StringUtils.isEmpty(version)) {
             return urls;
         }
         final List<URL> resultUrls = Lists.newArrayList();
@@ -90,7 +91,7 @@ public abstract class AbstractRouterService implements RouterService {
 
                 String routerModel = url.getParameter(Constants.ROUTER_MODEL);
                 try {
-                    if(RouterModel.ALL_ALLOWED.name().equals(routerModel)){
+                    if (RouterModel.ALL_ALLOWED.name().equals(routerModel)) {
                         resultUrls.add(url);
                         return;
                     }

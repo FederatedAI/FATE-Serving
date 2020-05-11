@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.core.bean;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.ai.fate.serving.core.bean.Request;
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -57,14 +56,6 @@ public class InferenceRequest implements Request {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
-    }
-
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
-
-    public void setModelVersion(String modelVersion) {
-        this.modelVersion = modelVersion;
     }
 
     public Map<String, Object> getSendToRemoteFeatureData() {
@@ -114,9 +105,17 @@ public class InferenceRequest implements Request {
         return modelVersion;
     }
 
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
+    }
+
     @Override
     public String getModelId() {
         return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 
     @Override

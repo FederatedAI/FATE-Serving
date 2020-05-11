@@ -42,15 +42,15 @@ public class Dict {
     public static final String MODEL_FEDERATED_PARTY = "model_federated_party";
     public static final String MODEL_FEDERATED_ROLES = "model_federated_roles";
     public static final String MODEL = "model";
-    public static final String VERSION ="version";
-    public static final String GRPC_TYPE ="grpcType";
-    public static final String ROUTER_INFO ="routerInfo";
-    public static final String RESULT_DATA ="resultData";
-    public static final String RETURN_CODE ="returnCode";
-    public static final String DOWN_STREAM_COST ="downstreamCost";
-    public static final String DOWN_STREAM_BEGIN ="downstreamBegin";
-    public static final String ROUTE_BASIS ="routeBasis";
-    public static final String SOURCE_IP ="sourceIp";
+    public static final String VERSION = "version";
+    public static final String GRPC_TYPE = "grpcType";
+    public static final String ROUTER_INFO = "routerInfo";
+    public static final String RESULT_DATA = "resultData";
+    public static final String RETURN_CODE = "returnCode";
+    public static final String DOWN_STREAM_COST = "downstreamCost";
+    public static final String DOWN_STREAM_BEGIN = "downstreamBegin";
+    public static final String ROUTE_BASIS = "routeBasis";
+    public static final String SOURCE_IP = "sourceIp";
 
 
     /**
@@ -148,30 +148,30 @@ public class Dict {
     public static final String MODEL_TRANSFER_URL = "model.transfer.url";
 
 
-    public  static  final String GUEST_APP_ID = "guestAppId";
-    public  static  final String HOST_APP_ID = "hostAppId";
-    public  static  final String SERVICE_ID = "serviceId";
-    public  static  final String APPLY_ID = "applyId";
-    public  static  final String FUTURE ="future";
-    public  static  final String CONFIGPATH = "configpath";
-    public  static  final String ACL_ENABLE = "acl.enable";
-    public  static  final String ACL_USERNAME = "acl.username";
-    public  static  final String ACL_PASSWORD = "acl.password";
-    public  static  final String AUTH_FILE = "authFile";
-    public  static  final String ENCRYPT_TYPE = "encrypt_type";
+    public static final String GUEST_APP_ID = "guestAppId";
+    public static final String HOST_APP_ID = "hostAppId";
+    public static final String SERVICE_ID = "serviceId";
+    public static final String APPLY_ID = "applyId";
+    public static final String FUTURE = "future";
+    public static final String CONFIGPATH = "configpath";
+    public static final String ACL_ENABLE = "acl.enable";
+    public static final String ACL_USERNAME = "acl.username";
+    public static final String ACL_PASSWORD = "acl.password";
+    public static final String AUTH_FILE = "authFile";
+    public static final String ENCRYPT_TYPE = "encrypt_type";
 
 
-    public  static  final String MD5_SALT = "$1$ML";
+    public static final String MD5_SALT = "$1$ML";
     public static final String USER_CACHE_KEY_PREFIX = "admin_user_";
 
-    public static final String CASE_ID="caseid";
-    public static final String  CODE ="code";
-    public static final String  MESSAGE ="message";
+    public static final String CASE_ID = "caseid";
+    public static final String CODE = "code";
+    public static final String MESSAGE = "message";
     public static final String MODEL_ID = "modelId";
     public static final String MODEL_VERSION = "modelVersion";
     public static final String APP_ID = "appid";
     public static final String PARTY_ID = "partyId";
-    public static final  String  FEATURE_DATA = "featureData";
+    public static final String FEATURE_DATA = "featureData";
 
     public static final String DEFAULT_VERSION = "1.0";
     public static final String SELF_PROJECT_NAME = "proxy";
@@ -192,17 +192,17 @@ public class Dict {
     public static final String LOCAL_INFERENCE_DATA = "localInferenceData";
     public static final String REMOTE_INFERENCE_DATA = "remoteInferenceData";
 
-    public static final String  SBT_TREE_NODE_ID_ARRAY = "sbtTreeNodeIdArray";
+    public static final String SBT_TREE_NODE_ID_ARRAY = "sbtTreeNodeIdArray";
 
-    public static final String REMOTE_METHOD_BATCH ="batch";
-    public static final String MODEL_NAME_SPACE ="modelNameSpace";
+    public static final String REMOTE_METHOD_BATCH = "batch";
+    public static final String MODEL_NAME_SPACE = "modelNameSpace";
     public static final String MODEL_TABLE_NAME = "modelTableName";
     public static final String REGISTER_PROJECT = "admin";
     public static final String REGISTER_ENVIRONMENT = "online";
     public static final String SERVICE_SERVING = "serving";
     public static final String SERVICE_PROXY = "proxy";
     public static final String FAILED = "failed";
-    public static final String BATCH_PRC_TIMEOUT ="batch.rpc.timeout";
+    public static final String BATCH_PRC_TIMEOUT = "batch.rpc.timeout";
     // parameters
     public static final String PARAMS_INITIATOR = "initiator";
     public static final String PARAMS_ROLE = "role";

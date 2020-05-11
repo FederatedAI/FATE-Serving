@@ -30,14 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class OneHotEncoder extends BaseComponent implements LocalInferenceAware{
+public class OneHotEncoder extends BaseComponent implements LocalInferenceAware {
     private static final Logger logger = LoggerFactory.getLogger(OneHotEncoder.class);
-
+    Pattern doublePattern = Pattern.compile("^-?([1-9]\\\\d*\\\\.\\\\d*|0\\\\.\\\\d*[1-9]\\\\d*|0?\\\\.0+|0)$");
     private List<String> cols;
     private Map<String, ColsMap> colsMapMap;
     private boolean needRun;
-    Pattern doublePattern = Pattern.compile("^-?([1-9]\\\\d*\\\\.\\\\d*|0\\\\.\\\\d*[1-9]\\\\d*|0?\\\\.0+|0)$");
-
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -49,13 +47,12 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware{
             this.cols = oneHotMeta.getTransformColNamesList();
             this.colsMapMap = oneHotParam.getColMapMap();
         } catch (Exception ex) {
-            logger.error("OneHotEncoder initModel error",ex);
+            logger.error("OneHotEncoder initModel error", ex);
             return ILLEGALDATA;
         }
         logger.info("Finish init OneHot Encoder class");
         return OK;
     }
-
 
 
     private boolean isDouble(String str) {
@@ -74,8 +71,8 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware{
             return firstData;
         }
         for (String colName : firstData.keySet()) {
-            try{
-                if (! this.cols.contains(colName)) {
+            try {
+                if (!this.cols.contains(colName)) {
                     outputData.put(colName, firstData.get(colName));
                     continue;
                 }
@@ -91,28 +88,28 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware{
                     if (this.isDouble(thisInputValue)) {
                         double d = Double.valueOf(thisInputValue);
                         inputValue = (int) Math.ceil(d);
-                    }else {
+                    } else {
                         inputValue = Integer.valueOf(thisInputValue);
                     }
-                }catch (Throwable e){
+                } catch (Throwable e) {
                     logger.error("Onehot component accept number input value only");
                 }
 
-                for (int i = 0; i < values.size(); i ++) {
+                for (int i = 0; i < values.size(); i++) {
                     Integer possibleValue = Integer.parseInt(values.get(i));
                     String newColName = encodedVariables.get(i);
                     if (inputValue.equals(possibleValue)) {
                         outputData.put(newColName, 1.0);
-                    }else {
+                    } else {
                         outputData.put(newColName, 0.0);
                     }
                 }
-            }catch(Throwable e){
-                logger.error("HeteroFeatureBinning error" ,e);
+            } catch (Throwable e) {
+                logger.error("HeteroFeatureBinning error", e);
             }
         }
         return outputData;
 
     }
 
-    }
+}

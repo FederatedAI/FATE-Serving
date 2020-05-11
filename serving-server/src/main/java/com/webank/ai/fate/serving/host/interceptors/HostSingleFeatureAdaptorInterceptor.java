@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
 import com.webank.ai.fate.register.utils.StringUtils;
-import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
+import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
@@ -32,11 +32,11 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
         }
         InferenceRequest inferenceRequest = inboundPackage.getBody();
         ReturnResult singleFeatureDataAdaptorData = singleFeatureDataAdaptor.getData(context, inboundPackage.getBody().getSendToRemoteFeatureData());
-        if(singleFeatureDataAdaptorData==null){
-            throw  new HostGetFeatureErrorException("adaptor return null");
+        if (singleFeatureDataAdaptorData == null) {
+            throw new HostGetFeatureErrorException("adaptor return null");
         }
-        if(!StatusCode.SUCCESS.equals(singleFeatureDataAdaptorData.getRetcode())){
-            throw  new HostGetFeatureErrorException("adaptor return code is invalid {}",singleFeatureDataAdaptorData.getRetcode());
+        if (!StatusCode.SUCCESS.equals(singleFeatureDataAdaptorData.getRetcode())) {
+            throw new HostGetFeatureErrorException("adaptor return code is invalid {}", singleFeatureDataAdaptorData.getRetcode());
         }
         inferenceRequest.getFeatureData().putAll(singleFeatureDataAdaptorData.getData());
     }

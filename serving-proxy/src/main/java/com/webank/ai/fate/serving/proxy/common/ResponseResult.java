@@ -11,30 +11,12 @@ public class ResponseResult<T> {
 
     @JsonProperty(value = "message")
     private String msg = "success";
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
     @JsonProperty(value = "data")
     private T data;
 
     public ResponseResult(T data) {
         this.data = data;
     }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
 
     public ResponseResult() {
 
@@ -50,7 +32,21 @@ public class ResponseResult<T> {
         this.data = data;
     }
 
+    public T getData() {
+        return data;
+    }
 
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 
     public String getMsg() {
         return msg;
@@ -59,7 +55,6 @@ public class ResponseResult<T> {
     public void setMsg(String msg) {
         this.msg = msg;
     }
-
 
 
 }

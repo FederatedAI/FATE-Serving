@@ -29,7 +29,7 @@ start() {
     fi
     if [ ${module} = "serving-server" ]; then
       #java -cp "conf/:lib/*:fate-${module}.jar" ${main_class} -c conf/${module}.properties >>logs/console.log 2>>logs/error.log &
-      java -Dspring.config.location=${configpath}/serving-server.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
+      java -Dspring.config.location=${configpath}/serving-server.properties -cp "conf/:lib/*:extension/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
     elif [ ${module} = "serving-proxy" ]; then
       java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
     elif [ ${module} = "serving-admin" ]; then

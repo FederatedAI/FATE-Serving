@@ -38,11 +38,9 @@ public class ProxyController {
 
     @Autowired
     IMetricFactory metricFactory;
-
+    Logger logger = LoggerFactory.getLogger(ProxyController.class);
     @Value("${coordinator:9999}")
     private String selfCoordinator;
-
-    Logger logger = LoggerFactory.getLogger(ProxyController.class);
 
     String binaryReader(HttpServletRequest request) throws IOException {
         int len = request.getContentLength();
@@ -57,11 +55,11 @@ public class ProxyController {
     @ResponseBody
     public Callable<String> federation(@PathVariable String version,
                                        @PathVariable String callName,
-                             @RequestBody String data,
-                             HttpServletRequest httpServletRequest,
-                             @RequestHeader HttpHeaders headers
+                                       @RequestBody String data,
+                                       HttpServletRequest httpServletRequest,
+                                       @RequestHeader HttpHeaders headers
     ) throws Exception {
-        metricFactory.counter("http.inference.request", "http inference request","callName", callName).increment();
+        metricFactory.counter("http.inference.request", "http inference request", "callName", callName).increment();
 
         return new Callable<String>() {
             @Override
@@ -78,16 +76,16 @@ public class ProxyController {
 
                 InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, data, httpServletRequest);
 
-                OutboundPackage<Map> result  =   serviceAdaptor.service(context,inboundPackage );
-                if(result!=null&&result.getData()!=null) {
+                OutboundPackage<Map> result = serviceAdaptor.service(context, inboundPackage);
+                if (result != null && result.getData() != null) {
                     result.getData().remove("log");
                     result.getData().remove("warn");
                     result.getData().remove("caseid");
                 }
 
-                metricFactory.counter("http.inference.response", "http inference response","callName", callName).increment();
+                metricFactory.counter("http.inference.response", "http inference response", "callName", callName).increment();
 
-                return  JSON.toJSONString(result.getData());
+                return JSON.toJSONString(result.getData());
 
             }
         };
@@ -95,19 +93,19 @@ public class ProxyController {
     }
 
 
-    private InboundPackage<Map> buildInboundPackageFederation(Context  context , String data,
-                                                              HttpServletRequest  httpServletRequest) {
+    private InboundPackage<Map> buildInboundPackageFederation(Context context, String data,
+                                                              HttpServletRequest httpServletRequest) {
         String sourceIp = WebUtil.getIpAddr(httpServletRequest);
         context.setSourceIp(sourceIp);
         context.setGuestAppId(selfCoordinator);
 
-        JSONObject jsonObject =JSON.parseObject(data);
-        Map head = JSON.parseObject(jsonObject.getString(Dict.HEAD)!=null?jsonObject.getString(Dict.HEAD):"{}", Map.class);
-        Map body = JSON.parseObject(jsonObject.getString(Dict.BODY)!=null?jsonObject.getString(Dict.BODY):"{}", Map.class);
+        JSONObject jsonObject = JSON.parseObject(data);
+        Map head = JSON.parseObject(jsonObject.getString(Dict.HEAD) != null ? jsonObject.getString(Dict.HEAD) : "{}", Map.class);
+        Map body = JSON.parseObject(jsonObject.getString(Dict.BODY) != null ? jsonObject.getString(Dict.BODY) : "{}", Map.class);
 
-        context.setHostAppid( head.get(Dict.APP_ID)!= null?head.getOrDefault(Dict.APP_ID,"").toString():"");
-        context.setCaseId( head.get(Dict.CASE_ID)!= null?head.getOrDefault(Dict.CASE_ID,"").toString():"");
-        if(null == context.getCaseId() || context.getCaseId().isEmpty()){
+        context.setHostAppid(head.get(Dict.APP_ID) != null ? head.getOrDefault(Dict.APP_ID, "").toString() : "");
+        context.setCaseId(head.get(Dict.CASE_ID) != null ? head.getOrDefault(Dict.CASE_ID, "").toString() : "");
+        if (null == context.getCaseId() || context.getCaseId().isEmpty()) {
             context.setCaseId(UUID.randomUUID().toString());
         }
 
@@ -116,7 +114,6 @@ public class ProxyController {
         inboundPackage.setHead(head);
         return inboundPackage;
     }
-
 
 
 }

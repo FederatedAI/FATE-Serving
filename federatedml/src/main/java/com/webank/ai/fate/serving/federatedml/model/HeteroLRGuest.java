@@ -17,14 +17,10 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
-
-import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
-import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
-import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,63 +31,62 @@ import java.util.Map;
 
 import static java.lang.Math.exp;
 
-public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware ,Returnable{
+public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Returnable {
 
     private static final Logger logger = LoggerFactory.getLogger(HeteroLRGuest.class);
 
     private double sigmod(double x) {
         return 1. / (1. + exp(-x));
     }
+
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> input
-                                             ) {
+    ) {
         Map<String, Object> result = new HashMap<>(8);
         Map<String, Double> forwardRet = forward(input);
         double score = forwardRet.get(Dict.SCORE);
-       // logger.info("caseid {} score:{}", context.getCaseId(), score);
+        // logger.info("caseid {} score:{}", context.getCaseId(), score);
         result.put(Dict.SCORE, score);
         return result;
     }
 
 
-
-
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> guestData,
-                                                    Map<String,Object> hostData) {
+                                                    Map<String, Object> hostData) {
 
 
-            Map<String, Object> result = this.handleRemoteReturnData(hostData);
-            hostData.forEach((k, v) -> {
-                Map<String, Object> onePartyData = (Map<String, Object>) v;
-                double score;
-                if(CollectionUtils.isNotEmpty(guestData)) {
-                    Map<String, Object> tempMap = guestData.get(0);
-                    Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
-                    double localScore = 0;
-                    if(componentData!=null&&componentData.get(Dict.SCORE)!=null){
-                     localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
-                    }else{
-                        throw new  GuestMergeException("local result is invalid ");
-                    }
-                    Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
-                    double remoteScore;
-                    if (remoteComopnentData != null) {
-                        remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
-                    } else {
-                        if (onePartyData.get(Dict.PROB) != null) {
-                                remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
-                        } else {
-                            throw new GuestMergeException("host data score is null");
-                        }
-                    }
-                    score = localScore;
-                    score += remoteScore;
-                    double prob = sigmod(score);
-                    result.put(Dict.SCORE, prob);
+        Map<String, Object> result = this.handleRemoteReturnData(hostData);
+        hostData.forEach((k, v) -> {
+            Map<String, Object> onePartyData = (Map<String, Object>) v;
+            double score;
+            if (CollectionUtils.isNotEmpty(guestData)) {
+                Map<String, Object> tempMap = guestData.get(0);
+                Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
+                double localScore = 0;
+                if (componentData != null && componentData.get(Dict.SCORE) != null) {
+                    localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
+                } else {
+                    throw new GuestMergeException("local result is invalid ");
                 }
+                Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
+                double remoteScore;
+                if (remoteComopnentData != null) {
+                    remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
+                } else {
+                    if (onePartyData.get(Dict.PROB) != null) {
+                        remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
+                    } else {
+                        throw new GuestMergeException("host data score is null");
+                    }
+                }
+                score = localScore;
+                score += remoteScore;
+                double prob = sigmod(score);
+                result.put(Dict.SCORE, prob);
+            }
 
-            });
+        });
 
 
         return result;

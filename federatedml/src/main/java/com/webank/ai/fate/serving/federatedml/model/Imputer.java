@@ -34,15 +34,15 @@ public class Imputer {
     }
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
-        if(inputData!=null) {
+        if (inputData != null) {
             for (String key : inputData.keySet()) {
-                if(inputData.get(key)!=null) {
+                if (inputData.get(key) != null) {
                     String value = inputData.get(key).toString();
                     if (this.missingValueSet.contains(value.toLowerCase())) {
                         try {
                             inputData.put(key, this.missingReplaceValues.get(key));
                         } catch (Exception ex) {
-                            logger.error("Imputer transform error",ex);
+                            logger.error("Imputer transform error", ex);
                             inputData.put(key, 0.);
                         }
                     }

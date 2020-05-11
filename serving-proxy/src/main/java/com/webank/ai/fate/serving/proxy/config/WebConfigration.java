@@ -20,27 +20,25 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class WebConfigration implements WebMvcConfigurer {
 
-    int processors = Runtime.getRuntime().availableProcessors();
-
     private final Logger logger = LoggerFactory.getLogger(WebConfigration.class);
-
+    int processors = Runtime.getRuntime().availableProcessors();
     @Autowired
     ServletContext servletContext;
 
     @Value("${proxy.async.timeout:5000}")
-    long  timeout;
+    long timeout;
 
     @Value("${proxy.async.coresize:0}")
-    int  coreSize;
+    int coreSize;
 
     @Value("${proxy.async.maxsize:0}")
-    int  maxSize;
+    int maxSize;
 
     @Override
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(coreSize>0?coreSize:processors);
-        executor.setMaxPoolSize(maxSize>0?maxSize:2*processors);
+        executor.setCorePoolSize(coreSize > 0 ? coreSize : processors);
+        executor.setMaxPoolSize(maxSize > 0 ? maxSize : 2 * processors);
         executor.setThreadNamePrefix("ProxyAsync");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.initialize();
@@ -58,7 +56,6 @@ public class WebConfigration implements WebMvcConfigurer {
     @Bean
 
     public FilterRegistrationBean initUserServletFilterRegistration() {
-
 
 
         FilterRegistrationBean registration = new FilterRegistrationBean();

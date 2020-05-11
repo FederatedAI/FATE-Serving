@@ -1,4 +1,3 @@
-
 package com.webank.ai.fate.serving.core.cache;
 
 
@@ -11,8 +10,8 @@ import java.util.Map;
 public class ExpiringLRUCache implements Cache {
     private final Map<Object, Object> store;
 
-    public ExpiringLRUCache(int maxSize,int  liveTimeSeconds,int  intervalSeconds) {
-        ExpiringMap<Object, Object> expiringMap = new ExpiringMap<>(maxSize,liveTimeSeconds, intervalSeconds);
+    public ExpiringLRUCache(int maxSize, int liveTimeSeconds, int intervalSeconds) {
+        ExpiringMap<Object, Object> expiringMap = new ExpiringMap<>(maxSize, liveTimeSeconds, intervalSeconds);
         expiringMap.getExpireThread().startExpiryIfNotStarted();
         this.store = expiringMap;
     }
@@ -29,22 +28,22 @@ public class ExpiringLRUCache implements Cache {
 
     @Override
     public List<DataWrapper> get(Object[] keys) {
-        List<DataWrapper>  result = Lists.newArrayList();
-        for(Object  key:keys) {
-           Object singleResult =  store.get(key);
-           if(singleResult!=null) {
-               DataWrapper  dataWrapper = new DataWrapper(key,singleResult);
-               result.add(dataWrapper);
-           }
+        List<DataWrapper> result = Lists.newArrayList();
+        for (Object key : keys) {
+            Object singleResult = store.get(key);
+            if (singleResult != null) {
+                DataWrapper dataWrapper = new DataWrapper(key, singleResult);
+                result.add(dataWrapper);
+            }
         }
-        return  result;
+        return result;
     }
 
     @Override
     public void put(List list) {
-        for(Object object: list ) {
-            DataWrapper  dataWrapper  =  (DataWrapper) object;
-            this.store.put(dataWrapper.getKey(),dataWrapper.getValue());
+        for (Object object : list) {
+            DataWrapper dataWrapper = (DataWrapper) object;
+            this.store.put(dataWrapper.getKey(), dataWrapper.getValue());
         }
     }
 

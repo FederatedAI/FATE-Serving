@@ -45,20 +45,28 @@ public class ZookeeperRegistry extends FailbackRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ZookeeperRegistry.class);
     private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
     private final static String DEFAULT_ROOT = "FATE-SERVICES";
+    private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
+
+
     private final static String ROOT_KEY = "root";
     public static ConcurrentMap<URL, ZookeeperRegistry> registeryMap = new ConcurrentHashMap();
+    private static String DYNAMIC_KEY = "dynamic";
     private final String root;
-    private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<>();
 
     ;
+    private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<>();
     private final ZookeeperClient zkClient;
     Set<String> registedString = Sets.newHashSet();
-    private static String DYNAMIC_KEY = "dynamic";
     Set<String> anyServices = new HashSet<String>();
     private String environment;
     private Set<String> dynamicEnvironments = new HashSet<String>();
     private String project;
     private int port;
+
+    public  ZookeeperClient getZkClient(){
+        return this.zkClient;
+    }
+
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
 //
@@ -111,6 +119,20 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     }
 
+    public  void doRegisterComponent(){
+
+        String hostAddress = NetUtils.getLocalIp();
+
+        this.zkClient.create(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT+PATH_SEPARATOR+project+PATH_SEPARATOR+hostAddress+":"+port,true);
+
+
+    }
+
+
+
+
+
+
     @Override
     public void doSubProject(String project) {
 
@@ -142,7 +164,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
             for (String environment : environments) {
 
                 String tempPath = path + Constants.PATH_SEPARATOR + environment;
-
 
                 List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
 
@@ -205,7 +226,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     public synchronized void register(Set<RegisterService> sets) {
         if (logger.isDebugEnabled()) {
-            logger.debug("prepare to register {}",sets);
+            logger.debug("prepare to register {}", sets);
         }
         String hostAddress = NetUtils.getLocalIp();
         Preconditions.checkArgument(port != 0);
@@ -240,9 +261,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
                         logger.info("url {} is already registed, will not do anything ", service.serviceName());
                     }
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
-                logger.error("try to register service {} failed",service);
+                logger.error("try to register service {} failed", service);
             }
         }
         logger.info("registed urls {}", registered);
@@ -253,7 +274,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     public void addDynamicEnvironment(Collection collection) {
-        if(collection != null && !collection.isEmpty()) {
+        if (collection != null && !collection.isEmpty()) {
             dynamicEnvironments.addAll(collection);
         }
     }
@@ -333,7 +354,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     zkListener = listeners.get(listener);
 
                 }
-                StringBuilder  sb = new StringBuilder(root);
+                StringBuilder sb = new StringBuilder(root);
                 sb.append("/").append(url.getProject());
 
                 List<String> children = zkClient.addChildListener(sb.toString(), zkListener);
@@ -358,8 +379,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 notify(url, listener, urls);
 
 
-            }
-            else {
+            } else {
 
                 for (String path : toCategoriesPath(url)) {
                     ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);

@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractRetryTask implements TimerTask {
 
     public static final Logger logger = LoggerFactory.getLogger(AbstractRetryTask.class);
+    private static int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
+    private static String REGISTRY_RETRY_TIMES_KEY = "retry.times";
     /**
      * url for retry task
      */
@@ -53,8 +55,6 @@ public abstract class AbstractRetryTask implements TimerTask {
      * task name for this task
      */
     private final String taskName;
-    private static int DEFAULT_REGISTRY_RETRY_PERIOD = 5 * 1000;
-    private static String REGISTRY_RETRY_TIMES_KEY = "retry.times";
     /**
      * times of retry.
      * retry task is execute in single thread so that the times is not need volatile.
@@ -130,6 +130,7 @@ public abstract class AbstractRetryTask implements TimerTask {
 
     /**
      * doRetry
+     *
      * @param url
      * @param registry
      * @param timeout

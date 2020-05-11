@@ -64,7 +64,7 @@ public abstract class MmMeter {
             if (keyValues.length % 2 == 1) {
                 throw new IllegalArgumentException("size must be even, it is a set of key=value pairs");
             } else {
-                for(int i = 0; i < keyValues.length; i += 2) {
+                for (int i = 0; i < keyValues.length; i += 2) {
                     result += (keyValues[i] + ':' + keyValues[i + 1] + ';');
                 }
             }

@@ -23,32 +23,27 @@ import java.util.List;
 
 
 @Service
-public class ZkServingRouter extends BaseServingRouter implements InitializingBean{
-
-    @Value("${useZkRouter:true}")
-    private  String  useZkRouter;
-
-    @Value("${routeType:random}")
-    private String routeTypeString;
-
-    private RouteType routeType;
-
-    @Value("${coordinator:9999}")
-    private String selfCoordinator;
-
-    @Autowired(required=false)
-    private RouterService zkRouterService;
+public class ZkServingRouter extends BaseServingRouter implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(ZkServingRouter.class);
+    @Value("${useZkRouter:true}")
+    private String useZkRouter;
+    @Value("${routeType:random}")
+    private String routeTypeString;
+    private RouteType routeType;
+    @Value("${coordinator:9999}")
+    private String selfCoordinator;
+    @Autowired(required = false)
+    private RouterService zkRouterService;
 
     @Override
-    public RouteType getRouteType(){
+    public RouteType getRouteType() {
         return routeType;
     }
 
     @Override
-    public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage){
-        if(!"true".equals(useZkRouter)){
+    public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage) {
+        if (!"true".equals(useZkRouter)) {
             return null;
         }
         String environment = getEnvironment(context, inboundPackage);
@@ -56,14 +51,14 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
 
         logger.info("try to find zk ,{}:{}:{}, result {}", "serving", environment, context.getServiceName(), list);
 
-        if(null == list || list.isEmpty()){
+        if (null == list || list.isEmpty()) {
             return null;
         }
         List<RouterInfo> routeList = new ArrayList<>();
-        for(URL url: list){
-            String  urlip = url.getHost();
-            int  port  = url.getPort();
-            RouterInfo router =  new RouterInfo();
+        for (URL url : list) {
+            String urlip = url.getHost();
+            int port = url.getPort();
+            RouterInfo router = new RouterInfo();
             router.setHost(urlip);
             router.setPort(port);
             routeList.add(router);
@@ -72,18 +67,18 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
     }
 
     // TODO utu: sucks! have to reconstruct the entire protocol of online serving
-    private String getEnvironment(Context context, InboundPackage inboundPackage){
-        if(Dict.SERVICENAME_INFERENCE.equals(context.getServiceName())){
+    private String getEnvironment(Context context, InboundPackage inboundPackage) {
+        if (Dict.SERVICENAME_INFERENCE.equals(context.getServiceName())) {
             // guest, proxy -> serving
-            return (String)inboundPackage.getHead().get(Dict.SERVICE_ID);
+            return (String) inboundPackage.getHead().get(Dict.SERVICE_ID);
         }
         // default unaryCall
-        if(GrpcType.INTRA_GRPC == context.getGrpcType()){
+        if (GrpcType.INTRA_GRPC == context.getGrpcType()) {
             // guest, serving -> proxy
             return Dict.SELF_ENVIRONMENT;
         } else {
-            Proxy.Packet  sourcePacket = (Proxy.Packet) inboundPackage.getBody();
-            if(selfCoordinator.equals(sourcePacket.getHeader().getDst().getPartyId())){
+            Proxy.Packet sourcePacket = (Proxy.Packet) inboundPackage.getBody();
+            if (selfCoordinator.equals(sourcePacket.getHeader().getDst().getPartyId())) {
                 // host, proxy -> serving
                 return FederatedModelUtils.getModelRouteKey(sourcePacket);
             } else {

@@ -477,8 +477,8 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
     public Model getModelByServiceId(String serviceId) {
         String namespaceKey = serviceIdNamespaceMap.get(serviceId);
-        if(namespaceKey==null){
-            throw  new ModelNullException("serviceId is not bind model");
+        if (namespaceKey == null) {
+            throw new ModelNullException("serviceId is not bind model");
         }
         return this.namespaceMap.get(namespaceKey);
     }

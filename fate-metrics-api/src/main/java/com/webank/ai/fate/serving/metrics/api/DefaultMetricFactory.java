@@ -46,7 +46,7 @@ public class DefaultMetricFactory implements IMetricFactory {
                 if (!mute) {
                     System.out.println(
                             "metric name: " + metricName + ", desc: " + description
-                                    + ", counter: " + counter.addAndGet((long)delta));
+                                    + ", counter: " + counter.addAndGet((long) delta));
                 }
             }
         };

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.NodeParam;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -37,7 +36,6 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
     private final String site = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
     private boolean fastMode = true;
-
 
 
     // DefaultCacheManager cacheManager = BaseContext.applicationContext.getBean(DefaultCacheManager.class);
@@ -75,7 +73,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         if (this.cache == null) {
             initCache();
         }
-        this.cache.put(tag,data);
+        this.cache.put(tag, data);
     }
 
     public Map<String, Object> getData(Context context, String tag) {
@@ -83,29 +81,29 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
             initCache();
         }
 
-        Map<String,Object> result = (Map<String,Object>)this.cache.get(tag);
+        Map<String, Object> result = (Map<String, Object>) this.cache.get(tag);
         return result;
     }
 
-    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input){
+    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input) {
 
         // <tree_idx, < node_idx, direction>>
 
         logger.info("running extractHostNodeRoute");
 
         Map<String, Object> result = new HashMap<String, Object>(8);
-        for(int i=0;i<this.treeNum;i++){
+        for (int i = 0; i < this.treeNum; i++) {
 
             DecisionTreeModelParam treeParam = this.trees.get(i);
             List<NodeParam> nodes = treeParam.getTreeList();
             Map<String, Boolean> treeRoute = new HashMap<String, Boolean>(8);
 
-            for(int j=0;j<nodes.size();j++){
+            for (int j = 0; j < nodes.size(); j++) {
 
 
                 NodeParam node = nodes.get(j);
 
-                if(!this.getSite(i, j).equals(this.site)){
+                if (!this.getSite(i, j).equals(this.site)) {
                     continue;
                 }
 
@@ -114,28 +112,27 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
 
                 boolean direction = false; // false go right, true go left
 
-                if(logger.isDebugEnabled()){
-                    logger.info("i is {}, j is {}",i,j);
+                if (logger.isDebugEnabled()) {
+                    logger.info("i is {}, j is {}", i, j);
                     logger.info("best fid is {}", fid);
                     logger.info("best split val is {}", splitValue);
                 }
 
-                if (input.containsKey(Integer.toString(fid))){
+                if (input.containsKey(Integer.toString(fid))) {
                     Object featVal = input.get(Integer.toString(fid));
                     direction = Double.parseDouble(featVal.toString()) <= splitValue + 1e-20;
-                }
-                else {
+                } else {
                     if (this.trees.get(i).getMissingDirMaskdict().containsKey(j)) {
                         int missingDir = this.trees.get(i).getMissingDirMaskdict().get(j);
                         direction = (missingDir != 1);
                     }
                 }
-                treeRoute.put(Integer.toString(j),direction);
+                treeRoute.put(Integer.toString(j), direction);
             }
-            result.put(Integer.toString(i),treeRoute);
+            result.put(Integer.toString(i), treeRoute);
         }
-        if(logger.isDebugEnabled()){
-            logger.info("show return route:{}",result);
+        if (logger.isDebugEnabled()) {
+            logger.info("show return route:{}", result);
         }
         return result;
     }
@@ -167,7 +164,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         String tag = context.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
         Map<String, Object> input = this.getData(context, tag);
 
-        if(!this.fastMode){
+        if (!this.fastMode) {
             Map<String, Object> ret = new HashMap<String, Object>(8);
             for (String treeIdx : interactiveData.keySet()) {
                 int idx = Integer.valueOf(treeIdx);
@@ -175,8 +172,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
                 ret.put(treeIdx, nodeId);
             }
             return ret;
-        }
-        else {
+        } else {
             // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>>
             Map<String, Object> ret = this.extractHostNodeRoute(input);
             return ret;
@@ -188,7 +184,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
 
         String tag = context.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
 
-        Map<String,Object>  input = request.get(0);
+        Map<String, Object> input = request.get(0);
 
         Map<String, Object> ret = new HashMap<String, Object>(8);
 

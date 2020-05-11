@@ -18,9 +18,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 
 import com.webank.ai.fate.core.mlmodel.buffer.LRModelParamProto.LRModelParam;
-import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +53,7 @@ public abstract class HeteroLR extends BaseComponent {
         int inputDataHitCount = 0;
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("model weight number:{}", weightNum);
             logger.debug("input data features number:{}", inputFeaturesNum);
         }
@@ -67,7 +65,7 @@ public abstract class HeteroLR extends BaseComponent {
                 score += w * x;
                 modelWeightHitCount += 1;
                 inputDataHitCount += 1;
-                if(logger.isDebugEnabled()) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
                 }
             }
@@ -82,7 +80,7 @@ public abstract class HeteroLR extends BaseComponent {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("model weight hit rate:{}", modelWeightHitRate);
             logger.debug("input data features hit rate:{}", inputDataHitRate);
         }
@@ -94,4 +92,4 @@ public abstract class HeteroLR extends BaseComponent {
 
         return ret;
     }
-    }
+}

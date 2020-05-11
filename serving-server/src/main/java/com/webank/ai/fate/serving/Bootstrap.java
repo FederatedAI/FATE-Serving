@@ -31,6 +31,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Set;
+
 @SpringBootApplication
 @ConfigurationProperties
 @PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
@@ -38,6 +39,7 @@ import java.util.Set;
 public class Bootstrap {
     private static ApplicationContext applicationContext;
     Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+
     public static void main(String[] args) {
         try {
             Bootstrap bootstrap = new Bootstrap();

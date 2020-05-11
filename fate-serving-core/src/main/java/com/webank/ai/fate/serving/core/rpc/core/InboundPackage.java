@@ -14,19 +14,11 @@ import java.util.Map;
 public class InboundPackage<T> {
 
 
-   static  Logger logger  = LoggerFactory.getLogger(InboundPackage.class);
-
-    public ManagedChannel getManagedChannel() {
-        return managedChannel;
-    }
-
-    public void setManagedChannel(ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
-    }
-
+    static Logger logger = LoggerFactory.getLogger(InboundPackage.class);
     ManagedChannel managedChannel;
-
     RouterInfo routerInfo;
+    String source;
+    Map head;
 
     /*public HttpServletRequest getHttpServletRequest() {
         return httpServletRequest;
@@ -37,6 +29,15 @@ public class InboundPackage<T> {
     }
 
     HttpServletRequest   httpServletRequest;*/
+    T body;
+
+    public ManagedChannel getManagedChannel() {
+        return managedChannel;
+    }
+
+    public void setManagedChannel(ManagedChannel managedChannel) {
+        this.managedChannel = managedChannel;
+    }
 
     public RouterInfo getRouterInfo() {
         return routerInfo;
@@ -69,8 +70,4 @@ public class InboundPackage<T> {
     public void setBody(T body) {
         this.body = body;
     }
-
-    String source;
-    Map head;
-    T body;
 }

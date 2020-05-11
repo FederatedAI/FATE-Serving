@@ -19,20 +19,17 @@ import java.util.Map;
 
 public abstract class AbstractServingServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> implements EnvironmentAware {
 
+    Environment environment;
+
     @Override
     protected resp transformErrorMap(Context context, Map data) {
         return null;
     }
+
     @Override
-    public void setEnvironment(Environment environment){
+    public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
-
-    Environment environment;
-
-
-
-
 
     @Override
     protected resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage) {
@@ -52,12 +49,12 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
     }
 
     @Override
-    protected void printFlowLog(Context   context ){
+    protected void printFlowLog(Context context) {
 
         flowLogger.info("{}|{}|" +
                         "{}|{}|{}|{}|" +
                         "{}|{}",
-                 context.getCaseId(), context.getReturnCode(), context.getCostTime(),
+                context.getCaseId(), context.getReturnCode(), context.getCostTime(),
                 context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
     }
 

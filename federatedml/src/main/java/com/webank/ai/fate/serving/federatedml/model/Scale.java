@@ -21,7 +21,6 @@ import com.webank.ai.fate.core.mlmodel.buffer.ScaleMetaProto.ScaleMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleParamProto.ScaleParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,7 @@ public class Scale extends BaseComponent {
             this.scaleParam = this.parseModel(ScaleParam.parser(), protoParam);
             this.needRun = this.scaleMeta.getNeedRun();
         } catch (Exception ex) {
-            logger.error("Scale initModel error",ex);
+            logger.error("Scale initModel error", ex);
             return ILLEGALDATA;
         }
         logger.info("Finish init Scale class");
@@ -83,4 +82,4 @@ public class Scale extends BaseComponent {
         return outputData;
     }
 
-  }
+}

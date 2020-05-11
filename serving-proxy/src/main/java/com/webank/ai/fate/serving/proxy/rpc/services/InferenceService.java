@@ -15,7 +15,6 @@ import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import io.grpc.ManagedChannel;
@@ -50,15 +49,13 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+    @Value("${proxy.grpc.inference.timeout:3000}")
+    private int timeout;
+    @Value("${proxy.grpc.inference.async.timeout:3000}")
+    private int asyncTimeout;
 
     public InferenceService() {
     }
-
-    @Value("${proxy.grpc.inference.timeout:3000}")
-    private int timeout;
-
-    @Value("${proxy.grpc.inference.async.timeout:3000}")
-    private int asyncTimeout;
 
     @Override
     public Map doService(Context context, InboundPackage<Map> data, OutboundPackage<Map> outboundPackage) {

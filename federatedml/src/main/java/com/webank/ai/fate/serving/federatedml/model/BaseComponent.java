@@ -33,22 +33,11 @@ import java.util.Map;
 
 public abstract class BaseComponent implements LocalInferenceAware {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseComponent.class);
-
-    protected String componentName;
-    protected String shortName;
-
-    protected int  index;
-
-    protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;
-
-    protected Cache cache ;
-
     protected static final int OK = 0;
     protected static final int UNKNOWNERROR = 1;
     protected static final int PARAMERROR = 2;
     protected static final int ILLEGALDATA = 3;
-    protected static final int NOMODEL= 4;
+    protected static final int NOMODEL = 4;
     protected static final int NOTME = 5;
     protected static final int FEDERATEDERROR = 6;
     protected static final int TIMEOUT = -1;
@@ -56,8 +45,12 @@ public abstract class BaseComponent implements LocalInferenceAware {
     protected static final int NETWORKERROR = -3;
     protected static final int IOERROR = -4;
     protected static final int RUNTIMEERROR = -5;
-
-
+    private static final Logger logger = LoggerFactory.getLogger(BaseComponent.class);
+    protected String componentName;
+    protected String shortName;
+    protected int index;
+    protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;
+    protected Cache cache;
 
     public abstract int initModel(byte[] protoMeta, byte[] protoParam);
 
@@ -66,30 +59,24 @@ public abstract class BaseComponent implements LocalInferenceAware {
     }
 
 
-    protected Map<String,Object> handleRemoteReturnData(Map<String,Object> hostData){
+    protected Map<String, Object> handleRemoteReturnData(Map<String, Object> hostData) {
         Map<String, Object> result = new HashMap<>(8);
         result.put(Dict.RET_CODE, InferenceRetCode.OK);
-        hostData.forEach((partId,partyDataObject)->{
-            Map  partyData =  (Map)partyDataObject;
-            if(partyData.get(Dict.RET_CODE)!=null&&!StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))){
+        hostData.forEach((partId, partyDataObject) -> {
+            Map partyData = (Map) partyDataObject;
+            if (partyData.get(Dict.RET_CODE) != null && !StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))) {
                 String remoteCode = partyData.get(Dict.RET_CODE).toString();
-                String remoteMsg = partyData.get(Dict.MESSAGE)!=null?partyData.get(Dict.MESSAGE).toString():"";
-                String  errorMsg = ErrorMessageUtil.buildRemoteRpcErrorMsg(remoteCode,remoteMsg);
-                String  retcode  = ErrorMessageUtil.transformRemoteErrorCode(remoteCode);
+                String remoteMsg = partyData.get(Dict.MESSAGE) != null ? partyData.get(Dict.MESSAGE).toString() : "";
+                String errorMsg = ErrorMessageUtil.buildRemoteRpcErrorMsg(remoteCode, remoteMsg);
+                String retcode = ErrorMessageUtil.transformRemoteErrorCode(remoteCode);
                 result.put(Dict.RET_CODE, retcode);
                 result.put(Dict.MESSAGE, errorMsg);
-                return ;
+                return;
             }
 
         });
-        return  result;
+        return result;
     }
-
-
-
-
-
-
 
 
 //    @Override
@@ -301,7 +288,6 @@ public abstract class BaseComponent implements LocalInferenceAware {
     }
 
 
-
     public FederatedRpcInvoker getFederatedRpcInvoker() {
         return federatedRpcInvoker;
     }
@@ -333,8 +319,6 @@ public abstract class BaseComponent implements LocalInferenceAware {
 //    public void setConfigMap(Map configMap) {
 //        this.configMap = configMap;
 //    }
-
-
 
 
 }

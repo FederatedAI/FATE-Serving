@@ -7,6 +7,9 @@ package com.webank.ai.fate.serving.core.rpc.core;
 public class OutboundPackage<T> {
 
 
+    public boolean hitCache = false;
+    T data;
+
     public boolean isHitCache() {
         return hitCache;
     }
@@ -15,9 +18,6 @@ public class OutboundPackage<T> {
         this.hitCache = hitCache;
     }
 
-    public boolean  hitCache=false;
-
-
     public T getData() {
         return data;
     }
@@ -25,6 +25,4 @@ public class OutboundPackage<T> {
     public void setData(T data) {
         this.data = data;
     }
-
-    T  data ;
 }

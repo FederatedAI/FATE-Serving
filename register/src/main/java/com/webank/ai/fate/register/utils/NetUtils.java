@@ -18,7 +18,6 @@ package com.webank.ai.fate.register.utils;
 
 import com.webank.ai.fate.register.url.URL;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.*;
@@ -35,6 +34,21 @@ import static com.webank.ai.fate.register.common.Constants.*;
  */
 public class NetUtils {
 
+    private static final Logger logger = null;
+    //LoggerFactory.getLogger(NetUtils.class);
+    // returned port range is [30000, 39999]
+    private static final int RND_PORT_START = 30000;
+    private static final int RND_PORT_RANGE = 10000;
+    // valid port range is (0, 65535]
+    private static final int MIN_PORT = 0;
+    private static final int MAX_PORT = 65535;
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
+    private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
+    private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
+    private static final String SPLIT_IPV4_CHARECTER = "\\.";
+    private static final String SPLIT_IPV6_CHARECTER = ":";
+    private static volatile InetAddress LOCAL_ADDRESS = null;
+
     public static void main(String[] args) {
 //        System.out.println(NetUtils.getLocalHost());
 //        System.out.println(NetUtils.getAvailablePort());
@@ -43,23 +57,6 @@ public class NetUtils {
 //        System.out.println(NetUtils.getIpByHost("127.0.0.1"));
         System.out.println(NetUtils.getLocalAddress0(""));
     }
-
-    private static final Logger logger = null;
-            //LoggerFactory.getLogger(NetUtils.class);
-    // returned port range is [30000, 39999]
-    private static final int RND_PORT_START = 30000;
-    private static final int RND_PORT_RANGE = 10000;
-
-    // valid port range is (0, 65535]
-    private static final int MIN_PORT = 0;
-    private static final int MAX_PORT = 65535;
-
-    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
-    private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
-    private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
-    private static final String SPLIT_IPV4_CHARECTER = "\\.";
-    private static final String SPLIT_IPV6_CHARECTER = ":";
-    private static volatile InetAddress LOCAL_ADDRESS = null;
 
     public static int getRandomPort() {
         return RND_PORT_START + ThreadLocalRandom.current().nextInt(RND_PORT_RANGE);
@@ -231,16 +228,15 @@ public class NetUtils {
 
         try {
             InetAddress inetAddress = getLocalAddress0("eth0");
-            if(inetAddress!=null){
-                return  inetAddress.getHostAddress();
-            }
-            else{
+            if (inetAddress != null) {
+                return inetAddress.getHostAddress();
+            } else {
                 inetAddress = getLocalAddress0("");
             }
-            if(inetAddress!=null){
+            if (inetAddress != null) {
                 return inetAddress.getHostAddress();
-            }else{
-                throw  new RuntimeException("can not get local ip");
+            } else {
+                throw new RuntimeException("can not get local ip");
             }
 
         } catch (Throwable e) {
@@ -286,8 +282,8 @@ public class NetUtils {
             Optional<InetAddress> addressOp = toValidAddress(localAddress);
             if (addressOp.isPresent()) {
                 return addressOp.get();
-            }else{
-                localAddress=null;
+            } else {
+                localAddress = null;
             }
         } catch (Throwable e) {
             logger.warn(e.getMessage());

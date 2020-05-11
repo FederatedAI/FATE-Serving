@@ -28,7 +28,7 @@ import java.util.List;
 
 public class DefaultRouterService extends AbstractRouterService {
     @Override
-    public List<URL> doRouter(URL url ,LoadBalancer loadBalancer) {
+    public List<URL> doRouter(URL url, LoadBalancer loadBalancer) {
         List<URL> urls = registry.getCacheUrls(url);
         if (CollectionUtils.isEmpty(urls)) {
             return null;
@@ -47,7 +47,7 @@ public class DefaultRouterService extends AbstractRouterService {
 
     private List<URL> filterEmpty(List<URL> urls) {
         List<URL> resultList = new ArrayList<>();
-        if(urls!=null) {
+        if (urls != null) {
             urls.forEach(url -> {
                 if (!url.getProtocol().equalsIgnoreCase(Constants.EMPTY_PROTOCOL)) {
                     resultList.add(url);

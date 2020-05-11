@@ -71,8 +71,6 @@ public class ServingServer implements InitializingBean {
         serverBuilder.addService(ServerInterceptors.intercept(hostInferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), HostInferenceService.class);
         server = serverBuilder.build();
         server.start();
-        logger.info("server start =================");
-
         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
         if (useRegister) {
             logger.info("serving-server is using register center");
@@ -93,6 +91,9 @@ public class ServingServer implements InitializingBean {
                 }
             });
             zookeeperRegistry.register(FateServer.serviceSets);
+
+            zookeeperRegistry.registerComponent();
+
         } else {
             logger.warn("serving-server not use register center");
         }

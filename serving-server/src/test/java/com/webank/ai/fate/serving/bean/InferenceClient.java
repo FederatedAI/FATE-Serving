@@ -78,7 +78,7 @@ public class InferenceClient {
 
     }
 
-    public InferenceServiceProto.InferenceMessage inference(InferenceServiceProto.InferenceMessage   inferenceMessage) {
+    public InferenceServiceProto.InferenceMessage inference(InferenceServiceProto.InferenceMessage inferenceMessage) {
         ManagedChannel managedChannel = null;
         try {
             managedChannel = createManagedChannel(ip, port);
@@ -93,8 +93,6 @@ public class InferenceClient {
         return blockingStub.inference(inferenceMessage);
 
     }
-
-
 
 
     public ModelServiceProto.PublishResponse load(ModelServiceProto.PublishRequest publishRequest) {

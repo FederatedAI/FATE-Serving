@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 
 public class FateServerBuilder extends ServerBuilder {
 
-
     ServerBuilder serverBuilder;
     private String partyId;
     private String version;
@@ -163,17 +162,6 @@ public class FateServerBuilder extends ServerBuilder {
         return this;
     }
 
-
-//                    .maxInboundMessageSize(32 << 20)
-//                .flowControlWindow(32 << 20)
-//                .keepAliveTime(6,TimeUnit.MINUTES)
-//                .keepAliveTimeout(24, TimeUnit.HOURS)
-//                .maxConnectionIdle(1, TimeUnit.HOURS)
-//                .permitKeepAliveTime(1, TimeUnit.SECONDS)
-//                .permitKeepAliveWithoutCalls(true)
-//                .executor((TaskExecutor) applicationContext.getBean("grpcServiceExecutor"))
-//            .maxConnectionAge(24, TimeUnit.HOURS)
-//                .maxConnectionAgeGrace(24, TimeUnit.HOURS);
 
     public FateServerBuilder permitKeepAliveWithoutCalls(boolean permit) {
         if (this.serverBuilder instanceof NettyServerBuilder) {

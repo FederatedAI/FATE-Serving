@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.core.async;
 
 import com.lmax.disruptor.EventTranslatorVararg;
 import com.lmax.disruptor.RingBuffer;
-import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,14 +9,6 @@ import org.slf4j.LoggerFactory;
  * Producer
  */
 public class AsyncMessageEventProducer {
-
-    private static Logger logger = LoggerFactory.getLogger(AsyncMessageEventProducer.class);
-
-    private final RingBuffer<AsyncMessageEvent> ringBuffer;
-
-    public AsyncMessageEventProducer(RingBuffer<AsyncMessageEvent> ringBuffer) {
-        this.ringBuffer = ringBuffer;
-    }
 
     public static final EventTranslatorVararg<AsyncMessageEvent> TRANSLATOR =
             (event, sequence, args) -> {
@@ -39,9 +30,15 @@ public class AsyncMessageEventProducer {
                 }
                 event.setTimestamp(System.currentTimeMillis());
             };
+    private static Logger logger = LoggerFactory.getLogger(AsyncMessageEventProducer.class);
+    private final RingBuffer<AsyncMessageEvent> ringBuffer;
+
+    public AsyncMessageEventProducer(RingBuffer<AsyncMessageEvent> ringBuffer) {
+        this.ringBuffer = ringBuffer;
+    }
 
     public void publishEvent(Object... args) {
-        if(args!=null&&args.length>0) {
+        if (args != null && args.length > 0) {
             ringBuffer.tryPublishEvent(TRANSLATOR, args);
         }
     }

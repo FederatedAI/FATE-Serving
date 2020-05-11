@@ -34,22 +34,23 @@ public class DisruptorUtil {
         logger.info("disruptor initialized");
     }
 
-    public void shutdown() {
-        if (disruptor != null) {
-            disruptor.shutdown();
-        }
-    }
-
     /**
      * event producer
      * args[0] event name, e.g. interface name, use to @Subscribe value
      * args[1] event action
      * args[2] data params
+     *
      * @param args
      */
-    public static void producer(AsyncMessageEvent... args){
+    public static void producer(AsyncMessageEvent... args) {
         RingBuffer<AsyncMessageEvent> ringBuffer = disruptor.getRingBuffer();
         AsyncMessageEventProducer producer = new AsyncMessageEventProducer(ringBuffer);
         producer.publishEvent(args);
+    }
+
+    public void shutdown() {
+        if (disruptor != null) {
+            disruptor.shutdown();
+        }
     }
 }

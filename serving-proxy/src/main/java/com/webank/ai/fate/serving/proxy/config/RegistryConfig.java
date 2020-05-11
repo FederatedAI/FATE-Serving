@@ -23,9 +23,9 @@ import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.InterGrpcServer;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,22 +56,22 @@ public class RegistryConfig {
     private String aclPassword;
 
     @Bean
-    public ZookeeperRegistry zookeeperRegistry(InterGrpcServer  interGrpcServer) {
+    public ZookeeperRegistry zookeeperRegistry(InterGrpcServer interGrpcServer) {
         if (logger.isDebugEnabled()) {
             logger.info("prepare to create zookeeper registry ,use zk {}", useZkRouter);
         }
         if ("true".equals(useZkRouter)) {
 
-            if(StringUtils.isEmpty(zkUrl)){
+            if (StringUtils.isEmpty(zkUrl)) {
                 logger.error("useZkRouter is true,but zkUrl is empty,please check zk.url in the config file");
-                throw  new   RuntimeException("wrong zk url");
+                throw new RuntimeException("wrong zk url");
             }
             System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
             System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
             System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
             ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, Dict.SELF_PROJECT_NAME,
                     Dict.SELF_ENVIRONMENT, Integer.valueOf(port));
-            logger.info("registe zk , {}",FateServer.serviceSets);
+            logger.info("registe zk , {}", FateServer.serviceSets);
             zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject("serving");
             return zookeeperRegistry;
@@ -80,7 +80,7 @@ public class RegistryConfig {
     }
 
     @Bean
-    public RouterService routerService(@Autowired(required=false) ZookeeperRegistry zookeeperRegistry) {
+    public RouterService routerService(@Autowired(required = false) ZookeeperRegistry zookeeperRegistry) {
         if (zookeeperRegistry != null) {
             DefaultRouterService defaultRouterService = new DefaultRouterService();
             defaultRouterService.setRegistry(zookeeperRegistry);

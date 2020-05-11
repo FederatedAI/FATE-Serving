@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface PrepareRemoteable {
 
-    public Map<String,Object> prepareRemoteData(Context context, Map<String, Object> input);
+    public Map<String, Object> prepareRemoteData(Context context, Map<String, Object> input);
 }

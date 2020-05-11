@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
@@ -50,8 +49,8 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, true);
 
         rpcList.forEach((rpcDataWraper -> {
-           // ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
-            ListenableFuture<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context,rpcDataWraper, useCache);
+            // ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);
+            ListenableFuture<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context, rpcDataWraper, useCache);
 
             futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);
         }));
@@ -60,7 +59,7 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
     }
 
 
-        @Override
+    @Override
     protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);

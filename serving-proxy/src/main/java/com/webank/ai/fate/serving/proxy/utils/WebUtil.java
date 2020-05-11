@@ -13,17 +13,18 @@ import java.net.UnknownHostException;
  **/
 public class WebUtil {
 
-   static  Logger logger  = LoggerFactory.getLogger(WebUtil.class);
+    static Logger logger = LoggerFactory.getLogger(WebUtil.class);
 
     /**
      * 获取来源ip
+     *
      * @param request
      * @return
      */
-    public static  String getIpAddr(HttpServletRequest request) {
+    public static String getIpAddr(HttpServletRequest request) {
 
-        String ipAddress ="";
-        try{
+        String ipAddress = "";
+        try {
             ipAddress = request.getHeader("x-forwarded-for");
             if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
                 ipAddress = request.getHeader("Proxy-Client-IP");
@@ -54,15 +55,12 @@ public class WebUtil {
                     ipAddress = ipAddress.substring(0, ipAddress.indexOf(ipSeparate));
                 }
             }
-        }catch(Exception e){
-            logger.error("get remote ip error",e);
+        } catch (Exception e) {
+            logger.error("get remote ip error", e);
         }
 
         return ipAddress;
     }
-
-
-
 
 
 }

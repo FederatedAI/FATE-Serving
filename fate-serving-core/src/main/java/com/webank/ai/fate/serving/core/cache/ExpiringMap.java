@@ -1,7 +1,8 @@
-
 package com.webank.ai.fate.serving.core.cache;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -9,7 +10,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public class ExpiringMap<K, V>  extends LinkedHashMap<K, V> {
+public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
 
     /**
      * default time to live (second)
@@ -18,37 +19,22 @@ public class ExpiringMap<K, V>  extends LinkedHashMap<K, V> {
 
     /**
      * default expire check interval (second)
-
      */
     private static final int DEFAULT_MAX_CAPACITY = 1000;
 
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
-
+    private static final int DEFAULT_EXPIRATION_INTERVAL = 1;
+    private static AtomicInteger expireCount = new AtomicInteger(1);
     private final Lock lock = new ReentrantLock();
+    private final ConcurrentHashMap<K, ExpiryObject> delegateMap;
+    private final ExpireThread expireThread;
     private volatile int maxCapacity;
 
-
-
-
-    @Override
-    protected boolean removeEldestEntry(java.util.Map.Entry<K, V> eldest) {
-        return size() > maxCapacity;
-    }
-    private static final int DEFAULT_EXPIRATION_INTERVAL = 1;
-
-    private static AtomicInteger expireCount = new AtomicInteger(1);
-
-    private final ConcurrentHashMap<K, ExpiryObject> delegateMap;
-
-    private final ExpireThread expireThread;
-
     public ExpiringMap() {
-        this(DEFAULT_MAX_CAPACITY,DEFAULT_TIME_TO_LIVE, DEFAULT_EXPIRATION_INTERVAL);
+        this(DEFAULT_MAX_CAPACITY, DEFAULT_TIME_TO_LIVE, DEFAULT_EXPIRATION_INTERVAL);
     }
 
-
-
-    public ExpiringMap(int  maxCapacity ,int timeToLive, int expirationInterval) {
+    public ExpiringMap(int maxCapacity, int timeToLive, int expirationInterval) {
         this.maxCapacity = maxCapacity;
         this.delegateMap = new ConcurrentHashMap<>();
         this.expireThread = new ExpireThread();
@@ -56,7 +42,10 @@ public class ExpiringMap<K, V>  extends LinkedHashMap<K, V> {
         expireThread.setExpirationInterval(expirationInterval);
     }
 
-
+    @Override
+    protected boolean removeEldestEntry(java.util.Map.Entry<K, V> eldest) {
+        return size() > maxCapacity;
+    }
 
     @Override
     public V put(K key, V value) {
@@ -233,10 +222,15 @@ public class ExpiringMap<K, V>  extends LinkedHashMap<K, V> {
      * Background thread, periodically checking if the data is out of date
      */
     public class ExpireThread implements Runnable {
+        private final Thread expirerThread;
         private long timeToLiveMillis;
         private long expirationIntervalMillis;
         private volatile boolean running = false;
-        private final Thread expirerThread;
+
+        public ExpireThread() {
+            expirerThread = new Thread(this, "ExpiryMapExpire-" + expireCount.getAndIncrement());
+            expirerThread.setDaemon(true);
+        }
 
         @Override
         public String toString() {
@@ -246,11 +240,6 @@ public class ExpiringMap<K, V>  extends LinkedHashMap<K, V> {
                     ", running=" + running +
                     ", expirerThread=" + expirerThread +
                     '}';
-        }
-
-        public ExpireThread() {
-            expirerThread = new Thread(this, "ExpiryMapExpire-" + expireCount.getAndIncrement());
-            expirerThread.setDaemon(true);
         }
 
         @Override

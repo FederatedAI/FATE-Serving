@@ -1,16 +1,13 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
-import java.util.List;
-import java.util.Map;
+public class BatchHostFederatedParams extends BatchInferenceRequest {
 
-public class BatchHostFederatedParams extends  BatchInferenceRequest{
-
-    String  hostTableName;
-    String  hostNamespace;
-    String  guestPartyId;
-    String  hostPartyId;
-    String  caseId;
+    String hostTableName;
+    String hostNamespace;
+    String guestPartyId;
+    String hostPartyId;
+    String caseId;
 
     public String getHostTableName() {
         return hostTableName;
@@ -55,11 +52,6 @@ public class BatchHostFederatedParams extends  BatchInferenceRequest{
     }
 
 
-
-
-
-
-
 //    public static class  SingleBatchHostFederatedParam{
 //
 //
@@ -84,7 +76,6 @@ public class BatchHostFederatedParams extends  BatchInferenceRequest{
 //
 //
 //    }
-
 
 
 }

@@ -3,7 +3,6 @@ package com.webank.ai.fate.serving;
 import com.webank.ai.fate.serving.core.annotation.Subscribe;
 import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncSubscribeRegister;
-import com.webank.ai.fate.serving.core.async.DefaultAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ public class AsyncMessageConfig {
             public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
                 String[] beans = SpringContextUtil.getBeanNamesForType(AbstractAsyncMessageProcessor.class);
                 for (String beanName : beans) {
-                    AbstractAsyncMessageProcessor eventProcessor =  SpringContextUtil.getBean(beanName,AbstractAsyncMessageProcessor.class);
+                    AbstractAsyncMessageProcessor eventProcessor = SpringContextUtil.getBean(beanName, AbstractAsyncMessageProcessor.class);
                     Method[] methods = eventProcessor.getClass().getMethods();
                     for (Method method : methods) {
                         if (method.isAnnotationPresent(Subscribe.class)) {
@@ -47,7 +46,7 @@ public class AsyncMessageConfig {
                                     methodList = new HashSet<>();
                                 }
                                 methodList.add(method);
-                                AsyncSubscribeRegister.METHOD_INSTANCE_MAP.put(method,eventProcessor);
+                                AsyncSubscribeRegister.METHOD_INSTANCE_MAP.put(method, eventProcessor);
                                 AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP.put(subscribe.value(), methodList);
                             }
                         }

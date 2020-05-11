@@ -4,9 +4,9 @@ package com.webank.ai.fate.serving.core.exceptions;
  * @Description TODO
  * @Author
  **/
-public class InvalidRoleInfoException  extends RuntimeException  {
+public class InvalidRoleInfoException extends RuntimeException {
 
-    public  InvalidRoleInfoException(){
+    public InvalidRoleInfoException() {
 
         super("InvalidRole");
     }

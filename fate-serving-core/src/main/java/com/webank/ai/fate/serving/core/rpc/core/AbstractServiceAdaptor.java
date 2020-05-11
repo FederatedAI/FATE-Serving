@@ -1,15 +1,11 @@
 package com.webank.ai.fate.serving.core.rpc.core;
 
-import com.alibaba.csp.sentinel.Entry;
-import com.alibaba.csp.sentinel.SphU;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
-
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -17,8 +13,6 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
-
-
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
 import io.grpc.stub.AbstractStub;
@@ -29,9 +23,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
 
 
 /**
@@ -39,13 +31,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Author
  **/
 
-public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor<req,resp> {
+public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdaptor<req, resp> {
 
-    protected Logger flowLogger = LoggerFactory.getLogger( "flow");
+    static public AtomicInteger requestInHandle = new AtomicInteger(0);
+    public static boolean isOpen = true;
+    protected Logger flowLogger = LoggerFactory.getLogger("flow");
+    protected String serviceName;
+    Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    ServiceAdaptor serviceAdaptor;
+    InterceptorChain preChain = new DefaultInterceptorChain();
 
-    Logger logger =  LoggerFactory.getLogger( this.getClass().getName());
+    ;
+    InterceptorChain postChain = new DefaultInterceptorChain();
 
-    public AbstractServiceAdaptor(){
+    ;
+    private Map<String, Method> methodMap = Maps.newHashMap();
+    private AbstractStub serviceStub;
+
+    public AbstractServiceAdaptor() {
 
     }
 
@@ -57,20 +60,14 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         this.methodMap = methodMap;
     }
 
-    private  Map<String ,Method>  methodMap= Maps.newHashMap();
-
-    public  void addPreProcessor(Interceptor interceptor){
+    public void addPreProcessor(Interceptor interceptor) {
 
         preChain.addInterceptor(interceptor);
-    };
+    }
 
-    public  void addPostProcessor(Interceptor interceptor){
+    public void addPostProcessor(Interceptor interceptor) {
         postChain.addInterceptor(interceptor);
-    };
-
-    static public AtomicInteger requestInHandle =  new AtomicInteger(0);
-
-    public static boolean  isOpen=true;
+    }
 
     public ServiceAdaptor getServiceAdaptor() {
         return serviceAdaptor;
@@ -80,13 +77,6 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         this.serviceAdaptor = serviceAdaptor;
     }
 
-
-    ServiceAdaptor serviceAdaptor;
-
-    InterceptorChain preChain = new DefaultInterceptorChain();
-
-    InterceptorChain postChain = new DefaultInterceptorChain();
-
     public AbstractStub getServiceStub() {
         return serviceStub;
     }
@@ -94,8 +84,6 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
     public void setServiceStub(AbstractStub serviceStub) {
         this.serviceStub = serviceStub;
     }
-
-    private AbstractStub serviceStub;
 
     public String getServiceName() {
         return serviceName;
@@ -105,9 +93,7 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         this.serviceName = serviceName;
     }
 
-    protected  String serviceName;
-
-    protected abstract resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp>  outboundPackage)  ;
+    protected abstract resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage);
 
     /**
      * @param context
@@ -116,39 +102,38 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
      * @throws Exception
      */
     @Override
-    public  OutboundPackage<resp> service(Context context , InboundPackage<req> data) throws RuntimeException {
+    public OutboundPackage<resp> service(Context context, InboundPackage<req> data) throws RuntimeException {
 
-        OutboundPackage<resp>    outboundPackage= new OutboundPackage<resp>();
+        OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
         long begin = System.currentTimeMillis();
         context.preProcess();
         List<Throwable> exceptions = Lists.newArrayList();
         context.setReturnCode(StatusCode.SUCCESS);
-        if(!isOpen){
-            return  this.serviceFailInner(context,data,new ShowDownRejectException());
+        if (!isOpen) {
+            return this.serviceFailInner(context, data, new ShowDownRejectException());
         }
         try {
             requestInHandle.addAndGet(1);
 
-            resp result=null;
+            resp result = null;
 
             context.setServiceName(this.serviceName);
 
-            preChain.doPreProcess(context,data,outboundPackage);
+            preChain.doPreProcess(context, data, outboundPackage);
 
             try {
                 result = doService(context, data, outboundPackage);
-                if(logger.isDebugEnabled()) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("do service, router info: {}, service name: {}, result: {}", JSON.toJSONString(data.getRouterInfo()), serviceName, result);
                 }
-            }catch(Throwable e){
+            } catch (Throwable e) {
                 exceptions.add(e);
                 logger.error("do service fail, cause by: {}", e.getMessage());
             }
             outboundPackage.setData(result);
-            postChain.doPostProcess(context,data,outboundPackage);
+            postChain.doPostProcess(context, data, outboundPackage);
 
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             exceptions.add(e);
             logger.error(e.getMessage());
         } finally {
@@ -156,17 +141,17 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
             long end = System.currentTimeMillis();
             long cost = end - begin;
 
-            if(exceptions.size()!=0){
+            if (exceptions.size() != 0) {
                 try {
                     outboundPackage = this.serviceFail(context, data, exceptions);
-                    AsyncMessageEvent  messageEvent = new AsyncMessageEvent();
+                    AsyncMessageEvent messageEvent = new AsyncMessageEvent();
                     messageEvent.setName(Dict.EVENT_ERROR);
                     messageEvent.setTimestamp(end);
                     messageEvent.setAction(context.getActionType());
                     messageEvent.setData("");
                     DisruptorUtil.producer(messageEvent);
-                }catch(Throwable e){
-                    logger.error("error ",e);
+                } catch (Throwable e) {
+                    logger.error("error ", e);
                 }
             }
             printFlowLog(context);
@@ -174,27 +159,27 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
         return outboundPackage;
     }
 
-    protected void printFlowLog(Context   context ){
+    protected void printFlowLog(Context context) {
 
         flowLogger.info("{}|{}|{}|{}|" +
                         "{}|{}|{}|{}|" +
                         "{}|{}",
-                 context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
+                context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
                 context.getHostAppid(), context.getReturnCode(), context.getCostTime(),
                 context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
     }
 
 
-    protected  OutboundPackage<resp>  serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {
+    protected OutboundPackage<resp> serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {
 
         Map result = new HashMap();
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
         result.put(Dict.MESSAGE, e.getMessage());
-        ErrorMessageUtil.handleException(result,e);
-        context.setReturnCode(result.get(Dict.CODE)!=null?result.get(Dict.CODE).toString(): ErrorCode.SYSTEM_ERROR.toString());
-        resp  rsp = transformErrorMap(context ,result);
+        ErrorMessageUtil.handleException(result, e);
+        context.setReturnCode(result.get(Dict.CODE) != null ? result.get(Dict.CODE).toString() : ErrorCode.SYSTEM_ERROR.toString());
+        resp rsp = transformErrorMap(context, result);
         outboundPackage.setData(rsp);
-        return  outboundPackage;
+        return outboundPackage;
     }
 
 
@@ -204,15 +189,12 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
         Throwable e = errors.get(0);
         logger.error("service fail ", e);
-        return  serviceFailInner(context,data,e);
+        return serviceFailInner(context, data, e);
 
     }
 
 
-
-
-
-    abstract  protected  resp  transformErrorMap(Context context,Map  data);
+    abstract protected resp transformErrorMap(Context context, Map data);
 
     private String objectToJson(Object obj) {
         return JSONObject.toJSONString(obj, SerializerFeature.WriteEnumUsingToString);
@@ -221,35 +203,32 @@ public abstract class AbstractServiceAdaptor<req,resp> implements ServiceAdaptor
 
     /**
      * 需要支持多方host
+     *
      * @param context
      * @param batchInferenceRequest
      * @return
      */
-    protected BatchHostFederatedParams buildBatchHostFederatedParams(Context  context, BatchInferenceRequest batchInferenceRequest, Model  guestModel, Model hostModel){
+    protected BatchHostFederatedParams buildBatchHostFederatedParams(Context context, BatchInferenceRequest batchInferenceRequest, Model guestModel, Model hostModel) {
 
-            BatchHostFederatedParams  batchHostFederatedParams = new  BatchHostFederatedParams();
-            String seqNo = batchInferenceRequest.getSeqno();
-            batchHostFederatedParams.setGuestPartyId(guestModel.getPartId());
-            batchHostFederatedParams.setHostPartyId(hostModel.getPartId());
-            List<BatchHostFederatedParams.SingleInferenceData> sendToHostDataList= Lists.newArrayList();
-            List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getBatchDataList();
-            for(BatchInferenceRequest.SingleInferenceData  singleInferenceData:guestDataList) {
-                BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
-                singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
-                singleBatchHostFederatedParam.setIndex(singleInferenceData.getIndex());
-                sendToHostDataList.add(singleBatchHostFederatedParam);
-            }
-            batchHostFederatedParams.setBatchDataList(sendToHostDataList);
-            batchHostFederatedParams.setHostTableName(hostModel.getTableName());
-            batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
-            batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
-            return  batchHostFederatedParams;
+        BatchHostFederatedParams batchHostFederatedParams = new BatchHostFederatedParams();
+        String seqNo = batchInferenceRequest.getSeqno();
+        batchHostFederatedParams.setGuestPartyId(guestModel.getPartId());
+        batchHostFederatedParams.setHostPartyId(hostModel.getPartId());
+        List<BatchHostFederatedParams.SingleInferenceData> sendToHostDataList = Lists.newArrayList();
+        List<BatchInferenceRequest.SingleInferenceData> guestDataList = batchInferenceRequest.getBatchDataList();
+        for (BatchInferenceRequest.SingleInferenceData singleInferenceData : guestDataList) {
+            BatchHostFederatedParams.SingleInferenceData singleBatchHostFederatedParam = new BatchHostFederatedParams.SingleInferenceData();
+            singleBatchHostFederatedParam.setSendToRemoteFeatureData(singleInferenceData.getSendToRemoteFeatureData());
+            singleBatchHostFederatedParam.setIndex(singleInferenceData.getIndex());
+            sendToHostDataList.add(singleBatchHostFederatedParam);
+        }
+        batchHostFederatedParams.setBatchDataList(sendToHostDataList);
+        batchHostFederatedParams.setHostTableName(hostModel.getTableName());
+        batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
+        batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
+        return batchHostFederatedParams;
 
     }
-
-
-
-
 
 
 }

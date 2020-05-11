@@ -34,9 +34,9 @@ public class Outlier {
     }
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
-        if(inputData!=null) {
+        if (inputData != null) {
             for (String key : inputData.keySet()) {
-                if(inputData.get(key)!=null) {
+                if (inputData.get(key) != null) {
                     String value = inputData.get(key).toString();
                     if (this.outlierValueSet.contains(value.toLowerCase())) {
                         try {

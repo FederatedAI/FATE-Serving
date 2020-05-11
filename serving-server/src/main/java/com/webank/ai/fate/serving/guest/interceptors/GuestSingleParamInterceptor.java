@@ -20,7 +20,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
         try {
-            InferenceServiceProto.InferenceMessage   message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
+            InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
             InferenceRequest inferenceRequest = null;
             inferenceRequest = JSON.parseObject(message.getBody().toByteArray(), InferenceRequest.class);
             inboundPackage.setBody(inferenceRequest);
@@ -28,7 +28,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
             Preconditions.checkArgument(inferenceRequest.getFeatureData() != null, "no feature data");
             Preconditions.checkArgument(inferenceRequest.getSendToRemoteFeatureData() != null, "no send to remote feature data");
             Preconditions.checkArgument(StringUtils.isNotBlank(inferenceRequest.getServiceId()), "no service id");
-            if (inferenceRequest.getCaseid().length() == 0) {
+            if (inferenceRequest.getCaseid()==null||inferenceRequest.getCaseid().length() == 0) {
                 inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
             }
             context.setCaseId(inferenceRequest.getCaseid());

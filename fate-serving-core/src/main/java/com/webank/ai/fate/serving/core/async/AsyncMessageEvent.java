@@ -3,19 +3,16 @@ package com.webank.ai.fate.serving.core.async;
 import com.alibaba.fastjson.JSON;
 import com.lmax.disruptor.EventFactory;
 
-public class AsyncMessageEvent<T> implements   Cloneable {
+public class AsyncMessageEvent<T> implements Cloneable {
 
+    public static final EventFactory<AsyncMessageEvent> FACTORY = () -> new AsyncMessageEvent();
     /**
      * event name, e.g. interface name, use to @Subscribe value
      */
     private String name;
-
     private String action;
-
     private T data;
-
     private String ip;
-
     private long timestamp;
 
     public String getName() {
@@ -65,22 +62,21 @@ public class AsyncMessageEvent<T> implements   Cloneable {
         this.ip = null;
         this.timestamp = 0;
     }
+
     @Override
-    public  String toString(){
+    public String toString() {
         return JSON.toJSONString(this);
     }
 
     @Override
     public AsyncMessageEvent clone() {
         AsyncMessageEvent stu = null;
-        try{
-            stu = (AsyncMessageEvent)super.clone();
-        }catch(CloneNotSupportedException e) {
+        try {
+            stu = (AsyncMessageEvent) super.clone();
+        } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
         return stu;
     }
-
-    public static final EventFactory<AsyncMessageEvent> FACTORY = () -> new AsyncMessageEvent();
 
 }

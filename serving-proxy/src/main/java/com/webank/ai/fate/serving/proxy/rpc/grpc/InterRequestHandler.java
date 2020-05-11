@@ -1,5 +1,3 @@
-
-
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
@@ -20,12 +18,12 @@ public class InterRequestHandler extends ProxyRequestHandler {
     ProxyServiceRegister proxyServiceRegister;
 
     @Override
-    public ProxyServiceRegister getProxyServiceRegister(){
+    public ProxyServiceRegister getProxyServiceRegister() {
         return proxyServiceRegister;
     }
 
     @Override
-    public void setExtraInfo(Context context, InboundPackage<Proxy.Packet> inboundPackage, Proxy.Packet req){
+    public void setExtraInfo(Context context, InboundPackage<Proxy.Packet> inboundPackage, Proxy.Packet req) {
         context.setGrpcType(GrpcType.INTER_GRPC);
     }
 

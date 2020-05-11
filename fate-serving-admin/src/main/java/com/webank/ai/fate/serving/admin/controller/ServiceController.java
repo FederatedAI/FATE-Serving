@@ -29,10 +29,9 @@ import java.util.*;
 @RestController
 public class ServiceController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
     @Autowired
     private ZookeeperRegistry zookeeperRegistry;
-
-    private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
 
     // 列出集群中所注册的所有接口
     @GetMapping("/service/registered")
@@ -42,18 +41,20 @@ public class ServiceController {
         }
         Properties properties = zookeeperRegistry.getCacheProperties();
 
-        Map<String, List<String>> registered = new HashMap<>();
+        Map<String, List<Object>> registered = new HashMap<>();
 
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
             if (StringUtils.isNotBlank(value)) {
                 String[] arr = value.trim().split("\\s+");
-                List<String> urls = new ArrayList<>();
+                List<Object> urls = new ArrayList<>();
                 for (String u : arr) {
                     URL url = URL.valueOf(u);
                     if (!Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
-                        urls.add(url.toFullString());
+                        Map temp = Maps.newHashMap();
+                        temp.put("ccc","ccccc");
+                        urls.add(url);
                     }
                 }
 
@@ -63,9 +64,9 @@ public class ServiceController {
             }
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("registered services: {}", registered);
-        }
+
+        logger.info("registered services: {}", registered);
+
 
         ReturnResult result = new ReturnResult();
         result.setRetcode(StatusCode.SUCCESS);

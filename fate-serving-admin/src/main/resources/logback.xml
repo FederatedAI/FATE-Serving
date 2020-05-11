@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.padual.com/java/logback.xsd"
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="http://www.padual.com/java/logback.xsd"
                debug="false" scan="true" scanPeriod="30 second">
 
     <property name="ROOT" value="/data/logs/fate/serving-admin/"/>
@@ -102,7 +103,7 @@
     </logger>
 
     <!-- Logger 根目录 -->
-    <root level="INFO">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ERROR"/>
         <appender-ref ref="WARN"/>

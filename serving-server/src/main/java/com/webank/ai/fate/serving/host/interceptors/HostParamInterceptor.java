@@ -34,6 +34,7 @@ import java.util.Map;
 @Service
 public class HostParamInterceptor implements Interceptor {
     Logger logger = LoggerFactory.getLogger(HostParamInterceptor.class);
+
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         byte[] reqBody = (byte[]) inboundPackage.getBody();

@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Component
-public class AuthUtils implements InitializingBean{
+public class AuthUtils implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(AuthUtils.class);
     private static Map<String, String> KEY_SECRET_MAP = new HashMap<>();
     private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
@@ -50,30 +50,24 @@ public class AuthUtils implements InitializingBean{
     private static boolean ifUseAuth = false;
     private static String applyId = "";
 
-    private final String  userDir =  System.getProperty(Dict.PROPERTY_USER_DIR);
+    private final String userDir = System.getProperty(Dict.PROPERTY_USER_DIR);
 
-    private final String DEFAULT_AUTH_FILE="conf"+System.getProperty(Dict.PROPERTY_FILE_SEPARATOR)+"auth_config.json";
-
-
+    private final String DEFAULT_AUTH_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "auth_config.json";
+    private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
     @Autowired
     private ToStringUtils toStringUtils;
-
     @Value("${auth.file:}")
     private String confFilePath;
     @Value("${auth.open:false}")
     private String openAuth;
-
-    private final String  fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
-
-
     @Value("${coordinator}")
     private String selfPartyId;
 
-    private String lastFileMd5="";
+    private String lastFileMd5 = "";
 
     @Scheduled(fixedRate = 10000)
-    public void loadConfig(){
-        if(Boolean.valueOf(openAuth)) {
+    public void loadConfig() {
+        if (Boolean.valueOf(openAuth)) {
 
             String filePath = "";
             if (StringUtils.isNotEmpty(confFilePath)) {
@@ -81,7 +75,7 @@ public class AuthUtils implements InitializingBean{
             } else {
                 filePath = userDir + this.fileSeparator + DEFAULT_AUTH_FILE;
             }
-            logger.info("start refreshed auth config ,file path is {}",filePath);
+            logger.info("start refreshed auth config ,file path is {}", filePath);
             String fileMd5 = FileUtils.fileMd5(filePath);
             if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
                 return;
@@ -154,7 +148,7 @@ public class AuthUtils implements InitializingBean{
     }
 
     public Proxy.Packet addAuthInfo(Proxy.Packet packet) throws Exception {
-        if(Boolean.valueOf(openAuth) && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
+        if (Boolean.valueOf(openAuth) && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
             Proxy.Packet.Builder packetBuilder = packet.toBuilder();
 
             Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
@@ -165,10 +159,9 @@ public class AuthUtils implements InitializingBean{
             String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp, appKey);
             authBuilder.setSignature(signature);
             authBuilder.setServiceId(packet.getAuth().getServiceId());
-            if(! ("".equals(packet.getAuth().getApplyId()))) {
+            if (!("".equals(packet.getAuth().getApplyId()))) {
                 authBuilder.setApplyId(packet.getAuth().getApplyId());
-            }
-            else{
+            } else {
                 authBuilder.setApplyId(applyId);
             }
 
@@ -179,7 +172,7 @@ public class AuthUtils implements InitializingBean{
     }
 
     public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
-        if(Boolean.valueOf(openAuth)) {
+        if (Boolean.valueOf(openAuth)) {
             // check timestamp
             long currentTimeMillis = System.currentTimeMillis();
             long requestTimeMillis = packet.getAuth().getTimestamp();

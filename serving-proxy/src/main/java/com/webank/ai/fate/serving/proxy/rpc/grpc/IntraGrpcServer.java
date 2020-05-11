@@ -21,17 +21,13 @@ import java.util.concurrent.Executor;
 @Service
 public class IntraGrpcServer implements InitializingBean {
     Logger logger = LoggerFactory.getLogger(InterGrpcServer.class);
-
-    @Value("${proxy.grpc.intra.port:8867}")
-    private Integer port;
-
     @Autowired
     IntraRequestHandler intraRequestHandler;
-
     @Resource(name = "grpcExecutorPool")
     Executor executor;
-
     Server server;
+    @Value("${proxy.grpc.intra.port:8867}")
+    private Integer port;
 
     @Override
     public void afterPropertiesSet() throws Exception {

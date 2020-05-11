@@ -69,9 +69,6 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     }
 
 
-
-
-
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = BATCHINFERENCE)
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {

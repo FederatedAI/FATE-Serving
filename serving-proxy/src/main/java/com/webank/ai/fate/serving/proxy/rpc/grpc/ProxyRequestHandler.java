@@ -1,5 +1,3 @@
-
-
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -21,10 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTransferServiceImplBase {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProxyRequestHandler.class);
     @Autowired
     IMetricFactory metricFactory;
-
-    private static final Logger logger = LoggerFactory.getLogger(ProxyRequestHandler.class);
 
     public abstract ProxyServiceRegister getProxyServiceRegister();
 
@@ -32,7 +29,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
 
     @RegisterService(serviceName = "unaryCall")
     @Override
-    public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver)  {
+    public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
 
         metricFactory.counter("grpc.unaryCall.request", "grpc unaryCall request",
                 "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
@@ -41,20 +38,20 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
             logger.debug("unaryCall req {}", req);
         }
         ServiceAdaptor unaryCallService = getProxyServiceRegister().getServiceAdaptor("unaryCall");
-        Context context  =  new BaseContext();
+        Context context = new BaseContext();
         InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, req);
         setExtraInfo(context, inboundPackage, req);
 
-        metricFactory.counter("grpc.unaryCall", "grpc unaryCall","direction", "request", "grpc.type", context.getGrpcType().toString()).increment();
+        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "request", "grpc.type", context.getGrpcType().toString()).increment();
 
         OutboundPackage<Proxy.Packet> outboundPackage = null;
         try {
-            outboundPackage = unaryCallService.service(context,inboundPackage);
+            outboundPackage = unaryCallService.service(context, inboundPackage);
         } catch (Exception e) {
             e.printStackTrace();
 
         }
-        Proxy.Packet   result = (Proxy.Packet)outboundPackage.getData();
+        Proxy.Packet result = (Proxy.Packet) outboundPackage.getData();
         responseObserver.onNext(result);
         responseObserver.onCompleted();
 
@@ -63,10 +60,10 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "response", "grpc.type", context.getGrpcType().toString()).increment();
     }
 
-    public InboundPackage<Proxy.Packet> buildInboundPackage(Context  context, Proxy.Packet req){
+    public InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {
         context.setCaseId(Long.toString(System.currentTimeMillis()));
         context.setVersion(req.getAuth().getVersion());
-        if(StringUtils.isEmpty(context.getVersion())){
+        if (StringUtils.isEmpty(context.getVersion())) {
             context.setVersion(Dict.DEFAULT_VERSION);
         }
         context.setGuestAppId(req.getHeader().getSrc().getPartyId());

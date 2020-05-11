@@ -25,6 +25,7 @@ import java.util.UUID;
 public class InferenceUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(InferenceUtils.class);
+
     public static String generateCaseid() {
         return UUID.randomUUID().toString().replace("-", "");
     }

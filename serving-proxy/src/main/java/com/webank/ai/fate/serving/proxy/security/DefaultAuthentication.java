@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *  检查用户权限
+ * 检查用户权限
  */
 @Service
 public class DefaultAuthentication implements Interceptor {
@@ -25,11 +25,11 @@ public class DefaultAuthentication implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        if(GrpcType.INTRA_GRPC == context.getGrpcType()){
+        if (GrpcType.INTRA_GRPC == context.getGrpcType()) {
             return;
         }
 
-        Proxy.Packet  sourcePackage = (Proxy.Packet) inboundPackage.getBody();
+        Proxy.Packet sourcePackage = (Proxy.Packet) inboundPackage.getBody();
         boolean isAuthPass = authUtils.checkAuthentication(sourcePackage);
         if (!isAuthPass) {
             logger.error("invalid signature");
@@ -38,7 +38,7 @@ public class DefaultAuthentication implements Interceptor {
     }
 
     @Override
-    public void doPostProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
     }
 }

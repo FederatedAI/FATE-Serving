@@ -48,6 +48,8 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final ConcurrentMap<String, FailedSubProjectTask> failedSubProject = new ConcurrentHashMap<>();
 
+   // private final ConcurrentMap<String,FailedRegisteComponentTask>  FailedRegisteComponent = new ConcurrentHashMap<>();
+
 
     private final int retryPeriod;
 
@@ -108,7 +110,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     public void addFailedSubscribedProjectTask(String project) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("try to add failed subscribed project {}",project);
+            logger.debug("try to add failed subscribed project {}", project);
         }
 
         FailedSubProjectTask oldOne = failedSubProject.get(project);
@@ -130,7 +132,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private void addFailedRegistered(URL url) {
         if (logger.isDebugEnabled()) {
-            logger.debug("try to add failed registed url {}",url);
+            logger.debug("try to add failed registed url {}", url);
         }
         FailedRegisteredTask oldOne = failedRegistered.get(url);
         if (oldOne != null) {
@@ -424,15 +426,15 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             logger.debug("prepare to recover registed.project.....{}", projectSets);
         }
 
-        Set<String>  subjectSets = new HashSet(this.projectSets);
-        if(!subjectSets.isEmpty()) {
+        Set<String> subjectSets = new HashSet(this.projectSets);
+        if (!subjectSets.isEmpty()) {
             subjectSets.forEach(project -> {
-                try{
-                this.addFailedSubscribedProjectTask(project);
-            }catch(Exception e){
-                    logger.error("recover addFailedSubscribedProjectTask error",e);
+                try {
+                    this.addFailedSubscribedProjectTask(project);
+                } catch (Exception e) {
+                    logger.error("recover addFailedSubscribedProjectTask error", e);
 
-            }
+                }
 
             });
         }

@@ -17,10 +17,12 @@ public class ErrorEventHandler extends AbstractAsyncMessageProcessor implements 
     static final String ALTER_CLASS = "alertClass";
     Environment environment;
     AlertInfoUploader alertInfoUploader = null;
-    @Subscribe(value=Dict.EVENT_ERROR)
+
+    @Subscribe(value = Dict.EVENT_ERROR)
     public void handleMetricsEvent(AsyncMessageEvent event) {
         alertInfoUploader.upload(event);
     }
+
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;

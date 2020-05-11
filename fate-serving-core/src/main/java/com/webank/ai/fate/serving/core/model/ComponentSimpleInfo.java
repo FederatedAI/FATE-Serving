@@ -1,9 +1,8 @@
 package com.webank.ai.fate.serving.core.model;
 
-public class   ComponentSimpleInfo{
+public class ComponentSimpleInfo {
 
-        String  componentName;
+    String componentName;
 
 
-    
 }

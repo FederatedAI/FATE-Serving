@@ -57,10 +57,9 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
 
     static final Charset CHARSET = Charset.forName(UTF_8);
     private static final Logger logger = LoggerFactory.getLogger(CuratorZookeeperClient.class);
+    private static final String SCHEME = "digest";
     private final CuratorFramework client;
     private Map<String, TreeCache> treeCacheMap = new ConcurrentHashMap<>();
-
-    private static final String SCHEME = "digest";
     private boolean aclEnable;
     private String aclUsername;
     private String aclPassword;

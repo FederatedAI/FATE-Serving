@@ -1,14 +1,13 @@
 package com.webank.ai.fate.serving.proxy.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.EncryptMethod;
-//import com.webank.ai.fate.serving.core.bean.HostFederatedParams;
-import com.webank.ai.fate.serving.core.bean.ModelInfo;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+
+//import com.webank.ai.fate.serving.core.bean.HostFederatedParams;
 
 public class FederatedModelUtils {
 
@@ -18,18 +17,17 @@ public class FederatedModelUtils {
         return StringUtils.join(Arrays.asList(tableName, namespace), MODEL_KEY_SEPARATOR);
     }
 
-    public static String getModelRouteKey(Proxy.Packet  packet) {
+    public static String getModelRouteKey(Proxy.Packet packet) {
         String data = packet.getBody().getValue().toStringUtf8();
 
-        Proxy.Model  model  = packet.getHeader().getTask().getModel();
+        Proxy.Model model = packet.getHeader().getTask().getModel();
 //        HostFederatedParams requestData = JSON.parseObject(data, HostFederatedParams.class);
 //        ModelInfo partnerModelInfo = requestData.getPartnerModelInfo();
 
-        String key =genModelKey( model.getTableName(),model.getNamespace());
+        String key = genModelKey(model.getTableName(), model.getNamespace());
         String md5Key = EncryptUtils.encrypt(key, EncryptMethod.MD5);
         return md5Key;
     }
-
 
 
 }

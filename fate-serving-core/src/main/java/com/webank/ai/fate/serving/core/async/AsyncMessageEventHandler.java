@@ -21,18 +21,16 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
 
     private static Logger logger = LoggerFactory.getLogger(AsyncMessageEventHandler.class);
 
-    ExecutorService executorService=null;
+    ExecutorService executorService = null;
 
-    public  AsyncMessageEventHandler(){
+    public AsyncMessageEventHandler() {
 
         int processors = Runtime.getRuntime().availableProcessors();
 
-         executorService = new ThreadPoolExecutor(processors, processors * 2, 0L, TimeUnit.MILLISECONDS,
+        executorService = new ThreadPoolExecutor(processors, processors * 2, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("AsyncMessage", true));
 
     }
-
-
 
 
     @Override
@@ -47,19 +45,19 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
 
         Set<Method> methods = AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP.get(eventName);
         if (methods == null || methods.size() == 0) {
-            logger.error("event {} not subscribe {}",eventName, AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP);
+            logger.error("event {} not subscribe {}", eventName, AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP);
             throw new AsyncMessageException(eventName + " event not subscribe {}");
 
         }
 
-        AsyncMessageEvent  another = event.clone();
+        AsyncMessageEvent another = event.clone();
 
         for (Method method : methods) {
             executorService.submit(() -> {
                 try {
 //                    Class<?> declaringClass = method.getDeclaringClass();
 //                    logger.info("uuuuuuuuuuuuuuu {}",another);
-                    Object  object = AsyncSubscribeRegister.METHOD_INSTANCE_MAP.get(method);
+                    Object object = AsyncSubscribeRegister.METHOD_INSTANCE_MAP.get(method);
                     method.invoke(object, another);
                 } catch (Exception e) {
                     logger.error("invoke event processor, {}", e.getMessage());

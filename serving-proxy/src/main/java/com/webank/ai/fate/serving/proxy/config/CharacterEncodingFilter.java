@@ -20,10 +20,9 @@ public class CharacterEncodingFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-        filterChain.doFilter(request , response);
+        filterChain.doFilter(request, response);
 
     }
-
 
 
     @Override

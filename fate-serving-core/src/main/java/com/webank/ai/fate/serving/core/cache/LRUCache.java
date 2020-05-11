@@ -1,4 +1,3 @@
-
 package com.webank.ai.fate.serving.core.cache;
 
 import java.util.LinkedHashMap;

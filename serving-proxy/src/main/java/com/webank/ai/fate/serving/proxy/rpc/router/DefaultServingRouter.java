@@ -16,28 +16,28 @@ import org.springframework.stereotype.Service;
  * @Author
  **/
 @Service
-public class DefaultServingRouter implements Interceptor{
+public class DefaultServingRouter implements Interceptor {
     Logger logger = LoggerFactory.getLogger(DefaultServingRouter.class);
 
     @Autowired
     private ZkServingRouter zkServingRouter;
 
     @Autowired
-    private  ConfigFileBasedServingRouter configFileBasedServingRouter;
+    private ConfigFileBasedServingRouter configFileBasedServingRouter;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        RouterInfo routerInfo =zkServingRouter.route(context, inboundPackage);
-        if(null == routerInfo){
+        RouterInfo routerInfo = zkServingRouter.route(context, inboundPackage);
+        if (null == routerInfo) {
             routerInfo = configFileBasedServingRouter.route(context, inboundPackage);
         }
-        if(null == routerInfo){
+        if (null == routerInfo) {
             throw new NoRouteInfoException();
         }
         inboundPackage.setRouterInfo(routerInfo);
     }
 
     @Override
-    public void doPostProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
     }
 }

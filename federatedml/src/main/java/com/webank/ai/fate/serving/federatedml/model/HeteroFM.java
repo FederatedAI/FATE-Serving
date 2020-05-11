@@ -19,9 +19,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.core.mlmodel.buffer.fm.FMModelParamProto.Embedding;
 import com.webank.ai.fate.core.mlmodel.buffer.fm.FMModelParamProto.FMModelParam;
-import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +58,7 @@ public abstract class HeteroFM extends BaseComponent {
         int inputDataHitCount = 0;
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("model weight number:{}", weightNum);
             logger.debug("input data features number:{}", inputFeaturesNum);
         }
@@ -72,7 +70,7 @@ public abstract class HeteroFM extends BaseComponent {
                 score += w * x;
                 modelWeightHitCount += 1;
                 inputDataHitCount += 1;
-                if(logger.isDebugEnabled()) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
                 }
             }
@@ -80,7 +78,7 @@ public abstract class HeteroFM extends BaseComponent {
 
         double[] multiplies = new double[this.embedSize];
         double[] squares = new double[this.embedSize];
-        for (String key: this.embedding.keySet()) {
+        for (String key : this.embedding.keySet()) {
             if (inputData.containsKey(key)) {
                 Double x = new Double(inputData.get(key).toString());
                 List<Double> wList = this.embedding.get(key).getWeightList();
@@ -91,8 +89,8 @@ public abstract class HeteroFM extends BaseComponent {
             }
         }
         double cross = 0.0;
-        for (int i =0; i < this.embedSize; i++) {
-            cross += (Math.pow(multiplies[i],2) - squares[i]);
+        for (int i = 0; i < this.embedSize; i++) {
+            cross += (Math.pow(multiplies[i], 2) - squares[i]);
         }
         score += cross * 0.5;
         score += this.intercept;
@@ -106,7 +104,7 @@ public abstract class HeteroFM extends BaseComponent {
             ex.printStackTrace();
         }
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("model weight hit rate:{}", modelWeightHitRate);
             logger.debug("input data features hit rate:{}", inputDataHitRate);
         }

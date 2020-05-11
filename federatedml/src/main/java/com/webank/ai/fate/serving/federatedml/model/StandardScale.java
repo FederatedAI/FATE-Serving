@@ -47,13 +47,13 @@ public class StandardScale {
                     value = (value - standardScale.getMean()) / std;
                     inputData.put(key, value);
                 } else {
-                    if(logger.isDebugEnabled()) {
+                    if (logger.isDebugEnabled()) {
                         logger.debug("feature {} is not in scale, maybe missing or do not need to be scaled");
                     }
                 }
 
             } catch (Exception ex) {
-                logger.error("StandardScale transform error",ex);
+                logger.error("StandardScale transform error", ex);
             }
         }
         return inputData;

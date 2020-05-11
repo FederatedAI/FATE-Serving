@@ -1,11 +1,8 @@
 package com.webank.ai.fate.serving.event;
 
-import java.util.Map;
-
-
 public class CacheEventData {
 
-    String  key;
+    String key;
     Object data;
 
     public CacheEventData(String key, Object data) {

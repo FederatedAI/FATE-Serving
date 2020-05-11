@@ -17,8 +17,6 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
-import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
-import com.webank.ai.fate.serving.core.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -24,7 +24,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -32,31 +31,25 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 @Service
-public  class ConfigFileBasedServingRouter extends BaseServingRouter implements InitializingBean{
+public class ConfigFileBasedServingRouter extends BaseServingRouter implements InitializingBean {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigFileBasedServingRouter.class);
+    private static final String IP = "ip";
+    private static final String PORT = "port";
+    private static final String HOSTNAME = "hostname";
+    private static final String DEFAULT = "default";
+    private final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
+    private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
     @Value("${routeType:random}")
     private String routeTypeString;
-
     private RouteType routeType;
-
-    private String userDir=System.getProperty(Dict.PROPERTY_USER_DIR);
-
+    private String userDir = System.getProperty(Dict.PROPERTY_USER_DIR);
     @Value("${route.table:}")
     private String routeTableFile;
-
-    private final String DEFAULT_ROUTER_FILE = "conf"+System.getProperty(Dict.PROPERTY_FILE_SEPARATOR)+"route_table.json";
-
-    private final String  fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
-
     @Value("${coordinator}")
     private String selfCoordinator;
-
     @Value("${inference.service.name:serving}")
     private String inferenceServiceName;
-
     private String lastFileMd5;
-
-    private static final Logger logger = LoggerFactory.getLogger(ConfigFileBasedServingRouter.class);
-
     private Map<Proxy.Topic, Set<Proxy.Topic>> allow;
     private Map<Proxy.Topic, Set<Proxy.Topic>> deny;
     private boolean defaultAllow;
@@ -64,21 +57,24 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
     private Map<Proxy.Topic, List<RouterInfo>> topicEndpointMapping;
     private BasicMeta.Endpoint.Builder endpointBuilder;
 
-    private static final String IP = "ip";
-    private static final String PORT = "port";
-    private static final String HOSTNAME = "hostname";
-    private static final String DEFAULT = "default";
+    public static void main(String[] args) {
+
+        System.err.println(System.getProperty("java.class.path"));
+        System.err.println(System.getenv());
+        System.err.println(System.getProperty("user.dir"));
+        System.err.println(System.getProperty("file.separator"));
+    }
 
     @Override
-    public RouteType getRouteType(){
+    public RouteType getRouteType() {
         return routeType;
     }
 
     @Override
-    public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage){
+    public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage) {
         Proxy.Topic dstTopic;
         Proxy.Topic srcTopic;
-        if(Dict.SERVICENAME_INFERENCE.equals(context.getServiceName())) {
+        if (Dict.SERVICENAME_INFERENCE.equals(context.getServiceName())) {
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
             dstTopic = topicBuilder.setPartyId(selfCoordinator).
                     setRole(inferenceServiceName)
@@ -89,14 +85,14 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
                     .setName(Dict.PARTNER_PARTY_NAME)
                     .build();
         } else {   // default unaryCall
-            Proxy.Packet  sourcePacket = (Proxy.Packet) inboundPackage.getBody();
+            Proxy.Packet sourcePacket = (Proxy.Packet) inboundPackage.getBody();
             dstTopic = sourcePacket.getHeader().getDst();
             srcTopic = sourcePacket.getHeader().getSrc();
         }
 
         Preconditions.checkNotNull(dstTopic, "dstTopic cannot be null");
 
-        if(!isAllowed(srcTopic, dstTopic)){
+        if (!isAllowed(srcTopic, dstTopic)) {
             logger.warn("from {} to {} is not allowed!", srcTopic, dstTopic);
             return null;
         }
@@ -127,12 +123,12 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         }
 
         routeList = new ArrayList<>();
-        for(BasicMeta.Endpoint epoint: endpoints){
-            RouterInfo router =  new RouterInfo();
+        for (BasicMeta.Endpoint epoint : endpoints) {
+            RouterInfo router = new RouterInfo();
             // ip is first priority
-            if(!epoint.getIp().isEmpty()) {
+            if (!epoint.getIp().isEmpty()) {
                 router.setHost(epoint.getIp());
-            }else{
+            } else {
                 router.setHost(epoint.getHostname());
             }
             router.setPort(epoint.getPort());
@@ -224,26 +220,25 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         return result;
     }
 
-
     @Scheduled(fixedRate = 10000)
     public void loadRouteTable() {
 
 
         String filePath = "";
-        if(StringUtils.isNotEmpty(routeTableFile)) {
-            filePath =  routeTableFile;
-        }else{
-            filePath = userDir+this.fileSeparator+DEFAULT_ROUTER_FILE;
+        if (StringUtils.isNotEmpty(routeTableFile)) {
+            filePath = routeTableFile;
+        } else {
+            filePath = userDir + this.fileSeparator + DEFAULT_ROUTER_FILE;
         }
-        logger.info("start refreshed route table...,try to load {}",filePath);
+        logger.info("start refreshed route table...,try to load {}", filePath);
 
-        File  file = new File(filePath);
-        if(!file.exists()){
-            logger.error("router table {} is not exist",filePath);
+        File file = new File(filePath);
+        if (!file.exists()) {
+            logger.error("router table {} is not exist", filePath);
             return;
         }
         String fileMd5 = FileUtils.fileMd5(filePath);
-        if(null != fileMd5 && fileMd5.equals(lastFileMd5)){
+        if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
             return;
         }
         JsonParser jsonParser = new JsonParser();
@@ -252,7 +247,7 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         try {
             jsonReader = new JsonReader(new FileReader(filePath));
             confJson = jsonParser.parse(jsonReader).getAsJsonObject();
-            logger.info("load router table {}",confJson);
+            logger.info("load router table {}", confJson);
 
         } catch (Exception e) {
             logger.error("parse router table error: {}", filePath);
@@ -271,7 +266,6 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         logger.info("refreshed route table at: {}", filePath);
         lastFileMd5 = fileMd5;
     }
-
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -295,7 +289,6 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
             logger.error("load route table fail. ", e);
         }
     }
-
 
     private void initRouteTable(JsonObject confJson) {
         Map<String, Map<String, List<BasicMeta.Endpoint>>> newRouteTable = new ConcurrentHashMap<>();
@@ -403,14 +396,5 @@ public  class ConfigFileBasedServingRouter extends BaseServingRouter implements 
         }
 
         return topicBuilder.build();
-    }
-
-
-    public  static  void main(String[] args){
-
-        System.err.println(System.getProperty("java.class.path"));
-        System.err.println(System.getenv());
-        System.err.println(System.getProperty("user.dir"));
-        System.err.println(System.getProperty("file.separator"));
     }
 }

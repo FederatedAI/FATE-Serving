@@ -21,15 +21,15 @@ public class GrpcConfigration {
     private static final Logger logger = LoggerFactory.getLogger(GrpcConfigration.class);
 
     @Value("${proxy.grpc.threadpool.coresize:50}")
-    private int  coreSize;
+    private int coreSize;
 
     @Value("${proxy.grpc.threadpool.maxsize:100}")
-    private int  maxPoolSize;
+    private int maxPoolSize;
 
     @Value("${proxy.grpc.threadpool.queuesize:10}")
-    private int  queueSize;
+    private int queueSize;
 
-    @Bean(name="grpcExecutorPool")
+    @Bean(name = "grpcExecutorPool")
     public Executor asyncServiceExecutor() {
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

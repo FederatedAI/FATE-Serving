@@ -7,20 +7,71 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BatchInferenceResult extends  ReturnResult{
+public class BatchInferenceResult extends ReturnResult {
 
     List<SingleInferenceResult> batchDataList;
+    private Map<Integer, SingleInferenceResult> singleInferenceResultMap;
 
-    static public  class  SingleInferenceResult  {
+    public List<SingleInferenceResult> getBatchDataList() {
+        if (batchDataList == null) {
+            batchDataList = new ArrayList<>();
+        }
+        return batchDataList;
+    }
 
-        Integer  index;
 
-        String  retcode;
+    public void setBatchDataList(List<SingleInferenceResult> batchDataList) {
+        this.batchDataList = batchDataList;
+    }
+
+    public void rebuild() {
 
 
-        String  retmsg;
+        Map result = Maps.newHashMap();
 
-        Map<String ,Object> data;
+        List<BatchInferenceResult.SingleInferenceResult> batchInferences = this.getBatchDataList();
+
+        for (BatchInferenceResult.SingleInferenceResult singleInferenceResult : batchInferences) {
+
+            result.put(singleInferenceResult.getIndex(), singleInferenceResult);
+        }
+        singleInferenceResultMap = result;
+
+    }
+
+    public Map<Integer, SingleInferenceResult> getSingleInferenceResultMap() {
+
+
+        if (singleInferenceResultMap == null) {
+
+            rebuild();
+        }
+
+        return singleInferenceResultMap;
+
+
+    }
+
+    static public class SingleInferenceResult {
+
+        Integer index;
+
+        String retcode;
+
+
+        String retmsg;
+
+        Map<String, Object> data;
+
+        public SingleInferenceResult() {
+        }
+
+        public SingleInferenceResult(Integer index, String retcode, String msg, Map<String, Object> data) {
+            this.index = index;
+            this.retcode = retcode;
+            this.retmsg = msg;
+            this.data = data;
+        }
 
         public String getRetcode() {
             return retcode;
@@ -45,6 +96,7 @@ public class BatchInferenceResult extends  ReturnResult{
         public void setIndex(Integer index) {
             this.index = index;
         }
+
         public String getRetmsg() {
             return retmsg;
         }
@@ -52,67 +104,9 @@ public class BatchInferenceResult extends  ReturnResult{
         public void setRetmsg(String retmsg) {
             this.retmsg = retmsg;
         }
-
-
-        public SingleInferenceResult() {
-        }
-
-        public SingleInferenceResult(Integer index, String retcode, String msg, Map<String, Object> data) {
-            this.index = index;
-            this.retcode = retcode;
-            this.retmsg = msg;
-            this.data = data;
-        }
     }
 
-
-    public List<SingleInferenceResult> getBatchDataList() {
-        if (batchDataList == null) {
-            batchDataList = new ArrayList<>();
-        }
-        return batchDataList;
-    }
-
-
-    public void setBatchDataList(List<SingleInferenceResult> batchDataList) {
-        this.batchDataList = batchDataList;
-    }
-
-    private  Map<Integer,SingleInferenceResult>  singleInferenceResultMap ;
-
-
-    public void  rebuild(){
-
-
-
-            Map result  =  Maps.newHashMap();
-
-            List<BatchInferenceResult.SingleInferenceResult>  batchInferences = this.getBatchDataList();
-
-            for(BatchInferenceResult.SingleInferenceResult  singleInferenceResult:batchInferences){
-
-                result.put(singleInferenceResult.getIndex(),singleInferenceResult);
-            }
-            singleInferenceResultMap =result;
-
-    }
-
-
-    public Map<Integer,SingleInferenceResult>   getSingleInferenceResultMap(){
-
-
-        if(singleInferenceResultMap==null){
-
-                rebuild();
-        }
-
-        return singleInferenceResultMap;
-
-
-
-
-    };
-
+    ;
 
 
 }

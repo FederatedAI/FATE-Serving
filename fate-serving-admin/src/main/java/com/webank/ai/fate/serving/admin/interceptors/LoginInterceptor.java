@@ -1,10 +1,5 @@
 package com.webank.ai.fate.serving.admin.interceptors;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.constant.StatusCode;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +8,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.concurrent.TimeUnit;
 
 public class LoginInterceptor implements HandlerInterceptor {
 

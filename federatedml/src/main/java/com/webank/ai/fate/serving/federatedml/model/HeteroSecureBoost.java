@@ -20,8 +20,6 @@ import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelMetaProto.BoostingTreeModelMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.BoostingTreeModelParam;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,9 +84,9 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         int fid = this.trees.get(treeId).getTree(treeNodeId).getFid();
         double splitValue = this.trees.get(treeId).getSplitMaskdict().get(treeNodeId);
         String fidStr = String.valueOf(fid);
-        logger.info("treeId {}, treeNodeId {}",treeId, treeNodeId);
-        logger.info("treenode fid {}",fidStr);
-        logger.info("input is {}",input);
+        logger.info("treeId {}, treeNodeId {}", treeId, treeNodeId);
+        logger.info("treenode fid {}", fidStr);
+        logger.info("input is {}", input);
 
         if (input.containsKey(fidStr)) {
             if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
@@ -113,8 +111,6 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         return nextTreeNodeId;
 
     }
-
-
 
 
 }

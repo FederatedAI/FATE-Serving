@@ -8,12 +8,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.config.FateServiceRegister;
-import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
@@ -40,23 +41,20 @@ import java.util.concurrent.TimeUnit;
 public class ModelController {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelController.class);
-
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     @Value("${fateflow.load.url}")
     private String loadUrl;
-
     @Value("${fateflow.bind.url}")
     private String bindUrl;
-
     @Autowired
     private StringRedisTemplate redisTemplate;
-
     @Value("${grpc.timeout:5000}")
     private int timeout;
-
     @Autowired
     private FateServiceRegister fateServiceRegister;
 
-    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+    @Autowired
+    private ComponentService  componentService;
 
 //    @RequestMapping(value = "/model/{version}/{callName}", method = {RequestMethod.GET, RequestMethod.POST})
 //    @ResponseBody
@@ -105,6 +103,7 @@ public class ModelController {
 
     /**
      * 实现queryModel
+     *
      * @return
      * @throws Exception
      */
@@ -217,7 +216,6 @@ public class ModelController {
 //
 //        return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
 //    }
-
     @GetMapping("/model/query")
     public ModelServiceProto.QueryModelResponse getModelByServiceId(String host, int port, String serviceId) throws Exception {
         // 根据serviceId查询
@@ -240,8 +238,8 @@ public class ModelController {
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
-        return   response;
-       // return ReturnResult.build(response.getStatusCode(), response.getMessage(), JSON.toJSONString(response.getModelInfosList()));
+        return response;
+        // return ReturnResult.build(response.getStatusCode(), response.getMessage(), JSON.toJSONString(response.getModelInfosList()));
     }
 
     @PostMapping("/model/publishLoad")

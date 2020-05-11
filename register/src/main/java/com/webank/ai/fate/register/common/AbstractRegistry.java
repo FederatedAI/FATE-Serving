@@ -63,6 +63,7 @@ public abstract class AbstractRegistry implements Registry {
     private URL registryUrl;
     // Local disk cache file
     private File file;
+
     public AbstractRegistry(URL url) {
         setUrl(url);
         // Start file save timer

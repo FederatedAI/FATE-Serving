@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.adapter.dataaccess;
+package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 
 import com.webank.ai.fate.serving.core.adaptor.BatchFeatureDataAdaptor;
@@ -32,29 +32,6 @@ import java.util.Map;
 
 public class MockBatchAdapter implements BatchFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(MockBatchAdapter.class);
-
-//    @Override
-//    public ReturnResult getData(Context context, Map<String, Object> featureIds) {
-//        ReturnResult returnResult = new ReturnResult();
-//        Map<String, Object> data = new HashMap<>();
-//        try {
-//            String mockData = "x0:1.88669,x1:-1.359293,x2:2.303601,x3:2.001237,x4:1.307686,x5:2.616665,x6:2.109526,x7:2.296076,x8:2.750622,x9:1.937015";
-//            for (String kv : StringUtils.split(mockData, ",")) {
-//                String[] a = StringUtils.split(kv, ":");
-//                data.put(a[0], Double.valueOf(a[1]));
-//            }9
-//            returnResult.setData(data);
-//            returnResult.setRetcode(InferenceRetCode.OK);
-//
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("MockAdapter result, {}", JSONObject.toJSONString(returnResult));
-//            }
-//        } catch (Exception ex) {
-//            logger.error(ex.getMessage());
-//            returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
-//        }
-//        return returnResult;
-//    }
 
     @Override
     public void init(Context context) {

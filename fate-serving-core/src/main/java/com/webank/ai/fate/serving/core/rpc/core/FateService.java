@@ -13,7 +13,9 @@ import java.lang.annotation.*;
 @Inherited
 public @interface FateService {
     String name();
+
     String[] preChain() default {};
-    String[]  postChain() default {};
+
+    String[] postChain() default {};
 
 }

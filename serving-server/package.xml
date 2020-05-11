@@ -27,6 +27,17 @@
             <includes>
                 <include>*.jar</include>
             </includes>
+            <excludes>
+                <exclude>fate-serving-extension-*.jar</exclude>
+            </excludes>
+        </fileSet>
+
+        <fileSet>
+            <outputDirectory>/extension</outputDirectory>
+            <directory>target/lib</directory>
+            <includes>
+                <include>fate-serving-extension-*.jar</include>
+            </includes>
         </fileSet>
 
         <fileSet>

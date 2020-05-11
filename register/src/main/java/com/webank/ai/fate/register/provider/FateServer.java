@@ -68,7 +68,7 @@ public class FateServer extends Server {
     @Override
     public Server start() throws IOException {
 
-        Server   server =this.server.start();
+        Server server = this.server.start();
 
         // register();
         return this;

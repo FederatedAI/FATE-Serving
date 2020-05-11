@@ -22,6 +22,15 @@ public class MetricEntity implements Comparable<MetricEntity> {
     public MetricEntity() {
     }
 
+    public static MetricEntity copyOf(MetricEntity newEntity) {
+        MetricEntity metricEntity = new MetricEntity();
+        metricEntity.setComponentName(newEntity.getComponentName());
+        metricEntity.setInterfaceName(newEntity.getInterfaceName());
+        metricEntity.setPassQps(newEntity.getPassQps());
+        metricEntity.setTimestamp(newEntity.getTimestamp());
+        return metricEntity;
+    }
+
     public String getUserAuthKey() {
         return userAuthKey;
     }
@@ -64,15 +73,6 @@ public class MetricEntity implements Comparable<MetricEntity> {
 
     public synchronized void addPassQps(Long passQps) {
         this.passQps += passQps;
-    }
-
-    public static MetricEntity copyOf(MetricEntity newEntity) {
-        MetricEntity metricEntity = new MetricEntity();
-        metricEntity.setComponentName(newEntity.getComponentName());
-        metricEntity.setInterfaceName(newEntity.getInterfaceName());
-        metricEntity.setPassQps(newEntity.getPassQps());
-        metricEntity.setTimestamp(newEntity.getTimestamp());
-        return metricEntity;
     }
 
     @Override

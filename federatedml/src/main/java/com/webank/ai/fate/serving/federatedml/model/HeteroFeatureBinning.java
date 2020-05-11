@@ -7,7 +7,6 @@ import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBi
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningResult;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.IVParam;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,34 +61,34 @@ public class HeteroFeatureBinning extends BaseComponent {
         }
 
         for (String colName : firstData.keySet()) {
-            try{
-                if (! this.splitPoints.containsKey(colName)) {
+            try {
+                if (!this.splitPoints.containsKey(colName)) {
                     outputData.put(colName, firstData.get(colName));
                     continue;
                 }
                 Long thisColIndex = (long) this.header.indexOf(colName);
-                if (! this.transformCols.contains(thisColIndex)) {
+                if (!this.transformCols.contains(thisColIndex)) {
                     outputData.put(colName, firstData.get(colName));
                     continue;
                 }
                 List<Double> splitPoint = this.splitPoints.get(colName);
                 Double colValue = Double.valueOf(firstData.get(colName).toString());
                 int colIndex = 0;
-                for (colIndex = 0; colIndex < splitPoint.size(); colIndex ++) {
+                for (colIndex = 0; colIndex < splitPoint.size(); colIndex++) {
                     if (colValue <= splitPoint.get(colIndex)) {
                         break;
                     }
                 }
                 outputData.put(colName, colIndex);
-            }catch(Throwable e){
-                logger.error("HeteroFeatureBinning error" ,e);
+            } catch (Throwable e) {
+                logger.error("HeteroFeatureBinning error", e);
             }
         }
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("HeteroFeatureBinning output {}", outputData);
         }
         return outputData;
 
     }
 
-  }
+}

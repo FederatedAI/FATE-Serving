@@ -20,7 +20,6 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOMetaProto.DataIOMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +56,7 @@ public class DataIO extends BaseComponent {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            logger.error("init DataIo error",ex);
+            logger.error("init DataIo error", ex);
             return ILLEGALDATA;
         }
         logger.info("Finish init DataIO class");
@@ -65,10 +64,8 @@ public class DataIO extends BaseComponent {
     }
 
 
-
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
-
 
 
         Map<String, Object> input = inputData.get(0);
@@ -84,6 +81,5 @@ public class DataIO extends BaseComponent {
         return input;
 
 
-
-        }
     }
+}

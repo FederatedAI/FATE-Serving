@@ -22,15 +22,13 @@ import java.util.Map;
 public class FateServiceRegister implements ServiceRegister, ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
 
     Logger logger = LoggerFactory.getLogger(FateServiceRegister.class);
+    Map<String, ServiceAdaptor> serviceAdaptorMap = new HashMap<String, ServiceAdaptor>();
+    ApplicationContext applicationContext;
 
     @Override
     public ServiceAdaptor getServiceAdaptor(String name) {
         return this.serviceAdaptorMap.get(name);
     }
-
-    Map<String, ServiceAdaptor> serviceAdaptorMap = new HashMap<String, ServiceAdaptor>();
-
-    ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {

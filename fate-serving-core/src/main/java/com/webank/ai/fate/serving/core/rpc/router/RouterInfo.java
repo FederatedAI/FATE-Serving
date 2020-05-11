@@ -23,11 +23,11 @@ public class RouterInfo {
 
 
     @Override
-    public String  toString(){
+    public String toString() {
 
-        StringBuilder   sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append(host).append(":").append(port);
-        return  sb.toString();
+        return sb.toString();
 
     }
 

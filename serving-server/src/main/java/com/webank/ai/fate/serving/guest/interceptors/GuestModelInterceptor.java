@@ -3,10 +3,7 @@ package com.webank.ai.fate.serving.guest.interceptors;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
-import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
-import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
@@ -28,19 +25,11 @@ public class GuestModelInterceptor implements Interceptor {
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         String serviceId = context.getServiceId();
-        try {
-            Model model = modelManager.getModelByServiceId(serviceId);
-            Preconditions.checkArgument(model != null, "model is null");
-            ((ServingServerContext) context).setModel(model);
-        } catch (Exception e) {
-            if(e instanceof BaseException){
-                throw e;
-            }
-            if (e instanceof IllegalArgumentException) {
-                throw new ModelNullException("can not find model by service id " + serviceId);
-            } else {
-                throw new SysException(StatusCode.SYSTEM_ERROR, "get model failed");
-            }
+        Model model = modelManager.getModelByServiceId(serviceId);
+        Preconditions.checkArgument(model != null, "model is null");
+        if (model == null) {
+            throw new ModelNullException("can not find model by service id " + serviceId);
         }
+        ((ServingServerContext) context).setModel(model);
     }
 }

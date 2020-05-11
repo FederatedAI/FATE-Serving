@@ -8,16 +8,16 @@ import java.util.concurrent.Future;
 
 public interface ModelProcessor {
 
-    public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String,Future> remoteFutureMap, long timeout);
+    public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String, Future> remoteFutureMap, long timeout);
 
-    public BatchInferenceResult  hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams);
+    public BatchInferenceResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams);
 
     public InferenceRequest guestPrepareDataBeforeInference(Context context, InferenceRequest inferenceRequest);
 
-    public ReturnResult guestInference(Context context, InferenceRequest inferenceRequest,Map<String,Future> remoteFutureMap ,long timeout);
+    public ReturnResult guestInference(Context context, InferenceRequest inferenceRequest, Map<String, Future> remoteFutureMap, long timeout);
 
-    public ReturnResult hostInference(Context context, InferenceRequest inferenceRequest );
+    public ReturnResult hostInference(Context context, InferenceRequest inferenceRequest);
 
-    public Object  getComponent(String  name);
+    public Object getComponent(String name);
 
 }

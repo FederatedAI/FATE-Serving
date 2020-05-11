@@ -1,12 +1,12 @@
 package com.webank.ai.fate.serving.core.rpc.core;
 
 /**
- * @Description 
+ * @Description
  * @Author
  **/
-public interface InterceptorChain<req,resp> extends Interceptor<req,resp> {
+public interface InterceptorChain<req, resp> extends Interceptor<req, resp> {
 
-    public void addInterceptor(Interceptor<req,resp> interceptor);
+    public void addInterceptor(Interceptor<req, resp> interceptor);
 
 
 }

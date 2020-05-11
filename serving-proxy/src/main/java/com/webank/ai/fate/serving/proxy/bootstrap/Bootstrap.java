@@ -26,9 +26,21 @@ import java.util.Set;
 @EnableScheduling
 public class Bootstrap {
 
+    private static ApplicationContext applicationContext;
     Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
-    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        try {
+            Bootstrap bootstrap = new Bootstrap();
+            bootstrap.start(args);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
+        } catch (Exception ex) {
+            System.err.println("server start error, " + ex.getMessage());
+            ex.printStackTrace();
+            System.exit(1);
+        }
+    }
 
     public void start(String[] args) {
         applicationContext = SpringApplication.run(Bootstrap.class, args);
@@ -67,19 +79,6 @@ public class Bootstrap {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static void main(String[] args) {
-        try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.start(args);
-
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
-        } catch (Exception ex) {
-            System.err.println("server start error, " + ex.getMessage());
-            ex.printStackTrace();
-            System.exit(1);
         }
     }
 

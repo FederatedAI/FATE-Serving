@@ -38,6 +38,13 @@ public class FederatedParams {
     String caseId;
 
     String seqNo;
+    boolean isBatch;
+    FederatedParty local;
+    ModelInfo modelInfo;
+    FederatedRoles role;
+    Map<String, Object> featureIdMap = Maps.newHashMap();
+    List<Map<String, Object>> batchFeatureIdMapList = Lists.newArrayList();
+    Map<String, Object> data = Maps.newHashMap();
 
     public boolean isBatch() {
         return isBatch;
@@ -47,13 +54,6 @@ public class FederatedParams {
         isBatch = batch;
     }
 
-    boolean isBatch;
-
-    FederatedParty local;
-    ModelInfo modelInfo;
-    FederatedRoles role;
-    Map<String, Object> featureIdMap = Maps.newHashMap();
-
     public List<Map<String, Object>> getBatchFeatureIdMapList() {
         return batchFeatureIdMapList;
     }
@@ -61,9 +61,6 @@ public class FederatedParams {
     public void setBatchFeatureIdMapList(List<Map<String, Object>> batchFeatureIdMapList) {
         this.batchFeatureIdMapList = batchFeatureIdMapList;
     }
-
-    List<Map<String,Object>> batchFeatureIdMapList = Lists.newArrayList();
-    Map<String, Object> data = Maps.newHashMap();
 
     public ModelInfo getModelInfo() {
         return modelInfo;
@@ -112,7 +109,6 @@ public class FederatedParams {
 //    public void setFeatureIdda(Map<String, Object> featureIdMap) {
 //        this.featureIdMap = featureIdMap;
 //    }
-
 
 
     public Map<String, Object> getData() {

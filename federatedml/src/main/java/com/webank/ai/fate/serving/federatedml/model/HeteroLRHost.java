@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeteroLRHost extends HeteroLR implements  Returnable{
+public class HeteroLRHost extends HeteroLR implements Returnable {
 
     private static final Logger logger = LoggerFactory.getLogger(HeteroLRHost.class);
 

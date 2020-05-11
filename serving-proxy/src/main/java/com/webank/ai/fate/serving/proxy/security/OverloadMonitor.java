@@ -16,18 +16,18 @@ import org.springframework.stereotype.Service;
  * @Author
  **/
 @Service
-public class OverloadMonitor implements Interceptor{
+public class OverloadMonitor implements Interceptor {
     Logger logger = LoggerFactory.getLogger(OverloadMonitor.class);
+
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         Entry entry = null;
         try {
-            entry=  SphU.entry(context.getServiceName());
-        } catch (BlockException ex){
+            entry = SphU.entry(context.getServiceName());
+        } catch (BlockException ex) {
             logger.warn("request was block by overload monitor, serviceName:{}.", context.getServiceName());
             throw ex;
-        }
-        finally {
+        } finally {
             if (entry != null) {
                 entry.exit();
             }
@@ -35,7 +35,7 @@ public class OverloadMonitor implements Interceptor{
     }
 
     @Override
-    public void doPostProcess(Context context, InboundPackage inboundPackage,OutboundPackage outboundPackage) throws Exception {
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
     }
 }

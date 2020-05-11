@@ -18,10 +18,11 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(Throwable.class)
     @ResponseBody
     public Map defaultErrorHandler(HttpServletRequest req, Exception e) throws Exception {
-        Map resultMap = ErrorMessageUtil.handleException(new HashMap(),e);
+        Map resultMap = ErrorMessageUtil.handleException(new HashMap(), e);
         return resultMap;
     }
 }

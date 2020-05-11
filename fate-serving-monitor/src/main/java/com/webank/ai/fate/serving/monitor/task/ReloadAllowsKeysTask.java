@@ -12,9 +12,8 @@ import java.io.*;
 @Component
 public class ReloadAllowsKeysTask {
 
-    private final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "allowKeys.json";
-
     private static final Logger logger = LoggerFactory.getLogger(ReloadAllowsKeysTask.class);
+    private final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "allowKeys.json";
 
     private String read(File file) {
         String result = "";

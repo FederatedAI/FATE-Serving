@@ -11,6 +11,6 @@ public class AsyncSubscribeRegister {
 
     public static final Map<String, Set<Method>> SUBSCRIBE_METHOD_MAP = new HashMap<>();
 
-    public static final Map<Method,Object>  METHOD_INSTANCE_MAP  = Maps.newHashMap();
+    public static final Map<Method, Object> METHOD_INSTANCE_MAP = Maps.newHashMap();
 
 }

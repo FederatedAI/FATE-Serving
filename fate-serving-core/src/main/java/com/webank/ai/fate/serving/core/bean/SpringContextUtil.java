@@ -8,11 +8,6 @@ public class SpringContextUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext = null;
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
     public static <T> T getBean(String beanName) {
         return (T) applicationContext.getBean(beanName);
     }
@@ -43,6 +38,11 @@ public class SpringContextUtil implements ApplicationContextAware {
 
     public static <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
         return applicationContext.getEnvironment().getProperty(key, targetType, defaultValue);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
 }

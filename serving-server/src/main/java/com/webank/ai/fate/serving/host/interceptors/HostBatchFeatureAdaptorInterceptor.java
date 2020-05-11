@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
 import com.webank.ai.fate.register.utils.StringUtils;
-import com.webank.ai.fate.serving.core.adaptor.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
+import com.webank.ai.fate.serving.core.adaptor.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.FeatureDataAdaptorException;
@@ -31,17 +31,17 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         }
         BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
-        if(batchHostFeatureAdaptorResult==null){
-            throw  new HostGetFeatureErrorException("adaptor return null");
+        if (batchHostFeatureAdaptorResult == null) {
+            throw new HostGetFeatureErrorException("adaptor return null");
         }
-        if(!StatusCode.SUCCESS.equals(batchHostFeatureAdaptorResult.getRetcode())){
-            throw  new HostGetFeatureErrorException(batchHostFeatureAdaptorResult.getRetcode(),"adaptor return error");
+        if (!StatusCode.SUCCESS.equals(batchHostFeatureAdaptorResult.getRetcode())) {
+            throw new HostGetFeatureErrorException(batchHostFeatureAdaptorResult.getRetcode(), "adaptor return error");
         }
         Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult> featureResultMap = batchHostFeatureAdaptorResult.getIndexResultMap();
         batchInferenceRequest.getBatchDataList().forEach(request -> {
             request.setNeedCheckFeature(true);
             BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult featureAdaptorResult = featureResultMap.get(request.getIndex());
-            if (featureAdaptorResult!=null&&StatusCode.SUCCESS.equals(featureAdaptorResult.getRetcode())&&featureAdaptorResult.getFeatures() != null) {
+            if (featureAdaptorResult != null && StatusCode.SUCCESS.equals(featureAdaptorResult.getRetcode()) && featureAdaptorResult.getFeatures() != null) {
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });
@@ -51,7 +51,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
     public void afterPropertiesSet() throws Exception {
         String adaptorClass = environment.getProperty("feature.batch.adaptor");
         if (StringUtils.isNotEmpty(adaptorClass)) {
-            logger.info("try to load adaptor {}",adaptorClass);
+            logger.info("try to load adaptor {}", adaptorClass);
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
 
             ServingServerContext context = new ServingServerContext();

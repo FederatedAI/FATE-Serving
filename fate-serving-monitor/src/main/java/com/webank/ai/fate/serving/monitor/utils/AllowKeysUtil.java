@@ -3,7 +3,6 @@ package com.webank.ai.fate.serving.monitor.utils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
-import com.webank.ai.fate.serving.monitor.controller.MetricsController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

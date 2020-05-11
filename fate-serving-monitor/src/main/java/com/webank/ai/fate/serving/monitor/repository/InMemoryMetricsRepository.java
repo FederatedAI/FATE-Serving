@@ -43,13 +43,13 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
         }
 
         allMetrics.computeIfAbsent(entity.getComponentName(), e -> new ConcurrentHashMap<>(16))
-            .computeIfAbsent(entity.getInterfaceName(), e -> new ConcurrentLinkedHashMap.Builder<Long, MetricEntity>()
-                .maximumWeightedCapacity(MAX_METRIC_LIVE_TIME_MS).weigher((key, value) -> {
-                    // Metric older than {@link #MAX_METRIC_LIVE_TIME_MS} will be removed.
-                    int weight = (int)(System.currentTimeMillis() - key);
-                    // weight must be a number greater than or equal to one
-                    return Math.max(weight, 1);
-                }).build()).put(entity.getTimestamp(), entity);
+                .computeIfAbsent(entity.getInterfaceName(), e -> new ConcurrentLinkedHashMap.Builder<Long, MetricEntity>()
+                        .maximumWeightedCapacity(MAX_METRIC_LIVE_TIME_MS).weigher((key, value) -> {
+                            // Metric older than {@link #MAX_METRIC_LIVE_TIME_MS} will be removed.
+                            int weight = (int) (System.currentTimeMillis() - key);
+                            // weight must be a number greater than or equal to one
+                            return Math.max(weight, 1);
+                        }).build()).put(entity.getTimestamp(), entity);
     }
 
     @Override
@@ -115,17 +115,17 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
         }
         // Order by last minute b_qps DESC.
         return interfaceCount.entrySet()
-            .stream()
-            .sorted((o1, o2) -> {
-                MetricEntity e1 = o1.getValue();
-                MetricEntity e2 = o2.getValue();
+                .stream()
+                .sorted((o1, o2) -> {
+                    MetricEntity e1 = o1.getValue();
+                    MetricEntity e2 = o2.getValue();
                 /*int t = e2.getBlockQps().compareTo(e1.getBlockQps());
                 if (t != 0) {
                     return t;
                 }*/
-                return e2.getPassQps().compareTo(e1.getPassQps());
-            })
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
+                    return e2.getPassQps().compareTo(e1.getPassQps());
+                })
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 }
