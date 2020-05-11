@@ -75,7 +75,7 @@ public class RegistryConfig {
             zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
             zookeeperRegistry.subProject(Dict.SERVICE_PROXY);
 
-            zookeeperRegistry.registerComponent();
+            zookeeperRegistry.doRegisterComponent();
 
             return zookeeperRegistry;
         }
