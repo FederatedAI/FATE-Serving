@@ -36,7 +36,7 @@ public class DefaultRouterService extends AbstractRouterService {
         urls = filterEmpty(urls);
         String version = url.getParameter(Constants.VERSION_KEY);
         if (CollectionUtils.isNotEmpty(urls) && StringUtils.isNotBlank(version)) {
-            urls = filterVersion(urls, version);
+            urls = filterVersion(urls, Long.parseLong(version));
         }
         List<URL> resultUrls = loadBalancer.select(urls);
         if (logger.isDebugEnabled()) {

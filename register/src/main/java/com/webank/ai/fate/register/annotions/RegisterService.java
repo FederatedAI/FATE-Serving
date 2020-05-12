@@ -16,7 +16,7 @@
 
 package com.webank.ai.fate.register.annotions;
 
-import com.webank.ai.fate.register.common.RouterModel;
+import com.webank.ai.fate.register.common.RouterMode;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,11 +29,12 @@ public @interface RegisterService {
 
     String serviceName();
 
-    String version() default "";
+    // default 1.0.0
+    long version() default 100;
 
     boolean useDynamicEnvironment() default false;
 
-    RouterModel routerModel() default RouterModel.ALL_ALLOWED;
+    RouterMode routerMode() default RouterMode.ALL_ALLOWED;
 
 
 //    String threadPoolKey() default "";

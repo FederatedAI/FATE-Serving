@@ -25,7 +25,7 @@ public interface Constants {
 
     public static String PARTY_ID = "party_id";
 
-    public static String ROUTER_MODEL = "ROUTER_MODEL";
+    public static String ROUTER_MODE = "router_mode";
 
     public static String VERSION = "version";
 
