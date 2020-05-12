@@ -71,7 +71,7 @@
 
 					<div class="row">
 						<div class="col-lg-12"  >
-							<table id="table" class="table table-condensed table-striped"
+							<table id="table" class="table table-no-bordered table-hover"
 								   data-toggle="table"
 								   data-url="api/service/registered"
 								   data-query-params="queryParams"
@@ -83,14 +83,15 @@
 								   data-page-list="[All]">
 								<thead>
 								<tr>
-									<th data-field="project" data-title="Project" data-width="180" data-sortable="true"></th>
-									<th data-field="environment" data-title="Environment" data-width="180" data-sortable="true"></th>
-									<th data-field="name" data-title="Name" data-width="180" data-sortable="true"></th>
-									<th data-field="host" data-title="Host" data-width="180" data-sortable="true"></th>
-									<th data-field="port" data-title="Port" data-width="180" data-sortable="true"></th>
-									<th data-field="routerMode" data-title="Router Mode" data-width="180" data-sortable="true"></th>
+									<th data-field="project" data-title="Project" data-sortable="true"></th>
+									<th data-field="environment" data-title="Environment" data-sortable="true"></th>
+									<th data-field="name" data-title="Name" data-sortable="true"></th>
+									<th data-field="host" data-title="Host" data-sortable="true"></th>
+									<th data-field="port" data-title="Port" data-sortable="true"></th>
+									<th data-field="routerMode" data-title="Router Mode" data-sortable="true"></th>
 									<th data-field="version" data-title="Version" data-sortable="true"></th>
 									<th data-field="weight" data-title="Weight" data-sortable="true"></th>
+									<th data-title="Operation" data-formatter="showMonitorFormatter"></th>
 								</tr>
 								</thead>
 							</table>
@@ -228,7 +229,7 @@
 							</div>
 						</form>
 						<div style="height: 40px;">
-							<button type="button" class="btn btn-info pull-right action-btn" id="saveBtn">Confirm</button>
+							<button type="button" class="btn btn-primary pull-right action-btn" id="saveBtn">Confirm</button>
 						</div>
 					</div>
 				</div>
@@ -323,6 +324,14 @@
 			return result;
 		}
 
+		function showMonitorFormatter(value, row, index) {
+			return '<button type="button" class="btn btn-success btn-sm" onclick="showMonitor(\'' + row.name + '\')">Monitor</button>'
+		}
+
+		function showMonitor(name) {
+			bootbox.alert(name);
+		}
+
 		$('#table').on('dbl-click-row.bs.table', function(e, row, ele, field){
 			$('#modifyDialog').modal();
 			$("input[name='url']").val(row.url);
@@ -334,7 +343,6 @@
 			$("input[name='routerMode']").val(row.routerMode);
 			$("input[name='version']").val(row.version);
 			$("input[name='weight']").val(row.weight);
-
 		});
 
 		$('#saveBtn').click(function() {
@@ -344,10 +352,11 @@
 				message: 'Confirm the changes?',
 				callback: function (confirm) {
 					if (confirm) {
-						bootbox.dialog({
+						/*bootbox.dialog({
 							message: '<p class="text-center"><i class="icon-spinner"></i>&nbsp;please wait...</p>',
+							size: 'small',
 							closeButton: false
-						});
+						});*/
 						var params = $('#updateForm').serialize();
 						$.post("api/service/update", params, function(result){
 							bootbox.hideAll();
@@ -364,12 +373,12 @@
 							setTimeout(function(){
 								bootbox.hideAll();
 							}, 500);
+
+							$('#updateForm')[0].reset();
 						});
 					} else {
 						$('#modifyDialog').modal();
 					}
-
-					$('#updateForm')[0].reset();
 				}
 			});
 		});
