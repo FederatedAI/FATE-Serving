@@ -207,7 +207,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String serviceName = registerService.serviceName();
         long version = registerService.version();
         String param = "?";
-        RouterMode routerMode = registerService.routerModel();
+        RouterMode routerMode = registerService.routerMode();
         param = param + Constants.ROUTER_MODE + "=" + routerMode.name();
         param = param + "&";
         param = param + Constants.TIMESTAMP_KEY + "=" + System.currentTimeMillis();
