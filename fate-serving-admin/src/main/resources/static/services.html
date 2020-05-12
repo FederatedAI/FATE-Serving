@@ -73,7 +73,6 @@
 						<div class="col-lg-12"  >
 							<table id="table" class="table table-condensed table-striped"
 								   data-toggle="table"
-								   data-detail-view="true"
 								   data-url="api/service/registered"
 								   data-query-params="queryParams"
 								   data-response-handler="responseHandler"
@@ -84,12 +83,14 @@
 								   data-page-list="[All]">
 								<thead>
 								<tr>
-									<th data-field="name" data-title="name" data-width="180" data-sortable="true"></th>
-									<th data-field="host" data-title="host" data-width="180" data-sortable="true"></th>
-									<th data-field="port" data-title="port" data-sortable="true"></th>
-									<th data-field="protocol" data-title="protocol" data-sortable="true"></th>
-									<th data-field="router_model" data-title="router model" data-sortable="true"></th>
-									<th data-field="timestamp" data-title="timestamp" data-sortable="true"></th>
+									<th data-field="project" data-title="Project" data-width="180" data-sortable="true"></th>
+									<th data-field="environment" data-title="Environment" data-width="180" data-sortable="true"></th>
+									<th data-field="name" data-title="Name" data-width="180" data-sortable="true"></th>
+									<th data-field="host" data-title="Host" data-width="180" data-sortable="true"></th>
+									<th data-field="port" data-title="Port" data-width="180" data-sortable="true"></th>
+									<th data-field="routerMode" data-title="Router Mode" data-width="180" data-sortable="true"></th>
+									<th data-field="version" data-title="Version" data-sortable="true"></th>
+									<th data-field="weight" data-title="Weight" data-sortable="true"></th>
 								</tr>
 								</thead>
 							</table>
@@ -152,11 +153,29 @@
 					</div>
 					<div class="modal-body">
 						<form id="updateForm" class="form-horizontal">
+							<input type="hidden" name="url"/>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">project</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="project" readonly class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">environment</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="environment" readonly class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
 							<div class="form-group">
 								<label class="col-lg-3 control-label">name</label>
 								<div class="col-lg-9">
 									<div class="col-lg-9">
-										<input type="hidden" name="id">
 										<input type="text" name="name" readonly class="form-control" placeholder="">
 									</div>
 									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
@@ -181,35 +200,35 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-lg-3 control-label">protocol</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="protocol" readonly class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
 								<label class="col-lg-3 control-label">router model</label>
 								<div class="col-lg-9">
 									<div class="col-lg-9">
-										<input type="text" name="router_model" class="form-control" placeholder="">
+										<input type="text" name="routerMode" class="form-control" placeholder="">
 									</div>
 									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-lg-3 control-label">timestamp</label>
+								<label class="col-lg-3 control-label">version</label>
 								<div class="col-lg-9">
 									<div class="col-lg-9">
-										<input type="text" name="timestamp" class="form-control" placeholder="">
+										<input type="text" name="version" class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">weight</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="weight" class="form-control" placeholder="">
 									</div>
 									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
 								</div>
 							</div>
 						</form>
 						<div style="height: 40px;">
-							<button type="button" class="btn btn-danger pull-right action-btn" id="saveBtn">Confirm</button>
+							<button type="button" class="btn btn-info pull-right action-btn" id="saveBtn">Confirm</button>
 						</div>
 					</div>
 				</div>
@@ -283,44 +302,76 @@
 		}
 
 		function responseHandler(res) {
+			var result = {
+				rows: [],
+				total: 0
+			}
 			if (res) {
-				var data = res.data.registered;
-				res = {};
+				var data = res.data.rows;
+				result.total = res.data.total;
 				var rows = [];
 				var idx = 0;
 				for (name in data) {
 					for (i in data[name]) {
-						var obj = data[name][i];
-						var rowData = {};
-						rowData.name = name;
-						rowData.host = obj.host;
-						rowData.port = obj.port;
-						rowData.protocol = obj.protocol;
-						rowData.router_model = obj.parameters.ROUTER_MODEL;
-						rowData.timestamp = obj.parameters.timestamp;
-						rows[idx] = rowData;
+						rows[idx] = data[name][i];
 						idx++;
 					}
 				}
-				res.rows = rows;
-				res.total = rows.length + 1;
+				result.rows = rows;
 			}
 			// console.log(res);
-			return res;
+			return result;
 		}
 
 		$('#table').on('dbl-click-row.bs.table', function(e, row, ele, field){
 			$('#modifyDialog').modal();
+			$("input[name='url']").val(row.url);
+			$("input[name='project']").val(row.project);
+			$("input[name='environment']").val(row.environment);
 			$("input[name='name']").val(row.name);
 			$("input[name='host']").val(row.host);
 			$("input[name='port']").val(row.port);
-			$("input[name='protocol']").val(row.protocol);
-			$("input[name='router_model']").val(row.router_model);
-			$("input[name='timestamp']").val(row.timestamp);
+			$("input[name='routerMode']").val(row.routerMode);
+			$("input[name='version']").val(row.version);
+			$("input[name='weight']").val(row.weight);
+
 		});
 
 		$('#saveBtn').click(function() {
-			alert(1);
+			$('#modifyDialog').modal('hide');
+			bootbox.confirm({
+				title: "Confirm",
+				message: 'Confirm the changes?',
+				callback: function (confirm) {
+					if (confirm) {
+						bootbox.dialog({
+							message: '<p class="text-center"><i class="icon-spinner"></i>&nbsp;please wait...</p>',
+							closeButton: false
+						});
+						var params = $('#updateForm').serialize();
+						$.post("api/service/update", params, function(result){
+							bootbox.hideAll();
+							if (result.retmsg) {
+								bootbox.alert(result.retmsg);
+								return;
+							}
+							bootbox.dialog({
+								message: '<p class="text-center">update success</p>',
+								size: 'small',
+								closeButton: false
+							});
+							$('#table').bootstrapTable('refresh', {silent: true});
+							setTimeout(function(){
+								bootbox.hideAll();
+							}, 500);
+						});
+					} else {
+						$('#modifyDialog').modal();
+					}
+
+					$('#updateForm')[0].reset();
+				}
+			});
 		});
 
         //alert("over");

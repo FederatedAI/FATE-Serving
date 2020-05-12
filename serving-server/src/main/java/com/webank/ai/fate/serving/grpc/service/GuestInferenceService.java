@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
-    static final String BATCHINFERENCE = "batchInference";
+    static final String BATCH_INFERENCE = "batchInference";
     static final String INFERENCE = "inference";
     private static final Logger logger = LoggerFactory.getLogger(GuestInferenceService.class);
     @Autowired
@@ -70,10 +70,10 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
 
 
     @Override
-    @RegisterService(useDynamicEnvironment = true, serviceName = BATCHINFERENCE)
+    @RegisterService(useDynamicEnvironment = true, serviceName = BATCH_INFERENCE)
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        Context context = prepareContext(BATCHINFERENCE);
+        Context context = prepareContext(BATCH_INFERENCE);
 
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(req);
