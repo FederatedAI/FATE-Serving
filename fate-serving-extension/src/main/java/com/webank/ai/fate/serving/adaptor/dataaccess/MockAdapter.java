@@ -42,7 +42,8 @@ public class MockAdapter implements SingleFeatureDataAdaptor {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
         try {
-            String mockData = "x0:1.88669,x1:-1.359293,x2:2.303601,x3:2.001237,x4:1.307686,x5:2.616665,x6:2.109526,x7:2.296076,x8:2.750622,x9:1.937015";
+//            String mockData = "x0:1.88669,x1:-1.359293,x2:2.303601,x3:2.001237,x4:1.307686,x5:2.616665,x6:2.109526,x7:2.296076,x8:2.750622,x9:1.937015";
+            String mockData = "x0:1,x1:5,x2:13,x3:58,x4:95,x5:352,x6:418,x7:833,x8:888,x9:937,x10:32776";
             for (String kv : StringUtils.split(mockData, ",")) {
                 String[] a = StringUtils.split(kv, ":");
                 data.put(a[0], Double.valueOf(a[1]));

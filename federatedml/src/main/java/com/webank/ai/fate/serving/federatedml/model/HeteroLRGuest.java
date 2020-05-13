@@ -69,6 +69,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                 } else {
                     throw new GuestMergeException("local result is invalid ");
                 }
+                logger.info("local score: {}", localScore);
                 Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
                 double remoteScore;
                 if (remoteComopnentData != null) {
@@ -80,6 +81,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                         throw new GuestMergeException("host data score is null");
                     }
                 }
+                logger.info("host score: {}", remoteScore);
                 score = localScore;
                 score += remoteScore;
                 double prob = sigmod(score);
