@@ -17,7 +17,9 @@
 package com.webank.ai.fate.register.zookeeper;
 
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.register.common.*;
@@ -46,6 +48,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
     private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
     private final static String DEFAULT_ROOT = "FATE-SERVICES";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
+
+
 
 
     private final static String ROOT_KEY = "root";
@@ -119,25 +123,33 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     }
 
-    public  void doRegisterComponent(){
 
-        String hostAddress = NetUtils.getLocalIp();
-
-        this.zkClient.create(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT+PATH_SEPARATOR+project+PATH_SEPARATOR+hostAddress+":"+port,true);
-
-
+    @Override
+    public  void doRegisterComponent(URL  url){
+        String  path = url.getPath();
+        Map  content = new HashMap();
+        content.put(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
+        this.zkClient.create(path, JSON.toJSONString(content),true);
     }
 
 
+    public void  registerComponent(){
 
-
-
+        String hostAddress = NetUtils.getLocalIp();
+        String path =  PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT+PATH_SEPARATOR+project+PATH_SEPARATOR+hostAddress+":"+port;
+        URL  url = new  URL(path,Maps.newHashMap());
+        url.addParameter(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
+        try {
+            doRegisterComponent(url);
+        } catch (Exception e) {
+            addFailedRegisterComponentTask(url);
+        }
+    }
 
     @Override
     public void doSubProject(String project) {
 
         String path = root + Constants.PATH_SEPARATOR + project;
-
 
         List<String> environments = zkClient.addChildListener(path, (parent, childrens) -> {
             if (StringUtils.isNotEmpty(parent)) {
@@ -321,8 +333,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
     @Override
     public void doSubscribe(final URL url, final NotifyListener listener) {
         try {
-
-
             List<URL> urls = new ArrayList<>();
             if (ANY_VALUE.equals(url.getEnvironment())) {
 

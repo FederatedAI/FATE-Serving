@@ -48,6 +48,7 @@ public interface Constants {
 
     public static String SERVER_PORT = "server_port";
 
+    public static String INSTANCE_ID = "instance_id";
 
     public static String HOST_KEY = "host";
 

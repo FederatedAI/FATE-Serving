@@ -41,7 +41,7 @@ import static com.webank.ai.fate.register.common.Constants.*;
 
 
 public abstract class AbstractRegistry implements Registry {
-
+    public final static  String  INSTANCE_ID = UUID.randomUUID().toString();
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
     private static final char URL_SEPARATOR = ' ';
@@ -105,6 +105,11 @@ public abstract class AbstractRegistry implements Registry {
         projectSets.add(project);
 
     }
+
+
+
+    public abstract  void doRegisterComponent(URL  url) ;
+
 
     public abstract void doSubProject(String project);
 

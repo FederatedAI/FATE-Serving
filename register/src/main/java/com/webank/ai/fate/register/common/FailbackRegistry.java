@@ -20,6 +20,7 @@ import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.task.*;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +30,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.webank.ai.fate.register.common.Constants.*;
+import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
 
 
 public abstract class FailbackRegistry extends AbstractRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(FailbackRegistry.class);
-
 
     private final ConcurrentMap<URL, FailedRegisteredTask> failedRegistered = new ConcurrentHashMap<URL, FailedRegisteredTask>();
 
@@ -48,7 +49,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final ConcurrentMap<String, FailedSubProjectTask> failedSubProject = new ConcurrentHashMap<>();
 
-   // private final ConcurrentMap<String,FailedRegisteComponentTask>  FailedRegisteComponent = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String,FailedRegisterComponentTask>  failedRegisteComponent = new ConcurrentHashMap<>();
 
 
     private final int retryPeriod;
@@ -77,6 +78,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             addFailedSubscribedProjectTask(project);
         }
     }
+
+
+
 
     public void removeFailedRegisteredTask(URL url) {
         failedRegistered.remove(url);
@@ -128,6 +132,34 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
         }
     }
+    public void addFailedRegisterComponentTask(URL  url) {
+        String instanceId = url.getParameter(INSTANCE_ID);
+
+        FailedRegisterComponentTask oldOne = this.failedRegisteComponent.get(instanceId);
+        if (oldOne != null) {
+            return;
+        }
+        FailedRegisterComponentTask newTask = new FailedRegisterComponentTask(url, this);
+        oldOne = failedRegisteComponent.putIfAbsent(instanceId, newTask);
+        if (oldOne == null) {
+            // never has a retry task. then start a new task for retry.
+            retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
+        }
+    }
+
+
+
+    public void removeFailedRegisterComponentTask(URL  url) {
+        String instanceId = url.getParameter(INSTANCE_ID);
+        FailedRegisterComponentTask oldOne = this.failedRegisteComponent.remove(instanceId);
+        if (oldOne != null) {
+            oldOne.cancel();
+        }
+    }
+
+
+
+
 
 
     private void addFailedRegistered(URL url) {

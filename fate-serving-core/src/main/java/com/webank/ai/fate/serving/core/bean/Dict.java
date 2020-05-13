@@ -30,6 +30,7 @@ public class Dict {
     public static final String GET_REMOTE_PARTY_RESULT = "getRemotePartyResult";
     public static final String FEDERATED_RESULT = "federatedResult";
     public static final String PORT = "port";
+    public static final String INSTANCE_ID = "instanceId";
 
     public static final String HIT_CACHE = "hitCache";
 

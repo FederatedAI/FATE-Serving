@@ -69,13 +69,10 @@ public class RegistryConfig {
             System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
 
             ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.getRegistery(zkUrl, Dict.REGISTER_PROJECT, Dict.REGISTER_ENVIRONMENT, port);
-
-//            logger.info("registe zk , {}", FateServer.serviceSets);
-//            zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
             zookeeperRegistry.subProject(Dict.SERVICE_PROXY);
 
-            zookeeperRegistry.doRegisterComponent();
+            zookeeperRegistry.registerComponent();
 
             return zookeeperRegistry;
         }

@@ -40,10 +40,8 @@ class URL implements Serializable {
     private final String protocol;
 
 
-    // by default, host to registry
     private final String host;
 
-    // by default, port to registry
     private final int port;
 
     private final String path;
@@ -70,6 +68,16 @@ class URL implements Serializable {
         this.port = 0;
         this.path = null;
         this.parameters = null;
+    }
+
+    public URL(String path,Map<String, String> parameters) {
+        this.protocol = null;
+        this.environment = null;
+        this.project = null;
+        this.host = null;
+        this.port = 0;
+        this.path = path;
+        this.parameters = parameters;
     }
 
     public URL(String protocol, String host, int port) {
