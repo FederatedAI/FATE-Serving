@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.register.common.AbstractRegistry;
 import com.webank.ai.fate.register.common.Constants;
-import com.webank.ai.fate.register.common.RouterModel;
+import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.interfaces.Registry;
 import com.webank.ai.fate.register.loadbalance.DefaultLoadBalanceFactory;
 import com.webank.ai.fate.register.loadbalance.LoadBalanceModel;
@@ -79,19 +79,19 @@ public abstract class AbstractRouterService implements RouterService {
         return this.router(url, LoadBalanceModel.random);
     }
 
-    protected List<URL> filterVersion(List<URL> urls, String version) {
-        if (StringUtils.isEmpty(version)) {
+    protected List<URL> filterVersion(List<URL> urls, long version) {
+        /*if (StringUtils.isEmpty(version)) {
             return urls;
-        }
+        }*/
         final List<URL> resultUrls = Lists.newArrayList();
 
         if (CollectionUtils.isNotEmpty(urls)) {
 
             urls.forEach(url -> {
 
-                String routerModel = url.getParameter(Constants.ROUTER_MODEL);
+                String routerMode = url.getParameter(Constants.ROUTER_MODE);
                 try {
-                    if (RouterModel.ALL_ALLOWED.name().equals(routerModel)) {
+                    if (RouterMode.ALL_ALLOWED.name().equals(routerMode)) {
                         resultUrls.add(url);
                         return;
                     }
@@ -101,24 +101,24 @@ public abstract class AbstractRouterService implements RouterService {
                         return;
                     }
 
-                    Double targetVersionValue = Double.parseDouble(targetVersion);
-                    Double versionValue = Double.parseDouble(version);
+                    long targetVersionValue = Long.parseLong(targetVersion);
+                    long versionValue = version;
 
-                    if (targetVersionValue != null && versionValue != null) {
-                        if (String.valueOf(RouterModel.VERSION_BIGER).equalsIgnoreCase(routerModel)) {
-                            if (versionValue.doubleValue() > targetVersionValue.doubleValue()) {
+                    if (targetVersionValue != 0 && versionValue != 0) {
+                        if (String.valueOf(RouterMode.VERSION_BIGER).equalsIgnoreCase(routerMode)) {
+                            if (versionValue > targetVersionValue) {
                                 resultUrls.add(url);
                             }
-                        } else if (String.valueOf(RouterModel.VERSION_BIGTHAN_OR_EQUAL).equalsIgnoreCase(routerModel)) {
-                            if (versionValue.doubleValue() >= targetVersionValue.doubleValue()) {
+                        } else if (String.valueOf(RouterMode.VERSION_BIGTHAN_OR_EQUAL).equalsIgnoreCase(routerMode)) {
+                            if (versionValue >= targetVersionValue) {
                                 resultUrls.add(url);
                             }
-                        } else if (String.valueOf(RouterModel.VERSION_SMALLER).equalsIgnoreCase(routerModel)) {
-                            if (versionValue.doubleValue() < targetVersionValue.doubleValue()) {
+                        } else if (String.valueOf(RouterMode.VERSION_SMALLER).equalsIgnoreCase(routerMode)) {
+                            if (versionValue < targetVersionValue) {
                                 resultUrls.add(url);
                             }
-                        } else if (String.valueOf(RouterModel.VERSION_EQUALS).equalsIgnoreCase(routerModel)) {
-                            if (versionValue.doubleValue() == targetVersionValue.doubleValue()) {
+                        } else if (String.valueOf(RouterMode.VERSION_EQUALS).equalsIgnoreCase(routerMode)) {
+                            if (versionValue == targetVersionValue) {
                                 resultUrls.add(url);
                             }
                         } else {

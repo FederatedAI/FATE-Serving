@@ -217,15 +217,15 @@ public class ZookeeperRegistry extends FailbackRegistry {
     private String parseRegisterService(RegisterService registerService) {
 
         String serviceName = registerService.serviceName();
-        String version = registerService.version();
+        long version = registerService.version();
         String param = "?";
-        RouterModel routerModel = registerService.routerModel();
-        param = param + Constants.ROUTER_MODEL + "=" + routerModel.name();
+        RouterMode routerMode = registerService.routerMode();
+        param = param + Constants.ROUTER_MODE + "=" + routerMode.name();
         param = param + "&";
         param = param + Constants.TIMESTAMP_KEY + "=" + System.currentTimeMillis();
         String key = serviceName;
         boolean appendParam = false;
-        if (StringUtils.isNotEmpty(version)) {
+        if (version != 0) {
             param = param + "&" + Constants.VERSION + "=" + version;
         }
         if (this.getServieWeightMap().containsKey(serviceName + ".weight")) {

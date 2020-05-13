@@ -16,7 +16,7 @@
 
 package com.webank.ai.fate.register.common;
 
-public enum RouterModel {
+public enum RouterMode {
     /**
      * VERSION_BIGER
      */
@@ -39,8 +39,8 @@ public enum RouterModel {
     ALL_ALLOWED;
 
     public static boolean contains(String routerMode) {
-        RouterModel[] values = RouterModel.values();
-        for (RouterModel value : values) {
+        RouterMode[] values = RouterMode.values();
+        for (RouterMode value : values) {
             if (String.valueOf(value).equals(routerMode)) {
                 return true;
             }

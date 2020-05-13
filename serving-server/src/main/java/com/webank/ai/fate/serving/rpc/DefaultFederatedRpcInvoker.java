@@ -306,7 +306,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         ListenableFuture<Proxy.Packet> future = null;
 
         if (inferenceRequest.getBatchDataList().size() > 0) {
-            logger.info("iiiiiiiiiiiiiiiiiiiiii {}", inferenceRequest.getBatchDataList().size());
+//            logger.info("iiiiiiiiiiiiiiiiiiiiii {}", inferenceRequest.getBatchDataList().size());
             future = this.async(context, rpcDataWraper);
         }
         return new BatchInferenceFuture(future, rpcDataWraper, inferenceRequest, useCache, cacheData);

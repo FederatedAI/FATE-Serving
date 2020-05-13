@@ -3,8 +3,10 @@
 	
 	<head>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<title>fate-serving-admin</title>
 		<link href="css/bootstrap.css" rel="stylesheet" />
+		<link href="css/bootstrap-table.min.css" rel="stylesheet" />
 		<link rel="stylesheet" href="css/local.css" />
 	</head>
 
@@ -69,7 +71,32 @@
 
 					<div class="row">
 						<div class="col-lg-12"  >
-							<table class="table table-condensed table-striped">
+							<table id="table" class="table table-no-bordered table-hover"
+								   data-toggle="table"
+								   data-url="api/service/registered"
+								   data-query-params="queryParams"
+								   data-response-handler="responseHandler"
+								   data-side-pagination="server"
+								   data-page-number="1"
+								   data-page-size="15"
+								   data-pagination="true"
+								   data-page-list="[All]">
+								<thead>
+								<tr>
+									<th data-field="project" data-title="Project" data-sortable="true"></th>
+									<th data-field="environment" data-title="Environment" data-sortable="true"></th>
+									<th data-field="name" data-title="Name" data-sortable="true"></th>
+									<th data-field="host" data-title="Host" data-sortable="true"></th>
+									<th data-field="port" data-title="Port" data-sortable="true"></th>
+									<th data-field="routerMode" data-title="Router Mode" data-sortable="true"></th>
+									<th data-field="version" data-title="Version" data-sortable="true"></th>
+									<th data-field="weight" data-title="Weight" data-sortable="true"></th>
+									<th data-title="Operation" data-formatter="showMonitorFormatter"></th>
+								</tr>
+								</thead>
+							</table>
+
+							<!--<table class="table table-condensed table-striped">
 								<thead>
 								<tr>
 									<th>
@@ -101,7 +128,7 @@
 								<tbody  id="node" >
 
 								</tbody>
-							</table>
+							</table>-->
 						</div>
 
 
@@ -149,6 +176,97 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="modal fade" id="modifyDialog" tabindex="-1" role="dialog" aria-labelledby="dialogLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="dialogLabel">Update</h4>
+					</div>
+					<div class="modal-body">
+						<form id="updateForm" class="form-horizontal">
+							<input type="hidden" name="url"/>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">project</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="project" readonly class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">environment</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="environment" readonly class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">name</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="name" readonly class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">host</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="host" readonly class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">port</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="port" readonly class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">router model</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="routerMode" class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">version</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="version" class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-lg-3 control-label">weight</label>
+								<div class="col-lg-9">
+									<div class="col-lg-9">
+										<input type="text" name="weight" class="form-control" placeholder="">
+									</div>
+									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+								</div>
+							</div>
+						</form>
+						<div style="height: 40px;">
+							<button type="button" class="btn btn-primary pull-right action-btn" id="saveBtn">Confirm</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 
 	<script src="js/jquery-1.11.3.min.js"></script>
@@ -156,14 +274,16 @@
 	<link type="text/css" href="css/jquery-ui-1.9.2.custom.css" rel="stylesheet" />
 	<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
 	<script type="text/javascript" src="js/echarts.min.js"></script>
+	<script type="text/javascript" src="js/bootbox.all.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap-table.min.js"></script>
 
 	<script type="text/javascript">
 		//function divhide() { $("#hiddendiv").fadeToggle(250); }
 	</script>
 	
 	<script>
-		//alert("iiiiiiii2");
-        $.get('api/service/registered', function (data) {
+	//alert("iiiiiiii2");
+        /*$.get('api/service/registered', function (data) {
            // alert(data);
             $.each(data.data.registered,function(name,value) {
                 // {
@@ -209,7 +329,93 @@
                 });
 
 			})
+		});*/
+
+		function queryParams(params) {
+			return params;
+		}
+
+		function responseHandler(res) {
+			var result = {
+				rows: [],
+				total: 0
+			}
+			if (res) {
+				var data = res.data.rows;
+				result.total = res.data.total;
+				var rows = [];
+				var idx = 0;
+				for (name in data) {
+					for (i in data[name]) {
+						rows[idx] = data[name][i];
+						idx++;
+					}
+				}
+				result.rows = rows;
+			}
+			// console.log(res);
+			return result;
+		}
+
+		function showMonitorFormatter(value, row, index) {
+			return '<button type="button" class="btn btn-success btn-sm" onclick="showMonitor(\'' + row.name + '\')">Monitor</button>'
+		}
+
+		function showMonitor(name) {
+			bootbox.alert(name);
+		}
+
+		$('#table').on('dbl-click-row.bs.table', function(e, row, ele, field){
+			$('#modifyDialog').modal();
+			$("input[name='url']").val(row.url);
+			$("input[name='project']").val(row.project);
+			$("input[name='environment']").val(row.environment);
+			$("input[name='name']").val(row.name);
+			$("input[name='host']").val(row.host);
+			$("input[name='port']").val(row.port);
+			$("input[name='routerMode']").val(row.routerMode);
+			$("input[name='version']").val(row.version);
+			$("input[name='weight']").val(row.weight);
 		});
+
+		$('#saveBtn').click(function() {
+			$('#modifyDialog').modal('hide');
+			bootbox.confirm({
+				title: "Confirm",
+				message: 'Confirm the changes?',
+				callback: function (confirm) {
+					if (confirm) {
+						/*bootbox.dialog({
+							message: '<p class="text-center"><i class="icon-spinner"></i>&nbsp;please wait...</p>',
+							size: 'small',
+							closeButton: false
+						});*/
+						var params = $('#updateForm').serialize();
+						$.post("api/service/update", params, function(result){
+							bootbox.hideAll();
+							if (result.retmsg) {
+								bootbox.alert(result.retmsg);
+								return;
+							}
+							bootbox.dialog({
+								message: '<p class="text-center">update success</p>',
+								size: 'small',
+								closeButton: false
+							});
+							$('#table').bootstrapTable('refresh', {silent: true});
+							setTimeout(function(){
+								bootbox.hideAll();
+							}, 500);
+
+							$('#updateForm')[0].reset();
+						});
+					} else {
+						$('#modifyDialog').modal();
+					}
+				}
+			});
+		});
+
         //alert("over");
 
         var ccc = [];
