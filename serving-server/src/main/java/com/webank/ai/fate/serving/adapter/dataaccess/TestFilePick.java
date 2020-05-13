@@ -56,8 +56,10 @@ public class TestFilePick implements FeatureData {
                 });
             }
             Map<String, Object> fdata = featureMaps.get(featureIds.get(Dict.DEVICE_ID));
-            if(fdata != null) {
-                returnResult.setData(fdata);
+
+            Map clone = (Map) ((HashMap)fdata).clone();
+            if(clone != null) {
+                returnResult.setData(clone);
                 returnResult.setRetcode(InferenceRetCode.OK);
             } else{
                 logger.error("cant not find features for {}.", featureIds.get(Dict.DEVICE_ID));
