@@ -361,9 +361,9 @@
 			return '<button type="button" class="btn btn-success btn-sm" onclick="showMonitor(\'' + row.name + '\')">Monitor</button>'
 		}
 
-		function showMonitor(name) {
-			bootbox.alert(name);
-		}
+		// function showMonitor(name) {
+		// 	bootbox.alert(name);
+		// }
 
 		$('#table').on('dbl-click-row.bs.table', function(e, row, ele, field){
 			$('#modifyDialog').modal();
@@ -442,7 +442,9 @@
 
         var serviceMonitorChart = echarts.init(document.getElementById('monitorChart'));
 
-		function  showServiceMonitor(){
+		function  showMonitor(){
+
+
             $("#serviceMonitorModal").modal({
                 keyboard: false
             });
