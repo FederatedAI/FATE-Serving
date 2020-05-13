@@ -164,7 +164,7 @@ public class PipelineModelProcessor implements ModelProcessor {
         });
         Map<String, Object> tempResult = singleMerge(context, localResult, remoteResultMap);
         String retcode = tempResult.get(Dict.RET_CODE).toString();
-        String message = tempResult.get(Dict.MESSAGE).toString();
+        String message = tempResult.get(Dict.MESSAGE) == null ? "" : tempResult.get(Dict.MESSAGE).toString();
         tempResult.remove(Dict.RET_CODE);
         tempResult.remove(Dict.MESSAGE);
         remoteResult.setData(tempResult);
