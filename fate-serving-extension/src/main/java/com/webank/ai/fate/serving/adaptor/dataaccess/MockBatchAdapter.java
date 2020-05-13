@@ -53,7 +53,7 @@ public class MockBatchAdapter implements BatchFeatureDataAdaptor {
             }
             BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult singleBatchHostFeatureAdaptorResult = new BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult();
             singleBatchHostFeatureAdaptorResult.setFeatures(data);
-            singleBatchHostFeatureAdaptorResult.setRetcode(StatusCode.HOST_FEATURE_NOT_EXIST);
+            singleBatchHostFeatureAdaptorResult.setRetcode(StatusCode.SUCCESS);
             indexMap.put(singleInferenceData.getIndex(), singleBatchHostFeatureAdaptorResult);
 
         });
