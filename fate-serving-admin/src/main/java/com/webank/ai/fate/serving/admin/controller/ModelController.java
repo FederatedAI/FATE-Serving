@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.admin.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
@@ -14,6 +15,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import io.grpc.ManagedChannel;
@@ -27,6 +29,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -217,29 +221,48 @@ public class ModelController {
 //        return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
 //    }
     @GetMapping("/model/query")
-    public ModelServiceProto.QueryModelResponse getModelByServiceId(String host, int port, String serviceId) throws Exception {
-        // 根据serviceId查询
-        Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "parameter serviceId is blank");
+    public ReturnResult queryModel(String host, int port, String serviceId) throws Exception {
+        Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
+        Preconditions.checkArgument(port != 0, "parameter port is blank");
 
         if (logger.isDebugEnabled()) {
-            logger.debug("get model by serviceId, host: {}, port: {}, serviceId: {}", host, port, serviceId);
+            logger.debug("query model, host: {}, port: {}, serviceId: {}", host, port, serviceId);
         }
 
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = getModelServiceBlockingStub(host, port);
 
         ModelServiceProto.QueryModelRequest.Builder queryModelRequestBuilder = ModelServiceProto.QueryModelRequest.newBuilder();
 
-
-        queryModelRequestBuilder.setQueryType(1);
-        queryModelRequestBuilder.setServiceId(serviceId);
+        if (StringUtils.isNotBlank(serviceId)) {
+            // by service id
+            queryModelRequestBuilder.setQueryType(1);
+//            queryModelRequestBuilder.setTableName(tableName);
+//            queryModelRequestBuilder.setNamespace(namespace);
+            queryModelRequestBuilder.setServiceId(serviceId);
+        } else {
+            // list all
+            queryModelRequestBuilder.setQueryType(0);
+        }
 
         ModelServiceProto.QueryModelResponse response = blockingStub.queryModel(queryModelRequestBuilder.build());
 
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
-        return response;
-        // return ReturnResult.build(response.getStatusCode(), response.getMessage(), JSON.toJSONString(response.getModelInfosList()));
+
+        Map data = Maps.newHashMap();
+        List rows = Lists.newArrayList();
+        List<ModelServiceProto.ModelInfoEx> modelInfosList = response.getModelInfosList();
+        if (modelInfosList != null) {
+            for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
+                rows.add(JSONObject.parseObject(modelInfoEx.getContent()));
+            }
+        }
+
+        data.put("total", rows.size());
+        data.put("rows", rows);
+//        return response;
+         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
 
     @PostMapping("/model/publishLoad")

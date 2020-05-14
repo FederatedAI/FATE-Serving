@@ -256,6 +256,17 @@
                     }
                 ]
             });
+
+            myChart.on("dblclick", function(param){
+				if (!param.data.leaf) {
+					// 不是叶子节点，跳过
+					return;
+				}
+				// 双击打开选中组件
+				if (param.type == 'dblclick') {
+					window.location.href = window.location.origin + '/component.html?target=' + param.name + '&label=' + param.data.label;
+				}
+            });
         });
 
 

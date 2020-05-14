@@ -30,6 +30,26 @@ public class ComponentService {
     public  class  NodeData{
         String name;
 
+        boolean leaf;
+
+        String label;
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(String label) {
+            this.label = label;
+        }
+
+        public boolean isLeaf() {
+            return leaf;
+        }
+
+        public void setLeaf(boolean leaf) {
+            this.leaf = leaf;
+        }
+
         public String getName() {
             return name;
         }
@@ -57,22 +77,24 @@ public class ComponentService {
 
     @Scheduled(cron = "0/5 * * * * ?")
     public void schedulePullComponent(){
-
-
         ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
         NodeData  root  = new NodeData();
         root.setName("cluster");
+        root.setLabel(root.getName());
         List<String> componentLists =  zkClient.getChildren(PATH_SEPARATOR+DEFAULT_COMPONENT_ROOT);
         if(componentLists!=null){
             componentLists.forEach(name->{
                 List<String>  nodes =zkClient.getChildren(PATH_SEPARATOR+DEFAULT_COMPONENT_ROOT+PATH_SEPARATOR+name);
                 NodeData  componentData = new NodeData();
                 componentData.setName(name);
+                componentData.setLabel(root.getLabel() + "-" + componentData.getName());
                 root.getChildren().add(componentData);
                 if(CollectionUtils.isNotEmpty(nodes)){
                     nodes.forEach(nodeName->{
                         NodeData  nodeData = new NodeData();
                         nodeData.setName(nodeName);
+                        nodeData.setLeaf(true);
+                        nodeData.setLabel(componentData.getLabel() + "-" + nodeData.getName());
                         componentData.getChildren().add(nodeData);
                     });
                 }
@@ -81,7 +103,7 @@ public class ComponentService {
             });
         }
         cachedNodeData =  root;
-        logger.info("refresh  component info ");
+        logger.debug("refresh  component info ");
     }
 
 

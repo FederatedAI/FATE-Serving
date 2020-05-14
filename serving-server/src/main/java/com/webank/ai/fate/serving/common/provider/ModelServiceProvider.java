@@ -1,9 +1,13 @@
 package com.webank.ai.fate.serving.common.provider;
 
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -41,7 +45,23 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.QueryModelRequest req = (ModelServiceProto.QueryModelRequest) data.getBody();
         String content = modelManager.queryModel(context, req);
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
-        builder.setMessage(content);
+
+        JSONArray returnArray = JSONArray.parseArray(content);
+        for (int i = 0; i < returnArray.size(); i++) {
+            Model model = JSONObject.parseObject(returnArray.getString(i), Model.class);
+
+            ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
+            modelExBuilder.setIndex(i);
+            modelExBuilder.setTableName(model.getTableName());
+            modelExBuilder.setNamespace(model.getNamespace());
+            modelExBuilder.setServiceId(model.getServiceId());
+            modelExBuilder.setContent(JSONObject.toJSONString(model));
+
+            builder.addModelInfos(modelExBuilder.build());
+        }
+
+        builder.setRetcode(StatusCode.SUCCESS);
+//        builder.setMessage(content);
         return builder.build();
     }
 
