@@ -472,10 +472,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                 if (StringUtils.isBlank(modelKey)) {
                     return null;
                 }
-
-                Model model = this.namespaceMap.get(modelKey);
-                model.setServiceId(queryModelRequest.getServiceId());
-                return JSON.toJSONString(Arrays.asList(model));
+                return JSON.toJSONString(Arrays.asList(this.namespaceMap.get(modelKey)));
         }
         return null;
 

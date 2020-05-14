@@ -50,6 +50,10 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         for (int i = 0; i < returnArray.size(); i++) {
             Model model = JSONObject.parseObject(returnArray.getString(i), Model.class);
 
+            if (req.getQueryType() == 1) {
+                model.setServiceId(req.getServiceId());
+            }
+
             ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
             modelExBuilder.setIndex(i);
             modelExBuilder.setTableName(model.getTableName());
