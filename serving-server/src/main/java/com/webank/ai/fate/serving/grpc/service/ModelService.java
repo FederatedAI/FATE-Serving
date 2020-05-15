@@ -113,26 +113,14 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
     @Override
     @RegisterService(serviceName = "unload")
-    public synchronized void unload(PublishRequest request, StreamObserver<PublishResponse> responseObserver) {
+    public synchronized void unload(ModelServiceProto.UnloadRequest request, StreamObserver<ModelServiceProto.UnloadResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNLOAD.name(), metricRegistry);
-        context.preProcess();
-        ReturnResult returnResult = null;
-        try {
-            PublishResponse.Builder builder = PublishResponse.newBuilder();
-            if (logger.isDebugEnabled()) {
-                logger.debug("unload model table name: {}, namespace: {}", request.getTableName(), request.getNamespace());
-            }
-
-            returnResult = modelManager.unload(request.getTableName(), request.getNamespace());
-
-            builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()))
-                    .setMessage(returnResult.getRetmsg())
-                    .setData(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult.getData()).getBytes()));
-            responseObserver.onNext(builder.build());
-            responseObserver.onCompleted();
-        } finally {
-            context.postProcess(request, returnResult);
-        }
+        InboundPackage<ModelServiceProto.UnloadRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.UnloadResponse unloadResponse = (ModelServiceProto.UnloadResponse) outboundPackage.getData();
+        responseObserver.onNext(unloadResponse);
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -140,6 +128,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     public synchronized void unbind(ModelServiceProto.UnbindRequest request, StreamObserver<ModelServiceProto.UnbindResponse> responseObserver) {
         Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNBIND.name(), metricRegistry);
         InboundPackage<ModelServiceProto.UnbindRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ModelServiceProto.UnbindResponse unbindResponse = (ModelServiceProto.UnbindResponse) outboundPackage.getData();
         responseObserver.onNext(unbindResponse);

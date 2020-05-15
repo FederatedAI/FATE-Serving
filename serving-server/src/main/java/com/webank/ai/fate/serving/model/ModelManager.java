@@ -76,7 +76,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
 
             String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-            if (tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
+            if (!tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
                 logger.info("unbind request info is error {}", req);
                 throw new ModelNullException("unbind request info is error");
             }
@@ -505,16 +505,20 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         return new StringBuilder().append(tableName).append("_").append(namespace).toString();
     }
 
-    public synchronized ReturnResult unload(String tableName, String namespace) {
-        ReturnResult returnResult = new ReturnResult();
+    public synchronized ModelServiceProto.UnloadResponse unload(Context context, ModelServiceProto.UnloadRequest request) {
+        ModelServiceProto.UnloadResponse.Builder resultBuilder = ModelServiceProto.UnloadResponse.newBuilder();
         try {
             if (logger.isDebugEnabled()) {
-                logger.debug("try to unload model, name: {}, namespace: {}", tableName, namespace);
+                logger.debug("try to unload model, name: {}, namespace: {}", request.getTableName(), request.getNamespace());
             }
 
-            returnResult.setRetcode(StatusCode.SUCCESS);
+            resultBuilder.setStatusCode(StatusCode.SUCCESS);
 
-            Model model = this.getModelByTableNameAndNamespace(tableName, namespace);
+            Model model = this.getModelByTableNameAndNamespace(request.getTableName(), request.getNamespace());
+            if (model == null) {
+                logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", request.getTableName(), request.getNamespace());
+                throw new ModelNullException(" found model info, please check if the model is already loaded.");
+            }
 //        Preconditions.checkArgument(model != null);
 //        if (model == null) {
 //            logger.info("model not loaded");
@@ -555,18 +559,21 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                 logger.info("Unregister urls: {}", unRegisterUrls);
             }
 
-            this.namespaceMap.remove(getNameSpaceKey(tableName, namespace));
+            this.namespaceMap.remove(getNameSpaceKey(request.getTableName(), request.getNamespace()));
             this.serviceIdNamespaceMap.remove(serviceId);
 
             logger.info("Unload model success");
 
             // update store
             this.store();
+        } catch (ModelNullException e) {
+            resultBuilder.setStatusCode(StatusCode.MODEL_NULL);
+            resultBuilder.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.error(e.getMessage());
-            returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
+            resultBuilder.setStatusCode(StatusCode.SYSTEM_ERROR);
         }
-        return returnResult;
+        return resultBuilder.build();
     }
 
     public void doSaveCache(Map data, File file, long version) {

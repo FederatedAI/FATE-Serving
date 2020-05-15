@@ -336,20 +336,21 @@ public class ModelController {
 
             ModelServiceGrpc.ModelServiceFutureStub futureStub = getModelServiceFutureStub(host, port);
 
-            ModelServiceProto.PublishRequest publishRequest = ModelServiceProto.PublishRequest.newBuilder()
+            ModelServiceProto.UnloadRequest unloadRequest = ModelServiceProto.UnloadRequest.newBuilder()
                     .setTableName(tableName)
                     .setNamespace(namespace)
                     .build();
 
-            ListenableFuture<ModelServiceProto.PublishResponse> future = futureStub.unload(publishRequest);
-            ModelServiceProto.PublishResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
+            ListenableFuture<ModelServiceProto.UnloadResponse> future = futureStub.unload(unloadRequest);
+            ModelServiceProto.UnloadResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", response);
             }
 
-            result.setRetcode(String.valueOf(response.getStatusCode()));
-            result.setData(JSONObject.parseObject(response.getData().toStringUtf8()));
+            result.setRetcode(response.getStatusCode());
+//            result.setData(JSONObject.parseObject(response.getData().toStringUtf8()));
+            result.setRetmsg(response.getMessage());
             return result;
         };
     }

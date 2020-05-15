@@ -97,6 +97,6 @@ service ModelService{
     rpc publishBind(PublishRequest) returns (PublishResponse);
     rpc publishOnline(PublishRequest) returns (PublishResponse);
     rpc queryModel(QueryModelRequest)  returns (QueryModelResponse);
-    rpc unload(PublishRequest) returns (PublishResponse);
+    rpc unload(UnloadRequest) returns (UnloadResponse);
     rpc unbind(UnbindRequest) returns (UnbindResponse);
 }

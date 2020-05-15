@@ -49,7 +49,7 @@
 
 					<ul class="nav nav-tabs">
 						<li role="presentation" class="active"><a data-toggle="tab" href="#basic">Basic</a></li>
-						<li role="presentation"><a data-toggle="tab" href="#models">Models</a></li>
+						<li role="presentation" id="modelsTab" class="hidden"><a data-toggle="tab" href="#models">Models</a></li>
 						<li role="presentation"><a data-toggle="tab" href="#jvm">JVM</a></li>
 					</ul>
 
@@ -70,6 +70,7 @@
 								<table id="modelsTable" class="table table-no-bordered table-hover"
 										data-toggle="table" 
 										data-toolbar="#modelsToolbar"
+										data-ajax="ajaxHandler",
 										data-url="api/model/query"
 										data-query-params="queryParams"
 										data-response-handler="responseHandler"
@@ -111,7 +112,7 @@
 	<script type="text/javascript" src="js/bootstrap-table.min.js"></script>
 
 	<script>
-		var urlParams = init();
+		var _config = init();
 		
 		$(function() {
 			$('#searchByServiceId').click(function() {
@@ -130,6 +131,12 @@
 			
 			if (_params.label) {
 				$('#label').text(_params.label);
+				var _labels = _params.label.split('-');
+				if (_labels[1] == 'serving') {
+					$('#modelsTab').removeClass('hidden');
+					$('#modelsTab').addClass('show');
+					_params.showModels = true;
+				}
 			}
 
 			var _target = _params.target.split(':');
@@ -138,9 +145,22 @@
 			return _params;
 		}
 
+		function ajaxHandler(params) {
+			if (_config.showModels) {
+				$.ajax(params);
+			} else {
+				params.success({
+					retcode: "0",
+					data: {
+						total: 0,
+						rows: []
+					}
+				});
+			}
+		}
 		function queryParams(params){
-			params.host = urlParams.host;
-			params.port = urlParams.port;
+			params.host = _config.host;
+			params.port = _config.port;
 			params.serviceId = $('#serviceId').val();
 			return params;
 		}
@@ -158,15 +178,72 @@
 
 		function operationFormatter(value, row, index) {
 			return '<div class="btn-group"><button type="button" class="btn btn-success btn-sm" onclick="doUnload(' + JSON.stringify(row).replace(/"/g, '&quot;') + ')">Unload</button>'
-			 + '<button type="button" class="btn btn-success btn-sm" onclick="doUnbind(' + JSON.stringify(row).replace(/"/g, '&quot;') + ')">UnBind</button></div>';
+			 + '<button type="button" class="btn btn-success btn-sm" onclick="doUnbind(' + JSON.stringify(row).replace(/"/g, '&quot;') + ')">Unbind</button></div>';
 		}
 
 		function doUnload(row) {
-			console.log(row);
+			bootbox.confirm({
+				title: "Confirm",
+				message: 'Unload model ' + row.tableName + '_' + row.namespace + '?',
+				callback: function (confirm) {
+					if (confirm) {
+						$.post("api/model/unload", {
+							host: _config.host,
+							port: _config.port,
+							tableName: row.tableName,
+							namespace: row.namespace
+						}, function(result){
+							bootbox.hideAll();
+							if (result.retmsg) {
+								bootbox.alert(result.retmsg);
+								return;
+							}
+							bootbox.dialog({
+								message: '<p class="text-center">unload success</p>',
+								size: 'small',
+								closeButton: false
+							});
+							$('#modelsTable').bootstrapTable('refresh', {silent: true});
+							setTimeout(function(){
+								bootbox.hideAll();
+							}, 500);
+						});
+					}
+				}
+			});
 		}
 		
 		function doUnbind(row) {
-			console.log(row);
+			bootbox.confirm({
+				title: "Confirm",
+				message: 'Unbind model ' + row.serviceId + '?',
+				callback: function (confirm) {
+					if (confirm) {
+						$.post("api/model/unbind", {
+							host: _config.host,
+							port: _config.port,
+							tableName: row.tableName,
+							namespace: row.namespace,
+							serviceId: row.serviceId
+						}, function(result){
+							bootbox.hideAll();
+							if (result.retmsg) {
+								bootbox.alert(result.retmsg);
+								return;
+							}
+							bootbox.dialog({
+								message: '<p class="text-center">unbind success</p>',
+								size: 'small',
+								closeButton: false
+							});
+							$('#modelsTable').bootstrapTable('refresh', {silent: true});
+							setTimeout(function(){
+								bootbox.hideAll();
+							}, 500);
+						});
+					}
+				}
+			});
 		}
 
 	</script>

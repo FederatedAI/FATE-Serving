@@ -69,5 +69,19 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         return builder.build();
     }
 
+    @FateServiceMethod(name = "UNLOAD")
+    public ModelServiceProto.UnloadResponse unload(Context context, InboundPackage data) {
+        ModelServiceProto.UnloadRequest req = (ModelServiceProto.UnloadRequest) data.getBody();
+        ModelServiceProto.UnloadResponse res = modelManager.unload(context, req);
+        return res;
+    }
+
+    @FateServiceMethod(name = "UNBIND")
+    public ModelServiceProto.UnbindResponse unbind(Context context, InboundPackage data) {
+        ModelServiceProto.UnbindRequest req = (ModelServiceProto.UnbindRequest) data.getBody();
+        ModelServiceProto.UnbindResponse res = modelManager.unbind(context, req);
+        return res;
+    }
+
 
 }
