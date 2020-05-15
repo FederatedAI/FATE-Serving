@@ -159,7 +159,8 @@ public class PipelineModelProcessor implements ModelProcessor {
                     remoteResultMap.put(partId, remoteData);
                 }
             } catch (Exception e) {
-                throw new RemoteRpcException("host " + partId + " remote error");
+                logger.error("host " + partId + " remote error : "+e.getMessage());
+                throw new RemoteRpcException("host " + partId + " remote error : "+e.getMessage());
             }
         });
         Map<String, Object> tempResult = singleMerge(context, localResult, remoteResultMap);

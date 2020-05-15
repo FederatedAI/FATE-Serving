@@ -119,9 +119,9 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
 
             context.setServiceName(this.serviceName);
 
-            preChain.doPreProcess(context, data, outboundPackage);
 
             try {
+                preChain.doPreProcess(context, data, outboundPackage);
                 result = doService(context, data, outboundPackage);
                 if (logger.isDebugEnabled()) {
                     logger.debug("do service, router info: {}, service name: {}, result: {}", JSON.toJSONString(data.getRouterInfo()), serviceName, result);

@@ -103,7 +103,7 @@
     </logger>
 
     <!-- Logger 根目录 -->
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ERROR"/>
         <appender-ref ref="WARN"/>
