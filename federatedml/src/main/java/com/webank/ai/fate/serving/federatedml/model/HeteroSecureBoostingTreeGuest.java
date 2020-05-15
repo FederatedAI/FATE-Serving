@@ -35,7 +35,9 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         return 1. / (1. + Math.exp(-x));
     }
 
-    private Map<String, Object> softmax(double[] weights) {
+    private boolean fastMode = true;
+
+    private Map<String, Object> softmax(double weights[]) {
         int n = weights.length;
         double max = weights[0];
         int maxIndex = 0;
@@ -99,6 +101,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
     }
 
     private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
+
         while (!this.isLocateInLeaf(treeId, treeNodeId) && this.getSite(treeId, treeNodeId).equals(this.site)) {
             treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
         }
@@ -106,6 +109,28 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         return treeNodeId;
     }
 
+    private int fastTraverseTree(int treeId, int treeNodeId, Map<String, Object> input, Map<String, Object> lookUpTable) {
+
+        while(!this.isLocateInLeaf(treeId, treeNodeId)){
+            if(this.getSite(treeId, treeNodeId).equals(this.site)){
+                treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
+            }
+            else{
+                Map<String, Boolean> lookUp = (Map<String, Boolean>) lookUpTable.get(String.valueOf(treeId));
+                if(lookUp.get(String.valueOf(treeNodeId))){
+                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
+                }
+                else {
+                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
+                }
+            }
+            if(logger.isDebugEnabled()) {
+                logger.info("tree id is {}, tree node is {}", treeId, treeNodeId);
+            }
+        }
+
+        return treeNodeId;
+    }
 
     private Map<String, Object> getFinalPredict(double[] weights) {
         Map<String, Object> ret = new HashMap<String, Object>(8);
@@ -121,9 +146,8 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 sumWeights[i % this.treeDim] += weights[i] * this.learningRate;
             }
 
-            for (int i = 0; i < this.treeDim; i++) {
+            for (int i = 0; i < this.treeDim; i++)
                 sumWeights[i] += this.initScore.get(i);
-            }
 
             ret = softmax(sumWeights);
         } else {
@@ -139,9 +163,8 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        if(logger.isDebugEnabled()) {
-            logger.debug("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
-        }
+
+        logger.info("HeteroSecureBoostingTreeGuest FederatedParams {}", predictParams);
 
         Map<String, Object> input = inputData.get(0);
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
@@ -155,9 +178,8 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 ++featureHit;
             }
         }
-        if(logger.isDebugEnabled()) {
-            logger.debug("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
-        }
+
+        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
         int[] treeNodeIds = new int[this.treeNum];
         double[] weights = new double[this.treeNum];
         int communicationRound = 0;
@@ -185,26 +207,53 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
             predictParams.getData().put(Dict.TREE_LOCATION, treeLocation);
 
+            if(logger.isDebugEnabled()) {
+                logger.info("fast mode is {}", this.fastMode);
+            }
+
             try {
+                logger.info("begin to federated");
 
                 ReturnResult tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
+                Map<String, Object> returnData = tempResult.getData();
 
-                Map<String, Object> afterLocation = tempResult.getData();
-                if(logger.isDebugEnabled()) {
-                    logger.debug("after loccation is {}", afterLocation);
-                }
-                for (String location : afterLocation.keySet()) {
-                    treeNodeIds[new Integer(location)] = ((Number) afterLocation.get(location)).intValue();
+                boolean getNodeRoute = false;
+                for(Object obj: returnData.values()){
+                    if(!(obj instanceof Integer)) getNodeRoute = true; // get node position if value is integer
+                    break;
                 }
 
-                if (afterLocation == null) {
-                    logger.error("receive predict result of host is null");
-                    throw new Exception("Null Data");
+                if(this.fastMode && getNodeRoute){
+
+                    if(logger.isDebugEnabled()){
+                        logger.info("running fast mode, look up table is {}",returnData);
+                    }
+
+                    for(String treeIdx: treeLocation.keySet()){
+                        int idx = Integer.valueOf(treeIdx);
+                        int curNodeId = (Integer)treeLocation.get(treeIdx);
+                        int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping, returnData);
+                        treeNodeIds[idx] = final_node_id;
+                    }
+                }
+                else{
+                    Map<String, Object> afterLocation = tempResult.getData();
+
+                    if(logger.isDebugEnabled()){
+                        logger.info("after location is {}", afterLocation);
+                    }
+
+                    for (String location : afterLocation.keySet()) {
+                        treeNodeIds[new Integer(location)] = ((Number) afterLocation.get(location)).intValue();
+                    }
+                    if (afterLocation == null) {
+                        logger.info("receive predict result of host is null");
+                        throw new Exception("Null Data");
+                    }
                 }
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                logger.error("HeteroSecureBoostingTreeGuest handle error",ex);
                 return null;
             }
         }
@@ -212,11 +261,11 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         for (int i = 0; i < this.treeNum; ++i) {
             weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
         }
-        if(logger.isDebugEnabled()){
-            logger.debug("tree leaf ids is {}", treeNodeIds);
-            logger.debug("weights is {}", weights);
-        }
 
+        if(logger.isDebugEnabled()){
+            logger.info("tree leaf ids is {}", treeNodeIds);
+            logger.info("weights is {}", weights);
+        }
 
         return getFinalPredict(weights);
     }
