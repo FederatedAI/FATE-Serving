@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.core.rpc.core;
 
-import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -85,12 +84,14 @@ public class ErrorMessageUtil {
             result.put(Dict.MESSAGE, "SYSTEM_ERROR");
 
 
-        } else if (e instanceof BlockException) {
-            result.put(Dict.CODE, ErrorCode.LIMIT_ERROR);
-
-            result.put(Dict.MESSAGE, "OVERLOAD");
-
-        } else if (e instanceof InvalidRoleInfoException) {
+        }
+//        else if (e instanceof BlockException) {
+//            result.put(Dict.CODE, ErrorCode.LIMIT_ERROR);
+//
+//            result.put(Dict.MESSAGE, "OVERLOAD");
+//
+//        }
+        else if (e instanceof InvalidRoleInfoException) {
             result.put(Dict.CODE, ErrorCode.ROLE_ERROR);
             result.put(Dict.MESSAGE, "ROLE_ERROR");
         } else if (e instanceof ShowDownRejectException) {

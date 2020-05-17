@@ -92,7 +92,7 @@ public class ServingServer implements InitializingBean {
             });
             zookeeperRegistry.register(FateServer.serviceSets);
 
-            zookeeperRegistry.registerComponent();
+            //zookeeperRegistry.registerComponent();
 
         } else {
             logger.warn("serving-server not use register center");

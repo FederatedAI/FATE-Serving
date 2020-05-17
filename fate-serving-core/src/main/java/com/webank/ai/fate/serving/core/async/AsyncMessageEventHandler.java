@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.core.async;
 
-import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;
 import com.lmax.disruptor.EventHandler;
 import com.webank.ai.fate.serving.core.exceptions.AsyncMessageException;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +27,7 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
         int processors = Runtime.getRuntime().availableProcessors();
 
         executorService = new ThreadPoolExecutor(processors, processors * 2, 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(), new NamedThreadFactory("AsyncMessage", true));
+                new LinkedBlockingQueue<>());
 
     }
 

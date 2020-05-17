@@ -16,6 +16,8 @@ import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.cache.ExpiringLRUCache;
 import com.webank.ai.fate.serving.core.cache.RedisCache;
+
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +91,16 @@ public class ServingConfig {
     @ConditionalOnMissingBean
     public SpringContextUtil springContextUtil() {
         return new SpringContextUtil();
+    }
+
+
+    @Bean
+    public FlowCounterManager FlowCounterManager(){
+        FlowCounterManager flowCounterManager = new  FlowCounterManager();
+       // flowCounterManager.setMetricReport(new ());
+        flowCounterManager.startReport();
+        return  flowCounterManager;
+
     }
 
 

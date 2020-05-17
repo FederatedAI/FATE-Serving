@@ -46,6 +46,12 @@ public class GetSystemInfo {
     private static String LOCALHOST_KEY = "localhost";
     private static String LOCALHOST_VALUE = "127.0.0.1";
 
+    public static int getPid() {
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        return Integer.parseInt(name.split("@")[0]);
+    }
+
+
     static {
         localIp = getLocalIp();
         logger.info("set local ip : {}", localIp);

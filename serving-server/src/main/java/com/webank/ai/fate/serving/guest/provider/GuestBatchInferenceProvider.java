@@ -21,13 +21,13 @@ import java.util.Map;
 
 
 @FateService(name = "batchInferenece", preChain = {
-        "monitorInterceptor",
-//        "requestOverloadBreaker",
+      //  "monitorInterceptor",
+        "requestOverloadBreaker",
         "guestBatchParamInterceptor",
         "guestModelInterceptor",
         "federationRouterInterceptor"
 }, postChain = {
-        "monitorInterceptor"
+       // "monitorInterceptor"
 
 })
 @Service
