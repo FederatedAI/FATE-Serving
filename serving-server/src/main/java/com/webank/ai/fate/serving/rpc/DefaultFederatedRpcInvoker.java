@@ -126,7 +126,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         if (!routerByzk) {
             address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
         } else {
-            List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIROMMENT, Dict.UNARYCALL);
+            List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIRONMENT, Dict.UNARYCALL);
             if (urls != null && urls.size() > 0) {
                 URL url = urls.get(0);
                 String ip = url.getHost();

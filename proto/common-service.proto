@@ -18,7 +18,7 @@ syntax = "proto3";
 
 
 package com.webank.ai.fate.api.networking.common;
-
+option java_outer_classname = "CommonServiceProto";
 
 message QueryMetricRequest{
     int64 beginMs = 1;
@@ -26,12 +26,29 @@ message QueryMetricRequest{
     string source = 3;
 }
 message QueryMetricResponse{
-    string metrics = 1;
+    bytes metrics = 1;
+}
+
+message UpdateFlowRuleRequest{
+    string source = 1;
+    double allowQps = 2;
+}
+
+message QueryPropertiesRequest{
+    string keyword = 1;
+}
+
+message CommonResponse{
+    string statusCode = 1;
+    string message = 2;
+    bytes data = 3;
 }
 
 service CommonService {
 
-    rpc queryMetrics(QueryMetricRequest)  returns (QueryMetricResponse);
+    rpc queryMetrics(QueryMetricRequest)  returns (CommonResponse);
+    rpc updateFlowRule(UpdateFlowRuleRequest)  returns (CommonResponse);
+    rpc queryProperties(QueryPropertiesRequest)  returns (CommonResponse);
 
 }
 

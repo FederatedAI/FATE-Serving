@@ -11,7 +11,6 @@ import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
@@ -139,7 +138,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         } finally {
             requestInHandle.decrementAndGet();
             long end = System.currentTimeMillis();
-            long cost = end - begin;
+//            long cost = end - begin;
 
             if (exceptions.size() != 0) {
                 try {
@@ -176,7 +175,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
         result.put(Dict.MESSAGE, e.getMessage());
         ErrorMessageUtil.handleException(result, e);
-        context.setReturnCode(result.get(Dict.CODE) != null ? result.get(Dict.CODE).toString() : ErrorCode.SYSTEM_ERROR.toString());
+        context.setReturnCode(result.get(Dict.CODE) != null ? result.get(Dict.CODE).toString() : StatusCode.SYSTEM_ERROR);
         resp rsp = transformErrorMap(context, result);
         outboundPackage.setData(rsp);
         return outboundPackage;

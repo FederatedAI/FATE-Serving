@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.host.provider;
 
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
-import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -44,7 +44,7 @@ public class HostBatchInferenceProvider extends AbstractServingServiceProvider<B
             batchInferenceResult.setRetcode(baseException.getRetcode());
             batchInferenceResult.setRetmsg(e.getMessage());
         } else {
-            batchInferenceResult.setRetcode(ErrorCode.SYSTEM_ERROR);
+            batchInferenceResult.setRetcode(StatusCode.SYSTEM_ERROR);
             batchInferenceResult.setRetmsg(e.getMessage());
         }
         outboundPackage.setData(batchInferenceResult);

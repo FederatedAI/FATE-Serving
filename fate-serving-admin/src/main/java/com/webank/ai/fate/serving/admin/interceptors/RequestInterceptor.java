@@ -1,3 +1,4 @@
+/*
 package com.webank.ai.fate.serving.admin.interceptors;
 
 import com.webank.ai.fate.serving.admin.cache.MetricCache;
@@ -59,3 +60,4 @@ public class RequestInterceptor implements HandlerInterceptor {
 
 
 }
+*/

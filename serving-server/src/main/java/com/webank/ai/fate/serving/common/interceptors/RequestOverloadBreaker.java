@@ -1,12 +1,14 @@
 package com.webank.ai.fate.serving.common.interceptors;
 
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.exceptions.OverLoadException;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,20 +17,31 @@ import org.springframework.stereotype.Service;
  * @Author
  **/
 @Service
-public class RequestOverloadBreaker implements Interceptor {
+public class RequestOverloadBreaker implements Interceptor, InitializingBean {
     Logger logger = LoggerFactory.getLogger(RequestOverloadBreaker.class);
+
     @Autowired
     FlowCounterManager  flowCounterManager;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        
-        flowCounterManager.pass(context.getServiceName());
-
+        boolean pass = flowCounterManager.pass(context.getServiceName());
+        if (!pass) {
+            flowCounterManager.block(context.getServiceName());
+            throw new OverLoadException("qps over load");
+        } else {
+            flowCounterManager.success(context.getServiceName());
+        }
     }
 
     @Override
     public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // init flow service allow qps
+        flowCounterManager.init();
     }
 }

@@ -213,7 +213,7 @@ public abstract class BaseComponent implements LocalInferenceAware {
 //                address = Configuration.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
 //            } else {
 //
-//                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIROMMENT + "/" + Dict.UNARYCALL);
+//                URL paramUrl = URL.valueOf(Dict.PROPERTY_PROXY_ADDRESS + "/" + Dict.ONLINE_ENVIRONMENT + "/" + Dict.UNARYCALL);
 //                URL newUrl =paramUrl.addParameter(Constants.VERSION_KEY,version);
 //                List<URL> urls = routerService.router(newUrl);
 //                if (urls!=null&&urls.size() > 0) {

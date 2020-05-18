@@ -9,6 +9,7 @@ import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
@@ -45,14 +46,14 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     static Map<String, String> fateErrorCodeMap = Maps.newHashMap();
 
     static {
-        fateErrorCodeMap.put(ErrorCode.PARAM_ERROR, "500");
-        fateErrorCodeMap.put(ErrorCode.ROLE_ERROR, "501");
-        fateErrorCodeMap.put(ErrorCode.SERVICE_NOT_FOUND, "502");
-        fateErrorCodeMap.put(ErrorCode.SYSTEM_ERROR, "503");
-        fateErrorCodeMap.put(ErrorCode.LIMIT_ERROR, "504");
-        fateErrorCodeMap.put(ErrorCode.NET_ERROR, "507");
-        fateErrorCodeMap.put(ErrorCode.SHUTDOWN_ERROR, "508");
-        fateErrorCodeMap.put(ErrorCode.ROUTER_ERROR, "509");
+        fateErrorCodeMap.put(StatusCode.PARAM_ERROR, "500");
+        fateErrorCodeMap.put(StatusCode.INVALID_ROLE_ERROR, "501");
+        fateErrorCodeMap.put(StatusCode.SERVICE_NOT_FOUND, "502");
+        fateErrorCodeMap.put(StatusCode.SYSTEM_ERROR, "503");
+        fateErrorCodeMap.put(StatusCode.OVER_LOAD_ERROR, "504");
+        fateErrorCodeMap.put(StatusCode.NET_ERROR, "507");
+        fateErrorCodeMap.put(StatusCode.SHUTDOWN_ERROR, "508");
+        fateErrorCodeMap.put(StatusCode.GUEST_ROUTER_ERROR, "509");
     }
 
     @Autowired

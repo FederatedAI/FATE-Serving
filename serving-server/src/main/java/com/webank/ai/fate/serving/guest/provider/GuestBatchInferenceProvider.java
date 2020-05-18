@@ -3,8 +3,8 @@ package com.webank.ai.fate.serving.guest.provider;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
-import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
@@ -75,7 +75,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
             batchInferenceResult.setRetcode(baseException.getRetcode());
             batchInferenceResult.setRetmsg(e.getMessage());
         } else {
-            batchInferenceResult.setRetcode(ErrorCode.SYSTEM_ERROR);
+            batchInferenceResult.setRetcode(StatusCode.SYSTEM_ERROR);
         }
         outboundPackage.setData(batchInferenceResult);
         return outboundPackage;

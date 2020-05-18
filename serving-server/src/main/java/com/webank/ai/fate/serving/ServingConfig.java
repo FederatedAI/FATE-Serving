@@ -17,6 +17,7 @@ import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.cache.ExpiringLRUCache;
 import com.webank.ai.fate.serving.core.cache.RedisCache;
 
+import com.webank.ai.fate.serving.core.flow.FileMetricReport;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,12 +96,10 @@ public class ServingConfig {
 
 
     @Bean
-    public FlowCounterManager FlowCounterManager(){
-        FlowCounterManager flowCounterManager = new  FlowCounterManager();
-       // flowCounterManager.setMetricReport(new ());
+    public FlowCounterManager FlowCounterManager() {
+        FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING);
         flowCounterManager.startReport();
-        return  flowCounterManager;
-
+        return flowCounterManager;
     }
 
 

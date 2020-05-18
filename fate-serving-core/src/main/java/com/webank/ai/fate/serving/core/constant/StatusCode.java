@@ -21,8 +21,10 @@ public class StatusCode {
     public static final String SHUTDOWN_ERROR = "111";
     public static final String HOST_NOT_SUPPORT_ERROR = "115";
     public static final String FEATURE_DATA_ADAPTOR_ERROR = "116";
+    public static final String OVER_LOAD_ERROR = "117";
     public static final String PARAM_ERROR = "120";
-    public static final String UNAUTHORIZED = "121";
+    public static final String INVALID_ROLE_ERROR = "121";
+    public static final String SERVICE_NOT_FOUND = "122";
 
 
 }

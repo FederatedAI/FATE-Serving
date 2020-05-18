@@ -21,7 +21,7 @@ import java.util.concurrent.Future;
         "requestOverloadBreaker",
         "guestSingleParamInterceptor",
         "guestModelInterceptor",
-        "modelOverloadBreaker",
+//        "modelOverloadBreaker",
         "federationRouterInterceptor"
 }, postChain = {
         "monitorInterceptor"

@@ -82,7 +82,7 @@ public class Dict {
     public static final String PROPERTY_MODEL_CACHE_MAX_SIZE = "modelCacheMaxSize";
     public static final String PROPERTY_INFERENCE_WORKER_THREAD_NUM = "inferenceWorkerThreadNum";
     public static final String PROPERTY_PROXY_ADDRESS = "proxy";
-    public static final String ONLINE_ENVIROMMENT = "online";
+    public static final String ONLINE_ENVIRONMENT = "online";
     public static final String PROPERTY_ROLL_ADDRESS = "roll";
     public static final String PROPERTY_FLOW_ADDRESS = "flow";
     public static final String PROPERTY_SERVING_ADDRESS = "serving";
@@ -198,10 +198,10 @@ public class Dict {
     public static final String REMOTE_METHOD_BATCH = "batch";
     public static final String MODEL_NAME_SPACE = "modelNameSpace";
     public static final String MODEL_TABLE_NAME = "modelTableName";
-    public static final String REGISTER_PROJECT = "admin";
     public static final String REGISTER_ENVIRONMENT = "online";
     public static final String SERVICE_SERVING = "serving";
     public static final String SERVICE_PROXY = "proxy";
+    public static final String SERVICE_ADMIN = "admin";
     public static final String FAILED = "failed";
     public static final String BATCH_PRC_TIMEOUT = "batch.rpc.timeout";
     // parameters

@@ -51,7 +51,7 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
             routerInfo.setHost(args[0]);
             routerInfo.setPort(new Integer(args[1]));
         } else {
-            List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIROMMENT, Dict.UNARYCALL);
+            List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIRONMENT, Dict.UNARYCALL);
             if (urls != null && urls.size() > 0) {
                 URL url = urls.get(0);
                 String ip = url.getHost();

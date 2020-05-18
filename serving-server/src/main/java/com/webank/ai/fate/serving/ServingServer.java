@@ -36,6 +36,8 @@ public class ServingServer implements InitializingBean {
     @Autowired
     GuestInferenceService guestInferenceService;
     @Autowired
+    CommonService commonService;
+    @Autowired
     ModelManager modelManager;
     @Autowired
     ModelService modelService;
@@ -69,6 +71,7 @@ public class ServingServer implements InitializingBean {
         serverBuilder.addService(ServerInterceptors.intercept(guestInferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), GuestInferenceService.class);
         serverBuilder.addService(ServerInterceptors.intercept(modelService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
         serverBuilder.addService(ServerInterceptors.intercept(hostInferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), HostInferenceService.class);
+        serverBuilder.addService(ServerInterceptors.intercept(commonService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), CommonService.class);
         server = serverBuilder.build();
         server.start();
         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);

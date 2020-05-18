@@ -1,52 +1,63 @@
 package com.webank.ai.fate.serving.core.flow;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.serving.core.bean.MetricEntity;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class FlowCounterManager {
 
-    String  appName;
+    Logger logger = LoggerFactory.getLogger(FlowCounterManager.class);
 
-    public   FlowCounterManager(String appName){
-        this.appName =  appName;
-        metricSearcher =  new  MetricSearcher(MetricWriter.METRIC_BASE_DIR,appName+"-metrics.log.pid"+ GetSystemInfo.getPid());
+    String appName;
+
+    MetricSearcher metricSearcher;
+
+    public MetricSearcher getMetricSearcher() {
+        return metricSearcher;
+    }
+
+    public void setMetricSearcher(MetricSearcher metricSearcher) {
+        this.metricSearcher = metricSearcher;
+    }
+
+    public FlowCounterManager() {
 
     }
 
-    Logger logger = LoggerFactory.getLogger(FlowCounterManager.class);
+    public FlowCounterManager(String appName) {
+        this.appName = appName;
+        metricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, appName + "-metrics.log.pid" + GetSystemInfo.getPid());
+        metricReport = new FileMetricReport(appName);
+    }
 
     public  List<MetricNode>  queryMetrics(long beginTimeMs, long endTimeMs, String identity){
-
         try {
-
             return  metricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return  null;
-
     }
 
     public  List<MetricNode>  queryAllMetrics(long beginTimeMs, int size){
-
         try {
             return  metricSearcher.find(beginTimeMs, size);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return  null;
-
     }
 
-
-
-    MetricSearcher   metricSearcher ;
-
+    MetricReport  metricReport;
 
     public MetricReport getMetricReport() {
         return metricReport;
@@ -56,35 +67,29 @@ public class FlowCounterManager {
         this.metricReport = metricReport;
     }
 
-    MetricReport  metricReport =  new FileMetricReport();
-
     private ConcurrentHashMap<String,FlowCounter>   passMap =   new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String,FlowCounter>   sucessMap =   new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String,FlowCounter>   successMap =   new ConcurrentHashMap<>();
     private ConcurrentHashMap<String,FlowCounter>   blockMap =   new ConcurrentHashMap<>();
     private ConcurrentHashMap<String,FlowCounter>   exceptionMap =   new ConcurrentHashMap<>();
-
-    public  FlowCounterManager(){
-
-    }
-
 
     public  boolean  pass(String sourceName){
         logger.info("================try to pass {}",sourceName);
         FlowCounter  flowCounter =passMap.get(sourceName);
         if(flowCounter==null){
-            flowCounter= passMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
+            flowCounter= passMap.putIfAbsent(sourceName,new  FlowCounter(getAllowedQps(sourceName)));
             if(flowCounter==null) {
                 flowCounter = passMap.get(sourceName);
             }
         }
         return  flowCounter.tryPass();
     }
+
     public  boolean  success(String sourceName){
-        FlowCounter  flowCounter =sucessMap.get(sourceName);
+        FlowCounter  flowCounter =successMap.get(sourceName);
         if(flowCounter==null){
-            flowCounter= sucessMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
+            flowCounter= successMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
             if(flowCounter==null) {
-                flowCounter = sucessMap.get(sourceName);
+                flowCounter = successMap.get(sourceName);
             }
         }
         return  flowCounter.tryPass();
@@ -126,7 +131,7 @@ public class FlowCounterManager {
                 passMap.forEach((sourceName,flowCounter)->{
 
                     long  passCount =flowCounter.getSum();
-                    FlowCounter sucessCounter = sucessMap.get(sourceName);
+                    FlowCounter successCounter = successMap.get(sourceName);
                     FlowCounter blockCounter =  blockMap.get(sourceName);
                     FlowCounter exceptionCounter = exceptionMap.get(sourceName);
                     MetricNode metricNode = new  MetricNode();
@@ -135,7 +140,7 @@ public class FlowCounterManager {
                     metricNode.setPassQps(passCount);
                     metricNode.setBlockQps(blockCounter!=null?new Double(blockCounter.getQps()).longValue():0);
                     metricNode.setExceptionQps(exceptionCounter!=null?new Double(exceptionCounter.getQps()).longValue():0);
-                    metricNode.setSuccessQps(sucessCounter!=null?new Double(sucessCounter.getQps()).longValue():0);
+                    metricNode.setSuccessQps(successCounter!=null?new Double(successCounter.getQps()).longValue():0);
                     reportList.add(metricNode);
                 });
                 metricReport.report(reportList);
@@ -148,6 +153,8 @@ public class FlowCounterManager {
 
     public  static  void main(String[] args){
         FlowCounterManager  flowCounterManager = new  FlowCounterManager();
+        flowCounterManager.setMetricReport(new FileMetricReport("Test"));
+        flowCounterManager.setMetricSearcher(new MetricSearcher(MetricWriter.METRIC_BASE_DIR, "Test" + "-metrics.log.pid" + GetSystemInfo.getPid()));
         flowCounterManager.startReport();
 
         while(true) {
@@ -160,14 +167,51 @@ public class FlowCounterManager {
         }
     }
 
+    private static final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "FlowRule.json";
+    Map<String, Double> sourceQpsAllowMap = new HashMap<>();
 
+    public void init() {
+        File file = new File(DEFAULT_CONFIG_FILE);
+        logger.info("try to load flow counter rules, {}", file.getAbsolutePath());
 
+        if (!file.exists()) {
+            logger.error("flow counter rule config not found, {}", file.getAbsolutePath());
+            return;
+        }
 
+        String result = "";
+        try (
+                FileInputStream fileInputStream = new FileInputStream(file);
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
+                BufferedReader reader = new BufferedReader(inputStreamReader)
+        ) {
+            String tempString = null;
+            while ((tempString = reader.readLine()) != null) {
+                result += tempString;
+            }
+        } catch (IOException e) {
+            logger.error("load flow counter rules failed, use default setting, cause by: {}", e.getMessage());
+        }
 
+        JSONArray dataArray = JSONArray.parseArray(result);
 
+        for (int i = 0; i < dataArray.size(); i++) {
+            JSONObject jsonObject = dataArray.getJSONObject(i);
+            sourceQpsAllowMap.put(jsonObject.getString("source"), jsonObject.getDoubleValue("allow_qps"));
+        }
 
+        logger.info("load flow counter rules success");
+    }
 
+    private double getAllowedQps(String sourceName) {
+        try {
+            return sourceQpsAllowMap.get(sourceName);
+        } catch (Exception e) {
+            return Integer.MAX_VALUE;
+        }
+    }
 
-
-
+    private void updateAllowQps(String sourceName, double allowQps) {
+        sourceQpsAllowMap.put(sourceName, allowQps);
+    }
 }

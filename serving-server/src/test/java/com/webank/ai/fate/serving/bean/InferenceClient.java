@@ -3,6 +3,8 @@ package com.webank.ai.fate.serving.bean;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
+import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
+import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import io.grpc.ManagedChannel;
@@ -122,6 +124,19 @@ public class InferenceClient {
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
 
         return blockingStub.publishBind(publishRequest);
+
+    }
+
+    public CommonServiceProto.CommonResponse queryMetric(CommonServiceProto.QueryMetricRequest data) {
+        ManagedChannel managedChannel = null;
+        try {
+            managedChannel = createManagedChannel(ip, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.queryMetrics(data);
 
     }
 

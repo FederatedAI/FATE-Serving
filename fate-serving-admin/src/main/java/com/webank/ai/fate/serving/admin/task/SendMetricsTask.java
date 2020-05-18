@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.admin.task;
 
 import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.serving.admin.cache.MetricCache;
-import com.webank.ai.fate.serving.admin.interceptors.RequestInterceptor;
 import com.webank.ai.fate.serving.core.bean.MetricEntity;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class SendMetricsTask implements InitializingBean {
 
-    private static final Logger logger = LoggerFactory.getLogger(RequestInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SendMetricsTask.class);
     // 最近10秒内的统计
     private static final long MAX_LAST_FETCH_INTERVAL_MS = 1000 * 15;
     private static final long FETCH_INTERVAL_SECOND = 6;

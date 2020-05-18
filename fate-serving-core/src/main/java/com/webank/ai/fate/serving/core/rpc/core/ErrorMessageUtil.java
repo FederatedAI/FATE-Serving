@@ -27,7 +27,7 @@ public class ErrorMessageUtil {
             returnResult.setRetcode(baseException.getRetcode());
             returnResult.setRetmsg(e.getMessage());
         } else {
-            returnResult.setRetcode(ErrorCode.SYSTEM_ERROR);
+            returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
         }
         return returnResult;
 
@@ -65,7 +65,7 @@ public class ErrorMessageUtil {
             returnResult.put(Dict.RET_CODE, baseException.getRetcode());
             returnResult.put(Dict.MESSAGE, baseException.getMessage());
         } else {
-            returnResult.put(Dict.RET_CODE, ErrorCode.SYSTEM_ERROR);
+            returnResult.put(Dict.RET_CODE, StatusCode.SYSTEM_ERROR);
         }
         return returnResult;
     }
@@ -74,37 +74,33 @@ public class ErrorMessageUtil {
     public static Map handleException(Map result, Throwable e) {
 
         if (e instanceof IllegalArgumentException) {
-            result.put(Dict.CODE, ErrorCode.PARAM_ERROR);
+            result.put(Dict.CODE, StatusCode.PARAM_ERROR);
             result.put(Dict.MESSAGE, "PARAM_ERROR");
         } else if (e instanceof NoRouteInfoException) {
-            result.put(Dict.CODE, ErrorCode.ROUTER_ERROR);
+            result.put(Dict.CODE, StatusCode.GUEST_ROUTER_ERROR);
             result.put(Dict.MESSAGE, "ROUTER_ERROR");
         } else if (e instanceof SysException) {
-            result.put(Dict.CODE, ErrorCode.SYSTEM_ERROR);
+            result.put(Dict.CODE, StatusCode.SYSTEM_ERROR);
             result.put(Dict.MESSAGE, "SYSTEM_ERROR");
-
-
         }
-//        else if (e instanceof BlockException) {
-//            result.put(Dict.CODE, ErrorCode.LIMIT_ERROR);
-//
-//            result.put(Dict.MESSAGE, "OVERLOAD");
-//
-//        }
+        else if (e instanceof OverLoadException) {
+            result.put(Dict.CODE, StatusCode.OVER_LOAD_ERROR);
+            result.put(Dict.MESSAGE, "OVER_LOAD");
+        }
         else if (e instanceof InvalidRoleInfoException) {
-            result.put(Dict.CODE, ErrorCode.ROLE_ERROR);
+            result.put(Dict.CODE, StatusCode.INVALID_ROLE_ERROR);
             result.put(Dict.MESSAGE, "ROLE_ERROR");
         } else if (e instanceof ShowDownRejectException) {
-            result.put(Dict.CODE, ErrorCode.SHUTDOWN_ERROR);
+            result.put(Dict.CODE, StatusCode.SHUTDOWN_ERROR);
             result.put(Dict.MESSAGE, "SHUTDOWN_ERROR");
 
         } else if (e instanceof NoResultException) {
             logger.error("NET_ERROR ", e);
-            result.put(Dict.CODE, ErrorCode.NET_ERROR);
+            result.put(Dict.CODE, StatusCode.NET_ERROR);
             result.put(Dict.MESSAGE, "NET_ERROR");
         } else {
             logger.error("SYSTEM_ERROR ", e);
-            result.put(Dict.CODE, ErrorCode.SYSTEM_ERROR);
+            result.put(Dict.CODE, StatusCode.SYSTEM_ERROR);
             result.put(Dict.MESSAGE, "SYSTEM_ERROR");
         }
 
