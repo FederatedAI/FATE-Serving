@@ -34,7 +34,7 @@ message UpdateFlowRuleRequest{
     double allowQps = 2;
 }
 
-message QueryPropertiesRequest{
+message QueryPropsRequest{
     string keyword = 1;
 }
 
@@ -48,7 +48,7 @@ service CommonService {
 
     rpc queryMetrics(QueryMetricRequest)  returns (CommonResponse);
     rpc updateFlowRule(UpdateFlowRuleRequest)  returns (CommonResponse);
-    rpc queryProperties(QueryPropertiesRequest)  returns (CommonResponse);
+    rpc listProps(QueryPropsRequest)  returns (CommonResponse);
 
 }
 

@@ -23,7 +23,7 @@ public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
     private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
     private static final String QUERY_METRICS = "queryMetrics";
     private static final String UPDATE_FLOW_RULE = "updateFlowRule";
-    private static final String QUERY_PROPERTIES = "queryProperties";
+    private static final String LIST_PROPS = "listProps";
 
     @Autowired
     CommonServiceProvider commonServiceProvider;
@@ -50,13 +50,27 @@ public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
     @Override
     @RegisterService(serviceName = UPDATE_FLOW_RULE)
     public void updateFlowRule(CommonServiceProto.UpdateFlowRuleRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
-//        super.updateFlowRule(request, responseObserver);
+        Context context = prepareContext(UPDATE_FLOW_RULE);
+        context.setActionType(CommonActionType.UPDATE_FLOW_RULE.name());
+        InboundPackage inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
+        CommonServiceProto.CommonResponse response = (CommonServiceProto.CommonResponse) outboundPackage.getData();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
-    @RegisterService(serviceName = QUERY_PROPERTIES)
-    public void queryProperties(CommonServiceProto.QueryPropertiesRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
-//        super.queryProperties(request, responseObserver);
+    @RegisterService(serviceName = LIST_PROPS)
+    public void listProps(CommonServiceProto.QueryPropsRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
+        Context context = prepareContext(LIST_PROPS);
+        context.setActionType(CommonActionType.LIST_PROPS.name());
+        InboundPackage inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
+        CommonServiceProto.CommonResponse response = (CommonServiceProto.CommonResponse) outboundPackage.getData();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     private Context prepareContext(String interfaceName) {

@@ -140,5 +140,31 @@ public class InferenceClient {
 
     }
 
+    public CommonServiceProto.CommonResponse updateRule(CommonServiceProto.UpdateFlowRuleRequest data) {
+        ManagedChannel managedChannel = null;
+        try {
+            managedChannel = createManagedChannel(ip, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.updateFlowRule(data);
+
+    }
+
+    public CommonServiceProto.CommonResponse listProps(CommonServiceProto.QueryPropsRequest data) {
+        ManagedChannel managedChannel = null;
+        try {
+            managedChannel = createManagedChannel(ip, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.listProps(data);
+
+    }
+
 
 }

@@ -211,7 +211,7 @@ public class FlowCounterManager {
         }
     }
 
-    private void updateAllowQps(String sourceName, double allowQps) {
+    public void updateAllowQps(String sourceName, double allowQps) {
         sourceQpsAllowMap.put(sourceName, allowQps);
     }
 }
