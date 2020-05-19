@@ -23,6 +23,8 @@ public class IntraGrpcServer implements InitializingBean {
     Logger logger = LoggerFactory.getLogger(InterGrpcServer.class);
     @Autowired
     IntraRequestHandler intraRequestHandler;
+    @Autowired
+    CommonRequestHandler commonRequestHandler;
     @Resource(name = "grpcExecutorPool")
     Executor executor;
     Server server;
@@ -35,6 +37,7 @@ public class IntraGrpcServer implements InitializingBean {
         serverBuilder.executor(executor);
         serverBuilder.addService(ServerInterceptors.intercept(intraRequestHandler, new ServiceExceptionHandler()));
         serverBuilder.addService(intraRequestHandler);
+        serverBuilder.addService(ServerInterceptors.intercept(commonRequestHandler, new ServiceExceptionHandler()), CommonRequestHandler.class);
         server = serverBuilder.build();
         server.start();
     }

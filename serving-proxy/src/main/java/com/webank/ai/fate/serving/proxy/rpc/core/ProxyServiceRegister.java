@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,6 +57,14 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
                 FateService proxyService = (FateService) serviceAdaptor.getClass().getAnnotation(FateService.class);
 
                 if (proxyService != null) {
+
+                    Method[] methods = serviceAdaptor.getClass().getMethods();
+                    for (Method method : methods) {
+                        FateServiceMethod fateServiceMethod = method.getAnnotation(FateServiceMethod.class);
+                        if (fateServiceMethod != null) {
+                            serviceAdaptor.getMethodMap().put(fateServiceMethod.name(), method);
+                        }
+                    }
 
                     serviceAdaptor.setServiceName(proxyService.name());
                     // TODO utu: may load from cfg file is a better choice?

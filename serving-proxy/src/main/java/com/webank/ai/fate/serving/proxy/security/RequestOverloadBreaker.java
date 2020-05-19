@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  * @Author
  **/
 @Service
-public class RequestOverloadBreaker implements Interceptor, InitializingBean {
+public class RequestOverloadBreaker implements Interceptor {
     Logger logger = LoggerFactory.getLogger(RequestOverloadBreaker.class);
 
     @Autowired
@@ -38,11 +38,5 @@ public class RequestOverloadBreaker implements Interceptor, InitializingBean {
     @Override
     public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
 
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        // init flow service allow qps
-        flowCounterManager.init();
     }
 }

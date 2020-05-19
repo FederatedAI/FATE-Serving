@@ -222,7 +222,10 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
         } else {
             filePath = userDir + this.fileSeparator + DEFAULT_ROUTER_FILE;
         }
-        logger.info("start refreshed route table...,try to load {}", filePath);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("start refreshed route table...,try to load {}", filePath);
+        }
 
         File file = new File(filePath);
         if (!file.exists()) {

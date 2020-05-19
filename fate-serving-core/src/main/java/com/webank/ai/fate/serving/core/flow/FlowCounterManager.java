@@ -120,7 +120,7 @@ public class FlowCounterManager {
     ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     public  void  startReport(){
-
+        init();
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -172,7 +172,7 @@ public class FlowCounterManager {
     /**
      * init rules
      */
-    public void init() {
+    private void init() {
         File file = new File(DEFAULT_CONFIG_FILE);
         logger.info("try to load flow counter rules, {}", file.getAbsolutePath());
 
@@ -214,6 +214,7 @@ public class FlowCounterManager {
     }
 
     public void updateAllowQps(String sourceName, double allowQps) {
+        logger.info("update {} allowed qps to {}", sourceName, allowQps);
         sourceQpsAllowMap.put(sourceName, allowQps);
     }
 }
