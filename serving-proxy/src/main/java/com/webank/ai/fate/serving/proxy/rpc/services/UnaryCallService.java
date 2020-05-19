@@ -10,13 +10,11 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
-import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
 import io.grpc.ManagedChannel;
 import org.slf4j.Logger;
@@ -36,13 +34,13 @@ import java.util.concurrent.TimeUnit;
 @Service
 // TODO utu: may load from cfg file is a better choice compare to using annotation?
 @FateService(name = "unaryCall", preChain = {
-        "overloadMonitor",
+        "requestOverloadBreaker",
         "federationParamValidator",
         "defaultAuthentication",
         "defaultServingRouter"})
 
 public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy.Packet> {
-    static final String RETURN_CODE = "retcode";
+//    static final String RETURN_CODE = "retcode";
     static Map<String, String> fateErrorCodeMap = Maps.newHashMap();
 
     static {
@@ -56,8 +54,8 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         fateErrorCodeMap.put(StatusCode.GUEST_ROUTER_ERROR, "509");
     }
 
-    @Autowired
-    IMetricFactory metricFactory;
+//    @Autowired
+//    IMetricFactory metricFactory;
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     @Autowired
     AuthUtils authUtils;
@@ -79,7 +77,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
 
             stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
 
-            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "out", "result", "success").increment();
+//            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "out", "result", "success").increment();
 
             context.setDownstreamBegin(System.currentTimeMillis());
 
@@ -87,12 +85,12 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
 
             Proxy.Packet packet = future.get(timeout, TimeUnit.MILLISECONDS);
 
-            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "success").increment();
+//            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "success").increment();
 
             return packet;
 
         } catch (Exception e) {
-            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "error").increment();
+//            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "error").increment();
 
             e.printStackTrace();
             logger.error("unaryCall error ", e);
@@ -108,8 +106,8 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         Proxy.Packet.Builder builder = Proxy.Packet.newBuilder();
         Proxy.Data.Builder dataBuilder = Proxy.Data.newBuilder();
         Map fateMap = Maps.newHashMap();
-        fateMap.put("retcode", transformErrorCode(data.get(Dict.CODE).toString()));
-        fateMap.put("retmsg", data.get(Dict.MESSAGE));
+        fateMap.put(Dict.RET_CODE, transformErrorCode(data.get(Dict.CODE).toString()));
+        fateMap.put(Dict.RET_MSG, data.get(Dict.MESSAGE));
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JSON.toJSONString(fateMap))));
         return builder.build();
     }
@@ -117,9 +115,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     private String transformErrorCode(String errorCode) {
         String result = fateErrorCodeMap.get(errorCode);
         if (result != null) {
-
             return fateErrorCodeMap.get(errorCode);
-
         } else {
             return "";
         }

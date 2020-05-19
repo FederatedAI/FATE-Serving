@@ -9,19 +9,17 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
-import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTransferServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ProxyRequestHandler.class);
-    @Autowired
-    IMetricFactory metricFactory;
+//    @Autowired
+//    IMetricFactory metricFactory;
 
     public abstract ProxyServiceRegister getProxyServiceRegister();
 
@@ -31,8 +29,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
     @Override
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
 
-        metricFactory.counter("grpc.unaryCall.request", "grpc unaryCall request",
-                "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
+//        metricFactory.counter("grpc.unaryCall.request", "grpc unaryCall request", "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
 
         if (logger.isDebugEnabled()) {
             logger.debug("unaryCall req {}", req);
@@ -42,7 +39,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, req);
         setExtraInfo(context, inboundPackage, req);
 
-        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "request", "grpc.type", context.getGrpcType().toString()).increment();
+//        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "request", "grpc.type", context.getGrpcType().toString()).increment();
 
         OutboundPackage<Proxy.Packet> outboundPackage = null;
         try {
@@ -55,9 +52,8 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         responseObserver.onNext(result);
         responseObserver.onCompleted();
 
-        metricFactory.counter("grpc.unaryCall.response", "grpc unaryCall response",
-                "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
-        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "response", "grpc.type", context.getGrpcType().toString()).increment();
+//        metricFactory.counter("grpc.unaryCall.response", "grpc unaryCall response", "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
+//        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "response", "grpc.type", context.getGrpcType().toString()).increment();
     }
 
     public InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {

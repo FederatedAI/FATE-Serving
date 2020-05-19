@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.common.interceptors;
+package com.webank.ai.fate.serving.proxy.security;
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.OverLoadException;

@@ -8,7 +8,6 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
-import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;
 import org.slf4j.Logger;
@@ -36,19 +35,19 @@ public class ProxyController {
     @Autowired
     ProxyServiceRegister proxyServiceRegister;
 
-    @Autowired
-    IMetricFactory metricFactory;
+//    @Autowired
+//    IMetricFactory metricFactory;
     Logger logger = LoggerFactory.getLogger(ProxyController.class);
     @Value("${coordinator:9999}")
     private String selfCoordinator;
 
-    String binaryReader(HttpServletRequest request) throws IOException {
+    /*String binaryReader(HttpServletRequest request) throws IOException {
         int len = request.getContentLength();
         ServletInputStream iii = request.getInputStream();
         byte[] buffer = new byte[len];
         iii.read(buffer, 0, len);
         return new String(buffer);
-    }
+    }*/
 
 
     @RequestMapping(value = "/federation/{version}/{callName}", method = {RequestMethod.POST, RequestMethod.GET})
@@ -59,7 +58,7 @@ public class ProxyController {
                                        HttpServletRequest httpServletRequest,
                                        @RequestHeader HttpHeaders headers
     ) throws Exception {
-        metricFactory.counter("http.inference.request", "http inference request", "callName", callName).increment();
+//        metricFactory.counter("http.inference.request", "http inference request", "callName", callName).increment();
 
         return new Callable<String>() {
             @Override
@@ -83,7 +82,7 @@ public class ProxyController {
                     result.getData().remove("caseid");
                 }
 
-                metricFactory.counter("http.inference.response", "http inference response", "callName", callName).increment();
+//                metricFactory.counter("http.inference.response", "http inference response", "callName", callName).increment();
 
                 return JSON.toJSONString(result.getData());
 

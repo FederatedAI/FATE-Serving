@@ -1,9 +1,11 @@
 package com.webank.ai.fate.serving.proxy.config;
 
-import com.webank.ai.fate.serving.core.annotation.Subscribe;
+import com.webank.ai.fate.serving.core.async.Subscribe;
 import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncSubscribeRegister;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -17,9 +19,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Configuration
-public class AsyncMessageConfig {
+public class ProxyConfig {
 
-    Logger logger = LoggerFactory.getLogger(AsyncMessageConfig.class);
+    Logger logger = LoggerFactory.getLogger(ProxyConfig.class);
 
     @Bean
     @ConditionalOnMissingBean
@@ -58,9 +60,11 @@ public class AsyncMessageConfig {
         };
     }
 
-    /*@Bean
-    public DefaultAsyncMessageProcessor defaultAsyncMessageProcessor() {
-        return new DefaultAsyncMessageProcessor();
-    }*/
+    @Bean
+    public FlowCounterManager FlowCounterManager() {
+        FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_PROXY);
+        flowCounterManager.startReport();
+        return flowCounterManager;
+    }
 
 }

@@ -16,12 +16,10 @@ import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
-import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 // TODO utu: may load from cfg file is a better choice compare to using annotation?
 @FateService(name = Dict.SERVICENAME_INFERENCE, preChain = {
-        "overloadMonitor",
+        "requestOverloadBreaker",
         "inferenceParamValidator",
         "defaultServingRouter"})
 
@@ -44,8 +42,8 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
     Logger logger = LoggerFactory.getLogger(InferenceService.class);
 
-    @Autowired
-    IMetricFactory metricFactory;
+//    @Autowired
+//    IMetricFactory metricFactory;
 
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
@@ -101,7 +99,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
 
-        metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "to.self.serving-server", "result", "success").increment();
+//        metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "to.self.serving-server", "result", "success").increment();
 
         if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
             resultFuture = futureStub.inference(reqBuilder.build());
@@ -122,11 +120,11 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
         try {
             InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait, TimeUnit.MILLISECONDS);
-            metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "success").increment();
+//            metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "success").increment();
             logger.info("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
             resultString = new String(result.getBody().toByteArray());
         } catch (Exception e) {
-            metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "grpc.error").increment();
+//            metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "from.self.serving-server", "result", "grpc.error").increment();
             logger.error("get grpc result error", e);
             throw new NoResultException();
         }

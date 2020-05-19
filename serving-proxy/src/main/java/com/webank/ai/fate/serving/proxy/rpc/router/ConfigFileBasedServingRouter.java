@@ -57,14 +57,6 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private Map<Proxy.Topic, List<RouterInfo>> topicEndpointMapping;
     private BasicMeta.Endpoint.Builder endpointBuilder;
 
-    public static void main(String[] args) {
-
-        System.err.println(System.getProperty("java.class.path"));
-        System.err.println(System.getenv());
-        System.err.println(System.getProperty("user.dir"));
-        System.err.println(System.getProperty("file.separator"));
-    }
-
     @Override
     public RouteType getRouteType() {
         return routeType;
