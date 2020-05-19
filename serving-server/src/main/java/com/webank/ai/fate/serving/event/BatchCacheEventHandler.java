@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.event;
 
 
-import com.webank.ai.fate.serving.core.annotation.Subscribe;
+import com.webank.ai.fate.serving.core.async.Subscribe;
 import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.bean.Dict;

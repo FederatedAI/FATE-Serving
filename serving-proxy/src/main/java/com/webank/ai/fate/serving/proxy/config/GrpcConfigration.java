@@ -17,7 +17,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 public class GrpcConfigration {
 
-
     private static final Logger logger = LoggerFactory.getLogger(GrpcConfigration.class);
 
     @Value("${proxy.grpc.threadpool.coresize:50}")

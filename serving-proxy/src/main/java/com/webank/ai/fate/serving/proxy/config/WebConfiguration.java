@@ -3,7 +3,6 @@ package com.webank.ai.fate.serving.proxy.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -13,17 +12,15 @@ import org.springframework.web.context.request.async.TimeoutCallableProcessingIn
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.servlet.ServletContext;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
+public class WebConfiguration implements WebMvcConfigurer {
 
-public class WebConfigration implements WebMvcConfigurer {
-
-    private final Logger logger = LoggerFactory.getLogger(WebConfigration.class);
+    private final Logger logger = LoggerFactory.getLogger(WebConfiguration.class);
     int processors = Runtime.getRuntime().availableProcessors();
-    @Autowired
-    ServletContext servletContext;
+//    @Autowired
+//    ServletContext servletContext;
 
     @Value("${proxy.async.timeout:5000}")
     long timeout;
@@ -54,10 +51,7 @@ public class WebConfigration implements WebMvcConfigurer {
 
 
     @Bean
-
     public FilterRegistrationBean initUserServletFilterRegistration() {
-
-
         FilterRegistrationBean registration = new FilterRegistrationBean();
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
         registration.setFilter(characterEncodingFilter);

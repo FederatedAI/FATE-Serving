@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.core.async;
 
-import com.webank.ai.fate.serving.core.annotation.Subscribe;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -26,3 +26,4 @@ __pycache__
 /serving-proxy/target/
 /serving-server/logs/
 /serving-server/target/
+/fate-serving-extension/target/
