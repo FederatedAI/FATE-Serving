@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.grpc.service;
 
 import com.alibaba.fastjson.JSON;
-import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
@@ -41,25 +40,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class HostInferenceService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
-    private static final Logger logger = LoggerFactory.getLogger(HostInferenceService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(HostInferenceService.class);
     @Autowired
     HostBatchInferenceProvider hostBatchInferenceProvider;
     @Autowired
     HostSingleInferenceProvider hostSingleInferenceProvider;
-
-    @Autowired
-    MetricRegistry metricRegistry;
-
     @Autowired
     Environment environment;
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
-
         String actionType = req.getHeader().getCommand().getName();
-//        ServingServerContext context = new ServingServerContext();
-        ServingServerContext context = (ServingServerContext) prepareContext(Dict.UNARYCALL);
+        ServingServerContext context = (ServingServerContext) prepareContext();
         String namespace = req.getHeader().getTask().getModel().getNamespace();
         String tableName = req.getHeader().getTask().getModel().getTableName();
         context.setActionType(actionType);
@@ -103,11 +96,9 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
 
     }
 
-    private Context prepareContext(String interfaceName) {
+    private Context prepareContext() {
         ServingServerContext context = new ServingServerContext();
-        context.setMetricRegistry(this.metricRegistry);
         context.setEnvironment(environment);
-        context.setInterfaceName(interfaceName);
         return context;
     }
 }

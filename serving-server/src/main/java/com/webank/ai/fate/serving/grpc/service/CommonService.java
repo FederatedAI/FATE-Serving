@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.grpc.service;
 
-import com.codahale.metrics.MetricRegistry;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.annotions.RegisterService;
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
 
-    private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
     private static final String QUERY_METRICS = "queryMetrics";
     private static final String UPDATE_FLOW_RULE = "updateFlowRule";
     private static final String LIST_PROPS = "listProps";
@@ -29,16 +28,12 @@ public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
     CommonServiceProvider commonServiceProvider;
 
     @Autowired
-    MetricRegistry metricRegistry;
-
-    @Autowired
     Environment environment;
 
     @Override
     @RegisterService(serviceName = QUERY_METRICS)
     public void queryMetrics(CommonServiceProto.QueryMetricRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
-        Context context = prepareContext(QUERY_METRICS);
-        context.setActionType(CommonActionType.QUERY_METRICS.name());
+        Context context = prepareContext(CommonActionType.QUERY_METRICS.name());
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
@@ -50,8 +45,7 @@ public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
     @Override
     @RegisterService(serviceName = UPDATE_FLOW_RULE)
     public void updateFlowRule(CommonServiceProto.UpdateFlowRuleRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
-        Context context = prepareContext(UPDATE_FLOW_RULE);
-        context.setActionType(CommonActionType.UPDATE_FLOW_RULE.name());
+        Context context = prepareContext(CommonActionType.UPDATE_FLOW_RULE.name());
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
@@ -63,8 +57,7 @@ public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
     @Override
     @RegisterService(serviceName = LIST_PROPS)
     public void listProps(CommonServiceProto.QueryPropsRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
-        Context context = prepareContext(LIST_PROPS);
-        context.setActionType(CommonActionType.LIST_PROPS.name());
+        Context context = prepareContext(CommonActionType.LIST_PROPS.name());
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
@@ -73,11 +66,10 @@ public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
         responseObserver.onCompleted();
     }
 
-    private Context prepareContext(String interfaceName) {
+    private Context prepareContext(String actionType) {
         ServingServerContext context = new ServingServerContext();
-        context.setMetricRegistry(this.metricRegistry);
         context.setEnvironment(environment);
-        context.setInterfaceName(interfaceName);
+        context.setActionType(actionType);
         return context;
     }
 

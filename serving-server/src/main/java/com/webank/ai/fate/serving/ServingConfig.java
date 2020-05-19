@@ -1,11 +1,6 @@
 package com.webank.ai.fate.serving;
 
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
@@ -16,8 +11,6 @@ import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.cache.ExpiringLRUCache;
 import com.webank.ai.fate.serving.core.cache.RedisCache;
-
-import com.webank.ai.fate.serving.core.flow.FileMetricReport;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +21,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class ServingConfig {
@@ -53,34 +44,6 @@ public class ServingConfig {
     }
 
     @Bean
-    public MetricRegistry metrics() {
-        return new MetricRegistry();
-    }
-
-    @Bean
-    public Meter requestMeter(MetricRegistry metrics) {
-        return metrics.meter("request");
-    }
-
-    @Bean
-    public Counter pendingJobs(MetricRegistry metrics) {
-        return metrics.counter("requestCount");
-    }
-
-    @Bean
-    public ConsoleReporter consoleReporter(MetricRegistry metrics) {
-        return ConsoleReporter.forRegistry(metrics)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .build();
-    }
-
-    @Bean
-    public JmxReporter jmxReporter(MetricRegistry metrics) {
-        return JmxReporter.forRegistry(metrics).build();
-    }
-
-    @Bean
     @Conditional({UseZkCondition.class})
     RouterService getRouterService(ZookeeperRegistry zookeeperRegistry) {
         DefaultRouterService routerService = new DefaultRouterService();
@@ -94,7 +57,6 @@ public class ServingConfig {
         return new SpringContextUtil();
     }
 
-
     @Bean
     public FlowCounterManager FlowCounterManager() {
         FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING);
@@ -102,10 +64,8 @@ public class ServingConfig {
         return flowCounterManager;
     }
 
-
     @Bean
     public Cache cache() {
-
         String cacheType = environment.getProperty("cache.type", "local");
         logger.info("cache type is {},prepare to build cache", cacheType);
         Cache cache = null;
@@ -137,7 +97,6 @@ public class ServingConfig {
                 cache = lruCache;
                 break;
             default:
-
         }
 
         return cache;

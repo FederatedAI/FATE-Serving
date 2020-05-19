@@ -16,40 +16,33 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
     private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
-    public static ApplicationContext applicationContext;
     public static AtomicLong requestInProcess = new AtomicLong(0);
     long timestamp;
     LoggerPrinter loggerPrinter = new BaseLoggerPrinter();
     String interfaceName;
     String actionType;
     Map dataMap = Maps.newHashMap();
-    Timer.Context timerContext;
     long costTime;
-    MetricRegistry metricRegistry;
 
     public BaseContext() {
 
     }
 
-    public BaseContext(LoggerPrinter loggerPrinter, String actionType, MetricRegistry metricRegistry) {
+    public BaseContext(LoggerPrinter loggerPrinter, String actionType/*, MetricRegistry metricRegistry*/) {
         this.loggerPrinter = loggerPrinter;
-        this.metricRegistry = metricRegistry;
+//        this.metricRegistry = metricRegistry;
         timestamp = System.currentTimeMillis();
         this.actionType = actionType;
     }
@@ -74,10 +67,6 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public void preProcess() {
         try {
             requestInProcess.addAndGet(1);
-            Timer timer = metricRegistry.timer(interfaceName + "#" + actionType + "_timer");
-            Counter counter = metricRegistry.counter(interfaceName + "#" + actionType + "_counter");
-            counter.inc();
-            timerContext = timer.time();
         } catch (Exception e) {
             logger.error("preProcess error", e);
 
@@ -122,12 +111,7 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     public void postProcess(Req req, Resp resp) {
         try {
             requestInProcess.decrementAndGet();
-            if (timerContext != null) {
-                costTime = timerContext.stop() / 1000000;
-            } else {
-                costTime = System.currentTimeMillis() - timestamp;
-            }
-
+            costTime = System.currentTimeMillis() - timestamp;
         } catch (Throwable e) {
             logger.error("postProcess error", e);
         }
@@ -264,13 +248,13 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
         dataMap.put(Dict.DOWN_STREAM_COST, downstreamCost);
     }
 
-    public MetricRegistry getMetricRegistry() {
+    /*public MetricRegistry getMetricRegistry() {
         return metricRegistry;
     }
 
     public void setMetricRegistry(MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
-    }
+    }*/
 
     @Override
     public long getDownstreamBegin() {

@@ -1,7 +1,5 @@
 package com.webank.ai.fate.serving;
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
@@ -47,10 +45,6 @@ public class ServingServer implements InitializingBean {
     ZookeeperRegistry zookeeperRegistry;
     @Autowired
     Environment environment;
-    @Autowired
-    ConsoleReporter consoleReporter;
-    @Autowired
-    JmxReporter jmxReporter;
     private Server server;
 
     @Override
@@ -101,9 +95,6 @@ public class ServingServer implements InitializingBean {
             logger.warn("serving-server not use register center");
         }
         modelManager.restore(new BaseContext());
-        // metrics
-        //   consoleReporter.start(1, TimeUnit.MINUTES);
-        jmxReporter.start();
 
         HttpClientPool.initPool();
     }

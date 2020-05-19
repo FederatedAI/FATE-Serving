@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.grpc.service;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
@@ -42,13 +41,11 @@ import org.springframework.stereotype.Service;
 public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
     static final String BATCH_INFERENCE = "batchInference";
     static final String INFERENCE = "inference";
-    private static final Logger logger = LoggerFactory.getLogger(GuestInferenceService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(GuestInferenceService.class);
     @Autowired
     GuestBatchInferenceProvider guestBatchInferenceProvider;
     @Autowired
     GuestSingleInferenceProvider guestSingleInferenceProvider;
-    @Autowired
-    MetricRegistry metricRegistry;
     @Autowired
     Environment environment;
 
@@ -56,13 +53,11 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE)
     public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        ReturnResult returnResult = new ReturnResult();
-        Context context = prepareContext(INFERENCE);
-        //byte[] reqbody = req.getBody().toByteArray();
+        Context context = prepareContext();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = this.guestSingleInferenceProvider.service(context, inboundPackage);
-        returnResult = (ReturnResult) outboundPackage.getData();
+        ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
@@ -73,8 +68,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     @RegisterService(useDynamicEnvironment = true, serviceName = BATCH_INFERENCE)
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        Context context = prepareContext(BATCH_INFERENCE);
-
+        Context context = prepareContext();
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = this.guestBatchInferenceProvider.service(context, inboundPackage);
@@ -85,11 +79,9 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
 
     }
 
-    private Context prepareContext(String interfaceName) {
+    private Context prepareContext() {
         ServingServerContext context = new ServingServerContext();
-        context.setMetricRegistry(this.metricRegistry);
         context.setEnvironment(environment);
-        context.setInterfaceName(interfaceName);
         return context;
     }
 

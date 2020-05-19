@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.grpc.service;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
@@ -26,41 +25,35 @@ import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishRequest;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishResponse;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.common.provider.ModelServiceProvider;
-import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.ModelActionType;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.utils.ObjectTransform;
-import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implements /*InitializingBean,*/EnvironmentAware {
+public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
 
-    @Autowired
-    ModelManager modelManager;
     @Autowired
     ModelServiceProvider modelServiceProvider;
     @Autowired
-    MetricRegistry metricRegistry;
-
     Environment environment;
 
     @Override
     @RegisterService(serviceName = "publishLoad")
     public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_LOAD.name(), metricRegistry);
+        Context context = prepareContext(ModelActionType.MODEL_LOAD.name());
         InboundPackage<ModelServiceProto.PublishRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(req);
-        context.setActionType("MODEL_LOAD");
-
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
 
@@ -76,10 +69,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "publishOnline")
     public synchronized void publishOnline(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_PUBLISH_ONLINE.name(), metricRegistry);
+        Context context = prepareContext(ModelActionType.MODEL_PUBLISH_ONLINE.name());
         InboundPackage<ModelServiceProto.PublishRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(req);
-        context.setActionType("MODEL_PUBLISH_ONLINE");
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
 
@@ -95,10 +87,9 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "publishBind")
     public synchronized void publishBind(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.MODEL_PUBLISH_ONLINE.name(), metricRegistry);
+        Context context = prepareContext(ModelActionType.MODEL_PUBLISH_ONLINE.name());
         InboundPackage<ModelServiceProto.PublishRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(req);
-        context.setActionType("MODEL_PUBLISH_ONLINE");
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
 
@@ -114,7 +105,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "unload")
     public synchronized void unload(ModelServiceProto.UnloadRequest request, StreamObserver<ModelServiceProto.UnloadResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNLOAD.name(), metricRegistry);
+        Context context = prepareContext(ModelActionType.UNLOAD.name());
         InboundPackage<ModelServiceProto.UnloadRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
@@ -126,7 +117,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     @Override
     @RegisterService(serviceName = "unbind")
     public synchronized void unbind(ModelServiceProto.UnbindRequest request, StreamObserver<ModelServiceProto.UnbindResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.UNBIND.name(), metricRegistry);
+        Context context = prepareContext(ModelActionType.UNBIND.name());
         InboundPackage<ModelServiceProto.UnbindRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
@@ -136,21 +127,21 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
     }
 
     @Override
-    public void queryModel(com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.QueryModelRequest request,
-                           io.grpc.stub.StreamObserver<com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.QueryModelResponse> responseObserver) {
-        Context context = new BaseContext(new BaseLoggerPrinter(), ModelActionType.QUERY_MODEL.name(), metricRegistry);
+    public void queryModel(ModelServiceProto.QueryModelRequest request, StreamObserver<ModelServiceProto.QueryModelResponse> responseObserver) {
+        Context context = prepareContext(ModelActionType.QUERY_MODEL.name());
         InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
-        context.setActionType("QUERY_MODEL");
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse) outboundPackage.getData();
         responseObserver.onNext(queryModelResponse);
         responseObserver.onCompleted();
     }
 
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
+    private Context prepareContext(String actionType) {
+        ServingServerContext context = new ServingServerContext();
+        context.setEnvironment(environment);
+        context.setActionType(actionType);
+        return context;
     }
+
 }

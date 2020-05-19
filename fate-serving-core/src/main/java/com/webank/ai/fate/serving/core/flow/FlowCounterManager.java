@@ -73,7 +73,6 @@ public class FlowCounterManager {
     private ConcurrentHashMap<String,FlowCounter>   exceptionMap =   new ConcurrentHashMap<>();
 
     public  boolean  pass(String sourceName){
-        logger.info("================try to pass {}",sourceName);
         FlowCounter  flowCounter =passMap.get(sourceName);
         if(flowCounter==null){
             flowCounter= passMap.putIfAbsent(sourceName,new  FlowCounter(getAllowedQps(sourceName)));
@@ -170,6 +169,9 @@ public class FlowCounterManager {
     private static final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "FlowRule.json";
     Map<String, Double> sourceQpsAllowMap = new HashMap<>();
 
+    /**
+     * init rules
+     */
     public void init() {
         File file = new File(DEFAULT_CONFIG_FILE);
         logger.info("try to load flow counter rules, {}", file.getAbsolutePath());
