@@ -24,7 +24,7 @@ configpath=$(cd $basepath/conf;pwd)
 
 module=serving-proxy
 main_class=com.webank.ai.fate.serving.proxy.bootstrap.Bootstrap
-module_version=1.2.0
+module_version=1.3.0
 
 
 case "$1" in
