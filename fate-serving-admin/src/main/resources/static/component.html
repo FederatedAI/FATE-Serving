@@ -56,7 +56,32 @@
 					<div class="panel-body">
 						<div class="tab-content">
 							<div id="basic" class="tab-pane active">
-								basic
+								<div id="basicToolbar">
+									<div class="input-group col-lg-5">
+										<input type="text" class="form-control" id="keyword" placeholder="Keyword">
+										<span class="input-group-btn">
+											<button class="btn btn-success" id="searchByKeyword" type="button">search</button>
+										</span>
+									</div>
+								</div>
+								<table id="basicTable" class="table table-no-bordered table-hover"
+										data-toggle="table" 
+										data-toolbar="#basicToolbar"
+										data-url="api/component/listProps"
+										data-query-params="basicQueryParams"
+										data-response-handler="responseHandler"
+										data-side-pagination="server"
+										data-page-number="1"
+										data-page-size="15"
+										data-pagination="true"
+										data-page-list="[All]">
+									<thead>
+										<tr>
+											<th data-field="key" data-title="Key" data-sortable="true"></th>
+											<th data-field="value" data-title="Value" data-sortable="true"></th>
+										</tr>
+									</thead>
+								</table>
 							</div>
 							<div id="models" class="tab-pane">
 								<div id="modelsToolbar">
@@ -118,6 +143,10 @@
 			$('#searchByServiceId').click(function() {
 				$('#modelsTable').bootstrapTable('refresh', {silent: true});
 			})
+
+			$('#searchByKeyword').click(function() {
+				$('#basicTable').bootstrapTable('refresh', {silent: true});
+			})
 		});
 
 		function init() {
@@ -158,6 +187,14 @@
 				});
 			}
 		}
+
+		function basicQueryParams(params){
+			params.host = _config.host;
+			params.port = _config.port;
+			params.keyword = $('#keyword').val();
+			return params;
+		}
+
 		function queryParams(params){
 			params.host = _config.host;
 			params.port = _config.port;
