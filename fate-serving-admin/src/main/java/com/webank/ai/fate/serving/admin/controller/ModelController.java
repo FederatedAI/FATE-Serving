@@ -8,14 +8,12 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
-import com.webank.ai.fate.serving.admin.config.FateServiceRegister;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import io.grpc.ManagedChannel;
@@ -29,7 +27,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -54,8 +51,6 @@ public class ModelController {
     private StringRedisTemplate redisTemplate;
     @Value("${grpc.timeout:5000}")
     private int timeout;
-    @Autowired
-    private FateServiceRegister fateServiceRegister;
 
     @Autowired
     private ComponentService  componentService;

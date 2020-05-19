@@ -91,9 +91,9 @@ public class ServiceController {
 
     // 修改每个接口中的路由信息，权重信息
     @PostMapping("/service/update")
-    public ReturnResult updateWeight(String project, String url, String routerMode, Integer weight, Long version) {
+    public ReturnResult updateService(String project, String url, String routerMode, Integer weight, Long version) {
         if (logger.isDebugEnabled()) {
-            logger.debug("try to update service weight");
+            logger.debug("try to update service");
         }
 
         Preconditions.checkArgument(StringUtils.isNotBlank(project), "parameter project is blank");

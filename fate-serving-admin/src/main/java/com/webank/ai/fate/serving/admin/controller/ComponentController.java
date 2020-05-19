@@ -35,8 +35,8 @@ public class ComponentController {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentController.class);
 
-    @Autowired
-    ZookeeperRegistry  zookeeperRegistry;
+//    @Autowired
+//    ZookeeperRegistry  zookeeperRegistry;
 
     @Autowired
     ComponentService  componentServices;
