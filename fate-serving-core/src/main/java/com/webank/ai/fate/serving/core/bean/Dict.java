@@ -210,5 +210,6 @@ public class Dict {
     public static final String PARAMS_ROLE = "role";
     public static final String PARAMS_JOB_PARAMETERS = "job_parameters";
     public static final String PARAMS_SERVICE_ID = "service_id";
+    public static final String BATCH_INFERENCE_SPLIT_SIZE="batch.inference.split.size";
 
 }

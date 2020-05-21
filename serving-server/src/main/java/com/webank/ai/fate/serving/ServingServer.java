@@ -45,6 +45,7 @@ public class ServingServer implements InitializingBean {
     ZookeeperRegistry zookeeperRegistry;
     @Autowired
     Environment environment;
+
     private Server server;
 
     @Override
@@ -89,12 +90,15 @@ public class ServingServer implements InitializingBean {
             });
             zookeeperRegistry.register(FateServer.serviceSets);
 
-            //zookeeperRegistry.registerComponent();
+            zookeeperRegistry.registerComponent();
 
         } else {
             logger.warn("serving-server not use register center");
         }
         modelManager.restore(new BaseContext());
+        // metrics
+        //   consoleReporter.start(1, TimeUnit.MINUTES);
+      // jmxReporter.start();
 
         HttpClientPool.initPool();
     }

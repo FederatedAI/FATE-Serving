@@ -26,11 +26,13 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
 
     @Override
     public void doPreProcess(Context context, InboundPackage<BatchInferenceRequest> inboundPackage, OutboundPackage<BatchInferenceResult> outboundPackage) throws Exception {
+        long  begin = System.currentTimeMillis();
         if (batchFeatureDataAdaptor == null) {
             throw new FeatureDataAdaptorException("adaptor not found");
         }
         BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
+        long  end1 = System.currentTimeMillis();
         if (batchHostFeatureAdaptorResult == null) {
             throw new HostGetFeatureErrorException("adaptor return null");
         }
@@ -45,6 +47,8 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });
+        long  end2 = System.currentTimeMillis();
+        logger.info("adaptor cost {} {}",end1-begin,end2-begin);
     }
 
     @Override

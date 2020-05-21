@@ -46,7 +46,7 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         modelProcessor.guestPrepareDataBeforeInference(context, inferenceRequest);
         List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, inferenceRequest);
 
-        Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, true);
+        Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, false);
 
         rpcList.forEach((rpcDataWraper -> {
             // ListenableFuture<Proxy.Packet> future = federatedRpcInvoker.async(context, rpcDataWraper);

@@ -51,7 +51,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         modelProcessor.guestPrepareDataBeforeInference(context, batchInferenceRequest);
         Map futureMap = Maps.newHashMap();
 
-        Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, true);
+        Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, false);
 
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);

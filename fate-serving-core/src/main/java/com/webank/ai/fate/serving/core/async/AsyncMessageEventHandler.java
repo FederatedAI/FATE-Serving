@@ -36,7 +36,7 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
     public void onEvent(AsyncMessageEvent event, long sequence, boolean endOfBatch) throws Exception {
         String eventName = event.getName();
 
-        logger.info("Async event: {}, {}", eventName, event);
+//        logger.info("Async event: {}, {}", eventName, event);
 
         if (StringUtils.isBlank(eventName)) {
             throw new AsyncMessageException("eventName is blank");

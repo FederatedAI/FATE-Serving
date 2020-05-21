@@ -32,7 +32,7 @@ public class HeteroLRHost extends HeteroLR implements Returnable {
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> result = new HashMap<>(8);
-        Map<String, Double> ret = forward(inputData);
+        Map<String, Double> ret = forwardParallel(inputData);
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
        // logger.info("hetero lr host local inference result is {}", result);
         return result;
