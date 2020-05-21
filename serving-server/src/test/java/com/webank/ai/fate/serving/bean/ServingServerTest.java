@@ -242,10 +242,9 @@ public class ServingServerTest {
     @Test
     public void test_04_BatchInference() {
 
-        BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
-        batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
+        System.err.println("oooooooooooooooooooooooooooo");
         List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
 
             singleInferenceData.getFeatureData().put("x0", 0.100016);
@@ -262,27 +261,57 @@ public class ServingServerTest {
             singleInferenceDataList.add(singleInferenceData);
 
         }
-        batchInferenceRequest.setBatchDataList(singleInferenceDataList);
-        batchInferenceRequest.setServiceId("my_test_service_id");
-        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
-                InferenceServiceProto.InferenceMessage.newBuilder();
-        String contentString = JSON.toJSONString(batchInferenceRequest);
-        System.err.println("send data ===" + contentString);
-        try {
-            inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
 
-        } catch (UnsupportedEncodingException e) {
+
+
+            for (int t = 0; t < 1; t++) {
+                new  Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //while(true)
+                        {
+                            BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
+                            batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
+
+
+                            batchInferenceRequest.setBatchDataList(singleInferenceDataList);
+                            batchInferenceRequest.setServiceId("my_test_service_id");
+                            InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
+                                    InferenceServiceProto.InferenceMessage.newBuilder();
+                            String contentString = JSON.toJSONString(batchInferenceRequest);
+                            //      System.err.println("send data ===" + contentString);
+                            try {
+                                inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
+
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+
+                            InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
+
+                            System.err.println(inferenceMessage.getBody());
+
+                            InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.batchInference(inferenceMessage);
+
+                            System.err.println("result ==================" + new String(resultMessage.getBody().toByteArray()));
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
+                System.err.println("00000000000");
+
+
+
+        }
+        try {
+            Thread.sleep(100000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
-
-        System.err.println(inferenceMessage.getBody());
-
-        InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.batchInference(inferenceMessage);
-
-        System.err.println("result ==================" + new String(resultMessage.getBody().toByteArray()));
-
     }
 
 }

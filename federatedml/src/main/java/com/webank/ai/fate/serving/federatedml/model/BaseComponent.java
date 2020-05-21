@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
 
 public abstract class BaseComponent implements LocalInferenceAware {
 
@@ -51,6 +52,8 @@ public abstract class BaseComponent implements LocalInferenceAware {
     protected int index;
     protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;
     protected Cache cache;
+
+    static  ForkJoinPool   forkJoinPool= new ForkJoinPool();
 
     public abstract int initModel(byte[] protoMeta, byte[] protoParam);
 

@@ -100,7 +100,7 @@ public class ServingServer implements InitializingBean {
         modelManager.restore(new BaseContext());
         // metrics
         //   consoleReporter.start(1, TimeUnit.MINUTES);
-        jmxReporter.start();
+      // jmxReporter.start();
 
         HttpClientPool.initPool();
     }
