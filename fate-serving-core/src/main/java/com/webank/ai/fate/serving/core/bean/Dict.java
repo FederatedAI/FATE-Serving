@@ -100,6 +100,8 @@ public class Dict {
     public static final String INPUT_DATA_HIT_RATE = "inputDataHitRate";
     public static final String GUEST_MODEL_WEIGHT_HIT_RATE = "guestModelWeightHitRate";
     public static final String GUEST_INPUT_DATA_HIT_RATE = "guestInputDataHitRate";
+    public static final String TAG_INPUT_FORMAT = "tag";
+    public static final String SPARSE_INPUT_FORMAT = "sparse";
     public static final String MIN_MAX_SCALE = "min_max_scale";
     public static final String STANDARD_SCALE = "standard_scale";
     public static final String DSL_COMPONENTS = "components";
