@@ -33,7 +33,7 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
     @Override
     protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
 
-        Map result = new HashMap();
+        Map result = new HashMap(8);
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
         outboundPackage.setData(returnResult);

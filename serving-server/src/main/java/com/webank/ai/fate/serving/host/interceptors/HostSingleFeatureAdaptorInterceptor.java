@@ -45,6 +45,7 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
     public void afterPropertiesSet() throws Exception {
         String adaptorClass = environment.getProperty("feature.single.adaptor");
         if (StringUtils.isNotEmpty(adaptorClass)) {
+            logger.info("try to load adaptor {}", adaptorClass);
             singleFeatureDataAdaptor = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
 
             ServingServerContext context = new ServingServerContext();

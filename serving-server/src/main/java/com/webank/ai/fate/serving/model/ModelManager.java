@@ -133,7 +133,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     }
 
     private List<RequestWapper> doLoadOldVersionCache(File file) {
-        Map<String, RequestWapper> properties = new HashMap<>();
+        Map<String, RequestWapper> properties = new HashMap<>(8);
         if (file != null && file.exists()) {
             try (InputStream in = new FileInputStream(file)) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in))) {
@@ -235,8 +235,8 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         // compatible 1.2.x
         restoreOldVersionCache();
 
-        ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>();
-        ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<String, Model>();
+        ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>(8);
+        ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<>(8);
         doLoadCache(tempNamespaceMap, namespaceFile);
         doLoadCache(tempServiceIdNamespaceMap, serviceIdFile);
 
@@ -473,9 +473,9 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                     return null;
                 }
                 return JSON.toJSONString(Arrays.asList(this.namespaceMap.get(modelKey)));
+            default:
+                return null;
         }
-        return null;
-
     }
 
     public Model getModelByServiceId(String serviceId) {

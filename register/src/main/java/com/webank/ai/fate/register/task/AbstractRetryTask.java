@@ -112,7 +112,7 @@ public abstract class AbstractRetryTask implements TimerTask {
             return;
         }
         if (logger.isInfoEnabled()) {
-            logger.info(taskName + " : " + url);
+            logger.info(taskName + " : " + url.getProject());
         }
         try {
             doRetry(url, registry, timeout);
@@ -122,7 +122,9 @@ public abstract class AbstractRetryTask implements TimerTask {
             reput(timeout, retryPeriod);
         } finally {
             long end = System.currentTimeMillis();
-            logger.error("retry task cost " + (end - begin));
+            if (logger.isDebugEnabled()) {
+                logger.debug("retry task cost " + (end - begin));
+            }
         }
 
 

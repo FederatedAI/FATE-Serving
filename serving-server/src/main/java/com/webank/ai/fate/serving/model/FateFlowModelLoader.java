@@ -116,7 +116,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                 return null;
             }
 
-            Map<String, Object> requestData = new HashMap<>();
+            Map<String, Object> requestData = new HashMap<>(8);
             requestData.put("name", modelLoaderParam.tableName);
             requestData.put("namespace", modelLoaderParam.nameSpace);
 
@@ -139,7 +139,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                 return null;
             }
 
-            Map<String, byte[]> resultMap = new HashMap<>();
+            Map<String, byte[]> resultMap = new HashMap<>(8);
             Map<String, Object> dataMap = responseData.getJSONObject(Dict.DATA);
             if (dataMap == null || dataMap.isEmpty()) {
                 logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);

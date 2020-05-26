@@ -49,7 +49,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final ConcurrentMap<String, FailedSubProjectTask> failedSubProject = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String,FailedRegisterComponentTask>  failedRegisteComponent = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String,FailedRegisterComponentTask>  failedRegisterComponent = new ConcurrentHashMap<>();
 
 
     private final int retryPeriod;
@@ -135,12 +135,12 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     public void addFailedRegisterComponentTask(URL  url) {
         String instanceId = url.getParameter(INSTANCE_ID);
 
-        FailedRegisterComponentTask oldOne = this.failedRegisteComponent.get(instanceId);
+        FailedRegisterComponentTask oldOne = this.failedRegisterComponent.get(instanceId);
         if (oldOne != null) {
             return;
         }
         FailedRegisterComponentTask newTask = new FailedRegisterComponentTask(url, this);
-        oldOne = failedRegisteComponent.putIfAbsent(instanceId, newTask);
+        oldOne = failedRegisterComponent.putIfAbsent(instanceId, newTask);
         if (oldOne == null) {
             // never has a retry task. then start a new task for retry.
             retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
@@ -151,7 +151,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     public void removeFailedRegisterComponentTask(URL  url) {
         String instanceId = url.getParameter(INSTANCE_ID);
-        FailedRegisterComponentTask oldOne = this.failedRegisteComponent.remove(instanceId);
+        FailedRegisterComponentTask oldOne = this.failedRegisterComponent.remove(instanceId);
         if (oldOne != null) {
             oldOne.cancel();
         }

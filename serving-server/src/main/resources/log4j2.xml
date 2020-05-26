@@ -65,6 +65,8 @@
     </Appenders>
 
     <Loggers>
+        <logger name="org.apache.zookeeper" level="WARN"></logger>
+s
         <AsyncLogger name="flow" level="info" includeLocation="true" additivity="true">
             <AppenderRef ref="flow"/>
         </AsyncLogger>

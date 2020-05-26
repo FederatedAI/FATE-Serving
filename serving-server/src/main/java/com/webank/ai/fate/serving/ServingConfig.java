@@ -25,7 +25,7 @@ import org.springframework.core.env.Environment;
 @Configuration
 public class ServingConfig {
 
-    public static final int version = 200;
+    public static final int VERSION = 200;
 
     Logger logger = LoggerFactory.getLogger(ServingConfig.class);
 
@@ -40,7 +40,7 @@ public class ServingConfig {
     ZookeeperRegistry getServiceRegistry() {
         String zkUrl = environment.getProperty("zk.url");
         Preconditions.checkArgument(StringUtils.isNotEmpty(zkUrl));
-        return ZookeeperRegistry.getRegistery(zkUrl, Dict.PROPERTY_SERVING_ADDRESS, Dict.SELF_ENVIRONMENT, port);
+        return ZookeeperRegistry.getRegistry(zkUrl, Dict.PROPERTY_SERVING_ADDRESS, Dict.SELF_ENVIRONMENT, port);
     }
 
     @Bean
@@ -58,7 +58,7 @@ public class ServingConfig {
     }
 
     @Bean
-    public FlowCounterManager FlowCounterManager() {
+    public FlowCounterManager flowCounterManager() {
         FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING);
         flowCounterManager.startReport();
         return flowCounterManager;

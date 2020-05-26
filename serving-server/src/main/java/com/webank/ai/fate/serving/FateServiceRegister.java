@@ -77,7 +77,7 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
 
 
         }
-        logger.info("service register info {}", this.serviceAdaptorMap);
+        logger.info("service register info {}", this.serviceAdaptorMap.keySet());
     }
 
 

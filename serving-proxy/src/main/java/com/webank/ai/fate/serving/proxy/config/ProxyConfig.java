@@ -61,7 +61,7 @@ public class ProxyConfig {
     }
 
     @Bean
-    public FlowCounterManager FlowCounterManager() {
+    public FlowCounterManager flowCounterManager() {
         FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_PROXY);
         flowCounterManager.startReport();
         return flowCounterManager;

@@ -87,7 +87,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         zkClient.addStateListener(state -> {
 
             if (state == StateListener.RECONNECTED) {
-                logger.error("state listenner reconnected");
+                logger.error("state listener reconnected");
                 try {
                     recover();
                 } catch (Exception e) {
@@ -97,7 +97,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         });
     }
 
-    public static synchronized ZookeeperRegistry getRegistery(String url, String project, String environment, int port) {
+    public static synchronized ZookeeperRegistry getRegistry(String url, String project, String environment, int port) {
 
         if (url == null) {
             return null;
@@ -162,7 +162,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
             logger.debug("environments {}", environments);
         }
         if (environments == null) {
-            logger.info("path {} is not exist in zk", path);
+            if (logger.isDebugEnabled()) {
+                logger.debug("path {} is not exist in zk", path);
+            }
             throw new RuntimeException("environment is null");
         }
 
@@ -228,8 +230,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (version != 0) {
             param = param + "&" + Constants.VERSION + "=" + version;
         }
-        if (this.getServieWeightMap().containsKey(serviceName + ".weight")) {
-            int weight = this.getServieWeightMap().get(serviceName + ".weight");
+        if (this.getServiceWeightMap().containsKey(serviceName + ".weight")) {
+            int weight = this.getServiceWeightMap().get(serviceName + ".weight");
             param = param + "&" + Constants.WEIGHT_KEY + "=" + weight;
         }
         key = key + param;

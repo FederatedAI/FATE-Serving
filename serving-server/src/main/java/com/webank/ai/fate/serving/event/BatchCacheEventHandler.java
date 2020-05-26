@@ -21,7 +21,6 @@ public class BatchCacheEventHandler extends AbstractAsyncMessageProcessor {
 
     @Subscribe(value = Dict.EVENT_SET_BATCH_INFERENCE_CACHE)
     public void handleMetricsEvent(AsyncMessageEvent event) {
-//        logger.info("pppppppppppppppppppppppppppppppppppppppppp {}",  event.getData());
         List<Cache.DataWrapper> lists = (List<Cache.DataWrapper>) event.getData();
         if (lists != null) {
             cache.put(lists);

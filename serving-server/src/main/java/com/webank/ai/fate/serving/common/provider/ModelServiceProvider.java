@@ -65,7 +65,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         }
 
         builder.setRetcode(StatusCode.SUCCESS);
-//        builder.setMessage(content);
         return builder.build();
     }
 

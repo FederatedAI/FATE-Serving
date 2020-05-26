@@ -82,7 +82,7 @@ public class ServingServer implements InitializingBean {
                     String weightKey = serviceName + ".weight";
                     int weight = environment.getProperty(weightKey, int.class, 0);
                     if (weight > 0) {
-                        zookeeperRegistry.getServieWeightMap().put(weightKey, weight);
+                        zookeeperRegistry.getServiceWeightMap().put(weightKey, weight);
                     }
                 } catch (Throwable e) {
                     logger.error("parse interface weight error", e);
@@ -96,9 +96,6 @@ public class ServingServer implements InitializingBean {
             logger.warn("serving-server not use register center");
         }
         modelManager.restore(new BaseContext());
-        // metrics
-        //   consoleReporter.start(1, TimeUnit.MINUTES);
-      // jmxReporter.start();
 
         HttpClientPool.initPool();
     }
