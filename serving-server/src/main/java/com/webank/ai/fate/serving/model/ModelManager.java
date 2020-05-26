@@ -466,13 +466,25 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         String namespace = queryModelRequest.getNamespace();
         switch (queryType) {
             case 0:
-                return JSON.toJSONString(listAllModel());
+                List<Model> models = listAllModel();
+                models.forEach(model -> {
+                    this.serviceIdNamespaceMap.forEach((k, v) -> {
+                        String nameSpaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+                        if (nameSpaceKey.equals(v)) {
+                            model.setServiceId(k);
+                        }
+                    });
+                });
+                return JSON.toJSONString(models);
             case 1:
                 String modelKey = this.serviceIdNamespaceMap.get(queryModelRequest.getServiceId());
                 if (StringUtils.isBlank(modelKey)) {
                     return null;
                 }
-                return JSON.toJSONString(Arrays.asList(this.namespaceMap.get(modelKey)));
+
+                Model model = this.namespaceMap.get(modelKey);
+                model.setServiceId(queryModelRequest.getServiceId());
+                return JSON.toJSONString(Arrays.asList(model));
             default:
                 return null;
         }

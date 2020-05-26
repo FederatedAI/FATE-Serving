@@ -111,8 +111,8 @@ public abstract class AbstractRetryTask implements TimerTask {
             logger.error("Final failed to execute task " + taskName + ", url: " + url + ", retry " + retryTimes + " times.");
             return;
         }
-        if (logger.isInfoEnabled()) {
-            logger.info(taskName + " : " + url.getProject());
+        if (logger.isDebugEnabled()) {
+            logger.debug(taskName + " : " + url.getProject());
         }
         try {
             doRetry(url, registry, timeout);

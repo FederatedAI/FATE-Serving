@@ -27,10 +27,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Description Model management
@@ -216,9 +218,17 @@ public class ModelController {
 //        return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
 //    }
     @GetMapping("/model/query")
-    public ReturnResult queryModel(String host, int port, String serviceId) throws Exception {
+    public ReturnResult queryModel(String host, int port, String serviceId, Integer page, Integer pageSize) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port is blank");
+
+        if (page == null || page < 0) {
+            page = 1;
+        }
+
+        if (pageSize == null) {
+            pageSize = 10;
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("query model, host: {}, port: {}, serviceId: {}", host, port, serviceId);
@@ -248,13 +258,23 @@ public class ModelController {
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();
         List<ModelServiceProto.ModelInfoEx> modelInfosList = response.getModelInfosList();
+        int totalSize = 0;
         if (modelInfosList != null) {
+            totalSize = modelInfosList.size();
+            modelInfosList = modelInfosList.stream().sorted(Comparator.comparingInt(ModelServiceProto.ModelInfoEx::getIndex)).collect(Collectors.toList());
+
+            // Pagination
+            int totalPage = (modelInfosList.size() + pageSize - 1) / pageSize;
+            if (page <= totalPage) {
+                modelInfosList = modelInfosList.subList((page - 1) * pageSize, Math.min(page * pageSize, modelInfosList.size()));
+            }
+
             for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
                 rows.add(JSONObject.parseObject(modelInfoEx.getContent()));
             }
         }
 
-        data.put("total", rows.size());
+        data.put("total", totalSize);
         data.put("rows", rows);
 //        return response;
          return ReturnResult.build(response.getRetcode(), response.getMessage(), data);

@@ -2,11 +2,14 @@ package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.ServiceDataWrapper;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -35,58 +39,68 @@ public class ServiceController {
 
     // 列出集群中所注册的所有接口
     @GetMapping("/service/registered")
-    public ReturnResult allRegistered() {
+    public ReturnResult listRegistered(Integer page, Integer pageSize) {
+        if (page == null || page < 0) {
+            page = 1;
+        }
+
+        if (pageSize == null) {
+            pageSize = 10;
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("try to query all registered service");
         }
         Properties properties = zookeeperRegistry.getCacheProperties();
 
-        Map<String, List<Object>> registered = new HashMap<>();
-
+        List<ServiceDataWrapper> resultList = new ArrayList<>();
+        int totalSize = 0;
+        int index = 0;
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             // serving/9999/batchInference
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
             if (StringUtils.isNotBlank(value)) {
                 String[] arr = value.trim().split("\\s+");
-                List<Object> urls = new ArrayList<>();
                 for (String u : arr) {
                     URL url = URL.valueOf(u);
                     if (!Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
                         String[] split = key.split("/");
-                        Map data = Maps.newHashMap();
-                        data.put("url", url.toFullString());
-                        data.put("project", split[0]);
-                        data.put("environment", split[1]);
-                        data.put("name", key);
-                        data.put("host", url.getHost());
-                        data.put("port", url.getPort());
-                        data.put("routerMode", url.getParameter("router_mode"));
-                        data.put("version", url.getParameter("version", 100));
-                        data.put("weight", url.getParameter("weight", 100));
-
-//                        urls.add(url);
-                        urls.add(data);
+                        ServiceDataWrapper wrapper = new ServiceDataWrapper();
+                        wrapper.setUrl(url.toFullString());
+                        wrapper.setProject(split[0]);
+                        wrapper.setEnvironment(split[1]);
+                        wrapper.setName(key);
+                        wrapper.setHost(url.getHost());
+                        wrapper.setPort(url.getPort());
+                        wrapper.setRouterMode(String.valueOf(url.getParameter("router_mode")));
+                        wrapper.setVersion(Long.parseLong(url.getParameter("version", "100")));
+                        wrapper.setWeight(Integer.parseInt(url.getParameter("weight", "100")));
+                        wrapper.setIndex(index);
+                        resultList.add(wrapper);
+                        index++;
                     }
-                }
-
-                if (urls.size() > 0) {
-                    registered.put(key, urls);
                 }
             }
         }
 
+        totalSize = resultList.size();
 
-        logger.info("registered services: {}", registered);
+        resultList = resultList.stream().sorted((Comparator.comparingInt(o -> (o.getProject() + o.getEnvironment()).hashCode()))).collect(Collectors.toList());
+        // Pagination
+        int totalPage = (resultList.size() + pageSize - 1) / pageSize;
+        if (page <= totalPage) {
+            resultList = resultList.subList((page - 1) * pageSize, Math.min(page * pageSize, resultList.size()));
+        }
 
-        ReturnResult result = new ReturnResult();
-        result.setRetcode(StatusCode.SUCCESS);
+        if (logger.isDebugEnabled()) {
+            logger.info("registered services: {}", resultList);
+        }
 
         Map data = Maps.newHashMap();
-        data.put("total", registered.size());
-        data.put("rows", registered);
-        result.setData(data);
-        return result;
+        data.put("total", totalSize);
+        data.put("rows", resultList);
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, data);
     }
 
     // 修改每个接口中的路由信息，权重信息

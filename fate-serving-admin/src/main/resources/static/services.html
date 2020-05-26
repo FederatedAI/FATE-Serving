@@ -80,7 +80,7 @@
 								   data-page-number="1"
 								   data-page-size="15"
 								   data-pagination="true"
-								   data-page-list="[All]">
+								   data-page-list="[10, 20, 30, ALL]">
 								<thead>
 								<tr>
 									<th data-field="project" data-title="Project" data-sortable="true"></th>
@@ -332,6 +332,8 @@
 		});*/
 
 		function queryParams(params) {
+			params.page = 1 + (params.offset / params.limit);
+			params.pageSize = params.limit;
 			return params;
 		}
 
@@ -341,7 +343,7 @@
 				total: 0
 			}
 			if (res) {
-				var data = res.data.rows;
+				/*var data = res.data.rows;
 				result.total = res.data.total;
 				var rows = [];
 				var idx = 0;
@@ -351,7 +353,8 @@
 						idx++;
 					}
 				}
-				result.rows = rows;
+				result.rows = rows;*/
+				result = res.data;
 			}
 			// console.log(res);
 			return result;
