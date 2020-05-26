@@ -63,19 +63,19 @@ public class HeteroFeatureBinning extends BaseModel {
             return firstData;
         }
 
-        for (int i=0; i < this.header.size(); i ++) {
+        for (int i = 0; i < this.header.size(); i++) {
             headerMap.put(this.header.get(i), (long) i);
         }
 
         for (String colName : firstData.keySet()) {
-		    try{
-		        if (! this.splitPoints.containsKey(colName)) {
+            try {
+                if (!this.splitPoints.containsKey(colName)) {
                     outputData.put(colName, firstData.get(colName));
-		            continue;
+                    continue;
                 }
 //		        Long thisColIndex = (long) this.header.indexOf(colName);
                 Long thisColIndex = headerMap.get(colName);
-		        if (! this.transformCols.contains(thisColIndex)) {
+                if (!this.transformCols.contains(thisColIndex)) {
                     outputData.put(colName, firstData.get(colName));
                     continue;
                 }
@@ -90,14 +90,15 @@ public class HeteroFeatureBinning extends BaseModel {
 //                        break;
 //                    }
 //                }
-            outputData.put(colName, colIndex);
-		    }catch(Throwable e){
-		        logger.error("HeteroFeatureBinning error" ,e);
+                outputData.put(colName, colIndex);
+            } catch (Throwable e) {
+                logger.error("HeteroFeatureBinning error", e);
             }
         }
-        if(logger.isDebugEnabled()) {
-            logger.debug("HeteroFeatureBinning output {}", outputData);
+        if (logger.isDebugEnabled()) {
+            logger.debug("DEBUG: HeteroFeatureBinning output {}", outputData);
         }
+
         return outputData;
     }
 

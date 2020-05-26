@@ -43,7 +43,7 @@ public class Imputer {
                 if (this.missingValueSet.contains(value.toLowerCase())) {
                     output.put(col, this.missingReplaceValues.get(col));
                 } else {
-                    output.put(col, 0);
+                    output.put(col, inputData.get(col));
                 }
             } else {
                 output.put(col, this.missingReplaceValues.get(col));
