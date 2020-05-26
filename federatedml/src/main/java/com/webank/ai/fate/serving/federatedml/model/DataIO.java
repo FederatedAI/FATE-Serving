@@ -75,21 +75,33 @@ public class DataIO extends BaseModel {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         Map<String, Object> data = inputData.get(0);
-        Map<String, Object> output = new HashMap<>();
+        Map<String, Object> outputData = new HashMap<>();
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("input-data, not filling, {}", data);
+        }
 
         if (this.inputformat.equals(Dict.TAG_INPUT_FORMAT) || this.inputformat.equals(Dict.SPARSE_INPUT_FORMAT
         )) {
+            if(logger.isDebugEnabled()) {
+                logger.debug("Sparse Data Filling Zeros");
+            }
             for (String col: this.header) {
-                    output.put(col, data.getOrDefault(col, 0));
+                    outputData.put(col, data.getOrDefault(col, 0));
+            }
+        } else {
+            outputData = data;
+            if(logger.isDebugEnabled()) {
+                logger.debug("Dense input-format, not filling, {}", outputData);
             }
         }
 
         if (this.isImputer) {
-            output = this.imputer.transform(output);
+            outputData = this.imputer.transform(outputData);
         }
 
         if (this.isOutlier) {
-            output = this.outlier.transform(output);
+            outputData = this.outlier.transform(outputData);
         }
 
         /*
@@ -99,6 +111,6 @@ public class DataIO extends BaseModel {
             }
         }*/
 
-        return output;
+        return outputData;
     }
 }
