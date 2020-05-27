@@ -1,14 +1,8 @@
 package com.webank.ai.fate.serving.bean;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
-import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
-import com.webank.ai.fate.api.serving.InferenceServiceProto;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.flow.MetricNode;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -17,8 +11,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.List;
 
 @RunWith(JUnit4.class)
@@ -67,5 +59,16 @@ public class CommonTest {
         System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
         System.err.println("Message ==================" + resultMessage.getMessage());
         System.err.println("result ==================" + resultMessage.getData().toStringUtf8());
+    }
+
+    @Test
+    public void test_08_query_models() {
+        ModelServiceProto.QueryModelRequest.Builder builder = ModelServiceProto.QueryModelRequest.newBuilder();
+
+        ModelServiceProto.QueryModelResponse response = inferenceClient.queryModels(builder.build());
+
+        System.err.println("StatusCode ==================" + response.getRetcode());
+        System.err.println("Message ==================" + response.getMessage());
+        System.err.println("result ==================" + JSONObject.toJSONString(response.getModelInfosList()));
     }
 }
