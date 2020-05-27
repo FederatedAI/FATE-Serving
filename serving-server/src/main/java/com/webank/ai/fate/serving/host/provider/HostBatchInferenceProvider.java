@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@FateService(name = "batchInferenece", preChain = {
+@FateService(name = "batchInference", preChain = {
+        "requestOverloadBreaker",
         "monitorInterceptor",
-//        "requestOverloadBreaker",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
         "hostBatchFeatureAdaptorInterceptor"

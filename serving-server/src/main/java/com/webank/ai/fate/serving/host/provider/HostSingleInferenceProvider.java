@@ -15,13 +15,12 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-@FateService(name = "HostInferenceProvider", preChain = {
+@FateService(name = "hostInferenceProvider", preChain = {
+        "requestOverloadBreaker",
         "monitorInterceptor",
-//        "requestOverloadBreaker",
         "hostParamInterceptor",
         "hostModelInterceptor",
         "hostSingleFeatureAdaptorInterceptor"
-
 }, postChain = {
         "monitorInterceptor"
 })

@@ -29,7 +29,7 @@ public class SingleCacheEventHandler extends AbstractAsyncMessageProcessor {
 
         Map map = (Map) cacheEventData.getData();
 
-        logger.info("oooooooooooooooooooooo {}", map);
+//        logger.info("oooooooooooooooooooooo {}", map);
 
         cache.put(cacheEventData.getKey(), JSON.toJSONString(map));
     }

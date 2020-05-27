@@ -8,7 +8,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 
@@ -119,7 +119,7 @@ public class PerformanceTest {
                 output(INFO_OUTPUT_FILE, content);
 
                 // print error log
-                if (resultObject.get("retcode") == null || !resultObject.getString("retcode").equals(InferenceRetCode.OK)) {
+                if (resultObject.get("retcode") == null || !resultObject.getString("retcode").equals(StatusCode.SUCCESS)) {
                     output(ERROR_OUTPUT_FILE, content);
                 }
 
