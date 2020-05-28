@@ -11,6 +11,6 @@ public class MockAlertInfoUploader implements AlertInfoUploader {
 
     @Override
     public void upload(AsyncMessageEvent event) {
-//        logger.info("alert info {}",event);
+        logger.warn("alert info {}",event);
     }
 }

@@ -103,7 +103,7 @@
 										data-page-number="1"
 										data-page-size="15"
 										data-pagination="true"
-										data-page-list="[All]">
+										data-page-list="[10, 20, 30, ALL]">
 									<thead>
 										<tr>
 											<th data-field="tableName" data-title="Table Name" data-sortable="true"></th>
@@ -199,6 +199,8 @@
 			params.host = _config.host;
 			params.port = _config.port;
 			params.serviceId = $('#serviceId').val();
+			params.page = 1 + (params.offset / params.limit);
+			params.pageSize = params.limit;
 			return params;
 		}
 

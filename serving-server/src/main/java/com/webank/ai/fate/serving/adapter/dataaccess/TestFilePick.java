@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class TestFilePick implements SingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(TestFilePick.class);
-    private static final Map<String, Map<String, Object>> featureMaps = new HashMap<>();
+//    private static final Map<String, Map<String, Object>> featureMaps = new HashMap<>();
 
 
     @Override

@@ -161,6 +161,17 @@ public class InferenceClient {
         return blockingStub.listProps(data);
 
     }
+    public ModelServiceProto.QueryModelResponse queryModels(ModelServiceProto.QueryModelRequest data) {
+        ManagedChannel managedChannel = null;
+        try {
+            managedChannel = createManagedChannel(ip, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.queryModel(data);
+
+    }
 
 }

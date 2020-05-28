@@ -13,6 +13,7 @@ import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,26 +47,23 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         String content = modelManager.queryModel(context, req);
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
 
-        JSONArray returnArray = JSONArray.parseArray(content);
-        for (int i = 0; i < returnArray.size(); i++) {
-            Model model = JSONObject.parseObject(returnArray.getString(i), Model.class);
+        if (StringUtils.isNotBlank(content)) {
+            JSONArray returnArray = JSONArray.parseArray(content);
+            for (int i = 0; i < returnArray.size(); i++) {
+                Model model = JSONObject.parseObject(returnArray.getString(i), Model.class);
 
-            if (req.getQueryType() == 1) {
-                model.setServiceId(req.getServiceId());
+                ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
+                modelExBuilder.setIndex(i);
+                modelExBuilder.setTableName(model.getTableName());
+                modelExBuilder.setNamespace(model.getNamespace());
+                modelExBuilder.setServiceId(model.getServiceId());
+                modelExBuilder.setContent(JSONObject.toJSONString(model));
+
+                builder.addModelInfos(modelExBuilder.build());
             }
-
-            ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
-            modelExBuilder.setIndex(i);
-            modelExBuilder.setTableName(model.getTableName());
-            modelExBuilder.setNamespace(model.getNamespace());
-            modelExBuilder.setServiceId(model.getServiceId());
-            modelExBuilder.setContent(JSONObject.toJSONString(model));
-
-            builder.addModelInfos(modelExBuilder.build());
         }
 
         builder.setRetcode(StatusCode.SUCCESS);
-//        builder.setMessage(content);
         return builder.build();
     }
 

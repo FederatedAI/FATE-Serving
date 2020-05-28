@@ -58,9 +58,4 @@ public class AsyncMessageConfig {
         };
     }
 
-    /*@Bean
-    public DefaultAsyncMessageProcessor defaultAsyncMessageProcessor() {
-        return new DefaultAsyncMessageProcessor();
-    }*/
-
 }

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 public class DefaultAsyncMessageProcessor extends AbstractAsyncMessageProcessor {
 
-    private static Logger logger = LoggerFactory.getLogger(DefaultAsyncMessageProcessor.class);
+//    private static Logger logger = LoggerFactory.getLogger(DefaultAsyncMessageProcessor.class);
 
     @Subscribe(Dict.EVENT_INFERENCE)
     public void processInferenceEvent(AsyncMessageEvent event) {

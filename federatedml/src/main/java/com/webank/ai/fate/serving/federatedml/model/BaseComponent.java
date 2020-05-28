@@ -19,7 +19,6 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.cache.Cache;
-import com.webank.ai.fate.serving.core.constant.InferenceRetCode;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
@@ -64,7 +63,7 @@ public abstract class BaseComponent implements LocalInferenceAware {
 
     protected Map<String, Object> handleRemoteReturnData(Map<String, Object> hostData) {
         Map<String, Object> result = new HashMap<>(8);
-        result.put(Dict.RET_CODE, InferenceRetCode.OK);
+        result.put(Dict.RET_CODE, StatusCode.SUCCESS);
         hostData.forEach((partId, partyDataObject) -> {
             Map partyData = (Map) partyDataObject;
             if (partyData.get(Dict.RET_CODE) != null && !StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))) {

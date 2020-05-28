@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-@FateService(name = "batchInferenece", preChain = {
-      //  "monitorInterceptor",
+@FateService(name = "batchInference", preChain = {
         "requestOverloadBreaker",
+        "monitorInterceptor",
         "guestBatchParamInterceptor",
         "guestModelInterceptor",
         "federationRouterInterceptor"
 }, postChain = {
-       // "monitorInterceptor"
+        "monitorInterceptor"
 
 })
 @Service

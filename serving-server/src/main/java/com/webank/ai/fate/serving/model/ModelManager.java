@@ -133,7 +133,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     }
 
     private List<RequestWapper> doLoadOldVersionCache(File file) {
-        Map<String, RequestWapper> properties = new HashMap<>();
+        Map<String, RequestWapper> properties = new HashMap<>(8);
         if (file != null && file.exists()) {
             try (InputStream in = new FileInputStream(file)) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in))) {
@@ -235,8 +235,8 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         // compatible 1.2.x
         restoreOldVersionCache();
 
-        ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>();
-        ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<String, Model>();
+        ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>(8);
+        ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<>(8);
         doLoadCache(tempNamespaceMap, namespaceFile);
         doLoadCache(tempServiceIdNamespaceMap, serviceIdFile);
 
@@ -466,16 +466,28 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         String namespace = queryModelRequest.getNamespace();
         switch (queryType) {
             case 0:
-                return JSON.toJSONString(listAllModel());
+                List<Model> models = listAllModel();
+                models.forEach(model -> {
+                    this.serviceIdNamespaceMap.forEach((k, v) -> {
+                        String nameSpaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+                        if (nameSpaceKey.equals(v)) {
+                            model.setServiceId(k);
+                        }
+                    });
+                });
+                return JSON.toJSONString(models);
             case 1:
                 String modelKey = this.serviceIdNamespaceMap.get(queryModelRequest.getServiceId());
                 if (StringUtils.isBlank(modelKey)) {
                     return null;
                 }
-                return JSON.toJSONString(Arrays.asList(this.namespaceMap.get(modelKey)));
-        }
-        return null;
 
+                Model model = this.namespaceMap.get(modelKey);
+                model.setServiceId(queryModelRequest.getServiceId());
+                return JSON.toJSONString(Arrays.asList(model));
+            default:
+                return null;
+        }
     }
 
     public Model getModelByServiceId(String serviceId) {

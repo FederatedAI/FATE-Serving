@@ -58,7 +58,7 @@ public abstract class AbstractRegistry implements Registry {
     private final Set<URL> registered = new HashSet<>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
-    protected Map<String, Integer> servieWeightMap = Maps.newHashMap();
+    protected Map<String, Integer> serviceWeightMap = Maps.newHashMap();
     protected Set<String> projectSets = Sets.newHashSet();
     private URL registryUrl;
     // Local disk cache file
@@ -93,12 +93,12 @@ public abstract class AbstractRegistry implements Registry {
         return urls;
     }
 
-    public Map<String, Integer> getServieWeightMap() {
-        return servieWeightMap;
+    public Map<String, Integer> getServiceWeightMap() {
+        return serviceWeightMap;
     }
 
-    public void setServieWeightMap(Map<String, Integer> servieWeightMap) {
-        this.servieWeightMap = servieWeightMap;
+    public void setServiceWeightMap(Map<String, Integer> serviceWeightMap) {
+        this.serviceWeightMap = serviceWeightMap;
     }
 
     public void subProject(String project) {
@@ -107,8 +107,7 @@ public abstract class AbstractRegistry implements Registry {
     }
 
 
-
-    public abstract  void doRegisterComponent(URL  url) ;
+    public abstract void doRegisterComponent(URL url);
 
 
     public abstract void doSubProject(String project);
@@ -202,8 +201,6 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     private void loadProperties() {
-
-
         if (file != null && file.exists()) {
             InputStream in = null;
             try {
@@ -332,8 +329,6 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     protected void recover() throws Exception {
-
-
         for (String project : this.projectSets) {
             logger.info("Recover project {} ", project);
             subProject(project);
@@ -508,11 +503,6 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public String toString() {
         return getUrl().toString();
-    }
-
-    public static interface ConfigurationListener {
-
-        void process(ConfigChangeEvent event);
     }
 
     private class SaveProperties implements Runnable {

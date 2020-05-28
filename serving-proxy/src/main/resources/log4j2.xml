@@ -52,6 +52,7 @@
         </RollingFile>
     </Appenders>
     <Loggers>
+        <logger name="org.apache.zookeeper" level="WARN"></logger>
 
         <AsyncLogger name="flow" level="info" includeLocation="true" additivity="false">
             <AppenderRef ref="flow"/>

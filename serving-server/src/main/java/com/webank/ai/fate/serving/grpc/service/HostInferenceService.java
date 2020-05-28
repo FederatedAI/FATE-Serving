@@ -84,7 +84,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
                 break;
             default:
                 responseResult = new ReturnResult();
-                responseResult.setRetcode(StatusCode.HOST_NOT_SUPPORT_ERROR);
+                responseResult.setRetcode(StatusCode.HOST_UNSUPPORTED_COMMAND_ERROR);
                 break;
         }
         Packet.Builder packetBuilder = Packet.newBuilder();

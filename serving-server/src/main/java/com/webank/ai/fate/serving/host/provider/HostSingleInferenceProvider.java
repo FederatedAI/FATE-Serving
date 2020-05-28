@@ -15,13 +15,12 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-@FateService(name = "HostInferenceProvider", preChain = {
+@FateService(name = "hostInferenceProvider", preChain = {
+        "requestOverloadBreaker",
         "monitorInterceptor",
-//        "requestOverloadBreaker",
         "hostParamInterceptor",
         "hostModelInterceptor",
         "hostSingleFeatureAdaptorInterceptor"
-
 }, postChain = {
         "monitorInterceptor"
 })
@@ -33,7 +32,7 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
     @Override
     protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
 
-        Map result = new HashMap();
+        Map result = new HashMap(8);
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
         outboundPackage.setData(returnResult);
