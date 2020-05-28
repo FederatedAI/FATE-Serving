@@ -52,6 +52,11 @@ public class Dict {
     public static final String DOWN_STREAM_BEGIN = "downstreamBegin";
     public static final String ROUTE_BASIS = "routeBasis";
     public static final String SOURCE_IP = "sourceIp";
+    public static final String SERVING_CORE_POOL_SIZE = "serving.core.pool.size";
+    public static final String SERVING_MAX_POOL_ZIE = "serving.max.pool.size";
+    public static final String SERVING_POOL_ALIVE_TIME =  "serving.pool.alive.time";
+    public static final String SERVING_POOL_QUEUE_SIZE =  "serving.pool.queue.size";
+
 
 
     /**
@@ -148,7 +153,9 @@ public class Dict {
     public static final String FALSE = "false";
     public static final String USE_REGISTER = "useRegister";
     public static final String MODEL_TRANSFER_URL = "model.transfer.url";
+    public static final String SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
 
+    public static final String FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
 
     public static final String GUEST_APP_ID = "guestAppId";
     public static final String HOST_APP_ID = "hostAppId";

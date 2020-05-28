@@ -35,8 +35,11 @@ public class CommonTest {
     @Test
     public void test_05_query_metric() {
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
-        builder.setBeginMs(1589795475000l);
-        builder.setEndMs(1589795523000l);
+
+        long now  =System.currentTimeMillis();
+        long begin  = now -5000;
+        builder.setBeginMs(begin);
+        builder.setEndMs(now);
         builder.setSource("commonService");
         CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryMetric(builder.build());
 

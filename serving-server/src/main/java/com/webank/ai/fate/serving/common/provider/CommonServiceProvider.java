@@ -1,10 +1,12 @@
 package com.webank.ai.fate.serving.common.provider;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.serving.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -35,14 +37,6 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     @Autowired
     FlowCounterManager flowCounterManager;
 
-    @Autowired
-    Environment environment;
-
-    /*@Override
-    protected OutboundPackage serviceFailInner(Context context, InboundPackage data, Throwable e) {
-        return super.serviceFailInner(context, data, e);
-    }*/
-
     @Override
     protected Object transformErrorMap(Context context, Map data) {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
@@ -57,11 +51,16 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         long beginMs = queryMetricRequest.getBeginMs();
         long endMs = queryMetricRequest.getEndMs();
         String sourceName = queryMetricRequest.getSource();
-        List<MetricNode> metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
+        List<MetricNode> metricNodes ;
 
+        if(StringUtils.isNotEmpty(sourceName)) {
+             metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
+        }else{
+             metricNodes = flowCounterManager.queryAllMetrics(beginMs,100);
+        }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
-        builder.setData(ByteString.copyFrom(JSONObject.toJSONString(metricNodes).getBytes()));
+        builder.setData(ByteString.copyFrom(JSON.toJSONString(metricNodes).getBytes()));
         return builder.build();
     }
 
@@ -83,20 +82,9 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
 
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
-
-        MutablePropertySources propertySources = ((StandardEnvironment) environment).getPropertySources();
-        propertySources.forEach(ps -> {
-            if (ps instanceof ResourcePropertySource) {
-                ResourcePropertySource propertySource = (ResourcePropertySource) ps;
-                if (StringUtils.isNotBlank(keyword) && propertySource.containsProperty(keyword)) {
-                    Map map = Maps.newHashMap();
-                    map.put(keyword, propertySource.getProperty(keyword));
-                    builder.setData(ByteString.copyFrom(JSONObject.toJSONString(map).getBytes()));
-                } else {
-                    builder.setData(ByteString.copyFrom(JSONObject.toJSONString(propertySource.getSource()).getBytes()));
-                }
-            }
-        });
+        Map map = Maps.newHashMap();
+        long  currentVersion = MetaInfo.currentVersion;
+        builder.setData(ByteString.copyFrom(JSON.toJSONString(MetaInfo.toMap()).getBytes()));
         return builder.build();
     }
 

@@ -39,7 +39,6 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        String version = environment.getProperty(Dict.VERSION, "");
         RouterInfo routerInfo = new RouterInfo();
         String address = null;
         if (routerService == null) {

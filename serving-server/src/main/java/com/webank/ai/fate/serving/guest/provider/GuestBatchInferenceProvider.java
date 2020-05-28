@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.serving.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
@@ -50,13 +51,9 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         BatchInferenceRequest batchInferenceRequest = (BatchInferenceRequest) inboundPackage.getBody();
         modelProcessor.guestPrepareDataBeforeInference(context, batchInferenceRequest);
         Map futureMap = Maps.newHashMap();
-
-        Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, false);
-
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);
-            //  ListenableFuture<Proxy.Packet> originBatchResultFuture = federatedRpcInvoker.async(context,  buildRpcDataWraper(model,remoteModel,batchHostFederatedParams));
-            ListenableFuture<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context, buildRpcDataWraper(model, remoteModel, batchHostFederatedParams), useCache);
+            ListenableFuture<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context, buildRpcDataWraper(model, remoteModel, batchHostFederatedParams), MetaInfo.useCache);
             futureMap.put(hostPartyId, originBatchResultFuture);
         });
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, timeout);
@@ -92,6 +89,9 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        Boolean useCache = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, false);
         timeout = environment.getProperty(Dict.BATCH_PRC_TIMEOUT, Long.class, DEFAULT_TIME_OUT);
+        MetaInfo.batchRpcTimeOut=timeout;
+        MetaInfo.useCache = useCache;
     }
 }

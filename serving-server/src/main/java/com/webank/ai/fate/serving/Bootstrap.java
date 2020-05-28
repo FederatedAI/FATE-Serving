@@ -25,9 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Set;
@@ -54,11 +57,48 @@ public class Bootstrap {
 
     public void start(String[] args) {
 
-        applicationContext = SpringApplication.run(new Class[]{Bootstrap.class}, args);
+        SpringApplication springApplication = new SpringApplication(Bootstrap.class);
+        springApplication.addListeners(new ApplicationListener<ApplicationEnvironmentPreparedEvent>() {
+            @Override
+            public void onApplicationEvent(ApplicationEnvironmentPreparedEvent applicationReadyEvent) {
+
+                ConfigurableEnvironment environment =  applicationReadyEvent.getEnvironment();
+
+                int processors = Runtime.getRuntime().availableProcessors();
+                //  String    P               address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+                MetaInfo.PROPERTY_PROXY_ADDRESS =environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+                MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE, int.class, processors);
+                MetaInfo.SERVING_MAX_POOL_SIZE =environment.getProperty(Dict.SERVING_MAX_POOL_SIZE, int.class, processors * 2);
+                MetaInfo.SERVING_POOL_ALIVE_TIME= environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME, int.class, 1000);
+                MetaInfo.USE_REGISTER =   environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
+                MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
+
+//         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
+//
+//    String ip = environment.getProperty("redis.ip");
+//    String password = environment.getProperty("redis.password");
+//    Integer port = environment.getProperty("redis.port", Integer.class);
+//    Integer timeout = environment.getProperty("redis.timeout", Integer.class, 2000);
+//    Integer maxTotal = environment.getProperty("redis.maxTotal", Integer.class, 20);
+//    Integer maxIdle = environment.getProperty("redis.maxIdle", Integer.class, 20);
+//    Integer expire = environment.getProperty("redis.expire", Integer.class);
+//
+//    Integer maxSize = environment.getProperty("local.cache.maxsize", Integer.class, 10000);
+//    Integer expireTime = environment.getProperty("local.cache.expire", Integer.class, 30);
+//    Integer interval = environment.getProperty("local.cache.interval", Integer.class, 3);
+
+
+
+            }
+        });
+        applicationContext = springApplication.run(args);
+
+
+       // applicationContext = SpringApplication.run(new Class[]{Bootstrap.class}, args);
     }
 
     public void stop() {
-        logger.info("try to shutdown server ==============!!!!!!!!!!!!!!!!!!!!!");
+        logger.info("try to shutdown server ...");
         AbstractServiceAdaptor.isOpen = false;
         int tryNum = 0;
         /**

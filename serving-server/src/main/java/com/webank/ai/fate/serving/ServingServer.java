@@ -51,12 +51,13 @@ public class ServingServer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        int processors = Runtime.getRuntime().availableProcessors();
-        Integer corePoolSize = environment.getProperty("serving.core.pool.size", int.class, processors);
-        Integer maxPoolSize = environment.getProperty("serving.max.pool.size", int.class, processors * 2);
-        Integer aliveTime = environment.getProperty("serving.pool.alive.time", int.class, 1000);
-        Integer queueSize = environment.getProperty("serving.pool.queue.size", int.class, 10);
-        Executor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, aliveTime.longValue(), TimeUnit.MILLISECONDS,
+//        int processors = Runtime.getRuntime().availableProcessors();
+//        Integer corePoolSize = environment.getProperty("serving.core.pool.size", int.class, processors);
+//        Integer maxPoolSize = environment.getProperty("serving.max.pool.size", int.class, processors * 2);
+//        Integer aliveTime = environment.getProperty("serving.pool.alive.time", int.class, 1000);
+//        Integer queueSize = environment.getProperty("serving.pool.queue.size", int.class, 10);
+        logger.info("try to star server ,meta info {}",MetaInfo.toMap());
+        Executor executor = new ThreadPoolExecutor(MetaInfo.SERVING_CORE_POOL_SIZE, MetaInfo.SERVING_MAX_POOL_SIZE, MetaInfo.SERVING_POOL_ALIVE_TIME, TimeUnit.MILLISECONDS,
                 new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
 
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
