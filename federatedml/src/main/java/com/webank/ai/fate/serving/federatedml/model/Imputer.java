@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,21 +35,21 @@ public class Imputer {
     }
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
-        if(inputData!=null) {
-            for (String key : inputData.keySet()) {
-                if(inputData.get(key)!=null) {
-                    String value = inputData.get(key).toString();
-                    if (this.missingValueSet.contains(value.toLowerCase())) {
-                        try {
-                            inputData.put(key, this.missingReplaceValues.get(key));
-                        } catch (Exception ex) {
-                            logger.error("Imputer transform error",ex);
-                            inputData.put(key, 0.);
-                        }
-                    }
+        Map<String, Object> output = new HashMap<>();
+
+        for (String col: this.missingReplaceValues.keySet()) {
+            if (inputData.containsKey(col)) {
+                String value = inputData.get(col).toString();
+                if (this.missingValueSet.contains(value.toLowerCase())) {
+                    output.put(col, this.missingReplaceValues.get(col));
+                } else {
+                    output.put(col, inputData.get(col));
                 }
+            } else {
+                output.put(col, this.missingReplaceValues.get(col));
             }
         }
-        return inputData;
+
+        return output;
     }
 }

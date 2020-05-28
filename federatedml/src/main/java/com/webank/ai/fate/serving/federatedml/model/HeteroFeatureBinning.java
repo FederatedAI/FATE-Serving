@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 
 public class HeteroFeatureBinning extends BaseModel {
@@ -56,38 +57,51 @@ public class HeteroFeatureBinning extends BaseModel {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         HashMap<String, Object> outputData = new HashMap<>(8);
+        HashMap<String, Long> headerMap = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
             return firstData;
         }
 
+        for (int i = 0; i < this.header.size(); i++) {
+            headerMap.put(this.header.get(i), (long) i);
+        }
+
         for (String colName : firstData.keySet()) {
-		    try{
-		        if (! this.splitPoints.containsKey(colName)) {
+            try {
+                if (!this.splitPoints.containsKey(colName)) {
                     outputData.put(colName, firstData.get(colName));
-		            continue;
+                    continue;
                 }
-		        Long thisColIndex = (long) this.header.indexOf(colName);
-		        if (! this.transformCols.contains(thisColIndex)) {
+//		        Long thisColIndex = (long) this.header.indexOf(colName);
+                Long thisColIndex = headerMap.get(colName);
+                if (!this.transformCols.contains(thisColIndex)) {
                     outputData.put(colName, firstData.get(colName));
                     continue;
                 }
                 List<Double> splitPoint = this.splitPoints.get(colName);
                 Double colValue = Double.valueOf(firstData.get(colName).toString());
-                int colIndex = 0;
-                for (colIndex = 0; colIndex < splitPoint.size(); colIndex ++) {
-                    if (colValue <= splitPoint.get(colIndex)) {
-                        break;
-                    }
-            }
-            outputData.put(colName, colIndex);
-		    }catch(Throwable e){
-		        logger.error("HeteroFeatureBinning error" ,e);
+                int colIndex = Collections.binarySearch(splitPoint, colValue);
+                if (colIndex < 0) {
+                    colIndex = - colIndex - 1;
+                }
+
+//                for (colIndex = 0; colIndex < splitPoint.size(); colIndex ++) {
+//
+//
+//                    if (colValue <= splitPoint.get(colIndex)) {
+//                        break;
+//                    }
+//                }
+                outputData.put(colName, colIndex);
+            } catch (Throwable e) {
+                logger.error("HeteroFeatureBinning error", e);
             }
         }
-        if(logger.isDebugEnabled()) {
-            logger.debug("HeteroFeatureBinning output {}", outputData);
+        if (logger.isDebugEnabled()) {
+            logger.debug("DEBUG: HeteroFeatureBinning output {}", outputData);
         }
+
         return outputData;
     }
 
