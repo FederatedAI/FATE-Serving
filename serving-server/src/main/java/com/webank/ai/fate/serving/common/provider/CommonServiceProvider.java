@@ -29,7 +29,9 @@ import java.util.Map;
 
 @FateService(name = "commonService", preChain = {
         "requestOverloadBreaker",
+        "monitorInterceptor"
 }, postChain = {
+        "monitorInterceptor"
 })
 @Service
 public class CommonServiceProvider extends AbstractServingServiceProvider {

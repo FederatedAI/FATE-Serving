@@ -6,8 +6,10 @@ import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,9 +37,6 @@ public class ComponentController {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentController.class);
 
-//    @Autowired
-//    ZookeeperRegistry  zookeeperRegistry;
-
     @Autowired
     ComponentService  componentServices;
 
@@ -47,8 +46,9 @@ public class ComponentController {
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     @GetMapping("/component/list")
-    public ComponentService.NodeData list() {
-      return  componentServices.getCachedNodeData();
+    public ReturnResult list() {
+        ComponentService.NodeData cachedNodeData = componentServices.getCachedNodeData();
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, JSONObject.parseObject(JSONObject.toJSONString(cachedNodeData), Map.class));
     }
 
     @GetMapping("/component/listProps")
@@ -81,18 +81,5 @@ public class ComponentController {
 
         return ReturnResult.build(response.getStatusCode(), response.getMessage(), data);
     }
-
-
-
-
-
-
-
-
-    // 列出集群中各个组件，能查询每个组件的配置信息，能够显示每个组件的健康状况
-
-    // 组件上报后缓存起来，给出ID方便调用
-
-    // 组件启停
 
 }

@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 
 @FateService(name = "modelService", preChain = {
         "requestOverloadBreaker",
+        "monitorInterceptor"
 }, postChain = {
+        "monitorInterceptor"
 })
 @Service
 public class ModelServiceProvider extends AbstractServingServiceProvider {

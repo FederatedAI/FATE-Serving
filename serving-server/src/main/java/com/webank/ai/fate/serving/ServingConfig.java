@@ -51,7 +51,7 @@ public class ServingConfig {
     ZookeeperRegistry getServiceRegistry() {
         String zkUrl = environment.getProperty("zk.url");
         Preconditions.checkArgument(StringUtils.isNotEmpty(zkUrl));
-        return ZookeeperRegistry.getRegistry(zkUrl, Dict.PROPERTY_SERVING_ADDRESS, Dict.SELF_ENVIRONMENT, port);
+        return ZookeeperRegistry.getRegistry(zkUrl, Dict.PROPERTY_SERVING_ADDRESS, Dict.ONLINE_ENVIRONMENT, port);
     }
 
     @Bean

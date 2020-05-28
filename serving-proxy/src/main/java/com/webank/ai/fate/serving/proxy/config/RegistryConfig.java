@@ -69,11 +69,14 @@ public class RegistryConfig {
             System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
             System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
             System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
-            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.getRegistry(zkUrl, Dict.SELF_PROJECT_NAME,
-                    Dict.SELF_ENVIRONMENT, Integer.valueOf(port));
+            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.getRegistry(zkUrl, Dict.SERVICE_PROXY,
+                    Dict.ONLINE_ENVIRONMENT, Integer.valueOf(port));
             logger.info("register zk , {}", FateServer.serviceSets);
             zookeeperRegistry.register(FateServer.serviceSets);
-            zookeeperRegistry.subProject("serving");
+            zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
+
+            zookeeperRegistry.registerComponent();
+
             return zookeeperRegistry;
         }
         return null;
