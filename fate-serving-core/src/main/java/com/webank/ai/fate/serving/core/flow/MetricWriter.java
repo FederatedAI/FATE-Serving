@@ -47,7 +47,8 @@ public class MetricWriter {
     private long singleFileSize;
     private int totalFileCount;
     private boolean append = false;
-    private final int pid = GetSystemInfo.getPid();
+    private final static int pid = GetSystemInfo.getPid();
+    private final static boolean usePid = false;
     String  appName;
 
     /**
@@ -277,13 +278,21 @@ public class MetricWriter {
      * @return if fileName matches baseFileName return true, else return false.
      */
     public static boolean fileNameMatches(String fileName, String baseFileName) {
-        if (fileName.startsWith(baseFileName)) {
-            String part = fileName.substring(baseFileName.length());
-            // part is like: ".yyyy-MM-dd.number", eg. ".2018-12-24.11"
-            return part.matches("\\.[0-9]{4}-[0-9]{2}-[0-9]{2}(\\.[0-9]*)?");
+        String matchFileName = baseFileName;
+        String part = "";
+        if (usePid) {
+            matchFileName = matchFileName.substring(0, matchFileName.indexOf(String.valueOf(pid)));
+            if (fileName.startsWith(matchFileName) && !fileName.startsWith(matchFileName + ".")) {
+                part = fileName.substring(matchFileName.length());
+                part = part.substring(part.indexOf("."));
+            }
         } else {
-            return false;
+            if (fileName.startsWith(matchFileName)) {
+                part = fileName.substring(matchFileName.length());
+            }
         }
+        // part is like: ".yyyy-MM-dd.number", eg. ".2018-12-24.11"
+        return part.matches("\\.[0-9]{4}-[0-9]{2}-[0-9]{2}(\\.[0-9]*)?");
     }
 
     private void removeMoreFiles() throws Exception {
@@ -352,7 +361,7 @@ public class MetricWriter {
             appName = appName.replace(dot, separator);
         }
         String name = appName + separator + METRIC_FILE;
-        if (true) {
+        if (usePid) {
             name += ".pid" + pid;
         }
         return name;

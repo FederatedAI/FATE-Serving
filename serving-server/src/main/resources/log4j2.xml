@@ -67,7 +67,7 @@
     <Loggers>
         <logger name="org.apache.zookeeper" level="WARN"></logger>
 s
-        <AsyncLogger name="flow" level="info" includeLocation="true" additivity="true">
+        <AsyncLogger name="flow" level="info" includeLocation="true" additivity="false">
             <AppenderRef ref="flow"/>
         </AsyncLogger>
         <!--<AsyncLogger name="debug" level="debug" includeLocation="true" additivity="false">-->
