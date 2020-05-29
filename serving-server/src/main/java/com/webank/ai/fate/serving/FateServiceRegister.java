@@ -44,7 +44,6 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
 
-
         String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
         for (String beanName : beans) {
             AbstractServiceAdaptor serviceAdaptor = applicationContext.getBean(beanName, AbstractServiceAdaptor.class);
@@ -58,9 +57,7 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
                 }
             }
             if (proxyService != null) {
-
                 serviceAdaptor.setServiceName(proxyService.name());
-                // TODO utu: may load from cfg file is a better choice?
                 String[] postChain = proxyService.postChain();
                 String[] preChain = proxyService.preChain();
                 for (String post : postChain) {

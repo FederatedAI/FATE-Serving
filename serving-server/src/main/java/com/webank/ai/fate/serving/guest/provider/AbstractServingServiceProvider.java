@@ -60,9 +60,7 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
 
     protected List<FederatedRpcInvoker.RpcDataWraper> buildRpcDataWraper(Context context, String methodName, Object data) {
         List<FederatedRpcInvoker.RpcDataWraper> result = Lists.newArrayList();
-
         Model model = ((ServingServerContext) context).getModel();
-
         Map<String, Model> hostModelMap = model.getFederationModelMap();
         hostModelMap.forEach((partId, hostModel) -> {
             FederatedRpcInvoker.RpcDataWraper rpcDataWraper = new FederatedRpcInvoker.RpcDataWraper();

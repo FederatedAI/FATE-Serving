@@ -32,8 +32,6 @@ import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -42,8 +40,6 @@ import java.util.UUID;
 
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
-
-//    private static final Logger logger = LoggerFactory.getLogger(ModelService.class);
 
     @Autowired
     ModelServiceProvider modelServiceProvider;
@@ -58,12 +54,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
-
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg());
         builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
-
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
@@ -76,12 +70,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
-
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg());
         builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
-
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
@@ -94,12 +86,10 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
-
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg());
         builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
-
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }

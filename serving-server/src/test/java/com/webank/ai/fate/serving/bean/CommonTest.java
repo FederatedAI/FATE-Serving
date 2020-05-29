@@ -28,8 +28,8 @@ public class CommonTest {
     public void test_05_query_metric() {
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
 
-        long now  =System.currentTimeMillis();
-        long begin  = now -5000;
+        long now = System.currentTimeMillis();
+        long begin = now - 5000;
         builder.setBeginMs(begin);
         builder.setEndMs(now);
         builder.setSource("commonService");

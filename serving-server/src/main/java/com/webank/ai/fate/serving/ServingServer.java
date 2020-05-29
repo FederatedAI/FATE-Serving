@@ -29,8 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class ServingServer implements InitializingBean {
 
     Logger logger = LoggerFactory.getLogger(ServingServer.class);
-    @Value("${port:8000}")
-    int port;
+
     @Autowired
     GuestInferenceService guestInferenceService;
     @Autowired
@@ -45,25 +44,17 @@ public class ServingServer implements InitializingBean {
     ZookeeperRegistry zookeeperRegistry;
     @Autowired
     Environment environment;
-
     private Server server;
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-//        int processors = Runtime.getRuntime().availableProcessors();
-//        Integer corePoolSize = environment.getProperty("serving.core.pool.size", int.class, processors);
-//        Integer maxPoolSize = environment.getProperty("serving.max.pool.size", int.class, processors * 2);
-//        Integer aliveTime = environment.getProperty("serving.pool.alive.time", int.class, 1000);
-//        Integer queueSize = environment.getProperty("serving.pool.queue.size", int.class, 10);
-        logger.info("try to star server ,meta info {}",MetaInfo.toMap());
+        logger.info("try to star server ,meta info {}", MetaInfo.toMap());
         Executor executor = new ThreadPoolExecutor(MetaInfo.SERVING_CORE_POOL_SIZE, MetaInfo.SERVING_MAX_POOL_SIZE, MetaInfo.SERVING_POOL_ALIVE_TIME, TimeUnit.MILLISECONDS,
                 new SynchronousQueue(), new NamedThreadFactory("ServingServer", true));
-
-        FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
+        FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(MetaInfo.PORT);
         serverBuilder.keepAliveTime(100, TimeUnit.MILLISECONDS);
         serverBuilder.executor(executor);
-        //new ServiceOverloadProtectionHandle()
         serverBuilder.addService(ServerInterceptors.intercept(guestInferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), GuestInferenceService.class);
         serverBuilder.addService(ServerInterceptors.intercept(modelService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), ModelService.class);
         serverBuilder.addService(ServerInterceptors.intercept(hostInferenceService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), HostInferenceService.class);
@@ -73,10 +64,8 @@ public class ServingServer implements InitializingBean {
         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
         if (useRegister) {
             logger.info("serving-server is using register center");
-
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
-
             FateServer.serviceSets.forEach(servie -> {
                 try {
                     String serviceName = servie.serviceName();
@@ -90,14 +79,11 @@ public class ServingServer implements InitializingBean {
                 }
             });
             zookeeperRegistry.register(FateServer.serviceSets);
-
             zookeeperRegistry.registerComponent();
-
         } else {
             logger.warn("serving-server not use register center");
         }
         modelManager.restore(new BaseContext());
-
         HttpClientPool.initPool();
     }
 }

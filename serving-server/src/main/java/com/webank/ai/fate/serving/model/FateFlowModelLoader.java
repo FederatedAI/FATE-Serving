@@ -156,17 +156,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         }
         return null;
     }
-//    @Override
-//    public  PipelineTask loadModel(Context context, String name, String namespace) {
-//        Map<String, byte[]> modelBytes = readModel(name, namespace);
-//        if (modelBytes == null || modelBytes.size() == 0) {
-//            logger.info("loadModel error {} {}",name,namespace);
-//            return null;
-//        }
-//        PipelineTask pipelineTask = new PipelineTask();
-//        pipelineTask.initModel(modelBytes);
-//        return pipelineTask;
-//    }
+
 
 
 }

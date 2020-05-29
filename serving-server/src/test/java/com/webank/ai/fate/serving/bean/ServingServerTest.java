@@ -38,10 +38,6 @@ public class ServingServerTest {
         String filePath = resource.getPath();
         filePath = filePath.replaceAll("%23", "#");
         System.err.println("filePath " + filePath);
-        // String  filepath =       "/Users/kaideng/work/webank/test/model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache";
-//        Context  context =  new ServingServerContext();
-//        InboundPackage   inboundPackage = new InboundPackage();
-//        OutboundPackage  outboundPackage = new OutboundPackage();
         ModelServiceProto.PublishRequest.Builder publicRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
         ModelServiceProto.PublishRequest publishRequest = publicRequestBuilder.setLocal(ModelServiceProto.LocalInfo.newBuilder().setRole("guest").setPartyId("9999").build())
                 .putRole("guest", ModelServiceProto.Party.newBuilder().addPartyId("9999").build())
@@ -241,7 +237,7 @@ public class ServingServerTest {
 
     @Test
     public void test_04_BatchInference() {
-        while(true) {
+        while (true) {
             BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
             batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
             List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();

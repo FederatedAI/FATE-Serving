@@ -28,7 +28,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
             Preconditions.checkArgument(inferenceRequest.getFeatureData() != null, "no feature data");
             Preconditions.checkArgument(inferenceRequest.getSendToRemoteFeatureData() != null, "no send to remote feature data");
             Preconditions.checkArgument(StringUtils.isNotBlank(inferenceRequest.getServiceId()), "no service id");
-            if (inferenceRequest.getCaseid()==null||inferenceRequest.getCaseid().length() == 0) {
+            if (inferenceRequest.getCaseid() == null || inferenceRequest.getCaseid().length() == 0) {
                 inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
             }
             context.setCaseId(inferenceRequest.getCaseid());
