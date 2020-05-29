@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
 import com.webank.ai.fate.register.utils.StringUtils;
+import com.webank.ai.fate.serving.MetaInfo;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
 import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -43,11 +44,10 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String adaptorClass = environment.getProperty("feature.single.adaptor");
+        String adaptorClass = MetaInfo.FEATURE_SINGLE_ADAPTOR;
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}", adaptorClass);
             singleFeatureDataAdaptor = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
-
             ServingServerContext context = new ServingServerContext();
             context.setEnvironment(environment);
             try {

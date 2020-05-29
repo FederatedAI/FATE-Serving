@@ -10,16 +10,14 @@ import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CommonService  extends CommonServiceGrpc.CommonServiceImplBase{
+public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
 
-//    private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
+    //    private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
     private static final String QUERY_METRICS = "queryMetrics";
     private static final String UPDATE_FLOW_RULE = "updateFlowRule";
     private static final String LIST_PROPS = "listProps";

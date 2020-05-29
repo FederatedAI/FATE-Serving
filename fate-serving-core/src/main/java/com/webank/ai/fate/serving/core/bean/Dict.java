@@ -56,7 +56,9 @@ public class Dict {
     public static final String SERVING_MAX_POOL_ZIE = "serving.max.pool.size";
     public static final String SERVING_POOL_ALIVE_TIME =  "serving.pool.alive.time";
     public static final String SERVING_POOL_QUEUE_SIZE =  "serving.pool.queue.size";
-
+    public static final String SINGLE_INFERENCE_RPC_TIMEOUT = "single.inference.rpc.timeout";
+    public static final String BATCH_INFERENCE_RPC_TIMEOUT = "batch.inference.rpc.timeout";
+    public static final String FEATURE_SINGLE_ADAPTOR = "feature.single.adaptor";
 
 
     /**

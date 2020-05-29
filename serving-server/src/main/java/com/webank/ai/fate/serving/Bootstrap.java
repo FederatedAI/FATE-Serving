@@ -62,16 +62,21 @@ public class Bootstrap {
             @Override
             public void onApplicationEvent(ApplicationEnvironmentPreparedEvent applicationReadyEvent) {
 
-                ConfigurableEnvironment environment =  applicationReadyEvent.getEnvironment();
+                ConfigurableEnvironment environment = applicationReadyEvent.getEnvironment();
 
                 int processors = Runtime.getRuntime().availableProcessors();
-                //  String    P               address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
-                MetaInfo.PROPERTY_PROXY_ADDRESS =environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+
+                MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
                 MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE, int.class, processors);
-                MetaInfo.SERVING_MAX_POOL_SIZE =environment.getProperty(Dict.SERVING_MAX_POOL_SIZE, int.class, processors * 2);
-                MetaInfo.SERVING_POOL_ALIVE_TIME= environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME, int.class, 1000);
-                MetaInfo.USE_REGISTER =   environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
+                MetaInfo.SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.SERVING_MAX_POOL_SIZE, int.class, processors * 2);
+                MetaInfo.SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME, int.class, 1000);
+                MetaInfo.USE_REGISTER = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
                 MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
+                MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, boolean.class, Boolean.FALSE);
+                MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT, Integer.class, 3000);
+                MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT, Integer.class, 3000);
+                MetaInfo.FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.FEATURE_SINGLE_ADAPTOR);
+                MetaInfo.PORT = environment.getProperty(Dict.PORT, Integer.class, 8000);
 
 //         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
 //
@@ -88,13 +93,12 @@ public class Bootstrap {
 //    Integer interval = environment.getProperty("local.cache.interval", Integer.class, 3);
 
 
-
             }
         });
         applicationContext = springApplication.run(args);
 
 
-       // applicationContext = SpringApplication.run(new Class[]{Bootstrap.class}, args);
+        // applicationContext = SpringApplication.run(new Class[]{Bootstrap.class}, args);
     }
 
     public void stop() {

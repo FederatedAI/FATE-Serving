@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.common.provider;
 
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -18,10 +17,6 @@ import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,12 +46,12 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         long beginMs = queryMetricRequest.getBeginMs();
         long endMs = queryMetricRequest.getEndMs();
         String sourceName = queryMetricRequest.getSource();
-        List<MetricNode> metricNodes ;
+        List<MetricNode> metricNodes;
 
-        if(StringUtils.isNotEmpty(sourceName)) {
-             metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
-        }else{
-             metricNodes = flowCounterManager.queryAllMetrics(beginMs,100);
+        if (StringUtils.isNotEmpty(sourceName)) {
+            metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
+        } else {
+            metricNodes = flowCounterManager.queryAllMetrics(beginMs, 100);
         }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
@@ -83,12 +78,10 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
         Map map = Maps.newHashMap();
-        long  currentVersion = MetaInfo.currentVersion;
+        long currentVersion = MetaInfo.currentVersion;
         builder.setData(ByteString.copyFrom(JSON.toJSONString(MetaInfo.toMap()).getBytes()));
         return builder.build();
     }
-
-
 
 
 }

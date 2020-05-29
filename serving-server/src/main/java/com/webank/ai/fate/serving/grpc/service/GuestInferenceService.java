@@ -31,8 +31,6 @@ import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.provider.GuestBatchInferenceProvider;
 import com.webank.ai.fate.serving.guest.provider.GuestSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -41,7 +39,6 @@ import org.springframework.stereotype.Service;
 public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
     static final String BATCH_INFERENCE = "batchInference";
     static final String INFERENCE = "inference";
-//    private static final Logger logger = LoggerFactory.getLogger(GuestInferenceService.class);
     @Autowired
     GuestBatchInferenceProvider guestBatchInferenceProvider;
     @Autowired
@@ -84,6 +81,5 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         context.setEnvironment(environment);
         return context;
     }
-
 
 }

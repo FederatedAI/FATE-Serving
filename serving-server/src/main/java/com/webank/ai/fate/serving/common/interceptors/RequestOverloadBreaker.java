@@ -8,7 +8,6 @@ import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,7 @@ public class RequestOverloadBreaker implements Interceptor {
     Logger logger = LoggerFactory.getLogger(RequestOverloadBreaker.class);
 
     @Autowired
-    FlowCounterManager  flowCounterManager;
+    FlowCounterManager flowCounterManager;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {

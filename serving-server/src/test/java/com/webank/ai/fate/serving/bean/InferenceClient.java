@@ -53,8 +53,8 @@ public class InferenceClient {
         } catch (Exception e) {
             e.printStackTrace();
         }
-       CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
-       return  blockingStub.queryMetrics(data);
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.queryMetrics(data);
     }
 
     public InferenceServiceProto.InferenceMessage batchInference(InferenceServiceProto.InferenceMessage data) {
@@ -161,6 +161,7 @@ public class InferenceClient {
         return blockingStub.listProps(data);
 
     }
+
     public ModelServiceProto.QueryModelResponse queryModels(ModelServiceProto.QueryModelRequest data) {
         ManagedChannel managedChannel = null;
         try {
