@@ -75,7 +75,7 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
         // default unaryCall
         if (GrpcType.INTRA_GRPC == context.getGrpcType()) {
             // guest, serving -> proxy
-            return Dict.SELF_ENVIRONMENT;
+            return Dict.ONLINE_ENVIRONMENT;
         } else {
             Proxy.Packet sourcePacket = (Proxy.Packet) inboundPackage.getBody();
             if (selfCoordinator.equals(sourcePacket.getHeader().getDst().getPartyId())) {
@@ -83,7 +83,7 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
                 return FederatedModelUtils.getModelRouteKey(sourcePacket);
             } else {
                 // exchange, proxy -> proxy
-                return Dict.SELF_ENVIRONMENT;
+                return Dict.ONLINE_ENVIRONMENT;
             }
         }
     }

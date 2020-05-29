@@ -36,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
 
@@ -131,6 +133,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         ServingServerContext context = new ServingServerContext();
         context.setEnvironment(environment);
         context.setActionType(actionType);
+        context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;
     }
 

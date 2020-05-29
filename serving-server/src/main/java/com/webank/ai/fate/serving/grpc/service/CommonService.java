@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
 
@@ -68,6 +70,7 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
         ServingServerContext context = new ServingServerContext();
         context.setEnvironment(environment);
         context.setActionType(actionType);
+        context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;
     }
 

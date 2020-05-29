@@ -205,7 +205,8 @@
         // };
 
 
-        $.get('api/component/list', function (data) {
+        $.get('api/component/list', function (_data) {
+        	var data = _data.data
             myChart.hideLoading();    //得到数据后隐藏Loading标志
 
             echarts.util.each(data.children, function (datum, index) {

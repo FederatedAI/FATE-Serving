@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req, Resp> {
+public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static AtomicLong requestInProcess = new AtomicLong(0);
     long timestamp;
@@ -37,12 +37,11 @@ public class BaseContext<Req, Resp extends ReturnResult> implements Context<Req,
     long costTime;
 
     public BaseContext() {
-
+        timestamp = System.currentTimeMillis();
     }
 
-    public BaseContext(LoggerPrinter loggerPrinter, String actionType/*, MetricRegistry metricRegistry*/) {
+    public BaseContext(LoggerPrinter loggerPrinter, String actionType) {
         this.loggerPrinter = loggerPrinter;
-//        this.metricRegistry = metricRegistry;
         timestamp = System.currentTimeMillis();
         this.actionType = actionType;
     }

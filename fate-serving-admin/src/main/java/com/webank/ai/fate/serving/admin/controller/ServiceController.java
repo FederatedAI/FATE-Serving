@@ -38,7 +38,7 @@ public class ServiceController {
     private ZookeeperRegistry zookeeperRegistry;
 
     // 列出集群中所注册的所有接口
-    @GetMapping("/service/registered")
+    @GetMapping("/service/list")
     public ReturnResult listRegistered(Integer page, Integer pageSize) {
         if (page == null || page < 0) {
             page = 1;

@@ -13,6 +13,8 @@ import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBase{
 
@@ -63,6 +65,7 @@ public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBas
     private Context prepareContext(String actionType) {
         BaseContext context = new BaseContext();
         context.setActionType(actionType);
+        context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;
     }
 
