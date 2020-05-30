@@ -10,6 +10,8 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
+import com.webank.ai.fate.serving.core.flow.JvmInfo;
+import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.core.flow.MetricNode;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
@@ -24,9 +26,9 @@ import java.util.Map;
 
 @FateService(name = "commonService", preChain = {
         "requestOverloadBreaker",
-        "monitorInterceptor"
+
 }, postChain = {
-        "monitorInterceptor"
+
 })
 @Service
 public class CommonServiceProvider extends AbstractServingServiceProvider {
@@ -65,7 +67,6 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     public CommonServiceProto.CommonResponse updateFlowRule(Context context, InboundPackage inboundPackage) {
         CommonServiceProto.UpdateFlowRuleRequest updateFlowRuleRequest = (CommonServiceProto.UpdateFlowRuleRequest) inboundPackage.getBody();
         flowCounterManager.updateAllowQps(updateFlowRuleRequest.getSource(), updateFlowRuleRequest.getAllowQps());
-
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);
@@ -76,14 +77,31 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     public CommonServiceProto.CommonResponse listProps(Context context, InboundPackage inboundPackage) {
         CommonServiceProto.QueryPropsRequest queryPropsRequest = (CommonServiceProto.QueryPropsRequest) inboundPackage.getBody();
         String keyword = queryPropsRequest.getKeyword();
-
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
         Map map = Maps.newHashMap();
-        long currentVersion = MetaInfo.currentVersion;
         builder.setData(ByteString.copyFrom(JSON.toJSONString(MetaInfo.toMap()).getBytes()));
         return builder.build();
     }
+
+    @FateServiceMethod(name = "QUERY_JVM")
+    public CommonServiceProto.CommonResponse listJvmMem(Context context, InboundPackage inboundPackage) {
+        try {
+            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
+            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+            builder.setStatusCode(StatusCode.SUCCESS);
+            Map map = Maps.newHashMap();
+            List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
+            builder.setData(ByteString.copyFrom(JSON.toJSONString(jvmInfos).getBytes()));
+            return builder.build();
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
 
 
 }

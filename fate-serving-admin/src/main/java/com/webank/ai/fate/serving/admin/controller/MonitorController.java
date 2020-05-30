@@ -33,6 +33,51 @@ public class MonitorController {
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
+    @GetMapping("/monitor/queryJvm")
+
+    public  List  queryJvmData(){
+
+        try {
+            long  now  = System.currentTimeMillis();
+
+            NettyChannelBuilder channelBuilder = NettyChannelBuilder
+                    .forAddress("localhost", 8000)
+                    .keepAliveTime(60, TimeUnit.SECONDS)
+                    .keepAliveTimeout(60, TimeUnit.SECONDS)
+                    .keepAliveWithoutCalls(true)
+                    .idleTimeout(60, TimeUnit.SECONDS)
+                    .perRpcBufferLimit(128 << 20)
+                    .flowControlWindow(32 << 20)
+                    .maxInboundMessageSize(32 << 20)
+                    .enableRetry()
+                    .retryBufferSize(16 << 20)
+                    .maxRetryAttempts(20);      // todo: configurable
+            channelBuilder.negotiationType(NegotiationType.PLAINTEXT)
+                    .usePlaintext();
+
+            ManagedChannel managedChannel =  channelBuilder.build();
+            CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+            blockingStub = blockingStub.withDeadlineAfter(2000, TimeUnit.MILLISECONDS);
+
+            CommonServiceProto.QueryJvmInfoRequest.Builder  builder = CommonServiceProto.QueryJvmInfoRequest.newBuilder();
+
+            CommonServiceProto.CommonResponse commonResponse =blockingStub.queryJvmInfo(builder.build());
+            if(commonResponse.getData()!=null) {
+                String data = new String(commonResponse.getData().toByteArray());
+                List  result =JSON.parseObject(data,List.class);
+                return  result;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return  null;
+    }
+
+
+
     @GetMapping("/monitor/query")
 
     public  List  queryMonitorData(){

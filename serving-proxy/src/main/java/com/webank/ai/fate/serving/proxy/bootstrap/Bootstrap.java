@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,6 @@ public class Bootstrap {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.start(args);
-
             Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
         } catch (Exception ex) {
             System.err.println("server start error, " + ex.getMessage());
@@ -44,10 +44,11 @@ public class Bootstrap {
 
     public void start(String[] args) {
         applicationContext = SpringApplication.run(Bootstrap.class, args);
+        JvmInfoCounter.start();
     }
 
     public void stop() {
-        logger.info("try to shutdown server ==============!!!!!!!!!!!!!!!!!!!!!");
+        logger.info("try to shutdown server ");
         AbstractServiceAdaptor.isOpen = false;
         int tryNum = 0;
         /**

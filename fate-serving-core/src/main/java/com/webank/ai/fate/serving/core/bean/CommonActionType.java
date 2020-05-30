@@ -19,5 +19,6 @@ package com.webank.ai.fate.serving.core.bean;
 public enum CommonActionType {
     QUERY_METRICS,
     UPDATE_FLOW_RULE,
-    LIST_PROPS
+    LIST_PROPS,
+    QUERY_JVM
 }

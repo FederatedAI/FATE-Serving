@@ -7,6 +7,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
+import com.webank.ai.fate.serving.grpc.service.CommonService;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
@@ -175,4 +176,17 @@ public class InferenceClient {
 
     }
 
+
+    public CommonServiceProto.CommonResponse queryJvmInfo(CommonServiceProto.QueryJvmInfoRequest data) {
+        ManagedChannel managedChannel = null;
+        try {
+            managedChannel = createManagedChannel(ip, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.queryJvmInfo(data);
+
+    }
 }

@@ -20,6 +20,7 @@ import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +35,13 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Set;
-
 @SpringBootApplication
 @ConfigurationProperties
 @PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
 @EnableScheduling
 public class Bootstrap {
     private static ApplicationContext applicationContext;
-    Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+    static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     public static void main(String[] args) {
         try {
@@ -49,23 +49,18 @@ public class Bootstrap {
             bootstrap.start(args);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
         } catch (Exception ex) {
-            System.err.println("server start error, " + ex.getMessage());
-            ex.printStackTrace();
+            logger.error("serving-server start error",ex);
             System.exit(1);
         }
     }
 
     public void start(String[] args) {
-
         SpringApplication springApplication = new SpringApplication(Bootstrap.class);
         springApplication.addListeners(new ApplicationListener<ApplicationEnvironmentPreparedEvent>() {
             @Override
             public void onApplicationEvent(ApplicationEnvironmentPreparedEvent applicationReadyEvent) {
-
                 ConfigurableEnvironment environment = applicationReadyEvent.getEnvironment();
-
                 int processors = Runtime.getRuntime().availableProcessors();
-
                 MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
                 MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE, int.class, processors);
                 MetaInfo.SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.SERVING_MAX_POOL_SIZE, int.class, processors * 2);
@@ -77,28 +72,11 @@ public class Bootstrap {
                 MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT, Integer.class, 3000);
                 MetaInfo.FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.FEATURE_SINGLE_ADAPTOR);
                 MetaInfo.PORT = environment.getProperty(Dict.PORT, Integer.class, 8000);
-
-//         boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
-//
-//    String ip = environment.getProperty("redis.ip");
-//    String password = environment.getProperty("redis.password");
-//    Integer port = environment.getProperty("redis.port", Integer.class);
-//    Integer timeout = environment.getProperty("redis.timeout", Integer.class, 2000);
-//    Integer maxTotal = environment.getProperty("redis.maxTotal", Integer.class, 20);
-//    Integer maxIdle = environment.getProperty("redis.maxIdle", Integer.class, 20);
-//    Integer expire = environment.getProperty("redis.expire", Integer.class);
-//
-//    Integer maxSize = environment.getProperty("local.cache.maxsize", Integer.class, 10000);
-//    Integer expireTime = environment.getProperty("local.cache.expire", Integer.class, 30);
-//    Integer interval = environment.getProperty("local.cache.interval", Integer.class, 3);
-
-
             }
         });
         applicationContext = springApplication.run(args);
+        JvmInfoCounter.start();
 
-
-        // applicationContext = SpringApplication.run(new Class[]{Bootstrap.class}, args);
     }
 
     public void stop() {
@@ -127,7 +105,6 @@ public class Bootstrap {
                 logger.info("unregister {}", url);
                 zookeeperRegistry.unregister(url);
             });
-
             zookeeperRegistry.destroy();
             try {
                 Thread.sleep(5000);

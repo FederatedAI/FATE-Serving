@@ -17,18 +17,25 @@
 package com.webank.ai.fate.serving.core.utils;
 
 
+
 import com.sun.management.OperatingSystemMXBean;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+
+import sun.management.ManagementFactoryHelper;
+
+import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -190,7 +197,7 @@ public class GetSystemInfo {
 
 
     public static double getSystemCpuLoad() {
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
+        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactoryHelper
                 .getOperatingSystemMXBean();
         double systemCpuLoad = osmxb.getSystemCpuLoad();
         return systemCpuLoad;
@@ -198,7 +205,7 @@ public class GetSystemInfo {
 
 
     public static double getProcessCpuLoad() {
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
+        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactoryHelper
                 .getOperatingSystemMXBean();
         double processCpuLoad = osmxb.getProcessCpuLoad();
         return processCpuLoad;
@@ -207,29 +214,105 @@ public class GetSystemInfo {
 
     public static long getTotalMemorySize() {
         int kb = 1024;
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
+        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactoryHelper
                 .getOperatingSystemMXBean();
+
+
         long totalMemorySize = osmxb.getTotalPhysicalMemorySize() / kb;
         return totalMemorySize;
     }
 
 
-    public static long getFreePhysicalMemorySize() {
-        int kb = 1024;
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
-                .getOperatingSystemMXBean();
-        long freePhysicalMemorySize = osmxb.getFreePhysicalMemorySize() / kb;
-        return freePhysicalMemorySize;
+//    public static long getFreePhysicalMemorySize() {
+//        int kb = 1024;
+//        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
+//                .getOperatingSystemMXBean();
+//        long freePhysicalMemorySize = osmxb.getFreePhysicalMemorySize() / kb;
+//        return freePhysicalMemorySize;
+//    }
+
+
+//    public static long getUsedMemory() {
+////        int kb = 1024;
+////        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
+////                .getOperatingSystemMXBean();
+////        long usedMemory = (osmxb.getTotalPhysicalMemorySize() - osmxb.getFreePhysicalMemorySize()) / kb;
+////        return usedMemory;
+////    }
+
+
+    public static void getJVMRuntimeParam(){
+
+        RuntimeMXBean runtimeMXBean = ManagementFactoryHelper.getRuntimeMXBean();
+//JVM启动参数
+        System.out.println(runtimeMXBean.getInputArguments());
+//系统属性
+        System.out.println(runtimeMXBean.getSystemProperties());
+//JVM名字
+        System.out.println(runtimeMXBean.getVmName());
+
+
     }
 
 
-    public static long getUsedMemory() {
-        int kb = 1024;
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory
-                .getOperatingSystemMXBean();
-        long usedMemory = (osmxb.getTotalPhysicalMemorySize() - osmxb.getFreePhysicalMemorySize()) / kb;
-        return usedMemory;
+    public  static void  getJvmThreadInfo(){
+        java.lang.management.ThreadMXBean threadMXBean =  ManagementFactoryHelper.getThreadMXBean();
+        threadMXBean.getThreadCount();
+        threadMXBean.getCurrentThreadCpuTime();
+        threadMXBean.getCurrentThreadUserTime();
     }
+
+
+    private static void reportGC() {
+        long fullCount = 0, fullTime = 0, youngCount = 0, youngTime = 0;
+        List<GarbageCollectorMXBean> gcs = ManagementFactory.getGarbageCollectorMXBeans();
+        for (GarbageCollectorMXBean gc : gcs) {
+            System.err.println(gc.getName() +"" +gc.getCollectionCount());
+
+
+        }
+//            switch (GarbageCollectorName.of(gc.getName())) {
+//                case MarkSweepCompact:
+//                case PSMarkSweep:
+//                case ConcurrentMarkSweep:
+//                    fullCount += gc.getCollectionCount();
+//                    fullTime += gc.getCollectionTime();
+//                    break;
+//                case Copy:
+//                case ParNew:
+//                case PSScavenge:
+//                    youngCount += gc.getCollectionCount();
+//                    youngTime += gc.getCollectionTime();
+//                    break;
+//            }
+            //todo your deal code， perfcounter report or write log here
+        }
+
+
+
+
+    public  static  void  getSystemLoad(){
+
+        java.lang.management.OperatingSystemMXBean operatingSystemMXBean = ManagementFactoryHelper.getOperatingSystemMXBean();
+//获取服务器的CPU个数
+//          System.out.println(operatingSystemMXBean.());
+//获取服务器的平均负载。这个指标非常重要，它可以有效的说明当前机器的性能是否正常，如果load过高，说明CPU无法及时处理任务。
+        System.out.println(operatingSystemMXBean.getSystemLoadAverage());
+
+
+
+    }
+
+
+    public  static  void main(String[] args){
+
+        getSystemLoad();
+        reportGC();
+
+
+
+    }
+
 
 
 }

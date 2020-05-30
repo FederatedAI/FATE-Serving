@@ -231,60 +231,7 @@ public class ServingServerTest {
 
         InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.inference(inferenceMessage);
 
-        System.err.println("result ==================" + new String(resultMessage.getBody().toByteArray()));
 
-    }
-
-    @Test
-    public void test_04_BatchInference() {
-        while (true) {
-            BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
-            batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
-            List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
-            for (int i = 0; i < 10; i++) {
-                BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
-
-                singleInferenceData.getFeatureData().put("x0", 0.100016);
-                singleInferenceData.getFeatureData().put("x1", 1.210);
-                singleInferenceData.getFeatureData().put("x2", 2.321);
-                singleInferenceData.getFeatureData().put("x3", 3.432);
-                singleInferenceData.getFeatureData().put("x4", 4.543);
-                singleInferenceData.getFeatureData().put("x5", 5.654);
-                singleInferenceData.getFeatureData().put("x6", 5.654);
-                singleInferenceData.getFeatureData().put("x7", 0.102345);
-
-                singleInferenceData.getSendToRemoteFeatureData().putAll(singleInferenceData.getFeatureData());
-                singleInferenceData.setIndex(i);
-                singleInferenceDataList.add(singleInferenceData);
-
-            }
-            batchInferenceRequest.setBatchDataList(singleInferenceDataList);
-            batchInferenceRequest.setServiceId("my_test_service_id");
-            InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
-                    InferenceServiceProto.InferenceMessage.newBuilder();
-            String contentString = JSON.toJSONString(batchInferenceRequest);
-            System.err.println("send data ===" + contentString);
-            try {
-                inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
-
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-
-            InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
-
-            System.err.println(inferenceMessage.getBody());
-
-            InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.batchInference(inferenceMessage);
-
-            System.err.println("result ==================" + new String(resultMessage.getBody().toByteArray()));
-
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
 }

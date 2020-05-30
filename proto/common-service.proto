@@ -38,6 +38,11 @@ message QueryPropsRequest{
     string keyword = 1;
 }
 
+message QueryJvmInfoRequest{
+    string keyword = 1;
+}
+
+
 message CommonResponse{
     string statusCode = 1;
     string message = 2;
@@ -45,11 +50,10 @@ message CommonResponse{
 }
 
 service CommonService {
-
     rpc queryMetrics(QueryMetricRequest)  returns (CommonResponse);
     rpc updateFlowRule(UpdateFlowRuleRequest)  returns (CommonResponse);
     rpc listProps(QueryPropsRequest)  returns (CommonResponse);
-
+    rpc queryJvmInfo(QueryJvmInfoRequest)  returns (CommonResponse);
 }
 
 

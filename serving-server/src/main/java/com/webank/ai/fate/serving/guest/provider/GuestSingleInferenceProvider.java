@@ -29,9 +29,6 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
 
-    @Autowired
-    Environment environment;
-
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
         Model model = ((ServingServerContext) context).getModel();
@@ -40,9 +37,8 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         Map<String, Future> futureMap = Maps.newHashMap();
         modelProcessor.guestPrepareDataBeforeInference(context, inferenceRequest);
         List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, inferenceRequest);
-        Boolean useCache = MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH;
         rpcList.forEach((rpcDataWraper -> {
-            ListenableFuture<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context, rpcDataWraper, useCache);
+            ListenableFuture<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context, rpcDataWraper, MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH);
             futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);
         }));
         ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap, MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT);

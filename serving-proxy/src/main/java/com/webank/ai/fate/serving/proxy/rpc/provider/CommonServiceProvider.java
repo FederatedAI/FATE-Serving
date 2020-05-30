@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.proxy.rpc.provider;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
@@ -9,6 +10,8 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
+import com.webank.ai.fate.serving.core.flow.JvmInfo;
+import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.core.flow.MetricNode;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
@@ -25,10 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 @FateService(name = "commonService", preChain = {
-        "requestOverloadBreaker",
-        "monitorInterceptor"
+        "requestOverloadBreaker"
 }, postChain = {
-        "monitorInterceptor"
+
 })
 @Service
 public class CommonServiceProvider extends AbstractProxyServiceProvider {
@@ -38,11 +40,6 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
 
     @Autowired
     Environment environment;
-
-    /*@Override
-    protected OutboundPackage serviceFailInner(Context context, InboundPackage data, Throwable e) {
-        return super.serviceFailInner(context, data, e);
-    }*/
 
     @Override
     protected Object transformErrorMap(Context context, Map data) {
@@ -101,6 +98,22 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         return builder.build();
     }
 
+    @FateServiceMethod(name = "QUERY_JVM")
+    public CommonServiceProto.CommonResponse listJvmMem(Context context, InboundPackage inboundPackage) {
+        try {
+            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
+            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+            builder.setStatusCode(StatusCode.SUCCESS);
+            Map map = Maps.newHashMap();
+            List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
+            builder.setData(ByteString.copyFrom(JSON.toJSONString(jvmInfos).getBytes()));
+            return builder.build();
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 
 
 

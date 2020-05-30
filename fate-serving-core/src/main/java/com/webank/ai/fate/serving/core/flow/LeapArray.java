@@ -70,6 +70,7 @@ public abstract class LeapArray<T> {
 
     private int calculateTimeIdx(/*@Valid*/ long timeMillis) {
         long timeId = timeMillis / windowLengthInMs;
+       // System.err.println(timeMillis +" "+windowLengthInMs +" timeId "+timeId );
         // Calculate current index so we can map the timestamp to the leap array.
         return (int)(timeId % array.length());
     }
@@ -90,6 +91,7 @@ public abstract class LeapArray<T> {
         }
 
         int idx = calculateTimeIdx(timeMillis);
+        //System.err.println(timeMillis + " "+idx);
         // Calculate current bucket start time.
         long windowStart = calculateWindowStart(timeMillis);
 

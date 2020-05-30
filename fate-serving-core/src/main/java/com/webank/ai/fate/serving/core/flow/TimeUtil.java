@@ -19,7 +19,6 @@ public final class TimeUtil {
             public void run() {
                 while(true) {
                     TimeUtil.currentTimeMillis = System.currentTimeMillis();
-
                     try {
                         TimeUnit.MILLISECONDS.sleep(1L);
                     } catch (Throwable var2) {
