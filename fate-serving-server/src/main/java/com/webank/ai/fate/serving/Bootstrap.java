@@ -68,18 +68,14 @@ public class Bootstrap {
         ClassPathResource classPathResource = new ClassPathResource("serving-server.properties");
         try {
             File file = classPathResource.getFile();
-
             Properties  environment = new Properties();
-            InputStream inputStream=null;
-            try {
-                inputStream = new BufferedInputStream(new FileInputStream(file));
+            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))){
                 environment.load(inputStream);
             } catch (FileNotFoundException e) {
-
+                logger.error("profile serving-server.properties not found");
             } catch (IOException e) {
-
+                logger.error("parse config error, {}", e.getMessage());
             }
-
 
             int processors = Runtime.getRuntime().availableProcessors();
             MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
