@@ -66,8 +66,6 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
 
     @Override
     protected OutboundPackage<BatchInferenceResult> serviceFailInner(Context context, InboundPackage<BatchInferenceRequest> data, Throwable e) {
-
-        Map result = new HashMap();
         OutboundPackage<BatchInferenceResult> outboundPackage = new OutboundPackage<BatchInferenceResult>();
         BatchInferenceResult batchInferenceResult = new BatchInferenceResult();
         if (e instanceof BaseException) {
@@ -78,6 +76,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
             batchInferenceResult.setRetcode(ErrorCode.SYSTEM_ERROR);
         }
         outboundPackage.setData(batchInferenceResult);
+        context.setReturnCode(batchInferenceResult.getRetcode());
         return outboundPackage;
     }
 
