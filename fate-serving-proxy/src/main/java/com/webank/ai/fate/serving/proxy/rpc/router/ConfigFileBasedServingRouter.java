@@ -243,7 +243,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
         try {
             jsonReader = new JsonReader(new FileReader(filePath));
             confJson = jsonParser.parse(jsonReader).getAsJsonObject();
-            MetaInfo.PROXY_ROUTER_TABLE = confJson.getAsString();
+            MetaInfo.PROXY_ROUTER_TABLE = confJson.toString();
             logger.info("load router table {}", confJson);
 
         } catch (Exception e) {

@@ -48,7 +48,7 @@ public class MetricWriter {
     private int totalFileCount;
     private boolean append = false;
     private final static int pid = GetSystemInfo.getPid();
-    private final static boolean usePid = false;
+    private final static boolean usePid = FlowCounterManager.USE_PID;
     String  appName;
 
     /**

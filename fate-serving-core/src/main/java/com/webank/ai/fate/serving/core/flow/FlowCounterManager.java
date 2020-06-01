@@ -23,6 +23,8 @@ public class FlowCounterManager {
 
     MetricSearcher metricSearcher;
 
+    public static final boolean USE_PID = false;
+
     public MetricSearcher getMetricSearcher() {
         return metricSearcher;
     }
@@ -37,7 +39,11 @@ public class FlowCounterManager {
 
     public FlowCounterManager(String appName) {
         this.appName = appName;
-        metricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, appName + "-metrics.log.pid" + GetSystemInfo.getPid());
+        String baseFileName = appName + "-metrics.log";
+        if (USE_PID) {
+            baseFileName += ".pid" + GetSystemInfo.getPid();
+        }
+        metricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, baseFileName);
         metricReport = new FileMetricReport(appName);
     }
 
