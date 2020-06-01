@@ -85,7 +85,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
     protected Object transformErrorMap(Context context, Map data){
         String  actionType =  context.getActionType();
         String  code = data.get(Dict.RET_CODE)!=null?data.get(Dict.RET_CODE).toString():StatusCode.SYSTEM_ERROR;
-        String  msg = data.get(Dict.RET_MSG)!=null?data.get(Dict.RET_MSG).toString():"";
+        String  msg = data.get(Dict.MESSAGE)!=null?data.get(Dict.MESSAGE).toString():"";
         if(StringUtils.isNotEmpty(actionType)){
             switch (actionType){
                 case "MODEL_LOAD":   ;
