@@ -174,8 +174,8 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
 
         Map result = new HashMap();
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
-        result.put(Dict.MESSAGE, e.getMessage());
-        ErrorMessageUtil.handleException(result, e);
+       // result.put(Dict.MESSAGE, e.getMessage());
+        result= ErrorMessageUtil.handleExceptionToMap(e);
         context.setReturnCode(result.get(Dict.CODE) != null ? result.get(Dict.CODE).toString() : ErrorCode.SYSTEM_ERROR.toString());
         resp rsp = transformErrorMap(context, result);
         outboundPackage.setData(rsp);

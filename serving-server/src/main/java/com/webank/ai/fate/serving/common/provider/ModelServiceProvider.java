@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.Model;
@@ -13,11 +14,14 @@ import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @FateService(name = "modelService", preChain = {
-        "requestOverloadBreaker",
+        "requestOverloadBreaker"
 }, postChain = {
 })
 @Service
@@ -46,26 +50,21 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         String content = modelManager.queryModel(context, req);
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
 
-        JSONArray returnArray = JSONArray.parseArray(content);
-        for (int i = 0; i < returnArray.size(); i++) {
-            Model model = JSONObject.parseObject(returnArray.getString(i), Model.class);
-
-            if (req.getQueryType() == 1) {
-                model.setServiceId(req.getServiceId());
+        if (StringUtils.isNotBlank(content)) {
+            JSONArray returnArray = JSONArray.parseArray(content);
+            for (int i = 0; i < returnArray.size(); i++) {
+                Model model = JSONObject.parseObject(returnArray.getString(i), Model.class);
+                ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
+                modelExBuilder.setIndex(i);
+                modelExBuilder.setTableName(model.getTableName());
+                modelExBuilder.setNamespace(model.getNamespace());
+                modelExBuilder.setServiceId(model.getServiceId());
+                modelExBuilder.setContent(JSONObject.toJSONString(model));
+                builder.addModelInfos(modelExBuilder.build());
             }
-
-            ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
-            modelExBuilder.setIndex(i);
-            modelExBuilder.setTableName(model.getTableName());
-            modelExBuilder.setNamespace(model.getNamespace());
-            modelExBuilder.setServiceId(model.getServiceId());
-            modelExBuilder.setContent(JSONObject.toJSONString(model));
-
-            builder.addModelInfos(modelExBuilder.build());
         }
 
         builder.setRetcode(StatusCode.SUCCESS);
-//        builder.setMessage(content);
         return builder.build();
     }
 
@@ -82,6 +81,32 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.UnbindResponse res = modelManager.unbind(context, req);
         return res;
     }
+    @Override
+    protected Object transformErrorMap(Context context, Map data){
+        String  actionType =  context.getActionType();
+        String  code = data.get(Dict.RET_CODE)!=null?data.get(Dict.RET_CODE).toString():StatusCode.SYSTEM_ERROR;
+        String  msg = data.get(Dict.RET_MSG)!=null?data.get(Dict.RET_MSG).toString():"";
+        if(StringUtils.isNotEmpty(actionType)){
+            switch (actionType){
+                case "MODEL_LOAD":   ;
+                case "MODEL_PUBLISH_ONLINE":
+                    ReturnResult returnResult = new  ReturnResult();
+                    returnResult.setRetcode(code);
+                    returnResult.setRetmsg(msg);
+                    return  returnResult;
+                case "QUERY_MODEL":
+                    ModelServiceProto.QueryModelResponse     queryModelResponse = ModelServiceProto.QueryModelResponse.newBuilder().setRetcode(code).setMessage(msg).build();
+                    return queryModelResponse;
+                case  "UNLOAD":
+                    ModelServiceProto.UnloadResponse  unloadResponse = ModelServiceProto.UnloadResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
+                    return unloadResponse;
+                case "UNBIND":
+                    ModelServiceProto.UnbindResponse     unbindResponse = ModelServiceProto.UnbindResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
+                    return  unbindResponse;
+            }
 
+        }
+        return null;
+    };
 
 }
