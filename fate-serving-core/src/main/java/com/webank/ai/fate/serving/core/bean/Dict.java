@@ -68,6 +68,7 @@ public class Dict {
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_MAX_SIZE = "remoteModelInferenceResultCacheMaxSize";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_TTL = "inferenceResultCacheTTL";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_CACHE_MAX_SIZE = "inferenceResultCacheCacheMaxSize";
+    public static final String CACHE_TYPE ="cache.type";
     public static final String PROPERTY_REDIS_MAX_TOTAL = "redis.maxTotal";
     public static final String PROPERTY_REDIS_MAX_IDLE = "redis.maxIdle";
     public static final String PROPERTY_REDIS_IP = "redis.ip";
@@ -102,6 +103,7 @@ public class Dict {
     public static final String PROPERTY_USER_DIR = "user.dir";
     public static final String PROPERTY_USER_HOME = "user.home";
     public static final String PROPERTY_FILE_SEPARATOR = "file.separator";
+    public static final String ZK_URL = "zk.url";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 
@@ -194,6 +196,7 @@ public class Dict {
     public static final String HEAD = "head";
     public static final String BODY = "body";
     public static final String SERVICENAME_INFERENCE = "inference";
+    public static final String SERVICENAME_BATCH_INFERENCE = "batchInference";
     public static final String SERVICENAME_START_INFERENCE_JOB = "startInferenceJob";
     public static final String SERVICENAME_GET_INFERENCE_RESULT = "getInferenceResult";
 

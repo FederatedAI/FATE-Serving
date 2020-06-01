@@ -42,10 +42,6 @@ public class GrpcConnectionPool {
 
     public ConcurrentHashMap<String, ChannelResource> poolMap = new ConcurrentHashMap<String, ChannelResource>();
     Random r = new Random();
-
-
-//            Configuration.getPropertyInt("rpc.connections.per.address",Runtime.getRuntime().availableProcessors());
-//    Configuration.getPropertyInt("rpc.per.channel.loadfactor",10)
     private int maxTotalPerAddress = Runtime.getRuntime().availableProcessors();
     private long defaultLoadFactor = 10;
     private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);

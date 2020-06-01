@@ -30,7 +30,7 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static AtomicLong requestInProcess = new AtomicLong(0);
     long timestamp;
-    LoggerPrinter loggerPrinter = new BaseLoggerPrinter();
+
     String interfaceName;
     String actionType;
     Map dataMap = Maps.newHashMap();
@@ -40,16 +40,15 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
         timestamp = System.currentTimeMillis();
     }
 
-    public BaseContext(LoggerPrinter loggerPrinter, String actionType) {
-        this.loggerPrinter = loggerPrinter;
+    public BaseContext( String actionType) {
+
         timestamp = System.currentTimeMillis();
         this.actionType = actionType;
     }
 
-    private BaseContext(LoggerPrinter loggerPrinter, long timestamp, Map dataMap) {
+    private BaseContext( long timestamp, Map dataMap) {
         this.timestamp = timestamp;
         this.dataMap = dataMap;
-        this.loggerPrinter = loggerPrinter;
     }
 
     @Override
@@ -139,7 +138,7 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     @Override
     public Context subContext() {
         Map newDataMap = Maps.newHashMap(dataMap);
-        return new BaseContext(this.loggerPrinter, this.timestamp, newDataMap);
+        return new BaseContext( this.timestamp, newDataMap);
     }
 
     @Override

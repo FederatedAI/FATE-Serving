@@ -25,14 +25,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
-        <module>serving-server</module>
-        <module>federatedml</module>
+        <module>fate-serving-server</module>
+        <module>fate-serving-federatedml</module>
         <module>fate-serving-core</module>
-        <module>register</module>
-        <module>serving-proxy</module>
-<!--        <module>fate-metrics-api</module>-->
-<!--        <module>fate-metrics-micrometer</module>-->
-        <!--<module>fate-serving-monitor</module>-->
+        <module>fate-serving-register</module>
+        <module>fate-serving-proxy</module>
         <module>fate-serving-admin</module>
         <module>fate-serving-extension</module>
     </modules>
@@ -58,7 +55,6 @@
         <jackson.version>2.10.0</jackson.version>
         <mysql.connector.version>8.0.13</mysql.connector.version>
         <jedis.version>2.9.0</jedis.version>
-<!--        <sentinel.version>1.6.3</sentinel.version>-->
         <dropwizard.metrics.version>4.1.2</dropwizard.metrics.version>
     </properties>
 
