@@ -35,9 +35,6 @@ public class HashedWheelTimer implements Timer {
 
     static final String OS_NAME = "os.name";
     static final String USER_HOME = "user.home";
-
-
-
     static final String OS_NAME_WIN = "win";
     public static final String NAME = "hased";
     private static final Logger logger = LoggerFactory.getLogger(HashedWheelTimer.class);
