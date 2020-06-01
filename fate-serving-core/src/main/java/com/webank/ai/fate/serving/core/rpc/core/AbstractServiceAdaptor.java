@@ -176,7 +176,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
        // result.put(Dict.MESSAGE, e.getMessage());
         result= ErrorMessageUtil.handleExceptionToMap(e);
-        context.setReturnCode(result.get(Dict.CODE) != null ? result.get(Dict.CODE).toString() : ErrorCode.SYSTEM_ERROR.toString());
+        context.setReturnCode(result.get(Dict.RET_CODE) != null ? result.get(Dict.RET_CODE).toString() : StatusCode.SYSTEM_ERROR);
         resp rsp = transformErrorMap(context, result);
         outboundPackage.setData(rsp);
         return outboundPackage;
