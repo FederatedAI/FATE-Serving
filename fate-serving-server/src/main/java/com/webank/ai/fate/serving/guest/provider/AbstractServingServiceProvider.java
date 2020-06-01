@@ -22,7 +22,7 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
     Environment environment;
 
     @Override
-    protected resp transformErrorMap(Context context, Map data) {
+    protected resp transformExceptionInfo(Context context, ExceptionInfo  exceptionInfo) {
         return null;
     }
 

@@ -62,6 +62,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         } else {
             batchInferenceResult.setRetcode(StatusCode.SYSTEM_ERROR);
         }
+        context.setReturnCode(batchInferenceResult.getRetcode());
         outboundPackage.setData(batchInferenceResult);
         return outboundPackage;
     }

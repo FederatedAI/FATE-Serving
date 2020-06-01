@@ -58,6 +58,19 @@ public class ErrorMessageUtil {
     }
 
 
+    public static AbstractServiceAdaptor.ExceptionInfo handleExceptionExceptionInfo(Throwable e) {
+        AbstractServiceAdaptor.ExceptionInfo exceptionInfo  = new AbstractServiceAdaptor.ExceptionInfo();
+        if (e instanceof BaseException) {
+            BaseException baseException = (BaseException) e;
+            exceptionInfo.setCode( baseException.getRetcode());
+            exceptionInfo.setMessage(baseException.getMessage());
+        } else {
+            exceptionInfo.setCode(StatusCode.SYSTEM_ERROR);
+        }
+        return exceptionInfo;
+    }
+
+
     public static Map handleExceptionToMap(Throwable e) {
         Map returnResult = new HashMap();
         if (e instanceof BaseException) {

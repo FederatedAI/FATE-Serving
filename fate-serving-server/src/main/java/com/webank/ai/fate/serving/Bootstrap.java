@@ -68,7 +68,6 @@ public class Bootstrap {
         ClassPathResource classPathResource = new ClassPathResource("serving-server.properties");
         try {
             File file = classPathResource.getFile();
-
             Properties  environment = new Properties();
             InputStream inputStream=null;
             try {

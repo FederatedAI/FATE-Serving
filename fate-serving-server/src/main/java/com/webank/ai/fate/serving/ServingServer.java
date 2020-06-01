@@ -86,5 +86,6 @@ public class ServingServer implements InitializingBean {
         }
         modelManager.restore(new BaseContext());
         HttpClientPool.initPool();
+        logger.warn("serving-server start over");
     }
 }

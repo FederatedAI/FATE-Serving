@@ -32,6 +32,37 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdaptor<req, resp> {
 
+
+    public static  class ExceptionInfo  {
+        public ExceptionInfo(){
+
+        }
+
+        String  code;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        String  message;
+
+
+    }
+
+
+
     static public AtomicInteger requestInHandle = new AtomicInteger(0);
     public static boolean isOpen = true;
     protected Logger flowLogger = LoggerFactory.getLogger("flow");
@@ -113,12 +144,8 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         }
         try {
             requestInHandle.addAndGet(1);
-
             resp result = null;
-
             context.setServiceName(this.serviceName);
-
-
             try {
                 preChain.doPreProcess(context, data, outboundPackage);
                 result = doService(context, data, outboundPackage);
@@ -138,7 +165,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         } finally {
             requestInHandle.decrementAndGet();
             long end = System.currentTimeMillis();
-//            long cost = end - begin;
+
 
             if (exceptions.size() != 0) {
                 try {
@@ -170,13 +197,10 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
 
 
     protected OutboundPackage<resp> serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {
-
-        Map result = new HashMap();
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
-        result.put(Dict.MESSAGE, e.getMessage());
-        ErrorMessageUtil.handleException(result, e);
-        context.setReturnCode(result.get(Dict.CODE) != null ? result.get(Dict.CODE).toString() : StatusCode.SYSTEM_ERROR);
-        resp rsp = transformErrorMap(context, result);
+        ExceptionInfo  exceptionInfo = ErrorMessageUtil.handleExceptionExceptionInfo( e);
+        context.setReturnCode(exceptionInfo.getCode() != null ?exceptionInfo.getCode() : StatusCode.SYSTEM_ERROR);
+        resp rsp = transformExceptionInfo(context, exceptionInfo);
         outboundPackage.setData(rsp);
         return outboundPackage;
     }
@@ -185,7 +209,6 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     @Override
     public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws RuntimeException {
 
-
         Throwable e = errors.get(0);
         logger.error("service fail ", e);
         return serviceFailInner(context, data, e);
@@ -193,7 +216,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     }
 
 
-    abstract protected resp transformErrorMap(Context context, Map data);
+    abstract protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo);
 
     private String objectToJson(Object obj) {
         return JSONObject.toJSONString(obj, SerializerFeature.WriteEnumUsingToString);

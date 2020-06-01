@@ -46,6 +46,7 @@ public class HostBatchInferenceProvider extends AbstractServingServiceProvider<B
             batchInferenceResult.setRetcode(StatusCode.SYSTEM_ERROR);
             batchInferenceResult.setRetmsg(e.getMessage());
         }
+        context.setReturnCode(batchInferenceResult.getRetcode());
         outboundPackage.setData(batchInferenceResult);
         return outboundPackage;
     }

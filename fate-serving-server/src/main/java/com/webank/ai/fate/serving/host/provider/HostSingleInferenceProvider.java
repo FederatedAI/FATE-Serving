@@ -17,12 +17,11 @@ import java.util.Map;
 
 @FateService(name = "hostInferenceProvider", preChain = {
         "requestOverloadBreaker",
-        "monitorInterceptor",
         "hostParamInterceptor",
         "hostModelInterceptor",
         "hostSingleFeatureAdaptorInterceptor"
 }, postChain = {
-        "monitorInterceptor"
+
 })
 @Service
 public class HostSingleInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
@@ -36,6 +35,7 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
         outboundPackage.setData(returnResult);
+        context.setReturnCode(returnResult.getRetcode());
         return outboundPackage;
     }
 
@@ -66,6 +66,8 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
         result.setData(map);
         return result;
     }
+
+
 
 
 }

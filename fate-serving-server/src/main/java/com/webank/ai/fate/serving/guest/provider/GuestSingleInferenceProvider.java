@@ -50,6 +50,7 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
         outboundPackage.setData(returnResult);
+        context.setReturnCode(returnResult.getRetcode());
         return outboundPackage;
     }
 }

@@ -9,6 +9,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.flow.JvmInfo;
 import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
@@ -37,10 +38,10 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     FlowCounterManager flowCounterManager;
 
     @Override
-    protected Object transformErrorMap(Context context, Map data) {
+    protected Object transformExceptionInfo(Context context, ExceptionInfo data) {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-        builder.setStatusCode(data.get(Dict.CODE).toString());
-        builder.setMessage(data.get(Dict.MESSAGE).toString());
+        builder.setStatusCode(data.getCode());
+        builder.setMessage(data.getMessage());
         return builder.build();
     }
 
@@ -51,7 +52,6 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         long endMs = queryMetricRequest.getEndMs();
         String sourceName = queryMetricRequest.getSource();
         List<MetricNode> metricNodes;
-
         if (StringUtils.isNotEmpty(sourceName)) {
             metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
         } else {
@@ -95,8 +95,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             builder.setData(ByteString.copyFrom(JSON.toJSONString(jvmInfos).getBytes()));
             return builder.build();
         }catch(Exception e){
-            e.printStackTrace();
-            return null;
+            throw  new SysException(e.getMessage());
         }
 
     }
