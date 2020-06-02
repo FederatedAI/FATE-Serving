@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
+import java.lang.Math;
 
 
 public class HeteroFeatureBinning extends BaseModel {
@@ -83,9 +84,8 @@ public class HeteroFeatureBinning extends BaseModel {
                 Double colValue = Double.valueOf(firstData.get(colName).toString());
                 int colIndex = Collections.binarySearch(splitPoint, colValue);
                 if (colIndex < 0) {
-                    colIndex = - colIndex - 1;
+                    colIndex = Math.min((- colIndex - 1), splitPoint.size() - 1);
                 }
-
 //                for (colIndex = 0; colIndex < splitPoint.size(); colIndex ++) {
 //
 //
