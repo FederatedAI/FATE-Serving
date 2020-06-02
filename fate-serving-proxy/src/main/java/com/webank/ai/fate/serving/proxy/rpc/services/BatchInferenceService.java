@@ -123,8 +123,11 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
     }
 
     @Override
-    protected Map transformErrorMap(Context context, Map data) {
-        return data;
+    protected Map transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
+        Map map = Maps.newHashMap();
+        map.put(Dict.RET_CODE, exceptionInfo.getCode());
+        map.put(Dict.RET_MSG, exceptionInfo.getMessage());
+        return map;
     }
 }
 

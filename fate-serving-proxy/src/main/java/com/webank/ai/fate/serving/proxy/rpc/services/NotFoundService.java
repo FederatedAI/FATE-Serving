@@ -29,7 +29,7 @@ public class NotFoundService extends AbstractServiceAdaptor<String, String> {
     }
 
     @Override
-    protected String transformErrorMap(Context context, Map data) {
+    protected String transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         return null;
     }
 }

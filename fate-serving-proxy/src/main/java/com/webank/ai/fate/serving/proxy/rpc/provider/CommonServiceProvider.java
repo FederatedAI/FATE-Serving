@@ -42,10 +42,10 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     Environment environment;
 
     @Override
-    protected Object transformErrorMap(Context context, Map data) {
+    protected Object transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-        builder.setStatusCode(data.get(Dict.CODE).toString());
-        builder.setMessage(data.get(Dict.MESSAGE).toString());
+        builder.setStatusCode(exceptionInfo.getCode());
+        builder.setMessage(exceptionInfo.getMessage());
         return builder.build();
     }
 

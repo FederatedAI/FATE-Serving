@@ -102,12 +102,12 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     }
 
     @Override
-    protected Proxy.Packet transformErrorMap(Context context, Map data) {
+    protected Proxy.Packet transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         Proxy.Packet.Builder builder = Proxy.Packet.newBuilder();
         Proxy.Data.Builder dataBuilder = Proxy.Data.newBuilder();
         Map fateMap = Maps.newHashMap();
-        fateMap.put(Dict.RET_CODE, transformErrorCode(data.get(Dict.CODE).toString()));
-        fateMap.put(Dict.RET_MSG, data.get(Dict.MESSAGE));
+        fateMap.put(Dict.RET_CODE, transformErrorCode(exceptionInfo.getCode()));
+        fateMap.put(Dict.RET_MSG, exceptionInfo.getMessage());
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JSON.toJSONString(fateMap))));
         return builder.build();
     }

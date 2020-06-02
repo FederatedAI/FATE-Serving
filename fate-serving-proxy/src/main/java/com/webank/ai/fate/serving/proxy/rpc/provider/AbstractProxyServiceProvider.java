@@ -13,7 +13,7 @@ import java.util.Map;
 public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
 
     @Override
-    protected resp transformErrorMap(Context context, Map data) {
+    protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         return null;
     }
 
