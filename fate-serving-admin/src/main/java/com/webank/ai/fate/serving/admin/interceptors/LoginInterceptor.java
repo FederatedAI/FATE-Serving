@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,10 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if(request.getMethod().equals(RequestMethod.OPTIONS.name())) {
+            response.setStatus(HttpStatus.OK.value());
+            return true;
+        }
         String token = request.getHeader("sessionToken");
         Preconditions.checkArgument(StringUtils.isNotBlank(token), "parameter sessionToken is required");
 
