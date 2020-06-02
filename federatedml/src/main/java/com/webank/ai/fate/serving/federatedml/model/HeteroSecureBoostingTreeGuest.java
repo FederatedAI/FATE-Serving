@@ -169,7 +169,11 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         Map<String, Object> input = inputData.get(0);
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
 
-        ReturnResult returnResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
+        if(!this.fastMode){
+            // ask host to prepare data, if fast mode is not enabled
+            ReturnResult returnResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
+        }
+
 
         int featureHit = 0;
         for (String key : input.keySet()) {
@@ -183,6 +187,8 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         int[] treeNodeIds = new int[this.treeNum];
         double[] weights = new double[this.treeNum];
         int communicationRound = 0;
+
+        // start local inference
         while (true) {
             HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
             for (int i = 0; i < this.treeNum; ++i) {
@@ -214,10 +220,18 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
             try {
                 logger.info("begin to federated");
 
-                ReturnResult tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
-                Map<String, Object> returnData = tempResult.getData();
-
                 boolean getNodeRoute = false;
+                ReturnResult tempResult;
+                if(this.fastMode){
+                    getNodeRoute = true;
+                    tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
+                }
+                else{
+                    tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
+                }
+
+
+                Map<String, Object> returnData = tempResult.getData();
                 for(Object obj: returnData.values()){
                     if(!(obj instanceof Integer)) getNodeRoute = true; // get node position if value is integer
                     break;

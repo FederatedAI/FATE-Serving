@@ -40,6 +40,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
     protected List<String> classes;
     protected int treeDim;
     protected double learningRate;
+    protected boolean fastMode = true;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
