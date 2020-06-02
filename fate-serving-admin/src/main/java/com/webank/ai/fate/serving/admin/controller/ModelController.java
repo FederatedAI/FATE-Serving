@@ -9,10 +9,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
@@ -57,166 +54,6 @@ public class ModelController {
     @Autowired
     private ComponentService  componentService;
 
-//    @RequestMapping(value = "/model/{version}/{callName}", method = {RequestMethod.GET, RequestMethod.POST})
-//    @ResponseBody
-//    public Callable<ReturnResult> modelQuery(@PathVariable String version, @PathVariable String callName,
-//                                       @RequestBody String data, @RequestHeader HttpHeaders headers,
-//                                       HttpServletRequest httpServletRequest
-//    ) throws Exception {
-//        return () -> {
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("receive : {} headers {}", data, headers.toSingleValueMap());
-//            }
-//
-//            Context context = new BaseContext();
-//            context.setCallName(callName);
-//            context.setVersion(version);
-//
-//            final ServiceAdaptor serviceAdaptor = fateServiceRegister.getServiceAdaptor(Dict.SERVICE_NAME_MODEL_QUERY);
-//            if (serviceAdaptor == null) {
-//                throw new RemoteRpcException(StatusCode.SYSTEM_ERROR, "service not found");
-//            }
-//
-//            InboundPackage<Map> inboundPackage = buildInboundPackage(context, data, headers, httpServletRequest);
-//
-//            OutboundPackage<ReturnResult> result = serviceAdaptor.service(context, inboundPackage);
-//            return result.getData();
-//        };
-//    }
-
-    private InboundPackage<Map> buildInboundPackage(Context context, String data, HttpHeaders headers, HttpServletRequest httpServletRequest) {
-        try {
-            Map head = Maps.newHashMap();
-//            head.put(Dict.HOST, headers.getFirst(Dict.HOST) != null ? headers.getFirst(Dict.HOST).trim() : "");
-
-            Map body = JSON.parseObject(data);
-
-            InboundPackage<Map> inboundPackage = new InboundPackage<>();
-            inboundPackage.setBody(body);
-            inboundPackage.setHead(head);
-            inboundPackage.setSource(data);
-            return inboundPackage;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    /**
-     * 实现queryModel
-     *
-     * @return
-     * @throws Exception
-     */
-//    @RequestMapping(value = "/model/{version}/{callName}", method = {RequestMethod.GET, RequestMethod.POST})
-//    @ResponseBody
-//    public Callable<ReturnResult> model(@PathVariable String version,
-//                                        @PathVariable String callName,
-//                                        @RequestBody String data,
-//                                        @RequestHeader HttpHeaders headers,
-//                                        HttpServletRequest httpServletRequest
-//    ) throws Exception {
-//        return () -> {
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("callName: {} receive: {} headers: {}", callName, data, headers.toSingleValueMap());
-//            }
-//            Context context = new BaseContext();
-//
-//            InboundPackage<Map> inboundPackage = buildInboundPackage(context, data, headers, httpServletRequest);
-//            Map body = inboundPackage.getBody();
-//
-//            String host = body.get(Dict.HOST) != null ? body.get(Dict.HOST).toString() : null;
-//            Integer port = body.get(Dict.PORT) != null ? Integer.valueOf(body.get(Dict.PORT).toString()) : null;
-//
-//            Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-//            Preconditions.checkArgument(port != null, "parameter port is null");
-//
-//            ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(context.geth(), context.getPort());
-//            ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
-//
-//            blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
-//
-//            ModelServiceProto.PublishRequest.Builder builder = ModelServiceProto.PublishRequest.newBuilder();
-//
-//            ModelServiceProto.PublishResponse response = null;
-//
-//            if (callName.equals(Dict.LIST_ALL_MODEL)) {
-//                response = blockingStub.listAllModel(builder.build());
-//            } else if (callName.equals(Dict.GET_MODEL_BY_NAME_AND_NAMESPACE)) {
-//                String tableName = String.valueOf(body.get(Dict.TABLE_NAME));
-//                String namespace = String.valueOf(body.get(Dict.NAMESPACE));
-//
-//                Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
-//                Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
-//
-//                builder.setTableName(tableName).setNamespace(namespace);
-//                response = blockingStub.getModelByTableNameAndNamespace(builder.build());
-//            } else if (callName.equals(Dict.GET_MODEL_BY_SERVICE_ID)) {
-//                String serviceId = String.valueOf(body.get(Dict.SERVICE_ID));
-//
-//                Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "parameter serviceId is blank");
-//
-//                builder.setServiceId(serviceId);
-//                response = blockingStub.getModelByServiceId(builder.build());
-//            }
-//
-//            if (response != null) {
-//                if (logger.isDebugEnabled()) {
-//                    logger.debug("response: {}", response);
-//                }
-//
-//                return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
-//            } else {
-//                throw new RemoteRpcException(StatusCode.UNAVAILABLE_REQUEST, "unavailable request: " + callName);
-//            }
-//        };
-//    }
-
-
-//    @GetMapping("/model/listAllModel")
-//    public ReturnResult listAllModel(String host, int port) throws Exception {
-//        if (logger.isDebugEnabled()) {
-//            logger.debug("list all model request, host: {}, port: {}", host, port);
-//        }
-//
-//        ModelServiceGrpc.ModelServiceBlockingStub blockingStub = getModelServiceBlockingStub(host, port);
-//
-//        ModelServiceProto.QueryModelRequest.Builder  builder =   ModelServiceProto.QueryModelRequest.newBuilder();
-//
-//        ModelServiceProto.QueryModelResponse response = blockingStub.queryModel(builder.build());
-//
-//        if (logger.isDebugEnabled()) {
-//            logger.debug("response: {}", response);
-//        }
-//
-//
-//        return ReturnResult.build(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
-//    }
-
-//    @GetMapping("/model/getModelByNameAndNamespace")
-//    public ReturnResult getModelByNameAndNamespace(String host, int port, String tableName, String namespace) throws Exception {
-//        Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
-//        Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
-//
-//        if (logger.isDebugEnabled()) {
-//            logger.debug("get model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", host, port, tableName, namespace);
-//        }
-//
-//        ModelServiceGrpc.ModelServiceBlockingStub blockingStub = getModelServiceBlockingStub(host, port);
-//
-//        ModelServiceProto.PublishRequest publishRequest = ModelServiceProto.PublishRequest.newBuilder()
-//                .setTableName(tableName)
-//                .setNamespace(namespace)
-//                .build();
-//
-//        ModelServiceProto.PublishResponse response = blockingStub.queryModel(publishRequest);
-//
-//        if (logger.isDebugEnabled()) {
-//            logger.debug("response: {}", response);
-//        }
-//
-//        return ReturnResult.success(response.getStatusCode(), response.getMessage(), JSONObject.parse(response.getData().toStringUtf8()));
-//    }
     @GetMapping("/model/query")
     public ReturnResult queryModel(String host, int port, String serviceId, Integer page, Integer pageSize) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
@@ -338,8 +175,13 @@ public class ModelController {
     }
 
     @PostMapping("/model/unload")
-    public Callable<ReturnResult> unload(String host, int port, String tableName, String namespace) throws Exception {
+    public Callable<ReturnResult> unload(@RequestBody RequestParamWrapper requestParams) throws Exception {
         return () -> {
+            String host = requestParams.getHost();
+            Integer port = requestParams.getPort();
+            String tableName = requestParams.getTableName();
+            String namespace = requestParams.getNamespace();
+
             Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
 
@@ -371,8 +213,14 @@ public class ModelController {
     }
 
     @PostMapping("/model/unbind")
-    public Callable<ReturnResult> unbind(String host, int port, String tableName, String namespace, String serviceId) throws Exception {
+    public Callable<ReturnResult> unbind(@RequestBody RequestParamWrapper requestParams) throws Exception {
         return () -> {
+            String host = requestParams.getHost();
+            Integer port = requestParams.getPort();
+            String tableName = requestParams.getTableName();
+            String namespace = requestParams.getNamespace();
+            String serviceId = requestParams.getServiceId();
+
             Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "parameter serviceId is blank");
@@ -404,9 +252,9 @@ public class ModelController {
         };
     }
 
-    private ModelServiceGrpc.ModelServiceBlockingStub getModelServiceBlockingStub(String host, int port) throws Exception {
+    private ModelServiceGrpc.ModelServiceBlockingStub getModelServiceBlockingStub(String host, Integer port) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-        Preconditions.checkArgument(port != 0, "parameter port was wrong");
+        Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
@@ -414,9 +262,9 @@ public class ModelController {
         return blockingStub;
     }
 
-    private ModelServiceGrpc.ModelServiceFutureStub getModelServiceFutureStub(String host, int port) throws Exception {
+    private ModelServiceGrpc.ModelServiceFutureStub getModelServiceFutureStub(String host, Integer port) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-        Preconditions.checkArgument(port != 0, "parameter port was wrong");
+        Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);

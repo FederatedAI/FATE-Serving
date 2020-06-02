@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.codec.digest.Md5Crypt;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,7 +44,10 @@ public class LoginController {
     private StringRedisTemplate redisTemplate;
 
     @PostMapping("/admin/login")
-    public ReturnResult login(String username, String password) {
+    public ReturnResult login(@RequestBody RequestParamWrapper requestParams) {
+        String username = requestParams.getUsername();
+        String password = requestParams.getPassword();
+
         Preconditions.checkArgument(StringUtils.isNotBlank(username), "parameter username is blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(password), "parameter password is blank");
 
@@ -56,7 +61,7 @@ public class LoginController {
 
             Map data = new HashMap<>();
             data.put("timestamp", System.currentTimeMillis());
-            data.put("sessionToken", token);
+            data.put(Dict.SESSION_TOKEN, token);
 
             result.setRetcode(StatusCode.SUCCESS);
             result.setData(data);
@@ -72,7 +77,7 @@ public class LoginController {
     public ReturnResult logout(HttpServletRequest request) {
         ReturnResult result = new ReturnResult();
 
-        String sessionToken = request.getHeader("sessionToken");
+        String sessionToken = request.getHeader(Dict.SESSION_TOKEN);
         String userInfo = redisTemplate.opsForValue().get(sessionToken);
         if (StringUtils.isNotBlank(userInfo)) {
             redisTemplate.delete(sessionToken);

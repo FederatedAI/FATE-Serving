@@ -8,6 +8,7 @@ import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.bean.ServiceDataWrapper;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -15,10 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -105,7 +103,13 @@ public class ServiceController {
 
     // 修改每个接口中的路由信息，权重信息
     @PostMapping("/service/update")
-    public ReturnResult updateService(String project, String url, String routerMode, Integer weight, Long version) {
+    public ReturnResult updateService(@RequestBody RequestParamWrapper requestParams) {
+        String project = requestParams.getProject();
+        String url = requestParams.getUrl();
+        String routerMode = requestParams.getRouterMode();
+        Integer weight = requestParams.getWeight();
+        Long version = requestParams.getVersion();
+
         if (logger.isDebugEnabled()) {
             logger.debug("try to update service");
         }

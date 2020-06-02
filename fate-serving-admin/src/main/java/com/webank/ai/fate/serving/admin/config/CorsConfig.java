@@ -1,5 +1,6 @@
 package com.webank.ai.fate.serving.admin.config;
 
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -12,7 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("X-Requested-With", "accept", "content-type", "sessionToken")
+                .allowedHeaders("X-Requested-With", "accept", "content-type", Dict.SESSION_TOKEN)
                 .allowCredentials(true)
                 .maxAge(86400);
     }

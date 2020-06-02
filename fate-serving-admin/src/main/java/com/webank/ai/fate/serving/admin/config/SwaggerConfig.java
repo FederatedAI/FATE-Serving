@@ -1,5 +1,6 @@
 package com.webank.ai.fate.serving.admin.config;
 
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -23,7 +24,7 @@ public class SwaggerConfig {
     public Docket createRestApi() {
         ParameterBuilder ticketPar = new ParameterBuilder();
         List<Parameter> pars = new ArrayList<Parameter>();
-        ticketPar.name("sessionToken").description("令牌")
+        ticketPar.name(Dict.SESSION_TOKEN).description("令牌")
                 .modelRef(new ModelRef("string")).parameterType("header")
                 .required(false).build(); //header中的ticket参数非必填，传空也可以
         pars.add(ticketPar.build());

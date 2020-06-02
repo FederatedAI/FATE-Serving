@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.admin.interceptors;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +31,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             response.setStatus(HttpStatus.OK.value());
             return true;
         }
-        String token = request.getHeader("sessionToken");
+        String token = request.getHeader(Dict.SESSION_TOKEN);
         Preconditions.checkArgument(StringUtils.isNotBlank(token), "parameter sessionToken is required");
 
         String userInfo = redisTemplate.opsForValue().get(token);
@@ -39,7 +40,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         } else {
             logger.info("Session token unavailable");
-            response.getWriter().write(JSONObject.toJSONString(ReturnResult.build(StatusCode.PARAM_ERROR, "Session token unavailable", null)));
+            response.getWriter().write(JSONObject.toJSONString(ReturnResult.build(StatusCode.PARAM_ERROR, "Session token unavailable")));
             response.flushBuffer();
             return false;
         }
