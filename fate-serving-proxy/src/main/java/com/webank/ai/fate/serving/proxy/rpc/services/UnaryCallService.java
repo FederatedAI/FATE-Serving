@@ -40,58 +40,34 @@ import java.util.concurrent.TimeUnit;
         "defaultServingRouter"})
 
 public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy.Packet> {
-//    static final String RETURN_CODE = "retcode";
-    static Map<String, String> fateErrorCodeMap = Maps.newHashMap();
 
-    static {
-        fateErrorCodeMap.put(StatusCode.PARAM_ERROR, "500");
-        fateErrorCodeMap.put(StatusCode.INVALID_ROLE_ERROR, "501");
-        fateErrorCodeMap.put(StatusCode.SERVICE_NOT_FOUND, "502");
-        fateErrorCodeMap.put(StatusCode.SYSTEM_ERROR, "503");
-        fateErrorCodeMap.put(StatusCode.OVER_LOAD_ERROR, "504");
-        fateErrorCodeMap.put(StatusCode.NET_ERROR, "507");
-        fateErrorCodeMap.put(StatusCode.SHUTDOWN_ERROR, "508");
-        fateErrorCodeMap.put(StatusCode.GUEST_ROUTER_ERROR, "509");
-    }
+    Logger logger = LoggerFactory.getLogger(UnaryCallService.class);
 
-//    @Autowired
-//    IMetricFactory metricFactory;
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+
     @Autowired
     AuthUtils authUtils;
-    Logger logger = LoggerFactory.getLogger(UnaryCallService.class);
     @Value("${proxy.grpc.unaryCall.timeout:3000}")
     private int timeout;
 
     @Override
     public Proxy.Packet doService(Context context, InboundPackage<Proxy.Packet> data, OutboundPackage<Proxy.Packet> outboundPackage) {
-
-        RouterInfo routerInfo = data.getRouterInfo();
-        ManagedChannel managedChannel = null;
         try {
             Proxy.Packet sourcePackage = data.getBody();
             sourcePackage = authUtils.addAuthInfo(sourcePackage);
 
-            managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
+            RouterInfo routerInfo = data.getRouterInfo();
+            ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
-
             stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
-
-//            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "out", "result", "success").increment();
 
             context.setDownstreamBegin(System.currentTimeMillis());
 
             ListenableFuture<Proxy.Packet> future = stub1.unaryCall(sourcePackage);
-
             Proxy.Packet packet = future.get(timeout, TimeUnit.MILLISECONDS);
 
-//            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "success").increment();
-
             return packet;
-
         } catch (Exception e) {
-//            metricFactory.counter("grpc.unaryCall.service", "in doService", "direction", "in", "result", "error").increment();
-
             e.printStackTrace();
             logger.error("unaryCall error ", e);
         } finally {
@@ -106,20 +82,10 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         Proxy.Packet.Builder builder = Proxy.Packet.newBuilder();
         Proxy.Data.Builder dataBuilder = Proxy.Data.newBuilder();
         Map fateMap = Maps.newHashMap();
-        fateMap.put(Dict.RET_CODE, transformErrorCode(exceptionInfo.getCode()));
+        fateMap.put(Dict.RET_CODE, exceptionInfo.getCode());
         fateMap.put(Dict.RET_MSG, exceptionInfo.getMessage());
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JSON.toJSONString(fateMap))));
         return builder.build();
-    }
-
-    private String transformErrorCode(String errorCode) {
-        String result = fateErrorCodeMap.get(errorCode);
-        if (result != null) {
-            return fateErrorCodeMap.get(errorCode);
-        } else {
-            return "";
-        }
-
     }
 
 }

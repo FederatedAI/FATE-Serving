@@ -47,6 +47,20 @@ public class ReturnResult {
         return returnResult;
     }
 
+    public static ReturnResult build(String retcode, String retmsg) {
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(retcode);
+        returnResult.setRetmsg(retmsg);
+        return returnResult;
+    }
+
+    public static ReturnResult build(String retcode, Map<String, Object> data) {
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(retcode);
+        returnResult.setData(data);
+        return returnResult;
+    }
+
     public int getFlag() {
         return flag;
     }

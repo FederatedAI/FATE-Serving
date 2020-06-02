@@ -67,7 +67,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage) {
         Proxy.Topic dstTopic;
         Proxy.Topic srcTopic;
-        if (Dict.SERVICENAME_INFERENCE.equals(context.getServiceName())) {
+        if (Dict.SERVICENAME_INFERENCE.equals(context.getServiceName()) || Dict.SERVICENAME_BATCH_INFERENCE.equals(context.getServiceName())) {
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
             dstTopic = topicBuilder.setPartyId(selfCoordinator).
                     setRole(inferenceServiceName)

@@ -32,23 +32,13 @@ import java.util.concurrent.Callable;
 @Controller
 public class ProxyController {
 
+    Logger logger = LoggerFactory.getLogger(ProxyController.class);
+
     @Autowired
     ProxyServiceRegister proxyServiceRegister;
 
-//    @Autowired
-//    IMetricFactory metricFactory;
-    Logger logger = LoggerFactory.getLogger(ProxyController.class);
     @Value("${coordinator:9999}")
     private String selfCoordinator;
-
-    /*String binaryReader(HttpServletRequest request) throws IOException {
-        int len = request.getContentLength();
-        ServletInputStream iii = request.getInputStream();
-        byte[] buffer = new byte[len];
-        iii.read(buffer, 0, len);
-        return new String(buffer);
-    }*/
-
 
     @RequestMapping(value = "/federation/{version}/{callName}", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
@@ -58,8 +48,6 @@ public class ProxyController {
                                        HttpServletRequest httpServletRequest,
                                        @RequestHeader HttpHeaders headers
     ) throws Exception {
-//        metricFactory.counter("http.inference.request", "http inference request", "callName", callName).increment();
-
         return new Callable<String>() {
             @Override
             public String call() throws Exception {
@@ -67,7 +55,7 @@ public class ProxyController {
                     logger.debug("receive : {} headers {}", data, headers.toSingleValueMap());
                 }
 
-                final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor(Dict.SERVICENAME_INFERENCE);
+                final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor(callName);
 
                 Context context = new BaseContext();
                 context.setCallName(callName);
@@ -82,10 +70,7 @@ public class ProxyController {
                     result.getData().remove("caseid");
                 }
 
-//                metricFactory.counter("http.inference.response", "http inference response", "callName", callName).increment();
-
                 return JSON.toJSONString(result.getData());
-
             }
         };
 
@@ -105,7 +90,7 @@ public class ProxyController {
         context.setHostAppid(head.get(Dict.APP_ID) != null ? head.getOrDefault(Dict.APP_ID, "").toString() : "");
         context.setCaseId(head.get(Dict.CASE_ID) != null ? head.getOrDefault(Dict.CASE_ID, "").toString() : "");
         if (null == context.getCaseId() || context.getCaseId().isEmpty()) {
-            context.setCaseId(UUID.randomUUID().toString());
+            context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         }
 
         InboundPackage<Map> inboundPackage = new InboundPackage<Map>();

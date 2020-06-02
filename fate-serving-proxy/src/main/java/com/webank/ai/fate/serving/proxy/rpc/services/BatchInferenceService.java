@@ -26,28 +26,21 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description TODO
- * @Author
- **/
 @Service
-
-// TODO utu: may load from cfg file is a better choice compare to using annotation?
 @FateService(name = Dict.SERVICENAME_BATCH_INFERENCE, preChain = {
         "requestOverloadBreaker",
         "inferenceParamValidator",
         "defaultServingRouter"})
-
 public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
 
     Logger logger = LoggerFactory.getLogger(BatchInferenceService.class);
 
-
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-    @Value("${proxy.grpc.inference.timeout:3000}")
+
+    @Value("${proxy.grpc.batch.inference.timeout:10000}")
     private int timeout;
-    @Value("${proxy.grpc.inference.async.timeout:3000}")
-    private int asyncTimeout;
+//    @Value("${proxy.grpc.batch.inference.async.timeout:10000}")
+//    private int asyncTimeout;
 
     public BatchInferenceService() {
     }
@@ -82,39 +75,30 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
-        
-
-        int timeWait = timeout;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("inference req : {}", JSON.toJSONString(inferenceReqMap));
+            logger.debug("batch inference req : {}", JSON.toJSONString(inferenceReqMap));
         }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(inferenceReqMap).getBytes()));
 
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
 
-//        metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "to.self.serving-server", "result", "success").increment();
-
-        if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
-            resultFuture = futureStub.inference(reqBuilder.build());
-            timeWait = timeout;
-        }
-        else {
+        if (callName.equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
+            resultFuture = futureStub.batchInference(reqBuilder.build());
+        } else {
             logger.error("unknown callName {}.", callName);
             throw new UnSupportMethodException();
         }
 
-
         try {
-            InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait, TimeUnit.MILLISECONDS);
+            InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout, TimeUnit.MILLISECONDS);
             logger.info("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
             resultString = new String(result.getBody().toByteArray());
         } catch (Exception e) {
             logger.error("get grpc result error", e);
             throw new NoResultException();
         }
-
 
         if (StringUtils.isNotEmpty(resultString)) {
             resultMap = JSON.parseObject(resultString, Map.class);
