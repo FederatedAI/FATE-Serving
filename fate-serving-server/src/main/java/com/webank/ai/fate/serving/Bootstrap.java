@@ -82,6 +82,7 @@ public class Bootstrap {
             MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_CORE_POOL_SIZE)) : processors;
             MetaInfo.SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.SERVING_MAX_POOL_SIZE)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_MAX_POOL_SIZE)):processors * 2;
             MetaInfo.SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)):1000;
+            MetaInfo.SERVING_POOL_QUEUE_SIZE =  environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)):100;
             MetaInfo.USE_REGISTER = environment.getProperty(Dict.USE_REGISTER)!=null?Boolean.getBoolean( environment.getProperty(Dict.USE_REGISTER)):Boolean.TRUE;
             MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
             MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)!=null?Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)):Boolean.FALSE;
