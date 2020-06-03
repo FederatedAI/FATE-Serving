@@ -8,6 +8,7 @@ import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.flow.JvmInfo;
@@ -78,23 +79,16 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     public CommonServiceProto.CommonResponse listProps(Context context, InboundPackage inboundPackage) {
         CommonServiceProto.QueryPropsRequest queryPropsRequest = (CommonServiceProto.QueryPropsRequest) inboundPackage.getBody();
         String keyword = queryPropsRequest.getKeyword();
-
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
-
-        MutablePropertySources propertySources = ((StandardEnvironment) environment).getPropertySources();
-        propertySources.forEach(ps -> {
-            if (ps instanceof ResourcePropertySource) {
-                ResourcePropertySource propertySource = (ResourcePropertySource) ps;
-                if (StringUtils.isNotBlank(keyword) && propertySource.containsProperty(keyword)) {
-                    Map map = Maps.newHashMap();
-                    map.put(keyword, propertySource.getProperty(keyword));
-                    builder.setData(ByteString.copyFrom(JSONObject.toJSONString(map).getBytes()));
-                } else {
-                    builder.setData(ByteString.copyFrom(JSONObject.toJSONString(propertySource.getSource()).getBytes()));
-                }
-            }
-        });
+        Map metaInfoMap = MetaInfo.toMap();
+        Map map = Maps.newHashMap();
+        if (StringUtils.isNotBlank(keyword) && metaInfoMap.get(keyword) != null) {
+            map.put(keyword, metaInfoMap.get(keyword));
+        } else {
+            map = metaInfoMap;
+        }
+        builder.setData(ByteString.copyFrom(JSON.toJSONString(map).getBytes()));
         return builder.build();
     }
 

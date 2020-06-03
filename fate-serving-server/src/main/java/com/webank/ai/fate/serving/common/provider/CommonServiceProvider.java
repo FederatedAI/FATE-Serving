@@ -78,8 +78,14 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         String keyword = queryPropsRequest.getKeyword();
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
+        Map metaInfoMap = MetaInfo.toMap();
         Map map = Maps.newHashMap();
-        builder.setData(ByteString.copyFrom(JSON.toJSONString(MetaInfo.toMap()).getBytes()));
+        if (StringUtils.isNotBlank(keyword) && metaInfoMap.get(keyword) != null) {
+            map.put(keyword, metaInfoMap.get(keyword));
+        } else {
+            map = metaInfoMap;
+        }
+        builder.setData(ByteString.copyFrom(JSON.toJSONString(map).getBytes()));
         return builder.build();
     }
 

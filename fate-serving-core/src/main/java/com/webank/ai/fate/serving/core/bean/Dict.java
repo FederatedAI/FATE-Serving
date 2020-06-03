@@ -68,7 +68,7 @@ public class Dict {
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_MAX_SIZE = "remoteModelInferenceResultCacheMaxSize";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_TTL = "inferenceResultCacheTTL";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_CACHE_MAX_SIZE = "inferenceResultCacheCacheMaxSize";
-    public static final String CACHE_TYPE ="cache.type";
+    public static final String PROPERTY_CACHE_TYPE ="cache.type";
     public static final String PROPERTY_REDIS_MAX_TOTAL = "redis.maxTotal";
     public static final String PROPERTY_REDIS_MAX_IDLE = "redis.maxIdle";
     public static final String PROPERTY_REDIS_IP = "redis.ip";
@@ -99,11 +99,40 @@ public class Dict {
     public static final String PROPERTY_FLOW_ADDRESS = "flow";
     public static final String PROPERTY_SERVING_ADDRESS = "serving";
     public static final String PROPERTY_USE_ZOOKEEPER = "useZookeeper";
-    public static final String PROPERTY_SERVER_PORT = "port";
+    public static final String PROPERTY_PORT = "port";
     public static final String PROPERTY_USER_DIR = "user.dir";
     public static final String PROPERTY_USER_HOME = "user.home";
     public static final String PROPERTY_FILE_SEPARATOR = "file.separator";
-    public static final String ZK_URL = "zk.url";
+    public static final String PROPERTY_ZK_URL = "zk.url";
+    public static final String PROPERTY_USE_ZK_ROUTER = "useZkRouter";
+    public static final String PROPERTY_USE_REGISTER = "useRegister";
+    public static final String MODEL_TRANSFER_URL = "model.transfer.url";
+    public static final String SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
+    public static final String FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
+    public static final String ACL_ENABLE = "acl.enable";
+    public static final String ACL_USERNAME = "acl.username";
+    public static final String ACL_PASSWORD = "acl.password";
+    public static final String PROXY_ROUTER_TABLE = "proxy.router.table";
+
+    public static final String PROPERTY_COORDINATOR = "coordinator";
+    public static final String PROPERTY_SERVER_PORT = "server.port";
+    public static final String PROPERTY_INFERENCE_SERVICE_NAME = "inference.service.name";
+    public static final String PROPERTY_ROUTE_TYPE = "routeType";
+    public static final String PROPERTY_ROUTE_TABLE = "route.table";
+    public static final String PROPERTY_AUTH_FILE = "auth.file";
+    public static final String PROPERTY_PROXY_GRPC_INTRA_PORT = "proxy.grpc.intra.port";
+    public static final String PROPERTY_PROXY_GRPC_INTER_PORT = "proxy.grpc.inter.port";
+    public static final String PROPERTY_PROXY_GRPC_INFERENCE_TIMEOUT = "proxy.grpc.inference.timeout";
+    public static final String PROPERTY_PROXY_GRPC_INFERENCE_ASYNC_TIMEOUT = "proxy.grpc.inference.async.timeout";
+    public static final String PROPERTY_PROXY_GRPC_UNARYCALL_TIMEOUT = "proxy.grpc.unaryCall.timeout";
+    public static final String PROPERTY_PROXY_GRPC_THREADPOOL_CORESIZE = "proxy.grpc.threadpool.coresize";
+    public static final String PROPERTY_PROXY_GRPC_THREADPOOL_MAXSIZE = "proxy.grpc.threadpool.maxsize";
+    public static final String PROPERTY_PROXY_GRPC_THREADPOOL_QUEUESIZE = "proxy.grpc.threadpool.queuesize";
+    public static final String PROPERTY_PROXY_ASYNC_TIMEOUT = "proxy.async.timeout";
+    public static final String PROPERTY_PROXY_ASYNC_CORESIZE = "proxy.async.coresize";
+    public static final String PROPERTY_PROXY_ASYNC_MAXSIZE = "proxy.async.maxsize";
+    public static final String PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT = "proxy.grpc.batch.inference.timeout";
+
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 
@@ -157,23 +186,12 @@ public class Dict {
     public static final String TREE_LOCATION = "treeLocation";
 
     public static final String UNARYCALL = "unaryCall";
-    public static final String USE_ZK_ROUTER = "useZkRouter";
-    public static final String FALSE = "false";
-    public static final String USE_REGISTER = "useRegister";
-    public static final String MODEL_TRANSFER_URL = "model.transfer.url";
-    public static final String SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
-
-    public static final String FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
 
     public static final String GUEST_APP_ID = "guestAppId";
     public static final String HOST_APP_ID = "hostAppId";
     public static final String SERVICE_ID = "serviceId";
     public static final String APPLY_ID = "applyId";
     public static final String FUTURE = "future";
-    public static final String CONFIGPATH = "configpath";
-    public static final String ACL_ENABLE = "acl.enable";
-    public static final String ACL_USERNAME = "acl.username";
-    public static final String ACL_PASSWORD = "acl.password";
     public static final String AUTH_FILE = "authFile";
     public static final String ENCRYPT_TYPE = "encrypt_type";
 

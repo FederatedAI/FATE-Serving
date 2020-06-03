@@ -79,31 +79,30 @@ public class Bootstrap {
 
             int processors = Runtime.getRuntime().availableProcessors();
             MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
-            MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_CORE_POOL_SIZE)) : processors;
-            MetaInfo.SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.SERVING_MAX_POOL_SIZE)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_MAX_POOL_SIZE)):processors * 2;
-            MetaInfo.SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)):1000;
-            MetaInfo.SERVING_POOL_QUEUE_SIZE =  environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)!=null?Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)):100;
-            MetaInfo.USE_REGISTER = environment.getProperty(Dict.USE_REGISTER)!=null?Boolean.getBoolean( environment.getProperty(Dict.USE_REGISTER)):Boolean.TRUE;
-            MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
-            MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)!=null?Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)):Boolean.FALSE;
-            MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT)!=null?Integer.valueOf(environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT)): 3000;
-            MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT)!=null?Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT)):3000;
+            MetaInfo.SERVING_CORE_POOL_SIZE = Integer.valueOf(environment.getProperty(Dict.SERVING_CORE_POOL_SIZE, String.valueOf(processors)));
+            MetaInfo.SERVING_MAX_POOL_SIZE = Integer.valueOf(environment.getProperty(Dict.SERVING_MAX_POOL_SIZE, String.valueOf(processors * 2)));
+            MetaInfo.SERVING_POOL_ALIVE_TIME = Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME, "1000"));
+            MetaInfo.SERVING_POOL_QUEUE_SIZE =  Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE, "100"));
+            MetaInfo.PROPERTY_USE_REGISTER = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_REGISTER, "true"));
+            MetaInfo.PROPERTY_USE_ZK_ROUTER = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER, "true"));
             MetaInfo.FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.FEATURE_SINGLE_ADAPTOR);
-            MetaInfo.PORT = environment.getProperty(Dict.PORT)!=null?Integer.valueOf(environment.getProperty(Dict.PORT)):8000;
-            MetaInfo.ZK_URL = environment.getProperty(Dict.ZK_URL);
-            MetaInfo.CACHE_TYPE = environment.getProperty(Dict.CACHE_TYPE, "local");
-            MetaInfo.PROPERTY_REDIS_IP= environment.getProperty(Dict.PROPERTY_REDIS_IP);
+            MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
+            MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH, "false"));
+            MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT, "3000"));
+            MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT, "3000"));
+            MetaInfo.PROPERTY_PORT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PORT, "8000"));
+            MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL, "zookeeper://localhost:2181");
+            MetaInfo.PROPERTY_CACHE_TYPE = environment.getProperty(Dict.PROPERTY_CACHE_TYPE, "local");
+            MetaInfo.PROPERTY_REDIS_IP= environment.getProperty(Dict.PROPERTY_REDIS_IP, "127.0.0.1");
             MetaInfo.PROPERTY_REDIS_PASSWORD = environment.getProperty(Dict.PROPERTY_REDIS_PASSWORD);
-            MetaInfo.PROPERTY_REDIS_PORT = environment.getProperty(Dict.PROPERTY_REDIS_PORT)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_PORT)):3306;
-            MetaInfo.PROPERTY_REDIS_TIMEOUT = environment.getProperty(Dict.PROPERTY_REDIS_TIMEOUT)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_TIMEOUT)): 2000;
-            MetaInfo.PROPERTY_REDIS_MAX_TOTAL= environment.getProperty(Dict.PROPERTY_REDIS_MAX_TOTAL)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_MAX_TOTAL)): 20;
-            MetaInfo.PROPERTY_REDIS_MAX_IDLE = environment.getProperty(Dict.PROPERTY_REDIS_MAX_IDLE)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_MAX_IDLE)):  2;
-            MetaInfo.PROPERTY_REDIS_EXPIRE = environment.getProperty(Dict.PROPERTY_REDIS_EXPIRE)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_EXPIRE)):3000;
-            MetaInfo.PROPERTY_LOCAL_CACHE_MAXSIZE = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_MAXSIZE)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_MAXSIZE)): 10000;
-            MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE= environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_EXPIRE)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_EXPIRE)): 30;
-            MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL)!=null?Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL)): 3;
-
-
+            MetaInfo.PROPERTY_REDIS_PORT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_PORT, "6379"));
+            MetaInfo.PROPERTY_REDIS_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_TIMEOUT, "2000"));
+            MetaInfo.PROPERTY_REDIS_MAX_TOTAL= Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_MAX_TOTAL, "20"));
+            MetaInfo.PROPERTY_REDIS_MAX_IDLE = Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_MAX_IDLE, "2"));
+            MetaInfo.PROPERTY_REDIS_EXPIRE = Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_EXPIRE, "3000"));
+            MetaInfo.PROPERTY_LOCAL_CACHE_MAXSIZE = Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_MAXSIZE, "10000"));
+            MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE= Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_EXPIRE, "30"));
+            MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL = Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL, "3"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -136,7 +135,7 @@ public class Bootstrap {
             }
         }
 
-        boolean useZkRouter = Boolean.parseBoolean(applicationContext.getEnvironment().getProperty(Dict.USE_ZK_ROUTER, "false"));
+        boolean useZkRouter = MetaInfo.PROPERTY_USE_ZK_ROUTER;
         if (useZkRouter) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             Set<URL> registered = zookeeperRegistry.getRegistered();

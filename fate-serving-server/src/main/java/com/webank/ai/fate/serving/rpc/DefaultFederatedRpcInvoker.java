@@ -120,7 +120,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
     private String route() {
 
-        boolean routerByzk = environment.getProperty(Dict.USE_ZK_ROUTER, boolean.class, Boolean.TRUE);
+        boolean routerByzk = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER, boolean.class, Boolean.TRUE);
         String address = null;
         if (!routerByzk) {
             address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);

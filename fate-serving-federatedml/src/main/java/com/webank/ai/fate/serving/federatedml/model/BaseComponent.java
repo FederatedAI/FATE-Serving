@@ -208,7 +208,7 @@ public abstract class BaseComponent implements LocalInferenceAware {
 //            packetBuilder.setAuth(authBuilder.build());
 //
 //            GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-//            String routerByZkString = Configuration.getProperty(Dict.USE_ZK_ROUTER, Dict.FALSE);
+//            String routerByZkString = Configuration.getProperty(Dict.PROPERTY_USE_ZK_ROUTER, Dict.FALSE);
 //            boolean routerByzk = Boolean.valueOf(routerByZkString);
 //            String address = null;
 //            if (!routerByzk) {
