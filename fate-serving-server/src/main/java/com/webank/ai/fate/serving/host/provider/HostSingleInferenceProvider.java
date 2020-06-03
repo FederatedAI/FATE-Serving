@@ -68,6 +68,4 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
     }
 
 
-
-
 }

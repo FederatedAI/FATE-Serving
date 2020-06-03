@@ -60,7 +60,6 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         responseObserver.onCompleted();
     }
 
-
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = BATCH_INFERENCE)
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
@@ -73,7 +72,6 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
-
     }
 
     private Context prepareContext() {

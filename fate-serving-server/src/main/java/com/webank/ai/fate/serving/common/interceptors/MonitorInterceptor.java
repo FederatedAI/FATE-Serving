@@ -15,12 +15,14 @@ public class MonitorInterceptor extends AbstractInterceptor {
 
 
     }
+
     ;
 
     @Override
     public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         context.postProcess(inboundPackage.getBody(), outboundPackage.getData());
     }
+
     ;
 
 }

@@ -49,7 +49,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.QueryModelRequest req = (ModelServiceProto.QueryModelRequest) data.getBody();
         String content = modelManager.queryModel(context, req);
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
-
         if (StringUtils.isNotBlank(content)) {
             JSONArray returnArray = JSONArray.parseArray(content);
             for (int i = 0; i < returnArray.size(); i++) {
@@ -63,7 +62,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 builder.addModelInfos(modelExBuilder.build());
             }
         }
-
         builder.setRetcode(StatusCode.SUCCESS);
         return builder.build();
     }
@@ -81,35 +79,38 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.UnbindResponse res = modelManager.unbind(context, req);
         return res;
     }
-    @Override
-     protected Object transformExceptionInfo(Context context, ExceptionInfo data){
-          String  actionType =  context.getActionType();
-          if(data!=null) {
-              String code = data.getCode() != null ? data.getCode() : StatusCode.SYSTEM_ERROR;
-              String msg = data.getMessage() != null ? data.getMessage().toString() : "";
-              if (StringUtils.isNotEmpty(actionType)) {
-                  switch (actionType) {
-                      case "MODEL_LOAD":
-                          ;
-                      case "MODEL_PUBLISH_ONLINE":
-                          ReturnResult returnResult = new ReturnResult();
-                          returnResult.setRetcode(code);
-                          returnResult.setRetmsg(msg);
-                          return returnResult;
-                      case "QUERY_MODEL":
-                          ModelServiceProto.QueryModelResponse queryModelResponse = ModelServiceProto.QueryModelResponse.newBuilder().setRetcode(code).setMessage(msg).build();
-                          return queryModelResponse;
-                      case "UNLOAD":
-                          ModelServiceProto.UnloadResponse unloadResponse = ModelServiceProto.UnloadResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
-                          return unloadResponse;
-                      case "UNBIND":
-                          ModelServiceProto.UnbindResponse unbindResponse = ModelServiceProto.UnbindResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
-                          return unbindResponse;
-                  }
 
-              }
-          }
-          return null;
-     };
+    @Override
+    protected Object transformExceptionInfo(Context context, ExceptionInfo data) {
+        String actionType = context.getActionType();
+        if (data != null) {
+            String code = data.getCode() != null ? data.getCode() : StatusCode.SYSTEM_ERROR;
+            String msg = data.getMessage() != null ? data.getMessage().toString() : "";
+            if (StringUtils.isNotEmpty(actionType)) {
+                switch (actionType) {
+                    case "MODEL_LOAD":
+                        ;
+                    case "MODEL_PUBLISH_ONLINE":
+                        ReturnResult returnResult = new ReturnResult();
+                        returnResult.setRetcode(code);
+                        returnResult.setRetmsg(msg);
+                        return returnResult;
+                    case "QUERY_MODEL":
+                        ModelServiceProto.QueryModelResponse queryModelResponse = ModelServiceProto.QueryModelResponse.newBuilder().setRetcode(code).setMessage(msg).build();
+                        return queryModelResponse;
+                    case "UNLOAD":
+                        ModelServiceProto.UnloadResponse unloadResponse = ModelServiceProto.UnloadResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
+                        return unloadResponse;
+                    case "UNBIND":
+                        ModelServiceProto.UnbindResponse unbindResponse = ModelServiceProto.UnbindResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
+                        return unbindResponse;
+                }
+
+            }
+        }
+        return null;
+    }
+
+    ;
 
 }

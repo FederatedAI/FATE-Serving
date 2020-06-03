@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.event;
 public class CacheEventData {
     String key;
     Object data;
+
     public CacheEventData(String key, Object data) {
         this.key = key;
         this.data = data;

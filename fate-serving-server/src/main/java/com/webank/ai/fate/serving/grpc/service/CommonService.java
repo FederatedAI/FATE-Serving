@@ -22,7 +22,6 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
     private static final String QUERY_METRICS = "queryMetrics";
     private static final String UPDATE_FLOW_RULE = "updateFlowRule";
     private static final String LIST_PROPS = "listProps";
-
     private static final String QUERY_JVM = "queryJvm";
 
     @Autowired
@@ -67,7 +66,6 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
         responseObserver.onCompleted();
     }
 
-
     @Override
     @RegisterService(serviceName = QUERY_JVM)
     public void queryJvmInfo(CommonServiceProto.QueryJvmInfoRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
@@ -79,9 +77,6 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
-
-
-
     private Context prepareContext(String actionType) {
         ServingServerContext context = new ServingServerContext();
         context.setEnvironment(environment);

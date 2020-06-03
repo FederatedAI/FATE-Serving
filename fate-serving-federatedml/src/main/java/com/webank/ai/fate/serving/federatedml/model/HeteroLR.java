@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.webank.ai.fate.core.mlmodel.buffer.LRModelParamProto.LRModelParam;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +53,8 @@ public abstract class HeteroLR extends BaseComponent {
         logger.info("Finish init HeteroLR class, model weight is {}", this.weight);
         return OK;
     }
-
     Map<String, Double> forward(List<Map<String, Object>> inputDatas) {
         Map<String, Object> inputData = inputDatas.get(0);
-        //logger.info("size {}",inputData.size());
-
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
         int weightNum = this.weight.size();
@@ -79,7 +77,6 @@ public abstract class HeteroLR extends BaseComponent {
             }
         }
         score += this.intercept;
-
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
         try {
@@ -92,7 +89,6 @@ public abstract class HeteroLR extends BaseComponent {
             logger.debug("model weight hit rate:{}", modelWeightHitRate);
             logger.debug("input data features hit rate:{}", inputDataHitRate);
         }
-
         Map<String, Double> ret = new HashMap<>(8);
         ret.put(Dict.SCORE, score);
         ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
@@ -105,7 +101,7 @@ public abstract class HeteroLR extends BaseComponent {
 
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
-        int  splitSize =100;
+        int  splitSize = MetaInfo.LR_SPLIT_SIZE;
 
         public LRTask(Map<String, Double> weight, Map<String, Object> inputData ,List<String>  keys){
             this.keys = keys;
@@ -163,9 +159,7 @@ public abstract class HeteroLR extends BaseComponent {
         };
     }
 
-
     public  class LRTaskResult  {
-
         public  LRTaskResult(double  score,int  modelWeightHitCount,int inputDataHitCount){
             this.score = score;
             this.modelWeightHitCount  = modelWeightHitCount;
@@ -174,12 +168,7 @@ public abstract class HeteroLR extends BaseComponent {
         double score = 0;
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
-
-
-
     }
-
-
 
     Map<String, Double> forwardParallel(List<Map<String, Object>> inputDatas) {
         Map<String, Object> inputData = inputDatas.get(0);
@@ -210,8 +199,6 @@ public abstract class HeteroLR extends BaseComponent {
                 }
             }
         }
-
-
         ForkJoinTask<LRTaskResult>  result = forkJoinPool.submit(new LRTask(weight,inputData,Lists.newArrayList(inputData.keySet())));
         if(result!=null){
             try {

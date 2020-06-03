@@ -38,54 +38,6 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
         return 1. / (1. + exp(-x));
     }
 
-//    @Override
-//    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-//        Map<String, Object> result = new HashMap<>();
-//        Map<String, Object> forwardRet = forward(inputData);
-//        double score = new Double(forwardRet.get(Dict.SCORE).toString());
-//        double[] guestCrosses = (double[]) forwardRet.get(Dict.FM_CROSS);
-//
-//
-//        if(logger.isDebugEnabled()) {
-//            logger.debug("caseid {} guest score:{}, cross data:{}", context.getCaseId(), score, guestCrosses);
-//        }
-//        try {
-//            ReturnResult hostPredictResponse = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, true);
-//            if(hostPredictResponse !=null) {
-//                result.put(Dict.RET_CODE,hostPredictResponse.getRetcode());
-//                if(logger.isDebugEnabled()) {
-//                    logger.debug("caseid {} host response is {}",context.getCaseId(),hostPredictResponse.getData());
-//                }
-//                if (hostPredictResponse.getData() != null && hostPredictResponse.getData().get(Dict.SCORE) != null) {
-//                    double hostScore = ((Number) hostPredictResponse.getData().get(Dict.SCORE)).doubleValue();
-//                    List<Double> hostCrosses = JSON.parseArray(hostPredictResponse.getData().get(Dict.FM_CROSS).toString(),double.class);
-//                    logger.info("caseid {} host score:{}, cross data: {}",context.getCaseId(), hostScore, hostCrosses);
-//                    score += hostScore;
-//                    if (hostCrosses == null || hostCrosses.size() != guestCrosses.length) {
-//                        throw new RuntimeException("the length of the cross part is not match");
-//                    }
-//                    for (int i = 0; i < guestCrosses.length; i++) {
-//                        score += hostCrosses.get(i) * guestCrosses[i];
-//                    }
-//                }
-//            }else{
-//                logger.info("caseid {} host response is null",context.getCaseId());
-//            }
-//        } catch (io.grpc.StatusRuntimeException ex) {
-//            logger.error("merge host predict failed:", ex);
-//            result.put(Dict.RET_CODE, InferenceRetCode.NETWORK_ERROR);
-//        }
-//        catch(Exception ex){
-//            logger.error("merge host predict failed:", ex);
-//            result.put(Dict.RET_CODE, InferenceRetCode.SYSTEM_ERROR);
-//        }
-//        double prob = sigmod(score);
-//        result.put(Dict.PROB, prob);
-//        result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE + ":{}", forwardRet.get(Dict.MODEL_WRIGHT_HIT_RATE));
-//        result.put(Dict.GUEST_INPUT_DATA_HIT_RATE + ":{}", forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
-//        return result;
-//    }
-
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
 
@@ -99,8 +51,6 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> hostData) {
         Map<String, Object> result = this.handleRemoteReturnData(hostData);
         Map<String, Object> localData = (Map<String, Object>) localDataList.get(0).get(this.getComponentName());
-
-        //     logger.info("local data {} remote data {}",localData,hostData);
         Preconditions.checkArgument(localData != null);
         Preconditions.checkArgument(hostData != null);
         Preconditions.checkArgument(localData.get(Dict.SCORE) != null);
@@ -109,7 +59,6 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
         String partyId = (String) set.toArray()[0];
         Map<String, Object> remoteData = (Map<String, Object>) hostData.get(partyId);
         Preconditions.checkArgument(remoteData.get(Dict.RET_CODE) != null);
-
         Map<String, Object> dataMap = (Map<String, Object>) remoteData.get(this.getComponentName());
         double localScore = ((Number) localData.get(Dict.SCORE)).doubleValue();
         logger.info("local score: {}", localScore);

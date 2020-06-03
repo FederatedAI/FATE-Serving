@@ -59,6 +59,8 @@ public class Dict {
     public static final String SINGLE_INFERENCE_RPC_TIMEOUT = "single.inference.rpc.timeout";
     public static final String BATCH_INFERENCE_RPC_TIMEOUT = "batch.inference.rpc.timeout";
     public static final String FEATURE_SINGLE_ADAPTOR = "feature.single.adaptor";
+    public static final String BATCH_SPLIT_SIZE = "batch.split.size";
+    public static final String LR_SPLIT_SIZE = "lr.split.size";
 
 
     /**

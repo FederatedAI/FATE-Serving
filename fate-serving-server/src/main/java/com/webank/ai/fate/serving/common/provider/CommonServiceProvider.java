@@ -93,8 +93,8 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
             builder.setData(ByteString.copyFrom(JSON.toJSONString(jvmInfos).getBytes()));
             return builder.build();
-        }catch(Exception e){
-            throw  new SysException(e.getMessage());
+        } catch (Exception e) {
+            throw new SysException(e.getMessage());
         }
 
     }

@@ -16,12 +16,9 @@ import java.util.Map;
 
 @Service
 public class SingleCacheEventHandler extends AbstractAsyncMessageProcessor {
-
     Logger logger = LoggerFactory.getLogger(SingleCacheEventHandler.class);
-
     @Autowired
     Cache cache;
-
     @Subscribe(value = Dict.EVENT_SET_INFERENCE_CACHE)
     public void handleMetricsEvent(AsyncMessageEvent event) {
         CacheEventData cacheEventData = (CacheEventData) event.getData();

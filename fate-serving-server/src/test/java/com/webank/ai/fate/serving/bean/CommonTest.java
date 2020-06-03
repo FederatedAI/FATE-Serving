@@ -79,12 +79,12 @@ public class CommonTest {
     @Test
     public void test_08_query_jvm() {
 
-            CommonServiceProto.QueryJvmInfoRequest.Builder builder = CommonServiceProto.QueryJvmInfoRequest.newBuilder();
-            builder.setKeyword("port");
-            CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryJvmInfo(builder.build());
+        CommonServiceProto.QueryJvmInfoRequest.Builder builder = CommonServiceProto.QueryJvmInfoRequest.newBuilder();
+        builder.setKeyword("port");
+        CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryJvmInfo(builder.build());
 
-            System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
-            System.err.println("Message ==================" + resultMessage.getMessage());
-            System.err.println("result ==================" + resultMessage.getData().toStringUtf8());
-        }
+        System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
+        System.err.println("Message ==================" + resultMessage.getMessage());
+        System.err.println("result ==================" + resultMessage.getData().toStringUtf8());
+    }
 }

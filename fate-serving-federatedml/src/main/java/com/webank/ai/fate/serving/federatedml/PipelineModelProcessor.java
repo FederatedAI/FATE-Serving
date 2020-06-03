@@ -38,10 +38,8 @@ public class PipelineModelProcessor implements ModelProcessor {
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
 
-    private int  splitSize =100;
-
+    private int  splitSize =MetaInfo.BATCH_SPLIT_SIZE;
     private     ForkJoinPool forkJoinPool = new ForkJoinPool();
-
     @Override
     public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String, Future> remoteFutureMap, long timeout) {
         BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
@@ -67,9 +65,7 @@ public class PipelineModelProcessor implements ModelProcessor {
         return batchFederatedResult;
     }
 
-
     class  LocalInferenceTask  extends RecursiveTask< Map<Integer, Map<String, Object>>> {
-
         LocalInferenceTask ( Context context, List<BatchInferenceRequest.SingleInferenceData> inputList,Map<String,Map<String,Object>>  tempCache){
             this.context = context;
             this.inputList = inputList;
@@ -80,24 +76,18 @@ public class PipelineModelProcessor implements ModelProcessor {
         List<BatchInferenceRequest.SingleInferenceData>   inputList ;
         @Override
         protected Map<Integer, Map<String, Object>>  compute() {
-
             Map<Integer, Map<String, Object>> result = new HashMap<>();
-
             if (inputList.size() <=splitSize) {
-
                 for (int i = 0; i < inputList.size(); i++) {
                     BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
                     try {
-
                         String key = EncryptUtils.encrypt(JSON.toJSONString(input.getFeatureData()), EncryptMethod.MD5);
                         Map<String, Object> singleResult =tempCache.get(key);
                         if(singleResult==null) {
                              singleResult = singleLocalPredict(context, input.getFeatureData());
-
                              if(singleResult!=null&&singleResult.size()!=0) {
                                  tempCache.putIfAbsent(key, singleResult);
                              }
-
                         }else{
                             singleResult = Maps.newHashMap(tempCache.get(key));
                         }
@@ -107,7 +97,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                                 throw new HostGetFeatureErrorException("no feature");
                             }
                         }
-
                     } catch (Throwable e) {
                         if (result.get(input.getIndex()) == null) {
                             result.put(input.getIndex(), ErrorMessageUtil.handleExceptionToMap(e));
@@ -118,30 +107,22 @@ public class PipelineModelProcessor implements ModelProcessor {
                 }
                 return result;
             } else {
-
-
                 List<List<BatchInferenceRequest.SingleInferenceData>> splits = new ArrayList<List<BatchInferenceRequest.SingleInferenceData>>();
-
-
                 int size = inputList.size();
                 int count = (size + splitSize - 1) / splitSize;
                 List<LocalInferenceTask> subJobs = Lists.newArrayList();
-
                 for (int i = 0; i < count; i++) {
                     List<BatchInferenceRequest.SingleInferenceData> subList = inputList.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
                     LocalInferenceTask subLocalInferenceTask = new LocalInferenceTask(context, subList,tempCache);
                     subLocalInferenceTask.fork();
                     subJobs.add(subLocalInferenceTask);
                 }
-
                 subJobs.forEach(localInferenceTask -> {
-
                     Map<Integer, Map<String, Object>> splitResult = localInferenceTask.join();
                     if (splitResult != null) {
                         result.putAll(splitResult);
                     }
                 });
-
                 return result;
             }
         }
@@ -158,7 +139,6 @@ public class PipelineModelProcessor implements ModelProcessor {
      */
     @Override
     public BatchInferenceResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams) {
-
         Map<Integer, Map<String, Object>> localResult = batchLocalInference(context, batchHostFederatedParams);
         BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
         localResult.forEach((index, data) -> {
@@ -368,10 +348,6 @@ public class PipelineModelProcessor implements ModelProcessor {
         @Override
         protected List<BatchInferenceResult.SingleInferenceResult> compute() {
 
-//            ArrayList<Integer>  keys = Lists.newArrayList( localResult.keySet());
-//            BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
-//            batchFederatedResult.setRetcode(StatusCode.SUCCESS);
-
             List<BatchInferenceResult.SingleInferenceResult>  singleResultLists =  Lists.newArrayList();
             if(keys.size()<=splitSize){
                 localResult.forEach((index, data) -> {
@@ -425,7 +401,6 @@ public class PipelineModelProcessor implements ModelProcessor {
     private BatchInferenceResult batchMergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, Map<String, BatchInferenceResult> remoteResult) {
         long  begin = System.currentTimeMillis();
         try {
-
             Preconditions.checkArgument(localResult != null);
             Preconditions.checkArgument(remoteResult != null);
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
@@ -434,37 +409,6 @@ public class PipelineModelProcessor implements ModelProcessor {
             ForkJoinTask<List<BatchInferenceResult.SingleInferenceResult>> forkJoinTask = forkJoinPool.submit(new MergeTask(context,localResult,remoteResult,keys));
             List<BatchInferenceResult.SingleInferenceResult>   resultList = forkJoinTask.get();
             batchFederatedResult.setBatchDataList(resultList);
-//            localResult.forEach((index, data) -> {
-//                Map<String, Object> remoteSingleMap = Maps.newHashMap();
-//                remoteResult.forEach((partyId, batchResult) -> {
-//                    if (batchResult.getSingleInferenceResultMap() != null) {
-//                        if (batchResult.getSingleInferenceResultMap().get(index) != null) {
-//                            BatchInferenceResult.SingleInferenceResult singleInferenceResult = batchResult.getSingleInferenceResultMap().get(index);
-//                            Map<String, Object> realRemoteData = singleInferenceResult.getData();
-//                            realRemoteData.put(Dict.RET_CODE, singleInferenceResult.getRetcode());
-//                            remoteSingleMap.put(partyId, realRemoteData);
-//                        }
-//                    }
-//                });
-//                try {
-//                    Map<String, Object> localData = localResult.get(index);
-//                    //logger.info("test merge {} : {}",index,remoteSingleMap.size());
-//                    //logger.info("remote data {}",remoteSingleMap);
-//                    Map<String, Object> mergeResult = this.singleMerge(context, localData, remoteSingleMap);
-//                    String retcode = mergeResult.get(Dict.RET_CODE).toString();
-//                    String msg = mergeResult.get(Dict.MESSAGE) != null ? mergeResult.get(Dict.MESSAGE).toString() : "";
-//                    mergeResult.remove(Dict.RET_CODE);
-//                    mergeResult.remove(Dict.MESSAGE);
-//                    batchFederatedResult.getBatchDataList().add(new BatchInferenceResult.SingleInferenceResult(index, retcode,
-//                            msg, mergeResult));
-//                } catch (Exception e) {
-//                    logger.error("merge remote error", e);
-//                    String retcode = ErrorMessageUtil.getLocalExceptionCode(e);
-//                    batchFederatedResult.getBatchDataList().add(new BatchInferenceResult.SingleInferenceResult(index, retcode, e.getMessage(), null));
-//                }
-//            });
-            long  end =  System.currentTimeMillis();
-
             return batchFederatedResult;
         } catch (Exception e) {
             throw new GuestMergeException(e.getMessage());
@@ -493,8 +437,6 @@ public class PipelineModelProcessor implements ModelProcessor {
         if (remoteData == null || remoteData.size() == 0) {
             throw new BaseException(StatusCode.GUEST_MERGE_ERROR, "remote inference result is null");
         }
-
-
         List<Map<String, Object>> outputData = Lists.newArrayList();
         List<Map<String, Object>> tempList = Lists.newArrayList();
         Map<String, Object> result = Maps.newHashMap();
@@ -525,10 +467,8 @@ public class PipelineModelProcessor implements ModelProcessor {
                     outputData.add(mergeResult);
                     tempList.add(mergeResult);
                 } else {
-
                     outputData.add(inputs.get(0));
                 }
-
                 if (component instanceof Returnable && mergeResult != null) {
                     tempList.add(mergeResult);
                 }
