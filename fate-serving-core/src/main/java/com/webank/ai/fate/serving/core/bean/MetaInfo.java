@@ -11,7 +11,6 @@ public class MetaInfo {
     public static long currentVersion = 200;
     public static List<AdaptorDescriptor.ParamDescriptor> inferenceParamDescriptorList;
     public static List<AdaptorDescriptor.ParamDescriptor> batchInferenceParamDescriptorList;
-    public static Integer  PORT;
     public static Boolean PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH;
     public static Integer PROPERTY_PORT;
     public static String  PROPERTY_ZK_URL;

@@ -1,11 +1,11 @@
 ## 测试相关及注意事项
 ### fate-serving
 - 模型发布：
+   
     1. 新增文件获取模型，需要提供参数`loadType`和`filePath`
     2. `loadType`默认为`FATEFLOW`，从FATE_FLOW中获取模型信息
 - 模型回放机制：
     1. 重构模型回放机制
-        
     2. 兼容旧版本模型缓存，旧版本模型缓存会转换成新版模型缓存，仅转换一次
 - 流量控制：
     1. serving-server/serving-proxy会根据conf/FlowRule.json控制流量
