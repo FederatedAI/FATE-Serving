@@ -232,10 +232,6 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
 
                 Map<String, Object> returnData = tempResult.getData();
-                for(Object obj: returnData.values()){
-                    if(!(obj instanceof Integer)) getNodeRoute = true; // get node position if value is integer
-                    break;
-                }
 
                 if(this.fastMode && getNodeRoute){
 
