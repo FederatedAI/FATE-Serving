@@ -136,19 +136,20 @@ public class FlowCounterManager {
                 long current = TimeUtil.currentTimeMillis();
                 List<MetricNode> reportList =   Lists.newArrayList();
                 passMap.forEach((sourceName,flowCounter)->{
-
                     long  passCount =flowCounter.getSum();
-                    FlowCounter successCounter = successMap.get(sourceName);
-                    FlowCounter blockCounter =  blockMap.get(sourceName);
-                    FlowCounter exceptionCounter = exceptionMap.get(sourceName);
-                    MetricNode metricNode = new  MetricNode();
-                    metricNode.setTimestamp(current);
-                    metricNode.setResource(sourceName);
-                    metricNode.setPassQps(passCount);
-                    metricNode.setBlockQps(blockCounter!=null?new Double(blockCounter.getQps()).longValue():0);
-                    metricNode.setExceptionQps(exceptionCounter!=null?new Double(exceptionCounter.getQps()).longValue():0);
-                    metricNode.setSuccessQps(successCounter!=null?new Double(successCounter.getQps()).longValue():0);
-                    reportList.add(metricNode);
+                    if (passCount > 0) {
+                        FlowCounter successCounter = successMap.get(sourceName);
+                        FlowCounter blockCounter =  blockMap.get(sourceName);
+                        FlowCounter exceptionCounter = exceptionMap.get(sourceName);
+                        MetricNode metricNode = new  MetricNode();
+                        metricNode.setTimestamp(current);
+                        metricNode.setResource(sourceName);
+                        metricNode.setPassQps(passCount);
+                        metricNode.setBlockQps(blockCounter!=null?new Double(blockCounter.getQps()).longValue():0);
+                        metricNode.setExceptionQps(exceptionCounter!=null?new Double(exceptionCounter.getQps()).longValue():0);
+                        metricNode.setSuccessQps(successCounter!=null?new Double(successCounter.getQps()).longValue():0);
+                        reportList.add(metricNode);
+                    }
                 });
                 metricReport.report(reportList);
 
