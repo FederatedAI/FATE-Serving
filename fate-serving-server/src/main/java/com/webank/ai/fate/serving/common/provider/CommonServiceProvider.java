@@ -27,7 +27,6 @@ import java.util.Map;
 
 @FateService(name = "commonService", preChain = {
         "requestOverloadBreaker",
-
 }, postChain = {
 
 })
@@ -99,8 +98,5 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         }
 
     }
-
-
-
 
 }
