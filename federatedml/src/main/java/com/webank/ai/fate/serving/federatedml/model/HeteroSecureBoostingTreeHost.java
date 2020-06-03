@@ -32,7 +32,6 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
 
     private final String site = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
-    private boolean fastMode = true;
 
     // DefaultCacheManager cacheManager = BaseContext.applicationContext.getBean(DefaultCacheManager.class);
 
@@ -143,7 +142,19 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
                 ++featureHit;
             }
         }
-        this.saveData(context, tag, fidValueMapping);
+
+        if(this.fastMode){
+            if(logger.isDebugEnabled()){
+                logger.info("fast mode enabled");
+            }
+            // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>> in first
+            // communication round
+            ret = this.extractHostNodeRoute(fidValueMapping);
+        }
+        else{
+            this.saveData(context, tag, fidValueMapping);
+        }
+
         return ret;
     }
 
@@ -152,19 +163,12 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
         Map<String, Object> input = this.getData(context, tag);
 
-        if(!this.fastMode){
-            Map<String, Object> ret = new HashMap<String, Object>(8);
-            for (String treeIdx : interactiveData.keySet()) {
-                int idx = Integer.valueOf(treeIdx);
-                int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), input);
-                ret.put(treeIdx, nodeId);
-            }
-            return ret;
+        Map<String, Object> ret = new HashMap<String, Object>(8);
+        for (String treeIdx : interactiveData.keySet()) {
+            int idx = Integer.valueOf(treeIdx);
+            int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), input);
+            ret.put(treeIdx, nodeId);
         }
-        else {
-            // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>>
-            Map<String, Object> ret = this.extractHostNodeRoute(input);
-            return ret;
-        }
+        return ret;
     }
 }
