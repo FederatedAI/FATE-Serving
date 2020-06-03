@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.admin.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -10,6 +11,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.flow.MetricNode;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -68,14 +71,33 @@ public class MonitorController {
 
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryMetrics(builder.build());
 
-        List resultList = Lists.newArrayList();
+        List<MetricNode> metricNodes = Lists.newArrayList();
         if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
-            resultList = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
+            List<JSONObject> resultData = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
+            if (resultData != null) {
+                for (JSONObject data : resultData) {
+                    metricNodes.add(data.toJavaObject(MetricNode.class));
+                }
+            }
         }
-        Map map = Maps.newHashMap();
-        map.put("total", resultList.size());
-        map.put("rows", resultList);
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, map);
+
+        metricNodes = metricNodes.stream()
+                .sorted(((o1, o2) -> o1.getTimestamp() == o2.getTimestamp() ? 0 : ((o1.getTimestamp() - o2.getTimestamp()) > 0 ? 1 : -1)))
+                .collect(Collectors.toList());
+
+        Map<String, Object> dataMap = Maps.newHashMap();
+        if (metricNodes != null) {
+            metricNodes.forEach(metricNode -> {
+                List<MetricNode> nodes = (List<MetricNode>) dataMap.get(metricNode.getResource());
+                if (nodes == null) {
+                    nodes = Lists.newArrayList();
+                }
+                nodes.add(metricNode);
+                dataMap.put(metricNode.getResource(), nodes);
+            });
+        }
+
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, dataMap);
     }
 
     private CommonServiceGrpc.CommonServiceBlockingStub getMonitorServiceBlockStub(String host, int port) {

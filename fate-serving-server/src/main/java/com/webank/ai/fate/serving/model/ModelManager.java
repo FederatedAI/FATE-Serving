@@ -541,7 +541,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
             // unregister serviceId, name, namespace
             String serviceId = model.getServiceId();
-            boolean useRegister = this.environment.getProperty(Dict.USE_REGISTER, Boolean.class, Boolean.TRUE);
+            boolean useRegister = MetaInfo.PROPERTY_USE_REGISTER;
             if (useRegister) {
                 String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
                 modelKey = EncryptUtils.encrypt(modelKey, EncryptMethod.MD5);

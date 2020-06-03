@@ -33,8 +33,8 @@ public class ServingConfig {
     @Bean
     @Conditional({UseZkCondition.class})
     ZookeeperRegistry getServiceRegistry() {
-        Preconditions.checkArgument(StringUtils.isNotEmpty(MetaInfo.ZK_URL));
-        return ZookeeperRegistry.getRegistry(MetaInfo.ZK_URL, Dict.PROPERTY_SERVING_ADDRESS, Dict.ONLINE_ENVIRONMENT, MetaInfo.PORT);
+        Preconditions.checkArgument(StringUtils.isNotEmpty(MetaInfo.PROPERTY_ZK_URL));
+        return ZookeeperRegistry.getRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.PROPERTY_SERVING_ADDRESS, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PORT);
     }
 
     @Bean
@@ -60,7 +60,7 @@ public class ServingConfig {
 
     @Bean
     public Cache cache() {
-        String cacheType = MetaInfo.CACHE_TYPE;
+        String cacheType = MetaInfo.PROPERTY_CACHE_TYPE;
         logger.info("cache type is {},prepare to build cache", cacheType);
         Cache cache = null;
         switch (cacheType) {

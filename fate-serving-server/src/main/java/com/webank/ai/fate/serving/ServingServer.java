@@ -50,8 +50,8 @@ public class ServingServer implements InitializingBean {
         logger.info("try to star server ,meta info {}", MetaInfo.toMap());
         Executor executor = new ThreadPoolExecutor(MetaInfo.SERVING_CORE_POOL_SIZE, MetaInfo.SERVING_MAX_POOL_SIZE, MetaInfo.SERVING_POOL_ALIVE_TIME, TimeUnit.MILLISECONDS,
                 MetaInfo.SERVING_POOL_QUEUE_SIZE == 0 ? new SynchronousQueue<Runnable>() :
-                        (MetaInfo.SERVING_POOL_QUEUE_SIZE < 0 ? new LinkedBlockingQueue<Runnable>()
-                                : new LinkedBlockingQueue<Runnable>(MetaInfo.SERVING_POOL_QUEUE_SIZE)), new NamedThreadFactory("ServingServer", true));
+                        ( MetaInfo.SERVING_POOL_QUEUE_SIZE < 0 ? new LinkedBlockingQueue<Runnable>()
+                                : new LinkedBlockingQueue<Runnable>( MetaInfo.SERVING_POOL_QUEUE_SIZE)), new NamedThreadFactory("ServingServer", true));
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(MetaInfo.PORT);
         serverBuilder.keepAliveTime(100, TimeUnit.MILLISECONDS);
         serverBuilder.executor(executor);
@@ -61,7 +61,7 @@ public class ServingServer implements InitializingBean {
         serverBuilder.addService(ServerInterceptors.intercept(commonService, new ServiceExceptionHandler(), new ServiceOverloadProtectionHandle()), CommonService.class);
         server = serverBuilder.build();
         server.start();
-        boolean useRegister = environment.getProperty(Dict.USE_REGISTER, boolean.class, Boolean.TRUE);
+        boolean useRegister = MetaInfo.PROPERTY_USE_REGISTER;
         if (useRegister) {
             logger.info("serving-server is using register center");
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);

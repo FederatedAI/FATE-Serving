@@ -45,6 +45,44 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
     public BatchInferenceService() {
     }
 
+    /*{
+            "head": {
+                "serviceId": "2020040111152695637611"
+            },
+            "body": {
+                "batchDataList": [
+                    {
+                        "index": 0,
+                        "featureData": {
+                            "x0": 1.88669,
+                            "x1": -1.359293,
+                            "x2": 2.303601,
+                            "x3": 2.00137,
+                            "x4": 1.307686
+                        },
+                        "sendToRemoteFeatureData": {
+                            "device_id": "aaaaa",
+                            "phone_num": "122222222"
+                        }
+                    },
+                    {
+                        "index": 1,
+                        "featureData": {
+                            "x0": 1.88669,
+                            "x1": -1.359293,
+                            "x2": 2.303601,
+                            "x3": 2.00137,
+                            "x4": 1.307686
+                        },
+                        "sendToRemoteFeatureData": {
+                            "device_id": "aaaaa",
+                            "phone_num": "122222222"
+                        }
+                    }
+                ]
+            }
+    }*/
+
     @Override
     public Map doService(Context context, InboundPackage<Map> data, OutboundPackage<Map> outboundPackage) {
 

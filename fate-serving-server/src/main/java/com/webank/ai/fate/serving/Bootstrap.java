@@ -43,7 +43,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.io.*;
 import java.util.Properties;
 import java.util.Set;
-
 @SpringBootApplication
 @ConfigurationProperties
 @PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
@@ -51,6 +50,7 @@ import java.util.Set;
 public class Bootstrap {
     private static ApplicationContext applicationContext;
     static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+
     public static void main(String[] args) {
         try {
             parseConfig();
@@ -58,37 +58,41 @@ public class Bootstrap {
             bootstrap.start(args);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
         } catch (Exception ex) {
-            logger.error("serving-server start error", ex);
+            logger.error("serving-server start error",ex);
             System.exit(1);
         }
     }
-    public static void parseConfig() {
+
+    public static void  parseConfig(){
+
         ClassPathResource classPathResource = new ClassPathResource("serving-server.properties");
         try {
             File file = classPathResource.getFile();
-            Properties environment = new Properties();
-            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
+            Properties  environment = new Properties();
+            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))){
                 environment.load(inputStream);
             } catch (FileNotFoundException e) {
                 logger.error("profile serving-server.properties not found");
             } catch (IOException e) {
                 logger.error("parse config error, {}", e.getMessage());
             }
+
             int processors = Runtime.getRuntime().availableProcessors();
             MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_CORE_POOL_SIZE)) : processors;
             MetaInfo.SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.SERVING_MAX_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_MAX_POOL_SIZE)) : processors * 2;
             MetaInfo.SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)) : 1000;
             MetaInfo.SERVING_POOL_QUEUE_SIZE = environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)) : 100;
-            MetaInfo.USE_REGISTER = environment.getProperty(Dict.USE_REGISTER) != null ? Boolean.getBoolean(environment.getProperty(Dict.USE_REGISTER)) : Boolean.TRUE;
             MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
             MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)) : Boolean.FALSE;
             MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT)) : 3000;
             MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT)) : 3000;
             MetaInfo.FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.FEATURE_SINGLE_ADAPTOR);
-            MetaInfo.PORT = environment.getProperty(Dict.PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PORT)) : 8000;
-            MetaInfo.ZK_URL = environment.getProperty(Dict.ZK_URL);
-            MetaInfo.CACHE_TYPE = environment.getProperty(Dict.CACHE_TYPE, "local");
+            MetaInfo.PROPERTY_USE_REGISTER = environment.getProperty(Dict.PROPERTY_USE_REGISTER)!=null?Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_REGISTER)):true;
+            MetaInfo.PROPERTY_USE_ZK_ROUTER = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)!=null?Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)):true;
+            MetaInfo.PROPERTY_PORT = environment.getProperty(Dict.PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PORT)) : 8000;
+            MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL);
+            MetaInfo.PROPERTY_CACHE_TYPE = environment.getProperty(Dict.PROPERTY_CACHE_TYPE, "local");
             MetaInfo.PROPERTY_REDIS_IP = environment.getProperty(Dict.PROPERTY_REDIS_IP);
             MetaInfo.PROPERTY_REDIS_PASSWORD = environment.getProperty(Dict.PROPERTY_REDIS_PASSWORD);
             MetaInfo.PROPERTY_REDIS_PORT = environment.getProperty(Dict.PROPERTY_REDIS_PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_REDIS_PORT)) : 3306;
@@ -101,15 +105,22 @@ public class Bootstrap {
             MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL)) : 3;
             MetaInfo.BATCH_SPLIT_SIZE = environment.getProperty(Dict.BATCH_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_SPLIT_SIZE)) : 100;
             MetaInfo.LR_SPLIT_SIZE = environment.getProperty(Dict.LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.LR_SPLIT_SIZE)) : 500;
+
+
         } catch (IOException e) {
             logger.error("init metainfo error", e);
         }
+
     }
+
+
 
     public void start(String[] args) {
         SpringApplication springApplication = new SpringApplication(Bootstrap.class);
+
         applicationContext = springApplication.run(args);
         JvmInfoCounter.start();
+
     }
 
     public void stop() {
@@ -127,7 +138,8 @@ public class Bootstrap {
                 e.printStackTrace();
             }
         }
-        boolean useZkRouter = Boolean.parseBoolean(applicationContext.getEnvironment().getProperty(Dict.USE_ZK_ROUTER, "false"));
+
+        boolean useZkRouter = MetaInfo.PROPERTY_USE_ZK_ROUTER;
         if (useZkRouter) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             Set<URL> registered = zookeeperRegistry.getRegistered();
