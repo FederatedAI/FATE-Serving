@@ -234,4 +234,26 @@ public class ServingServerTest {
 
     }
 
+    @Test
+    public void test_model_load_pb() {
+        URL resource = ModelTest.class.getClassLoader().getResource("host#10000#arbiter-10000#guest-9999#host-10000#model_202006031540378520599");
+        String filePath = resource.getPath().replaceAll("%23", "#");
+        ModelServiceProto.PublishRequest.Builder publicRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
+        ModelServiceProto.PublishRequest publishRequest = publicRequestBuilder.setLocal(ModelServiceProto.LocalInfo.newBuilder()
+                .setRole("guest").setPartyId("guest".equalsIgnoreCase("guest") ? "9999" : "10000").build())
+                .putRole("guest", ModelServiceProto.Party.newBuilder().addPartyId("9999").build())
+                .putRole("arbiter", ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
+                .putRole("host", ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
+                .putModel("guest", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("9999",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202006031540378520599").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .putModel("host", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202006031540378520599").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("202006031540378520599").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .setLoadType("PB")
+                .setFilePath(filePath)
+                .build();
+
+        inferenceClient.load(publishRequest);
+    }
 }

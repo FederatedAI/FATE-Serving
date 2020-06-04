@@ -23,6 +23,8 @@ public class SimpleModelLoaderFactory implements ModelLoaderFactory, Application
                 return (ModelLoader) applicationContext.getBean("fateFlowModelLoader");
             case "FILE":
                 return (ModelLoader) applicationContext.getBean("localFileModelLoader");
+            case "PB":
+                return (ModelLoader) applicationContext.getBean("localPbModelLoader");
             default:
                 return null;
 
