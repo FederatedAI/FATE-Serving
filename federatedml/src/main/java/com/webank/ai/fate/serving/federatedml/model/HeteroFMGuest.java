@@ -112,14 +112,14 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
 
         Map<String, Object> dataMap = (Map<String, Object>) remoteData.get(this.getComponentName());
         double localScore = ((Number) localData.get(Dict.SCORE)).doubleValue();
-        logger.info("local score: {}", localScore);
+        //logger.info("local score: {}", localScore);
         double[] guestCrosses = (double[]) localData.get(Dict.FM_CROSS);
         localData.get(Dict.FM_CROSS);
         double score = localScore;
 
 
         double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
-        logger.info("host score: {}", hostScore);
+        //logger.info("host score: {}", hostScore);
         Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
         List<Double> hostCrosses = JSON.parseArray(dataMap.get(Dict.FM_CROSS).toString(), double.class);
         Preconditions.checkArgument(hostCrosses.size() == guestCrosses.length, "");

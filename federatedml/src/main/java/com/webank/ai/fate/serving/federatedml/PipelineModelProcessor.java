@@ -56,7 +56,10 @@ public class PipelineModelProcessor implements ModelProcessor {
                 }
                 remoteResultMap.put(partyId, remoteInferenceResult);
             } catch (Exception e) {
-                throw new RemoteRpcException("party id " + partyId + " remote error");
+                if(!(e instanceof RemoteRpcException))
+                    throw new RemoteRpcException("party id " + partyId + " remote error");
+                else
+                    throw (RemoteRpcException)e;
             }
         });
         ExecutorService cc = Executors.newWorkStealingPool();
