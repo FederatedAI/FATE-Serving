@@ -2,10 +2,11 @@ package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.EncryptMethod;
 import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import org.apache.commons.codec.digest.Md5Crypt;
+import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public class LoginController {
         ReturnResult result = new ReturnResult();
         if (username.equals(this.username) && password.equals(this.password)) {
             String userInfo = StringUtils.join(Arrays.asList(username, password), "_");
-            String token = Md5Crypt.md5Crypt((Dict.USER_CACHE_KEY_PREFIX + userInfo).getBytes(), Dict.MD5_SALT);
+//            String token = Md5Crypt.md5Crypt((Dict.USER_CACHE_KEY_PREFIX + userInfo).getBytes(), Dict.MD5_SALT);
+            String token = EncryptUtils.encrypt(Dict.USER_CACHE_KEY_PREFIX + userInfo, EncryptMethod.MD5);
 
             redisTemplate.opsForValue().set(token, userInfo, 10, TimeUnit.MINUTES);
             logger.info("user {} login success.", username);
