@@ -33,6 +33,8 @@ import com.webank.ai.fate.register.utils.URLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -129,6 +131,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String  path = url.getPath();
         Map  content = new HashMap();
         content.put(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
+        content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
         this.zkClient.create(path, JSON.toJSONString(content),true);
     }
 
@@ -280,7 +283,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 logger.error("try to register service {} failed", service);
             }
         }
-        logger.info("registed urls {}", registered);
+        if (logger.isDebugEnabled()) {
+            logger.debug("registed urls {}", registered);
+        }
     }
 
     public void addDynamicEnvironment(String environment) {

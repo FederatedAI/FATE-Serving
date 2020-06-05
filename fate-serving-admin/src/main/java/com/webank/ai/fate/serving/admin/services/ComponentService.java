@@ -1,6 +1,8 @@
 package com.webank.ai.fate.serving.admin.services;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
@@ -11,28 +13,40 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.webank.ai.fate.register.common.Constants.PATH_SEPARATOR;
 
 @Service
 public class ComponentService {
-    @Autowired
-    ZookeeperRegistry zookeeperRegistry;
-    private final static String PATH_SEPARATOR ="/";
-    private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
 
     Logger logger = LoggerFactory.getLogger(ComponentService.class);
+    private final static String PATH_SEPARATOR = "/";
+    private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
 
-    public  NodeData    getCachedNodeData(){
-        return  cachedNodeData;
+    @Autowired
+    ZookeeperRegistry zookeeperRegistry;
+
+    public NodeData getCachedNodeData() {
+        return cachedNodeData;
     }
 
-    public  class  NodeData{
+    public class NodeData {
         String name;
 
         boolean leaf;
 
         String label;
+
+        long timestamp;
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
 
         public String getLabel() {
             return label;
@@ -66,48 +80,45 @@ public class ComponentService {
             this.children = children;
         }
 
-        List<NodeData>  children= Lists.newArrayList();
+        List<NodeData> children = Lists.newArrayList();
     }
 
-
-
-
-
-    NodeData  cachedNodeData;
+    NodeData cachedNodeData;
 
     @Scheduled(cron = "0/5 * * * * ?")
-    public void schedulePullComponent(){
+    public void schedulePullComponent() {
         ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
-        NodeData  root  = new NodeData();
+        NodeData root = new NodeData();
         root.setName("cluster");
         root.setLabel(root.getName());
-        List<String> componentLists =  zkClient.getChildren(PATH_SEPARATOR+DEFAULT_COMPONENT_ROOT);
-        if(componentLists!=null){
-            componentLists.forEach(name->{
-                List<String>  nodes =zkClient.getChildren(PATH_SEPARATOR+DEFAULT_COMPONENT_ROOT+PATH_SEPARATOR+name);
-                NodeData  componentData = new NodeData();
+        List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
+        if (componentLists != null) {
+            componentLists.forEach(name -> {
+                List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
+                NodeData componentData = new NodeData();
                 componentData.setName(name);
                 componentData.setLabel(root.getLabel() + "-" + componentData.getName());
                 root.getChildren().add(componentData);
-                if(CollectionUtils.isNotEmpty(nodes)){
-                    nodes.forEach(nodeName->{
-                        NodeData  nodeData = new NodeData();
+                if (CollectionUtils.isNotEmpty(nodes)) {
+                    nodes.forEach(nodeName -> {
+                        String content = zkClient.getContent(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name + PATH_SEPARATOR + nodeName);
+                        Map contentMap = JSONObject.parseObject(content, Map.class);
+                        NodeData nodeData = new NodeData();
                         nodeData.setName(nodeName);
                         nodeData.setLeaf(true);
                         nodeData.setLabel(componentData.getLabel() + "-" + nodeData.getName());
+                        nodeData.setTimestamp((Long) contentMap.get(Constants.TIMESTAMP_KEY));
                         componentData.getChildren().add(nodeData);
                     });
                 }
-
-
             });
         }
-        cachedNodeData =  root;
-        logger.debug("refresh  component info ");
+        cachedNodeData = root;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("refresh  component info ");
+        }
     }
-
-
-
 
 
 }
