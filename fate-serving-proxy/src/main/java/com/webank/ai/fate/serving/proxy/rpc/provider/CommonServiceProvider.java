@@ -56,8 +56,13 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         long beginMs = queryMetricRequest.getBeginMs();
         long endMs = queryMetricRequest.getEndMs();
         String sourceName = queryMetricRequest.getSource();
-        List<MetricNode> metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
-
+        CommonServiceProto.MetricType type = queryMetricRequest.getType();
+        List<MetricNode> metricNodes=null;
+        if(type.equals(CommonServiceProto.MetricType.INTERFACE)) {
+            metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
+        }else{
+            metricNodes = flowCounterManager.queryModelMetrics(beginMs, endMs, sourceName);
+        }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setData(ByteString.copyFrom(JSONObject.toJSONString(metricNodes).getBytes()));
@@ -68,7 +73,6 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     public CommonServiceProto.CommonResponse updateFlowRule(Context context, InboundPackage inboundPackage) {
         CommonServiceProto.UpdateFlowRuleRequest updateFlowRuleRequest = (CommonServiceProto.UpdateFlowRuleRequest) inboundPackage.getBody();
         flowCounterManager.updateAllowQps(updateFlowRuleRequest.getSource(), updateFlowRuleRequest.getAllowQps());
-
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);

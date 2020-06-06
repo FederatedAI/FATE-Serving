@@ -6,12 +6,10 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
-import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
 import io.grpc.stub.AbstractStub;
@@ -37,31 +35,31 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         public ExceptionInfo(){
 
         }
-
         String  code;
-
         public String getCode() {
             return code;
         }
-
         public void setCode(String code) {
             this.code = code;
         }
-
         public String getMessage() {
             return message;
         }
-
         public void setMessage(String message) {
             this.message = message;
         }
-
         String  message;
-
-
     }
 
+    public FlowCounterManager getFlowCounterManager() {
+        return flowCounterManager;
+    }
 
+    public void setFlowCounterManager(FlowCounterManager flowCounterManager) {
+        this.flowCounterManager = flowCounterManager;
+    }
+
+    protected   FlowCounterManager  flowCounterManager;
 
     static public AtomicInteger requestInHandle = new AtomicInteger(0);
     public static boolean isOpen = true;
@@ -70,18 +68,12 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     Logger logger = LoggerFactory.getLogger(this.getClass().getName());
     ServiceAdaptor serviceAdaptor;
     InterceptorChain preChain = new DefaultInterceptorChain();
-
-    ;
     InterceptorChain postChain = new DefaultInterceptorChain();
-
-    ;
     private Map<String, Method> methodMap = Maps.newHashMap();
     private AbstractStub serviceStub;
-
     public AbstractServiceAdaptor() {
 
     }
-
     public Map<String, Method> getMethodMap() {
         return methodMap;
     }
@@ -135,7 +127,6 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     public OutboundPackage<resp> service(Context context, InboundPackage<req> data) throws RuntimeException {
 
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
-        long begin = System.currentTimeMillis();
         context.preProcess();
         List<Throwable> exceptions = Lists.newArrayList();
         context.setReturnCode(StatusCode.SUCCESS);
@@ -164,21 +155,38 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
             logger.error(e.getMessage());
         } finally {
             requestInHandle.decrementAndGet();
-            long end = System.currentTimeMillis();
-
-
             if (exceptions.size() != 0) {
                 try {
                     outboundPackage = this.serviceFail(context, data, exceptions);
                     AsyncMessageEvent messageEvent = new AsyncMessageEvent();
+                    long end = System.currentTimeMillis();
                     messageEvent.setName(Dict.EVENT_ERROR);
                     messageEvent.setTimestamp(end);
                     messageEvent.setAction(context.getActionType());
-                    messageEvent.setData("");
+                    messageEvent.setData(exceptions);
+                    messageEvent.setContext(context);
                     DisruptorUtil.producer(messageEvent);
+                    flowCounterManager.exception(context.getResourceName());
+                    if(context instanceof ServingServerContext) {
+                        ServingServerContext servingServerContext =(ServingServerContext)context;
+                        Model model =servingServerContext.getModel();
+                        if(model!=null) {
+                            flowCounterManager.exception(model.getResourceName());
+                        }
+                    }
                 } catch (Throwable e) {
                     logger.error("error ", e);
                 }
+            }
+            String returnCode = context.getReturnCode();
+            if(StatusCode.SUCCESS.equals(returnCode)){
+                if(context instanceof   ServingServerContext) {
+                    Model model = ((ServingServerContext) context).getModel();
+                    if(model!=null) {
+                        flowCounterManager.success (model.getResourceName());
+                    }
+                }
+                flowCounterManager.success(context.getResourceName());
             }
             printFlowLog(context);
         }

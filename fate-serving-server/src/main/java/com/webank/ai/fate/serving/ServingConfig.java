@@ -53,7 +53,7 @@ public class ServingConfig {
 
     @Bean
     public FlowCounterManager flowCounterManager() {
-        FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING);
+        FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING,true);
         flowCounterManager.startReport();
         return flowCounterManager;
     }

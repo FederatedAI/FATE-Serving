@@ -14,9 +14,6 @@ public class MetricNode {
     private long exceptionQps;
     private long rt;
 
-    /**
-     * @since 1.5.0
-     */
     private long occupiedPassQps;
 
     private String resource;

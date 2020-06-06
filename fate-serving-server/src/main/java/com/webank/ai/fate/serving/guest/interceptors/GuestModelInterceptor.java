@@ -3,7 +3,9 @@ package com.webank.ai.fate.serving.guest.interceptors;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
@@ -18,9 +20,10 @@ import org.springframework.stereotype.Service;
 public class GuestModelInterceptor implements Interceptor {
 
     Logger logger = LoggerFactory.getLogger(GuestModelInterceptor.class);
-
     @Autowired
     ModelManager modelManager;
+    @Autowired
+    FlowCounterManager  flowCounterManager;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
@@ -31,5 +34,13 @@ public class GuestModelInterceptor implements Interceptor {
             throw new ModelNullException("can not find model by service id " + serviceId);
         }
         ((ServingServerContext) context).setModel(model);
+
+        boolean  pass = flowCounterManager.pass(model.getResourceName());
+        if(!pass){
+            flowCounterManager.block(model.getResourceName());
+        }
+
     }
+
+
 }

@@ -3,6 +3,9 @@ package com.webank.ai.fate.serving.core.flow;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.webank.ai.fate.serving.core.timer.HashedWheelTimer;
+import com.webank.ai.fate.serving.core.timer.Timeout;
+import com.webank.ai.fate.serving.core.timer.TimerTask;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +25,14 @@ public class FlowCounterManager {
     String appName;
 
     MetricSearcher metricSearcher;
+    MetricSearcher modelMetricSearcher;
+    boolean  countModelRequest;
+
+    LimitQueue<MetricNode>  modelLimitQueue = new  LimitQueue<MetricNode>(10);
 
     public static final boolean USE_PID = false;
+
+    HashedWheelTimer   hashedWheelTimer =  new  HashedWheelTimer();
 
     public MetricSearcher getMetricSearcher() {
         return metricSearcher;
@@ -33,18 +42,30 @@ public class FlowCounterManager {
         this.metricSearcher = metricSearcher;
     }
 
-    public FlowCounterManager() {
-
+//    public FlowCounterManager() {
+//
+//    }
+    public FlowCounterManager(String appName) {
+        this(appName,false);
     }
 
-    public FlowCounterManager(String appName) {
+
+
+    public FlowCounterManager(String appName,Boolean countModelRequest) {
         this.appName = appName;
         String baseFileName = appName + "-metrics.log";
+
         if (USE_PID) {
             baseFileName += ".pid" + GetSystemInfo.getPid();
         }
         metricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, baseFileName);
+
         metricReport = new FileMetricReport(appName);
+        if(countModelRequest){
+             modelMetricReport = new FileMetricReport("model");
+             modelMetricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR,   "model-metrics.log");
+        }
+
     }
 
     public  List<MetricNode>  queryMetrics(long beginTimeMs, long endTimeMs, String identity){
@@ -65,7 +86,34 @@ public class FlowCounterManager {
         return  null;
     }
 
+    public  List<MetricNode>  queryModelMetrics(long beginTimeMs, long endTimeMs, String identity){
+        try {
+            return  metricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  null;
+    }
+
+    public  List<MetricNode>  queryAllModelMetrics(long beginTimeMs, int size){
+        try {
+            return  metricSearcher.find(beginTimeMs, size);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  null;
+    }
+
+
+
+//    public  List<MetricNode>  queryAllModelMetrics(){
+//
+//    }
+
+
     MetricReport  metricReport;
+
+    MetricReport  modelMetricReport;
 
     public MetricReport getMetricReport() {
         return metricReport;
@@ -79,6 +127,61 @@ public class FlowCounterManager {
     private ConcurrentHashMap<String,FlowCounter>   successMap =   new ConcurrentHashMap<>();
     private ConcurrentHashMap<String,FlowCounter>   blockMap =   new ConcurrentHashMap<>();
     private ConcurrentHashMap<String,FlowCounter>   exceptionMap =   new ConcurrentHashMap<>();
+//    private ConcurrentHashMap<String,FlowCounter>   modelPassMap =   new ConcurrentHashMap<>();
+//    private ConcurrentHashMap<String,FlowCounter>   modelSuccessMap =   new ConcurrentHashMap<>();
+//    private ConcurrentHashMap<String,FlowCounter>   modelBlockMap =   new ConcurrentHashMap<>();
+//    private ConcurrentHashMap<String,FlowCounter>   modelExceptionMap =   new ConcurrentHashMap<>();
+//    private ConcurrentHashMap<String,LimitQueue<MetricNode>>  interfaceMetricNode;
+//    private ConcurrentHashMap<String,LimitQueue<MetricNode>>  modelMetricNode;
+
+
+
+
+
+
+//    public  boolean  modelPass(String sourceName){
+//        FlowCounter  flowCounter =modelPassMap.get(sourceName);
+//        if(flowCounter==null){
+//            flowCounter= modelPassMap.putIfAbsent(sourceName,new  FlowCounter(getAllowedQps(sourceName)));
+//            if(flowCounter==null) {
+//                flowCounter = modelPassMap.get(sourceName);
+//            }
+//        }
+//        return  flowCounter.tryPass();
+//    }
+
+//    public  boolean  modelSuccess(String sourceName){
+//        FlowCounter  flowCounter =modelSuccessMap.get(sourceName);
+//        if(flowCounter==null){
+//            flowCounter= modelSuccessMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
+//            if(flowCounter==null) {
+//                flowCounter = modelSuccessMap.get(sourceName);
+//            }
+//        }
+//        return  flowCounter.tryPass();
+//    }
+
+//    public  boolean  modelBlock(String sourceName){
+//        FlowCounter  flowCounter =modelBlockMap.get(sourceName);
+//        if(flowCounter==null){
+//            flowCounter= modelBlockMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
+//            if(flowCounter==null) {
+//                flowCounter = modelBlockMap.get(sourceName);
+//            }
+//        }
+//        return  flowCounter.tryPass();
+//    }
+
+//    public  boolean  modelException(String sourceName){
+//        FlowCounter  flowCounter =modelExceptionMap.get(sourceName);
+//        if(flowCounter==null){
+//            flowCounter= modelExceptionMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
+//            if(flowCounter==null) {
+//                flowCounter = modelExceptionMap.get(sourceName);
+//            }
+//        }
+//        return  flowCounter.tryPass();
+//    }
 
     public  boolean  pass(String sourceName){
         FlowCounter  flowCounter =passMap.get(sourceName);
@@ -124,10 +227,10 @@ public class FlowCounterManager {
         return  flowCounter.tryPass();
     }
 
-
     ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     public  void  startReport(){
+
         init();
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -135,24 +238,30 @@ public class FlowCounterManager {
 
                 long current = TimeUtil.currentTimeMillis();
                 List<MetricNode> reportList =   Lists.newArrayList();
+                List<MetricNode> modelReportList =   Lists.newArrayList();
                 passMap.forEach((sourceName,flowCounter)->{
-                    long  passCount =flowCounter.getSum();
-                    if (passCount > 0) {
+
                         FlowCounter successCounter = successMap.get(sourceName);
                         FlowCounter blockCounter =  blockMap.get(sourceName);
                         FlowCounter exceptionCounter = exceptionMap.get(sourceName);
                         MetricNode metricNode = new  MetricNode();
                         metricNode.setTimestamp(current);
                         metricNode.setResource(sourceName);
-                        metricNode.setPassQps(passCount);
+                        metricNode.setPassQps(flowCounter.getSum());
                         metricNode.setBlockQps(blockCounter!=null?new Double(blockCounter.getQps()).longValue():0);
                         metricNode.setExceptionQps(exceptionCounter!=null?new Double(exceptionCounter.getQps()).longValue():0);
                         metricNode.setSuccessQps(successCounter!=null?new Double(successCounter.getQps()).longValue():0);
-                        reportList.add(metricNode);
-                    }
-                });
-                metricReport.report(reportList);
+                        if(sourceName.startsWith("I_")){
+                            reportList.add(metricNode);
+                        }
+                        if(sourceName.startsWith("M_")){
+                            modelReportList.add(metricNode);
+                        }
 
+                });
+                logger.info("try to report {}",reportList);
+                metricReport.report(reportList);
+                modelMetricReport.report(modelReportList);
             }
         }, 0,
         1,
@@ -160,19 +269,21 @@ public class FlowCounterManager {
     }
 
     public  static  void main(String[] args){
-        FlowCounterManager  flowCounterManager = new  FlowCounterManager();
+        FlowCounterManager  flowCounterManager = new  FlowCounterManager("test");
         flowCounterManager.setMetricReport(new FileMetricReport("Test"));
         flowCounterManager.setMetricSearcher(new MetricSearcher(MetricWriter.METRIC_BASE_DIR, "Test" + "-metrics.log.pid" + GetSystemInfo.getPid()));
         flowCounterManager.startReport();
 
         while(true) {
-            flowCounterManager.pass("test");
+            flowCounterManager.pass("M_test");
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+
     }
 
     private static final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "FlowRule.json";

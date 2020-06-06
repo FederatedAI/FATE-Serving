@@ -19,11 +19,18 @@ syntax = "proto3";
 
 package com.webank.ai.fate.api.networking.common;
 option java_outer_classname = "CommonServiceProto";
+enum MetricType {
+    INTERFACE = 0;
+    MODEL = 1;
+}
+
+
 
 message QueryMetricRequest{
     int64 beginMs = 1;
     int64 endMs = 2;
     string source = 3;
+    MetricType type = 4;
 }
 message QueryMetricResponse{
     bytes metrics = 1;

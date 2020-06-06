@@ -25,7 +25,6 @@ import java.util.Map;
         "federationRouterInterceptor"
 }, postChain = {
 
-
 })
 @Service
 public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {
@@ -52,7 +51,6 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
 
     @Override
     protected OutboundPackage<BatchInferenceResult> serviceFailInner(Context context, InboundPackage<BatchInferenceRequest> data, Throwable e) {
-
         OutboundPackage<BatchInferenceResult> outboundPackage = new OutboundPackage<BatchInferenceResult>();
         BatchInferenceResult batchInferenceResult = new BatchInferenceResult();
         if (e instanceof BaseException) {

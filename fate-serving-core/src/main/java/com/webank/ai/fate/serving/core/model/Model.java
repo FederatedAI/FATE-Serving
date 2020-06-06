@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.core.model;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -144,6 +145,20 @@ public class Model implements Comparable<Model>, Serializable {
     public String toString() {
 
         return JSON.toJSONString(this);
+    }
+    String  resourceName ;
+    public String getResourceName (){
+        if(StringUtils.isNotEmpty(resourceName)) {
+            return  resourceName;
+        }
+        else{
+            resourceName=  "M_"+tableName+"_"+namespace;
+            return  resourceName;
+        }
+
+
+
+
     }
 
 

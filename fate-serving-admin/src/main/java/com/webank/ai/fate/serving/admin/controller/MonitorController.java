@@ -68,9 +68,8 @@ public class MonitorController {
         if (StringUtils.isNotBlank(source)) {
             builder.setSource(source);
         }
-
+        builder.setType(CommonServiceProto.MetricType.INTERFACE);
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryMetrics(builder.build());
-
         List<MetricNode> metricNodes = Lists.newArrayList();
         if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
             List<JSONObject> resultData = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
@@ -81,6 +80,50 @@ public class MonitorController {
             }
         }
 
+        metricNodes = metricNodes.stream()
+                .sorted(((o1, o2) -> o1.getTimestamp() == o2.getTimestamp() ? 0 : ((o1.getTimestamp() - o2.getTimestamp()) > 0 ? 1 : -1)))
+                .collect(Collectors.toList());
+
+        Map<String, Object> dataMap = Maps.newHashMap();
+        if (metricNodes != null) {
+            metricNodes.forEach(metricNode -> {
+                List<MetricNode> nodes = (List<MetricNode>) dataMap.get(metricNode.getResource());
+                if (nodes == null) {
+                    nodes = Lists.newArrayList();
+                }
+                nodes.add(metricNode);
+                dataMap.put(metricNode.getResource(), nodes);
+            });
+        }
+
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, dataMap);
+    }
+
+
+
+    @GetMapping("/monitor/queryModel")
+    public ReturnResult queryModelMonitorData(String host, int port, String source) {
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
+        blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
+
+        long now = System.currentTimeMillis();
+        builder.setBeginMs(now - 5000);
+        builder.setEndMs(now);
+        if (StringUtils.isNotBlank(source)) {
+            builder.setSource(source);
+        }
+        builder.setType(CommonServiceProto.MetricType.MODEL);
+        CommonServiceProto.CommonResponse commonResponse = blockingStub.queryMetrics(builder.build());
+        List<MetricNode> metricNodes = Lists.newArrayList();
+        if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
+            List<JSONObject> resultData = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
+            if (resultData != null) {
+                for (JSONObject data : resultData) {
+                    metricNodes.add(data.toJavaObject(MetricNode.class));
+                }
+            }
+        }
         metricNodes = metricNodes.stream()
                 .sorted(((o1, o2) -> o1.getTimestamp() == o2.getTimestamp() ? 0 : ((o1.getTimestamp() - o2.getTimestamp()) > 0 ? 1 : -1)))
                 .collect(Collectors.toList());

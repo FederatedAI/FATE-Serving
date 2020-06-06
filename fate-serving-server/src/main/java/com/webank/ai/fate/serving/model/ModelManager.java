@@ -635,7 +635,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                     data.putAll(deserialize);
                 }
             } catch (Throwable e) {
-                logger.error("failed to doLoadCache file ", e);
+                logger.error("failed to doLoadCache file {}", file,e);
             }
         }
     }

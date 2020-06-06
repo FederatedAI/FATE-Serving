@@ -20,6 +20,7 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,8 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     String actionType;
     Map dataMap = Maps.newHashMap();
     long costTime;
+
+    String resourceName;
 
     public BaseContext() {
         timestamp = System.currentTimeMillis();
@@ -246,14 +249,6 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
         dataMap.put(Dict.DOWN_STREAM_COST, downstreamCost);
     }
 
-    /*public MetricRegistry getMetricRegistry() {
-        return metricRegistry;
-    }
-
-    public void setMetricRegistry(MetricRegistry metricRegistry) {
-        this.metricRegistry = metricRegistry;
-    }*/
-
     @Override
     public long getDownstreamBegin() {
         return (long) dataMap.get(Dict.DOWN_STREAM_BEGIN);
@@ -335,6 +330,19 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     public void setRemoteFuture(ListenableFuture future) {
         this.dataMap.put(Dict.FUTURE, future);
     }
+
+    @Override
+    public String getResourceName() {
+
+        if(StringUtils.isNotEmpty(resourceName)) {
+            return  resourceName;
+        }
+        else {
+            resourceName = "I_"+(StringUtils.isNotEmpty(this.getActionType()) ? this.getActionType() : this.getServiceName());
+        }
+        return  resourceName;
+    }
+
 
 
 }

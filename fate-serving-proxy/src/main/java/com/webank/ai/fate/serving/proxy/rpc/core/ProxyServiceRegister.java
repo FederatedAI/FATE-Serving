@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.proxy.rpc.core;
 
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.rpc.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,13 +52,12 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
 
         if (applicationEvent instanceof ContextRefreshedEvent) {
             String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
+            FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
             for (String beanName : beans) {
                 AbstractServiceAdaptor serviceAdaptor = applicationContext.getBean(beanName, AbstractServiceAdaptor.class);
-
+                serviceAdaptor.setFlowCounterManager(flowCounterManager);
                 FateService proxyService = (FateService) serviceAdaptor.getClass().getAnnotation(FateService.class);
-
                 if (proxyService != null) {
-
                     Method[] methods = serviceAdaptor.getClass().getMethods();
                     for (Method method : methods) {
                         FateServiceMethod fateServiceMethod = method.getAnnotation(FateServiceMethod.class);
@@ -65,7 +65,6 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
                             serviceAdaptor.getMethodMap().put(fateServiceMethod.name(), method);
                         }
                     }
-
                     serviceAdaptor.setServiceName(proxyService.name());
                     // TODO utu: may load from cfg file is a better choice?
                     String[] postChain = proxyService.postChain();

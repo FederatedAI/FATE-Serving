@@ -14,12 +14,11 @@ import org.springframework.stereotype.Service;
 
 @FateService(name = "batchInference", preChain = {
         "requestOverloadBreaker",
-        "monitorInterceptor",
         "hostBatchParamInterceptor",
         "hostModelInterceptor",
         "hostBatchFeatureAdaptorInterceptor"
 }, postChain = {
-        "monitorInterceptor"
+
 })
 @Service
 public class HostBatchInferenceProvider extends AbstractServingServiceProvider<BatchInferenceRequest, BatchInferenceResult> {

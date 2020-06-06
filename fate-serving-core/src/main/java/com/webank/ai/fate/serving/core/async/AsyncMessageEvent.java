@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.core.async;
 
 import com.alibaba.fastjson.JSON;
 import com.lmax.disruptor.EventFactory;
+import com.webank.ai.fate.serving.core.bean.Context;
 
 public class AsyncMessageEvent<T> implements Cloneable {
 
@@ -14,6 +15,16 @@ public class AsyncMessageEvent<T> implements Cloneable {
     private T data;
     private String ip;
     private long timestamp;
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    private Context context;
 
     public String getName() {
         return name;

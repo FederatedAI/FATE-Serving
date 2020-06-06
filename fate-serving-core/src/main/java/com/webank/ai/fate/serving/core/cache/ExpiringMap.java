@@ -12,14 +12,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
 
-    /**
-     * default time to live (second)
-     */
+
     private static final int DEFAULT_TIME_TO_LIVE = 180;
 
-    /**
-     * default expire check interval (second)
-     */
+
     private static final int DEFAULT_MAX_CAPACITY = 1000;
 
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;

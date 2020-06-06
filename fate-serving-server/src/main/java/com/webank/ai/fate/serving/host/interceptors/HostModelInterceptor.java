@@ -3,7 +3,9 @@ package com.webank.ai.fate.serving.host.interceptors;
 
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
@@ -21,6 +23,8 @@ public class HostModelInterceptor implements Interceptor {
 
     @Autowired
     ModelManager modelManager;
+    @Autowired
+    FlowCounterManager  flowCounterManager;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
@@ -34,6 +38,11 @@ public class HostModelInterceptor implements Interceptor {
             throw new HostModelNullException("mode is null");
         }
         servingServerContext.setModel(model);
+
+        boolean  pass = flowCounterManager.pass(model.getResourceName());
+        if(!pass){
+            flowCounterManager.block(model.getResourceName());
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving;
 
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.rpc.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +46,10 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
 
         String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
+        FlowCounterManager  flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
         for (String beanName : beans) {
             AbstractServiceAdaptor serviceAdaptor = applicationContext.getBean(beanName, AbstractServiceAdaptor.class);
-
+            serviceAdaptor.setFlowCounterManager(flowCounterManager);
             FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
             Method[] methods = serviceAdaptor.getClass().getMethods();
             for (Method method : methods) {
@@ -74,6 +76,8 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
 
 
         }
+
+
         logger.info("service register info {}", this.serviceAdaptorMap.keySet());
     }
 

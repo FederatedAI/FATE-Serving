@@ -10,13 +10,7 @@ import java.io.FileInputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-/**
- * 从指定目录下找出所有的metric文件，并按照指定时间戳进行检索，参考{@link com.alibaba.csp.sentinel.node.metric.MetricSearcher#find(long, int)}。
- * 会借助索引以提高检索效率，参考{@link MetricWriter}；还会在内部缓存上一次检索的文件指针，以便下一次顺序检索时
- * 减少读盘次数。
- *
- *
- */
+
 public class MetricSearcher {
 
     private static final Charset defaultCharset = Charset.forName("UTF-8");

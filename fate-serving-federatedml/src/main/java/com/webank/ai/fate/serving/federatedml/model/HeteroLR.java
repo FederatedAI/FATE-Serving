@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.webank.ai.fate.core.mlmodel.buffer.LRModelParamProto.LRModelParam;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -57,6 +58,8 @@ public abstract class HeteroLR extends BaseComponent {
         Map<String, Object> inputData = inputDatas.get(0);
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
+
+
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
         if (logger.isDebugEnabled()) {
