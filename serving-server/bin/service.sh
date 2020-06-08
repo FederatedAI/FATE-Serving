@@ -22,7 +22,7 @@ set -e
 source ./bin/common.sh
 module=serving-server
 main_class=com.webank.ai.fate.serving.ServingServer
-module_version=1.2.0
+module_version=1.3.0
 
 
 case "$1" in

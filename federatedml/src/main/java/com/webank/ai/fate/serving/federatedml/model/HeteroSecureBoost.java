@@ -40,6 +40,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
     protected List<String> classes;
     protected int treeDim;
     protected double learningRate;
+    protected boolean fastMode = true;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -93,6 +94,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
         int fid = this.trees.get(treeId).getTree(treeNodeId).getFid();
         double splitValue = this.trees.get(treeId).getSplitMaskdict().get(treeNodeId);
         String fidStr = String.valueOf(fid);
+
         if (input.containsKey(fidStr)) {
             if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
@@ -100,6 +102,7 @@ public abstract class HeteroSecureBoost extends BaseModel {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
             }
         } else {
+            logger.info("go missing dir");
             if (this.trees.get(treeId).getMissingDirMaskdict().containsKey(treeNodeId)) {
                 int missingDir = this.trees.get(treeId).getMissingDirMaskdict().get(treeNodeId);
                 if (missingDir == 1) {

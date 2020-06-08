@@ -1,3 +1,7 @@
+# Release 1.3.0
+## Major Features and Improvements
+* Hetero Secureboosting communication optimization: communication round is reduced to 1 by letting the host send a pre-computed host node route, which is used for inferencing, to the guest. 
+
 # Release 1.2.0
 ## Major Features and Improvements
 * Replace serving-router with a brand new service called serving-proxy, which supports authentication and inference request with HTTP or gRPC
