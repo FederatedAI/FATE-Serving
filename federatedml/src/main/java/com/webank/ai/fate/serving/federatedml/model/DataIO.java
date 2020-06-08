@@ -20,11 +20,13 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOMetaProto.DataIOMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
 import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,8 @@ public class DataIO extends BaseModel {
     private static final Logger logger = LoggerFactory.getLogger(DataIO.class);
     private DataIOMeta dataIOMeta;
     private DataIOParam dataIOParam;
+    private List<String> header;
+    private String inputformat;
     private Imputer imputer;
     private Outlier outlier;
     private boolean isImputer;
@@ -56,9 +60,12 @@ public class DataIO extends BaseModel {
                 this.outlier = new Outlier(this.dataIOMeta.getOutlierMeta().getOutlierValueList(),
                         this.dataIOParam.getOutlierParam().getOutlierReplaceValue());
             }
+
+            this.header = this.dataIOParam.getHeaderList();
+            this.inputformat = this.dataIOMeta.getInputFormat();
         } catch (Exception ex) {
             ex.printStackTrace();
-            logger.error("init DataIo error",ex);
+            logger.error("init DataIo error", ex);
             return StatusCode.ILLEGALDATA;
         }
         logger.info("Finish init DataIO class");
@@ -67,16 +74,43 @@ public class DataIO extends BaseModel {
 
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-        Map<String, Object> input = inputData.get(0);
+        Map<String, Object> data = inputData.get(0);
+        Map<String, Object> outputData = new HashMap<>();
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("input-data, not filling, {}", data);
+        }
+
+        if (this.inputformat.equals(Dict.TAG_INPUT_FORMAT) || this.inputformat.equals(Dict.SPARSE_INPUT_FORMAT
+        )) {
+            if(logger.isDebugEnabled()) {
+                logger.debug("Sparse Data Filling Zeros");
+            }
+            for (String col: this.header) {
+                    outputData.put(col, data.getOrDefault(col, 0));
+            }
+        } else {
+            outputData = data;
+            if(logger.isDebugEnabled()) {
+                logger.debug("Dense input-format, not filling, {}", outputData);
+            }
+        }
 
         if (this.isImputer) {
-            input = this.imputer.transform(input);
+            outputData = this.imputer.transform(outputData);
         }
 
         if (this.isOutlier) {
-            input = this.outlier.transform(input);
+            outputData = this.outlier.transform(outputData);
         }
 
-        return input;
+        /*
+        for (String col: data.keySet()) {
+            if (!output.containsKey(col)) {
+                output.put(col, data.get(col));
+            }
+        }*/
+
+        return outputData;
     }
 }
