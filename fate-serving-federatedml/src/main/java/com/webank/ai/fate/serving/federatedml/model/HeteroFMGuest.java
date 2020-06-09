@@ -17,11 +17,14 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
-import com.alibaba.fastjson.JSON;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +36,7 @@ import static java.lang.Math.exp;
 
 public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Returnable {
     private static final Logger logger = LoggerFactory.getLogger(HeteroFMGuest.class);
+
 
     private double sigmod(double x) {
         return 1. / (1. + exp(-x));
@@ -70,7 +74,8 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
         double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
         logger.info("host score: {}", hostScore);
         Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
-        List<Double> hostCrosses = JSON.parseArray(dataMap.get(Dict.FM_CROSS).toString(), double.class);
+
+        List<Double> hostCrosses = JsonUtil.json2List(dataMap.get(Dict.FM_CROSS).toString(),new TypeReference<List<Double>>() {});
         Preconditions.checkArgument(hostCrosses.size() == guestCrosses.length, "");
         score += hostScore;
         for (int i = 0; i < guestCrosses.length; i++) {

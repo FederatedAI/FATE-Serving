@@ -1,7 +1,6 @@
 package com.webank.ai.fate.serving.core.flow;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
@@ -25,7 +24,6 @@ public class FlowCounterManager {
     Logger logger = LoggerFactory.getLogger(FlowCounterManager.class);
 
     String appName;
-
     MetricSearcher metricSearcher;
     MetricSearcher modelMetricSearcher;
     boolean  countModelRequest;
@@ -278,10 +276,10 @@ public class FlowCounterManager {
 
       //  JSONArray dataArray = JSONArray.parseArray(result);
         Gson  gson = new Gson();
-        gson.fromJson(result,List.class);
-        for (int i = 0; i < dataArray.size(); i++) {
-            JSONObject jsonObject = dataArray.getJSONObject(i);
-            sourceQpsAllowMap.put(jsonObject.getString("source"), jsonObject.getDoubleValue("allow_qps"));
+        List configs =gson.fromJson(result,List.class);
+        for (int i = 0; i < configs.size(); i++) {
+            Map jsonObject = (Map)configs.get(i);
+            sourceQpsAllowMap.put(jsonObject.get("source").toString(),Double.valueOf(jsonObject.get("allow_qps").toString()));
         }
 
         logger.info("load flow counter rules success");

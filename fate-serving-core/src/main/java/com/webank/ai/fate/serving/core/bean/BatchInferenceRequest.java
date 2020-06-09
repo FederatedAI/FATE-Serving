@@ -3,7 +3,7 @@ package com.webank.ai.fate.serving.core.bean;
 
 
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -53,9 +53,9 @@ public class BatchInferenceRequest extends InferenceRequest {
     @Override
     public String toString() {
         String result = "";
-        Gson gson = new Gson();
+
         try {
-            result = gson.toJson(this);
+            result = JsonUtil.object2Json(this);
         } catch (Throwable e) {
 
         }

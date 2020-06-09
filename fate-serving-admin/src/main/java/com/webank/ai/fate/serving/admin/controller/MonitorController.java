@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.admin.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -12,7 +12,9 @@ import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.flow.MetricNode;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +48,7 @@ public class MonitorController {
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryJvmInfo(builder.build());
         List resultList = Lists.newArrayList();
         if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
-            resultList = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
+            resultList = JsonUtil.json2List(commonResponse.getData().toStringUtf8(), new TypeReference<List>(){});
         }
         Map map = Maps.newHashMap();
         map.put("total", resultList.size());

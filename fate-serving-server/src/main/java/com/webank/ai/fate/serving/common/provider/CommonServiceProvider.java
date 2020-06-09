@@ -1,7 +1,6 @@
 package com.webank.ai.fate.serving.common.provider;
 
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -17,6 +16,7 @@ import com.webank.ai.fate.serving.core.flow.MetricNode;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
-        builder.setData(ByteString.copyFrom(JSON.toJSONString(metricNodes).getBytes()));
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(metricNodes).getBytes()));
         return builder.build();
     }
 
@@ -85,7 +85,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         } else {
             map = metaInfoMap;
         }
-        builder.setData(ByteString.copyFrom(JSON.toJSONString(map).getBytes()));
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(map).getBytes()));
         return builder.build();
     }
 
@@ -97,7 +97,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             builder.setStatusCode(StatusCode.SUCCESS);
             Map map = Maps.newHashMap();
             List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
-            builder.setData(ByteString.copyFrom(JSON.toJSONString(jvmInfos).getBytes()));
+            builder.setData(ByteString.copyFrom(JsonUtil.object2Json(jvmInfos).getBytes()));
             return builder.build();
         } catch (Exception e) {
             throw new SysException(e.getMessage());

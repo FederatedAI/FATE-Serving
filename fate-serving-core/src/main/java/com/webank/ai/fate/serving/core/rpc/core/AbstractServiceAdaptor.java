@@ -1,11 +1,8 @@
 package com.webank.ai.fate.serving.core.rpc.core;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -13,6 +10,7 @@ import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdaptor<req, resp> {
 
-    Gson  gson = new Gson();
+
     public static  class ExceptionInfo  {
         public ExceptionInfo(){
 
@@ -142,7 +140,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                 preChain.doPreProcess(context, data, outboundPackage);
                 result = doService(context, data, outboundPackage);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("do service, router info: {}, service name: {}, result: {}", gson.toJson(data.getRouterInfo()), serviceName, result);
+                    logger.debug("do service, router info: {}, service name: {}, result: {}", JsonUtil.object2Json(data.getRouterInfo()), serviceName, result);
                 }
             } catch (Throwable e) {
                 exceptions.add(e);

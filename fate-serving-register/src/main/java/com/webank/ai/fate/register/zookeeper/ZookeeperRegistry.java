@@ -17,10 +17,10 @@
 package com.webank.ai.fate.register.zookeeper;
 
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.register.common.*;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
@@ -124,15 +124,16 @@ public class ZookeeperRegistry extends FailbackRegistry {
         return registeryMap.get(registryUrl);
 
     }
-
+    Gson gson = new Gson();
 
     @Override
     public  void doRegisterComponent(URL  url){
         String  path = url.getPath();
         Map  content = new HashMap();
+
         content.put(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
         content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
-        this.zkClient.create(path, JSON.toJSONString(content),true);
+        this.zkClient.create(path, gson.toJson(content),true);
     }
 
 

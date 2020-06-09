@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.proxy.rpc.services;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;

@@ -1,6 +1,6 @@
 package com.webank.ai.fate.serving.monitor.controller;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.MetricEntity;

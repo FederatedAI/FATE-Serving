@@ -16,8 +16,7 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.gson.Gson;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,8 +119,8 @@ public class ReturnResult {
 
     @Override
     public String toString() {
-        Gson  gson = new Gson();
-        String result = gson.toJson(this);
+
+        String result = JsonUtil.object2Json(this);
         return result;
     }
 }

@@ -16,9 +16,8 @@
 
 package com.webank.ai.fate.serving.core.model;
 
-
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -146,7 +145,7 @@ public class Model implements Comparable<Model>, Serializable {
     @Override
     public String toString() {
 
-        return JSON.toJSONString(this);
+        return JsonUtil.object2Json(this);
     }
     String  resourceName ;
     public String getResourceName (){

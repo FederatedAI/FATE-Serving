@@ -1,11 +1,12 @@
 package com.webank.ai.fate.serving.admin.services;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +103,7 @@ public class ComponentService {
                 if (CollectionUtils.isNotEmpty(nodes)) {
                     nodes.forEach(nodeName -> {
                         String content = zkClient.getContent(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name + PATH_SEPARATOR + nodeName);
-                        Map contentMap = JSONObject.parseObject(content, Map.class);
+                        Map contentMap = JsonUtil.json2Object(content, Map.class);
                         NodeData nodeData = new NodeData();
                         nodeData.setName(nodeName);
                         nodeData.setLeaf(true);

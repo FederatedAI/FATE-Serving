@@ -1,9 +1,10 @@
 package com.webank.ai.fate.serving.core.async;
 
 
-import com.google.gson.Gson;
+
 import com.lmax.disruptor.EventFactory;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 
 public class AsyncMessageEvent<T> implements Cloneable {
 
@@ -77,9 +78,9 @@ public class AsyncMessageEvent<T> implements Cloneable {
 
     @Override
     public String toString() {
-        Gson gson = new Gson();
 
-        return gson.toJson(this);
+
+        return JsonUtil.object2Json(this);
     }
 
     @Override
