@@ -31,6 +31,8 @@ public class Model implements Comparable<Model>, Serializable {
 
     private String namespace;
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * guest or host
      */
