@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdaptor<req, resp> {
 
-
+    Gson  gson = new Gson();
     public static  class ExceptionInfo  {
         public ExceptionInfo(){
 
@@ -141,7 +142,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                 preChain.doPreProcess(context, data, outboundPackage);
                 result = doService(context, data, outboundPackage);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("do service, router info: {}, service name: {}, result: {}", JSON.toJSONString(data.getRouterInfo()), serviceName, result);
+                    logger.debug("do service, router info: {}, service name: {}, result: {}", gson.toJson(data.getRouterInfo()), serviceName, result);
                 }
             } catch (Throwable e) {
                 exceptions.add(e);
@@ -226,9 +227,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
 
     abstract protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo);
 
-    private String objectToJson(Object obj) {
-        return JSONObject.toJSONString(obj, SerializerFeature.WriteEnumUsingToString);
-    }
+
 
 
     /**

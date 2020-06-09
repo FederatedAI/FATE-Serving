@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.core.flow;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.timer.HashedWheelTimer;
 import com.webank.ai.fate.serving.core.timer.Timeout;
@@ -201,7 +202,7 @@ public class FlowCounterManager {
                             modelReportList.add(metricNode);
                         }
                 });
-                logger.info("try to report {}",reportList);
+            //    logger.info("try to report {}",reportList);
                 metricReport.report(reportList);
                 modelMetricReport.report(modelReportList);
             }
@@ -275,8 +276,9 @@ public class FlowCounterManager {
             logger.error("load flow counter rules failed, use default setting, cause by: {}", e.getMessage());
         }
 
-        JSONArray dataArray = JSONArray.parseArray(result);
-
+      //  JSONArray dataArray = JSONArray.parseArray(result);
+        Gson  gson = new Gson();
+        gson.fromJson(result,List.class);
         for (int i = 0; i < dataArray.size(); i++) {
             JSONObject jsonObject = dataArray.getJSONObject(i);
             sourceQpsAllowMap.put(jsonObject.getString("source"), jsonObject.getDoubleValue("allow_qps"));

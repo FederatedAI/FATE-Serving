@@ -3,7 +3,7 @@ package com.webank.ai.fate.serving.core.flow;
 
 
 
-import com.alibaba.fastjson.JSON;
+
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import com.webank.ai.fate.serving.core.utils.JVMGCUtils;

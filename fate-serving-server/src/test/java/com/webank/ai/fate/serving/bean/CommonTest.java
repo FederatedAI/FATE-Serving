@@ -32,7 +32,8 @@ public class CommonTest {
         long begin = now - 5000;
         builder.setBeginMs(begin);
         builder.setEndMs(now);
-        builder.setSource("commonService");
+        builder.setType(CommonServiceProto.MetricType.INTERFACE);
+      //  builder.setSource("commonService");
         CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryMetric(builder.build());
 
         List<MetricNode> list = JSONObject.parseObject(resultMessage.getData().toStringUtf8(), List.class);
@@ -77,7 +78,7 @@ public class CommonTest {
 
 
     @Test
-    public void test_08_query_jvm() {
+    public void test_09_query_jvm() {
 
         CommonServiceProto.QueryJvmInfoRequest.Builder builder = CommonServiceProto.QueryJvmInfoRequest.newBuilder();
         builder.setKeyword("port");
@@ -87,4 +88,24 @@ public class CommonTest {
         System.err.println("Message ==================" + resultMessage.getMessage());
         System.err.println("result ==================" + resultMessage.getData().toStringUtf8());
     }
+
+    @Test
+    public void test_10_query_model_metric() {
+
+        CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
+
+        long now = System.currentTimeMillis();
+        long begin = now - 5000;
+        builder.setBeginMs(begin);
+        builder.setEndMs(now);
+        builder.setType(CommonServiceProto.MetricType.MODEL);
+        CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryMetric(builder.build());
+
+        List<MetricNode> list = JSONObject.parseObject(resultMessage.getData().toStringUtf8(), List.class);
+        System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
+        System.err.println("Message ==================" + resultMessage.getMessage());
+        System.err.println("result ==================" + JSONObject.toJSONString(list));
+
+    }
+
 }
