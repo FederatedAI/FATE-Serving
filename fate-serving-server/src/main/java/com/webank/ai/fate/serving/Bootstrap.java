@@ -21,6 +21,7 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ public class Bootstrap {
             MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL)) : 3;
             MetaInfo.BATCH_SPLIT_SIZE = environment.getProperty(Dict.BATCH_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_SPLIT_SIZE)) : 100;
             MetaInfo.LR_SPLIT_SIZE = environment.getProperty(Dict.LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.LR_SPLIT_SIZE)) : 500;
-
+            MetaInfo.PROPERTY_SERVICE_ROLE_NAME =  environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
 
         } catch (IOException e) {
             logger.error("init metainfo error", e);
@@ -126,6 +127,32 @@ public class Bootstrap {
     public void stop() {
         logger.info("try to shutdown server ...");
         AbstractServiceAdaptor.isOpen = false;
+
+        boolean useZkRouter = MetaInfo.PROPERTY_USE_ZK_ROUTER;
+        if (useZkRouter) {
+            ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
+            Set<URL> registered = zookeeperRegistry.getRegistered();
+            Set<URL> urls = Sets.newHashSet();
+            urls.addAll(registered);
+            urls.forEach(url -> {
+                logger.info("unregister {}", url);
+                zookeeperRegistry.unregister(url);
+            });
+            zookeeperRegistry.destroy();
+        }
+
+        FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
+        try{
+
+            flowCounterManager.rmAllFiles();
+
+        }catch(Exception  e){
+
+            e.printStackTrace();;
+        }
+
+
+
         int tryNum = 0;
         /**
          * 3秒
@@ -139,23 +166,13 @@ public class Bootstrap {
             }
         }
 
-        boolean useZkRouter = MetaInfo.PROPERTY_USE_ZK_ROUTER;
-        if (useZkRouter) {
-            ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-            Set<URL> registered = zookeeperRegistry.getRegistered();
-            Set<URL> urls = Sets.newHashSet();
-            urls.addAll(registered);
-            urls.forEach(url -> {
-                logger.info("unregister {}", url);
-                zookeeperRegistry.unregister(url);
-            });
-            zookeeperRegistry.destroy();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+
+
+
+
+
+
+
     }
 
 }

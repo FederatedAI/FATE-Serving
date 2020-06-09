@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.core.flow;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.timer.HashedWheelTimer;
 import com.webank.ai.fate.serving.core.timer.Timeout;
 import com.webank.ai.fate.serving.core.timer.TimerTask;
@@ -30,7 +31,7 @@ public class FlowCounterManager {
 
     LimitQueue<MetricNode>  modelLimitQueue = new  LimitQueue<MetricNode>(10);
 
-    public static final boolean USE_PID = false;
+    public static final boolean USE_PID = true;
 
     HashedWheelTimer   hashedWheelTimer =  new  HashedWheelTimer();
 
@@ -42,9 +43,7 @@ public class FlowCounterManager {
         this.metricSearcher = metricSearcher;
     }
 
-//    public FlowCounterManager() {
-//
-//    }
+
     public FlowCounterManager(String appName) {
         this(appName,false);
     }
@@ -87,28 +86,26 @@ public class FlowCounterManager {
     }
 
     public  List<MetricNode>  queryModelMetrics(long beginTimeMs, long endTimeMs, String identity){
+
         try {
-            return  metricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
+            return  modelMetricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("find mode metric error",e);
+            throw  new SysException("find mode metric error");
         }
-        return  null;
+
+
     }
 
     public  List<MetricNode>  queryAllModelMetrics(long beginTimeMs, int size){
         try {
-            return  metricSearcher.find(beginTimeMs, size);
+            return  modelMetricSearcher.find(beginTimeMs, size);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("find mode metric error",e);
+            throw  new SysException("find mode metric error");
+
         }
-        return  null;
     }
-
-
-
-//    public  List<MetricNode>  queryAllModelMetrics(){
-//
-//    }
 
 
     MetricReport  metricReport;
@@ -127,61 +124,8 @@ public class FlowCounterManager {
     private ConcurrentHashMap<String,FlowCounter>   successMap =   new ConcurrentHashMap<>();
     private ConcurrentHashMap<String,FlowCounter>   blockMap =   new ConcurrentHashMap<>();
     private ConcurrentHashMap<String,FlowCounter>   exceptionMap =   new ConcurrentHashMap<>();
-//    private ConcurrentHashMap<String,FlowCounter>   modelPassMap =   new ConcurrentHashMap<>();
-//    private ConcurrentHashMap<String,FlowCounter>   modelSuccessMap =   new ConcurrentHashMap<>();
-//    private ConcurrentHashMap<String,FlowCounter>   modelBlockMap =   new ConcurrentHashMap<>();
-//    private ConcurrentHashMap<String,FlowCounter>   modelExceptionMap =   new ConcurrentHashMap<>();
-//    private ConcurrentHashMap<String,LimitQueue<MetricNode>>  interfaceMetricNode;
-//    private ConcurrentHashMap<String,LimitQueue<MetricNode>>  modelMetricNode;
 
 
-
-
-
-
-//    public  boolean  modelPass(String sourceName){
-//        FlowCounter  flowCounter =modelPassMap.get(sourceName);
-//        if(flowCounter==null){
-//            flowCounter= modelPassMap.putIfAbsent(sourceName,new  FlowCounter(getAllowedQps(sourceName)));
-//            if(flowCounter==null) {
-//                flowCounter = modelPassMap.get(sourceName);
-//            }
-//        }
-//        return  flowCounter.tryPass();
-//    }
-
-//    public  boolean  modelSuccess(String sourceName){
-//        FlowCounter  flowCounter =modelSuccessMap.get(sourceName);
-//        if(flowCounter==null){
-//            flowCounter= modelSuccessMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
-//            if(flowCounter==null) {
-//                flowCounter = modelSuccessMap.get(sourceName);
-//            }
-//        }
-//        return  flowCounter.tryPass();
-//    }
-
-//    public  boolean  modelBlock(String sourceName){
-//        FlowCounter  flowCounter =modelBlockMap.get(sourceName);
-//        if(flowCounter==null){
-//            flowCounter= modelBlockMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
-//            if(flowCounter==null) {
-//                flowCounter = modelBlockMap.get(sourceName);
-//            }
-//        }
-//        return  flowCounter.tryPass();
-//    }
-
-//    public  boolean  modelException(String sourceName){
-//        FlowCounter  flowCounter =modelExceptionMap.get(sourceName);
-//        if(flowCounter==null){
-//            flowCounter= modelExceptionMap.putIfAbsent(sourceName,new  FlowCounter(Integer.MAX_VALUE));
-//            if(flowCounter==null) {
-//                flowCounter = modelExceptionMap.get(sourceName);
-//            }
-//        }
-//        return  flowCounter.tryPass();
-//    }
 
     public  boolean  pass(String sourceName){
         FlowCounter  flowCounter =passMap.get(sourceName);
@@ -240,7 +184,6 @@ public class FlowCounterManager {
                 List<MetricNode> reportList =   Lists.newArrayList();
                 List<MetricNode> modelReportList =   Lists.newArrayList();
                 passMap.forEach((sourceName,flowCounter)->{
-
                         FlowCounter successCounter = successMap.get(sourceName);
                         FlowCounter blockCounter =  blockMap.get(sourceName);
                         FlowCounter exceptionCounter = exceptionMap.get(sourceName);
@@ -257,7 +200,6 @@ public class FlowCounterManager {
                         if(sourceName.startsWith("M_")){
                             modelReportList.add(metricNode);
                         }
-
                 });
                 logger.info("try to report {}",reportList);
                 metricReport.report(reportList);
@@ -266,6 +208,24 @@ public class FlowCounterManager {
         }, 0,
         1,
         TimeUnit.SECONDS);
+    }
+
+
+    public  void  rmAllFiles(){
+        try {
+            if (modelMetricReport instanceof FileMetricReport) {
+                FileMetricReport fileMetricReport = (FileMetricReport) modelMetricReport;
+                fileMetricReport.rmAllFile();
+            }
+            if (metricReport instanceof FileMetricReport) {
+
+                FileMetricReport fileMetricReport = (FileMetricReport) metricReport;
+                fileMetricReport.rmAllFile();
+
+            }
+        }catch (Exception e){
+            logger.error("remove metric file error");
+        }
     }
 
     public  static  void main(String[] args){

@@ -11,18 +11,16 @@ public class FileMetricReport implements MetricReport{
     public FileMetricReport(String appName) {
         this.metricWriter= new MetricWriter(appName, DEFAULT_FILE_SIZE);
     }
+    public  void rmAllFile() throws Exception {
+        metricWriter.removeAllFiles();
+    }
 
     @Override
     public void report(List<MetricNode> data) {
-//        long  currentTime =  TimeUtil.currentTimeMillis();
         try {
             metricWriter.write(TimeUtil.currentTimeMillis(),data);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
-
     }
 }

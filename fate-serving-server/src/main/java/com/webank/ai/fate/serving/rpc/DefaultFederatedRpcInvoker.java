@@ -58,8 +58,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
     private static final Logger logger = LoggerFactory.getLogger(FederatedRpcInvoker.class);
     @Autowired(required = false)
     public RouterService routerService;
-    @Autowired
-    private Environment environment;
+
     @Autowired
     private Cache cache;
 
@@ -77,12 +76,12 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
         metaDataBuilder.setSrc(
                 topicBuilder.setPartyId(String.valueOf(model.getPartId())).
-                        setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                        setRole(MetaInfo.PROPERTY_SERVICE_ROLE_NAME)
                         .setName(Dict.PARTNER_PARTY_NAME)
                         .build());
         metaDataBuilder.setDst(
                 topicBuilder.setPartyId(String.valueOf(rpcDataWraper.getHostModel().getPartId()))
-                        .setRole(environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE))
+                        .setRole(MetaInfo.PROPERTY_SERVICE_ROLE_NAME)
                         .setName(Dict.PARTY_NAME)
                         .build());
         metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(rpcDataWraper.getRemoteMethodName()).build());
@@ -90,11 +89,9 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         metaDataBuilder.setOperator(version);
         Proxy.Task.Builder taskBuilder = com.webank.ai.fate.api.networking.proxy.Proxy.Task.newBuilder();
         Proxy.Model.Builder modelBuilder = Proxy.Model.newBuilder();
-
         modelBuilder.setNamespace(rpcDataWraper.getHostModel().getNamespace());
         modelBuilder.setTableName(rpcDataWraper.getHostModel().getTableName());
         taskBuilder.setModel(modelBuilder.build());
-
         metaDataBuilder.setTask(taskBuilder.build());
         packetBuilder.setHeader(metaDataBuilder.build());
         Proxy.AuthInfo.Builder authBuilder = Proxy.AuthInfo.newBuilder();
@@ -111,18 +108,16 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             authBuilder.setApplyId(context.getApplyId());
         }
         packetBuilder.setAuth(authBuilder.build());
-
         return packetBuilder.build();
 
     }
 
 
     private String route() {
-
-        boolean routerByzk = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER, boolean.class, Boolean.TRUE);
+        boolean routerByzk = MetaInfo.PROPERTY_USE_ZK_ROUTER;
         String address = null;
         if (!routerByzk) {
-            address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+            address = MetaInfo.PROPERTY_PROXY_ADDRESS;
         } else {
             List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIRONMENT, Dict.UNARYCALL);
             if (urls != null && urls.size() > 0) {
@@ -134,8 +129,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         }
         return address;
     }
-
-
     @Override
     public Proxy.Packet sync(Context context, RpcDataWraper rpcDataWraper, long timeout) {
         Proxy.Packet resultPacket = null;
@@ -156,7 +149,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
 
     private String buildCacheKey(Model guestModel, Model hostModel, Map sendToRemote) {
-
         String tableName = guestModel.getTableName();
         String namespace = guestModel.getNamespace();
         String partId = hostModel.getPartId();
@@ -179,14 +171,13 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                 Map data = JSON.parseObject(result.toString(), Map.class);
                 ReturnResult returnResult = new ReturnResult();
                 returnResult.setRetcode(StatusCode.SUCCESS);
-                returnResult.setRetmsg("hit cache");
+                returnResult.setRetmsg("hit host cache");
                 return new AbstractFuture<ReturnResult>() {
                     @Override
                     public ReturnResult get() throws InterruptedException, ExecutionException {
                         returnResult.setData(data);
                         return returnResult;
                     }
-
                     @Override
                     public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                         returnResult.setData(data);
@@ -199,8 +190,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         }
         ListenableFuture<Proxy.Packet> future = this.async(context, rpcDataWraper);
         return new AbstractFuture<ReturnResult>() {
-
-
             @Override
             public ReturnResult get() throws InterruptedException, ExecutionException {
                 return parse(future.get());
@@ -209,7 +198,6 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                 return parse(future.get(timeout, unit));
             }
-
             private ReturnResult parse(Proxy.Packet remote) {
                 if (remote != null) {
                     String remoteContent = remote.getBody().getValue().toStringUtf8();
@@ -232,14 +220,12 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             }
 
         };
-
     }
 
 
     @Override
     public ListenableFuture<BatchInferenceResult> batchInferenceRpcWithCache(Context context,
                                                                              RpcDataWraper rpcDataWraper, boolean useCache) {
-
         BatchInferenceRequest inferenceRequest = (BatchInferenceRequest) rpcDataWraper.getData();
         Map<Integer, BatchInferenceResult.SingleInferenceResult> cacheData = Maps.newHashMap();
         if (useCache) {
@@ -260,17 +246,12 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             ;
             if (CollectionUtils.isNotEmpty(cacheKeys)) {
                 List<Cache.DataWrapper<String, String>> dataWrapperList = this.cache.get(cacheKeys.toArray());
-
                 if (dataWrapperList != null) {
-
-
                     Set<Integer> prepareToRemove = Sets.newHashSet();
                     for (Cache.DataWrapper<String, String> cacheDataWrapper : dataWrapperList) {
                         String key = cacheDataWrapper.getKey();
                         List<Integer> indexs = keyIndexMap.get(key);
                         if (indexs != null) {
-//                        System.err.println("index "+ index);
-//                        BatchInferenceRequest.SingleInferenceData removedRequest = listData.remove(index.intValue());
                             prepareToRemove.addAll(indexs);
                             for (Integer index : indexs) {
                                 String value = cacheDataWrapper.getValue();
@@ -278,7 +259,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                                 BatchInferenceResult.SingleInferenceResult finalSingleResult = new BatchInferenceResult.SingleInferenceResult();
                                 finalSingleResult.setRetcode(StatusCode.SUCCESS);
                                 finalSingleResult.setData(data);
-                                finalSingleResult.setRetmsg("hit cache");
+                                finalSingleResult.setRetmsg("hit host cache");
                                 finalSingleResult.setIndex(listData.get(index).getIndex());
                                 cacheData.put(listData.get(index).getIndex(), finalSingleResult);
                             }
@@ -286,22 +267,18 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                     }
 
                     List<BatchInferenceRequest.SingleInferenceData> newRequestList = Lists.newArrayList();
-
                     for (int index = 0; index < listData.size(); index++) {
                         if (!prepareToRemove.contains(index)) {
                             newRequestList.add(listData.get(index));
                         }
-
                     }
                     inferenceRequest.getBatchDataList().clear();
                     inferenceRequest.getBatchDataList().addAll(newRequestList);
-
                 }
             }
         }
 
         ListenableFuture<Proxy.Packet> future = null;
-
         if (inferenceRequest.getBatchDataList().size() > 0) {
             future = this.async(context, rpcDataWraper);
         }
@@ -311,27 +288,17 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
     @Override
     public ListenableFuture<Proxy.Packet> async(Context context, RpcDataWraper rpcDataWraper) {
-
         Proxy.Packet packet = this.build(context, rpcDataWraper);
-
         Proxy.Packet resultPacket = null;
-
         String address = this.route();
-
         GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-
         Preconditions.checkArgument(StringUtils.isNotEmpty(address));
-
         ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
-
         ListenableFuture<Proxy.Packet> future = null;
-
         DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
         context.setDownstreamBegin(System.currentTimeMillis());
         future = stub1.unaryCall(packet);
         return future;
-
-
     }
 
 

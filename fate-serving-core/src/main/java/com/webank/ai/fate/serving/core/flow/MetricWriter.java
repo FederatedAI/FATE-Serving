@@ -4,6 +4,8 @@ package com.webank.ai.fate.serving.core.flow;
 
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -15,32 +17,24 @@ import java.util.*;
 
 public class MetricWriter {
 
+    Logger logger = LoggerFactory.getLogger(MetricWriter.class);
+
     private static final String CHARSET = "UTF-8";
 
     public static final String METRIC_BASE_DIR = System.getProperty(Dict.PROPERTY_USER_HOME)+"/.fate/metric/";
-    /**
-     * Note: {@link MetricFileNameComparator}'s implementation relays on the metric file name,
-     * we should be careful when changing the metric file name.
-     *
-     * @see #formMetricFileName(String, int)
-     */
+
     public static final String METRIC_FILE = "metrics.log";
     public static final String METRIC_FILE_INDEX_SUFFIX = ".idx";
     public static final Comparator<String> METRIC_FILE_NAME_CMP = new MetricFileNameComparator();
 
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    /**
-     * 排除时差干扰
-     */
+
     private long timeSecondBase;
     private String baseDir;
     private String baseFileName;
-    /**
-     * file must exist when writing
-     */
+
     private File curMetricFile;
     private File curMetricIndexFile;
-
     private FileOutputStream outMetric;
     private DataOutputStream outIndex;
     private BufferedOutputStream outMetricBuf;
@@ -282,10 +276,13 @@ public class MetricWriter {
         String part = "";
         if (usePid) {
             matchFileName = matchFileName.substring(0, matchFileName.indexOf(String.valueOf(pid)));
+          //  System.err.println(matchFileName);
             if (fileName.startsWith(matchFileName) && !fileName.startsWith(matchFileName + ".")) {
+
                 part = fileName.substring(matchFileName.length());
                 part = part.substring(part.indexOf("."));
             }
+
         } else {
             if (fileName.startsWith(matchFileName)) {
                 part = fileName.substring(matchFileName.length());
@@ -295,7 +292,32 @@ public class MetricWriter {
         return part.matches("\\.[0-9]{4}-[0-9]{2}-[0-9]{2}(\\.[0-9]*)?");
     }
 
-    private void removeMoreFiles() throws Exception {
+    public static boolean fileNameAllMatches(String fileName, String baseFileName) {
+        String matchFileName = baseFileName;
+        String part = "";
+        if (usePid) {
+            matchFileName = matchFileName.substring(0, matchFileName.indexOf(String.valueOf(pid)));
+           // System.err.println(matchFileName);
+            if (fileName.startsWith(matchFileName) && !fileName.startsWith(matchFileName + ".")) {
+
+                part = fileName.substring(matchFileName.length());
+                part = part.substring(part.indexOf("."));
+            }
+
+        } else {
+            if (fileName.startsWith(matchFileName)) {
+                part = fileName.substring(matchFileName.length());
+            }
+        }
+        // part is like: ".yyyy-MM-dd.number", eg. ".2018-12-24.11"
+        System.err.println("======"+part);
+        return part.matches("\\.[0-9]{4}-[0-9]{2}-[0-9]{2}");
+    }
+
+
+
+
+    public void removeMoreFiles() throws Exception {
         List<String> list = listMetricFiles(baseDir, baseFileName);
         if (list == null || list.isEmpty()) {
             return;
@@ -304,9 +326,38 @@ public class MetricWriter {
             String fileName = list.get(i);
             String indexFile = formIndexFileName(fileName);
             new File(fileName).delete();
-//            RecordLog.info("[MetricWriter] Removing metric file: " + fileName);
+            logger.info("removing metric file: " + fileName);
             new File(indexFile).delete();
 //            RecordLog.info("[MetricWriter] Removing metric index file: " + indexFile);
+        }
+    }
+
+
+    public void removeAllFiles() throws Exception {
+        List<String> list = listMetricFiles(baseDir, baseFileName);
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            String fileName = list.get(i);
+            if(fileName.indexOf("pid"+pid+".")>0) {
+                String indexFile = formIndexFileName(fileName);
+                try {
+                    new File(fileName).delete();
+                }catch(Exception e){
+
+                }
+                System.err.println("removing metric file: " + fileName);
+                try {
+                    new File(indexFile).delete();
+                }catch(Exception e){
+
+                }
+                System.err.println("removing metric file: " + indexFile);
+            }else{
+                System.err.println("metric file "+fileName +"is not match");
+            }
+
         }
     }
 

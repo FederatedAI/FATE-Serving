@@ -42,10 +42,8 @@ public class MonitorController {
     public ReturnResult queryJvmData(String host, int port) {
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
         blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
-
         CommonServiceProto.QueryJvmInfoRequest.Builder builder = CommonServiceProto.QueryJvmInfoRequest.newBuilder();
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryJvmInfo(builder.build());
-
         List resultList = Lists.newArrayList();
         if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
             resultList = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
@@ -79,7 +77,6 @@ public class MonitorController {
                 }
             }
         }
-
         metricNodes = metricNodes.stream()
                 .sorted(((o1, o2) -> o1.getTimestamp() == o2.getTimestamp() ? 0 : ((o1.getTimestamp() - o2.getTimestamp()) > 0 ? 1 : -1)))
                 .collect(Collectors.toList());
@@ -95,7 +92,6 @@ public class MonitorController {
                 dataMap.put(metricNode.getResource(), nodes);
             });
         }
-
         return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, dataMap);
     }
 
@@ -106,7 +102,6 @@ public class MonitorController {
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
         blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
-
         long now = System.currentTimeMillis();
         builder.setBeginMs(now - 5000);
         builder.setEndMs(now);
