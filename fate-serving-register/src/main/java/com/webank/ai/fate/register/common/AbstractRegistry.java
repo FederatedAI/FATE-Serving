@@ -304,8 +304,8 @@ public abstract class AbstractRegistry implements Registry {
         if (listener == null) {
             throw new IllegalArgumentException("subscribe listener == null");
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Subscribe: " + url);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Subscribe: " + url);
         }
         Set<NotifyListener> listeners = subscribed.computeIfAbsent(url, n -> new HashSet<>());
         listeners.add(listener);
