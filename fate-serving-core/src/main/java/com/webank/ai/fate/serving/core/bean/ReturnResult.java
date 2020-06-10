@@ -16,7 +16,7 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +105,7 @@ public class ReturnResult {
 
     @Override
     public String toString() {
-        String result = JSON.toJSONString(this);
+        String result = JsonUtil.object2Json(this);
         return result;
     }
 }

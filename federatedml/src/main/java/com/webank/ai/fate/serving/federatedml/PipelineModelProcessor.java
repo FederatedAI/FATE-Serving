@@ -1,13 +1,11 @@
 package com.webank.ai.fate.serving.federatedml;
 
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
-import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.*;
@@ -16,6 +14,7 @@ import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
 import com.webank.ai.fate.serving.federatedml.model.PrepareRemoteable;
 import com.webank.ai.fate.serving.federatedml.model.Returnable;
@@ -91,7 +90,7 @@ public class PipelineModelProcessor implements ModelProcessor {
                     BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
                     try {
 
-                        String key = EncryptUtils.encrypt(JSON.toJSONString(input.getFeatureData()), EncryptMethod.MD5);
+                        String key = EncryptUtils.encrypt(JsonUtil.object2Json(input.getFeatureData()), EncryptMethod.MD5);
                         Map<String, Object> singleResult =tempCache.get(key);
                         if(singleResult==null) {
                             singleResult = singleLocalPredict(context, input.getFeatureData());

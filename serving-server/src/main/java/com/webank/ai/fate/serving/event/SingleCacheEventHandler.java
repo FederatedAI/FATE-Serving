@@ -1,12 +1,12 @@
 package com.webank.ai.fate.serving.event;
 
 
-import com.alibaba.fastjson.JSON;
 import com.webank.ai.fate.serving.core.annotation.Subscribe;
 import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.cache.Cache;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +29,9 @@ public class SingleCacheEventHandler extends AbstractAsyncMessageProcessor {
 
         Map map = (Map) cacheEventData.getData();
 
-        logger.info("oooooooooooooooooooooo {}", map);
+//        logger.info("oooooooooooooooooooooo {}", map);
 
-        cache.put(cacheEventData.getKey(), JSON.toJSONString(map));
+        cache.put(cacheEventData.getKey(), JsonUtil.object2Json(map));
     }
 
 }

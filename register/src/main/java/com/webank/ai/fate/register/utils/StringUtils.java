@@ -777,7 +777,7 @@ public final class StringUtils {
 //                buf.append(arg);
 //            } else {
 //                try {
-//                    buf.append(JSON.toJSONString(arg));
+//                    buf.append(JsonUtil.object2Json(arg));
 //                } catch (Exception e) {
 //                    logger.warn(e.getMessage(), e);
 //                    buf.append(arg);

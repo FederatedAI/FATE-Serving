@@ -33,6 +33,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.webank.ai.fate</groupId>
+            <artifactId>fate-serving-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
             <exclusions>

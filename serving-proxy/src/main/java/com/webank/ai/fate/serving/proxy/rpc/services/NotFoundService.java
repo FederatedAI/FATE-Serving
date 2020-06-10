@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.proxy.rpc.services;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -9,6 +8,7 @@ import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ public class NotFoundService extends AbstractServiceAdaptor<String, String> {
         Map result = Maps.newHashMap();
         result.put(Dict.CODE, ErrorCode.SERVICE_NOT_FOUND);
         result.put(Dict.MESSAGE, "SERVICE_NOT_FOUND");
-        return JSON.toJSONString(result);
+        return JsonUtil.object2Json(result);
     }
 
     @Override

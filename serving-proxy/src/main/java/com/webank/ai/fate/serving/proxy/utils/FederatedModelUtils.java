@@ -21,7 +21,7 @@ public class FederatedModelUtils {
         String data = packet.getBody().getValue().toStringUtf8();
 
         Proxy.Model model = packet.getHeader().getTask().getModel();
-//        HostFederatedParams requestData = JSON.parseObject(data, HostFederatedParams.class);
+//        HostFederatedParams requestData = JsonUtil.json2Object(data, HostFederatedParams.class);
 //        ModelInfo partnerModelInfo = requestData.getPartnerModelInfo();
 
         String key = genModelKey(model.getTableName(), model.getNamespace());

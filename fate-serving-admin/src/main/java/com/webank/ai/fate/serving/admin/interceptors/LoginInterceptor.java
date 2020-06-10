@@ -31,7 +31,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 //            ReturnResult result = new ReturnResult();
 //            result.setRetcode(StatusCode.PARAM_ERROR);
 //            result.setRetmsg("Session token unavailable");
-//            response.getWriter().write(JSONObject.toJSONString(result));
+//            response.getWriter().write(JsonUtil.object2Json(result));
 //            response.flushBuffer();
 //            return false;
 //        }

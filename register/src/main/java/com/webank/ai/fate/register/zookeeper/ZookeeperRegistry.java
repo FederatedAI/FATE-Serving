@@ -17,7 +17,6 @@
 package com.webank.ai.fate.register.zookeeper;
 
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -30,6 +29,7 @@ import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.NetUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +129,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String  path = url.getPath();
         Map  content = new HashMap();
         content.put(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
-        this.zkClient.create(path, JSON.toJSONString(content),true);
+        this.zkClient.create(path, JsonUtil.object2Json(content),true);
     }
 
 

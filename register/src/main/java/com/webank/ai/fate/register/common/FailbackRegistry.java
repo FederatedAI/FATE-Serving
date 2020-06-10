@@ -20,7 +20,6 @@ import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.task.*;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.register.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.webank.ai.fate.register.common.Constants.*;
-import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
 
 
 public abstract class FailbackRegistry extends AbstractRegistry {

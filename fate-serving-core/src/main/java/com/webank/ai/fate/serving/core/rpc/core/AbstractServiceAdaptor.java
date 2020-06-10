@@ -1,8 +1,5 @@
 package com.webank.ai.fate.serving.core.rpc.core;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
@@ -11,10 +8,10 @@ import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +121,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                 preChain.doPreProcess(context, data, outboundPackage);
                 result = doService(context, data, outboundPackage);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("do service, router info: {}, service name: {}, result: {}", JSON.toJSONString(data.getRouterInfo()), serviceName, result);
+                    logger.debug("do service, router info: {}, service name: {}, result: {}", JsonUtil.object2Json(data.getRouterInfo()), serviceName, result);
                 }
             } catch (Throwable e) {
                 exceptions.add(e);
@@ -197,7 +194,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     abstract protected resp transformErrorMap(Context context, Map data);
 
     private String objectToJson(Object obj) {
-        return JSONObject.toJSONString(obj, SerializerFeature.WriteEnumUsingToString);
+        return JsonUtil.object2Json(obj);
     }
 
 

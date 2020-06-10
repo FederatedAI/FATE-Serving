@@ -37,7 +37,7 @@ public class MetricsController {
                 logger.debug("receive: {} headers: {}", body, headers.toSingleValueMap());
             }
 
-            MetricEntity metricEntity = JSONObject.parseObject(body, MetricEntity.class);
+            MetricEntity metricEntity = JsonUtil.json2Object(body, MetricEntity.class);
             Preconditions.checkArgument(metricEntity != null);
 
             if (!AllowKeysUtil.contains(metricEntity.getUserAuthKey(), metricEntity.getComponentName())) {

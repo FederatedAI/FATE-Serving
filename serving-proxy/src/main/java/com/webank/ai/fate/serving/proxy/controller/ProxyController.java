@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.proxy.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.serving.core.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -8,6 +7,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;
@@ -85,7 +85,7 @@ public class ProxyController {
 
                 metricFactory.counter("http.inference.response", "http inference response", "callName", callName).increment();
 
-                return JSON.toJSONString(result.getData());
+                return JsonUtil.object2Json(result.getData());
 
             }
         };
@@ -99,9 +99,9 @@ public class ProxyController {
         context.setSourceIp(sourceIp);
         context.setGuestAppId(selfCoordinator);
 
-        JSONObject jsonObject = JSON.parseObject(data);
-        Map head = JSON.parseObject(jsonObject.getString(Dict.HEAD) != null ? jsonObject.getString(Dict.HEAD) : "{}", Map.class);
-        Map body = JSON.parseObject(jsonObject.getString(Dict.BODY) != null ? jsonObject.getString(Dict.BODY) : "{}", Map.class);
+        Map jsonObject = JsonUtil.json2Object(data, Map.class);
+        Map head = JsonUtil.json2Object(jsonObject.get(Dict.HEAD) != null ? String.valueOf(jsonObject.get(Dict.HEAD)) : "{}", Map.class);
+        Map body = JsonUtil.json2Object(jsonObject.get(Dict.BODY) != null ? String.valueOf(jsonObject.get(Dict.BODY)) : "{}", Map.class);
 
         context.setHostAppid(head.get(Dict.APP_ID) != null ? head.getOrDefault(Dict.APP_ID, "").toString() : "");
         context.setCaseId(head.get(Dict.CASE_ID) != null ? head.getOrDefault(Dict.CASE_ID, "").toString() : "");

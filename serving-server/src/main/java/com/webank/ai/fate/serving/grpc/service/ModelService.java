@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.grpc.service;
 
 
-import com.alibaba.fastjson.JSONObject;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
@@ -29,7 +28,7 @@ import com.webank.ai.fate.serving.common.provider.ModelServiceProvider;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.utils.ObjectTransform;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -67,7 +66,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg());
-        builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
 
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
@@ -86,7 +85,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg());
-        builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
 
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
@@ -105,7 +104,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg());
-        builder.setData(ByteString.copyFrom(JSONObject.toJSONString(returnResult.getData()).getBytes()));
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
 
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();

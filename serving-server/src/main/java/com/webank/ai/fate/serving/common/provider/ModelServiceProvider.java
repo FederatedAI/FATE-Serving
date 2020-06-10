@@ -1,8 +1,6 @@
 package com.webank.ai.fate.serving.common.provider;
 
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -12,12 +10,14 @@ import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @FateService(name = "modelService", preChain = {
@@ -47,19 +47,18 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
     @FateServiceMethod(name = "QUERY_MODEL")
     public ModelServiceProto.QueryModelResponse queryModel(Context context, InboundPackage data) {
         ModelServiceProto.QueryModelRequest req = (ModelServiceProto.QueryModelRequest) data.getBody();
-        String content = modelManager.queryModel(context, req);
+        List<Model> models = modelManager.queryModel(context, req);
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
 
-        if (StringUtils.isNotBlank(content)) {
-            JSONArray returnArray = JSONArray.parseArray(content);
-            for (int i = 0; i < returnArray.size(); i++) {
-                Model model = JSONObject.parseObject(returnArray.getString(i), Model.class);
+        if (models != null) {
+            for (int i = 0; i < models.size(); i++) {
+                Model model = models.get(i);
                 ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
                 modelExBuilder.setIndex(i);
                 modelExBuilder.setTableName(model.getTableName());
                 modelExBuilder.setNamespace(model.getNamespace());
                 modelExBuilder.setServiceId(model.getServiceId());
-                modelExBuilder.setContent(JSONObject.toJSONString(model));
+                modelExBuilder.setContent(JsonUtil.object2Json(model));
                 builder.addModelInfos(modelExBuilder.build());
             }
         }

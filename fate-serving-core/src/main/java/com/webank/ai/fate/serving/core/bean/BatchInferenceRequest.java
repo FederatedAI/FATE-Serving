@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.core.bean;
 
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,7 @@ public class BatchInferenceRequest extends InferenceRequest {
     public String toString() {
         String result = "";
         try {
-            result = JSON.toJSONString(this);
+            result = JsonUtil.object2Json(this);
         } catch (Throwable e) {
 
         }

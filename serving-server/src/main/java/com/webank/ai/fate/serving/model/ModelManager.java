@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.model;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
@@ -459,20 +458,20 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
     }
 
-    public String queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
+    public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
 
         int queryType = queryModelRequest.getQueryType();
         String tableName = queryModelRequest.getTableName();
         String namespace = queryModelRequest.getNamespace();
         switch (queryType) {
             case 0:
-                return JSON.toJSONString(listAllModel());
+                return listAllModel();
             case 1:
                 String modelKey = this.serviceIdNamespaceMap.get(queryModelRequest.getServiceId());
                 if (StringUtils.isBlank(modelKey)) {
                     return null;
                 }
-                return JSON.toJSONString(Arrays.asList(this.namespaceMap.get(modelKey)));
+                return Arrays.asList(this.namespaceMap.get(modelKey));
         }
         return null;
 

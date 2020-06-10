@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
@@ -29,6 +28,7 @@ import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -361,7 +361,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
                 //rpcDataWraper.setHostModel(model.getFederationModelMap().values());
 
                 Proxy.Packet returnPacket = federatedRpcInvoker.sync(context, rpcDataWraper, 3000);
-                ReturnResult tempResult = JSON.parseObject(returnPacket.getBody().getValue().toByteArray(), ReturnResult.class);
+                ReturnResult tempResult = JsonUtil.json2Object(returnPacket.getBody().getValue().toByteArray(), ReturnResult.class);
 
                 Map<String, Object> returnData = tempResult.getData();
 

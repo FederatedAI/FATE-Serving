@@ -1,7 +1,5 @@
 package com.webank.ai.fate.serving.admin.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -15,9 +13,9 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +27,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -92,7 +89,7 @@ public class ModelController {
             Map head = Maps.newHashMap();
 //            head.put(Dict.HOST, headers.getFirst(Dict.HOST) != null ? headers.getFirst(Dict.HOST).trim() : "");
 
-            Map body = JSON.parseObject(data);
+            Map body = JsonUtil.json2Object(data, Map.class);
 
             InboundPackage<Map> inboundPackage = new InboundPackage<>();
             inboundPackage.setBody(body);
@@ -255,7 +252,7 @@ public class ModelController {
         List<ModelServiceProto.ModelInfoEx> modelInfosList = response.getModelInfosList();
         if (modelInfosList != null) {
             for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
-                rows.add(JSONObject.parseObject(modelInfoEx.getContent()));
+                rows.add(JsonUtil.json2Object(modelInfoEx.getContent(), ModelServiceProto.ModelInfoEx.class));
             }
         }
 
@@ -273,7 +270,7 @@ public class ModelController {
             }
             ReturnResult result = new ReturnResult();
 
-            JSONObject data = JSON.parseObject(requestData);
+            Map data = JsonUtil.json2Object(requestData, Map.class);
             Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
@@ -284,7 +281,7 @@ public class ModelController {
 
             if (StringUtils.isNotBlank(resp)) {
                 result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JSONObject.parseObject(resp));
+                result.setData(JsonUtil.json2Object(resp, Map.class));
             } else {
                 result.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
                 result.setRetmsg("publishLoad failed");
@@ -301,7 +298,7 @@ public class ModelController {
             }
             ReturnResult result = new ReturnResult();
 
-            JSONObject data = JSON.parseObject(requestData);
+            Map data = JsonUtil.json2Object(requestData, Map.class);
             Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
@@ -313,7 +310,7 @@ public class ModelController {
 
             if (StringUtils.isNotBlank(resp)) {
                 result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JSONObject.parseObject(resp));
+                result.setData(JsonUtil.json2Object(resp, Map.class));
             } else {
                 result.setRetcode(StatusCode.GUEST_BIND_MODEL_ERROR);
                 result.setRetmsg("publishBind failed");
@@ -349,7 +346,7 @@ public class ModelController {
             }
 
             result.setRetcode(response.getStatusCode());
-//            result.setData(JSONObject.parseObject(response.getData().toStringUtf8()));
+//            result.setData(JsonUtil.json2Object(response.getData().toStringUtf8()));
             result.setRetmsg(response.getMessage());
             return result;
         };

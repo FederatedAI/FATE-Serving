@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.grpc.service;
 
-import com.alibaba.fastjson.JSON;
 import com.codahale.metrics.MetricRegistry;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -30,6 +29,7 @@ import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.host.provider.HostBatchInferenceProvider;
 import com.webank.ai.fate.serving.host.provider.HostSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
@@ -96,7 +96,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
         }
         Packet.Builder packetBuilder = Packet.newBuilder();
         packetBuilder.setBody(Proxy.Data.newBuilder()
-                .setValue(ByteString.copyFrom(JSON.toJSONString(result).getBytes()))
+                .setValue(ByteString.copyFrom(JsonUtil.object2Json(result).getBytes()))
                 .build());
         responseObserver.onNext(packetBuilder.build());
         responseObserver.onCompleted();

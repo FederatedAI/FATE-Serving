@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.webank.ai.fate.register.common.Constants.PATH_SEPARATOR;
-
 @Service
 public class ComponentService {
     @Autowired
