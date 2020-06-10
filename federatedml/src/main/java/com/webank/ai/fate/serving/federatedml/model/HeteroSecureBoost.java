@@ -80,6 +80,10 @@ public abstract class HeteroSecureBoost extends BaseModel {
         return this.trees.get(treeId).getTree(treeNodeId).getSitename().split(":", -1)[0];
     }
 
+    protected String getSite1(int treeId, int treeNodeId) {
+        return this.trees.get(treeId).getTree(treeNodeId).getSitename().split(":", -1)[1];
+    }
+
     protected String generateTag(String caseId, String modelId, int communicationRound) {
         return caseId + "_" + modelId + "_" + String.valueOf(communicationRound);
     }
