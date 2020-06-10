@@ -4,11 +4,7 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
- 
-/**
- * 类描述：JVM GC信息工具类
- * 
- **/
+
 public class JVMGCUtils {
 	static private GarbageCollectorMXBean youngGC;
     static private GarbageCollectorMXBean fullGC; 
