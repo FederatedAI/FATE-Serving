@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Maps;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.springframework.util.StringUtils;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +21,7 @@ public class JsonUtil {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         //设置输入时忽略JSON字符串中存在而Java对象实际没有的属性
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     public static String object2Json(Object o) {

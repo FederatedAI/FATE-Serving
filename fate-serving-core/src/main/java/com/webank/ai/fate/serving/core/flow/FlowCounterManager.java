@@ -52,16 +52,17 @@ public class FlowCounterManager {
     public FlowCounterManager(String appName,Boolean countModelRequest) {
         this.appName = appName;
         String baseFileName = appName + "-metrics.log";
-
+        String modelFileName = "model-metrics.log";
         if (USE_PID) {
             baseFileName += ".pid" + GetSystemInfo.getPid();
+            modelFileName += ".pid" + GetSystemInfo.getPid();
         }
         metricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, baseFileName);
 
         metricReport = new FileMetricReport(appName);
         if(countModelRequest){
-             modelMetricReport = new FileMetricReport("model");
-             modelMetricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR,   "model-metrics.log");
+            modelMetricReport = new FileMetricReport("model");
+            modelMetricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR,   modelFileName);
         }
 
     }
@@ -89,8 +90,8 @@ public class FlowCounterManager {
         try {
             return  modelMetricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
         } catch (Exception e) {
-            logger.error("find mode metric error",e);
-            throw  new SysException("find mode metric error");
+            logger.error("find model metric error",e);
+            throw  new SysException("find model metric error");
         }
 
 
