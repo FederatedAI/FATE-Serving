@@ -117,6 +117,10 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
             }
             else{
                 Map<String, Boolean> lookUp = (Map<String, Boolean>) lookUpTable.get(String.valueOf(treeId));
+                if (lookUp.get(String.valueOf(treeNodeId)) == null) {
+                    return treeNodeId;
+                }
+
                 if(lookUp.get(String.valueOf(treeNodeId))){
                     treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
                 }
@@ -171,7 +175,9 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
 
         if(!this.fastMode){
             // ask host to prepare data, if fast mode is not enabled
-            ReturnResult returnResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
+            for(int i = 0; i < predictParams.getRole().getRole(Dict.HOST).size(); ++i){
+                ReturnResult returnResult = this.getFederatedPredictMulti(context, predictParams, Dict.FEDERATED_INFERENCE, false, i);
+            }
         }
 
 
@@ -189,6 +195,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         int communicationRound = 0;
 
         // start local inference
+        int host = 0;
         while (true) {
             HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
             for (int i = 0; i < this.treeNum; ++i) {
@@ -224,13 +231,13 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
                 ReturnResult tempResult;
                 if(this.fastMode){
                     getNodeRoute = true;
-                    tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE, false);
+                    tempResult = this.getFederatedPredictMulti(context, predictParams, Dict.FEDERATED_INFERENCE, false, host%(predictParams.getRole().getRole(Dict.HOST).size()));
                 }
                 else{
-                    tempResult = this.getFederatedPredict(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false);
+                    tempResult = this.getFederatedPredictMulti(context, predictParams, Dict.FEDERATED_INFERENCE_FOR_TREE, false, host%(predictParams.getRole().getRole(Dict.HOST).size()));
                 }
 
-
+                host++;
                 Map<String, Object> returnData = tempResult.getData();
 
                 if(this.fastMode && getNodeRoute){
