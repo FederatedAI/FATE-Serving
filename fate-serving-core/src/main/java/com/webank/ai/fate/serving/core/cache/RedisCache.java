@@ -39,6 +39,18 @@ public class RedisCache implements Cache {
     }
 
     @Override
+    public void put(Object key, Object value, int expire) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            Pipeline redisPipeline = jedis.pipelined();
+            redisPipeline.set(key.toString(), value.toString());
+            if (expire > 0) {
+                redisPipeline.expire(key.toString(), expire);
+            }
+            redisPipeline.sync();
+        }
+    }
+
+    @Override
     public Object get(Object key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.get(key.toString());
@@ -56,6 +68,13 @@ public class RedisCache implements Cache {
             }
         }
         return result;
+    }
+
+    @Override
+    public void delete(Object key) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.del(key.toString());
+        }
     }
 
     @Override

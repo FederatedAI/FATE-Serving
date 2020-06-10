@@ -100,7 +100,7 @@ public class Bootstrap {
          * 3秒
          */
         while (AbstractServiceAdaptor.requestInHandle.get() > 0 && tryNum < 30) {
-            logger.info("try to shundown,try count {}, remain {}", tryNum, AbstractServiceAdaptor.requestInHandle.get());
+            logger.info("try to shutdown,try count {}, remain {}", tryNum, AbstractServiceAdaptor.requestInHandle.get());
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

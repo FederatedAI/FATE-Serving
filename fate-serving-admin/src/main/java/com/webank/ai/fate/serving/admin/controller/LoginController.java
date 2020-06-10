@@ -5,6 +5,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.EncryptMethod;
 import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Description User management
@@ -42,7 +41,7 @@ public class LoginController {
     private String password;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private Cache cache;
 
     @PostMapping("/admin/login")
     public ReturnResult login(@RequestBody RequestParamWrapper requestParams) {
@@ -58,7 +57,7 @@ public class LoginController {
 //            String token = Md5Crypt.md5Crypt((Dict.USER_CACHE_KEY_PREFIX + userInfo).getBytes(), Dict.MD5_SALT);
             String token = EncryptUtils.encrypt(Dict.USER_CACHE_KEY_PREFIX + userInfo, EncryptMethod.MD5);
 
-            redisTemplate.opsForValue().set(token, userInfo, 10, TimeUnit.MINUTES);
+            cache.put(token, userInfo, 600);
             logger.info("user {} login success.", username);
 
             Map data = new HashMap<>();
@@ -80,9 +79,9 @@ public class LoginController {
         ReturnResult result = new ReturnResult();
 
         String sessionToken = request.getHeader(Dict.SESSION_TOKEN);
-        String userInfo = redisTemplate.opsForValue().get(sessionToken);
+        String userInfo = (String) cache.get(sessionToken);
         if (StringUtils.isNotBlank(userInfo)) {
-            redisTemplate.delete(sessionToken);
+            cache.delete(sessionToken);
             result.setRetcode(StatusCode.SUCCESS);
         } else {
             logger.info("Session token unavailable");

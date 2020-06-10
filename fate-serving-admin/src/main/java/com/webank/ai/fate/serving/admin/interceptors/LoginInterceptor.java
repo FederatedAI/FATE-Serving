@@ -1,30 +1,28 @@
 package com.webank.ai.fate.serving.admin.interceptors;
 
-
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.concurrent.TimeUnit;
 
 public class LoginInterceptor implements HandlerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private Cache cache;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -35,9 +33,9 @@ public class LoginInterceptor implements HandlerInterceptor {
         String token = request.getHeader(Dict.SESSION_TOKEN);
         Preconditions.checkArgument(StringUtils.isNotBlank(token), "parameter sessionToken is required");
 
-        String userInfo = redisTemplate.opsForValue().get(token);
+        String userInfo = (String) cache.get(token);
         if (StringUtils.isNotBlank(userInfo)) {
-            redisTemplate.opsForValue().set(token, userInfo, 10, TimeUnit.MINUTES);
+            cache.put(token, userInfo, 600);
             return true;
         } else {
             logger.info("Session token unavailable");

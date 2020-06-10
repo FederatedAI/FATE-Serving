@@ -8,9 +8,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
@@ -19,11 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +45,6 @@ public class ModelController {
     private String loadUrl;
     @Value("${fateflow.bind.url}")
     private String bindUrl;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
     @Value("${grpc.timeout:5000}")
     private int timeout;
 

@@ -16,14 +16,11 @@
 
 package com.webank.ai.fate.serving.admin.config;
 
-import com.webank.ai.fate.register.router.DefaultRouterService;
-import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,13 +76,11 @@ public class RegistryConfig {
         return null;
     }
 
-    @Bean
-    public RouterService routerService(@Autowired(required = false) ZookeeperRegistry zookeeperRegistry) {
-        if (zookeeperRegistry != null) {
-            DefaultRouterService defaultRouterService = new DefaultRouterService();
-            defaultRouterService.setRegistry(zookeeperRegistry);
-            return defaultRouterService;
-        }
-        return null;
-    }
+    /*@Bean
+    @ConditionalOnBean(ZookeeperRegistry.class)
+    public RouterService routerService(ZookeeperRegistry zookeeperRegistry) {
+        DefaultRouterService defaultRouterService = new DefaultRouterService();
+        defaultRouterService.setRegistry(zookeeperRegistry);
+        return defaultRouterService;
+    }*/
 }

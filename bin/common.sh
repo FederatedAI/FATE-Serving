@@ -34,7 +34,7 @@ start() {
     elif [ ${module} = "serving-admin" ]; then
       java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
     else
-      echo "usage: ${module} {serving-server|serving-proxy|serving-admin|serving-monitor}"
+      echo "usage: ${module} {serving-server|serving-proxy|serving-admin}"
     fi
     #sleep 5
     #id=$(ps -p $! | awk '{print $1}' | sed -n '2p')

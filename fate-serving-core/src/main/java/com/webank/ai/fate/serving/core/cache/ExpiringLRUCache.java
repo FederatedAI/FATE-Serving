@@ -22,6 +22,11 @@ public class ExpiringLRUCache implements Cache {
     }
 
     @Override
+    public void put(Object key, Object value, int expire) {
+        this.put(key, value);
+    }
+
+    @Override
     public Object get(Object key) {
         return store.get(key);
     }
@@ -37,6 +42,11 @@ public class ExpiringLRUCache implements Cache {
             }
         }
         return result;
+    }
+
+    @Override
+    public void delete(Object key) {
+        store.remove(key);
     }
 
     @Override

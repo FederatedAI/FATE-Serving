@@ -319,8 +319,8 @@ public abstract class AbstractRegistry implements Registry {
         if (listener == null) {
             throw new IllegalArgumentException("unsubscribe listener == null");
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Unsubscribe: " + url);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Unsubscribe: " + url);
         }
         Set<NotifyListener> listeners = subscribed.get(url);
         if (listeners != null) {

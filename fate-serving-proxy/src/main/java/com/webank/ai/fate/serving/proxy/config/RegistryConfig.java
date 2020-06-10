@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -56,7 +57,7 @@ public class RegistryConfig {
     private String aclPassword;
 
     @Bean
-    public ZookeeperRegistry zookeeperRegistry(InterGrpcServer interGrpcServer) {
+    public ZookeeperRegistry zookeeperRegistry() {
         if (logger.isDebugEnabled()) {
             logger.info("prepare to create zookeeper registry ,use zk {}", useZkRouter);
         }
@@ -83,7 +84,8 @@ public class RegistryConfig {
     }
 
     @Bean
-    public RouterService routerService(@Autowired(required = false) ZookeeperRegistry zookeeperRegistry) {
+    @ConditionalOnBean(ZookeeperRegistry.class)
+    public RouterService routerService(ZookeeperRegistry zookeeperRegistry) {
         if (zookeeperRegistry != null) {
             DefaultRouterService defaultRouterService = new DefaultRouterService();
             defaultRouterService.setRegistry(zookeeperRegistry);

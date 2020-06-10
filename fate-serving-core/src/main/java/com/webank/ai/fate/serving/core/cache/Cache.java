@@ -6,11 +6,15 @@ public interface Cache<K, V> {
 
     void put(K key, V value);
 
+    void put(K key, V value, int expire);
+
     V get(K key);
 
     List<DataWrapper> get(K... keys);
 
     void put(List<DataWrapper> dataWrappers);
+
+    void delete(K key);
 
     public static class DataWrapper<K, V> {
         K key;
