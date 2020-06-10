@@ -107,7 +107,7 @@ public class Bootstrap {
             MetaInfo.BATCH_SPLIT_SIZE = environment.getProperty(Dict.BATCH_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_SPLIT_SIZE)) : 100;
             MetaInfo.LR_SPLIT_SIZE = environment.getProperty(Dict.LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.LR_SPLIT_SIZE)) : 500;
             MetaInfo.PROPERTY_SERVICE_ROLE_NAME =  environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
-
+            MetaInfo.MODEL_TRANSFER_URL = environment.getProperty(Dict.MODEL_TRANSFER_URL);
         } catch (IOException e) {
             logger.error("init metainfo error", e);
         }

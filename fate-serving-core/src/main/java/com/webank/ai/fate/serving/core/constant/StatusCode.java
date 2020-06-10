@@ -9,7 +9,7 @@ public class StatusCode {
     public static final String SHUTDOWN_ERROR = "503";
     public static final String INVALID_ROLE_ERROR = "504";
     public static final String SERVICE_NOT_FOUND = "505";
-
+    public static final String MODEL_INIT_ERROR = "506";
     public static final String PARAM_ERROR = "100";
     public static final String GUEST_PARAM_ERROR = "100";
     public static final String HOST_PARAM_ERROR = "100";
@@ -20,6 +20,7 @@ public class StatusCode {
     public static final String GUEST_BIND_MODEL_ERROR = "103";
     public static final String HOST_BIND_MODEL_ERROR = "103";
     public static final String MODEL_NULL = "104";
+
     public static final String HOST_MODEL_NULL = "104";
     public static final String GUEST_ROUTER_ERROR = "105";
     public static final String HOST_UNSUPPORTED_COMMAND_ERROR = "106";

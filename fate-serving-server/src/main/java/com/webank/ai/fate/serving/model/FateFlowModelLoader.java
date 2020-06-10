@@ -21,6 +21,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
@@ -107,7 +108,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             }
 
             if (StringUtils.isBlank(requestUrl)) {
-                requestUrl = environment.getProperty(Dict.MODEL_TRANSFER_URL);
+                requestUrl = MetaInfo.MODEL_TRANSFER_URL;
                 logger.info("use profile model.transfer.url, {}", requestUrl);
             }
 

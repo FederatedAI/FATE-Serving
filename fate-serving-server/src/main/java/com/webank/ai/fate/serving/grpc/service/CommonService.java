@@ -18,18 +18,14 @@ import java.util.UUID;
 
 @Service
 public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
-
     private static final String QUERY_METRICS = "queryMetrics";
     private static final String UPDATE_FLOW_RULE = "updateFlowRule";
     private static final String LIST_PROPS = "listProps";
     private static final String QUERY_JVM = "queryJvm";
-
     @Autowired
     CommonServiceProvider commonServiceProvider;
-
     @Autowired
     Environment environment;
-
     @Override
     @RegisterService(serviceName = QUERY_METRICS)
     public void queryMetrics(CommonServiceProto.QueryMetricRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
@@ -84,5 +80,4 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
         context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;
     }
-
 }

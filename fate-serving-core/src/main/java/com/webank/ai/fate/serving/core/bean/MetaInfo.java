@@ -41,6 +41,7 @@ public class MetaInfo {
     public static int LR_SPLIT_SIZE;
 
     public static String PROPERTY_SERVICE_ROLE_NAME;
+    public static String MODEL_TRANSFER_URL;
 
 
 

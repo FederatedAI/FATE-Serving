@@ -33,14 +33,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Service
-public class ModelManager implements InitializingBean, EnvironmentAware {
-//    @Autowired
-//    private ModelLoader modelLoader;
+public class ModelManager implements InitializingBean {
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
 
-    Environment environment;
     @Autowired
     ModelLoaderFactory modelLoaderFactory;
     File serviceIdFile;
@@ -233,18 +230,12 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
         // compatible 1.2.x
         restoreOldVersionCache();
-
         ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>(8);
         ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<>(8);
         doLoadCache(tempNamespaceMap, namespaceFile);
         doLoadCache(tempServiceIdNamespaceMap, serviceIdFile);
-
         ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
-
-
         ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.FATEFLOW);
-
-
         tempNamespaceMap.forEach((k, model) -> {
             try {
                 modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
@@ -256,7 +247,6 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                     namespaceMap.put(k, model);
                     logger.info("restore model {} success ", k);
                 }
-
             } catch (Exception e) {
                 logger.info("restore model {} error {} ", k, e.getMessage());
             }
@@ -311,14 +301,12 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         try {
             returnResult.setRetcode(StatusCode.SUCCESS);
             Model model = this.buildModelForBind(context, req);
-
             String serviceId = req.getServiceId();
             String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
             Model loadedModel = this.namespaceMap.get(modelKey);
             if (loadedModel == null) {
                 throw new ModelNullException("model " + modelKey + " is not exist ");
             }
-
             this.serviceIdNamespaceMap.put(serviceId, modelKey);
             if (zookeeperRegistry != null) {
                 if (StringUtils.isNotEmpty(serviceId)) {
@@ -374,12 +362,10 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
 
         if (model.getRole().equals(Dict.GUEST)) {
-
             ModelServiceProto.Party hostParty = roleMap.get(Dict.HOST);
             String hostPartyId = hostParty.getPartyIdList().get(0);
 //            ModelServiceProto.RoleModelInfo hostRoleModelInfo= modelMap.get(hostPartyId);
             ModelServiceProto.RoleModelInfo hostRoleModelInfo = modelMap.get(Dict.HOST);
-
             ModelServiceProto.ModelInfo hostModelInfo = hostRoleModelInfo.getRoleModelInfoMap().get(hostPartyId);
             String hostNamespace = hostModelInfo.getNamespace();
             String hostTableName = hostModelInfo.getTableName();
@@ -401,34 +387,27 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     }
 
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
-        ReturnResult returnResult = new ReturnResult();
-        try {
+            ReturnResult returnResult = new ReturnResult();
             returnResult.setRetcode(StatusCode.SUCCESS);
             Model model = this.buildModelForLoad(context, req);
             String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
             ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
-            // TODO: 2020/4/2  这里没完成
-
             String loadType = req.getLoadType();
             if (StringUtils.isNotEmpty(loadType)) {
                 modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.valueOf(loadType));
             } else {
                 modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
             }
-
             modelLoaderParam.setTableName(model.getTableName());
             modelLoaderParam.setNameSpace(model.getNamespace());
             modelLoaderParam.setFilePath(req.getFilePath());
-
             ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
             Preconditions.checkArgument(modelLoader != null);
-
             ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
             if (modelProcessor == null) {
-                throw new ModelProcessorInitException();
+                throw new ModelProcessorInitException("modelProcessor is null");
             }
             model.setModelProcessor(modelProcessor);
-
             this.namespaceMap.put(namespaceKey, model);
             /**
              *  host model
@@ -443,18 +422,9 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                     zookeeperRegistry.register(FateServer.serviceSets);
                 }
             }
-
             // update cache
             this.store(namespaceMap, namespaceFile);
-        } catch (ModelProcessorInitException e) {
-            returnResult.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
-            returnResult.setRetmsg(e.getMessage());
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
-        }
-
-        return returnResult;
+            return returnResult;
 
     }
 
@@ -670,10 +640,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         }
     }
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
+
 
     private static class RequestWapper {
         String content;
