@@ -139,6 +139,49 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
         }
     }
 
+    protected ReturnResult getFederatedPredictMulti(Context context, FederatedParams guestFederatedParams, String remoteMethodName, boolean useCache, int host) {
+        ReturnResult remoteResult = null;
+
+        try {
+            FederatedParty srcParty = guestFederatedParams.getLocal();
+            FederatedRoles federatedRoles = guestFederatedParams.getRole();
+            Map<String, Object> featureIds = (Map<String, Object>) guestFederatedParams.getFeatureIdMap();
+            FederatedParty dstParty = new FederatedParty(Dict.HOST, federatedRoles.getRole(Dict.HOST).get(host));
+            if (useCache) {
+                ReturnResult remoteResultFromCache = CacheManager.getInstance().getRemoteModelInferenceResult(guestFederatedParams);
+                if (remoteResultFromCache != null) {
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("caseid {} get remote party model inference result from cache", context.getCaseId());
+                    }
+                    context.putData(Dict.GET_REMOTE_PARTY_RESULT, false);
+                    context.hitCache(true);
+                    remoteResult = remoteResultFromCache;
+                    return remoteResult;
+                }
+            }
+            HostFederatedParams hostFederatedParams = new HostFederatedParams();
+            hostFederatedParams.setCaseId(guestFederatedParams.getCaseId());
+            hostFederatedParams.setSeqNo(guestFederatedParams.getSeqNo());
+            hostFederatedParams.getFeatureIdMap().putAll(guestFederatedParams.getFeatureIdMap());
+            hostFederatedParams.setLocal(dstParty);
+            hostFederatedParams.setPartnerLocal(srcParty);
+            hostFederatedParams.setRole(federatedRoles);
+            hostFederatedParams.setPartnerModelInfo(guestFederatedParams.getModelInfo());
+            hostFederatedParams.setData(guestFederatedParams.getData());
+            context.putData(Dict.GET_REMOTE_PARTY_RESULT, true);
+            remoteResult = getFederatedPredictFromRemote(context, srcParty, dstParty, hostFederatedParams, remoteMethodName);
+            if (useCache&& remoteResult!=null&&remoteResult.getRetcode()==0) {
+                CacheManager.getInstance().putRemoteModelInferenceResult(guestFederatedParams, remoteResult);
+                if(logger.isDebugEnabled()) {
+                    logger.info("caseid {} get remote party model inference result from federated request.", context.getCaseId());
+                }
+            }
+            return remoteResult;
+        } finally {
+            context.setFederatedResult(remoteResult);
+        }
+    }
+
     protected ReturnResult getFederatedPredictFromRemote(Context context, FederatedParty srcParty, FederatedParty dstParty, HostFederatedParams hostFederatedParams, String remoteMethodName) {
 
 

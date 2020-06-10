@@ -16,13 +16,12 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto;
+import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
+import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.NodeParam;
 import com.webank.ai.fate.serving.core.bean.CacheManager;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.FederatedParams;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
-import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.NodeParam;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,8 +50,8 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
     }
     */
 
-    private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
-        while (getSite(treeId, treeNodeId).equals(this.site)) {
+    private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input, String localPartyId) {
+        while (getSite(treeId, treeNodeId).equals(this.site) && getSite1(treeId, treeNodeId).equals(localPartyId)) {
             treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
         }
 
@@ -71,7 +70,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
         return data;
     }
 
-    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input){
+    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input, String localPartyId){
 
         // <tree_idx, < node_idx, direction>>
 
@@ -89,7 +88,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
 
                 NodeParam node = nodes.get(j);
 
-                if(!this.getSite(i, j).equals(this.site)){
+                if(!this.getSite(i, j).equals(this.site) || !getSite1(i, j).equals(localPartyId)){
                     continue;
                 }
 
@@ -130,7 +129,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
         logger.info("HeteroSecureBoostingTreeHost FederatedParams {}", predictParams);
 
         Map<String, Object> input = inputData.get(0);
-
+        String localPartyId = predictParams.getLocal().getPartyId();
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
         Map<String, Object> ret = new HashMap<String, Object>(8);
 
@@ -149,7 +148,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
             }
             // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>> in first
             // communication round
-            ret = this.extractHostNodeRoute(fidValueMapping);
+            ret = this.extractHostNodeRoute(fidValueMapping, localPartyId);
         }
         else{
             this.saveData(context, tag, fidValueMapping);
@@ -159,14 +158,14 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
     }
 
     public Map<String, Object> predictSingleRound(Context context, Map<String, Object> interactiveData, FederatedParams predictParams) {
-
+        String localPartyId = predictParams.getLocal().getPartyId();
         String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
         Map<String, Object> input = this.getData(context, tag);
 
         Map<String, Object> ret = new HashMap<String, Object>(8);
         for (String treeIdx : interactiveData.keySet()) {
             int idx = Integer.valueOf(treeIdx);
-            int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), input);
+            int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), input, localPartyId);
             ret.put(treeIdx, nodeId);
         }
         return ret;
