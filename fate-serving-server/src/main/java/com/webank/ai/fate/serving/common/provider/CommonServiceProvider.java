@@ -54,6 +54,9 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         List<MetricNode> metricNodes=null;
         if(type.equals(CommonServiceProto.MetricType.INTERFACE)) {
             metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
+            if (StringUtils.isBlank(sourceName)) {
+                metricNodes = flowCounterManager.queryAllMetrics(beginMs, 300);
+            }
         }else{
             metricNodes = flowCounterManager.queryModelMetrics(beginMs, endMs, sourceName);
         }
