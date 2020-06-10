@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.admin.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -10,6 +9,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class ComponentController {
     @GetMapping("/component/list")
     public ReturnResult list() {
         ComponentService.NodeData cachedNodeData = componentServices.getCachedNodeData();
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, JSONObject.parseObject(JSONObject.toJSONString(cachedNodeData), Map.class));
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, JsonUtil.json2Object(JsonUtil.object2Json(cachedNodeData), Map.class));
     }
 
     @GetMapping("/component/listProps")
@@ -63,7 +63,7 @@ public class ComponentController {
         }
 
         CommonServiceProto.CommonResponse response = blockingStub.listProps(builder.build());
-        Map<String, Object> propMap = JSONObject.parseObject(response.getData().toStringUtf8(), Map.class);
+        Map<String, Object> propMap = JsonUtil.json2Object(response.getData().toStringUtf8(), Map.class);
 
         List<Map> list = propMap.entrySet().stream()
                 .sorted(Comparator.comparing(Map.Entry::getKey))

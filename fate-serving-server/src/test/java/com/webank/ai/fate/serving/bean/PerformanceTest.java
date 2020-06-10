@@ -1,7 +1,4 @@
 package com.webank.ai.fate.serving.bean;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
@@ -9,6 +6,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,6 +15,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -102,7 +101,7 @@ public class PerformanceTest {
                 ManagedChannel managedChannel = GRPC_CONNECTION_POOL.getManagedChannel(HOST, PORT);
 
                 InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
-                inferenceMessageBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(batchInferenceRequest), "UTF-8"));
+                inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(batchInferenceRequest), "UTF-8"));
 
                 inferenceMessageBuilder.setBody(ByteString.copyFrom(inferenceMessageBuilder.build().toByteArray()));
 
@@ -111,7 +110,7 @@ public class PerformanceTest {
 
                 long endTime = System.currentTimeMillis();
                 String result = new String(inferenceMessage.getBody().toByteArray());
-                JSONObject resultObject = JSONObject.parseObject(result);
+                Map resultObject = JsonUtil.json2Object(result, Map.class);
                 // startTime | endTime | cost | result
                 String content = StringUtils.join(Arrays.asList(startTime, endTime, endTime - startTime, result), " | ");
 
@@ -119,7 +118,7 @@ public class PerformanceTest {
                 output(INFO_OUTPUT_FILE, content);
 
                 // print error log
-                if (resultObject.get("retcode") == null || !resultObject.getString("retcode").equals(StatusCode.SUCCESS)) {
+                if (resultObject.get("retcode") == null || !resultObject.get("retcode").equals(StatusCode.SUCCESS)) {
                     output(ERROR_OUTPUT_FILE, content);
                 }
 

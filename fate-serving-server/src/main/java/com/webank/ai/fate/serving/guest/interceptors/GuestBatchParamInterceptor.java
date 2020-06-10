@@ -1,6 +1,4 @@
 package com.webank.ai.fate.serving.guest.interceptors;
-
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
@@ -10,6 +8,7 @@ import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ public class GuestBatchParamInterceptor implements Interceptor {
         InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
         BatchInferenceRequest batchInferenceRequest = null;
         try {
-            batchInferenceRequest = JSON.parseObject(message.getBody().toByteArray(), BatchInferenceRequest.class);
+            batchInferenceRequest = JsonUtil.json2Object(message.getBody().toByteArray(), BatchInferenceRequest.class);
             inboundPackage.setBody(batchInferenceRequest);
             Preconditions.checkArgument(batchInferenceRequest != null, "request message parse error");
             Preconditions.checkArgument(StringUtils.isNotBlank(batchInferenceRequest.getServiceId()), "no service id");

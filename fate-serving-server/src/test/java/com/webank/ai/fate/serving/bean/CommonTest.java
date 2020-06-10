@@ -1,9 +1,10 @@
 package com.webank.ai.fate.serving.bean;
 
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.serving.core.flow.MetricNode;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -36,10 +37,10 @@ public class CommonTest {
       //  builder.setSource("commonService");
         CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryMetric(builder.build());
 
-        List<MetricNode> list = JSONObject.parseObject(resultMessage.getData().toStringUtf8(), List.class);
+        List<MetricNode> list = JsonUtil.json2Object(resultMessage.getData().toStringUtf8(), new TypeReference<List<MetricNode>>(){});
         System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
         System.err.println("Message ==================" + resultMessage.getMessage());
-        System.err.println("result ==================" + JSONObject.toJSONString(list));
+        System.err.println("result ==================" + JsonUtil.object2Json(list));
     }
 
     @Test
@@ -73,7 +74,7 @@ public class CommonTest {
 
         System.err.println("StatusCode ==================" + response.getRetcode());
         System.err.println("Message ==================" + response.getMessage());
-        System.err.println("result ==================" + JSONObject.toJSONString(response.getModelInfosList()));
+        System.err.println("result ==================" + JsonUtil.object2Json(response.getModelInfosList()));
     }
 
 
@@ -101,10 +102,10 @@ public class CommonTest {
         builder.setType(CommonServiceProto.MetricType.MODEL);
         CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryMetric(builder.build());
 
-        List<MetricNode> list = JSONObject.parseObject(resultMessage.getData().toStringUtf8(), List.class);
+        List<MetricNode> list = JsonUtil.json2List(resultMessage.getData().toStringUtf8(), new TypeReference<List<MetricNode>>(){});
         System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
         System.err.println("Message ==================" + resultMessage.getMessage());
-        System.err.println("result ==================" + JSONObject.toJSONString(list));
+        System.err.println("result ==================" + JsonUtil.object2Json(list));
 
     }
 

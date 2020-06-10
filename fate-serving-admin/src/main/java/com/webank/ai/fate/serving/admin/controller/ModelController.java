@@ -1,7 +1,6 @@
 package com.webank.ai.fate.serving.admin.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -13,6 +12,7 @@ import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -107,7 +107,7 @@ public class ModelController {
             }
 
             for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
-                rows.add(JSONObject.parseObject(modelInfoEx.getContent()));
+                rows.add(JsonUtil.json2Object(modelInfoEx.getContent(),Map.class));
             }
         }
 
@@ -124,8 +124,7 @@ public class ModelController {
                 logger.debug("try to publishLoad, receive : {}", requestData);
             }
             ReturnResult result = new ReturnResult();
-
-            JSONObject data = JSON.parseObject(requestData);
+            Map data = JsonUtil.json2Object(requestData,Map.class);
             Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
@@ -136,7 +135,7 @@ public class ModelController {
 
             if (StringUtils.isNotBlank(resp)) {
                 result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JSONObject.parseObject(resp));
+                result.setData(JsonUtil.json2Object(resp,Map.class));
             } else {
                 result.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
                 result.setRetmsg("publishLoad failed");
@@ -153,7 +152,7 @@ public class ModelController {
             }
             ReturnResult result = new ReturnResult();
 
-            JSONObject data = JSON.parseObject(requestData);
+            Map data = JsonUtil.json2Object(requestData,Map.class);
             Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
@@ -165,7 +164,7 @@ public class ModelController {
 
             if (StringUtils.isNotBlank(resp)) {
                 result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JSONObject.parseObject(resp));
+                result.setData(JsonUtil.json2Object(resp,Map.class));
             } else {
                 result.setRetcode(StatusCode.GUEST_BIND_MODEL_ERROR);
                 result.setRetmsg("publishBind failed");

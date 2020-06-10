@@ -16,15 +16,15 @@
 
 package com.webank.ai.fate.serving.model;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                 String base64String = new String(Base64.getEncoder().encode(v));
                 result.put(k, base64String);
             });
-            return JSON.toJSONString(result).getBytes();
+            return JsonUtil.object2Json(result).getBytes();
         }
         return null;
     }
@@ -66,7 +66,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         Map<String, byte[]> result = Maps.newHashMap();
         if (data != null) {
             String dataString = new String(data);
-            Map originData = JSON.parseObject(dataString, Map.class);
+            Map originData = JsonUtil.json2Object(dataString, Map.class);
             if (originData != null) {
                 originData.forEach((k, v) -> {
                     result.put(k.toString(), Base64.getDecoder().decode(v.toString()));
@@ -133,14 +133,14 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                 return null;
             }
 
-            JSONObject responseData = JSONObject.parseObject(responseBody);
-            if (responseData.getInteger(Dict.RET_CODE) != 0) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.getString("retmsg"));
+            Map responseData = JsonUtil.json2Object(responseBody,Map.class);
+            if (responseData.get(Dict.RET_CODE)!=null&&!responseData.get(Dict.RET_CODE).toString().equals(StatusCode.SUCCESS)) {
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get("retmsg"));
                 return null;
             }
 
             Map<String, byte[]> resultMap = new HashMap<>(8);
-            Map<String, Object> dataMap = responseData.getJSONObject(Dict.DATA);
+            Map<String, Object> dataMap = responseData.get(Dict.DATA)!=null?(Map<String, Object>)responseData.get(Dict.DATA):null;
             if (dataMap == null || dataMap.isEmpty()) {
                 logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);
                 return null;

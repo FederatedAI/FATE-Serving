@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.guest.interceptors;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -10,6 +9,7 @@ import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
         try {
             InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
             InferenceRequest inferenceRequest = null;
-            inferenceRequest = JSON.parseObject(message.getBody().toByteArray(), InferenceRequest.class);
+            inferenceRequest = JsonUtil.json2Object(message.getBody().toByteArray(), InferenceRequest.class);
             inboundPackage.setBody(inferenceRequest);
             Preconditions.checkArgument(inferenceRequest != null, "request message parse error");
             Preconditions.checkArgument(inferenceRequest.getFeatureData() != null, "no feature data");

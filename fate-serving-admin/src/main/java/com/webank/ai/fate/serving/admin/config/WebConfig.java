@@ -1,8 +1,6 @@
 package com.webank.ai.fate.serving.admin.config;
 
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+
 import com.webank.ai.fate.serving.admin.interceptors.LoginInterceptor;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
@@ -44,19 +42,7 @@ public class WebConfig implements WebMvcConfigurer {
 //                .addResourceLocations("classpath:/META-INF/resources/webjars/");
 //    }
 
-    @Bean
-    public HttpMessageConverters fastJsonHttpMessageConverters() {
-        FastJsonHttpMessageConverter fastJsonHttpMessageConverter = new FastJsonHttpMessageConverter();
 
-        FastJsonConfig fastJsonConfig = new FastJsonConfig();
-        fastJsonConfig.setSerializerFeatures(SerializerFeature.PrettyFormat);
-
-        fastJsonHttpMessageConverter.setFastJsonConfig(fastJsonConfig);
-        HttpMessageConverter<?> converter = fastJsonHttpMessageConverter;
-
-        return new HttpMessageConverters(converter);
-
-    }
 
 
 }

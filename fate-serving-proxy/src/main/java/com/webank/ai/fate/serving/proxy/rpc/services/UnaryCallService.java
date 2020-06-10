@@ -1,6 +1,6 @@
 package com.webank.ai.fate.serving.proxy.rpc.services;
 
-import com.alibaba.fastjson.JSON;
+
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
@@ -15,6 +15,7 @@ import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
 import io.grpc.ManagedChannel;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         Map fateMap = Maps.newHashMap();
         fateMap.put(Dict.RET_CODE, exceptionInfo.getCode());
         fateMap.put(Dict.RET_MSG, exceptionInfo.getMessage());
-        builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JSON.toJSONString(fateMap))));
+        builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JsonUtil.object2Json(fateMap))));
         return builder.build();
     }
 

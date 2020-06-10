@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.model;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
@@ -459,7 +458,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
     }
 
-    public String queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
+    public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
 
         int queryType = queryModelRequest.getQueryType();
         String tableName = queryModelRequest.getTableName();
@@ -475,7 +474,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
                         }
                     });
                 });
-                return JSON.toJSONString(models);
+                return models;
             case 1:
                 String modelKey = this.serviceIdNamespaceMap.get(queryModelRequest.getServiceId());
                 if (StringUtils.isBlank(modelKey)) {
@@ -484,7 +483,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
                 Model model = this.namespaceMap.get(modelKey);
                 model.setServiceId(queryModelRequest.getServiceId());
-                return JSON.toJSONString(Arrays.asList(model));
+                return Arrays.asList(model);
             default:
                 return null;
         }

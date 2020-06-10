@@ -72,11 +72,10 @@ public class MonitorController {
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryMetrics(builder.build());
         List<MetricNode> metricNodes = Lists.newArrayList();
         if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
-            List<JSONObject> resultData = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
+            List<MetricNode> resultData = JsonUtil.json2List(commonResponse.getData().toStringUtf8(), new TypeReference<List<MetricNode>>() {
+            });
             if (resultData != null) {
-                for (JSONObject data : resultData) {
-                    metricNodes.add(data.toJavaObject(MetricNode.class));
-                }
+                metricNodes = resultData;
             }
         }
         metricNodes = metricNodes.stream()
@@ -114,11 +113,10 @@ public class MonitorController {
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryMetrics(builder.build());
         List<MetricNode> metricNodes = Lists.newArrayList();
         if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
-            List<JSONObject> resultData = JSON.parseObject(commonResponse.getData().toStringUtf8(), List.class);
+            List<MetricNode> resultData = JsonUtil.json2List(commonResponse.getData().toStringUtf8(), new TypeReference<List<MetricNode>>() {
+            });
             if (resultData != null) {
-                for (JSONObject data : resultData) {
-                    metricNodes.add(data.toJavaObject(MetricNode.class));
-                }
+                metricNodes = resultData;
             }
         }
         metricNodes = metricNodes.stream()

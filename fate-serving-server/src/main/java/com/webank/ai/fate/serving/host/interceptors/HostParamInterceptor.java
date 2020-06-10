@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.host.interceptors;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -24,6 +23,7 @@ import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -39,12 +39,12 @@ public class HostParamInterceptor implements Interceptor {
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         byte[] reqBody = (byte[]) inboundPackage.getBody();
         if (context.getActionType().equalsIgnoreCase(Dict.FEDERATED_INFERENCE_FOR_TREE)) {
-            Map params = JSON.parseObject(reqBody, HashMap.class);
+            Map params = JsonUtil.json2Object(reqBody, HashMap.class);
             Preconditions.checkArgument(params != null, "parse inference params error");
             inboundPackage.setBody(params);
         } else {
             InferenceRequest inferenceRequest = null;
-            inferenceRequest = JSON.parseObject(reqBody, InferenceRequest.class);
+            inferenceRequest = JsonUtil.json2Object(reqBody, InferenceRequest.class);
             Preconditions.checkArgument(inferenceRequest != null, "parse inference params error");
             inboundPackage.setBody(inferenceRequest);
         }

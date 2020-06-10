@@ -1,11 +1,9 @@
 package com.webank.ai.fate.serving.model;
-
-
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.ModelLoadException;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,7 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
                 String base64String = new String(Base64.getEncoder().encode(v));
                 result.put(k, base64String);
             });
-            return JSON.toJSONString(result).getBytes();
+            return JsonUtil.object2Json(result).getBytes();
         }
         return null;
     }
@@ -35,7 +33,7 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
         Map<String, byte[]> result = Maps.newHashMap();
         if (data != null) {
             String dataString = new String(data);
-            Map originData = JSON.parseObject(dataString, Map.class);
+            Map originData = JsonUtil.json2Object(dataString, Map.class);
             if (originData != null) {
                 originData.forEach((k, v) -> {
                     result.put(k.toString(), Base64.getDecoder().decode(v.toString()));

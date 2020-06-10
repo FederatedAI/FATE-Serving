@@ -15,6 +15,7 @@ import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -86,10 +87,10 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         int timeWait = timeout;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("inference req : {}", JSON.toJSONString(inferenceReqMap));
+            logger.debug("inference req : {}", JsonUtil.object2Json(inferenceReqMap));
         }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
-        reqBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(inferenceReqMap).getBytes()));
+        reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
 
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
 
@@ -116,7 +117,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
 
         if (StringUtils.isNotEmpty(resultString)) {
-            resultMap = JSON.parseObject(resultString, Map.class);
+            resultMap = JsonUtil.json2Object(resultString, Map.class);
         }
         return resultMap;
     }

@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.rpc;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -16,6 +15,7 @@ import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +101,7 @@ public class BatchInferenceFuture extends AbstractFuture {
     private BatchInferenceResult parse(Proxy.Packet remote) {
         if (remote != null) {
             String remoteContent = remote.getBody().getValue().toStringUtf8();
-            BatchInferenceResult remoteInferenceResult = JSON.parseObject(remoteContent, BatchInferenceResult.class);
+            BatchInferenceResult remoteInferenceResult = JsonUtil.json2Object(remoteContent, BatchInferenceResult.class);
             if (useCache && StatusCode.SUCCESS.equals(remoteInferenceResult.getRetcode())) {
                 try {
                     AsyncMessageEvent asyncMessageEvent = new AsyncMessageEvent();
@@ -110,7 +110,7 @@ public class BatchInferenceFuture extends AbstractFuture {
                         BatchInferenceResult.SingleInferenceResult singleInferenceResult = remoteInferenceResult.getSingleInferenceResultMap().get(singleInferenceData.getIndex());
                         if (singleInferenceResult != null && StatusCode.SUCCESS.equals(singleInferenceResult.getRetcode())) {
                             Cache.DataWrapper dataWrapper = new Cache.DataWrapper(buildCacheKey(rpcDataWraper.getGuestModel(), rpcDataWraper.getHostModel(),
-                                    singleInferenceData.getSendToRemoteFeatureData()), JSON.toJSONString(singleInferenceResult.getData()));
+                                    singleInferenceData.getSendToRemoteFeatureData()), JsonUtil.object2Json(singleInferenceResult.getData()));
                             cacheEventDataList.add(dataWrapper);
                         }
                     }
@@ -135,7 +135,7 @@ public class BatchInferenceFuture extends AbstractFuture {
         String namespace = guestModel.getNamespace();
         String partId = hostModel.getPartId();
         StringBuilder sb = new StringBuilder();
-        sb.append(partId).append(tableName).append(namespace).append(JSON.toJSONString(sendToRemote));
+        sb.append(partId).append(tableName).append(namespace).append(JsonUtil.object2Json(sendToRemote));
         String key = EncryptUtils.encrypt(sb.toString(), EncryptMethod.MD5);
         return key;
 

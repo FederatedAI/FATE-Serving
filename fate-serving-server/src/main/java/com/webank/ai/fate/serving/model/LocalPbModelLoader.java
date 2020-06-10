@@ -1,12 +1,9 @@
 package com.webank.ai.fate.serving.model;
-
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.ModelLoadException;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.TransferUtils;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.springframework.stereotype.Service;
@@ -30,7 +27,7 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
                 String base64String = new String(Base64.getEncoder().encode(v));
                 result.put(k, base64String);
             });
-            return JSON.toJSONString(result).getBytes();
+            return JsonUtil.object2Json(result).getBytes();
         }
         return null;
     }
@@ -40,7 +37,7 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
         Map<String, byte[]> result = Maps.newHashMap();
         try {
             if (data != null) {
-                Map originData = JSON.parseObject(data, Map.class);
+                Map originData = JsonUtil.json2Object(data, Map.class);
                 if (originData != null) {
                     originData.forEach((k, v) -> {
                         result.put(k.toString(), Base64.getDecoder().decode(v.toString()));
@@ -110,7 +107,7 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
                             }
                         }
                     }
-                    return JSONObject.toJSONString(resultMap).getBytes();
+                    return JsonUtil.object2Json(resultMap).getBytes();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {

@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.springframework.util.StringUtils;
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +25,11 @@ public class JsonUtil {
     }
 
     public static String object2Json(Object o) {
-        if (o == null)
+        if (o == null) {
             return null;
+        }
 
-        String s = null;
+        String s = "";
 
         try {
             s = mapper.writeValueAsString(o);
@@ -76,6 +81,7 @@ public class JsonUtil {
         T t = null;
         try {
             t = mapper.readValue(json, c);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -116,13 +122,17 @@ public class JsonUtil {
 
             List  test = new ArrayList();
             map.put("xxx",test);
+
+            Map inner = Maps.newHashMap();
+            inner.put("cccc",3333);
+            map.put("testInner",inner);
             test.add(1);
             test.add(2);
             test.add(3);
 
 
 
-           String  x =  object2Json(test);
+           String  x =  object2Json(map);
 
 
 
@@ -130,12 +140,16 @@ public class JsonUtil {
 
            System.err.println(x);
 
-            List<Double>  list =  json2List(x, new TypeReference<List<Double>>() {
-            });
+           Map  temp =json2Object(x,Map.class);
 
-            for(Object cd:list) {
-                System.err.println(cd.getClass());
-            }
+           System.err.println(temp);
+
+//            List<Double>  list =  json2List(x, new TypeReference<List<Double>>() {
+//            });
+
+//            for(Object cd:list) {
+//                System.err.println(cd.getClass());
+//            }
     }
 
 

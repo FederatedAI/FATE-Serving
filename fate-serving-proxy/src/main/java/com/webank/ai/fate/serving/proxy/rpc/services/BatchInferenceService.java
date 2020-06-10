@@ -1,6 +1,6 @@
 package com.webank.ai.fate.serving.proxy.rpc.services;
 
-import com.alibaba.fastjson.JSON;
+
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
@@ -16,6 +16,7 @@ import com.webank.ai.fate.serving.core.rpc.core.FateService;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -115,10 +116,10 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
         inferenceReqMap.putAll(reqBodyMap);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("batch inference req : {}", JSON.toJSONString(inferenceReqMap));
+            logger.debug("batch inference req : {}", JsonUtil.object2Json(inferenceReqMap));
         }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
-        reqBuilder.setBody(ByteString.copyFrom(JSON.toJSONString(inferenceReqMap).getBytes()));
+        reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
 
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
 
@@ -139,7 +140,7 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
         }
 
         if (StringUtils.isNotEmpty(resultString)) {
-            resultMap = JSON.parseObject(resultString, Map.class);
+            resultMap = JsonUtil.json2Object(resultString, Map.class);
         }
         return resultMap;
     }
