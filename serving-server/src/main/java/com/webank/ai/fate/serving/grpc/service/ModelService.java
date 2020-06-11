@@ -65,7 +65,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
-        builder.setMessage(returnResult.getRetmsg());
+        builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
 
         responseObserver.onNext(builder.build());
@@ -84,7 +84,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
-        builder.setMessage(returnResult.getRetmsg());
+        builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
 
         responseObserver.onNext(builder.build());
@@ -103,7 +103,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase implemen
 
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
-        builder.setMessage(returnResult.getRetmsg());
+        builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
 
         responseObserver.onNext(builder.build());

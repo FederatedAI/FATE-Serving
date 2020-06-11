@@ -42,6 +42,7 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
             modelData = restore(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace);
             if (modelData == null) {
                 logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
+                return null;
             }
         } else {
             this.store(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace, modelData);
