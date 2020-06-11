@@ -1,4 +1,5 @@
 package com.webank.ai.fate.serving.bean;
+
 import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;

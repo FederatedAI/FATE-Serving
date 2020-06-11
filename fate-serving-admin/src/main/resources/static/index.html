@@ -1,282 +1,281 @@
 <!DOCTYPE html>
 <html>
-	
-	<head>
-		<meta charset="UTF-8">
-		<title>fate-serving-admin</title>
-		<link href="css/bootstrap.css" rel="stylesheet" />
-		<link rel="stylesheet" href="css/local.css" />
-	</head>
 
-	<body>
-		<header id="header" class="navbar navbar-default  navbar-static-top">
-			<div class="container-fluid">
-				<div class="navbar-header">
+<head>
+    <meta charset="UTF-8">
+    <title>fate-serving-admin</title>
+    <link href="css/bootstrap.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/local.css"/>
+</head>
 
-					<a class="navbar-brand" data-i18n="title" href="#" id="logo" >fate-serving-admin</a>
+<body>
+<header id="header" class="navbar navbar-default  navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
 
-					<a class="navbar-brand" class="btn btn-default" onclick="divhide()">
-						<span class="glyphicon glyphicon-align-justify"></span>
-					</a>
-					<!--
-                    	作者：15875763212@163.com
-                    	时间：2019-08-03
-                    	描述：
-                    <span class="navbar-brand" data-i18n="title">jQuery Bootgrid</span>
-                    -->
-				</div>
+            <a class="navbar-brand" data-i18n="title" href="#" id="logo">fate-serving-admin</a>
 
-				<!--<nav id="menu" class="navbar-collapse collapse" role="navigation">-->
-					<!--<ul class="nav navbar-nav navbar-right">-->
-						<!--<li><a href="#">退出</a></li>-->
-					<!--</ul>-->
-				<!--</nav>-->
-			</div>
-		</header>
+            <a class="navbar-brand" class="btn btn-default" onclick="divhide()">
+                <span class="glyphicon glyphicon-align-justify"></span>
+            </a>
+            <!--
+                作者：15875763212@163.com
+                时间：2019-08-03
+                描述：
+            <span class="navbar-brand" data-i18n="title">jQuery Bootgrid</span>
+            -->
+        </div>
 
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-md-2" id="hiddendiv">
-					<ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
-						<!--<li class="active">-->
-							<!--<a href="#">-->
-								<!--<i class="glyphicon glyphicon-th-large"></i> 首页-->
-							<!--</a>-->
-						<!--</li>-->
-						<!--<li>-->
-							<!--<a href="#systemSetting" data-toggle="collapse" class="nav-header collapsed" data-parent="hiddendiv">-->
-								<!--<i class="glyphicon glyphicon-cog"></i> cluster manager-->
-								<!--<span class="pull-right glyphicon glyphicon-chevron-down"></span>-->
-							<!--</a>-->
-							<!--<ul id="systemSetting" class="nav nav-list collapse secondmenu" style="height: 0px;">-->
-								<!--<li><a href="#" onclick="createTabs('usercode','用户管理','./bootgrid.html')"><i class="glyphicon glyphicon-user"></i>用户管理</a></li>-->
-								<!--<li><a href="#" onclick="createTabs('menucode','菜单管理','./bootgrid.html')"><i class="glyphicon glyphicon-th-list"></i>菜单管理</a></li>-->
-								<!--<li><a href="#" onclick="createTabs('rolecode','角色管理','./bootgrid.html')"><i class="glyphicon glyphicon-asterisk"></i>角色管理</a></li>-->
-								<!--<li><a href="#"><i class="glyphicon glyphicon-edit"></i>修改密码</a></li>-->
-								<!--<li><a href="#"><i class="glyphicon glyphicon-eye-open"></i>日志查看</a></li>-->
-							<!--</ul>-->
-						<!--</li>-->
-						<li  class="active">
-							<a href="index.html" >
-								<i class="glyphicon glyphicon-credit-card"></i> cluster
-							</a>
-						</li>
+        <!--<nav id="menu" class="navbar-collapse collapse" role="navigation">-->
+        <!--<ul class="nav navbar-nav navbar-right">-->
+        <!--<li><a href="#">退出</a></li>-->
+        <!--</ul>-->
+        <!--</nav>-->
+    </div>
+</header>
 
-						<li>
-							<a href="services.html">
-								<i class="glyphicon glyphicon-globe"></i>  services
-								<!--<span class="label label-warning pull-right">5</span>-->
-							</a>
-						</li>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2" id="hiddendiv">
+            <ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+                <!--<li class="active">-->
+                <!--<a href="#">-->
+                <!--<i class="glyphicon glyphicon-th-large"></i> 首页-->
+                <!--</a>-->
+                <!--</li>-->
+                <!--<li>-->
+                <!--<a href="#systemSetting" data-toggle="collapse" class="nav-header collapsed" data-parent="hiddendiv">-->
+                <!--<i class="glyphicon glyphicon-cog"></i> cluster manager-->
+                <!--<span class="pull-right glyphicon glyphicon-chevron-down"></span>-->
+                <!--</a>-->
+                <!--<ul id="systemSetting" class="nav nav-list collapse secondmenu" style="height: 0px;">-->
+                <!--<li><a href="#" onclick="createTabs('usercode','用户管理','./bootgrid.html')"><i class="glyphicon glyphicon-user"></i>用户管理</a></li>-->
+                <!--<li><a href="#" onclick="createTabs('menucode','菜单管理','./bootgrid.html')"><i class="glyphicon glyphicon-th-list"></i>菜单管理</a></li>-->
+                <!--<li><a href="#" onclick="createTabs('rolecode','角色管理','./bootgrid.html')"><i class="glyphicon glyphicon-asterisk"></i>角色管理</a></li>-->
+                <!--<li><a href="#"><i class="glyphicon glyphicon-edit"></i>修改密码</a></li>-->
+                <!--<li><a href="#"><i class="glyphicon glyphicon-eye-open"></i>日志查看</a></li>-->
+                <!--</ul>-->
+                <!--</li>-->
+                <li class="active">
+                    <a href="index.html">
+                        <i class="glyphicon glyphicon-credit-card"></i> cluster
+                    </a>
+                </li>
 
-						<li>
-							<a href="models.html" >
-								<i class="glyphicon glyphicon-calendar"></i> models
-							</a>
-						</li>
-						<!--<li>-->
-							<!--<a href="#" data-toggle="collapse" data-parent="hiddendiv">-->
-								<!--<i class="glyphicon glyphicon-fire"></i> 关于系统-->
-							<!--</a>-->
-						<!--</li>-->
+                <li>
+                    <a href="services.html">
+                        <i class="glyphicon glyphicon-globe"></i> services
+                        <!--<span class="label label-warning pull-right">5</span>-->
+                    </a>
+                </li>
 
-					</ul>
+                <li>
+                    <a href="models.html">
+                        <i class="glyphicon glyphicon-calendar"></i> models
+                    </a>
+                </li>
+                <!--<li>-->
+                <!--<a href="#" data-toggle="collapse" data-parent="hiddendiv">-->
+                <!--<i class="glyphicon glyphicon-fire"></i> 关于系统-->
+                <!--</a>-->
+                <!--</li>-->
 
-				</div>
+            </ul>
 
-
-
-				<div class="col-md-9" id="tabs2">
+        </div>
 
 
-					<h1 class="page-header">Dashboard</h1>
-					<ul class="nav" role="tablist" id="maintab">
-						<div  id="charts"  style="width: 800px;height:600px;">
-						</div>
-					</ul>
-					<!-- Tab panes
-					<div class="tab-content" id="maindiv">
-						<div class="tab-pane active" id="home"></div>
-					</div> -->
-				</div>
-			</div>
-		</div>
-	</body>
-
-	<script src="js/jquery-1.11.3.min.js"></script>
-	<script src="js/bootstrap.js"></script>
-	<link type="text/css" href="css/jquery-ui-1.9.2.custom.css" rel="stylesheet" />
-	<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
-	<script type="text/javascript" src="js/echarts.min.js"></script>
-
-	<script type="text/javascript">
-		function divhide() { $("#hiddendiv").fadeToggle(250); }
-	</script>
-	
-	<script>
-		//createTabs('rolecode','角色管理','./bootgrid.html')"
-		function createTabs(functionCode, functionName, url) {
-			addTab(functionName, functionCode, url);
-		}
-		//tabs  jquery ui bootstrap 中的案例，有些改变，但总体还是借鉴。
-		var tabTitle = "new Tab",
-			tabTemplate = "<li class='active' ><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
-			tabCounter = 0;
-		var tabs = $("#tabs2").tabs();
-	
-		function addTab(functionName, functionCode, url) {
-			var label = functionName || "Tab " + tabCounter,
-				id = "tabs-" + functionCode,
-				li = $(tabTemplate.replace(/#\{href\}/g, "#" + id).replace(/#\{label\}/g, label));
-				
-			if ($("#tabs-" + functionCode).length > 0) //如果有相同的functionCode ，说明已经有了tab，不用新建，选中就行了。
-			{
-				tabs.tabs('select', '#' + id);
-				return;
-			}
-			
-			tabs.find(".ui-tabs-nav").append(li);
-			//每个div 中都有一个iframe ,这种方式不是太好，可自己优化。
-			tabs.append("<div id='" + id + "'><iframe src=\"" + url + "\"  width=\"100%\" height=\"550px;\" frameborder=0 scrolling=\"no\"></iframe></div>");
-			tabs.tabs("refresh");
-			tabs.tabs('select', '#' + id); //根据id 选中tab
-			tabCounter++;
-		}
-		
-		//关闭
-		$("#tabs2").on("click", 'span.ui-icon-close', function() {
-			var panelId = $(this).closest("li").remove().attr("aria-controls");
-			$("#" + panelId).remove();
-			tabs.tabs("refresh");
-		});
+        <div class="col-md-9" id="tabs2">
 
 
+            <h1 class="page-header">Dashboard</h1>
+            <ul class="nav" role="tablist" id="maintab">
+                <div id="charts" style="width: 800px;height:600px;">
+                </div>
+            </ul>
+            <!-- Tab panes
+            <div class="tab-content" id="maindiv">
+                <div class="tab-pane active" id="home"></div>
+            </div> -->
+        </div>
+    </div>
+</div>
+</body>
 
-        // 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('charts'));
+<script src="js/jquery-1.11.3.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<link type="text/css" href="css/jquery-ui-1.9.2.custom.css" rel="stylesheet"/>
+<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
+<script type="text/javascript" src="js/echarts.min.js"></script>
 
-        var  data1 =  '        {\n' +
-            '            "children": [\n' +
-            '                {\n' +
-            '                    "children": [\n' +
-            '                        {\n' +
-            '                            "children": [\n' +
-            '                                {\n' +
-            '                                    "children": [],\n' +
-            '                                    "name": "低压车间表计82"\n' +
-            '                                }\n' +
-            '                            ],\n' +
-            '                            "name": "低压关口表计1"\n' +
-            '                        }\n' +
-            '                    ],\n' +
-            '                    "name": "高压子表计122"\n' +
-            '                },\n' +
-            '                {\n' +
-            '                    "children": [\n' +
-            '                        {\n' +
-            '                            "children": [],\n' +
-            '                            "name": "低压关口表计101"\n' +
-            '                        }\n' +
-            '                    ],\n' +
-            '                    "name": "高压子表计141"\n' +
-            '                }\n' +
-            '            ],\n' +
-            '            "name": "高压总表计102"\n' +
-            '        }'
+<script type="text/javascript">
+    function divhide() {
+        $("#hiddendiv").fadeToggle(250);
+    }
+</script>
 
-        // 指定图表的配置项和数据
-        // var option = {
-        //     title: {
-        //         text: '第一个 ECharts 实例'
-        //     },
-        //     tooltip: {},
-        //     legend: {
-        //         data:['销量']
-        //     },
-        //     xAxis: {
-        //         data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
-        //     },
-        //     yAxis: {},
-        //     series: [{
-        //         name: '销量',
-        //         type: 'bar',
-        //         data: [5, 20, 36, 10, 10, 20]
-        //     }]
-        // };
+<script>
+    //createTabs('rolecode','角色管理','./bootgrid.html')"
+    function createTabs(functionCode, functionName, url) {
+        addTab(functionName, functionCode, url);
+    }
+
+    //tabs  jquery ui bootstrap 中的案例，有些改变，但总体还是借鉴。
+    var tabTitle = "new Tab",
+        tabTemplate = "<li class='active' ><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
+        tabCounter = 0;
+    var tabs = $("#tabs2").tabs();
+
+    function addTab(functionName, functionCode, url) {
+        var label = functionName || "Tab " + tabCounter,
+            id = "tabs-" + functionCode,
+            li = $(tabTemplate.replace(/#\{href\}/g, "#" + id).replace(/#\{label\}/g, label));
+
+        if ($("#tabs-" + functionCode).length > 0) //如果有相同的functionCode ，说明已经有了tab，不用新建，选中就行了。
+        {
+            tabs.tabs('select', '#' + id);
+            return;
+        }
+
+        tabs.find(".ui-tabs-nav").append(li);
+        //每个div 中都有一个iframe ,这种方式不是太好，可自己优化。
+        tabs.append("<div id='" + id + "'><iframe src=\"" + url + "\"  width=\"100%\" height=\"550px;\" frameborder=0 scrolling=\"no\"></iframe></div>");
+        tabs.tabs("refresh");
+        tabs.tabs('select', '#' + id); //根据id 选中tab
+        tabCounter++;
+    }
+
+    //关闭
+    $("#tabs2").on("click", 'span.ui-icon-close', function () {
+        var panelId = $(this).closest("li").remove().attr("aria-controls");
+        $("#" + panelId).remove();
+        tabs.tabs("refresh");
+    });
 
 
-        $.get('api/component/list', function (_data) {
-        	var data = _data.data
-            myChart.hideLoading();    //得到数据后隐藏Loading标志
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('charts'));
 
-            echarts.util.each(data.children, function (datum, index) {
-                //index % 2 === 0 && (datum.collapsed = true);
-                datum.display = true
-            });    //间隔展开子数据，animate，display，physics，scale，vis是展开的
+    var data1 = '        {\n' +
+        '            "children": [\n' +
+        '                {\n' +
+        '                    "children": [\n' +
+        '                        {\n' +
+        '                            "children": [\n' +
+        '                                {\n' +
+        '                                    "children": [],\n' +
+        '                                    "name": "低压车间表计82"\n' +
+        '                                }\n' +
+        '                            ],\n' +
+        '                            "name": "低压关口表计1"\n' +
+        '                        }\n' +
+        '                    ],\n' +
+        '                    "name": "高压子表计122"\n' +
+        '                },\n' +
+        '                {\n' +
+        '                    "children": [\n' +
+        '                        {\n' +
+        '                            "children": [],\n' +
+        '                            "name": "低压关口表计101"\n' +
+        '                        }\n' +
+        '                    ],\n' +
+        '                    "name": "高压子表计141"\n' +
+        '                }\n' +
+        '            ],\n' +
+        '            "name": "高压总表计102"\n' +
+        '        }'
 
-            myChart.setOption(option = {
-                tooltip: {    //提示框组件
-                    trigger: 'item',    //触发类型，默认：item（数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用）。可选：'axis'：坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。'none':什么都不触发。
-                    triggerOn: 'mousemove'    //提示框触发的条件，默认mousemove|click（鼠标点击和移动时触发）。可选mousemove：鼠标移动时，click：鼠标点击时，none：
-                },
-                series: [    //系列列表
-                    {
-                        type: 'tree',    //树形结构
+    // 指定图表的配置项和数据
+    // var option = {
+    //     title: {
+    //         text: '第一个 ECharts 实例'
+    //     },
+    //     tooltip: {},
+    //     legend: {
+    //         data:['销量']
+    //     },
+    //     xAxis: {
+    //         data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+    //     },
+    //     yAxis: {},
+    //     series: [{
+    //         name: '销量',
+    //         type: 'bar',
+    //         data: [5, 20, 36, 10, 10, 20]
+    //     }]
+    // };
 
-                        data: [data],    //上面从flare.json中得到的数据
 
-                        top: '1%',       //距离上
-                        left: '20%',      //左
-                        bottom: '1%',    //下
-                        right: '20%',    //右的距离
+    $.get('api/component/list', function (_data) {
+        var data = _data.data
+        myChart.hideLoading();    //得到数据后隐藏Loading标志
 
-                        symbolSize: 40,   //标记的大小，就是那个小圆圈，默认7
-                      //  orient: 'vertical',
-                        label: {         //每个节点所对应的标签的样式
+        echarts.util.each(data.children, function (datum, index) {
+            //index % 2 === 0 && (datum.collapsed = true);
+            datum.display = true
+        });    //间隔展开子数据，animate，display，physics，scale，vis是展开的
+
+        myChart.setOption(option = {
+            tooltip: {    //提示框组件
+                trigger: 'item',    //触发类型，默认：item（数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用）。可选：'axis'：坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。'none':什么都不触发。
+                triggerOn: 'mousemove'    //提示框触发的条件，默认mousemove|click（鼠标点击和移动时触发）。可选mousemove：鼠标移动时，click：鼠标点击时，none：
+            },
+            series: [    //系列列表
+                {
+                    type: 'tree',    //树形结构
+
+                    data: [data],    //上面从flare.json中得到的数据
+
+                    top: '1%',       //距离上
+                    left: '20%',      //左
+                    bottom: '1%',    //下
+                    right: '20%',    //右的距离
+
+                    symbolSize: 40,   //标记的大小，就是那个小圆圈，默认7
+                    //  orient: 'vertical',
+                    label: {         //每个节点所对应的标签的样式
+                        normal: {
+                            position: 'left',       //标签的位置
+                            verticalAlign: 'middle',//文字垂直对齐方式，默认自动。可选：top，middle，bottom
+                            align: 'right',         //文字水平对齐方式，默认自动。可选：top，center，bottom
+                            fontSize: 15             //标签文字大小
+                        }
+                    },
+
+                    leaves: {    //叶子节点的特殊配置，如上面的树图示例中，叶子节点和非叶子节点的标签位置不同
+                        label: {
                             normal: {
-                                position: 'left',       //标签的位置
-                                verticalAlign: 'middle',//文字垂直对齐方式，默认自动。可选：top，middle，bottom
-                                align: 'right',         //文字水平对齐方式，默认自动。可选：top，center，bottom
-                                fontSize: 15             //标签文字大小
+                                position: 'right',
+                                verticalAlign: 'middle',
+                                align: 'left'
                             }
-                        },
+                        }
+                    },
 
-                        leaves: {    //叶子节点的特殊配置，如上面的树图示例中，叶子节点和非叶子节点的标签位置不同
-                            label: {
-                                normal: {
-                                    position: 'right',
-                                    verticalAlign: 'middle',
-                                    align: 'left'
-                                }
-                            }
-                        },
-
-                        expandAndCollapse: true,    //子树折叠和展开的交互，默认打开
-                        animationDuration: 550,     //初始动画的时长，支持回调函数,默认1000
-                        animationDurationUpdate: 750//数据更新动画的时长，默认300
-                    }
-                ]
-            });
-
-            myChart.on("dblclick", function(param){
-				if (!param.data.leaf) {
-					// 不是叶子节点，跳过
-					return;
-				}
-				// 双击打开选中组件
-				if (param.type == 'dblclick') {
-					window.location.href = window.location.origin + '/component.html?target=' + param.name + '&label=' + param.data.label;
-				}
-            });
+                    expandAndCollapse: true,    //子树折叠和展开的交互，默认打开
+                    animationDuration: 550,     //初始动画的时长，支持回调函数,默认1000
+                    animationDurationUpdate: 750//数据更新动画的时长，默认300
+                }
+            ]
         });
 
+        myChart.on("dblclick", function (param) {
+            if (!param.data.leaf) {
+                // 不是叶子节点，跳过
+                return;
+            }
+            // 双击打开选中组件
+            if (param.type == 'dblclick') {
+                window.location.href = window.location.origin + '/component.html?target=' + param.name + '&label=' + param.data.label;
+            }
+        });
+    });
 
-        // 使用刚指定的配置项和数据显示图表。
+
+    // 使用刚指定的配置项和数据显示图表。
     //    myChart.setOption(option);
-		
-	</script>
 
-
+</script>
 
 
 </html>

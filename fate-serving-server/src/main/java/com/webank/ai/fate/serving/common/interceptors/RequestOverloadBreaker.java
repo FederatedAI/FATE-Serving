@@ -1,8 +1,6 @@
 package com.webank.ai.fate.serving.common.interceptors;
 
-import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.OverLoadException;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -35,9 +33,6 @@ public class RequestOverloadBreaker implements Interceptor {
             throw new OverLoadException("request was block by over load, service name: " + context.getServiceName());
         }
     }
-
-
-
 
 
 }

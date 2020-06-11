@@ -43,8 +43,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -129,6 +129,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         }
         return address;
     }
+
     @Override
     public Proxy.Packet sync(Context context, RpcDataWraper rpcDataWraper, long timeout) {
         Proxy.Packet resultPacket = null;
@@ -178,6 +179,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                         returnResult.setData(data);
                         return returnResult;
                     }
+
                     @Override
                     public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                         returnResult.setData(data);
@@ -194,10 +196,12 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             public ReturnResult get() throws InterruptedException, ExecutionException {
                 return parse(future.get());
             }
+
             @Override
             public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                 return parse(future.get(timeout, unit));
             }
+
             private ReturnResult parse(Proxy.Packet remote) {
                 if (remote != null) {
                     String remoteContent = remote.getBody().getValue().toStringUtf8();

@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
@@ -53,61 +51,37 @@ public class ModelManager implements InitializingBean {
 
     public synchronized ModelServiceProto.UnbindResponse unbind(Context context, ModelServiceProto.UnbindRequest req) {
         ModelServiceProto.UnbindResponse.Builder resultBuilder = ModelServiceProto.UnbindResponse.newBuilder();
-        try {
-            String serviceId = req.getServiceId();
-            Preconditions.checkArgument(serviceId != null);
-
-
-            logger.info("try to unbind model, service id : {}", serviceId);
-
-            String modelKey = this.getNameSpaceKey(req.getTableName(), req.getNamespace());
-
-            if (!this.namespaceMap.containsKey(modelKey)) {
-                logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", req.getTableName(), req.getNamespace());
-                throw new ModelNullException(" found model info, please check if the model is already loaded.");
-
-            }
-
-            Model model = this.namespaceMap.get(modelKey);
-
-
-            String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-            if (!tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
-                logger.info("unbind request info is error {}", req);
-                throw new ModelNullException("unbind request info is error");
-            }
-            if (zookeeperRegistry != null) {
-                // unregister
-                Set<URL> registered = zookeeperRegistry.getRegistered();
-                List<URL> unRegisterUrls = Lists.newArrayList();
-
-                for (URL url : registered) {
-                    if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
-                        unRegisterUrls.add(url);
-                    }
-                }
-
-                for (URL url : unRegisterUrls) {
-                    zookeeperRegistry.unregister(url);
-                }
-                logger.info("Unregister urls: {}", unRegisterUrls);
-            }
-
-
-            this.serviceIdNamespaceMap.remove(serviceId);
-            // update cache
-            this.store(serviceIdNamespaceMap, serviceIdFile);
-
-            logger.info("unbind model success");
-
-            resultBuilder.setStatusCode(StatusCode.SUCCESS);
-        } catch (ModelNullException e) {
-            resultBuilder.setStatusCode(StatusCode.MODEL_NULL);
-            resultBuilder.setMessage(e.getMessage());
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            resultBuilder.setStatusCode(StatusCode.SYSTEM_ERROR);
+        String serviceId = req.getServiceId();
+        Preconditions.checkArgument(serviceId != null);
+        logger.info("try to unbind model, service id : {}", serviceId);
+        String modelKey = this.getNameSpaceKey(req.getTableName(), req.getNamespace());
+        if (!this.namespaceMap.containsKey(modelKey)) {
+            logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", req.getTableName(), req.getNamespace());
+            throw new ModelNullException(" found model info, please check if the model is already loaded.");
         }
+        Model model = this.namespaceMap.get(modelKey);
+        String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        if (!tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
+            logger.info("unbind request info is error {}", req);
+            throw new ModelNullException("unbind request info is error");
+        }
+        if (zookeeperRegistry != null) {
+            Set<URL> registered = zookeeperRegistry.getRegistered();
+            List<URL> unRegisterUrls = Lists.newArrayList();
+            for (URL url : registered) {
+                if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                    unRegisterUrls.add(url);
+                }
+            }
+            for (URL url : unRegisterUrls) {
+                zookeeperRegistry.unregister(url);
+            }
+            logger.info("Unregister urls: {}", unRegisterUrls);
+        }
+        this.serviceIdNamespaceMap.remove(serviceId);
+        this.store(serviceIdNamespaceMap, serviceIdFile);
+        logger.info("unbind model success");
+        resultBuilder.setStatusCode(StatusCode.SUCCESS);
         return resultBuilder.build();
     }
 
@@ -154,7 +128,6 @@ public class ModelManager implements InitializingBean {
                 if (logger.isInfoEnabled()) {
                     logger.info("load model cache file " + file + ", data: " + properties);
                 }
-
                 List<RequestWapper> list = Lists.newArrayList();
                 properties.forEach((k, v) -> {
                     list.add(v);
@@ -387,44 +360,44 @@ public class ModelManager implements InitializingBean {
     }
 
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
-            ReturnResult returnResult = new ReturnResult();
-            returnResult.setRetcode(StatusCode.SUCCESS);
-            Model model = this.buildModelForLoad(context, req);
-            String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-            ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
-            String loadType = req.getLoadType();
-            if (StringUtils.isNotEmpty(loadType)) {
-                modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.valueOf(loadType));
-            } else {
-                modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
-            }
-            modelLoaderParam.setTableName(model.getTableName());
-            modelLoaderParam.setNameSpace(model.getNamespace());
-            modelLoaderParam.setFilePath(req.getFilePath());
-            ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
-            Preconditions.checkArgument(modelLoader != null);
-            ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
-            if (modelProcessor == null) {
-                throw new ModelProcessorInitException("modelProcessor is null");
-            }
-            model.setModelProcessor(modelProcessor);
-            this.namespaceMap.put(namespaceKey, model);
-            /**
-             *  host model
-             */
-            if (Dict.HOST.equals(model.getRole())) {
-                if (zookeeperRegistry != null) {
-                    if (StringUtils.isNotEmpty(model.getServiceId())) {
-                        zookeeperRegistry.addDynamicEnvironment(model.getServiceId());
-                    }
-                    String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
-                    zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
-                    zookeeperRegistry.register(FateServer.serviceSets);
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(StatusCode.SUCCESS);
+        Model model = this.buildModelForLoad(context, req);
+        String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
+        String loadType = req.getLoadType();
+        if (StringUtils.isNotEmpty(loadType)) {
+            modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.valueOf(loadType));
+        } else {
+            modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+        }
+        modelLoaderParam.setTableName(model.getTableName());
+        modelLoaderParam.setNameSpace(model.getNamespace());
+        modelLoaderParam.setFilePath(req.getFilePath());
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
+        Preconditions.checkArgument(modelLoader != null);
+        ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
+        if (modelProcessor == null) {
+            throw new ModelProcessorInitException("modelProcessor is null");
+        }
+        model.setModelProcessor(modelProcessor);
+        this.namespaceMap.put(namespaceKey, model);
+        /**
+         *  host model
+         */
+        if (Dict.HOST.equals(model.getRole())) {
+            if (zookeeperRegistry != null) {
+                if (StringUtils.isNotEmpty(model.getServiceId())) {
+                    zookeeperRegistry.addDynamicEnvironment(model.getServiceId());
                 }
+                String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
+                zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+                zookeeperRegistry.register(FateServer.serviceSets);
             }
-            // update cache
-            this.store(namespaceMap, namespaceFile);
-            return returnResult;
+        }
+        // update cache
+        this.store(namespaceMap, namespaceFile);
+        return returnResult;
 
     }
 
@@ -450,7 +423,6 @@ public class ModelManager implements InitializingBean {
                 if (StringUtils.isBlank(modelKey)) {
                     return null;
                 }
-
                 Model model = this.namespaceMap.get(modelKey);
                 model.setServiceId(queryModelRequest.getServiceId());
                 return Arrays.asList(model);
@@ -488,72 +460,45 @@ public class ModelManager implements InitializingBean {
 
     public synchronized ModelServiceProto.UnloadResponse unload(Context context, ModelServiceProto.UnloadRequest request) {
         ModelServiceProto.UnloadResponse.Builder resultBuilder = ModelServiceProto.UnloadResponse.newBuilder();
-        try {
-            if (logger.isDebugEnabled()) {
-                logger.debug("try to unload model, name: {}, namespace: {}", request.getTableName(), request.getNamespace());
-            }
-
-            resultBuilder.setStatusCode(StatusCode.SUCCESS);
-
-            Model model = this.getModelByTableNameAndNamespace(request.getTableName(), request.getNamespace());
-            if (model == null) {
-                logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", request.getTableName(), request.getNamespace());
-                throw new ModelNullException(" found model info, please check if the model is already loaded.");
-            }
-//        Preconditions.checkArgument(model != null);
-//        if (model == null) {
-//            logger.info("model not loaded");
-//            returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
-//            returnResult.setRetmsg("model not loaded");
-//            return returnResult;
-//        }
-
-            // unregister serviceId, name, namespace
-            String serviceId = model.getServiceId();
-            boolean useRegister = MetaInfo.PROPERTY_USE_REGISTER;
-            if (useRegister) {
-                String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
-                modelKey = EncryptUtils.encrypt(modelKey, EncryptMethod.MD5);
-
-                logger.info("Unregister environments: {}", StringUtils.join(modelKey, ",", serviceId));
-
-                Set<URL> registered = zookeeperRegistry.getRegistered();
-                List<URL> unRegisterUrls = Lists.newArrayList();
-                if (Dict.HOST.equals(model.getRole())) {
-                    for (URL url : registered) {
-                        if (modelKey.equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
-                            unRegisterUrls.add(url);
-                        }
-                    }
-                } else if (Dict.GUEST.equals(model.getRole())) {
-                    for (URL url : registered) {
-                        if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
-                            unRegisterUrls.add(url);
-                        }
-                    }
-                }
-
-                for (URL url : unRegisterUrls) {
-                    zookeeperRegistry.unregister(url);
-                }
-
-                logger.info("Unregister urls: {}", unRegisterUrls);
-            }
-
-            this.namespaceMap.remove(getNameSpaceKey(request.getTableName(), request.getNamespace()));
-            this.serviceIdNamespaceMap.remove(serviceId);
-
-            logger.info("Unload model success");
-
-            // update store
-            this.store();
-        } catch (ModelNullException e) {
-            resultBuilder.setStatusCode(StatusCode.MODEL_NULL);
-            resultBuilder.setMessage(e.getMessage());
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            resultBuilder.setStatusCode(StatusCode.SYSTEM_ERROR);
+        if (logger.isDebugEnabled()) {
+            logger.debug("try to unload model, name: {}, namespace: {}", request.getTableName(), request.getNamespace());
         }
+        resultBuilder.setStatusCode(StatusCode.SUCCESS);
+        Model model = this.getModelByTableNameAndNamespace(request.getTableName(), request.getNamespace());
+        if (model == null) {
+            logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", request.getTableName(), request.getNamespace());
+            throw new ModelNullException(" found model info, please check if the model is already loaded.");
+        }
+        String serviceId = model.getServiceId();
+        boolean useRegister = MetaInfo.PROPERTY_USE_REGISTER;
+        if (useRegister) {
+            String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
+            modelKey = EncryptUtils.encrypt(modelKey, EncryptMethod.MD5);
+            logger.info("Unregister environments: {}", StringUtils.join(modelKey, ",", serviceId));
+            Set<URL> registered = zookeeperRegistry.getRegistered();
+            List<URL> unRegisterUrls = Lists.newArrayList();
+            if (Dict.HOST.equals(model.getRole())) {
+                for (URL url : registered) {
+                    if (modelKey.equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                        unRegisterUrls.add(url);
+                    }
+                }
+            } else if (Dict.GUEST.equals(model.getRole())) {
+                for (URL url : registered) {
+                    if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                        unRegisterUrls.add(url);
+                    }
+                }
+            }
+            for (URL url : unRegisterUrls) {
+                zookeeperRegistry.unregister(url);
+            }
+            logger.info("unregister urls: {}", unRegisterUrls);
+        }
+        this.namespaceMap.remove(getNameSpaceKey(request.getTableName(), request.getNamespace()));
+        this.serviceIdNamespaceMap.remove(serviceId);
+        logger.info("unload model success");
+        this.store();
         return resultBuilder.build();
     }
 
@@ -604,7 +549,7 @@ public class ModelManager implements InitializingBean {
                     data.putAll(deserialize);
                 }
             } catch (Throwable e) {
-                logger.error("failed to doLoadCache file {}", file,e);
+                logger.error("failed to doLoadCache file {}", file, e);
             }
         }
     }
@@ -625,13 +570,10 @@ public class ModelManager implements InitializingBean {
             // new version
             String loadModelStoreFileName = locationPre + "/.fate/loadModelStore.cache";
             String bindModelStoreFileName = locationPre + "/.fate/bindModelStore.cache";
-
             namespaceFile = new File(loadModelStoreFileName);
             generateParent(namespaceFile);
-
             serviceIdFile = new File(bindModelStoreFileName);
             generateParent(serviceIdFile);
-
             // compatible 1.2.x
             String publishLoadFileName = locationPre + "/.fate/publishLoadStore.cache";
             String publishOnlineFileName = locationPre + "/.fate/publishOnlineStore.cache";
@@ -639,7 +581,6 @@ public class ModelManager implements InitializingBean {
             publishOnlineStoreFile = new File(publishOnlineFileName);
         }
     }
-
 
 
     private static class RequestWapper {

@@ -1,433 +1,432 @@
 <!DOCTYPE html>
 <html>
-	
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<title>fate-serving-admin</title>
-		<link href="css/bootstrap.css" rel="stylesheet" />
-		<link href="css/bootstrap-table.min.css" rel="stylesheet" />
-		<link rel="stylesheet" href="css/local.css" />
-	</head>
 
-	<body>
-		<header id="header" class="navbar navbar-default  navbar-static-top">
-			<div class="container-fluid">
-				<div class="navbar-header">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>fate-serving-admin</title>
+    <link href="css/bootstrap.css" rel="stylesheet"/>
+    <link href="css/bootstrap-table.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/local.css"/>
+</head>
 
-					<a class="navbar-brand" data-i18n="title" href="#" id="logo" >fate-serving-admin</a>
+<body>
+<header id="header" class="navbar navbar-default  navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
 
-					<a class="navbar-brand" class="btn btn-default" onclick="divhide()">
-						<span class="glyphicon glyphicon-align-justify"></span>
-					</a>
+            <a class="navbar-brand" data-i18n="title" href="#" id="logo">fate-serving-admin</a>
 
-				</div>
+            <a class="navbar-brand" class="btn btn-default" onclick="divhide()">
+                <span class="glyphicon glyphicon-align-justify"></span>
+            </a>
 
-				<!--<nav id="menu" class="navbar-collapse collapse" role="navigation">-->
-					<!--<ul class="nav navbar-nav navbar-right">-->
-						<!--<li><a href="#">退出</a></li>-->
-					<!--</ul>-->
-				<!--</nav>-->
-			</div>
-		</header>
+        </div>
 
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-md-2" id="hiddendiv">
-					<ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
-						<!--<li class="active">-->
-							<!--<a href="#">-->
-								<!--<i class="glyphicon glyphicon-th-large"></i> 首页-->
-							<!--</a>-->
-						<!--</li>-->
+        <!--<nav id="menu" class="navbar-collapse collapse" role="navigation">-->
+        <!--<ul class="nav navbar-nav navbar-right">-->
+        <!--<li><a href="#">退出</a></li>-->
+        <!--</ul>-->
+        <!--</nav>-->
+    </div>
+</header>
 
-						<li  >
-							<a href="index.html" >
-								<i class="glyphicon glyphicon-credit-card"></i> cluster
-							</a>
-						</li>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2" id="hiddendiv">
+            <ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+                <!--<li class="active">-->
+                <!--<a href="#">-->
+                <!--<i class="glyphicon glyphicon-th-large"></i> 首页-->
+                <!--</a>-->
+                <!--</li>-->
 
-						<li class="active">
-							<a href="services.html">
-								<i class="glyphicon glyphicon-globe"></i> services
-								<!--<span class="label label-warning pull-right">5</span>-->
-							</a>
-						</li>
+                <li>
+                    <a href="index.html">
+                        <i class="glyphicon glyphicon-credit-card"></i> cluster
+                    </a>
+                </li>
 
-                        <!--<li>
-                            <a href="models.html" >
-                                <i class="glyphicon glyphicon-calendar"></i> models
-                            </a>
-                        </li>-->
+                <li class="active">
+                    <a href="services.html">
+                        <i class="glyphicon glyphicon-globe"></i> services
+                        <!--<span class="label label-warning pull-right">5</span>-->
+                    </a>
+                </li>
 
-					</ul>
+                <!--<li>
+                    <a href="models.html" >
+                        <i class="glyphicon glyphicon-calendar"></i> models
+                    </a>
+                </li>-->
 
-				</div>
+            </ul>
 
-
-                <div class="col-md-9">
-
-                    <h1 class="page-header">Dashboard</h1>
-
-					<div class="row">
-						<div class="col-lg-12"  >
-							<table id="table" class="table table-no-bordered table-hover"
-								   data-toggle="table"
-								   data-url="api/service/list"
-								   data-query-params="queryParams"
-								   data-response-handler="responseHandler"
-								   data-side-pagination="server"
-								   data-page-number="1"
-								   data-page-size="15"
-								   data-pagination="true"
-								   data-page-list="[10, 20, 30, ALL]">
-								<thead>
-								<tr>
-									<th data-field="project" data-title="Project" data-sortable="true"></th>
-									<th data-field="environment" data-title="Environment" data-sortable="true"></th>
-									<th data-field="name" data-title="Name" data-sortable="true"></th>
-									<th data-field="host" data-title="Host" data-sortable="true"></th>
-									<th data-field="port" data-title="Port" data-sortable="true"></th>
-									<th data-field="routerMode" data-title="Router Mode" data-sortable="true"></th>
-									<th data-field="version" data-title="Version" data-sortable="true"></th>
-									<th data-field="weight" data-title="Weight" data-sortable="true"></th>
-									<th data-title="Operation" data-formatter="showMonitorFormatter"></th>
-								</tr>
-								</thead>
-							</table>
-
-							<!--<table class="table table-condensed table-striped">
-								<thead>
-								<tr>
-									<th>
-										name
-									</th>
-									<th>
-										host
-									</th>
-                                    <th>
-                                        port
-                                    </th>
-
-                                    <th>
-                                        protocol
-                                    </th>
-                                    <th>
-                                        router_model
-                                    </th>
-                                    <th>
-                                        timestamp
-                                    </th>
-									<th>
-										monitor
-									</th>
+        </div>
 
 
-								</tr>
-								</thead>
-								<tbody  id="node" >
+        <div class="col-md-9">
 
-								</tbody>
-							</table>-->
-						</div>
+            <h1 class="page-header">Dashboard</h1>
 
+            <div class="row">
+                <div class="col-lg-12">
+                    <table id="table" class="table table-no-bordered table-hover"
+                           data-toggle="table"
+                           data-url="api/service/list"
+                           data-query-params="queryParams"
+                           data-response-handler="responseHandler"
+                           data-side-pagination="server"
+                           data-page-number="1"
+                           data-page-size="15"
+                           data-pagination="true"
+                           data-page-list="[10, 20, 30, ALL]">
+                        <thead>
+                        <tr>
+                            <th data-field="project" data-title="Project" data-sortable="true"></th>
+                            <th data-field="environment" data-title="Environment" data-sortable="true"></th>
+                            <th data-field="name" data-title="Name" data-sortable="true"></th>
+                            <th data-field="host" data-title="Host" data-sortable="true"></th>
+                            <th data-field="port" data-title="Port" data-sortable="true"></th>
+                            <th data-field="routerMode" data-title="Router Mode" data-sortable="true"></th>
+                            <th data-field="version" data-title="Version" data-sortable="true"></th>
+                            <th data-field="weight" data-title="Weight" data-sortable="true"></th>
+                            <th data-title="Operation" data-formatter="showMonitorFormatter"></th>
+                        </tr>
+                        </thead>
+                    </table>
 
+                    <!--<table class="table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>
+                                name
+                            </th>
+                            <th>
+                                host
+                            </th>
+                            <th>
+                                port
+                            </th>
 
-						<div class="modal fade" id="serviceMonitorModal">
-							<div class="modal-dialog">
-								<div class="modal-content">
-									<div class="modal-header">
-										<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-										<h4 class="modal-title" id="myModalLabel">
-											monitor
-										</h4>
-									</div>
-									<div class="modal-body">
-										<div  id="monitorChart"  style="width: 600px;height:600px;">
-
-
-										</div>
-
-
-
-									</div>
-
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-
-					</div>
-
-					<!-- /.row -->
-
-
-					<!-- /.row -->
-
-				</div>
-					<!-- Tab panes
-					<div class="tab-content" id="maindiv">
-						<div class="tab-pane active" id="home"></div>
-					</div> -->
-				</div>
-			</div>
-		</div>
-
-		<div class="modal fade" id="modifyDialog" tabindex="-1" role="dialog" aria-labelledby="dialogLabel">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title" id="dialogLabel">Update</h4>
-					</div>
-					<div class="modal-body">
-						<form id="updateForm" class="form-horizontal">
-							<input type="hidden" name="url"/>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">project</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="project" readonly class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">environment</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="environment" readonly class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">name</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="name" readonly class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">host</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="host" readonly class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">port</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="port" readonly class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">router model</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="routerMode" class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">version</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="version" class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-lg-3 control-label">weight</label>
-								<div class="col-lg-9">
-									<div class="col-lg-9">
-										<input type="text" name="weight" class="form-control" placeholder="">
-									</div>
-									<span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
-								</div>
-							</div>
-						</form>
-						<div style="height: 40px;">
-							<button type="button" class="btn btn-primary pull-right action-btn" id="saveBtn">Confirm</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</body>
-
-	<script src="js/jquery-1.11.3.min.js"></script>
-	<script src="js/bootstrap.js"></script>
-	<link type="text/css" href="css/jquery-ui-1.9.2.custom.css" rel="stylesheet" />
-	<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
-	<script type="text/javascript" src="js/echarts.min.js"></script>
-	<script type="text/javascript" src="js/bootbox.all.min.js"></script>
-	<script type="text/javascript" src="js/bootstrap-table.min.js"></script>
-
-	<script type="text/javascript">
-		//function divhide() { $("#hiddendiv").fadeToggle(250); }
-	</script>
-	
-	<script>
-	//alert("iiiiiiii2");
-        /*$.get('api/service/registered', function (data) {
-           // alert(data);
-            $.each(data.data.registered,function(name,value) {
-                // {
-                //     "absolutePath":"/unbind",
-                //     "address":"192.168.3.12:8000",
-                //     "anyHost":false,
-                //     "backupAddress":"192.168.3.12:8000",
-                //     "backupUrls":[
-                //     {"$ref":".."}
-                // ],
-                //     "colonSeparatedKey":":::",
-                //     "host":"192.168.3.12",
-                //     "localHost":false,
-                //     "parameters":{
-                //     "ROUTER_MODEL":"ALL_ALLOWED",
-                //         "timestamp":"1589080908045"
-                // },
-                //     "path":"unbind",
-                //     "port":8000,
-                //     "protocol":"grpc",
-                //     "serviceInterface":"unbind",
-                //     "serviceKey":"null/null/unbind",
-                //     "serviceName":"unbind"
-                // }
-               // alert(value);
+                            <th>
+                                protocol
+                            </th>
+                            <th>
+                                router_model
+                            </th>
+                            <th>
+                                timestamp
+                            </th>
+                            <th>
+                                monitor
+                            </th>
 
 
-                $.each(value,function(idx,obj)
+                        </tr>
+                        </thead>
+                        <tbody  id="node" >
 
-                {
+                        </tbody>
+                    </table>-->
+                </div>
 
-                    var tr=$("<tr></tr>");
-                    tr.append( $("<td></td>").append(name));
-                    tr.append( $("<td></td>").append(obj.host));
-                    tr.append( $("<td></td>").append(obj.port));
-                    tr.append( $("<td></td>").append(obj.protocol));
-                    tr.append( $("<td></td>").append(obj.parameters.ROUTER_MODEL));
-                    tr.append( $("<td></td>").append(obj.parameters.timestamp));
-                    var   addTaskBotton  =$("<td> <button type=\"button\" class=\"btn btn-sm btn-success\"   onclick=\"showServiceMonitor()\" >check</button> </td>");
-                    tr.append( $("<td></td>").append(addTaskBotton));
-                    $("#node").append(tr);
 
-                });
+                <div class="modal fade" id="serviceMonitorModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    monitor
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                <div id="monitorChart" style="width: 600px;height:600px;">
 
-			})
-		});*/
 
-		function queryParams(params) {
-			params.page = 1 + (params.offset / params.limit);
-			params.pageSize = params.limit;
-			return params;
-		}
+                                </div>
 
-		function responseHandler(res) {
-			var result = {
-				rows: [],
-				total: 0
-			}
-			if (res) {
-				/*var data = res.data.rows;
-				result.total = res.data.total;
-				var rows = [];
-				var idx = 0;
-				for (name in data) {
-					for (i in data[name]) {
-						rows[idx] = data[name][i];
-						idx++;
-					}
-				}
-				result.rows = rows;*/
-				result = res.data;
-			}
-			// console.log(res);
-			return result;
-		}
 
-		function showMonitorFormatter(value, row, index) {
-			return '<button type="button" class="btn btn-success btn-sm" onclick="showMonitor(\'' + row.name + '\')">Monitor</button>'
-		}
+                            </div>
 
-		// function showMonitor(name) {
-		// 	bootbox.alert(name);
-		// }
+                        </div>
 
-		$('#table').on('dbl-click-row.bs.table', function(e, row, ele, field){
-			$('#modifyDialog').modal();
-			$("input[name='url']").val(row.url);
-			$("input[name='project']").val(row.project);
-			$("input[name='environment']").val(row.environment);
-			$("input[name='name']").val(row.name);
-			$("input[name='host']").val(row.host);
-			$("input[name='port']").val(row.port);
-			$("input[name='routerMode']").val(row.routerMode);
-			$("input[name='version']").val(row.version);
-			$("input[name='weight']").val(row.weight);
-		});
+                    </div>
 
-		$('#saveBtn').click(function() {
-			$('#modifyDialog').modal('hide');
-			bootbox.confirm({
-				title: "Confirm",
-				message: 'Confirm the changes?',
-				callback: function (confirm) {
-					if (confirm) {
-						/*bootbox.dialog({
-							message: '<p class="text-center"><i class="icon-spinner"></i>&nbsp;please wait...</p>',
-							size: 'small',
-							closeButton: false
-						});*/
-						var params = $('#updateForm').serialize();
-						$.post("api/service/update", params, function(result){
-							bootbox.hideAll();
-							if (result.retmsg) {
-								bootbox.alert(result.retmsg);
-								return;
-							}
-							bootbox.dialog({
-								message: '<p class="text-center">update success</p>',
-								size: 'small',
-								closeButton: false
-							});
-							$('#table').bootstrapTable('refresh', {silent: true});
-							setTimeout(function(){
-								bootbox.hideAll();
-							}, 500);
+                </div>
 
-							$('#updateForm')[0].reset();
-						});
-					} else {
-						$('#modifyDialog').modal();
-					}
-				}
-			});
-		});
+            </div>
 
-        //alert("over");
 
-        var ccc = [];
-        var now = +new Date();
-        var oneDay = 24 * 3600 * 1000;
-        var value = Math.random() * 1000;
-        for (var i = 0; i < 1000; i++) {
-            ccc.push(randomData());
+        </div>
+
+        <!-- /.row -->
+
+
+        <!-- /.row -->
+
+    </div>
+    <!-- Tab panes
+    <div class="tab-content" id="maindiv">
+        <div class="tab-pane active" id="home"></div>
+    </div> -->
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="modifyDialog" tabindex="-1" role="dialog" aria-labelledby="dialogLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="dialogLabel">Update</h4>
+            </div>
+            <div class="modal-body">
+                <form id="updateForm" class="form-horizontal">
+                    <input type="hidden" name="url"/>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">project</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="project" readonly class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">environment</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="environment" readonly class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">name</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="name" readonly class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">host</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="host" readonly class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">port</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="port" readonly class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">router model</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="routerMode" class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">version</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="version" class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">weight</label>
+                        <div class="col-lg-9">
+                            <div class="col-lg-9">
+                                <input type="text" name="weight" class="form-control" placeholder="">
+                            </div>
+                            <span class="col-lg-3 pul-left" style="color:red;font-size:6px;"></span>
+                        </div>
+                    </div>
+                </form>
+                <div style="height: 40px;">
+                    <button type="button" class="btn btn-primary pull-right action-btn" id="saveBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="js/jquery-1.11.3.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<link type="text/css" href="css/jquery-ui-1.9.2.custom.css" rel="stylesheet"/>
+<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
+<script type="text/javascript" src="js/echarts.min.js"></script>
+<script type="text/javascript" src="js/bootbox.all.min.js"></script>
+<script type="text/javascript" src="js/bootstrap-table.min.js"></script>
+
+<script type="text/javascript">
+    //function divhide() { $("#hiddendiv").fadeToggle(250); }
+</script>
+
+<script>
+    //alert("iiiiiiii2");
+    /*$.get('api/service/registered', function (data) {
+       // alert(data);
+        $.each(data.data.registered,function(name,value) {
+            // {
+            //     "absolutePath":"/unbind",
+            //     "address":"192.168.3.12:8000",
+            //     "anyHost":false,
+            //     "backupAddress":"192.168.3.12:8000",
+            //     "backupUrls":[
+            //     {"$ref":".."}
+            // ],
+            //     "colonSeparatedKey":":::",
+            //     "host":"192.168.3.12",
+            //     "localHost":false,
+            //     "parameters":{
+            //     "ROUTER_MODEL":"ALL_ALLOWED",
+            //         "timestamp":"1589080908045"
+            // },
+            //     "path":"unbind",
+            //     "port":8000,
+            //     "protocol":"grpc",
+            //     "serviceInterface":"unbind",
+            //     "serviceKey":"null/null/unbind",
+            //     "serviceName":"unbind"
+            // }
+           // alert(value);
+
+
+            $.each(value,function(idx,obj)
+
+            {
+
+                var tr=$("<tr></tr>");
+                tr.append( $("<td></td>").append(name));
+                tr.append( $("<td></td>").append(obj.host));
+                tr.append( $("<td></td>").append(obj.port));
+                tr.append( $("<td></td>").append(obj.protocol));
+                tr.append( $("<td></td>").append(obj.parameters.ROUTER_MODEL));
+                tr.append( $("<td></td>").append(obj.parameters.timestamp));
+                var   addTaskBotton  =$("<td> <button type=\"button\" class=\"btn btn-sm btn-success\"   onclick=\"showServiceMonitor()\" >check</button> </td>");
+                tr.append( $("<td></td>").append(addTaskBotton));
+                $("#node").append(tr);
+
+            });
+
+        })
+    });*/
+
+    function queryParams(params) {
+        params.page = 1 + (params.offset / params.limit);
+        params.pageSize = params.limit;
+        return params;
+    }
+
+    function responseHandler(res) {
+        var result = {
+            rows: [],
+            total: 0
         }
+        if (res) {
+            /*var data = res.data.rows;
+            result.total = res.data.total;
+            var rows = [];
+            var idx = 0;
+            for (name in data) {
+                for (i in data[name]) {
+                    rows[idx] = data[name][i];
+                    idx++;
+                }
+            }
+            result.rows = rows;*/
+            result = res.data;
+        }
+        // console.log(res);
+        return result;
+    }
+
+    function showMonitorFormatter(value, row, index) {
+        return '<button type="button" class="btn btn-success btn-sm" onclick="showMonitor(\'' + row.name + '\')">Monitor</button>'
+    }
+
+    // function showMonitor(name) {
+    // 	bootbox.alert(name);
+    // }
+
+    $('#table').on('dbl-click-row.bs.table', function (e, row, ele, field) {
+        $('#modifyDialog').modal();
+        $("input[name='url']").val(row.url);
+        $("input[name='project']").val(row.project);
+        $("input[name='environment']").val(row.environment);
+        $("input[name='name']").val(row.name);
+        $("input[name='host']").val(row.host);
+        $("input[name='port']").val(row.port);
+        $("input[name='routerMode']").val(row.routerMode);
+        $("input[name='version']").val(row.version);
+        $("input[name='weight']").val(row.weight);
+    });
+
+    $('#saveBtn').click(function () {
+        $('#modifyDialog').modal('hide');
+        bootbox.confirm({
+            title: "Confirm",
+            message: 'Confirm the changes?',
+            callback: function (confirm) {
+                if (confirm) {
+                    /*bootbox.dialog({
+                        message: '<p class="text-center"><i class="icon-spinner"></i>&nbsp;please wait...</p>',
+                        size: 'small',
+                        closeButton: false
+                    });*/
+                    var params = $('#updateForm').serialize();
+                    $.post("api/service/update", params, function (result) {
+                        bootbox.hideAll();
+                        if (result.retmsg) {
+                            bootbox.alert(result.retmsg);
+                            return;
+                        }
+                        bootbox.dialog({
+                            message: '<p class="text-center">update success</p>',
+                            size: 'small',
+                            closeButton: false
+                        });
+                        $('#table').bootstrapTable('refresh', {silent: true});
+                        setTimeout(function () {
+                            bootbox.hideAll();
+                        }, 500);
+
+                        $('#updateForm')[0].reset();
+                    });
+                } else {
+                    $('#modifyDialog').modal();
+                }
+            }
+        });
+    });
+
+    //alert("over");
+
+    var ccc = [];
+    var now = +new Date();
+    var oneDay = 24 * 3600 * 1000;
+    var value = Math.random() * 1000;
+    for (var i = 0; i < 1000; i++) {
+        ccc.push(randomData());
+    }
 
 
     function randomData() {
@@ -448,88 +447,84 @@
     }
 
 
-        var serviceMonitorChart = echarts.init(document.getElementById('monitorChart'));
+    var serviceMonitorChart = echarts.init(document.getElementById('monitorChart'));
 
-		function  showMonitor(){
+    function showMonitor() {
 
 
-            $("#serviceMonitorModal").modal({
-                keyboard: false
-            });
+        $("#serviceMonitorModal").modal({
+            keyboard: false
+        });
 
-            option = {
-                title: {
-                    text: 'qps'
+        option = {
+            title: {
+                text: 'qps'
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                    params = params[0];
+                    //  alert(params.name);
+                    var date = new Date(params.name);
+                    return date.getFullYear() + '/' + date.getDate() + '/' + (date.getMonth() + 1) + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '  ' + params.value[1];
                 },
-                tooltip: {
-                    trigger: 'axis',
-                    formatter: function (params) {
-                        params = params[0];
-                      //  alert(params.name);
-                        var date = new Date(params.name);
-                        return date.getFullYear()+'/'+date.getDate() + '/' + (date.getMonth() + 1) +' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds() + '  ' + params.value[1];
-                    },
-                    axisPointer: {
-                        animation: false
-                    }
-                },
-                xAxis: {
-                    type: 'time',
-                    splitLine: {
-                        show: false
-                    }
-                },
-                yAxis: {
-                    type: 'value',
-                    boundaryGap: [0, '100%'],
-                    splitLine: {
-                        show: false
-                    }
-                },
-                series: [{
-                    name: '模拟数据',
-                    type: 'line',
-                    showSymbol: false,
-                    hoverAnimation: false,
-                    data: ccc
-                }]
-            };
+                axisPointer: {
+                    animation: false
+                }
+            },
+            xAxis: {
+                type: 'time',
+                splitLine: {
+                    show: false
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '100%'],
+                splitLine: {
+                    show: false
+                }
+            },
+            series: [{
+                name: '模拟数据',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: ccc
+            }]
+        };
 
 
-            serviceMonitorChart.setOption(
-                option
+        serviceMonitorChart.setOption(
+            option
+        );
 
-			);
-
-            // setInterval(function () {
-            //
-            //     for (var i = 0; i < 5; i++) {
-            //
-            //         ccc.push(randomData());
-            //     }
-
-
-            var ppp = [
-                {name:'2016/12/18 6:38:08', value:['2016/12/18 6:38:08', 80]},
-                {name:'2016/12/18 16:18:18', value:['2016/12/18 16:18:18', 60]},
-                {name:'2016/12/18 19:18:18', value:['2016/12/18 19:18:18', 90]}
-            ];
+        // setInterval(function () {
+        //
+        //     for (var i = 0; i < 5; i++) {
+        //
+        //         ccc.push(randomData());
+        //     }
 
 
-                serviceMonitorChart.setOption({
-                    series: [{
-                        data: ppp
-                    }]
-                });
-            // }, 1000);
-
-		}
+        var ppp = [
+            {name: '2016/12/18 6:38:08', value: ['2016/12/18 6:38:08', 80]},
+            {name: '2016/12/18 16:18:18', value: ['2016/12/18 16:18:18', 60]},
+            {name: '2016/12/18 19:18:18', value: ['2016/12/18 19:18:18', 90]}
+        ];
 
 
+        serviceMonitorChart.setOption({
+            series: [{
+                data: ppp
+            }]
+        });
+        // }, 1000);
 
-	</script>
+    }
 
 
+</script>
 
 
 </html>

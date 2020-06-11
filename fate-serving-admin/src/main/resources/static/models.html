@@ -1,287 +1,287 @@
 <!DOCTYPE html>
 <html>
-	
-	<head>
-		<meta charset="UTF-8">
-		<title>fate-serving-admin</title>
-		<link href="css/bootstrap.css" rel="stylesheet" />
-		<link rel="stylesheet" href="css/local.css" />
-	</head>
 
-	<body>
-		<header id="header" class="navbar navbar-default  navbar-static-top">
-			<div class="container-fluid">
-				<div class="navbar-header">
+<head>
+    <meta charset="UTF-8">
+    <title>fate-serving-admin</title>
+    <link href="css/bootstrap.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/local.css"/>
+</head>
 
-					<a class="navbar-brand" data-i18n="title" href="#" id="logo" >fate-serving-admin</a>
+<body>
+<header id="header" class="navbar navbar-default  navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
 
-					<a class="navbar-brand" class="btn btn-default" onclick="divhide()">
-						<span class="glyphicon glyphicon-align-justify"></span>
-					</a>
+            <a class="navbar-brand" data-i18n="title" href="#" id="logo">fate-serving-admin</a>
 
-				</div>
+            <a class="navbar-brand" class="btn btn-default" onclick="divhide()">
+                <span class="glyphicon glyphicon-align-justify"></span>
+            </a>
 
-				<!--<nav id="menu" class="navbar-collapse collapse" role="navigation">-->
-					<!--<ul class="nav navbar-nav navbar-right">-->
-						<!--<li><a href="#">退出</a></li>-->
-					<!--</ul>-->
-				<!--</nav>-->
-			</div>
-		</header>
+        </div>
 
-
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-md-2" id="hiddendiv">
-					<ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
-						<!--<li class="active">-->
-						<!--<a href="#">-->
-						<!--<i class="glyphicon glyphicon-th-large"></i> 首页-->
-						<!--</a>-->
-						<!--</li>-->
-
-						<li  >
-							<a href="index.html" >
-								<i class="glyphicon glyphicon-credit-card"></i> cluster
-							</a>
-						</li>
-
-						<li >
-							<a href="services.html">
-								<i class="glyphicon glyphicon-globe"></i> services
-								<!--<span class="label label-warning pull-right">5</span>-->
-							</a>
-						</li>
-
-						<li class="active">
-							<a href="models.html" >
-								<i class="glyphicon glyphicon-calendar"></i> models
-							</a>
-						</li>
-
-					</ul>
-
-				</div>
-				<div class="col-md-9">
-					<h1 class="page-header">Dashboard</h1>
-
-					<div >
-						<div class="col-xs-6 col-sm-3 placeholder">
-							<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-							<h4>Label</h4>
-							<span class="text-muted">Something else</span>
-						</div>
-						<div class="col-xs-6 col-sm-3 placeholder">
-							<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-							<h4>Label</h4>
-							<span class="text-muted">Something else</span>
-						</div>
-						<div class="col-xs-6 col-sm-3 placeholder">
-							<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-							<h4>Label</h4>
-							<span class="text-muted">Something else</span>
-						</div>
-						<div >
-							<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-							<h4>Label</h4>
-							<span class="text-muted">Something else</span>
-						</div>
-					</div>
-
-					<h2 class="sub-header">Section title</h2>
-					<div class="table-responsive">
-						<table class="table table-striped">
-							<thead>
-							<tr>
-								<th>tablename</th>
-								<th>namespace</th>
-								<th>ip</th>
-								<th>port</th>
-							</tr>
-							</thead>
-							<tbody>
-							<tr>
-								<td>1,001</td>
-								<td>Lorem</td>
-								<td>ipsum</td>
-								<td>dolor</td>
-								<td>sit</td>
-							</tr>
-							<tr>
-								<td>1,002</td>
-								<td>amet</td>
-								<td>consectetur</td>
-								<td>adipiscing</td>
-								<td>elit</td>
-							</tr>
-							<tr>
-								<td>1,003</td>
-								<td>Integer</td>
-								<td>nec</td>
-								<td>odio</td>
-								<td>Praesent</td>
-							</tr>
-							<tr>
-								<td>1,003</td>
-								<td>libero</td>
-								<td>Sed</td>
-								<td>cursus</td>
-								<td>ante</td>
-							</tr>
-							<tr>
-								<td>1,004</td>
-								<td>dapibus</td>
-								<td>diam</td>
-								<td>Sed</td>
-								<td>nisi</td>
-							</tr>
-							<tr>
-								<td>1,005</td>
-								<td>Nulla</td>
-								<td>quis</td>
-								<td>sem</td>
-								<td>at</td>
-							</tr>
-							<tr>
-								<td>1,006</td>
-								<td>nibh</td>
-								<td>elementum</td>
-								<td>imperdiet</td>
-								<td>Duis</td>
-							</tr>
-							<tr>
-								<td>1,007</td>
-								<td>sagittis</td>
-								<td>ipsum</td>
-								<td>Praesent</td>
-								<td>mauris</td>
-							</tr>
-							<tr>
-								<td>1,008</td>
-								<td>Fusce</td>
-								<td>nec</td>
-								<td>tellus</td>
-								<td>sed</td>
-							</tr>
-							<tr>
-								<td>1,009</td>
-								<td>augue</td>
-								<td>semper</td>
-								<td>porta</td>
-								<td>Mauris</td>
-							</tr>
-							<tr>
-								<td>1,010</td>
-								<td>massa</td>
-								<td>Vestibulum</td>
-								<td>lacinia</td>
-								<td>arcu</td>
-							</tr>
-							<tr>
-								<td>1,011</td>
-								<td>eget</td>
-								<td>nulla</td>
-								<td>Class</td>
-								<td>aptent</td>
-							</tr>
-							<tr>
-								<td>1,012</td>
-								<td>taciti</td>
-								<td>sociosqu</td>
-								<td>ad</td>
-								<td>litora</td>
-							</tr>
-							<tr>
-								<td>1,013</td>
-								<td>torquent</td>
-								<td>per</td>
-								<td>conubia</td>
-								<td>nostra</td>
-							</tr>
-							<tr>
-								<td>1,014</td>
-								<td>per</td>
-								<td>inceptos</td>
-								<td>himenaeos</td>
-								<td>Curabitur</td>
-							</tr>
-							<tr>
-								<td>1,015</td>
-								<td>sodales</td>
-								<td>ligula</td>
-								<td>in</td>
-								<td>libero</td>
-							</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</body>
-
-	<script src="js/jquery-1.11.3.min.js"></script>
-	<script src="js/bootstrap.js"></script>
-	<link type="text/css" href="css/jquery-ui-1.9.2.custom.css" rel="stylesheet" />
-	<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
-	<script type="text/javascript" src="js/echarts.min.js"></script>
-
-	<script type="text/javascript">
-		//function divhide() { $("#hiddendiv").fadeToggle(250); }
-	</script>
-	
-	<script>
-		//alert("iiiiiiii2");
-        $.get('api/service/registered', function (data) {
-           // alert(data);
-            $.each(data.data.registered,function(name,value) {
-                // {
-                //     "absolutePath":"/unbind",
-                //     "address":"192.168.3.12:8000",
-                //     "anyHost":false,
-                //     "backupAddress":"192.168.3.12:8000",
-                //     "backupUrls":[
-                //     {"$ref":".."}
-                // ],
-                //     "colonSeparatedKey":":::",
-                //     "host":"192.168.3.12",
-                //     "localHost":false,
-                //     "parameters":{
-                //     "ROUTER_MODEL":"ALL_ALLOWED",
-                //         "timestamp":"1589080908045"
-                // },
-                //     "path":"unbind",
-                //     "port":8000,
-                //     "protocol":"grpc",
-                //     "serviceInterface":"unbind",
-                //     "serviceKey":"null/null/unbind",
-                //     "serviceName":"unbind"
-                // }
-               // alert(value);
+        <!--<nav id="menu" class="navbar-collapse collapse" role="navigation">-->
+        <!--<ul class="nav navbar-nav navbar-right">-->
+        <!--<li><a href="#">退出</a></li>-->
+        <!--</ul>-->
+        <!--</nav>-->
+    </div>
+</header>
 
 
-                $.each(value,function(idx,obj)
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2" id="hiddendiv">
+            <ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+                <!--<li class="active">-->
+                <!--<a href="#">-->
+                <!--<i class="glyphicon glyphicon-th-large"></i> 首页-->
+                <!--</a>-->
+                <!--</li>-->
 
-                {
+                <li>
+                    <a href="index.html">
+                        <i class="glyphicon glyphicon-credit-card"></i> cluster
+                    </a>
+                </li>
 
-                    var tr=$("<tr></tr>");
-                    tr.append( $("<td></td>").append(name));
-                    tr.append( $("<td></td>").append(obj.host));
-                    tr.append( $("<td></td>").append(obj.port));
-                    tr.append( $("<td></td>").append(obj.protocol));
-                    tr.append( $("<td></td>").append(obj.parameters.ROUTER_MODEL));
-                    tr.append( $("<td></td>").append(obj.parameters.timestamp));
+                <li>
+                    <a href="services.html">
+                        <i class="glyphicon glyphicon-globe"></i> services
+                        <!--<span class="label label-warning pull-right">5</span>-->
+                    </a>
+                </li>
 
-                    $("#node").append(tr);
+                <li class="active">
+                    <a href="models.html">
+                        <i class="glyphicon glyphicon-calendar"></i> models
+                    </a>
+                </li>
 
-                });
+            </ul>
 
-			})
-		});
-        //alert("over");
-	</script>
+        </div>
+        <div class="col-md-9">
+            <h1 class="page-header">Dashboard</h1>
+
+            <div>
+                <div class="col-xs-6 col-sm-3 placeholder">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
+                         width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+                    <h4>Label</h4>
+                    <span class="text-muted">Something else</span>
+                </div>
+                <div class="col-xs-6 col-sm-3 placeholder">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
+                         width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+                    <h4>Label</h4>
+                    <span class="text-muted">Something else</span>
+                </div>
+                <div class="col-xs-6 col-sm-3 placeholder">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
+                         width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+                    <h4>Label</h4>
+                    <span class="text-muted">Something else</span>
+                </div>
+                <div>
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
+                         width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
+                    <h4>Label</h4>
+                    <span class="text-muted">Something else</span>
+                </div>
+            </div>
+
+            <h2 class="sub-header">Section title</h2>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>tablename</th>
+                        <th>namespace</th>
+                        <th>ip</th>
+                        <th>port</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>1,001</td>
+                        <td>Lorem</td>
+                        <td>ipsum</td>
+                        <td>dolor</td>
+                        <td>sit</td>
+                    </tr>
+                    <tr>
+                        <td>1,002</td>
+                        <td>amet</td>
+                        <td>consectetur</td>
+                        <td>adipiscing</td>
+                        <td>elit</td>
+                    </tr>
+                    <tr>
+                        <td>1,003</td>
+                        <td>Integer</td>
+                        <td>nec</td>
+                        <td>odio</td>
+                        <td>Praesent</td>
+                    </tr>
+                    <tr>
+                        <td>1,003</td>
+                        <td>libero</td>
+                        <td>Sed</td>
+                        <td>cursus</td>
+                        <td>ante</td>
+                    </tr>
+                    <tr>
+                        <td>1,004</td>
+                        <td>dapibus</td>
+                        <td>diam</td>
+                        <td>Sed</td>
+                        <td>nisi</td>
+                    </tr>
+                    <tr>
+                        <td>1,005</td>
+                        <td>Nulla</td>
+                        <td>quis</td>
+                        <td>sem</td>
+                        <td>at</td>
+                    </tr>
+                    <tr>
+                        <td>1,006</td>
+                        <td>nibh</td>
+                        <td>elementum</td>
+                        <td>imperdiet</td>
+                        <td>Duis</td>
+                    </tr>
+                    <tr>
+                        <td>1,007</td>
+                        <td>sagittis</td>
+                        <td>ipsum</td>
+                        <td>Praesent</td>
+                        <td>mauris</td>
+                    </tr>
+                    <tr>
+                        <td>1,008</td>
+                        <td>Fusce</td>
+                        <td>nec</td>
+                        <td>tellus</td>
+                        <td>sed</td>
+                    </tr>
+                    <tr>
+                        <td>1,009</td>
+                        <td>augue</td>
+                        <td>semper</td>
+                        <td>porta</td>
+                        <td>Mauris</td>
+                    </tr>
+                    <tr>
+                        <td>1,010</td>
+                        <td>massa</td>
+                        <td>Vestibulum</td>
+                        <td>lacinia</td>
+                        <td>arcu</td>
+                    </tr>
+                    <tr>
+                        <td>1,011</td>
+                        <td>eget</td>
+                        <td>nulla</td>
+                        <td>Class</td>
+                        <td>aptent</td>
+                    </tr>
+                    <tr>
+                        <td>1,012</td>
+                        <td>taciti</td>
+                        <td>sociosqu</td>
+                        <td>ad</td>
+                        <td>litora</td>
+                    </tr>
+                    <tr>
+                        <td>1,013</td>
+                        <td>torquent</td>
+                        <td>per</td>
+                        <td>conubia</td>
+                        <td>nostra</td>
+                    </tr>
+                    <tr>
+                        <td>1,014</td>
+                        <td>per</td>
+                        <td>inceptos</td>
+                        <td>himenaeos</td>
+                        <td>Curabitur</td>
+                    </tr>
+                    <tr>
+                        <td>1,015</td>
+                        <td>sodales</td>
+                        <td>ligula</td>
+                        <td>in</td>
+                        <td>libero</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="js/jquery-1.11.3.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<link type="text/css" href="css/jquery-ui-1.9.2.custom.css" rel="stylesheet"/>
+<script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
+<script type="text/javascript" src="js/echarts.min.js"></script>
+
+<script type="text/javascript">
+    //function divhide() { $("#hiddendiv").fadeToggle(250); }
+</script>
+
+<script>
+    //alert("iiiiiiii2");
+    $.get('api/service/registered', function (data) {
+        // alert(data);
+        $.each(data.data.registered, function (name, value) {
+            // {
+            //     "absolutePath":"/unbind",
+            //     "address":"192.168.3.12:8000",
+            //     "anyHost":false,
+            //     "backupAddress":"192.168.3.12:8000",
+            //     "backupUrls":[
+            //     {"$ref":".."}
+            // ],
+            //     "colonSeparatedKey":":::",
+            //     "host":"192.168.3.12",
+            //     "localHost":false,
+            //     "parameters":{
+            //     "ROUTER_MODEL":"ALL_ALLOWED",
+            //         "timestamp":"1589080908045"
+            // },
+            //     "path":"unbind",
+            //     "port":8000,
+            //     "protocol":"grpc",
+            //     "serviceInterface":"unbind",
+            //     "serviceKey":"null/null/unbind",
+            //     "serviceName":"unbind"
+            // }
+            // alert(value);
 
 
+            $.each(value, function (idx, obj) {
+
+                var tr = $("<tr></tr>");
+                tr.append($("<td></td>").append(name));
+                tr.append($("<td></td>").append(obj.host));
+                tr.append($("<td></td>").append(obj.port));
+                tr.append($("<td></td>").append(obj.protocol));
+                tr.append($("<td></td>").append(obj.parameters.ROUTER_MODEL));
+                tr.append($("<td></td>").append(obj.parameters.timestamp));
+
+                $("#node").append(tr);
+
+            });
+
+        })
+    });
+    //alert("over");
+</script>
 
 
 </html>

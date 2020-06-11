@@ -49,7 +49,7 @@ public class ModelController {
     private int timeout;
 
     @Autowired
-    private ComponentService  componentService;
+    private ComponentService componentService;
 
     @GetMapping("/model/query")
     public ReturnResult queryModel(String host, int port, String serviceId, Integer page, Integer pageSize) throws Exception {
@@ -104,14 +104,14 @@ public class ModelController {
             }
 
             for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
-                rows.add(JsonUtil.json2Object(modelInfoEx.getContent(),Map.class));
+                rows.add(JsonUtil.json2Object(modelInfoEx.getContent(), Map.class));
             }
         }
 
         data.put("total", totalSize);
         data.put("rows", rows);
 //        return response;
-         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
+        return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
 
     @PostMapping("/model/publishLoad")
@@ -121,7 +121,7 @@ public class ModelController {
                 logger.debug("try to publishLoad, receive : {}", requestData);
             }
             ReturnResult result = new ReturnResult();
-            Map data = JsonUtil.json2Object(requestData,Map.class);
+            Map data = JsonUtil.json2Object(requestData, Map.class);
             Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
@@ -132,7 +132,7 @@ public class ModelController {
 
             if (StringUtils.isNotBlank(resp)) {
                 result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JsonUtil.json2Object(resp,Map.class));
+                result.setData(JsonUtil.json2Object(resp, Map.class));
             } else {
                 result.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
                 result.setRetmsg("publishLoad failed");
@@ -149,7 +149,7 @@ public class ModelController {
             }
             ReturnResult result = new ReturnResult();
 
-            Map data = JsonUtil.json2Object(requestData,Map.class);
+            Map data = JsonUtil.json2Object(requestData, Map.class);
             Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
@@ -161,7 +161,7 @@ public class ModelController {
 
             if (StringUtils.isNotBlank(resp)) {
                 result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JsonUtil.json2Object(resp,Map.class));
+                result.setData(JsonUtil.json2Object(resp, Map.class));
             } else {
                 result.setRetcode(StatusCode.GUEST_BIND_MODEL_ERROR);
                 result.setRetmsg("publishBind failed");

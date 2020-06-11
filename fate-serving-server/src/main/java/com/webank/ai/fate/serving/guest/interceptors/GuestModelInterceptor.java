@@ -3,7 +3,6 @@ package com.webank.ai.fate.serving.guest.interceptors;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
-import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.model.Model;
@@ -23,7 +22,7 @@ public class GuestModelInterceptor implements Interceptor {
     @Autowired
     ModelManager modelManager;
     @Autowired
-    FlowCounterManager  flowCounterManager;
+    FlowCounterManager flowCounterManager;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
@@ -35,8 +34,8 @@ public class GuestModelInterceptor implements Interceptor {
         }
         ((ServingServerContext) context).setModel(model);
 
-        boolean  pass = flowCounterManager.pass(model.getResourceName());
-        if(!pass){
+        boolean pass = flowCounterManager.pass(model.getResourceName());
+        if (!pass) {
             flowCounterManager.block(model.getResourceName());
         }
 

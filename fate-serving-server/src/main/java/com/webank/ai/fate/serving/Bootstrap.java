@@ -28,29 +28,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.context.event.ApplicationPreparedEvent;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.*;
 import java.util.Properties;
 import java.util.Set;
+
 @SpringBootApplication
 @ConfigurationProperties
 @PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
 @EnableScheduling
 public class Bootstrap {
-    private static ApplicationContext applicationContext;
     static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+    private static ApplicationContext applicationContext;
 
     public static void main(String[] args) {
         try {
@@ -59,18 +53,18 @@ public class Bootstrap {
             bootstrap.start(args);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
         } catch (Exception ex) {
-            logger.error("serving-server start error",ex);
+            logger.error("serving-server start error", ex);
             System.exit(1);
         }
     }
 
-    public static void  parseConfig(){
+    public static void parseConfig() {
 
         ClassPathResource classPathResource = new ClassPathResource("serving-server.properties");
         try {
             File file = classPathResource.getFile();
-            Properties  environment = new Properties();
-            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))){
+            Properties environment = new Properties();
+            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
                 environment.load(inputStream);
             } catch (FileNotFoundException e) {
                 logger.error("profile serving-server.properties not found");
@@ -89,8 +83,8 @@ public class Bootstrap {
             MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT)) : 3000;
             MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT)) : 3000;
             MetaInfo.FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.FEATURE_SINGLE_ADAPTOR);
-            MetaInfo.PROPERTY_USE_REGISTER = environment.getProperty(Dict.PROPERTY_USE_REGISTER)!=null?Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_REGISTER)):true;
-            MetaInfo.PROPERTY_USE_ZK_ROUTER = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)!=null?Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)):true;
+            MetaInfo.PROPERTY_USE_REGISTER = environment.getProperty(Dict.PROPERTY_USE_REGISTER) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_REGISTER)) : true;
+            MetaInfo.PROPERTY_USE_ZK_ROUTER = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)) : true;
             MetaInfo.PROPERTY_PORT = environment.getProperty(Dict.PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PORT)) : 8000;
             MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL);
             MetaInfo.PROPERTY_CACHE_TYPE = environment.getProperty(Dict.PROPERTY_CACHE_TYPE, "local");
@@ -106,14 +100,13 @@ public class Bootstrap {
             MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL)) : 3;
             MetaInfo.BATCH_SPLIT_SIZE = environment.getProperty(Dict.BATCH_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_SPLIT_SIZE)) : 100;
             MetaInfo.LR_SPLIT_SIZE = environment.getProperty(Dict.LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.LR_SPLIT_SIZE)) : 500;
-            MetaInfo.PROPERTY_SERVICE_ROLE_NAME =  environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
+            MetaInfo.PROPERTY_SERVICE_ROLE_NAME = environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
             MetaInfo.MODEL_TRANSFER_URL = environment.getProperty(Dict.MODEL_TRANSFER_URL);
         } catch (IOException e) {
             logger.error("init metainfo error", e);
         }
 
     }
-
 
 
     public void start(String[] args) {
@@ -142,15 +135,15 @@ public class Bootstrap {
         }
 
         FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
-        try{
+        try {
 
             flowCounterManager.rmAllFiles();
 
-        }catch(Exception  e){
+        } catch (Exception e) {
 
-            e.printStackTrace();;
+            e.printStackTrace();
+            ;
         }
-
 
 
         int tryNum = 0;
@@ -165,12 +158,6 @@ public class Bootstrap {
                 e.printStackTrace();
             }
         }
-
-
-
-
-
-
 
 
     }

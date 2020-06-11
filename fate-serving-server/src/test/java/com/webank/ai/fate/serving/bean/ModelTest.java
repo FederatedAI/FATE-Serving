@@ -1,15 +1,11 @@
 package com.webank.ai.fate.serving.bean;
+
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
-import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
-import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
-import com.webank.ai.fate.serving.core.flow.MetricNode;
-import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -17,16 +13,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RunWith(JUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

@@ -26,6 +26,7 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
     CommonServiceProvider commonServiceProvider;
     @Autowired
     Environment environment;
+
     @Override
     @RegisterService(serviceName = QUERY_METRICS)
     public void queryMetrics(CommonServiceProto.QueryMetricRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
@@ -73,6 +74,7 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
     private Context prepareContext(String actionType) {
         ServingServerContext context = new ServingServerContext();
         context.setEnvironment(environment);

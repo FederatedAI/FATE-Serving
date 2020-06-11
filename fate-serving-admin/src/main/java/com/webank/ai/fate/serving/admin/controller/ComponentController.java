@@ -3,7 +3,6 @@ package com.webank.ai.fate.serving.admin.controller;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
@@ -38,12 +37,10 @@ public class ComponentController {
     private static final Logger logger = LoggerFactory.getLogger(ComponentController.class);
 
     @Autowired
-    ComponentService  componentServices;
-
+    ComponentService componentServices;
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     @Value("${grpc.timeout:5000}")
     private int timeout;
-
-    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     @GetMapping("/component/list")
     public ReturnResult list() {

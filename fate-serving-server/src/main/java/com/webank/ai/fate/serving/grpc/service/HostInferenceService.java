@@ -15,6 +15,7 @@
  */
 
 package com.webank.ai.fate.serving.grpc.service;
+
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;

@@ -2,7 +2,6 @@ package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.url.URL;

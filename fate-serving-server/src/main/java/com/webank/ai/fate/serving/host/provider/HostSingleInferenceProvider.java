@@ -44,7 +44,6 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
     public ReturnResult federatedInference(Context context, InboundPackage<InferenceRequest> data) {
 
         InferenceRequest params = data.getBody();
-        Map<String, Object> featureData = params.getFeatureData();
         Model model = ((ServingServerContext) context).getModel();
         ModelProcessor modelProcessor = model.getModelProcessor();
         ReturnResult result = modelProcessor.hostInference(context, params);

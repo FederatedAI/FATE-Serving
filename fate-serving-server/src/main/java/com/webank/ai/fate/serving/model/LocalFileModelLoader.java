@@ -1,4 +1,5 @@
 package com.webank.ai.fate.serving.model;
+
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.ModelLoadException;
