@@ -83,9 +83,15 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
         Map metaInfoMap = MetaInfo.toMap();
-        Map map = Maps.newHashMap();
-        if (StringUtils.isNotBlank(keyword) && metaInfoMap.get(keyword) != null) {
-            map.put(keyword, metaInfoMap.get(keyword));
+        Map map;
+        if (StringUtils.isNotBlank(keyword)) {
+            Map resultMap = Maps.newHashMap();
+            metaInfoMap.forEach((k, v) -> {
+                if (String.valueOf(k).toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
+                    resultMap.put(k, v);
+                }
+            });
+            map = resultMap;
         } else {
             map = metaInfoMap;
         }

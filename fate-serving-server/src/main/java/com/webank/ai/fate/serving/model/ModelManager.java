@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
@@ -417,8 +418,8 @@ public class ModelManager implements InitializingBean {
 //        String namespace = queryModelRequest.getNamespace();
         switch (queryType) {
             case 0:
-                List<Model> models = listAllModel();
-                models.forEach(model -> {
+                List<Model> allModels = listAllModel();
+                allModels.forEach(model -> {
                     this.serviceIdNamespaceMap.forEach((k, v) -> {
                         String nameSpaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
                         if (nameSpaceKey.equals(v)) {
@@ -426,16 +427,25 @@ public class ModelManager implements InitializingBean {
                         }
                     });
                 });
-                return models;
+                return allModels;
             case 1:
-                String modelKey = this.serviceIdNamespaceMap.get(queryModelRequest.getServiceId());
-                if (StringUtils.isBlank(modelKey)) {
+                // Fuzzy query
+                Map<String, String> matchModelMap = Maps.newHashMap();
+                this.serviceIdNamespaceMap.forEach((k, v) -> {
+                    if (k.toLowerCase().indexOf(queryModelRequest.getServiceId().toLowerCase()) > -1) {
+                        matchModelMap.put(k, v);
+                    }
+                });
+                if (matchModelMap.isEmpty()) {
                     return null;
                 }
-
-                Model model = this.namespaceMap.get(modelKey);
-                model.setServiceId(queryModelRequest.getServiceId());
-                return Arrays.asList(model);
+                List<Model> models = Lists.newArrayList();
+                matchModelMap.forEach((k, v) -> {
+                    Model model = this.namespaceMap.get(v);
+                    model.setServiceId(k);
+                    models.add(model);
+                });
+                return models;
             default:
                 return null;
         }
