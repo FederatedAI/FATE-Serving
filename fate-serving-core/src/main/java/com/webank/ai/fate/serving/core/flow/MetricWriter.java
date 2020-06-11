@@ -355,7 +355,7 @@ public class MetricWriter {
                 }
                 System.err.println("removing metric file: " + indexFile);
             }else{
-                System.err.println("metric file "+fileName +"is not match");
+                System.err.println("metric file "+fileName +" is not match");
             }
 
         }

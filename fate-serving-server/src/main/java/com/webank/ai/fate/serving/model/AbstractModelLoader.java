@@ -42,6 +42,7 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
             modelData = restore(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace);
             if (modelData == null) {
                 logger.info("load model from local cache error, name {} namespace {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
+                return null;
             }
         } else {
             this.store(context, modelLoaderParam.tableName, modelLoaderParam.nameSpace, modelData);
@@ -103,8 +104,8 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
         StringBuilder sb = new StringBuilder();
         String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
         if (StringUtils.isNotEmpty(locationPre) && StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(namespace)) {
-            String cachFilePath = sb.append(locationPre).append("/.fate/model_").append(name).append("_").append(namespace).append("_").append("cache").toString();
-            return cachFilePath;
+            String cacheFilePath = sb.append(locationPre).append("/.fate/model_").append(name).append("_").append(namespace).append("_").append("cache").toString();
+            return cacheFilePath;
         }
         return null;
     }

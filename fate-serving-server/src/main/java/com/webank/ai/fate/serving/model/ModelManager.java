@@ -58,8 +58,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         ModelServiceProto.UnbindResponse.Builder resultBuilder = ModelServiceProto.UnbindResponse.newBuilder();
         try {
             String serviceId = req.getServiceId();
-            Preconditions.checkArgument(serviceId != null);
-
+            Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
 
             logger.info("try to unbind model, service id : {}", serviceId);
 
@@ -74,8 +73,8 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             Model model = this.namespaceMap.get(modelKey);
 
 
-            String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-            if (!tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
+            String tableNameKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+            if (!tableNameKey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
                 logger.info("unbind request info is error {}", req);
                 throw new ModelNullException("unbind request info is error");
             }
@@ -104,6 +103,10 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             logger.info("unbind model success");
 
             resultBuilder.setStatusCode(StatusCode.SUCCESS);
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            resultBuilder.setStatusCode(StatusCode.PARAM_ERROR);
+            resultBuilder.setMessage(e.getMessage());
         } catch (ModelNullException e) {
             resultBuilder.setStatusCode(StatusCode.MODEL_NULL);
             resultBuilder.setMessage(e.getMessage());
@@ -309,10 +312,16 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     public synchronized ReturnResult bind(Context context, ModelServiceProto.PublishRequest req) {
         ReturnResult returnResult = new ReturnResult();
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("try to bind model, receive request : {}", req);
+            }
+
+            String serviceId = req.getServiceId();
+            Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
+
             returnResult.setRetcode(StatusCode.SUCCESS);
             Model model = this.buildModelForBind(context, req);
 
-            String serviceId = req.getServiceId();
             String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
             Model loadedModel = this.namespaceMap.get(modelKey);
             if (loadedModel == null) {
@@ -329,6 +338,10 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             }
             //update cache
             this.store(serviceIdNamespaceMap, serviceIdFile);
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            returnResult.setRetcode(StatusCode.PARAM_ERROR);
+            returnResult.setRetmsg(e.getMessage());
         } catch (ModelNullException e) {
             returnResult.setRetcode(StatusCode.MODEL_NULL);
             returnResult.setRetmsg(e.getMessage());
@@ -348,10 +361,10 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         String serviceId = req.getServiceId();
         model.setServiceId(serviceId);
         Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
-        ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole().toString());
+        ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole());
         Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
-        ModelServiceProto.Party selfParty = roleMap.get(model.getRole().toString());
+        ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
         String selfNamespace = selfModelInfo.getNamespace();
@@ -369,7 +382,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         String serviceId = req.getServiceId();
         model.setServiceId(serviceId);
         Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
-        ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole().toString());
+        ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole());
         Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
 
@@ -390,7 +403,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             model.getFederationModelMap().put(hostModel.getPartId(), hostModel);
 
         }
-        ModelServiceProto.Party selfParty = roleMap.get(model.getRole().toString());
+        ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
         String selfNamespace = selfModelInfo.getNamespace();
@@ -403,6 +416,9 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
         ReturnResult returnResult = new ReturnResult();
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("try to load model, receive request : {}", req);
+            }
             returnResult.setRetcode(StatusCode.SUCCESS);
             Model model = this.buildModelForLoad(context, req);
             String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
@@ -421,7 +437,7 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             modelLoaderParam.setFilePath(req.getFilePath());
 
             ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
-            Preconditions.checkArgument(modelLoader != null);
+            Preconditions.checkArgument(modelLoader != null, "model loader not found");
 
             ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
             if (modelProcessor == null) {
@@ -433,20 +449,23 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             /**
              *  host model
              */
-            if (Dict.HOST.equals(model.getRole())) {
-                if (zookeeperRegistry != null) {
-                    if (StringUtils.isNotEmpty(model.getServiceId())) {
-                        zookeeperRegistry.addDynamicEnvironment(model.getServiceId());
-                    }
-                    String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
-                    zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
-                    zookeeperRegistry.register(FateServer.serviceSets);
+            if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
+                if (StringUtils.isNotEmpty(model.getServiceId())) {
+                    zookeeperRegistry.addDynamicEnvironment(model.getServiceId());
                 }
+                String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
+                zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+                zookeeperRegistry.register(FateServer.serviceSets);
             }
 
             // update cache
             this.store(namespaceMap, namespaceFile);
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            returnResult.setRetcode(StatusCode.PARAM_ERROR);
+            returnResult.setRetmsg(e.getMessage());
         } catch (ModelProcessorInitException e) {
+            logger.error("load model error, {}", e.getMessage());
             returnResult.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
             returnResult.setRetmsg(e.getMessage());
         } catch (Exception e) {
@@ -461,8 +480,8 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
 
         int queryType = queryModelRequest.getQueryType();
-        String tableName = queryModelRequest.getTableName();
-        String namespace = queryModelRequest.getNamespace();
+//        String tableName = queryModelRequest.getTableName();
+//        String namespace = queryModelRequest.getNamespace();
         switch (queryType) {
             case 0:
                 List<Model> models = listAllModel();
@@ -519,6 +538,9 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     public synchronized ModelServiceProto.UnloadResponse unload(Context context, ModelServiceProto.UnloadRequest request) {
         ModelServiceProto.UnloadResponse.Builder resultBuilder = ModelServiceProto.UnloadResponse.newBuilder();
         try {
+            Preconditions.checkArgument(StringUtils.isNotBlank(request.getTableName()), "param tableName is blank");
+            Preconditions.checkArgument(StringUtils.isNotBlank(request.getNamespace()), "param namespace id is blank");
+
             if (logger.isDebugEnabled()) {
                 logger.debug("try to unload model, name: {}, namespace: {}", request.getTableName(), request.getNamespace());
             }
@@ -577,6 +599,10 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
             // update store
             this.store();
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            resultBuilder.setStatusCode(StatusCode.PARAM_ERROR);
+            resultBuilder.setMessage(e.getMessage());
         } catch (ModelNullException e) {
             resultBuilder.setStatusCode(StatusCode.MODEL_NULL);
             resultBuilder.setMessage(e.getMessage());

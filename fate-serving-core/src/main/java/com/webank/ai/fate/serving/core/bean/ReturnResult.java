@@ -78,7 +78,7 @@ public class ReturnResult {
     }
 
     public String getRetmsg() {
-        return retmsg;
+        return retmsg != null ? retmsg : "";
     }
 
     public void setRetmsg(String retmsg) {

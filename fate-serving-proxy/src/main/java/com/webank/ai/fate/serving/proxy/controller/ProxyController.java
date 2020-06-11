@@ -18,9 +18,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -83,10 +82,11 @@ public class ProxyController {
         context.setSourceIp(sourceIp);
         context.setGuestAppId(selfCoordinator);
         Map jsonObject = JsonUtil.json2Object(data,Map.class);
-        Map head = JsonUtil.json2Object(jsonObject.get(Dict.HEAD) != null ? jsonObject.get(Dict.HEAD).toString() : "{}", Map.class);
-        Map body = JsonUtil.json2Object(jsonObject.get(Dict.BODY) != null ? jsonObject.get(Dict.BODY).toString() : "{}", Map.class);
-        context.setHostAppid(head.get(Dict.APP_ID) != null ? head.getOrDefault(Dict.APP_ID, "").toString() : "");
-        context.setCaseId(head.get(Dict.CASE_ID) != null ? head.getOrDefault(Dict.CASE_ID, "").toString() : "");
+
+        Map head = (Map) jsonObject.getOrDefault(Dict.HEAD, new HashMap<>());
+        Map body = (Map) jsonObject.getOrDefault(Dict.BODY, new HashMap<>());
+        context.setHostAppid((String) head.getOrDefault(Dict.APP_ID, ""));
+        context.setCaseId((String) head.getOrDefault(Dict.CASE_ID, ""));
         if (null == context.getCaseId() || context.getCaseId().isEmpty()) {
             context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         }

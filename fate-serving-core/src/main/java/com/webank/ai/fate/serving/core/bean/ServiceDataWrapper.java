@@ -1,5 +1,7 @@
 package com.webank.ai.fate.serving.core.bean;
 
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
+
 public class ServiceDataWrapper {
 
     private String url;
@@ -95,17 +97,6 @@ public class ServiceDataWrapper {
 
     @Override
     public String toString() {
-        return "ServiceDataWrapper{" +
-                "url='" + url + '\'' +
-                ", project='" + project + '\'' +
-                ", environment='" + environment + '\'' +
-                ", name='" + name + '\'' +
-                ", host='" + host + '\'' +
-                ", port=" + port +
-                ", routerMode='" + routerMode + '\'' +
-                ", version=" + version +
-                ", weight=" + weight +
-                ", index=" + index +
-                '}';
+        return JsonUtil.object2Json(this);
     }
 }
