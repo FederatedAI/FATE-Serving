@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
@@ -33,14 +31,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Service
-public class ModelManager implements InitializingBean, EnvironmentAware {
-//    @Autowired
-//    private ModelLoader modelLoader;
+public class ModelManager implements InitializingBean {
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
 
-    Environment environment;
     @Autowired
     ModelLoaderFactory modelLoaderFactory;
     File serviceIdFile;
@@ -58,7 +53,8 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         ModelServiceProto.UnbindResponse.Builder resultBuilder = ModelServiceProto.UnbindResponse.newBuilder();
         try {
             String serviceId = req.getServiceId();
-            Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
+            Preconditions.checkArgument(serviceId != null);
+
 
             logger.info("try to unbind model, service id : {}", serviceId);
 
@@ -73,8 +69,8 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             Model model = this.namespaceMap.get(modelKey);
 
 
-            String tableNameKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-            if (!tableNameKey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
+            String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+            if (!tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
                 logger.info("unbind request info is error {}", req);
                 throw new ModelNullException("unbind request info is error");
             }
@@ -103,10 +99,6 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
             logger.info("unbind model success");
 
             resultBuilder.setStatusCode(StatusCode.SUCCESS);
-        } catch (IllegalArgumentException e) {
-            logger.error(e.getMessage());
-            resultBuilder.setStatusCode(StatusCode.PARAM_ERROR);
-            resultBuilder.setMessage(e.getMessage());
         } catch (ModelNullException e) {
             resultBuilder.setStatusCode(StatusCode.MODEL_NULL);
             resultBuilder.setMessage(e.getMessage());
@@ -387,12 +379,10 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
 
         if (model.getRole().equals(Dict.GUEST)) {
-
             ModelServiceProto.Party hostParty = roleMap.get(Dict.HOST);
             String hostPartyId = hostParty.getPartyIdList().get(0);
 //            ModelServiceProto.RoleModelInfo hostRoleModelInfo= modelMap.get(hostPartyId);
             ModelServiceProto.RoleModelInfo hostRoleModelInfo = modelMap.get(Dict.HOST);
-
             ModelServiceProto.ModelInfo hostModelInfo = hostRoleModelInfo.getRoleModelInfoMap().get(hostPartyId);
             String hostNamespace = hostModelInfo.getNamespace();
             String hostTableName = hostModelInfo.getTableName();
@@ -414,65 +404,44 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     }
 
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
-        ReturnResult returnResult = new ReturnResult();
-        try {
-            if (logger.isDebugEnabled()) {
-                logger.debug("try to load model, receive request : {}", req);
-            }
-            returnResult.setRetcode(StatusCode.SUCCESS);
-            Model model = this.buildModelForLoad(context, req);
-            String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-            ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
-            // TODO: 2020/4/2  这里没完成
-
-            String loadType = req.getLoadType();
-            if (StringUtils.isNotEmpty(loadType)) {
-                modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.valueOf(loadType));
-            } else {
-                modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
-            }
-
-            modelLoaderParam.setTableName(model.getTableName());
-            modelLoaderParam.setNameSpace(model.getNamespace());
-            modelLoaderParam.setFilePath(req.getFilePath());
-
-            ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
-            Preconditions.checkArgument(modelLoader != null, "model loader not found");
-
-            ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
-            if (modelProcessor == null) {
-                throw new ModelProcessorInitException();
-            }
-            model.setModelProcessor(modelProcessor);
-
-            this.namespaceMap.put(namespaceKey, model);
-            /**
-             *  host model
-             */
-            if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
-                if (StringUtils.isNotEmpty(model.getServiceId())) {
-                    zookeeperRegistry.addDynamicEnvironment(model.getServiceId());
-                }
-                String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
-                zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
-                zookeeperRegistry.register(FateServer.serviceSets);
-            }
-
-            // update cache
-            this.store(namespaceMap, namespaceFile);
-        } catch (IllegalArgumentException e) {
-            logger.error(e.getMessage());
-            returnResult.setRetcode(StatusCode.PARAM_ERROR);
-            returnResult.setRetmsg(e.getMessage());
-        } catch (ModelProcessorInitException e) {
-            logger.error("load model error, {}", e.getMessage());
-            returnResult.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
-            returnResult.setRetmsg(e.getMessage());
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
+        if (logger.isDebugEnabled()) {
+            logger.debug("try to load model, receive request : {}", req);
         }
-
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(StatusCode.SUCCESS);
+        Model model = this.buildModelForLoad(context, req);
+        String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
+        String loadType = req.getLoadType();
+        if (StringUtils.isNotEmpty(loadType)) {
+            modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.valueOf(loadType));
+        } else {
+            modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+        }
+        modelLoaderParam.setTableName(model.getTableName());
+        modelLoaderParam.setNameSpace(model.getNamespace());
+        modelLoaderParam.setFilePath(req.getFilePath());
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
+        Preconditions.checkArgument(modelLoader != null, "model loader not found");
+        ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
+        if (modelProcessor == null) {
+            throw new ModelProcessorInitException("modelProcessor is null");
+        }
+        model.setModelProcessor(modelProcessor);
+        this.namespaceMap.put(namespaceKey, model);
+        /**
+         *  host model
+         */
+        if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
+            if (StringUtils.isNotEmpty(model.getServiceId())) {
+                zookeeperRegistry.addDynamicEnvironment(model.getServiceId());
+            }
+            String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
+            zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+            zookeeperRegistry.register(FateServer.serviceSets);
+        }
+        // update cache
+        this.store(namespaceMap, namespaceFile);
         return returnResult;
 
     }
@@ -538,9 +507,6 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
     public synchronized ModelServiceProto.UnloadResponse unload(Context context, ModelServiceProto.UnloadRequest request) {
         ModelServiceProto.UnloadResponse.Builder resultBuilder = ModelServiceProto.UnloadResponse.newBuilder();
         try {
-            Preconditions.checkArgument(StringUtils.isNotBlank(request.getTableName()), "param tableName is blank");
-            Preconditions.checkArgument(StringUtils.isNotBlank(request.getNamespace()), "param namespace id is blank");
-
             if (logger.isDebugEnabled()) {
                 logger.debug("try to unload model, name: {}, namespace: {}", request.getTableName(), request.getNamespace());
             }
@@ -599,10 +565,6 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
 
             // update store
             this.store();
-        } catch (IllegalArgumentException e) {
-            logger.error(e.getMessage());
-            resultBuilder.setStatusCode(StatusCode.PARAM_ERROR);
-            resultBuilder.setMessage(e.getMessage());
         } catch (ModelNullException e) {
             resultBuilder.setStatusCode(StatusCode.MODEL_NULL);
             resultBuilder.setMessage(e.getMessage());
@@ -696,10 +658,6 @@ public class ModelManager implements InitializingBean, EnvironmentAware {
         }
     }
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
 
     private static class RequestWapper {
         String content;

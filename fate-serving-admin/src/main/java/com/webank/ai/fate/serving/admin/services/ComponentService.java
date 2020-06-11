@@ -16,20 +16,53 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-import static com.webank.ai.fate.register.common.Constants.PATH_SEPARATOR;
-
 @Service
 public class ComponentService {
 
-    Logger logger = LoggerFactory.getLogger(ComponentService.class);
     private final static String PATH_SEPARATOR = "/";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
-
+    Logger logger = LoggerFactory.getLogger(ComponentService.class);
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
+    NodeData cachedNodeData;
 
     public NodeData getCachedNodeData() {
         return cachedNodeData;
+    }
+
+    @Scheduled(cron = "0/5 * * * * ?")
+    public void schedulePullComponent() {
+        ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
+        NodeData root = new NodeData();
+        root.setName("cluster");
+        root.setLabel(root.getName());
+        List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
+        if (componentLists != null) {
+            componentLists.forEach(name -> {
+                List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
+                NodeData componentData = new NodeData();
+                componentData.setName(name);
+                componentData.setLabel(root.getLabel() + "-" + componentData.getName());
+                root.getChildren().add(componentData);
+                if (CollectionUtils.isNotEmpty(nodes)) {
+                    nodes.forEach(nodeName -> {
+                        String content = zkClient.getContent(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name + PATH_SEPARATOR + nodeName);
+                        Map contentMap = JsonUtil.json2Object(content, Map.class);
+                        NodeData nodeData = new NodeData();
+                        nodeData.setName(nodeName);
+                        nodeData.setLeaf(true);
+                        nodeData.setLabel(componentData.getLabel() + "-" + nodeData.getName());
+                        nodeData.setTimestamp((Long) contentMap.get(Constants.TIMESTAMP_KEY));
+                        componentData.getChildren().add(nodeData);
+                    });
+                }
+            });
+        }
+        cachedNodeData = root;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("refresh  component info ");
+        }
     }
 
     public class NodeData {
@@ -40,6 +73,7 @@ public class ComponentService {
         String label;
 
         long timestamp;
+        List<NodeData> children = Lists.newArrayList();
 
         public long getTimestamp() {
             return timestamp;
@@ -79,45 +113,6 @@ public class ComponentService {
 
         public void setChildren(List<NodeData> children) {
             this.children = children;
-        }
-
-        List<NodeData> children = Lists.newArrayList();
-    }
-
-    NodeData cachedNodeData;
-
-    @Scheduled(cron = "0/5 * * * * ?")
-    public void schedulePullComponent() {
-        ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
-        NodeData root = new NodeData();
-        root.setName("cluster");
-        root.setLabel(root.getName());
-        List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
-        if (componentLists != null) {
-            componentLists.forEach(name -> {
-                List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
-                NodeData componentData = new NodeData();
-                componentData.setName(name);
-                componentData.setLabel(root.getLabel() + "-" + componentData.getName());
-                root.getChildren().add(componentData);
-                if (CollectionUtils.isNotEmpty(nodes)) {
-                    nodes.forEach(nodeName -> {
-                        String content = zkClient.getContent(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name + PATH_SEPARATOR + nodeName);
-                        Map contentMap = JsonUtil.json2Object(content, Map.class);
-                        NodeData nodeData = new NodeData();
-                        nodeData.setName(nodeName);
-                        nodeData.setLeaf(true);
-                        nodeData.setLabel(componentData.getLabel() + "-" + nodeData.getName());
-                        nodeData.setTimestamp((Long) contentMap.get(Constants.TIMESTAMP_KEY));
-                        componentData.getChildren().add(nodeData);
-                    });
-                }
-            });
-        }
-        cachedNodeData = root;
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("refresh  component info ");
         }
     }
 

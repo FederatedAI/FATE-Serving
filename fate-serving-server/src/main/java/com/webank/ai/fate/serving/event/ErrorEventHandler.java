@@ -1,7 +1,6 @@
 package com.webank.ai.fate.serving.event;
 
 import com.webank.ai.fate.register.utils.StringUtils;
-import com.webank.ai.fate.serving.ServingServer;
 import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.async.Subscribe;
@@ -10,8 +9,6 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.upload.AlertInfoUploader;
-import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
@@ -23,21 +20,21 @@ import org.springframework.stereotype.Service;
 public class ErrorEventHandler extends AbstractAsyncMessageProcessor implements EnvironmentAware, InitializingBean {
 
     @Autowired
-    FlowCounterManager  flowCounterManager;
+    FlowCounterManager flowCounterManager;
 
-    Environment  environment;
+    Environment environment;
 
     @Subscribe(value = Dict.EVENT_ERROR)
     public void handleMetricsEvent(AsyncMessageEvent event) {
         Context context = event.getContext();
-        String  serviceName = context.getServiceName();
-        String  actionType  = context.getActionType();
-        String  resource = StringUtils.isNotEmpty(actionType)?actionType:serviceName;
+        String serviceName = context.getServiceName();
+        String actionType = context.getActionType();
+        String resource = StringUtils.isNotEmpty(actionType) ? actionType : serviceName;
         flowCounterManager.exception(resource);
-        if(context instanceof ServingServerContext) {
-            ServingServerContext servingServerContext =(ServingServerContext)context;
-            Model model =servingServerContext.getModel();
-            if(model!=null) {
+        if (context instanceof ServingServerContext) {
+            ServingServerContext servingServerContext = (ServingServerContext) context;
+            Model model = servingServerContext.getModel();
+            if (model != null) {
                 flowCounterManager.exception(model.getResourceName());
             }
         }

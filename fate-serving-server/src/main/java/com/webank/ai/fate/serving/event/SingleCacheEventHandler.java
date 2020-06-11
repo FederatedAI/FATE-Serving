@@ -1,7 +1,6 @@
 package com.webank.ai.fate.serving.event;
 
 
-
 import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
 import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.core.async.Subscribe;
@@ -20,6 +19,7 @@ public class SingleCacheEventHandler extends AbstractAsyncMessageProcessor {
     Logger logger = LoggerFactory.getLogger(SingleCacheEventHandler.class);
     @Autowired
     Cache cache;
+
     @Subscribe(value = Dict.EVENT_SET_INFERENCE_CACHE)
     public void handleMetricsEvent(AsyncMessageEvent event) {
         CacheEventData cacheEventData = (CacheEventData) event.getData();

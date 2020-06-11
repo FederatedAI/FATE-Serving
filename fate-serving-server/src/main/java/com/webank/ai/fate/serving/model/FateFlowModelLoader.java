@@ -21,6 +21,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
@@ -107,7 +108,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             }
 
             if (StringUtils.isBlank(requestUrl)) {
-                requestUrl = environment.getProperty(Dict.MODEL_TRANSFER_URL);
+                requestUrl = MetaInfo.MODEL_TRANSFER_URL;
                 logger.info("use profile model.transfer.url, {}", requestUrl);
             }
 
@@ -135,12 +136,12 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
 
             Map responseData = JsonUtil.json2Object(responseBody, Map.class);
             if (responseData.get(Dict.RET_CODE) != null && !responseData.get(Dict.RET_CODE).toString().equals(StatusCode.SUCCESS)) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get(Dict.RET_MSG));
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get("retmsg"));
                 return null;
             }
 
             Map<String, byte[]> resultMap = new HashMap<>(8);
-            Map<String, Object> dataMap = (Map<String, Object>) responseData.get(Dict.DATA);
+            Map<String, Object> dataMap = responseData.get(Dict.DATA) != null ? (Map<String, Object>) responseData.get(Dict.DATA) : null;
             if (dataMap == null || dataMap.isEmpty()) {
                 logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);
                 return null;

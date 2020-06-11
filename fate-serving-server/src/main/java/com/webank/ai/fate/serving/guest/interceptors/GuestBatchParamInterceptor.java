@@ -1,4 +1,5 @@
 package com.webank.ai.fate.serving.guest.interceptors;
+
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;

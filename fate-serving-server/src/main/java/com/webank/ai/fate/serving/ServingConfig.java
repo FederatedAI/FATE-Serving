@@ -15,13 +15,10 @@ import com.webank.ai.fate.serving.core.cache.RedisCache;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 @Configuration
 public class ServingConfig {
@@ -53,7 +50,7 @@ public class ServingConfig {
 
     @Bean
     public FlowCounterManager flowCounterManager() {
-        FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING,true);
+        FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING, true);
         flowCounterManager.startReport();
         return flowCounterManager;
     }

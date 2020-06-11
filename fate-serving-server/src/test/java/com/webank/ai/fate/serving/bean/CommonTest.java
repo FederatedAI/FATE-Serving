@@ -34,10 +34,11 @@ public class CommonTest {
         builder.setBeginMs(begin);
         builder.setEndMs(now);
         builder.setType(CommonServiceProto.MetricType.INTERFACE);
-      //  builder.setSource("commonService");
+        //  builder.setSource("commonService");
         CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryMetric(builder.build());
 
-        List<MetricNode> list = JsonUtil.json2Object(resultMessage.getData().toStringUtf8(), new TypeReference<List<MetricNode>>(){});
+        List<MetricNode> list = JsonUtil.json2Object(resultMessage.getData().toStringUtf8(), new TypeReference<List<MetricNode>>() {
+        });
         System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
         System.err.println("Message ==================" + resultMessage.getMessage());
         System.err.println("result ==================" + JsonUtil.object2Json(list));
@@ -102,7 +103,8 @@ public class CommonTest {
         builder.setType(CommonServiceProto.MetricType.MODEL);
         CommonServiceProto.CommonResponse resultMessage = inferenceClient.queryMetric(builder.build());
 
-        List<MetricNode> list = JsonUtil.json2List(resultMessage.getData().toStringUtf8(), new TypeReference<List<MetricNode>>(){});
+        List<MetricNode> list = JsonUtil.json2List(resultMessage.getData().toStringUtf8(), new TypeReference<List<MetricNode>>() {
+        });
         System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
         System.err.println("Message ==================" + resultMessage.getMessage());
         System.err.println("result ==================" + JsonUtil.object2Json(list));

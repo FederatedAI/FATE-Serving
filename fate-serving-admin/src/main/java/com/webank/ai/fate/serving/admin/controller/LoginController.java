@@ -56,14 +56,12 @@ public class LoginController {
             String userInfo = StringUtils.join(Arrays.asList(username, password), "_");
 //            String token = Md5Crypt.md5Crypt((Dict.USER_CACHE_KEY_PREFIX + userInfo).getBytes(), Dict.MD5_SALT);
             String token = EncryptUtils.encrypt(Dict.USER_CACHE_KEY_PREFIX + userInfo, EncryptMethod.MD5);
-
             cache.put(token, userInfo, 600);
             logger.info("user {} login success.", username);
 
             Map data = new HashMap<>();
             data.put("timestamp", System.currentTimeMillis());
             data.put(Dict.SESSION_TOKEN, token);
-
             result.setRetcode(StatusCode.SUCCESS);
             result.setData(data);
         } else {

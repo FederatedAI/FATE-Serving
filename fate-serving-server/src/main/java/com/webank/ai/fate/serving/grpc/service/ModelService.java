@@ -15,6 +15,7 @@
  */
 
 package com.webank.ai.fate.serving.grpc.service;
+
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
@@ -41,6 +42,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
 
     @Autowired
     ModelServiceProvider modelServiceProvider;
+
     @Autowired
     Environment environment;
 
@@ -54,7 +56,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
-        builder.setMessage(returnResult.getRetmsg());
+        builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
@@ -70,7 +72,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
-        builder.setMessage(returnResult.getRetmsg());
+        builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
@@ -86,7 +88,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
-        builder.setMessage(returnResult.getRetmsg());
+        builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(returnResult.getData()).getBytes()));
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();

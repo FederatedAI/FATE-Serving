@@ -51,13 +51,13 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         long endMs = queryMetricRequest.getEndMs();
         String sourceName = queryMetricRequest.getSource();
         CommonServiceProto.MetricType type = queryMetricRequest.getType();
-        List<MetricNode> metricNodes=null;
-        if(type.equals(CommonServiceProto.MetricType.INTERFACE)) {
+        List<MetricNode> metricNodes = null;
+        if (type.equals(CommonServiceProto.MetricType.INTERFACE)) {
             metricNodes = flowCounterManager.queryMetrics(beginMs, endMs, sourceName);
             if (StringUtils.isBlank(sourceName)) {
                 metricNodes = flowCounterManager.queryAllMetrics(beginMs, 300);
             }
-        }else{
+        } else {
             metricNodes = flowCounterManager.queryModelMetrics(beginMs, endMs, sourceName);
         }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();

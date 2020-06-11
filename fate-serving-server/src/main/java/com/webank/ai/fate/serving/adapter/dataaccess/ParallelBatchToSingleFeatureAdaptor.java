@@ -54,11 +54,9 @@ public class ParallelBatchToSingleFeatureAdaptor implements BatchFeatureDataAdap
 
     @Override
     public BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList) {
-
         BatchHostFeatureAdaptorResult result = new BatchHostFeatureAdaptorResult();
         CountDownLatch countDownLatch = new CountDownLatch(featureIdList.size());
         for (int i = 0; i < featureIdList.size(); i++) {
-
             BatchHostFederatedParams.SingleInferenceData singleInferenceData = featureIdList.get(i);
             // TODO: 2020/3/4    这里需要加 线程池满后的异常处理
             this.listeningExecutorService.submit(new Runnable() {
