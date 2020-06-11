@@ -21,6 +21,7 @@ import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -133,13 +134,13 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             }
 
             Map responseData = JsonUtil.json2Object(responseBody, Map.class);
-            if (responseData.get(Dict.RET_CODE) != null && Integer.valueOf(responseData.get(Dict.RET_CODE).toString()) != 0) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get("retmsg").toString());
+            if (responseData.get(Dict.RET_CODE)!=null&&!responseData.get(Dict.RET_CODE).toString().equals(StatusCode.SUCCESS)) {
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get("retmsg"));
                 return null;
             }
 
             Map<String, byte[]> resultMap = new HashMap<>();
-            Map<String, Object> dataMap = JsonUtil.json2Object(responseData.get(Dict.DATA).toString(), Map.class);
+            Map<String, Object> dataMap = (Map<String, Object>) responseData.get(Dict.DATA);
             if (dataMap == null || dataMap.isEmpty()) {
                 logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);
                 return null;
