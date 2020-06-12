@@ -26,8 +26,6 @@ import java.util.List;
 public class ModelServiceProvider extends AbstractServingServiceProvider {
     @Autowired
     ModelManager modelManager;
-
-
     @FateServiceMethod(name = "MODEL_LOAD")
     public Object load(Context context, InboundPackage data) {
         ModelServiceProto.PublishRequest publishRequest = (ModelServiceProto.PublishRequest) data.getBody();
@@ -48,8 +46,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         List<Model> models = modelManager.queryModel(context, req);
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
         if (CollectionUtils.isNotEmpty(models)) {
-
-
             for (int i = 0; i < models.size(); i++) {
                 Model model = models.get(i);
                 ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
@@ -87,8 +83,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
             String msg = data.getMessage() != null ? data.getMessage().toString() : "";
             if (StringUtils.isNotEmpty(actionType)) {
                 switch (actionType) {
-                    case "MODEL_LOAD":
-                        ;
+                    case "MODEL_LOAD": ;
                     case "MODEL_PUBLISH_ONLINE":
                         ReturnResult returnResult = new ReturnResult();
                         returnResult.setRetcode(code);
@@ -109,7 +104,4 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         }
         return null;
     }
-
-    ;
-
 }

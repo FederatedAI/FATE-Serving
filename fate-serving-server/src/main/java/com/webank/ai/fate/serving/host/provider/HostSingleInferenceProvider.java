@@ -30,7 +30,6 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
 
     @Override
     protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
-
         Map result = new HashMap(8);
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
@@ -42,7 +41,6 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
 
     @FateServiceMethod(name = "federatedInference")
     public ReturnResult federatedInference(Context context, InboundPackage<InferenceRequest> data) {
-
         InferenceRequest params = data.getBody();
         Model model = ((ServingServerContext) context).getModel();
         ModelProcessor modelProcessor = model.getModelProcessor();
@@ -53,7 +51,6 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
 
     @FateServiceMethod(name = "federatedInference4Tree")
     public ReturnResult federatedInference4Tree(Context context, InboundPackage<Map> data) {
-
         Map params = data.getBody();
         Model model = ((ServingServerContext) context).getModel();
         Object componentObject = model.getModelProcessor().getComponent(params.get(Dict.COMPONENT_NAME).toString());

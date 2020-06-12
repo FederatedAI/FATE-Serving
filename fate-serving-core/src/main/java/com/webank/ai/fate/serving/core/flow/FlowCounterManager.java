@@ -47,8 +47,6 @@ public class FlowCounterManager {
         this(appName,false);
     }
 
-
-
     public FlowCounterManager(String appName,Boolean countModelRequest) {
         this.appName = appName;
         String baseFileName = appName + "-metrics.log";
@@ -58,13 +56,11 @@ public class FlowCounterManager {
             modelFileName += ".pid" + GetSystemInfo.getPid();
         }
         metricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, baseFileName);
-
         metricReport = new FileMetricReport(appName);
         if(countModelRequest){
             modelMetricReport = new FileMetricReport("model");
             modelMetricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR,   modelFileName);
         }
-
     }
 
     public  List<MetricNode>  queryMetrics(long beginTimeMs, long endTimeMs, String identity){
@@ -93,8 +89,6 @@ public class FlowCounterManager {
             logger.error("find model metric error",e);
             throw  new SysException("find model metric error");
         }
-
-
     }
 
     public  List<MetricNode>  queryAllModelMetrics(long beginTimeMs, int size){

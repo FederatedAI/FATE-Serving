@@ -19,7 +19,6 @@ public class JsonUtil {
 
     static {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //设置输入时忽略JSON字符串中存在而Java对象实际没有的属性
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
@@ -28,9 +27,7 @@ public class JsonUtil {
         if (o == null) {
             return null;
         }
-
         String s = "";
-
         try {
             s = mapper.writeValueAsString(o);
         } catch (Exception e) {
@@ -39,34 +36,9 @@ public class JsonUtil {
         return s;
     }
 
-//    public static <T> List<String> listObject2ListJson(List<T> objects) {
-//        if (objects == null)
-//            return null;
-//
-//        List<String> lists = new ArrayList<String>();
-//        for (T t : objects) {
-//            lists.add(JsonUtil.object2Json(t));
-//        }
-//
-//        return lists;
-//    }
-
-//    public static <T> List<T> listJson2ListObject(List<String> jsons, Class<T> c) {
-//        if (jsons == null)
-//            return null;
-//
-//        List<T> ts = new ArrayList<T>();
-//        for (String j : jsons) {
-//            ts.add(JsonUtil.json2Object(j, c));
-//        }
-//
-//        return ts;
-//    }
-
     public static <T> T json2Object(String json, Class<T> c) {
         if (StringUtils.hasLength(json) == false)
             return null;
-
         T t = null;
         try {
             t = mapper.readValue(json, c);
@@ -114,43 +86,5 @@ public class JsonUtil {
         }
         return (T) t;
     }
-
-
-    public  static  void  main(String[] args){
-
-            Map map = new HashMap();
-
-            List  test = new ArrayList();
-            map.put("xxx",test);
-
-            Map inner = Maps.newHashMap();
-            inner.put("cccc",3333);
-            map.put("testInner",inner);
-            test.add(1);
-            test.add(2);
-            test.add(3);
-
-
-
-           String  x =  object2Json(map);
-
-
-
-
-
-           System.err.println(x);
-
-           Map  temp =json2Object(x,Map.class);
-
-           System.err.println(temp);
-
-//            List<Double>  list =  json2List(x, new TypeReference<List<Double>>() {
-//            });
-
-//            for(Object cd:list) {
-//                System.err.println(cd.getClass());
-//            }
-    }
-
 
 }

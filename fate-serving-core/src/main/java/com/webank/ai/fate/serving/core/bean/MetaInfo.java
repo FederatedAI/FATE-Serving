@@ -22,6 +22,7 @@ public class MetaInfo {
     public static Boolean PROPERTY_USE_REGISTER;
     public static Boolean PROPERTY_USE_ZK_ROUTER;
     public static String FEATURE_BATCH_ADAPTOR;
+    public static Integer BATCH_INFERENCE_MAX;
     public static String FEATURE_SINGLE_ADAPTOR;
     public static Integer SINGLE_INFERENCE_RPC_TIMEOUT;
     public static Integer BATCH_INFERENCE_RPC_TIMEOUT;
@@ -39,6 +40,7 @@ public class MetaInfo {
     public static Integer PROPERTY_LOCAL_CACHE_INTERVAL;
     public static int BATCH_SPLIT_SIZE;
     public static int LR_SPLIT_SIZE;
+
 
     public static String PROPERTY_SERVICE_ROLE_NAME;
     public static String MODEL_TRANSFER_URL;

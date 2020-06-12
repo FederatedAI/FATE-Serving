@@ -96,7 +96,6 @@ public class MonitorController {
     @GetMapping("/monitor/queryModel")
     public ReturnResult queryModelMonitorData(String host, int port, String source) {
         Preconditions.checkArgument(StringUtils.isNotBlank(source), "parameter source is blank");
-
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
         blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();

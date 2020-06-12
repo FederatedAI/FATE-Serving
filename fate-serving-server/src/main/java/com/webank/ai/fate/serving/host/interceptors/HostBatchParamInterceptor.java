@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.host.interceptors;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.HostInvalidParamException;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
@@ -46,7 +47,7 @@ public class HostBatchParamInterceptor implements Interceptor {
             Preconditions.checkArgument(batchHostFederatedParams != null, "");
             Preconditions.checkArgument(batchHostFederatedParams.getBatchDataList() != null && batchHostFederatedParams.getBatchDataList().size() > 0);
             List<BatchHostFederatedParams.SingleInferenceData> datalist = batchHostFederatedParams.getBatchDataList();
-            int batchSizeLimit = environment.getProperty("batch.inference.max", int.class, 500);
+            int batchSizeLimit = MetaInfo.BATCH_INFERENCE_MAX;
             Preconditions.checkArgument(datalist.size() <= batchSizeLimit, "batch size is big than " + batchSizeLimit);
         } catch (Exception e) {
             throw new HostInvalidParamException(e.getMessage());

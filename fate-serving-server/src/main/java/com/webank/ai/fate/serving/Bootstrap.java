@@ -45,7 +45,6 @@ import java.util.Set;
 public class Bootstrap {
     static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
     private static ApplicationContext applicationContext;
-
     public static void main(String[] args) {
         try {
             parseConfig();
@@ -59,7 +58,6 @@ public class Bootstrap {
     }
 
     public static void parseConfig() {
-
         ClassPathResource classPathResource = new ClassPathResource("serving-server.properties");
         try {
             File file = classPathResource.getFile();
@@ -68,10 +66,11 @@ public class Bootstrap {
                 environment.load(inputStream);
             } catch (FileNotFoundException e) {
                 logger.error("profile serving-server.properties not found");
+                throw e;
             } catch (IOException e) {
                 logger.error("parse config error, {}", e.getMessage());
+                throw e;
             }
-
             int processors = Runtime.getRuntime().availableProcessors();
             MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_CORE_POOL_SIZE)) : processors;
@@ -79,6 +78,7 @@ public class Bootstrap {
             MetaInfo.SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)) : 1000;
             MetaInfo.SERVING_POOL_QUEUE_SIZE = environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)) : 100;
             MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
+            MetaInfo.BATCH_INFERENCE_MAX = environment.getProperty(Dict.BATCH_INFERENCE_MAX)!=null? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_MAX)):300;
             MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)) : Boolean.FALSE;
             MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT)) : 3000;
             MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT)) : 3000;
@@ -102,25 +102,24 @@ public class Bootstrap {
             MetaInfo.LR_SPLIT_SIZE = environment.getProperty(Dict.LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.LR_SPLIT_SIZE)) : 500;
             MetaInfo.PROPERTY_SERVICE_ROLE_NAME = environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
             MetaInfo.MODEL_TRANSFER_URL = environment.getProperty(Dict.MODEL_TRANSFER_URL);
+
+
         } catch (IOException e) {
             logger.error("init metainfo error", e);
+            System.exit(1);
         }
-
     }
 
 
     public void start(String[] args) {
         SpringApplication springApplication = new SpringApplication(Bootstrap.class);
-
         applicationContext = springApplication.run(args);
         JvmInfoCounter.start();
-
     }
 
     public void stop() {
         logger.info("try to shutdown server ...");
         AbstractServiceAdaptor.isOpen = false;
-
         boolean useZkRouter = MetaInfo.PROPERTY_USE_ZK_ROUTER;
         if (useZkRouter) {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
@@ -133,19 +132,12 @@ public class Bootstrap {
             });
             zookeeperRegistry.destroy();
         }
-
         FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
         try {
-
             flowCounterManager.rmAllFiles();
-
         } catch (Exception e) {
-
             e.printStackTrace();
-            ;
         }
-
-
         int tryNum = 0;
         /**
          * 3秒

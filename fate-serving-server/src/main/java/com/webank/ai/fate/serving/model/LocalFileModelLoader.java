@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Map;
 
@@ -33,7 +34,12 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
     protected Map<String, byte[]> unserialize(Context context, byte[] data) {
         Map<String, byte[]> result = Maps.newHashMap();
         if (data != null) {
-            String dataString = new String(data);
+            String dataString = null;
+            try {
+                dataString = new String(data,"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.getMessage();
+            }
             Map originData = JsonUtil.json2Object(dataString, Map.class);
             if (originData != null) {
                 originData.forEach((k, v) -> {
@@ -65,9 +71,7 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
             throw new ModelLoadException("model file" + file.getAbsolutePath() + " is not exist");
         }
         byte[] content = readFile(file);
-        // TODO: 2020/4/5 暂时拿原来的缓存文件来用
         Map<String, byte[]> data = unserialize(context, content);
-
         return data;
     }
 

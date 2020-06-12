@@ -17,11 +17,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<InferenceRequest, ReturnResult> implements InitializingBean {
-
     Logger logger = LoggerFactory.getLogger(HostSingleFeatureAdaptorInterceptor.class);
-
     SingleFeatureDataAdaptor singleFeatureDataAdaptor = null;
-
     @Override
     public void doPreProcess(Context context, InboundPackage<InferenceRequest> inboundPackage, OutboundPackage<ReturnResult> outboundPackage) throws Exception {
         if (singleFeatureDataAdaptor == null) {

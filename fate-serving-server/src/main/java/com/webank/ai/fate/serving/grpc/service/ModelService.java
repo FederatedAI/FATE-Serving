@@ -42,10 +42,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
 
     @Autowired
     ModelServiceProvider modelServiceProvider;
-
     @Autowired
     Environment environment;
-
     @Override
     @RegisterService(serviceName = "publishLoad")
     public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {

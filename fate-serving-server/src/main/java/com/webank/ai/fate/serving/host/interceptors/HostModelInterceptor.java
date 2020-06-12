@@ -37,7 +37,6 @@ public class HostModelInterceptor implements Interceptor {
             throw new HostModelNullException("mode is null");
         }
         servingServerContext.setModel(model);
-
         boolean pass = flowCounterManager.pass(model.getResourceName());
         if (!pass) {
             flowCounterManager.block(model.getResourceName());

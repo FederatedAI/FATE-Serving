@@ -32,7 +32,6 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         }
         BatchInferenceRequest batchInferenceRequest = inboundPackage.getBody();
         BatchHostFeatureAdaptorResult batchHostFeatureAdaptorResult = batchFeatureDataAdaptor.getFeatures(context, inboundPackage.getBody().getBatchDataList());
-        long end1 = System.currentTimeMillis();
         if (batchHostFeatureAdaptorResult == null) {
             throw new HostGetFeatureErrorException("adaptor return null");
         }
@@ -47,17 +46,16 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });
-        long end2 = System.currentTimeMillis();
-        logger.info("adaptor cost {} {}", end1 - begin, end2 - begin);
+        long end = System.currentTimeMillis();
+        logger.info("batch adaptor cost {} ", end - begin);
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String adaptorClass = environment.getProperty("feature.batch.adaptor");
+        String adaptorClass = MetaInfo.FEATURE_BATCH_ADAPTOR;
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}", adaptorClass);
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
-
             ServingServerContext context = new ServingServerContext();
             context.setEnvironment(environment);
             try {
