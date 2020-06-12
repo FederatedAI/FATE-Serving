@@ -10,6 +10,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,9 +56,14 @@ public class HeteroFeatureBinning extends BaseComponent {
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
 
         HashMap<String, Object> outputData = new HashMap<>(8);
+        HashMap<String, Long> headerMap = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
             return firstData;
+        }
+
+        for (int i=0; i < this.header.size(); i ++) {
+            headerMap.put(this.header.get(i), (long) i);
         }
 
         for (String colName : firstData.keySet()) {
@@ -66,18 +72,16 @@ public class HeteroFeatureBinning extends BaseComponent {
                     outputData.put(colName, firstData.get(colName));
                     continue;
                 }
-                Long thisColIndex = (long) this.header.indexOf(colName);
+                Long thisColIndex = headerMap.get(colName);
                 if (!this.transformCols.contains(thisColIndex)) {
                     outputData.put(colName, firstData.get(colName));
                     continue;
                 }
                 List<Double> splitPoint = this.splitPoints.get(colName);
                 Double colValue = Double.valueOf(firstData.get(colName).toString());
-                int colIndex = 0;
-                for (colIndex = 0; colIndex < splitPoint.size(); colIndex++) {
-                    if (colValue <= splitPoint.get(colIndex)) {
-                        break;
-                    }
+                int colIndex = Collections.binarySearch(splitPoint, colValue);
+                if (colIndex < 0) {
+                    colIndex = Math.min((- colIndex - 1), splitPoint.size() - 1);
                 }
                 outputData.put(colName, colIndex);
             } catch (Throwable e) {
@@ -85,7 +89,7 @@ public class HeteroFeatureBinning extends BaseComponent {
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("HeteroFeatureBinning output {}", outputData);
+            logger.debug("DEBUG: HeteroFeatureBinning output {}", outputData);
         }
         return outputData;
 

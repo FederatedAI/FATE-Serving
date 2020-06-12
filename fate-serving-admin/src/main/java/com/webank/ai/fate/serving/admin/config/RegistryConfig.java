@@ -50,7 +50,7 @@ public class RegistryConfig {
     @Value("${acl.password:}")
     private String aclPassword;
 
-    @Bean
+    @Bean(destroyMethod = "destroy")
     public ZookeeperRegistry zookeeperRegistry() {
         if (logger.isDebugEnabled()) {
             logger.info("prepare to create zookeeper registry ,use zk {}", useZkRouter);

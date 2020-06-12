@@ -20,9 +20,11 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOMetaProto.DataIOMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +32,8 @@ public class DataIO extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(DataIO.class);
     private DataIOMeta dataIOMeta;
     private DataIOParam dataIOParam;
+    private List<String> header;
+    private String inputformat;
     private Imputer imputer;
     private Outlier outlier;
     private boolean isImputer;
@@ -54,6 +58,9 @@ public class DataIO extends BaseComponent {
                 this.outlier = new Outlier(this.dataIOMeta.getOutlierMeta().getOutlierValueList(),
                         this.dataIOParam.getOutlierParam().getOutlierReplaceValue());
             }
+
+            this.header = this.dataIOParam.getHeaderList();
+            this.inputformat = this.dataIOMeta.getInputFormat();
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.error("init DataIo error", ex);
@@ -66,20 +73,36 @@ public class DataIO extends BaseComponent {
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
+        Map<String, Object> data = inputData.get(0);
+        Map<String, Object> outputData = new HashMap<>();
 
+        if(logger.isDebugEnabled()) {
+            logger.debug("input-data, not filling, {}", data);
+        }
 
-        Map<String, Object> input = inputData.get(0);
+        if (this.inputformat.equals(Dict.TAG_INPUT_FORMAT) || this.inputformat.equals(Dict.SPARSE_INPUT_FORMAT
+        )) {
+            if(logger.isDebugEnabled()) {
+                logger.debug("Sparse Data Filling Zeros");
+            }
+            for (String col: this.header) {
+                outputData.put(col, data.getOrDefault(col, 0));
+            }
+        } else {
+            outputData = data;
+            if(logger.isDebugEnabled()) {
+                logger.debug("Dense input-format, not filling, {}", outputData);
+            }
+        }
 
         if (this.isImputer) {
-            input = this.imputer.transform(input);
+            outputData = this.imputer.transform(outputData);
         }
 
         if (this.isOutlier) {
-            input = this.outlier.transform(input);
+            outputData = this.outlier.transform(outputData);
         }
 
-        return input;
-
-
+        return outputData;
     }
 }

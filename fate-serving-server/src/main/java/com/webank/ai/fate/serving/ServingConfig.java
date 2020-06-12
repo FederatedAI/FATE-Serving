@@ -27,7 +27,7 @@ public class ServingConfig {
 
     Logger logger = LoggerFactory.getLogger(ServingConfig.class);
 
-    @Bean
+    @Bean(destroyMethod = "destroy")
     @Conditional({UseZkCondition.class})
     ZookeeperRegistry getServiceRegistry() {
         Preconditions.checkArgument(StringUtils.isNotEmpty(MetaInfo.PROPERTY_ZK_URL));
@@ -48,7 +48,7 @@ public class ServingConfig {
         return new SpringContextUtil();
     }
 
-    @Bean
+    @Bean(destroyMethod = "destroy")
     public FlowCounterManager flowCounterManager() {
         FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING, true);
         flowCounterManager.startReport();

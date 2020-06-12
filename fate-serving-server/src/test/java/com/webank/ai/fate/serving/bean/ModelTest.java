@@ -37,6 +37,13 @@ public class ModelTest {
     }
 
     @Test
+    public void testLoadSbtModel() {
+        test_model_load("model_20200604203524746623105_guest#9999#guest-9999#host-10000#model_cache", "guest", "20200604203524746623105");
+        test_model_load("model_20200604203524746623105_host#10000#guest-9999#host-10000#model_cache", "host", "20200604203524746623105");
+        test_model_Bind("local_sbt", "20200604203524746623105");
+    }
+
+    @Test
     public void test_load_pb() {
         test_model_load_pb("host#10000#arbiter-10000#guest-9999#host-10000#model_202006031540378520599", "guest", "202006031540378520599");
     }

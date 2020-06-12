@@ -84,9 +84,6 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         int fid = this.trees.get(treeId).getTree(treeNodeId).getFid();
         double splitValue = this.trees.get(treeId).getSplitMaskdict().get(treeNodeId);
         String fidStr = String.valueOf(fid);
-        logger.info("treeId {}, treeNodeId {}", treeId, treeNodeId);
-        logger.info("treenode fid {}", fidStr);
-        logger.info("input is {}", input);
 
         if (input.containsKey(fidStr)) {
             if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
@@ -95,7 +92,6 @@ public abstract class HeteroSecureBoost extends BaseComponent {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
             }
         } else {
-            logger.info("go missing dir");
             if (this.trees.get(treeId).getMissingDirMaskdict().containsKey(treeNodeId)) {
                 int missingDir = this.trees.get(treeId).getMissingDirMaskdict().get(treeNodeId);
                 if (missingDir == 1) {
