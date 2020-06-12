@@ -277,10 +277,15 @@ public class MetricWriter {
         if (usePid) {
             matchFileName = matchFileName.substring(0, matchFileName.indexOf(String.valueOf(pid)));
           //  System.err.println(matchFileName);
+            // fileName: serving-metrics.log.pid71860.2020-06-12
+            // baseFileName: serving-metrics.log.pid71860
             if (fileName.startsWith(matchFileName) && !fileName.startsWith(matchFileName + ".")) {
-
-                part = fileName.substring(matchFileName.length());
-                part = part.substring(part.indexOf("."));
+                part = fileName.substring(matchFileName.length()); // 71860.2020-06-12
+                String[] split = part.split("\\.");
+                if (!split[0].equals(String.valueOf(pid))) {
+                    return false;
+                }
+                part = part.substring(part.indexOf(".")); // .2020-06-12
             }
 
         } else {

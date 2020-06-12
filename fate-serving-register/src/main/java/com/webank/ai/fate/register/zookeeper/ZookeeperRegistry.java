@@ -134,6 +134,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
         content.put(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
         content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
         this.zkClient.create(path, gson.toJson(content),true);
+
+        logger.info("register component {}", path);
     }
 
 
