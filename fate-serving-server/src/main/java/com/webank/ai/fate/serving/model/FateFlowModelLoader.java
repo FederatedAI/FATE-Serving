@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -96,7 +97,10 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         try {
             String requestUrl = "";
 
-            if (routerService != null) {
+            String filePath = modelLoaderParam.getFilePath();
+            if (StringUtils.isNotBlank(filePath)) {
+                requestUrl = URLDecoder.decode(filePath);
+            } else if (routerService != null) {
                 URL url = URL.valueOf("flow/online/transfer");
                 List<URL> urls = routerService.router(url);
                 if (urls == null || urls.isEmpty()) {
@@ -109,13 +113,14 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
 
             if (StringUtils.isBlank(requestUrl)) {
                 requestUrl = MetaInfo.MODEL_TRANSFER_URL;
-                logger.info("use profile model.transfer.url, {}", requestUrl);
             }
 
             if (StringUtils.isBlank(requestUrl)) {
                 logger.info("roll address not found");
                 return null;
             }
+
+            logger.info("use request url: {}", requestUrl);
 
             Map<String, Object> requestData = new HashMap<>(8);
             requestData.put("name", modelLoaderParam.tableName);

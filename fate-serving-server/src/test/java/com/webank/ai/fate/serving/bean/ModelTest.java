@@ -44,6 +44,29 @@ public class ModelTest {
     }
 
     @Test
+    public void testLoadFateFlowModel(){
+//        http%3A%2F%2F127.0.0.1%3A9380%2Fv1%2Fmodel%2Ftransfer
+        ModelServiceProto.PublishRequest.Builder publicRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
+        ModelServiceProto.PublishRequest publishRequest = publicRequestBuilder.setLocal(ModelServiceProto.LocalInfo.newBuilder()
+                .setRole("guest").setPartyId("guest".equalsIgnoreCase("guest") ? "9999" : "10000").build())
+                .putRole("guest", ModelServiceProto.Party.newBuilder().addPartyId("9999").build())
+                .putRole("arbiter", ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
+                .putRole("host", ModelServiceProto.Party.newBuilder().addPartyId("10000").build())
+                .putModel("guest", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("9999",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("20200604203524746623105").setNamespace("guest#9999#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .putModel("host", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("20200604203524746623105").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
+                        ModelServiceProto.ModelInfo.newBuilder().setTableName("20200604203524746623105").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
+                .setLoadType("FATEFLOW")
+                .setFilePath("http%3A%2F%2F127.0.0.1%3A9380%2Fv1%2Fmodel%2Ftransfer")
+//                .setFilePath("http://127.0.0.1:9380/v1/model/transfer")
+                .build();
+
+        inferenceClient.load(publishRequest);
+    }
+
+    @Test
     public void test_load_pb() {
         test_model_load_pb("host#10000#arbiter-10000#guest-9999#host-10000#model_202006031540378520599", "guest", "202006031540378520599");
     }
