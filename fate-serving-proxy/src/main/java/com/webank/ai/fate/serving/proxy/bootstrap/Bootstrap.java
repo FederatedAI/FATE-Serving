@@ -1,10 +1,9 @@
 package com.webank.ai.fate.serving.proxy.bootstrap;
 
-import com.google.common.collect.Sets;
-import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import org.slf4j.Logger;
@@ -19,7 +18,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.*;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * @Description TODO
@@ -95,36 +93,16 @@ public class Bootstrap {
     public void stop() {
         logger.info("try to shutdown server ");
         AbstractServiceAdaptor.isOpen = false;
-        int tryNum = 0;
-        /**
-         * 3秒
-         */
-        while (AbstractServiceAdaptor.requestInHandle.get() > 0 && tryNum < 30) {
-            logger.info("try to shutdown,try count {}, remain {}", tryNum, AbstractServiceAdaptor.requestInHandle.get());
+
+        int retryCount = 0;
+        while (AbstractServiceAdaptor.requestInHandle.get() > 0 && retryCount < 30) {
+            logger.info("try to stop server, there is {} request in process, try count {}", AbstractServiceAdaptor.requestInHandle.get(), retryCount + 1);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-
-        boolean useZkRouter = MetaInfo.PROPERTY_USE_ZK_ROUTER;
-        if (useZkRouter) {
-            ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-            Set<URL> registered = zookeeperRegistry.getRegistered();
-            Set<URL> urls = Sets.newHashSet();
-            urls.addAll(registered);
-            urls.forEach(url -> {
-                logger.info("unregister {}", url);
-                zookeeperRegistry.unregister(url);
-            });
-
-            zookeeperRegistry.destroy();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            retryCount++;
         }
     }
 

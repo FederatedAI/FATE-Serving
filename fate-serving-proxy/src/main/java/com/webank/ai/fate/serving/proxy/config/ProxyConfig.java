@@ -60,7 +60,7 @@ public class ProxyConfig {
         };
     }
 
-    @Bean
+    @Bean(destroyMethod = "destroy")
     public FlowCounterManager flowCounterManager() {
         FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_PROXY);
         flowCounterManager.startReport();

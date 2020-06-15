@@ -292,4 +292,11 @@ public class FlowCounterManager {
         logger.info("update {} allowed qps to {}", sourceName, allowQps);
         sourceQpsAllowMap.put(sourceName, allowQps);
     }
+
+    public void destroy() {
+        System.err.println("try to destroy flow counter");
+        if (this != null) {
+            this.rmAllFiles();
+        }
+    }
 }

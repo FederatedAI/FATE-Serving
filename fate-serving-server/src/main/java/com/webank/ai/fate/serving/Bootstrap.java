@@ -120,38 +120,17 @@ public class Bootstrap {
     public void stop() {
         logger.info("try to shutdown server ...");
         AbstractServiceAdaptor.isOpen = false;
-        boolean useZkRouter = MetaInfo.PROPERTY_USE_ZK_ROUTER;
-        if (useZkRouter) {
-            ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
-            Set<URL> registered = zookeeperRegistry.getRegistered();
-            Set<URL> urls = Sets.newHashSet();
-            urls.addAll(registered);
-            urls.forEach(url -> {
-                logger.info("unregister {}", url);
-                zookeeperRegistry.unregister(url);
-            });
-            zookeeperRegistry.destroy();
-        }
-        FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
-        try {
-            flowCounterManager.rmAllFiles();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        int tryNum = 0;
-        /**
-         * 3秒
-         */
-        while (AbstractServiceAdaptor.requestInHandle.get() > 0 && tryNum < 30) {
-            logger.info("try to shutdown,try count {}, remain {}", tryNum, AbstractServiceAdaptor.requestInHandle.get());
+
+        int retryCount = 0;
+        while (AbstractServiceAdaptor.requestInHandle.get() > 0 && retryCount < 30) {
+            logger.info("try to stop server, there is {} request in process, try count {}", AbstractServiceAdaptor.requestInHandle.get(), retryCount + 1);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            retryCount++;
         }
-
-
     }
 
 }

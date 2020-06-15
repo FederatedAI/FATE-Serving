@@ -308,6 +308,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     @Override
     public void destroy() {
+        System.err.println("try to destroy zookeeper registry");
         super.destroy();
         try {
             zkClient.close();
