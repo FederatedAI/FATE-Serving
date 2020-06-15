@@ -36,26 +36,6 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
     private final String site = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
     private boolean fastMode = true;
-
-
-    // DefaultCacheManager cacheManager = BaseContext.applicationContext.getBean(DefaultCacheManager.class);
-
-    /*
-    Map<String, Double> forward(List<Map<String, Object>> inputDatas) {
-        Map<String, Object> inputData = inputDatas.get(0);
-        HashMap<Integer, Object> fidValueMapping = new HashMap<Integer, Object>();
-        int featureHit = 0;
-        for (String key : inputData.keySet()) {
-            if (this.featureNameFidMapping.containsKey(key)) {
-                fidValueMapping.put(this.featureNameFidMapping.get(key), inputData.get(key));
-                ++featureHit;
-            }
-        }
-        LOGGER.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
-
-    }
-    */
-
     private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
         while (getSite(treeId, treeNodeId).equals(this.site)) {
             treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
@@ -64,120 +44,62 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         return treeNodeId;
     }
 
-    private void initCache() {
-        Cache cache = SpringContextUtil.getBean("cache", Cache.class);
-        this.cache = cache;
-    }
 
-    public void saveData(Context context, String tag, Map<String, Object> data) {
-        if (this.cache == null) {
-            initCache();
-        }
-        this.cache.put(tag, data);
-    }
 
-    public Map<String, Object> getData(Context context, String tag) {
-        if (this.cache == null) {
-            initCache();
-        }
 
-        Map<String, Object> result = (Map<String, Object>) this.cache.get(tag);
-        return result;
-    }
-
-    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input) {
-
-        // <tree_idx, < node_idx, direction>>
+    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input){
 
         logger.info("running extractHostNodeRoute");
 
         Map<String, Object> result = new HashMap<String, Object>(8);
-        for (int i = 0; i < this.treeNum; i++) {
+        for(int i=0;i<this.treeNum;i++){
 
             DecisionTreeModelParam treeParam = this.trees.get(i);
             List<NodeParam> nodes = treeParam.getTreeList();
             Map<String, Boolean> treeRoute = new HashMap<String, Boolean>(8);
 
-            for (int j = 0; j < nodes.size(); j++) {
+            for(int j=0;j<nodes.size();j++){
 
 
                 NodeParam node = nodes.get(j);
 
-                if (!this.getSite(i, j).equals(this.site)) {
+                if(!this.getSite(i, j).equals(this.site)){
                     continue;
                 }
-
                 int fid = this.trees.get(i).getTree(j).getFid();
                 double splitValue = this.trees.get(i).getSplitMaskdict().get(j);
 
                 boolean direction = false; // false go right, true go left
 
-                if (logger.isDebugEnabled()) {
-                    logger.info("i is {}, j is {}", i, j);
+                if(logger.isDebugEnabled()){
+                    logger.info("i is {}, j is {}",i,j);
                     logger.info("best fid is {}", fid);
                     logger.info("best split val is {}", splitValue);
                 }
 
-                if (input.containsKey(Integer.toString(fid))) {
+                if (input.containsKey(Integer.toString(fid))){
                     Object featVal = input.get(Integer.toString(fid));
                     direction = Double.parseDouble(featVal.toString()) <= splitValue + 1e-20;
-                } else {
+                }
+                else {
                     if (this.trees.get(i).getMissingDirMaskdict().containsKey(j)) {
                         int missingDir = this.trees.get(i).getMissingDirMaskdict().get(j);
                         direction = (missingDir != 1);
                     }
                 }
-                treeRoute.put(Integer.toString(j), direction);
+                treeRoute.put(Integer.toString(j),direction);
             }
-            result.put(Integer.toString(i), treeRoute);
+            result.put(Integer.toString(i),treeRoute);
         }
-        if (logger.isDebugEnabled()) {
-            logger.info("show return route:{}", result);
+        if(logger.isDebugEnabled()){
+            logger.info("show return route:{}",result);
         }
         return result;
     }
 
-//    @Override
-//    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
-//
-//        logger.info("HeteroSecureBoostingTreeHost FederatedParams {}", predictParams);
-//
-//        Map<String, Object> input = inputData.get(0);
-//
-//        String tag = predictParams.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
-//        Map<String, Object> ret = new HashMap<String, Object>(8);
-//
-//        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
-//        int featureHit = 0;
-//        for (String key : input.keySet()) {
-//            if (this.featureNameFidMapping.containsKey(key)) {
-//                fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
-//                ++featureHit;
-//            }
-//        }
-//        this.saveData(context, tag, fidValueMapping);
-//        return ret;
-//    }
 
-    public Map<String, Object> predictSingleRound(Context context, Map<String, Object> interactiveData) {
 
-        String tag = context.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
-        Map<String, Object> input = this.getData(context, tag);
 
-        if (!this.fastMode) {
-            Map<String, Object> ret = new HashMap<String, Object>(8);
-            for (String treeIdx : interactiveData.keySet()) {
-                int idx = Integer.valueOf(treeIdx);
-                int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), input);
-                ret.put(treeIdx, nodeId);
-            }
-            return ret;
-        } else {
-            // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>>
-            Map<String, Object> ret = this.extractHostNodeRoute(input);
-            return ret;
-        }
-    }
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> request) {
@@ -196,23 +118,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
                 ++featureHit;
             }
         }
-        this.saveData(context, tag, fidValueMapping);
-
-        /*Map prepareData = (Map) input.get(this.componentName);
-        Map<String,Object>  interactiveData = (Map<String, Object>) prepareData.getOrDefault(Dict.TREE_LOCATION, Maps.newHashMap());
-
-        if(!this.fastMode){
-
-            for (String treeIdx : interactiveData.keySet()) {
-                int idx = Integer.valueOf(treeIdx);
-                int nodeId = this.traverseTree(idx, (Integer) interactiveData.get(treeIdx), fidValueMapping);
-                ret.put(treeIdx, nodeId);
-            }
-        }
-        else {
-            // if use fast mode, return data is the look up table: <tree_idx, < node_idx, direction>>
-            ret = this.extractHostNodeRoute(fidValueMapping);
-        }*/
+        ret = this.extractHostNodeRoute(fidValueMapping);
         return ret;
 
 
