@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.guest.provider;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
+import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.model.Model;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
@@ -12,7 +13,6 @@ import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +40,13 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
         resp result = null;
         try {
             result = (resp) method.invoke(this, context, data);
-        } catch (IllegalAccessException e) {
-            throw new SysException(e.getMessage());
-        } catch (InvocationTargetException e) {
-            throw new SysException(e.getMessage());
+        } catch (Throwable e) {
+            if (e.getCause() != null && e.getCause() instanceof BaseException) {
+                BaseException baseException = (BaseException) e.getCause();
+                throw baseException;
+            } else {
+                throw new SysException(e.getMessage());
+            }
         }
         return result;
     }

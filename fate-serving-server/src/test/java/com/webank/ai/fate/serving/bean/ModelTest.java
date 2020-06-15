@@ -68,13 +68,13 @@ public class ModelTest {
 
     @Test
     public void test_load_pb() {
-//        test_model_load_pb("guest#9999#guest-9999#host-10000#model_2020061215063879320146.zip", "guest", "2020061215063879320146");
-        test_model_load_pb("/data/projects/fate-serving-2.0/serving-server/guest#9999#arbiter-10000#guest-9999#host-10000#model_202006122116502527621.zip", "guest", "2020061215063879320146");
+        test_model_load_pb("guest#9999#guest-9999#host-10000#model_2020061215063879320146.zip", "guest", "2020061215063879320146");
+//        test_model_load_pb("/data/projects/fate-serving-2.0/serving-server/guest#9999#arbiter-10000#guest-9999#host-10000#model_202006122116502527621.zip", "guest", "2020061215063879320146");
     }
 
     public void test_model_load_pb(String filename, String currentRole, String modelVersion) {
-//        URL resource = ModelTest.class.getClassLoader().getResource(filename);
-//        String filePath = resource.getPath().replaceAll("%23", "#");
+        URL resource = ModelTest.class.getClassLoader().getResource(filename);
+        String filePath = resource.getPath().replaceAll("%23", "#");
         ModelServiceProto.PublishRequest.Builder publicRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
         ModelServiceProto.PublishRequest publishRequest = publicRequestBuilder.setLocal(ModelServiceProto.LocalInfo.newBuilder()
                 .setRole(currentRole).setPartyId(currentRole.equalsIgnoreCase("guest") ? "9999" : "10000").build())
@@ -88,7 +88,8 @@ public class ModelTest {
                 .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
                         ModelServiceProto.ModelInfo.newBuilder().setTableName(modelVersion).setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .setLoadType("PB")
-                .setFilePath("/data/projects/fate-serving-2.0/serving-server/guest#9999#arbiter-10000#guest-9999#host-10000#model_202006122116502527621.zip")
+//                .setFilePath("/data/projects/fate-serving-2.0/serving-server/guest#9999#arbiter-10000#guest-9999#host-10000#model_202006122116502527621.zip")
+                .setFilePath(filePath)
                 .build();
 
         inferenceClient.load(publishRequest);
