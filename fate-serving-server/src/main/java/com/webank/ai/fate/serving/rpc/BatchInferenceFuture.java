@@ -60,10 +60,7 @@ public class BatchInferenceFuture extends AbstractFuture {
     }
 
     public BatchInferenceResult mergeCache(BatchInferenceResult remoteBatchInferenceResult) {
-
-
         if (cacheData != null && cacheData.size() > 0) {
-
             if (remoteBatchInferenceResult != null) {
                 cacheData.forEach((k, v) -> {
                     remoteBatchInferenceResult.getBatchDataList().add(v);
@@ -79,7 +76,6 @@ public class BatchInferenceFuture extends AbstractFuture {
                 newBatchInferenceResult.rebuild();
                 return newBatchInferenceResult;
             }
-
         } else {
             return remoteBatchInferenceResult;
         }
@@ -94,7 +90,6 @@ public class BatchInferenceFuture extends AbstractFuture {
         } else {
             return mergeCache(null);
         }
-
     }
 
 
@@ -130,7 +125,6 @@ public class BatchInferenceFuture extends AbstractFuture {
 
 
     private String buildCacheKey(Model guestModel, Model hostModel, Map sendToRemote) {
-
         String tableName = guestModel.getTableName();
         String namespace = guestModel.getNamespace();
         String partId = hostModel.getPartId();
@@ -138,8 +132,6 @@ public class BatchInferenceFuture extends AbstractFuture {
         sb.append(partId).append(tableName).append(namespace).append(JsonUtil.object2Json(sendToRemote));
         String key = EncryptUtils.encrypt(sb.toString(), EncryptMethod.MD5);
         return key;
-
-
     }
 
 

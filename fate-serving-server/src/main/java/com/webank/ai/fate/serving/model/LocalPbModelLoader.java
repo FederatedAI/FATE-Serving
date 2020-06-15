@@ -65,22 +65,19 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
 
     @Override
     protected Map<String, byte[]> doLoadModel(Context context, ModelLoaderParam modelLoaderParam) {
-
         String filePath = modelLoaderParam.getFilePath();
         File file = new File(filePath);
         if (!file.exists()) {
             throw new ModelLoadException("model file" + file.getAbsolutePath() + " is not exist");
         }
         byte[] content = readFile(file);
-        // TODO: 2020/4/5 暂时拿原来的缓存文件来用
         Map<String, byte[]> data = unserialize(context, content);
-
         return data;
     }
 
     protected byte[] readFile(File file) {
         if (file != null && file.exists() && file.isDirectory()) {
-            Map<String, Object> resultMap = new HashMap<>();
+            Map<String, Object> resultMap = Maps.newHashMap();
             String root = file.getAbsolutePath();
             List<String> properties = TransferUtils.yml2Properties(root + File.separator + "define" + File.separator + "define_meta.yaml");
             if (properties != null) {
@@ -91,7 +88,6 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
                             String[] split = property.split("=");
                             String key = split[0];
                             String value = split[1];
-
                             String[] keySplit = key.split("\\.");
                             File dataFile = new File(root + File.separator + "variables" + File.separator + "data" + File.separator + keySplit[2] + File.separator + keySplit[3] + File.separator + value);
                             if (dataFile.exists()) {

@@ -30,7 +30,6 @@ public class GuestBatchParamInterceptor implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-
         InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
         BatchInferenceRequest batchInferenceRequest = null;
         try {

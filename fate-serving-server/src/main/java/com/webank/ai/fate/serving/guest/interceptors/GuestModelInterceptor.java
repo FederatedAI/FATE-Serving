@@ -33,7 +33,6 @@ public class GuestModelInterceptor implements Interceptor {
             throw new ModelNullException("can not find model by service id " + serviceId);
         }
         ((ServingServerContext) context).setModel(model);
-
         boolean pass = flowCounterManager.pass(model.getResourceName());
         if (!pass) {
             flowCounterManager.block(model.getResourceName());
