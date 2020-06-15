@@ -73,7 +73,6 @@ public abstract class BaseComponent implements LocalInferenceAware {
                 String retcode = ErrorMessageUtil.transformRemoteErrorCode(remoteCode);
                 result.put(Dict.RET_CODE, retcode);
                 result.put(Dict.MESSAGE, errorMsg);
-                return;
             }
         });
         return result;

@@ -22,7 +22,7 @@ import java.util.List;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ModelTest {
 
-    InferenceClient inferenceClient = new InferenceClient("127.0.0.1", 8100);
+    InferenceClient inferenceClient = new InferenceClient("localhost", 8000);
 
     @BeforeClass
     public static void init() {
@@ -31,6 +31,8 @@ public class ModelTest {
 
     @Test
     public void testLoadModel() {
+       // test_model_load("model_20200605211120176604298_guest#9999#guest-9999#host-10000#model_cache", "guest", "20200605211120176604298");
+
         test_model_load("model_2020040111152695637611_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache", "guest", "2020040111152695637611");
         test_model_load("model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache", "host", "2020040111152695637611");
         test_model_Bind("2020040111152695637611", "2020040111152695637611");
@@ -142,7 +144,7 @@ public class ModelTest {
 
         InferenceRequest inferenceRequest = new InferenceRequest();
 
-        inferenceRequest.setServiceId("fm");
+        inferenceRequest.setServiceId("local_sbt");
 
         inferenceRequest.getFeatureData().put("x0", 0.100016);
         inferenceRequest.getFeatureData().put("x1", 1.210);

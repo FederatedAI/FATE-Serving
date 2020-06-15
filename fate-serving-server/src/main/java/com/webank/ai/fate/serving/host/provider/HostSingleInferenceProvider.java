@@ -49,19 +49,19 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
 
     }
 
-    @FateServiceMethod(name = "federatedInference4Tree")
-    public ReturnResult federatedInference4Tree(Context context, InboundPackage<Map> data) {
-        Map params = data.getBody();
-        Model model = ((ServingServerContext) context).getModel();
-        Object componentObject = model.getModelProcessor().getComponent(params.get(Dict.COMPONENT_NAME).toString());
-        Preconditions.checkArgument(componentObject != null);
-        HeteroSecureBoostingTreeHost heteroSecureBoostingTreeHost = (HeteroSecureBoostingTreeHost) componentObject;
-        Map<String, Object> map = heteroSecureBoostingTreeHost.predictSingleRound(context, (Map<String, Object>) params.get(Dict.TREE_LOCATION));
-        ReturnResult result = new ReturnResult();
-        result.setRetcode(StatusCode.SUCCESS);
-        result.setData(map);
-        return result;
-    }
+//    @FateServiceMethod(name = "federatedInference4Tree")
+//    public ReturnResult federatedInference4Tree(Context context, InboundPackage<Map> data) {
+//        Map params = data.getBody();
+//        Model model = ((ServingServerContext) context).getModel();
+//        Object componentObject = model.getModelProcessor().getComponent(params.get(Dict.COMPONENT_NAME).toString());
+//        Preconditions.checkArgument(componentObject != null);
+//        HeteroSecureBoostingTreeHost heteroSecureBoostingTreeHost = (HeteroSecureBoostingTreeHost) componentObject;
+//        Map<String, Object> map = heteroSecureBoostingTreeHost.predictSingleRound(context, (Map<String, Object>) params.get(Dict.TREE_LOCATION));
+//        ReturnResult result = new ReturnResult();
+//        result.setRetcode(StatusCode.SUCCESS);
+//        result.setData(map);
+//        return result;
+//    }
 
 
 }

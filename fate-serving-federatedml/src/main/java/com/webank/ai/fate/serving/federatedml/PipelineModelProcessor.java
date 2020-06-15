@@ -474,8 +474,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                 if (component instanceof Returnable && mergeResult != null) {
                     tempList.add(mergeResult);
                 }
-
-
             } else {
                 outputData.add(inputs.get(0));
             }
@@ -484,8 +482,6 @@ public class PipelineModelProcessor implements ModelProcessor {
             result.putAll(tempList.get(tempList.size() - 1));
         }
         return result;
-
-
     }
 
     public Map<String, Object> singleLocalPredict(Context context, Map<String, Object> inputData) {

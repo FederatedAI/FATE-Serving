@@ -157,8 +157,9 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
                 sumWeights[i % this.treeDim] += weights[i] * this.learningRate;
             }
 
-            for (int i = 0; i < this.treeDim; i++)
+            for (int i = 0; i < this.treeDim; i++) {
                 sumWeights[i] += this.initScore.get(i);
+            }
 
             ret = softmax(sumWeights);
         } else {
@@ -182,44 +183,22 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
 
         Map<String, Object> localData = localDataList.get(0);
-        Model model = ((ServingServerContext) context).getModel();
-        /**
-         *   第一轮不在这里
-         */
-        // componentResult = featureData + prepareData
-        Map<String, Object> componentResult = (Map<String, Object>) localData.get(this.componentName);
-        if (componentResult == null) {
-            throw new GuestMergeException("component result is null");
-        }
-        Map<String, Object> prepareRemoteData = (Map<String, Object>) componentResult.get(this.componentName);
-        if (prepareRemoteData == null) {
-            throw new GuestMergeException("prepareRemoteData is null");
-        }
 
-        int[] treeNodeIds = (int[]) prepareRemoteData.get(Dict.SBT_TREE_NODE_ID_ARRAY);
+        Map<String, Object> result = this.handleRemoteReturnData(remoteData);
+
+        int[] treeNodeIds = (int[]) context.getData(Dict.SBT_TREE_NODE_ID_ARRAY);
         double[] weights = new double[this.treeNum];
         if (treeNodeIds == null) {
 
             throw new GuestMergeException("tree node id array is not return from first loop");
         }
 
-        Map<String, Object> input = componentResult;
-        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
 
-        int featureHit = 0;
-        for (String key : input.keySet()) {
-            if (this.featureNameFidMapping.containsKey(key)) {
-                fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
-                ++featureHit;
-            }
-        }
-        /**
-         *   变成从1开始  因为第一轮已经过了
-         */
+        HashMap<String, Object> fidValueMapping = (HashMap<String, Object> )context.getData("fidValueMapping");
 
-        int communicationRound = 1;
 
-        {
+        remoteData.forEach((k, v)->{
+
             HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
             for (int i = 0; i < this.treeNum; ++i) {
                 if (this.isLocateInLeaf(i, treeNodeIds[i])) {
@@ -230,22 +209,33 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
                     treeLocation.put(String.valueOf(i), treeNodeIds[i]);
                 }
             }
-//            if (treeLocation.size() == 0) {
-//                break;
-//            }
+            Map<String,Object> onePartyData = (Map<String,Object>)v;
+            Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
 
-        }
+            double remoteScore;
+            if (remoteComopnentData == null) {
+                remoteComopnentData = onePartyData;
+            }
+            for(String treeIdx: treeLocation.keySet()){
+                int idx = Integer.valueOf(treeIdx);
+                int curNodeId = (Integer)treeLocation.get(treeIdx);
+                int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping,remoteComopnentData);
+                treeNodeIds[idx] = final_node_id;
+            }
 
-        for (int i = 0; i < this.treeNum; ++i) {
-            weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
-        }
+            for (int i = 0; i < this.treeNum; ++i) {
+                weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
+            }
 
-        if (logger.isDebugEnabled()) {
-            logger.info("tree leaf ids is {}", treeNodeIds);
-            logger.info("weights is {}", weights);
-        }
+            if (logger.isDebugEnabled()) {
+                logger.info("tree leaf ids is {}", treeNodeIds);
+                logger.info("weights is {}", weights);
+            }
+
+        } );
 
         return getFinalPredict(weights);
+
 
 
     }
@@ -292,7 +282,9 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
 
         result.put(Dict.TREE_LOCATION, treeLocation);
 
-        result.put(Dict.SBT_TREE_NODE_ID_ARRAY, treeNodeIds);
+        context.putData(Dict.SBT_TREE_NODE_ID_ARRAY, treeNodeIds);
+
+        context.putData("fidValueMapping",fidValueMapping);
 
         return result;
     }
