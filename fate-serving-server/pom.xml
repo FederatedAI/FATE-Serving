@@ -28,14 +28,6 @@
     <artifactId>fate-serving-server</artifactId>
 
     <dependencies>
-        <!--<dependency>
-            <groupId>com.webank.ai.fate</groupId>
-            <artifactId>fate-serving-monitor</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../lib/fate-serving-monitor-1.0.jar</systemPath>
-        </dependency>
--->
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-serving-core</artifactId>

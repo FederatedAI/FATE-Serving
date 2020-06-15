@@ -9,7 +9,6 @@
     </parent>
 
     <artifactId>fate-serving-admin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>fate-serving-admin</name>
 
     <properties>

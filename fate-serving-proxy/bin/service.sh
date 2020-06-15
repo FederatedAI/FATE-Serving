@@ -18,13 +18,13 @@
 set -e
 source ./bin/common.sh
 basepath=$(cd `dirname $0`;pwd)
-export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
-export PATH=$PATH:$JAVA_HOME/bin
+#export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
+#export PATH=$PATH:$JAVA_HOME/bin
 configpath=$(cd $basepath/conf;pwd)
 
 module=serving-proxy
 main_class=com.webank.ai.fate.serving.proxy.bootstrap.Bootstrap
-module_version=1.2.0
+module_version=2.0.0
 
 
 case "$1" in
