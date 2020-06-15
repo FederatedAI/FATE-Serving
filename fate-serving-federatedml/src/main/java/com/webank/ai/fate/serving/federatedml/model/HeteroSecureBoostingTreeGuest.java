@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements MergeInferenceAware, LocalInferenceAware, PrepareRemoteable, Returnable {
+public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements MergeInferenceAware, LocalInferenceAware, Returnable {
 
     private final String site = "guest";
     private boolean fastMode = true;
@@ -176,26 +176,63 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
-        return inputData.get(0);
+
+
+        Map<String,Object> result =  Maps.newHashMap();
+        /**
+         *   准备第一次交互
+         */
+        int[] treeNodeIds = new int[this.treeNum];
+
+        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
+
+        HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
+
+        Map<String,Object> input = inputData.get(0);
+        int featureHit = 0;
+        for (String key : input.keySet()) {
+            if (this.featureNameFidMapping.containsKey(key)) {
+                fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
+                ++featureHit;
+            }
+        }
+
+        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
+
+        double[] weights = new double[this.treeNum];
+        int communicationRound = 0;
+
+        for (int i = 0; i < this.treeNum; ++i) {
+            if (this.isLocateInLeaf(i, treeNodeIds[i])) {
+                continue;
+            }
+            treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
+            if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
+                treeLocation.put(String.valueOf(i), treeNodeIds[i]);
+            }
+        }
+
+        result.put(Dict.SBT_TREE_NODE_ID_ARRAY,treeNodeIds);
+
+        result.put("fidValueMapping",fidValueMapping);
+
+        return  result;
     }
 
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
 
-        Map<String, Object> localData = localDataList.get(0);
+        Map<String, Object> localData = (Map<String,Object>)localDataList.get(0).get(this.getComponentName());
 
         Map<String, Object> result = this.handleRemoteReturnData(remoteData);
 
-        int[] treeNodeIds = (int[]) context.getData(Dict.SBT_TREE_NODE_ID_ARRAY);
+        int[] treeNodeIds = (int[]) localData.get(Dict.SBT_TREE_NODE_ID_ARRAY);
         double[] weights = new double[this.treeNum];
         if (treeNodeIds == null) {
 
             throw new GuestMergeException("tree node id array is not return from first loop");
         }
-
-
-        HashMap<String, Object> fidValueMapping = (HashMap<String, Object> )context.getData("fidValueMapping");
-
+        HashMap<String, Object> fidValueMapping = (HashMap<String, Object> ) localData.get("fidValueMapping");
 
         remoteData.forEach((k, v)->{
 
@@ -240,52 +277,5 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
 
     }
 
-    @Override
-    public Map<String, Object> prepareRemoteData(Context context, Map<String, Object> input) {
-        /**
-         *   准备第一次交互
-         */
-        int[] treeNodeIds = new int[this.treeNum];
 
-        HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
-
-        HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
-
-
-        int featureHit = 0;
-        for (String key : input.keySet()) {
-            if (this.featureNameFidMapping.containsKey(key)) {
-                fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
-                ++featureHit;
-            }
-        }
-
-        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
-
-        double[] weights = new double[this.treeNum];
-        int communicationRound = 0;
-
-        for (int i = 0; i < this.treeNum; ++i) {
-            if (this.isLocateInLeaf(i, treeNodeIds[i])) {
-                continue;
-            }
-            treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
-            if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
-                treeLocation.put(String.valueOf(i), treeNodeIds[i]);
-            }
-        }
-        Map<String, Object> result = Maps.newHashMap();
-
-        result.put(Dict.COMPONENT_NAME, this.componentName);
-
-        result.put(Dict.TREE_COMPUTE_ROUND, 0);
-
-        result.put(Dict.TREE_LOCATION, treeLocation);
-
-        context.putData(Dict.SBT_TREE_NODE_ID_ARRAY, treeNodeIds);
-
-        context.putData("fidValueMapping",fidValueMapping);
-
-        return result;
-    }
 }

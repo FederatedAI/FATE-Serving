@@ -12,7 +12,6 @@ public interface ModelProcessor {
 
     public BatchInferenceResult hostBatchInference(Context context, BatchHostFederatedParams batchHostFederatedParams);
 
-    public InferenceRequest guestPrepareDataBeforeInference(Context context, InferenceRequest inferenceRequest);
 
     public ReturnResult guestInference(Context context, InferenceRequest inferenceRequest, Map<String, Future> remoteFutureMap, long timeout);
 

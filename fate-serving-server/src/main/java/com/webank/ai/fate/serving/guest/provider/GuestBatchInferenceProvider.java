@@ -36,7 +36,6 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         Model model = ((ServingServerContext) context).getModel();
         ModelProcessor modelProcessor = model.getModelProcessor();
         BatchInferenceRequest batchInferenceRequest = (BatchInferenceRequest) inboundPackage.getBody();
-        modelProcessor.guestPrepareDataBeforeInference(context, batchInferenceRequest);
         Map futureMap = Maps.newHashMap();
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);
