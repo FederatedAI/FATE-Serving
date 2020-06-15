@@ -346,7 +346,6 @@ public class ModelManager implements InitializingBean {
         if (model.getRole().equals(Dict.GUEST)) {
             ModelServiceProto.Party hostParty = roleMap.get(Dict.HOST);
             String hostPartyId = hostParty.getPartyIdList().get(0);
-//            ModelServiceProto.RoleModelInfo hostRoleModelInfo= modelMap.get(hostPartyId);
             ModelServiceProto.RoleModelInfo hostRoleModelInfo = modelMap.get(Dict.HOST);
             ModelServiceProto.ModelInfo hostModelInfo = hostRoleModelInfo.getRoleModelInfoMap().get(hostPartyId);
             String hostNamespace = hostModelInfo.getNamespace();
@@ -412,10 +411,7 @@ public class ModelManager implements InitializingBean {
     }
 
     public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
-
         int queryType = queryModelRequest.getQueryType();
-//        String tableName = queryModelRequest.getTableName();
-//        String namespace = queryModelRequest.getNamespace();
         switch (queryType) {
             case 0:
                 List<Model> allModels = listAllModel();
