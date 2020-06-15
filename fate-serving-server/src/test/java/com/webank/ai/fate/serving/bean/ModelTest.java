@@ -68,7 +68,7 @@ public class ModelTest {
 
     @Test
     public void test_load_pb() {
-        test_model_load_pb("host#10000#arbiter-10000#guest-9999#host-10000#model_202006031540378520599", "guest", "202006031540378520599");
+        test_model_load_pb("guest#9999#guest-9999#host-10000#model_2020061215063879320146.zip", "guest", "2020061215063879320146");
     }
 
     public void test_model_load_pb(String filename, String currentRole, String modelVersion) {

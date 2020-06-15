@@ -2,19 +2,17 @@ package com.webank.ai.fate.serving.model;
 
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.ModelLoadException;
 import com.webank.ai.fate.serving.core.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.TransferUtils;
+import com.webank.ai.fate.serving.core.utils.ZipUtil;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,9 +74,16 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
     }
 
     protected byte[] readFile(File file) {
-        if (file != null && file.exists() && file.isDirectory()) {
+        String outputPath = "";
+        try {
+            String tempDir = System.getProperty(Dict.PROPERTY_USER_HOME)+"/.fate/temp/";
+            outputPath = ZipUtil.unzip(file, tempDir);
+            File outputDir = new File(outputPath);
+            if (!outputDir.exists()) {
+                throw new FileNotFoundException();
+            }
             Map<String, Object> resultMap = Maps.newHashMap();
-            String root = file.getAbsolutePath();
+            String root = outputDir.getAbsolutePath();
             List<String> properties = TransferUtils.yml2Properties(root + File.separator + "define" + File.separator + "define_meta.yaml");
             if (properties != null) {
                 InputStream in = null;
@@ -89,7 +94,7 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
                             String key = split[0];
                             String value = split[1];
                             String[] keySplit = key.split("\\.");
-                            File dataFile = new File(root + File.separator + "variables" + File.separator + "data" + File.separator + keySplit[2] + File.separator + keySplit[3] + File.separator + value);
+                            File dataFile = new File(root + File.separator + "variables" + File.separator + "data" + File.separator + keySplit[2] + File.separator + keySplit[3] + File.separator + keySplit[4]);
                             if (dataFile.exists()) {
                                 in = new FileInputStream(dataFile);
                                 Long length = dataFile.length();
@@ -99,13 +104,15 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
                                     String resultKey = keySplit[2] + "." + keySplit[3] + ":" + keySplit[4];
                                     resultMap.put(resultKey, content);
                                 }
+                                in.close();
                             } else {
                                 logger.warn("model proto file not found {}", dataFile.getPath());
                             }
                         }
                     }
-                    return JsonUtil.object2Json(resultMap).getBytes();
+
                 } catch (Exception e) {
+                    logger.error("read model file error, {}", e.getMessage());
                     e.printStackTrace();
                 } finally {
                     if (in != null) {
@@ -117,6 +124,12 @@ public class LocalPbModelLoader extends AbstractModelLoader<Map<String, byte[]>>
                     }
                 }
             }
+            return JsonUtil.object2Json(resultMap).getBytes();
+        } catch (Exception e) {
+            logger.error("read file {} error, cause by {}", file.getAbsolutePath(), e.getMessage());
+            e.printStackTrace();
+        } finally {
+            ZipUtil.clear(outputPath);
         }
         return null;
     }
