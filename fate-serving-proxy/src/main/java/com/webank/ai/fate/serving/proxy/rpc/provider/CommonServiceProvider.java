@@ -66,8 +66,9 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             metricNodes = flowCounterManager.queryModelMetrics(beginMs, endMs, sourceName);
         }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+        String response = metricNodes != null ? JsonUtil.object2Json(metricNodes) : "";
         builder.setStatusCode(StatusCode.SUCCESS);
-        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(metricNodes).getBytes()));
+        builder.setData(ByteString.copyFrom(response.getBytes()));
         return builder.build();
     }
 

@@ -42,7 +42,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
             this.code = code;
         }
         public String getMessage() {
-            return message;
+            return message != null ? message : "";
         }
         public void setMessage(String message) {
             this.message = message;

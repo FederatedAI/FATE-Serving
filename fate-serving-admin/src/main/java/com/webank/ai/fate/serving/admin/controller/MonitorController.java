@@ -59,7 +59,7 @@ public class MonitorController {
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
 
         long now = System.currentTimeMillis();
-        builder.setBeginMs(now - 5000);
+        builder.setBeginMs(now - 15000);
         builder.setEndMs(now);
         if (StringUtils.isNotBlank(source)) {
             builder.setSource(source);
@@ -100,7 +100,7 @@ public class MonitorController {
         blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
         long now = System.currentTimeMillis();
-        builder.setBeginMs(now - 5000);
+        builder.setBeginMs(now - 15000);
         builder.setEndMs(now);
         if (StringUtils.isNotBlank(source)) {
             builder.setSource(source);

@@ -225,6 +225,11 @@ public class ModelManager implements InitializingBean {
                 ModelProcessor modelProcessor = modelLoader.restoreModel(context, modelLoaderParam);
                 if (modelProcessor != null) {
                     model.setModelProcessor(modelProcessor);
+                    if (model.getRole().equals(Dict.GUEST)) {
+                        for (Model value : model.getFederationModelMap().values()) {
+                            value.setRole(Dict.HOST);
+                        }
+                    }
                     namespaceMap.put(k, model);
                     logger.info("restore model {} success ", k);
                 }
