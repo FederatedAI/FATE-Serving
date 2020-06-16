@@ -354,6 +354,7 @@ public class ModelManager implements InitializingBean {
             hostModel.setPartId(hostPartyId);
             hostModel.setNamespace(hostNamespace);
             hostModel.setTableName(hostTableName);
+            hostModel.setRole(Dict.HOST);
             model.getFederationModelMap().put(hostModel.getPartId(), hostModel);
 
         }

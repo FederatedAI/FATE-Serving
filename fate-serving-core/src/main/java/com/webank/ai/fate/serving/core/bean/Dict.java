@@ -211,6 +211,8 @@ public class Dict {
     public static final String MODEL_VERSION = "modelVersion";
     public static final String APP_ID = "appid";
     public static final String PARTY_ID = "partyId";
+    public static final String ROLE = "role";
+    public static final String PART_ID = "partId";
     public static final String FEATURE_DATA = "featureData";
     public static final String SESSION_TOKEN = "sessionToken";
 

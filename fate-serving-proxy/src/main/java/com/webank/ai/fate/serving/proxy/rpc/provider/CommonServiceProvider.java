@@ -107,10 +107,10 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     @FateServiceMethod(name = "QUERY_JVM")
     public CommonServiceProto.CommonResponse listJvmMem(Context context, InboundPackage inboundPackage) {
         try {
-            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
+//            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
             builder.setStatusCode(StatusCode.SUCCESS);
-            Map map = Maps.newHashMap();
+//            Map map = Maps.newHashMap();
             List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
             builder.setData(ByteString.copyFrom(JsonUtil.object2Json(jvmInfos).getBytes()));
             return builder.build();
@@ -118,9 +118,6 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             e.printStackTrace();
             return null;
         }
-
     }
-
-
 
 }
