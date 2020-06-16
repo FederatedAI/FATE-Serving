@@ -42,6 +42,7 @@ public class JvmInfoCounter {
             executorService.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
+                    long timestamp = TimeUtil.currentTimeMillis();
                     JvmInfo memInfo = data.currentWindow().value();
                     memInfo.heap = JVMMemoryUtils.getHeapMemoryUsage();
                     memInfo.old = JVMMemoryUtils.getOldGenMemoryUsage();
@@ -53,10 +54,27 @@ public class JvmInfoCounter {
                     memInfo.fullGcCount = JVMGCUtils.getFullGCCollectionCount();
                     memInfo.fullGcTime  = JVMGCUtils.getFullGCCollectionTime();
                     memInfo.threadCount = JVMThreadUtils.getThreadCount();
+                    memInfo.timestamp = timestamp;
                 }
             }, 0, 1000, TimeUnit.MILLISECONDS);
             started =  true;
         }
+    }
+
+    public static void main(String[] args){
+
+        JvmInfoCounter.start();
+        while(true) {
+            System.err.println(JvmInfoCounter.getMemInfos());
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
     }
 
 

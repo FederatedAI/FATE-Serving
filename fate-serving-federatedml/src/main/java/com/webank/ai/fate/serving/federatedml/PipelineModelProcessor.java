@@ -37,9 +37,8 @@ public class PipelineModelProcessor implements ModelProcessor {
     private Map<String, BaseComponent> componentMap = new HashMap<String, BaseComponent>();
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
-
     private int  splitSize =MetaInfo.BATCH_SPLIT_SIZE;
-    private     ForkJoinPool forkJoinPool = new ForkJoinPool();
+    private  static ForkJoinPool forkJoinPool = new ForkJoinPool();
     @Override
     public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String, Future> remoteFutureMap, long timeout) {
         BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
@@ -62,7 +61,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                 }
             }
         });
-        ExecutorService cc = Executors.newWorkStealingPool();
         batchFederatedResult = batchMergeHostResult(context, localResult, remoteResultMap);
         return batchFederatedResult;
     }
@@ -128,8 +126,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                 return result;
             }
         }
-
-
     }
 
     /**
@@ -158,11 +154,8 @@ public class PipelineModelProcessor implements ModelProcessor {
         return batchFederatedResult;
     }
 
-
     @Override
     public ReturnResult guestInference(Context context, InferenceRequest inferenceRequest, Map<String, Future> futureMap, long timeout) {
-
-
         Map<String, Object> localResult = singleLocalPredict(context, inferenceRequest.getFeatureData());
         ReturnResult remoteResult = new ReturnResult();
         Map<String, Object> remoteResultMap = Maps.newHashMap();
@@ -204,7 +197,6 @@ public class PipelineModelProcessor implements ModelProcessor {
 
     @Override
     public Object getComponent(String name) {
-
         return this.componentMap.get(name);
     }
 
@@ -216,12 +208,10 @@ public class PipelineModelProcessor implements ModelProcessor {
                 logger.info("after parse pipeline {}", newModelProtoMap.keySet());
                 Preconditions.checkArgument(newModelProtoMap.get(PIPLELINE_IN_MODEL) != null);
                 PipelineProto.Pipeline pipeLineProto = PipelineProto.Pipeline.parseFrom(newModelProtoMap.get(PIPLELINE_IN_MODEL));
-                //inference_dsl
                 String dsl = pipeLineProto.getInferenceDsl().toStringUtf8();
                 dslParser.parseDagFromDSL(dsl);
                 ArrayList<String> components = dslParser.getAllComponent();
                 HashMap<String, String> componentModuleMap = dslParser.getComponentModuleMap();
-
                 for (int i = 0; i < components.size(); ++i) {
                     String componentName = components.get(i);
                     String className = componentModuleMap.get(componentName);
@@ -246,7 +236,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                     }
                 }
             } catch (Exception ex) {
-                // ex.printStackTrace();
                 logger.info("initModel error:{}", ex);
                 throw new RuntimeException("initModel error");
             }
@@ -260,12 +249,9 @@ public class PipelineModelProcessor implements ModelProcessor {
 
     public Map<Integer, Map<String, Object>> batchLocalInference(Context context,
                                                                  BatchInferenceRequest batchFederatedParams) {
-        long begin  =  System.currentTimeMillis();
         List<BatchInferenceRequest.SingleInferenceData> inputList = batchFederatedParams.getBatchDataList();
-
         Map<String,Map<String,Object>>  tempCache  = Maps.newConcurrentMap();
         ForkJoinTask<Map<Integer, Map<String, Object>>> future = forkJoinPool.submit(new LocalInferenceTask(context, inputList,tempCache));
-
         Map<Integer, Map<String, Object>>  result = null;
         try {
             result = future.get();
@@ -275,16 +261,10 @@ public class PipelineModelProcessor implements ModelProcessor {
         return  result;
     }
 
-
-
     class  MergeTask  extends   RecursiveTask<List<BatchInferenceResult.SingleInferenceResult>>{
-
         Map<Integer, Map<String, Object>> localResult;
-
         Map<String, BatchInferenceResult> remoteResult;
-
         List<Integer>  keys ;
-
         MergeTask ( Context context,Map<Integer, Map<String, Object>> localResult,
                     Map<String, BatchInferenceResult> remoteResult,List<Integer> keys){
             this.context = context;
@@ -293,10 +273,8 @@ public class PipelineModelProcessor implements ModelProcessor {
             this.keys = keys;
             }
         Context  context;
-
         @Override
         protected List<BatchInferenceResult.SingleInferenceResult> compute() {
-
             List<BatchInferenceResult.SingleInferenceResult>  singleResultLists =  Lists.newArrayList();
             if(keys.size()<=splitSize){
                 localResult.forEach((index, data) -> {
@@ -318,8 +296,7 @@ public class PipelineModelProcessor implements ModelProcessor {
                         String msg = mergeResult.get(Dict.MESSAGE) != null ? mergeResult.get(Dict.MESSAGE).toString() : "";
                         mergeResult.remove(Dict.RET_CODE);
                         mergeResult.remove(Dict.MESSAGE);
-                        singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode,
-                                msg, mergeResult));
+                        singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode, msg, mergeResult));
                     } catch (Exception e) {
                         logger.error("merge remote error", e);
                         String retcode = ErrorMessageUtil.getLocalExceptionCode(e);
@@ -475,16 +452,9 @@ public class PipelineModelProcessor implements ModelProcessor {
                 outputData.add(inputs.get(0));
             }
         }
-
         return result;
-
-
     }
 
-    private LocalInferenceParam buildLocalInferenceParam() {
-        LocalInferenceParam param = new LocalInferenceParam();
-        return param;
-    }
 
     private HashMap<String, byte[]> changeModelProto(Map<String, byte[]> modelProtoMap) {
         HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>(8);
@@ -505,7 +475,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                 newModelProtoMap.put(entry.getKey(), entry.getValue());
             }
         }
-
         return newModelProtoMap;
     }
 }

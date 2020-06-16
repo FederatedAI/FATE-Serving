@@ -44,9 +44,7 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
-
         Map<String, Object> forwardRet = forward(input);
-
         return forwardRet;
     }
 
@@ -69,12 +67,9 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
         double[] guestCrosses = (double[]) localData.get(Dict.FM_CROSS);
         localData.get(Dict.FM_CROSS);
         double score = localScore;
-
-
         double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
         logger.info("host score: {}", hostScore);
         Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
-
         List<Double> hostCrosses = JsonUtil.json2List(dataMap.get(Dict.FM_CROSS).toString(),new TypeReference<List<Double>>() {});
         Preconditions.checkArgument(hostCrosses.size() == guestCrosses.length, "");
         score += hostScore;

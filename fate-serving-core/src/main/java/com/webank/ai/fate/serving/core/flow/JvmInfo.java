@@ -3,6 +3,10 @@ package com.webank.ai.fate.serving.core.flow;
 import com.webank.ai.fate.serving.core.utils.JVMMemoryUtils;
 
 public class JvmInfo {
+    @Override
+    public String toString() {
+        return Long.toString(this.timestamp);
+    }
 
     long  timestamp ;
     public  JvmInfo(long  timestamp){
