@@ -5,6 +5,10 @@ import com.webank.ai.fate.serving.core.utils.JVMMemoryUtils;
 public class JvmInfo {
 
     long  timestamp ;
+
+    public JvmInfo() {
+    }
+
     public  JvmInfo(long  timestamp){
         this.timestamp = timestamp;
     }

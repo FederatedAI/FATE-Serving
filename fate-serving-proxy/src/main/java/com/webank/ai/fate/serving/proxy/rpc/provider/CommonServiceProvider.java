@@ -8,6 +8,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.flow.JvmInfo;
 import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
@@ -115,9 +116,8 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
             builder.setData(ByteString.copyFrom(JsonUtil.object2Json(jvmInfos).getBytes()));
             return builder.build();
-        }catch(Exception e){
-            e.printStackTrace();
-            return null;
+        } catch (Exception e){
+            throw new SysException(e.getMessage());
         }
     }
 
