@@ -9,6 +9,10 @@ public class JvmInfo {
     }
 
     long  timestamp ;
+
+    public JvmInfo() {
+    }
+
     public  JvmInfo(long  timestamp){
         this.timestamp = timestamp;
     }

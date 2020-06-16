@@ -144,7 +144,7 @@ public class ModelTest {
 
         InferenceRequest inferenceRequest = new InferenceRequest();
 
-        inferenceRequest.setServiceId("local_sbt");
+        inferenceRequest.setServiceId("fm");
 
         inferenceRequest.getFeatureData().put("x0", 0.100016);
         inferenceRequest.getFeatureData().put("x1", 1.210);

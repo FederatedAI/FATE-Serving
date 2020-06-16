@@ -21,9 +21,10 @@ import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
-public class Model implements Comparable<Model>, Serializable {
+public class Model implements Comparable<Model>, Serializable, Cloneable {
 
     private long timestamp;
 
@@ -51,6 +52,16 @@ public class Model implements Comparable<Model>, Serializable {
     private transient ModelProcessor modelProcessor;
 
     private String serviceId;
+
+    private List<Map> rolePartyMapList;
+
+    public List<Map> getRolePartyMapList() {
+        return rolePartyMapList;
+    }
+
+    public void setRolePartyMapList(List<Map> rolePartyMapList) {
+        this.rolePartyMapList = rolePartyMapList;
+    }
 
     public Model() {
         this.timestamp = System.currentTimeMillis();
@@ -141,6 +152,16 @@ public class Model implements Comparable<Model>, Serializable {
         return this.namespace.equals(model.namespace) && this.tableName.equals(model.tableName);
     }
 
+    @Override
+    public Object clone() {
+        Object obj = null;
+        try {
+            obj = super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return obj;
+    }
 
     @Override
     public String toString() {

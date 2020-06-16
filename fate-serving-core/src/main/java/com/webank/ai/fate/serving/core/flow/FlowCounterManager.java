@@ -197,7 +197,9 @@ public class FlowCounterManager {
                 });
             //    logger.info("try to report {}",reportList);
                 metricReport.report(reportList);
-                modelMetricReport.report(modelReportList);
+                if (modelMetricReport != null) {
+                    modelMetricReport.report(modelReportList);
+                }
             }
         }, 0,
         1,

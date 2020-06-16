@@ -38,8 +38,8 @@ public class MetaInfo {
     public static Integer PROPERTY_LOCAL_CACHE_MAXSIZE;
     public static Integer PROPERTY_LOCAL_CACHE_EXPIRE;
     public static Integer PROPERTY_LOCAL_CACHE_INTERVAL;
-    public static int BATCH_SPLIT_SIZE;
-    public static int LR_SPLIT_SIZE;
+    public static Integer BATCH_SPLIT_SIZE;
+    public static Integer LR_SPLIT_SIZE;
 
 
     public static String PROPERTY_SERVICE_ROLE_NAME;

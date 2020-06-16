@@ -11,6 +11,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.flow.JvmInfo;
 import com.webank.ai.fate.serving.core.flow.MetricNode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
@@ -41,10 +42,18 @@ public class MonitorController {
         blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryJvmInfoRequest.Builder builder = CommonServiceProto.QueryJvmInfoRequest.newBuilder();
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryJvmInfo(builder.build());
-        List resultList = Lists.newArrayList();
+        List<JvmInfo> resultList = Lists.newArrayList();
         if (commonResponse.getData() != null && !commonResponse.getData().toStringUtf8().equals("null")) {
-            resultList = JsonUtil.json2List(commonResponse.getData().toStringUtf8(), new TypeReference<List>() {
+            List<JvmInfo> resultData = JsonUtil.json2List(commonResponse.getData().toStringUtf8(), new TypeReference<List<JvmInfo>>() {
             });
+
+            if (resultData != null) {
+                resultList = resultData;
+            }
+
+            resultList = resultList.stream()
+                    .sorted(((o1, o2) -> o1.getTimestamp() == o2.getTimestamp() ? 0 : ((o1.getTimestamp() - o2.getTimestamp()) > 0 ? 1 : -1)))
+                    .collect(Collectors.toList());
         }
         Map map = Maps.newHashMap();
         map.put("total", resultList.size());
@@ -59,7 +68,7 @@ public class MonitorController {
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
 
         long now = System.currentTimeMillis();
-        builder.setBeginMs(now - 5000);
+        builder.setBeginMs(now - 15000);
         builder.setEndMs(now);
         if (StringUtils.isNotBlank(source)) {
             builder.setSource(source);
@@ -100,7 +109,7 @@ public class MonitorController {
         blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
         long now = System.currentTimeMillis();
-        builder.setBeginMs(now - 5000);
+        builder.setBeginMs(now - 15000);
         builder.setEndMs(now);
         if (StringUtils.isNotBlank(source)) {
             builder.setSource(source);

@@ -41,8 +41,11 @@ public class JVMMemoryUtils {
 	    private long max;
 	    //已经申请分配内存与最大内存大小的百分比
 	    private float usedPercent;
-	    
-	    public JVMMemoryUsage(MemoryUsage memoryUsage) {
+
+		public JVMMemoryUsage() {
+		}
+
+		public JVMMemoryUsage(MemoryUsage memoryUsage) {
 	    	this.setMemoryUsage(memoryUsage);
 	    	//this(memoryUsage.getInit(), memoryUsage.getUsed(), memoryUsage.getCommitted(), memoryUsage.getMax());
 		}

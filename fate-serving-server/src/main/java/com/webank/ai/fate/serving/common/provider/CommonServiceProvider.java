@@ -61,8 +61,9 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             metricNodes = flowCounterManager.queryModelMetrics(beginMs, endMs, sourceName);
         }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+        String response = metricNodes != null ? JsonUtil.object2Json(metricNodes) : "";
         builder.setStatusCode(StatusCode.SUCCESS);
-        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(metricNodes).getBytes()));
+        builder.setData(ByteString.copyFrom(response.getBytes()));
         return builder.build();
     }
 
@@ -102,17 +103,16 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     @FateServiceMethod(name = "QUERY_JVM")
     public CommonServiceProto.CommonResponse listJvmMem(Context context, InboundPackage inboundPackage) {
         try {
-            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
+//            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
             builder.setStatusCode(StatusCode.SUCCESS);
-            Map map = Maps.newHashMap();
+//            Map map = Maps.newHashMap();
             List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
             builder.setData(ByteString.copyFrom(JsonUtil.object2Json(jvmInfos).getBytes()));
             return builder.build();
         } catch (Exception e) {
             throw new SysException(e.getMessage());
         }
-
     }
 
 }

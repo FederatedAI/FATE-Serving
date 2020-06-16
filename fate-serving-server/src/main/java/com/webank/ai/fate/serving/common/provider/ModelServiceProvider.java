@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.common.provider;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.Model;
@@ -16,7 +17,10 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @FateService(name = "modelService", preChain = {
         "requestOverloadBreaker"
@@ -47,7 +51,32 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
         if (CollectionUtils.isNotEmpty(models)) {
             for (int i = 0; i < models.size(); i++) {
-                Model model = models.get(i);
+                Model model = (Model) models.get(i).clone();
+                if (model == null) {
+                    continue;
+                }
+
+                List<Map> rolePartyMapList = model.getRolePartyMapList();
+                if (rolePartyMapList == null) {
+                    rolePartyMapList = new ArrayList<>();
+                }
+
+                Map rolePartyMap = new HashMap();
+                rolePartyMap.put(Dict.ROLE, model.getRole());
+                rolePartyMap.put(Dict.PART_ID, model.getPartId());
+                rolePartyMapList.add(rolePartyMap);
+
+                if (model.getFederationModelMap() != null) {
+                    for (Model value : model.getFederationModelMap().values()) {
+                        rolePartyMap = new HashMap();
+                        rolePartyMap.put(Dict.ROLE, value.getRole());
+                        rolePartyMap.put(Dict.PART_ID, value.getPartId());
+                        rolePartyMapList.add(rolePartyMap);
+                    }
+                }
+
+                model.setRolePartyMapList(rolePartyMapList);
+
                 ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
                 modelExBuilder.setIndex(i);
                 modelExBuilder.setTableName(model.getTableName());

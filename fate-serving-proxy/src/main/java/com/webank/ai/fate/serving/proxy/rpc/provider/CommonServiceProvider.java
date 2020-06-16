@@ -8,6 +8,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.flow.JvmInfo;
 import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
@@ -66,8 +67,9 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             metricNodes = flowCounterManager.queryModelMetrics(beginMs, endMs, sourceName);
         }
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+        String response = metricNodes != null ? JsonUtil.object2Json(metricNodes) : "";
         builder.setStatusCode(StatusCode.SUCCESS);
-        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(metricNodes).getBytes()));
+        builder.setData(ByteString.copyFrom(response.getBytes()));
         return builder.build();
     }
 
@@ -107,20 +109,16 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     @FateServiceMethod(name = "QUERY_JVM")
     public CommonServiceProto.CommonResponse listJvmMem(Context context, InboundPackage inboundPackage) {
         try {
-            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
+//            CommonServiceProto.QueryJvmInfoRequest queryPropsRequest = (CommonServiceProto.QueryJvmInfoRequest) inboundPackage.getBody();
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
             builder.setStatusCode(StatusCode.SUCCESS);
-            Map map = Maps.newHashMap();
+//            Map map = Maps.newHashMap();
             List<JvmInfo> jvmInfos = JvmInfoCounter.getMemInfos();
             builder.setData(ByteString.copyFrom(JsonUtil.object2Json(jvmInfos).getBytes()));
             return builder.build();
-        }catch(Exception e){
-            e.printStackTrace();
-            return null;
+        } catch (Exception e){
+            throw new SysException(e.getMessage());
         }
-
     }
-
-
 
 }
