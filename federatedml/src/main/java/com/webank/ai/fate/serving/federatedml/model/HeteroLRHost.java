@@ -34,7 +34,9 @@ public class HeteroLRHost extends HeteroLR {
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
 
         HashMap<String, Object> result = new HashMap<>(8);
-        Map<String, Double> ret = forward(inputData);
+        Map<String, Double> ret = forward(context, inputData);
+        result.put(Dict.MODELING_FEATURE_HIT_RATE, ret.get(Dict.MODELING_FEATURE_HIT_RATE));
+        result.put(Dict.INPUT_DATA_HIT_RATE, ret.get(Dict.INPUT_DATA_HIT_RATE));
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
 
         logger.info("hetero lr host predict ends, result is {}", result);

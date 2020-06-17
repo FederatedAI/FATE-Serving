@@ -96,10 +96,13 @@ public class Dict {
     public static final String SUCCESS = "success";
     public static final String PROB = "prob";
     public static final String ACCESS = "access";
+    public static final String MODELING_FEATURE_HIT_RATE = "modelingFeatureHitRate";
+    public static final String HOST_MODELING_FEATURE_HIT_RATE = "hostModelingFeatureHitRate";
     public static final String MODEL_WRIGHT_HIT_RATE = "modelWrightHitRate";
     public static final String INPUT_DATA_HIT_RATE = "inputDataHitRate";
     public static final String GUEST_MODEL_WEIGHT_HIT_RATE = "guestModelWeightHitRate";
     public static final String GUEST_INPUT_DATA_HIT_RATE = "guestInputDataHitRate";
+    public static final String HOST_INPUT_DATA_HIT_RATE = "HostInputDataHitRate";
     public static final String TAG_INPUT_FORMAT = "tag";
     public static final String SPARSE_INPUT_FORMAT = "sparse";
     public static final String MIN_MAX_SCALE = "min_max_scale";
@@ -126,6 +129,7 @@ public class Dict {
     public static final String INFERENCE_REQUEST = "inferenceRequest";
     public static final String INFERENCE_RESULT = "inferenceResult";
     public static final String FM_CROSS = "fm_cross";
+    public static final String ORIGINAL_PREDICT_DATA = "originalPredictData";
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_TYPE_JSON_UTF8 = "application/json;charset=UTF-8";
@@ -169,7 +173,7 @@ public class Dict {
     public static final String MODEL_VERSION = "modelVersion";
     public static final String APP_ID = "appid";
     public static final String PARTY_ID = "partyId";
-    public static final  String  FEATURE_DATA = "featureData";
+    public static final String  FEATURE_DATA = "featureData";
 
     public static final String DEFAULT_VERSION = "1.0";
     public static final String SELF_PROJECT_NAME = "proxy";
