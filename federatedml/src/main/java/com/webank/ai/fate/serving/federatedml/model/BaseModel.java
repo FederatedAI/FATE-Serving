@@ -33,8 +33,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public abstract class BaseModel implements Predictor<List<Map<String, Object>>, FederatedParams, Map<String, Object>> {
@@ -91,6 +93,38 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
         return res;
 
+    }
+
+    public Map<String, Double> featureHitRateStatistics(Context context, Set<String> features) {
+        Map<String, Object> data = (Map)context.getData(Dict.ORIGINAL_PREDICT_DATA);
+        int inputDataShape = data.size();
+        int featureShape = features.size();
+        int featureHit = 0;
+
+        Map<String, Double> ret = new HashMap<>();
+
+        for (String name : features) {
+            if (data.containsKey(name)) {
+                featureHit++;
+            }
+        }
+
+        double featureHitRate = -1.0;
+        double inputDataHitRate = -1.0;
+        try {
+            featureHitRate = 1.0 * featureHit / featureShape;
+            inputDataHitRate = 1.0 * featureHit / inputDataShape;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("input feature data's shape is {}, header shape is {}, input feature hit rate is {}, modeling feature hit rate is {}", inputDataShape, featureShape, inputDataHitRate, featureHitRate);
+        }
+
+        ret.put(Dict.MODELING_FEATURE_HIT_RATE, featureHitRate);
+        ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
+        return ret;
     }
 
     public abstract Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams);

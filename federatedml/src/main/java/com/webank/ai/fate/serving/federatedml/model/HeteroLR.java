@@ -50,11 +50,13 @@ public abstract class HeteroLR extends BaseModel {
         return StatusCode.OK;
     }
 
-    Map<String, Double> forward(List<Map<String, Object>> inputDatas) {
+    Map<String, Double> forward(Context context, List<Map<String, Object>> inputDatas) {
         Map<String, Object> inputData = inputDatas.get(0);
 
+        /*
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
+         */
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
         if(logger.isDebugEnabled()) {
@@ -67,8 +69,10 @@ public abstract class HeteroLR extends BaseModel {
                 Double x = new Double(inputData.get(key).toString());
                 Double w = new Double(this.weight.get(key).toString());
                 score += w * x;
+                /*
                 modelWeightHitCount += 1;
                 inputDataHitCount += 1;
+                 */
                 if(logger.isDebugEnabled()) {
                     logger.debug("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
                 }
@@ -76,6 +80,7 @@ public abstract class HeteroLR extends BaseModel {
         }
         score += this.intercept;
 
+        /*
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
         try {
@@ -84,16 +89,22 @@ public abstract class HeteroLR extends BaseModel {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
         if(logger.isDebugEnabled()) {
             logger.debug("model weight hit rate:{}", modelWeightHitRate);
             logger.debug("input data features hit rate:{}", inputDataHitRate);
-        }
+        }*/
 
         Map<String, Double> ret = new HashMap<>(8);
         ret.put(Dict.SCORE, score);
+
+        /*
         ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
         ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
-
+        */
+        Map<String, Double>  featureStat = this.featureHitRateStatistics(context, this.weight.keySet());
+        ret.put(Dict.MODELING_FEATURE_HIT_RATE, featureStat.get(Dict.MODELING_FEATURE_HIT_RATE));
+        ret.put(Dict.INPUT_DATA_HIT_RATE, featureStat.get(Dict.INPUT_DATA_HIT_RATE));
         return ret;
     }
 

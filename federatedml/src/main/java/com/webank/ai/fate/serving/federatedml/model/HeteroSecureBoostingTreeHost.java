@@ -135,11 +135,12 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
         Map<String, Object> ret = new HashMap<String, Object>(8);
 
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
-        int featureHit = 0;
+
+        // int featureHit = 0;
         for (String key : input.keySet()) {
             if (this.featureNameFidMapping.containsKey(key)) {
                 fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
-                ++featureHit;
+                // ++featureHit;
             }
         }
 
@@ -154,6 +155,10 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost {
         else{
             this.saveData(context, tag, fidValueMapping);
         }
+
+        Map<String, Double>  featureStat = this.featureHitRateStatistics(context, this.featureNameFidMapping.keySet());
+        ret.put(Dict.MODELING_FEATURE_HIT_RATE, featureStat.get(Dict.MODELING_FEATURE_HIT_RATE));
+        ret.put(Dict.INPUT_DATA_HIT_RATE, featureStat.get(Dict.INPUT_DATA_HIT_RATE));
 
         return ret;
     }
