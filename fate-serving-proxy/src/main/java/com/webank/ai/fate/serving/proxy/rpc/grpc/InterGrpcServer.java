@@ -34,8 +34,7 @@ public class InterGrpcServer implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
-        serverBuilder.addService(ServerInterceptors.intercept(interRequestHandler, new ServiceExceptionHandler()));
-        serverBuilder.addService(interRequestHandler);
+        serverBuilder.addService(ServerInterceptors.intercept(interRequestHandler, new ServiceExceptionHandler()), InterRequestHandler.class);
         server = serverBuilder.build();
         server.start();
 
