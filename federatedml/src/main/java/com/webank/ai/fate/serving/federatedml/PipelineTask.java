@@ -92,6 +92,7 @@ public class PipelineTask {
 
     public Map<String, Object> predict(Context context, Map<String, Object> inputData, FederatedParams predictParams) {
         //logger.info("Start Pipeline predict use {} model node.", this.pipeLineNode.size());
+        context.putData(Dict.ORIGINAL_PREDICT_DATA, inputData);
         List<Map<String, Object>> outputData = Lists.newArrayList();
 
         List<Map<String,Object>>  result = Lists.newArrayList();
