@@ -47,7 +47,7 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
             return null;
         }
         String environment = getEnvironment(context, inboundPackage);
-        List<URL> list = zkRouterService.router("serving", environment, context.getServiceName());
+        List<URL> list = zkRouterService.router(Dict.SERVICE_SERVING, environment, context.getServiceName());
 
         logger.info("try to find zk ,{}:{}:{}, result {}", "serving", environment, context.getServiceName(), list);
 

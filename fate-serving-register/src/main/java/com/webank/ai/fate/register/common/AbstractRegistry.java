@@ -17,7 +17,6 @@
 package com.webank.ai.fate.register.common;
 
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.interfaces.Registry;
@@ -25,6 +24,8 @@ import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,9 @@ public abstract class AbstractRegistry implements Registry {
     private final Set<URL> registered = new HashSet<>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
-    protected Map<String, Integer> serviceWeightMap = Maps.newHashMap();
+    // environment + serviceName => ServiceWrapper
+    protected ConcurrentMap<String, ServiceWrapper> serviceCacheMap = new ConcurrentHashMap<>();
+    protected File serviceCacheFile;
     protected Set<String> projectSets = Sets.newHashSet();
     private URL registryUrl;
     // Local disk cache file
@@ -82,6 +85,18 @@ public abstract class AbstractRegistry implements Registry {
 
         loadProperties();
         notify(url.getBackupUrls());
+
+        String serviceCacheFileName = System.getProperty(Dict.PROPERTY_USER_HOME)+"/.fate/fate-service-" + url.getParameter(PROJECT_KEY) + "-" + url.getHost() + "-" + url.getPort() + ".cache";
+        if (StringUtils.isNotEmpty(serviceCacheFileName)) {
+            serviceCacheFile = new File(serviceCacheFileName);
+            if (!serviceCacheFile.exists() && serviceCacheFile.getParentFile() != null && !serviceCacheFile.getParentFile().exists()) {
+                if (!serviceCacheFile.getParentFile().mkdirs()) {
+                    throw new IllegalArgumentException("Invalid service cache file " + serviceCacheFile + ", cause: Failed to create directory " + serviceCacheFile.getParentFile() + "!");
+                }
+            }
+        }
+
+        loadServiceCache(serviceCacheMap, serviceCacheFile);
     }
 
     protected static List<URL> filterEmpty(URL url, List<URL> urls) {
@@ -93,12 +108,69 @@ public abstract class AbstractRegistry implements Registry {
         return urls;
     }
 
-    public Map<String, Integer> getServiceWeightMap() {
-        return serviceWeightMap;
+    public void saveServiceCache(Map data, File file) {
+        if (file == null) {
+            logger.error("save cache file error , file is null");
+            return;
+        }
+        // Save
+        try {
+            File lockfile = new File(file.getAbsolutePath() + ".lock");
+            if (!lockfile.exists()) {
+                lockfile.createNewFile();
+            }
+            try (RandomAccessFile raf = new RandomAccessFile(lockfile, "rw");
+                 FileChannel channel = raf.getChannel()) {
+                FileLock lock = channel.tryLock();
+                if (lock == null) {
+                    throw new IOException("can not lock the model cache file " + file.getAbsolutePath() + ", ignore and retry later, maybe multi java process use the file");
+                }
+                try {
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
+                    try (FileOutputStream outputFile = new FileOutputStream(file)) {
+                        byte[] serialize = Base64.getEncoder().encode(JsonUtil.object2Json(data).getBytes());
+                        outputFile.write(serialize);
+                    }
+                } finally {
+                    lock.release();
+                }
+            }
+            logger.info("save cache file {} success", file.getAbsolutePath());
+        } catch (Throwable e) {
+            logger.error("Failed to save model cache file, will retry, cause: " + e.getMessage(), e);
+        }
     }
 
-    public void setServiceWeightMap(Map<String, Integer> serviceWeightMap) {
-        this.serviceWeightMap = serviceWeightMap;
+    public void loadServiceCache(Map data, File file) {
+        if (file != null && file.exists()) {
+            try (InputStream in = new FileInputStream(file)) {
+                Long length = file.length();
+                byte[] bytes = new byte[length.intValue()];
+                int readCount = in.read(bytes);
+                if (readCount > 0) {
+                    data.clear();
+                    ConcurrentHashMap deserialize = JsonUtil.json2Object(Base64.getDecoder().decode(bytes), ConcurrentHashMap.class);
+                    if (deserialize != null) {
+                        deserialize.forEach((k, v) -> {
+                            ServiceWrapper serviceWrapper = JsonUtil.json2Object(JsonUtil.object2Json(v), ServiceWrapper.class);
+                            data.put(k, serviceWrapper);
+                        });
+                    }
+                }
+            } catch (Throwable e) {
+                logger.error("failed to doLoadCache file {}", file,e);
+            }
+        }
+    }
+
+    public ConcurrentMap<String, ServiceWrapper> getServiceCacheMap() {
+        return serviceCacheMap;
+    }
+
+    public void setServiceCacheMap(ConcurrentMap<String, ServiceWrapper> serviceCacheMap) {
+        this.serviceCacheMap = serviceCacheMap;
     }
 
     public void subProject(String project) {

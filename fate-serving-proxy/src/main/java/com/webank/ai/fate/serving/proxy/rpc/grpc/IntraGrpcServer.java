@@ -1,6 +1,8 @@
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
+import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
+import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -25,6 +27,8 @@ public class IntraGrpcServer implements InitializingBean {
     IntraRequestHandler intraRequestHandler;
     @Autowired
     CommonRequestHandler commonRequestHandler;
+    @Autowired
+    ZookeeperRegistry zookeeperRegistry;
     @Resource(name = "grpcExecutorPool")
     Executor executor;
     Server server;
@@ -36,10 +40,12 @@ public class IntraGrpcServer implements InitializingBean {
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
         serverBuilder.executor(executor);
         serverBuilder.addService(ServerInterceptors.intercept(intraRequestHandler, new ServiceExceptionHandler()));
-        serverBuilder.addService(intraRequestHandler);
         serverBuilder.addService(ServerInterceptors.intercept(commonRequestHandler, new ServiceExceptionHandler()), CommonRequestHandler.class);
         server = serverBuilder.build();
         server.start();
+
+        logger.info("register zk , {}", FateServer.serviceSets);
+        zookeeperRegistry.register(FateServer.serviceSets);
     }
 }
 

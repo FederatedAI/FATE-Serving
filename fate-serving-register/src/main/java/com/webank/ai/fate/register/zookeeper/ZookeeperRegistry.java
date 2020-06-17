@@ -30,9 +30,13 @@ import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.NetUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -152,6 +156,26 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
     }
 
+    public boolean tryUnregister(URL url) {
+        try {
+            CuratorZookeeperClient client = (CuratorZookeeperClient) zkClient;
+            boolean exists = client.checkExists(toUrlPath(url));
+            if (exists) {
+                zkClient.delete(toUrlPath(url));
+                registedString.remove(url.getServiceInterface() + url.getEnvironment());
+                syncServiceCacheFile();
+                return true;
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to unregister " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
+    private void syncServiceCacheFile() {
+        super.saveServiceCache(serviceCacheMap, serviceCacheFile);
+    }
+
     @Override
     public void doSubProject(String project) {
 
@@ -236,12 +260,30 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (version != 0) {
             param = param + "&" + Constants.VERSION + "=" + version;
         }
-        if (this.getServiceWeightMap().containsKey(serviceName + ".weight")) {
-            int weight = this.getServiceWeightMap().get(serviceName + ".weight");
-            param = param + "&" + Constants.WEIGHT_KEY + "=" + weight;
-        }
         key = key + param;
         return key;
+    }
+
+    private void loadCacheParams(URL url) {
+        Map<String, String> parameters = url.getParameters();
+        ServiceWrapper serviceWrapper = this.getServiceCacheMap().get(url.getEnvironment() + "/" + url.getPath());
+        if (serviceWrapper != null) {
+            if (serviceWrapper.getRouterMode() != null) {
+                parameters.put(Constants.ROUTER_MODE, serviceWrapper.getRouterMode());
+            }
+            if (serviceWrapper.getWeight() != null) {
+                parameters.put(Constants.WEIGHT_KEY, String.valueOf(serviceWrapper.getWeight()));
+            }
+            if (serviceWrapper.getVersion() != null) {
+                parameters.put(Constants.VERSION_KEY, String.valueOf(serviceWrapper.getVersion()));
+            }
+        } else {
+            serviceWrapper = new ServiceWrapper();
+            serviceWrapper.setRouterMode(parameters.get(Constants.ROUTER_MODE));
+            serviceWrapper.setWeight(parameters.get(Constants.WEIGHT_KEY) != null ? Integer.valueOf(parameters.get(Constants.WEIGHT_KEY)) : null);
+            serviceWrapper.setVersion(parameters.get(Constants.VERSION_KEY) != null ? Long.valueOf(parameters.get(Constants.VERSION_KEY)) : null);
+            this.getServiceCacheMap().put(url.getEnvironment() + "/" + url.getPath(), serviceWrapper);
+        }
     }
 
     public synchronized void register(Set<RegisterService> sets) {
@@ -255,12 +297,15 @@ public class ZookeeperRegistry extends FailbackRegistry {
         Set<URL> registered = this.getRegistered();
         for (RegisterService service : sets) {
             try {
-                URL serviceUrl = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+                URL url = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+                URL serviceUrl = url.setProject(project);
                 if (service.useDynamicEnvironment()) {
-
                     if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
                         dynamicEnvironments.forEach(environment -> {
                             URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                            // use cache service params
+                            loadCacheParams(newServiceUrl);
+
                             String serviceName = service.serviceName() + environment;
                             if (!registedString.contains(serviceName)) {
                                 this.register(newServiceUrl);
@@ -271,12 +316,16 @@ public class ZookeeperRegistry extends FailbackRegistry {
                         });
                     }
                 } else {
-                    if (!registedString.contains(service.serviceName())) {
+                    if (!registedString.contains(service.serviceName() + environment)) {
+                        URL newServiceUrl = serviceUrl.setEnvironment(environment);
                         if (logger.isDebugEnabled()) {
-                            logger.debug("try to register url {}", serviceUrl);
+                            logger.debug("try to register url {}", newServiceUrl);
                         }
-                        this.register(serviceUrl);
-                        this.registedString.add(service.serviceName());
+                        // use cache service params
+                        loadCacheParams(newServiceUrl);
+
+                        this.register(newServiceUrl);
+                        this.registedString.add(service.serviceName() + environment);
                     } else {
                         logger.info("url {} is already registed, will not do anything ", service.serviceName());
                     }
@@ -286,6 +335,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 logger.error("try to register service {} failed", service);
             }
         }
+
+        syncServiceCacheFile();
+
         if (logger.isDebugEnabled()) {
             logger.debug("registed urls {}", registered);
         }

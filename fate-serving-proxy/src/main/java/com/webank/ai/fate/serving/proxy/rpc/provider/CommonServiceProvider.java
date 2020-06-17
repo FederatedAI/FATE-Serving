@@ -4,6 +4,11 @@ package com.webank.ai.fate.serving.proxy.rpc.provider;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.register.common.Constants;
+import com.webank.ai.fate.register.common.RouterMode;
+import com.webank.ai.fate.register.common.ServiceWrapper;
+import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
@@ -25,8 +30,10 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 @FateService(name = "commonService", preChain = {
         "requestOverloadBreaker"
@@ -40,7 +47,7 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     FlowCounterManager flowCounterManager;
 
     @Autowired
-    Environment environment;
+    ZookeeperRegistry zookeeperRegistry;
 
     @Override
     protected Object transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
@@ -121,4 +128,70 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         }
     }
 
+    @FateServiceMethod(name = "UPDATE_SERVICE")
+    public CommonServiceProto.CommonResponse updateService(Context context, InboundPackage inboundPackage) {
+        try {
+            CommonServiceProto.UpdateServiceRequest request = (CommonServiceProto.UpdateServiceRequest) inboundPackage.getBody();
+            String url = request.getUrl();
+            String routerMode = request.getRouterMode();
+            int weight = request.getWeight();
+            long version = request.getVersion();
+
+            URL originUrl = URL.valueOf(url);
+
+            boolean hasChange = false;
+            ServiceWrapper serviceWrapper = new ServiceWrapper();
+            HashMap<String, String> parameters = Maps.newHashMap(originUrl.getParameters());
+            if (RouterMode.contains(routerMode) && !routerMode.equalsIgnoreCase(originUrl.getParameter(Constants.ROUTER_MODE))) {
+                parameters.put(Constants.ROUTER_MODE, routerMode);
+                serviceWrapper.setRouterMode(routerMode);
+                hasChange = true;
+            }
+
+            String originWeight = originUrl.getParameter(Constants.WEIGHT_KEY);
+            if (weight != -1 && (originWeight == null || weight != Integer.parseInt(originWeight))) {
+                parameters.put(Constants.WEIGHT_KEY, String.valueOf(weight));
+                serviceWrapper.setWeight(weight);
+                hasChange = true;
+            }
+
+            String originVersion = originUrl.getParameter(Constants.VERSION_KEY);
+            if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
+                parameters.put(Constants.VERSION_KEY, String.valueOf(version));
+                serviceWrapper.setVersion(version);
+                hasChange = true;
+            }
+
+            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+
+            builder.setStatusCode(StatusCode.SUCCESS);
+            if (hasChange) {
+                // update service cache map
+                ConcurrentMap<String, ServiceWrapper> serviceCacheMap = zookeeperRegistry.getServiceCacheMap();
+                ServiceWrapper cacheServiceWrapper = serviceCacheMap.get(originUrl.getEnvironment() + "/" + originUrl.getPath());
+                if (cacheServiceWrapper == null) {
+                    cacheServiceWrapper = new ServiceWrapper();
+                }
+                cacheServiceWrapper.update(serviceWrapper);
+                serviceCacheMap.put(originUrl.getEnvironment() + "/" + originUrl.getPath(), cacheServiceWrapper);
+
+                boolean success = zookeeperRegistry.tryUnregister(originUrl);
+                if (success) {
+                    // register
+                    URL newUrl = new URL(originUrl.getProtocol(), originUrl.getProject(), originUrl.getEnvironment(),
+                            originUrl.getHost(), originUrl.getPort(), originUrl.getPath(), parameters);
+                    zookeeperRegistry.register(newUrl);
+                    builder.setMessage(Dict.SUCCESS);
+                } else {
+                    builder.setStatusCode(StatusCode.UNREGISTER_ERROR);
+                    builder.setMessage("no node");
+                }
+            } else {
+                builder.setMessage("no change");
+            }
+            return builder.build();
+        } catch (Exception e) {
+            throw new SysException(e.getMessage());
+        }
+    }
 }

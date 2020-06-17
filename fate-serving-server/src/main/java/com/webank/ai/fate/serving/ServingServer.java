@@ -63,18 +63,6 @@ public class ServingServer implements InitializingBean {
             logger.info("serving-server is using register center");
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
-            FateServer.serviceSets.forEach(servie -> {
-                try {
-                    String serviceName = servie.serviceName();
-                    String weightKey = serviceName + ".weight";
-                    int weight = environment.getProperty(weightKey, int.class, 0);
-                    if (weight > 0) {
-                        zookeeperRegistry.getServiceWeightMap().put(weightKey, weight);
-                    }
-                } catch (Throwable e) {
-                    logger.error("parse interface weight error", e);
-                }
-            });
             zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.registerComponent();
         } else {

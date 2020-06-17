@@ -20,5 +20,6 @@ public enum CommonActionType {
     QUERY_METRICS,
     UPDATE_FLOW_RULE,
     LIST_PROPS,
-    QUERY_JVM
+    QUERY_JVM,
+    UPDATE_SERVICE
 }

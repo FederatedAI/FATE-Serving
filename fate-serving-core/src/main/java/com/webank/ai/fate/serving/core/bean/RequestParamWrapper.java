@@ -9,11 +9,11 @@ public class RequestParamWrapper {
     String tableName;
     String namespace;
     String serviceId;
-    String project;
     String url;
     String routerMode;
     Integer weight;
     Long version;
+    String environment;
 
     public String getUsername() {
         return username;
@@ -71,14 +71,6 @@ public class RequestParamWrapper {
         this.serviceId = serviceId;
     }
 
-    public String getProject() {
-        return project;
-    }
-
-    public void setProject(String project) {
-        this.project = project;
-    }
-
     public String getUrl() {
         return url;
     }
@@ -109,5 +101,13 @@ public class RequestParamWrapper {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

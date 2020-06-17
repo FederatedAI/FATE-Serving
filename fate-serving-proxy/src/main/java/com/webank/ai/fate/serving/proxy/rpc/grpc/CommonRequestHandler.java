@@ -23,6 +23,7 @@ public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBas
     private static final String UPDATE_FLOW_RULE = "updateFlowRule";
     private static final String LIST_PROPS = "listProps";
     private static final String QUERY_JVM = "queryJvm";
+    private static final String UPDATE_SERVICE = "updateService";
     @Autowired
     CommonServiceProvider commonServiceProvider;
 
@@ -66,6 +67,18 @@ public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBas
     @RegisterService(serviceName = QUERY_JVM)
     public void queryJvmInfo(CommonServiceProto.QueryJvmInfoRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
         Context context = prepareContext(CommonActionType.QUERY_JVM.name());
+        InboundPackage inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
+        CommonServiceProto.CommonResponse response = (CommonServiceProto.CommonResponse) outboundPackage.getData();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    @RegisterService(serviceName = UPDATE_SERVICE)
+    public void updateService(CommonServiceProto.UpdateServiceRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
+        Context context = prepareContext(CommonActionType.UPDATE_SERVICE.name());
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);

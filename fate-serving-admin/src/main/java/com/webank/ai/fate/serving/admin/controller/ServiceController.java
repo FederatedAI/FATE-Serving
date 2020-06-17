@@ -2,22 +2,24 @@ package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
+import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.common.Constants;
-import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.bean.ServiceDataWrapper;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -33,6 +35,9 @@ public class ServiceController {
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
     @Autowired
     private ZookeeperRegistry zookeeperRegistry;
+    @Value("${grpc.timeout:5000}")
+    private int timeout;
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     // 列出集群中所注册的所有接口
     @GetMapping("/service/list")
@@ -102,8 +107,9 @@ public class ServiceController {
 
     // 修改每个接口中的路由信息，权重信息
     @PostMapping("/service/update")
-    public ReturnResult updateService(@RequestBody RequestParamWrapper requestParams) {
-        String project = requestParams.getProject();
+    public ReturnResult updateService(@RequestBody RequestParamWrapper requestParams) throws Exception {
+        String host = requestParams.getHost();
+        int port = requestParams.getPort();
         String url = requestParams.getUrl();
         String routerMode = requestParams.getRouterMode();
         Integer weight = requestParams.getWeight();
@@ -113,50 +119,47 @@ public class ServiceController {
             logger.debug("try to update service");
         }
 
-        Preconditions.checkArgument(StringUtils.isNotBlank(project), "parameter project is blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(url), "parameter url is blank");
 
-        logger.info("update {} url: {}, routerMode: {}, weight: {}, version: {}", project, url, routerMode, weight, version);
+        logger.info("update url: {}, routerMode: {}, weight: {}, version: {}", url, routerMode, weight, version);
+
+        CommonServiceGrpc.CommonServiceFutureStub commonServiceFutureStub = getCommonServiceFutureStub(host, port);
+        CommonServiceProto.UpdateServiceRequest.Builder builder = CommonServiceProto.UpdateServiceRequest.newBuilder();
+
+        builder.setUrl(url);
+        if (StringUtils.isNotBlank(routerMode)) {
+            builder.setRouterMode(routerMode);
+        }
+
+        if (weight != null) {
+            builder.setWeight(weight);
+        } else {
+            builder.setWeight(-1);
+        }
+
+        if (version != null) {
+            builder.setVersion(version);
+        } else {
+            builder.setVersion(-1);
+        }
+
+        ListenableFuture<CommonServiceProto.CommonResponse> future = commonServiceFutureStub.updateService(builder.build());
+
+        CommonServiceProto.CommonResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
 
         ReturnResult result = new ReturnResult();
-        result.setRetcode(StatusCode.SUCCESS);
-
-        // grpc://10.58.8.74:8000/inference?router_mode=VERSION_BIGER&timestamp=1589266159585&version=100&weight=50
-        URL originUrl = URL.valueOf(url);
-        originUrl = originUrl.setProject(project);
-
-        Map<String, String> originParameters = originUrl.getParameters();
-
-        boolean hasChange = false;
-        HashMap<String, String> parameters = Maps.newHashMap(originUrl.getParameters());
-        if (RouterMode.contains(routerMode) && !routerMode.equalsIgnoreCase(originUrl.getParameter(Constants.ROUTER_MODE))) {
-            parameters.put(Constants.ROUTER_MODE, routerMode);
-            hasChange = true;
-        }
-
-        String originWeight = originUrl.getParameter(Constants.WEIGHT_KEY);
-        if (weight != null && (originWeight == null || weight != Integer.parseInt(originWeight))) {
-            parameters.put(Constants.WEIGHT_KEY, String.valueOf(weight));
-            hasChange = true;
-        }
-
-        String originVersion = originUrl.getParameter(Constants.VERSION_KEY);
-        if (version != null && (originVersion == null || version != Long.parseLong(originVersion))) {
-            parameters.put(Constants.VERSION_KEY, String.valueOf(version));
-            hasChange = true;
-        }
-
-        if (hasChange) {
-            // unregistered
-            zookeeperRegistry.unregister(originUrl);
-
-            // register
-            URL newUrl = new URL(originUrl.getProtocol(), originUrl.getProject(), originUrl.getEnvironment(), originUrl.getHost(), originUrl.getPort(), originUrl.getPath(), parameters);
-            zookeeperRegistry.register(newUrl);
-        } else {
-            result.setRetmsg("no change");
-        }
+        result.setRetcode(response.getStatusCode());
+        result.setRetmsg(response.getMessage());
         return result;
+    }
+
+    private CommonServiceGrpc.CommonServiceFutureStub getCommonServiceFutureStub(String host, Integer port) throws Exception {
+        Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
+        Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
+
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
+        CommonServiceGrpc.CommonServiceFutureStub futureStub = CommonServiceGrpc.newFutureStub(managedChannel);
+        return futureStub;
     }
 
 }

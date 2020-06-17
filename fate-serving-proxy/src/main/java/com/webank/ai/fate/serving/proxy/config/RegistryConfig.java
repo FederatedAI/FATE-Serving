@@ -16,16 +16,13 @@
 
 package com.webank.ai.fate.serving.proxy.config;
 
-import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.proxy.rpc.grpc.InterGrpcServer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
@@ -72,10 +69,7 @@ public class RegistryConfig {
             System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
             ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.getRegistry(zkUrl, Dict.SERVICE_PROXY,
                     Dict.ONLINE_ENVIRONMENT, Integer.valueOf(port));
-            logger.info("register zk , {}", FateServer.serviceSets);
-            zookeeperRegistry.register(FateServer.serviceSets);
             zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
-
             zookeeperRegistry.registerComponent();
 
             return zookeeperRegistry;

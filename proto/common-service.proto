@@ -49,6 +49,12 @@ message QueryJvmInfoRequest{
     string keyword = 1;
 }
 
+message UpdateServiceRequest{
+    string url = 1;
+    string routerMode = 2;
+    int32 weight = 3;
+    int64 version = 4;
+}
 
 message CommonResponse{
     string statusCode = 1;
@@ -61,6 +67,7 @@ service CommonService {
     rpc updateFlowRule(UpdateFlowRuleRequest)  returns (CommonResponse);
     rpc listProps(QueryPropsRequest)  returns (CommonResponse);
     rpc queryJvmInfo(QueryJvmInfoRequest)  returns (CommonResponse);
+    rpc updateService(UpdateServiceRequest)  returns (CommonResponse);
 }
 
 

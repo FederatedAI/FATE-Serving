@@ -26,6 +26,7 @@ public class StatusCode {
     public static final String MODEL_INIT_ERROR = "123";
     public static final String OVER_LOAD_ERROR = "124";
     public static final String HOST_UNSUPPORTED_COMMAND_ERROR = "125";
+    public static final String UNREGISTER_ERROR = "126";
 
 
 
