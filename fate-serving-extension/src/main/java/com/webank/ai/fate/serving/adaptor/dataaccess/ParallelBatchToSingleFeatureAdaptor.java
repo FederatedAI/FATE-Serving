@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.adapter.dataaccess;
+package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 
 import com.google.common.util.concurrent.ListeningExecutorService;

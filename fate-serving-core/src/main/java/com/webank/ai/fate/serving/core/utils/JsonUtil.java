@@ -5,13 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.Maps;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 public class JsonUtil {
 
@@ -37,7 +31,7 @@ public class JsonUtil {
     }
 
     public static <T> T json2Object(String json, Class<T> c) {
-        if (StringUtils.hasLength(json) == false)
+        if (StringUtils.isBlank(json))
             return null;
         T t = null;
         try {
@@ -62,7 +56,7 @@ public class JsonUtil {
 
 
     public static <T> T json2List(String json, TypeReference<T>  typeReference) {
-        if (StringUtils.hasLength(json) == false)
+        if (StringUtils.isBlank(json))
             return null;
         T result=null;
         try {
@@ -75,7 +69,7 @@ public class JsonUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> T json2Object(String json, TypeReference<T> tr) {
-        if (StringUtils.hasLength(json) == false)
+        if (StringUtils.isBlank(json))
             return null;
 
         T t = null;

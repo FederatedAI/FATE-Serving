@@ -20,8 +20,6 @@ import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionT
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.NodeParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
-import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 
 import java.util.HashMap;

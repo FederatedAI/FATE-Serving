@@ -8,14 +8,12 @@ import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.bean.SpringContextUtil;
 import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.cache.ExpiringLRUCache;
 import com.webank.ai.fate.serving.core.cache.RedisCache;
 import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -40,12 +38,6 @@ public class ServingConfig {
         DefaultRouterService routerService = new DefaultRouterService();
         routerService.setRegistry(zookeeperRegistry);
         return routerService;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public SpringContextUtil springContextUtil() {
-        return new SpringContextUtil();
     }
 
     @Bean(destroyMethod = "destroy")

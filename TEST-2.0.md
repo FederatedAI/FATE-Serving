@@ -53,7 +53,7 @@
     3. 特征获取插件，需实现`BatchFeatureDataAdaptor`接口，通过配置`feature.batch.adaptor`的类路径启用
     4. 异常情况性能测试，拉取host挂了，或者adaptor出异常，可能产生大量错误日志，需要测试验证性能
     5. 批量最大数量受参数`batch.inference.max`限制，默认500
-    6. 批量转单笔预测，需要将`feature.batch.adaptor`配置为`com.webank.ai.fate.serving.adapter.dataaccess.ParallelBatchToSingleFeatureAdaptor`
+    6. 批量转单笔预测，需要将`feature.batch.adaptor`配置为`com.webank.ai.fate.serving.adaptor.dataaccess.ParallelBatchToSingleFeatureAdaptor`
 - 异步事件处理机制：
     1. 触发错误立即上报
     2. 缓存预测结果
