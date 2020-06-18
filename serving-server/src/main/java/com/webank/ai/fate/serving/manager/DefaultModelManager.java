@@ -102,12 +102,14 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             }
             if (modelInfo == null) {
                 returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
+                returnResult.setRetmsg("No model for me.");
                 return returnResult;
             }
 
             PipelineTask model = pushModelIntoPool(context, modelInfo.getName(), modelInfo.getNamespace());
             if (model == null) {
                 returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
+                returnResult.setRetmsg("load model failed");
                 return returnResult;
             }
 
@@ -146,6 +148,7 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             logger.error(ex.getMessage());
             ex.printStackTrace();
             returnResult.setRetcode(InferenceRetCode.SYSTEM_ERROR);
+            returnResult.setRetmsg(ex.getMessage());
         }
         return returnResult;
     }
@@ -162,26 +165,25 @@ public class DefaultModelManager implements ModelManager, InitializingBean {
             logger.info("service id is null");
         }
         ReturnResult returnResult = new ReturnResult();
-        ModelInfo modelInfo = federatedRolesModel.get(role).get(partyId);
-        if (modelInfo == null) {
-            returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
-            returnResult.setRetmsg("No model for me.");
-            return returnResult;
-        }
-
-        String modelKey = ModelUtil.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
-        PipelineTask model = modelCache.get(context, modelKey);
-        if (model == null) {
-            returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
-            returnResult.setRetmsg("Can not found model by these information.");
-            return returnResult;
-        }
-        modelFederatedParty.put(modelKey, federatedParty);
-
-        modelFederatedRoles.put(modelKey, federatedRoles);
-
-
         try {
+            ModelInfo modelInfo = federatedRolesModel.get(role).get(partyId);
+            if (modelInfo == null) {
+                returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
+                returnResult.setRetmsg("No model for me.");
+                return returnResult;
+            }
+
+            String modelKey = ModelUtil.genModelKey(modelInfo.getName(), modelInfo.getNamespace());
+            PipelineTask model = modelCache.get(context, modelKey);
+            if (model == null) {
+                returnResult.setRetcode(InferenceRetCode.LOAD_MODEL_FAILED);
+                returnResult.setRetmsg("Can not found model by these information.");
+                return returnResult;
+            }
+            modelFederatedParty.put(modelKey, federatedParty);
+
+            modelFederatedRoles.put(modelKey, federatedRoles);
+
             String modelNamespace = modelInfo.getNamespace();
             String modelName = modelInfo.getName();
             modelNamespaceDataMapPool.put(modelNamespace, new ModelNamespaceData(modelNamespace, federatedParty, federatedRoles, modelName, model));
