@@ -97,6 +97,11 @@ public abstract class BaseModel implements Predictor<List<Map<String, Object>>, 
 
     public Map<String, Double> featureHitRateStatistics(Context context, Set<String> features) {
         Map<String, Object> data = (Map)context.getData(Dict.ORIGINAL_PREDICT_DATA);
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("original input data is {}, modeling features is {}", data, features);
+        }
+
         int inputDataShape = data.size();
         int featureShape = features.size();
         int featureHit = 0;
