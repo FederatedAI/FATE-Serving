@@ -38,8 +38,10 @@ public class LoginInterceptor implements HandlerInterceptor {
             cache.put(token, userInfo, 600);
             return true;
         } else {
-            logger.info("Session token unavailable");
-            response.getWriter().write(JsonUtil.object2Json(ReturnResult.build(StatusCode.PARAM_ERROR, "Session token unavailable")));
+            if (logger.isDebugEnabled()) {
+                logger.debug("session token unavailable");
+            }
+            response.getWriter().write(JsonUtil.object2Json(ReturnResult.build(StatusCode.INVALID_TOKEN, "session token unavailable")));
             response.flushBuffer();
             return false;
         }
