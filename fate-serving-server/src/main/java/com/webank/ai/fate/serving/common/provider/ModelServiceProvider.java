@@ -2,14 +2,14 @@ package com.webank.ai.fate.serving.common.provider;
 
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.url.CollectionUtils;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.rpc.core.FateService;
+import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.rpc.core.FateService;
-import com.webank.ai.fate.serving.core.rpc.core.FateServiceMethod;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;

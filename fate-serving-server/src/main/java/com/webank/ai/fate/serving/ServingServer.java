@@ -4,7 +4,7 @@ import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
 import com.webank.ai.fate.register.provider.FateServerBuilder;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.core.bean.BaseContext;
+import com.webank.ai.fate.serving.common.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.HttpClientPool;

@@ -1,13 +1,13 @@
 package com.webank.ai.fate.serving.proxy.rpc.router;
 
 import com.google.common.hash.Hashing;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.RouterInterface;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.router.RouteType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
-import com.webank.ai.fate.serving.core.rpc.router.RouterInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

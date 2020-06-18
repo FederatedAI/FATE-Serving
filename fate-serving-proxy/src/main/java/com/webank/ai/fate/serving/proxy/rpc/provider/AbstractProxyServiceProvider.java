@@ -1,10 +1,10 @@
 package com.webank.ai.fate.serving.proxy.rpc.provider;
 
+import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
-import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

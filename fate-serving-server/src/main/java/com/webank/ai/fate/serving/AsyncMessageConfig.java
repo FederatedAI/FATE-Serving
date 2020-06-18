@@ -1,8 +1,9 @@
 package com.webank.ai.fate.serving;
 
-import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
-import com.webank.ai.fate.serving.core.async.AsyncSubscribeRegister;
-import com.webank.ai.fate.serving.core.async.Subscribe;
+
+import com.webank.ai.fate.serving.common.async.AbstractAsyncMessageProcessor;
+import com.webank.ai.fate.serving.common.async.AsyncSubscribeRegister;
+import com.webank.ai.fate.serving.common.async.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;

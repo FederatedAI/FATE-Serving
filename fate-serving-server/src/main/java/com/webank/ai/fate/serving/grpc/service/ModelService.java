@@ -22,13 +22,13 @@ import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishRequest;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto.PublishResponse;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.provider.ModelServiceProvider;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ModelActionType;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.bean.ServingServerContext;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
     @RegisterService(serviceName = "publishLoad")
     public synchronized void publishLoad(PublishRequest req, StreamObserver<PublishResponse> responseObserver) {
         Context context = prepareContext(ModelActionType.MODEL_LOAD.name());
-        InboundPackage<ModelServiceProto.PublishRequest> inboundPackage = new InboundPackage();
+        InboundPackage<PublishRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();

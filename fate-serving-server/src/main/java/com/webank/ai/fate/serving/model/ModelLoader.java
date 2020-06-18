@@ -1,7 +1,8 @@
 package com.webank.ai.fate.serving.model;
 
+import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.model.ModelProcessor;
+
 
 public interface ModelLoader {
 

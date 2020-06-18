@@ -2,12 +2,12 @@ package com.webank.ai.fate.serving.guest.interceptors;
 
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.exceptions.GuestInvalidParamException;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;

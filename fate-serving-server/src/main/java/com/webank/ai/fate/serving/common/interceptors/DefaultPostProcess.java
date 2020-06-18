@@ -19,8 +19,6 @@ package com.webank.ai.fate.serving.common.interceptors;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,12 +1,12 @@
 package com.webank.ai.fate.serving.proxy.controller;
 
 
-import com.webank.ai.fate.serving.core.bean.BaseContext;
+import com.webank.ai.fate.serving.common.bean.BaseContext;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;

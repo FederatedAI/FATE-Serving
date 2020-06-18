@@ -1,10 +1,9 @@
 package com.webank.ai.fate.serving.proxy.config;
-
-import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
-import com.webank.ai.fate.serving.core.async.AsyncSubscribeRegister;
-import com.webank.ai.fate.serving.core.async.Subscribe;
+import com.webank.ai.fate.serving.common.async.AbstractAsyncMessageProcessor;
+import com.webank.ai.fate.serving.common.async.AsyncSubscribeRegister;
+import com.webank.ai.fate.serving.common.async.Subscribe;
+import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -14,7 +13,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;

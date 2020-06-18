@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import org.slf4j.Logger;

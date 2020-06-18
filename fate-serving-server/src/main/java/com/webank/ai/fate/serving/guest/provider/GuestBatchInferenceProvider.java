@@ -12,12 +12,6 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
-import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.model.ModelProcessor;
-import com.webank.ai.fate.serving.core.rpc.core.FateService;
-import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

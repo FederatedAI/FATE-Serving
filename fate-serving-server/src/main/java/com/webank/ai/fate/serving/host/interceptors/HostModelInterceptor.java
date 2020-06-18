@@ -1,14 +1,14 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
 
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
-import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
-import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

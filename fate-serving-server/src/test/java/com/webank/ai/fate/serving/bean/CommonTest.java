@@ -3,7 +3,7 @@ package com.webank.ai.fate.serving.bean;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
-import com.webank.ai.fate.serving.core.flow.MetricNode;
+import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;

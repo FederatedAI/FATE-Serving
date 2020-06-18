@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.common.interceptors;
 
 import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
-import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;

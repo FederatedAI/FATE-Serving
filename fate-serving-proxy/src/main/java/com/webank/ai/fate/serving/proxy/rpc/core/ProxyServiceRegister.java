@@ -1,8 +1,8 @@
 package com.webank.ai.fate.serving.proxy.rpc.core;
 
+import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
+import com.webank.ai.fate.serving.common.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
-import com.webank.ai.fate.serving.core.rpc.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;

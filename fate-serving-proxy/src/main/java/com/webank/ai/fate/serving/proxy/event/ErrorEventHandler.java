@@ -1,8 +1,7 @@
 package com.webank.ai.fate.serving.proxy.event;
-
-import com.webank.ai.fate.serving.core.async.Subscribe;
-import com.webank.ai.fate.serving.core.async.AbstractAsyncMessageProcessor;
-import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
+import com.webank.ai.fate.serving.common.async.AbstractAsyncMessageProcessor;
+import com.webank.ai.fate.serving.common.async.AsyncMessageEvent;
+import com.webank.ai.fate.serving.common.async.Subscribe;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;

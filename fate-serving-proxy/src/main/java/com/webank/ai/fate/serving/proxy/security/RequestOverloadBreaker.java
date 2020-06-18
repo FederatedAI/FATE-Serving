@@ -1,11 +1,11 @@
 package com.webank.ai.fate.serving.proxy.security;
 
+import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.OverLoadException;
-import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.Interceptor;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -21,7 +21,7 @@ public class RequestOverloadBreaker implements Interceptor {
     Logger logger = LoggerFactory.getLogger(RequestOverloadBreaker.class);
 
     @Autowired
-    FlowCounterManager  flowCounterManager;
+    FlowCounterManager flowCounterManager;
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
