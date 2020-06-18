@@ -29,9 +29,11 @@
         <module>fate-serving-federatedml</module>
         <module>fate-serving-core</module>
         <module>fate-serving-register</module>
+        <module>fate-serving-common</module>
         <module>fate-serving-proxy</module>
         <module>fate-serving-admin</module>
         <module>fate-serving-extension</module>
+        <module>fate-serving-sdk</module>
     </modules>
 
     <properties>
@@ -197,6 +199,7 @@
             <artifactId>jackson-dataformat-properties</artifactId>
             <version>2.9.4</version>
         </dependency>
+
 
     </dependencies>
 
