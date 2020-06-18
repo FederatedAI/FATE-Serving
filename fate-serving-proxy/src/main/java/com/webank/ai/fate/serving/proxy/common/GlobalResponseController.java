@@ -24,7 +24,6 @@ public class GlobalResponseController implements ResponseBodyAdvice<Object> {
     public boolean supports(MethodParameter methodParameter, Class converterType) {
         Boolean isRest = AnnotationUtils.isAnnotationDeclaredLocally(RestController.class, methodParameter.getContainingClass());
         ResponseBody responseBody = AnnotationUtils.findAnnotation(methodParameter.getMethod(), ResponseBody.class);
-
         if (responseBody != null || isRest) {
             return true;
         } else {
