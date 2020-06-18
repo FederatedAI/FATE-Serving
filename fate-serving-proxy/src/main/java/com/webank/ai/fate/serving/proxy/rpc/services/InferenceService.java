@@ -8,6 +8,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.NoResultException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
@@ -42,13 +43,9 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
     Logger logger = LoggerFactory.getLogger(InferenceService.class);
 
-
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-    @Value("${proxy.grpc.inference.timeout:3000}")
-    private int timeout;
-    @Value("${proxy.grpc.inference.async.timeout:3000}")
-    private int asyncTimeout;
 
+    private int timeout = MetaInfo.PROPERTY_PROXY_GRPC_INFERENCE_TIMEOUT;
     public InferenceService() {
     }
 
@@ -57,19 +54,13 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
         Map resultMap = Maps.newHashMap();
         RouterInfo routerInfo = data.getRouterInfo();
-
         ManagedChannel managedChannel = null;
-
         String resultString = null;
         String callName = context.getCallName();
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
 
         try {
-            if (logger.isDebugEnabled()) {
-                logger.debug("try to get grpc connection");
-            }
             managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
-
         } catch (Exception e) {
             logger.error("get grpc channel error", e);
             throw new NoResultException();
@@ -77,13 +68,10 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
         Map reqBodyMap = data.getBody();
         Map reqHeadMap = data.getHead();
-
         Map inferenceReqMap = Maps.newHashMap();
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
-
-
         int timeWait = timeout;
 
         if (logger.isDebugEnabled()) {
@@ -91,11 +79,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
-
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-
-//        metricFactory.counter("http.inference.service", "in doService", "callName", callName, "direction", "to.self.serving-server", "result", "success").increment();
-
         if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
             resultFuture = futureStub.inference(reqBuilder.build());
             timeWait = timeout;
@@ -104,18 +88,14 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
             logger.error("unknown callName {}.", callName);
             throw new UnSupportMethodException();
         }
-
-
         try {
             InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait, TimeUnit.MILLISECONDS);
-            logger.info("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
+            //logger.info("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
             resultString = new String(result.getBody().toByteArray());
         } catch (Exception e) {
             logger.error("get grpc result error", e);
             throw new NoResultException();
         }
-
-
         if (StringUtils.isNotEmpty(resultString)) {
             resultMap = JsonUtil.json2Object(resultString, Map.class);
         }

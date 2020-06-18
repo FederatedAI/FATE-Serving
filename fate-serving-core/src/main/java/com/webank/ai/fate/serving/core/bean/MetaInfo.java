@@ -66,6 +66,7 @@ public class MetaInfo {
     public static Integer PROPERTY_PROXY_ASYNC_MAXSIZE;
     public static Integer PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT;
 
+
     public static Map toMap() {
         Map result = Maps.newHashMap();
         Field[] fields = MetaInfo.class.getFields();
