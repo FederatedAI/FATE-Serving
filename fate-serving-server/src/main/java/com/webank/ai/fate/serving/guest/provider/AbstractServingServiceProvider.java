@@ -1,15 +1,15 @@
 package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Lists;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
+import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
-import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
-import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 

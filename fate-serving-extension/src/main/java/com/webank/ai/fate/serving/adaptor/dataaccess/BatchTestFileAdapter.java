@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 
-import com.webank.ai.fate.serving.core.adaptor.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -33,11 +32,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BatchTestFileAdapter implements BatchFeatureDataAdaptor {
+public class BatchTestFileAdapter extends AbstractBatchFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(BatchTestFileAdapter.class);
 
     @Override
-    public void init(Context context) {
+    public void init() {
 
     }
 

@@ -1,6 +1,10 @@
 package com.webank.ai.fate.serving.host.provider;
 
 import com.google.common.base.Preconditions;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.model.ModelProcessor;
+import com.webank.ai.fate.serving.common.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.model.Model;

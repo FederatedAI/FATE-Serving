@@ -2,6 +2,13 @@ package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.model.ModelProcessor;
+import com.webank.ai.fate.serving.common.rpc.core.FateService;
+import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;

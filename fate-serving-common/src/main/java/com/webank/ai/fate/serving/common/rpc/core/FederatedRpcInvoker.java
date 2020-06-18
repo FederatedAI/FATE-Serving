@@ -3,10 +3,10 @@ package com.webank.ai.fate.serving.common.rpc.core;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.model.Model;
 
 import java.util.List;
 import java.util.Map;

@@ -1,9 +1,9 @@
 package com.webank.ai.fate.serving.admin.interceptors;
 
 import com.google.common.base.Preconditions;
+import com.webank.ai.fate.serving.common.cache.Cache;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;

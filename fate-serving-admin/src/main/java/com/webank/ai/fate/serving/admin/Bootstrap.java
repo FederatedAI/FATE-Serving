@@ -1,10 +1,10 @@
 package com.webank.ai.fate.serving.admin;
 
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.common.flow.JvmInfoCounter;
+import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.flow.JvmInfoCounter;
-import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;

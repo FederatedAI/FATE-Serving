@@ -26,6 +26,7 @@
 
     <artifactId>fate-serving-core</artifactId>
 
+
     <!--<dependencies>-->
         <!--<dependency>-->
             <!--<groupId>redis.clients</groupId>-->

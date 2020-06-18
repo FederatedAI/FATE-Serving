@@ -1,5 +1,10 @@
 package com.webank.ai.fate.serving.host.provider;
 
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.rpc.core.FateService;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;

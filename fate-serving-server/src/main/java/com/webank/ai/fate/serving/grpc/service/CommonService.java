@@ -3,7 +3,10 @@ package com.webank.ai.fate.serving.grpc.service;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.provider.CommonServiceProvider;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.CommonActionType;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ServingServerContext;
@@ -90,7 +93,6 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
 
     private Context prepareContext(String actionType) {
         ServingServerContext context = new ServingServerContext();
-        context.setEnvironment(environment);
         context.setActionType(actionType);
         context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;

@@ -2,10 +2,11 @@ package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.model.ModelProcessor;
+import com.webank.ai.fate.serving.common.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.model.ModelProcessor;
-import com.webank.ai.fate.serving.core.rpc.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

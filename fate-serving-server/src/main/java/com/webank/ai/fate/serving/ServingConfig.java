@@ -6,12 +6,13 @@ import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.common.cache.Cache;
+import com.webank.ai.fate.serving.common.cache.ExpiringLRUCache;
+import com.webank.ai.fate.serving.common.cache.RedisCache;
+import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.cache.Cache;
-import com.webank.ai.fate.serving.core.cache.ExpiringLRUCache;
-import com.webank.ai.fate.serving.core.cache.RedisCache;
-import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;

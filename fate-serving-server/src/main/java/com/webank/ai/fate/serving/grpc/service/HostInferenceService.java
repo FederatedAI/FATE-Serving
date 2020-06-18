@@ -21,13 +21,13 @@ import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.api.networking.proxy.Proxy.Packet;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.host.provider.HostBatchInferenceProvider;
 import com.webank.ai.fate.serving.host.provider.HostSingleInferenceProvider;
@@ -95,7 +95,6 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
 
     private Context prepareContext() {
         ServingServerContext context = new ServingServerContext();
-        context.setEnvironment(environment);
         return context;
     }
 }

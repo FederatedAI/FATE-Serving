@@ -1,11 +1,11 @@
 package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
+import com.webank.ai.fate.serving.common.cache.Cache;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.EncryptMethod;
 import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import org.apache.commons.lang3.StringUtils;

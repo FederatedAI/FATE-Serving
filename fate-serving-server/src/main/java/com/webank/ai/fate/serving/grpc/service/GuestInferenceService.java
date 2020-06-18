@@ -21,12 +21,13 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.bean.ServingServerContext;
-import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
+
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.provider.GuestBatchInferenceProvider;
 import com.webank.ai.fate.serving.guest.provider.GuestSingleInferenceProvider;
@@ -76,7 +77,6 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
 
     private Context prepareContext() {
         ServingServerContext context = new ServingServerContext();
-        context.setEnvironment(environment);
         return context;
     }
 

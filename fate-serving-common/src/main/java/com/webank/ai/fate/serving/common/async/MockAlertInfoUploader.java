@@ -1,7 +1,6 @@
-package com.webank.ai.fate.serving.core.upload;
+package com.webank.ai.fate.serving.common.async;
 
 
-import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

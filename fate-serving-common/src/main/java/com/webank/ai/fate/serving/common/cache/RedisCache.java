@@ -22,7 +22,6 @@ public class RedisCache implements Cache {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(maxTotal);
         jedisPoolConfig.setMaxIdle(maxIdel);
-//        this.jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, null);
         this.jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, password);
     }
 

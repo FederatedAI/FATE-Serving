@@ -19,7 +19,6 @@ package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.webank.ai.fate.serving.core.adaptor.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
@@ -35,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 许多host方并未提供批量查询接口，这个类将批量请求拆分成单笔请求发送，再合结果
  */
-public class ParallelBatchToSingleFeatureAdaptor implements BatchFeatureDataAdaptor {
+public class ParallelBatchToSingleFeatureAdaptor extends AbstractBatchFeatureDataAdaptor {
 
     int timeout;
 
@@ -48,7 +47,7 @@ public class ParallelBatchToSingleFeatureAdaptor implements BatchFeatureDataAdap
     }
 
     @Override
-    public void init(Context context) {
+    public void init() {
 
     }
 

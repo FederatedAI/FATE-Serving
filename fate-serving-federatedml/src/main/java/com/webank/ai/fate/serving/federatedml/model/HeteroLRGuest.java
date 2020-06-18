@@ -17,10 +17,10 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 
+import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
-import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

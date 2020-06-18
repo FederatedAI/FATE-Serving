@@ -2,10 +2,10 @@ package com.webank.ai.fate.serving.admin.config;
 
 
 import com.webank.ai.fate.serving.admin.interceptors.LoginInterceptor;
+import com.webank.ai.fate.serving.common.cache.Cache;
+import com.webank.ai.fate.serving.common.cache.ExpiringLRUCache;
+import com.webank.ai.fate.serving.common.cache.RedisCache;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.cache.Cache;
-import com.webank.ai.fate.serving.core.cache.ExpiringLRUCache;
-import com.webank.ai.fate.serving.core.cache.RedisCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -26,10 +26,6 @@ public class WebConfig implements WebMvcConfigurer {
         return new LoginInterceptor();
     }
 
-//    @Bean
-//    public RequestInterceptor requestInterceptor() {
-//        return new RequestInterceptor();
-//    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

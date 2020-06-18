@@ -20,8 +20,9 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
+import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

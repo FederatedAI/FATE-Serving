@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 
-import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -29,12 +28,12 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MockAdapter implements SingleFeatureDataAdaptor {
+public class MockAdapter extends AbstractSingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(MockAdapter.class);
 
     @Override
-    public void init(Context context) {
-
+    public void init() {
+        environment.getProperty("port");
     }
 
     @Override

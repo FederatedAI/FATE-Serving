@@ -3,13 +3,16 @@ package com.webank.ai.fate.serving.common.rpc.core;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.serving.core.async.AsyncMessageEvent;
+import com.webank.ai.fate.serving.common.async.AsyncMessageEvent;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
+import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.utils.DisruptorUtil;
+
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
-import com.webank.ai.fate.serving.core.flow.FlowCounterManager;
-import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.utils.DisruptorUtil;
+
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
@@ -57,7 +60,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         this.flowCounterManager = flowCounterManager;
     }
 
-    protected   FlowCounterManager  flowCounterManager;
+    protected FlowCounterManager flowCounterManager;
 
     static public AtomicInteger requestInHandle = new AtomicInteger(0);
     public static boolean isOpen = true;

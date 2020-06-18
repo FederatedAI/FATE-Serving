@@ -18,9 +18,9 @@ package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.NodeParam;
+import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 
 import java.util.HashMap;
 import java.util.List;

@@ -13,7 +13,6 @@ public class RequestParamWrapper {
     String routerMode;
     Integer weight;
     Long version;
-    String environment;
 
     public String getUsername() {
         return username;
@@ -103,11 +102,4 @@ public class RequestParamWrapper {
         this.version = version;
     }
 
-    public String getEnvironment() {
-        return environment;
-    }
-
-    public void setEnvironment(String environment) {
-        this.environment = environment;
-    }
 }

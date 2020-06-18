@@ -17,12 +17,12 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.common.cache.Cache;
+import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
+import com.webank.ai.fate.serving.common.rpc.core.ErrorMessageUtil;
+import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.cache.Cache;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
-import com.webank.ai.fate.serving.core.rpc.core.ErrorMessageUtil;
-import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
