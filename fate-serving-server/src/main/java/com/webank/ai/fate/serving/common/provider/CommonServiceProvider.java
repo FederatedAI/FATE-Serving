@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.common.provider;
 
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -42,7 +43,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
 
     @Autowired
     FlowCounterManager flowCounterManager;
-    @Autowired
+    @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
 
     @Override
@@ -127,14 +128,13 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     @FateServiceMethod(name = "UPDATE_SERVICE")
     public CommonServiceProto.CommonResponse updateService(Context context, InboundPackage inboundPackage) {
         try {
+            Preconditions.checkArgument(zookeeperRegistry!=null);
             CommonServiceProto.UpdateServiceRequest request = (CommonServiceProto.UpdateServiceRequest) inboundPackage.getBody();
             String url = request.getUrl();
             String routerMode = request.getRouterMode();
             int weight = request.getWeight();
             long version = request.getVersion();
-
             URL originUrl = URL.valueOf(url);
-
             boolean hasChange = false;
             ServiceWrapper serviceWrapper = new ServiceWrapper();
             HashMap<String, String> parameters = Maps.newHashMap(originUrl.getParameters());
@@ -143,23 +143,19 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
                 serviceWrapper.setRouterMode(routerMode);
                 hasChange = true;
             }
-
             String originWeight = originUrl.getParameter(Constants.WEIGHT_KEY);
             if (weight != -1 && (originWeight == null || weight != Integer.parseInt(originWeight))) {
                 parameters.put(Constants.WEIGHT_KEY, String.valueOf(weight));
                 serviceWrapper.setWeight(weight);
                 hasChange = true;
             }
-
             String originVersion = originUrl.getParameter(Constants.VERSION_KEY);
             if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
                 parameters.put(Constants.VERSION_KEY, String.valueOf(version));
                 serviceWrapper.setVersion(version);
                 hasChange = true;
             }
-
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-
             builder.setStatusCode(StatusCode.SUCCESS);
             if (hasChange) {
                 // update service cache map
@@ -173,7 +169,6 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
 
                 boolean success = zookeeperRegistry.tryUnregister(originUrl);
                 if (success) {
-                    // register
                     URL newUrl = new URL(originUrl.getProtocol(), originUrl.getProject(), originUrl.getEnvironment(),
                             originUrl.getHost(), originUrl.getPort(), originUrl.getPath(), parameters);
                     zookeeperRegistry.register(newUrl);

@@ -28,10 +28,8 @@ import java.util.Properties;
 @PropertySource("classpath:application.properties")
 @EnableScheduling
 public class Bootstrap {
-
     private static ApplicationContext applicationContext;
     private static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
-
     public static void main(String[] args) {
         try {
             parseConfig();

@@ -9,6 +9,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.NoResultException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
@@ -38,64 +39,20 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
-    @Value("${proxy.grpc.batch.inference.timeout:10000}")
-    private int timeout;
-//    @Value("${proxy.grpc.batch.inference.async.timeout:10000}")
-//    private int asyncTimeout;
+    private int timeout = MetaInfo.PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT;
 
     public BatchInferenceService() {
     }
-
-    /*{
-            "head": {
-                "serviceId": "2020040111152695637611"
-            },
-            "body": {
-                "batchDataList": [
-                    {
-                        "index": 0,
-                        "featureData": {
-                            "x0": 1.88669,
-                            "x1": -1.359293,
-                            "x2": 2.303601,
-                            "x3": 2.00137,
-                            "x4": 1.307686
-                        },
-                        "sendToRemoteFeatureData": {
-                            "device_id": "aaaaa",
-                            "phone_num": "122222222"
-                        }
-                    },
-                    {
-                        "index": 1,
-                        "featureData": {
-                            "x0": 1.88669,
-                            "x1": -1.359293,
-                            "x2": 2.303601,
-                            "x3": 2.00137,
-                            "x4": 1.307686
-                        },
-                        "sendToRemoteFeatureData": {
-                            "device_id": "aaaaa",
-                            "phone_num": "122222222"
-                        }
-                    }
-                ]
-            }
-    }*/
 
     @Override
     public Map doService(Context context, InboundPackage<Map> data, OutboundPackage<Map> outboundPackage) {
 
         Map resultMap = Maps.newHashMap();
         RouterInfo routerInfo = data.getRouterInfo();
-
         ManagedChannel managedChannel = null;
-
         String resultString = null;
         String callName = context.getCallName();
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
-
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("try to get grpc connection");
@@ -106,30 +63,24 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
             logger.error("get grpc channel error", e);
             throw new NoResultException();
         }
-
         Map reqBodyMap = data.getBody();
         Map reqHeadMap = data.getHead();
-
         Map inferenceReqMap = Maps.newHashMap();
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
-
         if (logger.isDebugEnabled()) {
             logger.debug("batch inference req : {}", JsonUtil.object2Json(inferenceReqMap));
         }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
-
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-
         if (callName.equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
             resultFuture = futureStub.batchInference(reqBuilder.build());
         } else {
             logger.error("unknown callName {}.", callName);
             throw new UnSupportMethodException();
         }
-
         try {
             InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout, TimeUnit.MILLISECONDS);
             logger.info("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
@@ -138,7 +89,6 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
             logger.error("get grpc result error", e);
             throw new NoResultException();
         }
-
         if (StringUtils.isNotEmpty(resultString)) {
             resultMap = JsonUtil.json2Object(resultString, Map.class);
         }

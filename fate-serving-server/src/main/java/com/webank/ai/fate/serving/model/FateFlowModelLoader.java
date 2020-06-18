@@ -116,7 +116,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             }
 
             if (StringUtils.isBlank(requestUrl)) {
-                logger.info("roll address not found");
+                logger.info("fateflow address not found");
                 return null;
             }
 
@@ -129,33 +129,27 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             long start = System.currentTimeMillis();
             String responseBody = HttpClientPool.transferPost(requestUrl, requestData);
             long end = System.currentTimeMillis();
-
             if (logger.isDebugEnabled()) {
                 logger.debug("{}|{}|{}|{}", requestUrl, start, end, (end - start) + " ms");
             }
-
             if (StringUtils.isEmpty(responseBody)) {
                 logger.info("read model fail, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
                 return null;
             }
-
             Map responseData = JsonUtil.json2Object(responseBody, Map.class);
             if (responseData.get(Dict.RET_CODE) != null && !responseData.get(Dict.RET_CODE).toString().equals(StatusCode.SUCCESS)) {
                 logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get("retmsg"));
                 return null;
             }
-
             Map<String, byte[]> resultMap = new HashMap<>(8);
             Map<String, Object> dataMap = responseData.get(Dict.DATA) != null ? (Map<String, Object>) responseData.get(Dict.DATA) : null;
             if (dataMap == null || dataMap.isEmpty()) {
                 logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);
                 return null;
             }
-
             for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
                 resultMap.put(entry.getKey(), Base64.getDecoder().decode(String.valueOf(entry.getValue())));
             }
-
             return resultMap;
         } catch (Exception e) {
             logger.error("get model info from fateflow error", e);
