@@ -15,19 +15,13 @@
  */
 
 package com.webank.ai.fate.serving.federatedml.model;
-import com.google.common.collect.Lists;
+
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.bean.ServingServerContext;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
 import com.webank.ai.fate.serving.core.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.model.MergeInferenceAware;
-import com.webank.ai.fate.serving.core.model.Model;
-import com.webank.ai.fate.serving.core.rpc.core.FederatedRpcInvoker;
-import com.webank.ai.fate.serving.core.utils.JsonUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;

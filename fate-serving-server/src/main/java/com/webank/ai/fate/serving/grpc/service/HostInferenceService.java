@@ -95,7 +95,6 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
 
     private Context prepareContext() {
         ServingServerContext context = new ServingServerContext();
-        context.setEnvironment(environment);
         return context;
     }
 }

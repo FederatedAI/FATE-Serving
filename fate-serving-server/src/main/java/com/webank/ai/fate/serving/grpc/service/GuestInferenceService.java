@@ -76,7 +76,6 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
 
     private Context prepareContext() {
         ServingServerContext context = new ServingServerContext();
-        context.setEnvironment(environment);
         return context;
     }
 

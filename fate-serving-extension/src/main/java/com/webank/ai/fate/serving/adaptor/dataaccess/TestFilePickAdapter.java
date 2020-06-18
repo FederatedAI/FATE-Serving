@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 
-import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
@@ -32,12 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestFilePickAdapter implements SingleFeatureDataAdaptor {
+public class TestFilePickAdapter extends AbstractSingleFeatureDataAdaptor {
     private static final Logger logger = LoggerFactory.getLogger(TestFilePickAdapter.class);
     private static final Map<String, Map<String, Object>> featureMaps = new HashMap<>();
 
     @Override
-    public void init(Context context) {
+    public void init() {
 
     }
 

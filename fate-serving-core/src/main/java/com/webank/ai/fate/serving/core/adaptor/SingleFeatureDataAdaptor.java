@@ -24,7 +24,7 @@ import java.util.Map;
 
 public interface SingleFeatureDataAdaptor {
 
-    void init(Context context);
+    void init();
 
     ReturnResult getData(Context context, Map<String, Object> featureIds);
 }

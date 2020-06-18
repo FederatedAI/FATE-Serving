@@ -90,7 +90,6 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
 
     private Context prepareContext(String actionType) {
         ServingServerContext context = new ServingServerContext();
-        context.setEnvironment(environment);
         context.setActionType(actionType);
         context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;

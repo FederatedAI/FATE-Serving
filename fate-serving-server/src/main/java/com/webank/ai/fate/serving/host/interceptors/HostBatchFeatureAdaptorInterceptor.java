@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.host.interceptors;
 
 import com.webank.ai.fate.register.utils.StringUtils;
+import com.webank.ai.fate.serving.adaptor.dataaccess.AbstractBatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.common.interceptors.AbstractInterceptor;
 import com.webank.ai.fate.serving.core.adaptor.BatchFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.*;
@@ -56,10 +57,9 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}", adaptorClass);
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
-            ServingServerContext context = new ServingServerContext();
-            context.setEnvironment(environment);
+            ((AbstractBatchFeatureDataAdaptor) batchFeatureDataAdaptor).setEnvironment(environment);
             try {
-                batchFeatureDataAdaptor.init(context);
+                batchFeatureDataAdaptor.init();
             } catch (Exception e) {
                 logger.error("batch adaptor init error");
             }

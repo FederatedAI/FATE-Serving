@@ -24,7 +24,7 @@ import java.util.List;
 
 public interface BatchFeatureDataAdaptor extends AdaptorDescriptor {
 
-    void init(Context context);
+    void init();
 
     BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList);
 }
