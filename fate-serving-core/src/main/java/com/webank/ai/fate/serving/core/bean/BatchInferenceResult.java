@@ -25,14 +25,9 @@ public class BatchInferenceResult extends ReturnResult {
     }
 
     public void rebuild() {
-
-
         Map result = Maps.newHashMap();
-
         List<BatchInferenceResult.SingleInferenceResult> batchInferences = this.getBatchDataList();
-
         for (BatchInferenceResult.SingleInferenceResult singleInferenceResult : batchInferences) {
-
             result.put(singleInferenceResult.getIndex(), singleInferenceResult);
         }
         singleInferenceResultMap = result;
