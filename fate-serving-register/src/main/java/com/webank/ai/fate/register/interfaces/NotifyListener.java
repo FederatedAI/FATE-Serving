@@ -16,11 +16,9 @@
 
 package com.webank.ai.fate.register.interfaces;
 
-
 import com.webank.ai.fate.register.url.URL;
 
 import java.util.List;
-
 
 public interface NotifyListener {
 

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.task;
 
-
 import com.webank.ai.fate.register.common.FailbackRegistry;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.url.URL;

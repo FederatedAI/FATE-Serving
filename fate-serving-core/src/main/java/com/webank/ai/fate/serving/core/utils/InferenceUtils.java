@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.core.utils;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
-
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
@@ -86,8 +85,6 @@ public class ParallelBatchToSingleFeatureAdaptor extends AbstractBatchFeatureDat
         /**
          *   如果等待超时也需要把已经返回的查询结果返回
          */
-
-
         return result;
 
     }

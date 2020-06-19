@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.proxy.rpc.core;
 
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
@@ -16,7 +32,6 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * @Description TODO
@@ -37,19 +52,15 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
         } else {
             return serviceAdaptorMap.get("NotFound");
         }
-
     }
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-
         this.applicationContext = context;
-
     }
 
     @Override
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
-
         if (applicationEvent instanceof ContextRefreshedEvent) {
             String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
             FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
@@ -80,12 +91,8 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
 
                     this.serviceAdaptorMap.put(proxyService.name(), serviceAdaptor);
                 }
-
-
             }
             logger.info("service register info {}", this.serviceAdaptorMap);
         }
-
-
     }
 }

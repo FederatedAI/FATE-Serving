@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.common;
 
-
 import java.util.regex.Pattern;
 
 public interface Constants {

@@ -47,9 +47,6 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
     @Autowired(required = false)
     private RouterService routerService;
 
-    @Autowired
-    private Environment environment;
-
     @Override
     protected byte[] serialize(Context context, Map<String, byte[]> data) {
         Map<String, String> result = Maps.newHashMap();
@@ -156,6 +153,5 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         }
         return null;
     }
-
 
 }

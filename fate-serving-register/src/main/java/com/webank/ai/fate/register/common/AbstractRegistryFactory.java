@@ -31,20 +31,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static com.webank.ai.fate.register.common.Constants.INTERFACE_KEY;
 
-
 public abstract class AbstractRegistryFactory implements RegistryFactory {
 
     // Log output
-
     private static final Logger logger = LoggerFactory.getLogger(AbstractRegistryFactory.class);
-
 
     // The lock for the acquisition process of the registry
     private static final ReentrantLock LOCK = new ReentrantLock();
 
     // Registry Collection Map<RegistryAddress, Registry>
     private static final Map<String, Registry> REGISTRIES = new HashMap<>();
-
 
     public static Collection<Registry> getRegistries() {
         return Collections.unmodifiableCollection(REGISTRIES.values());
@@ -53,7 +49,6 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
     /**
      * Close all created registries
      */
-
     public static void destroyAll() {
         if (logger.isInfoEnabled()) {
             logger.info("Close all registries " + getRegistries());

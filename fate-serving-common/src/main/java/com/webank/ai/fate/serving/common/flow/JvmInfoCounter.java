@@ -1,6 +1,20 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.webank.ai.fate.serving.common.flow;
-
 
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.serving.core.utils.JVMGCUtils;
@@ -15,27 +29,23 @@ import java.util.concurrent.TimeUnit;
 
 public class JvmInfoCounter {
 
-    static boolean  started =false;
+    static boolean started = false;
+    static ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
+    private static LeapArray<JvmInfo> data = new JvmInfoLeapArray(10, 10000);
+    private static Logger logger = LoggerFactory.getLogger(JvmInfoCounter.class);
 
-    private static LeapArray<JvmInfo> data= new JvmInfoLeapArray(10, 10000);;
+    public static List<JvmInfo> getMemInfos() {
+        List<JvmInfo> result = Lists.newArrayList();
+        if (data.listAll() != null) {
+            data.listAll().forEach(window -> {
+                result.add(window.value());
+            });
+        }
+        return result;
+    }
 
-    private  static Logger logger = LoggerFactory.getLogger(JvmInfoCounter.class);
-
-    public static  List<JvmInfo>  getMemInfos(){
-       List<JvmInfo>  result = Lists.newArrayList();
-       if(data.listAll()!=null){
-           data.listAll().forEach(window->{
-               result.add(window.value());
-           });
-       }
-       return  result;
-    };
-
-    static ScheduledThreadPoolExecutor  executorService =  new ScheduledThreadPoolExecutor(1);
-
-    public static synchronized void  start(){
-
-        if(!started) {
+    public static synchronized void start() {
+        if (!started) {
             executorService.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
@@ -47,21 +57,20 @@ public class JvmInfoCounter {
                     memInfo.nonHeap = JVMMemoryUtils.getNonHeapMemoryUsage();
                     memInfo.survivor = JVMMemoryUtils.getSurvivorSpaceMemoryUsage();
                     memInfo.yongGcCount = JVMGCUtils.getYoungGCCollectionCount();
-                    memInfo.yongGcTime  =  JVMGCUtils.getYoungGCCollectionTime();
+                    memInfo.yongGcTime = JVMGCUtils.getYoungGCCollectionTime();
                     memInfo.fullGcCount = JVMGCUtils.getFullGCCollectionCount();
-                    memInfo.fullGcTime  = JVMGCUtils.getFullGCCollectionTime();
+                    memInfo.fullGcTime = JVMGCUtils.getFullGCCollectionTime();
                     memInfo.threadCount = JVMThreadUtils.getThreadCount();
                     memInfo.timestamp = timestamp;
                 }
             }, 0, 1000, TimeUnit.MILLISECONDS);
-            started =  true;
+            started = true;
         }
     }
 
-    public static void main(String[] args){
-
+    public static void main(String[] args) {
         JvmInfoCounter.start();
-        while(true) {
+        while (true) {
             System.err.println(JvmInfoCounter.getMemInfos());
             try {
                 Thread.sleep(1000);
@@ -69,11 +78,6 @@ public class JvmInfoCounter {
                 e.printStackTrace();
             }
         }
-
-
-
     }
-
-
 
 }

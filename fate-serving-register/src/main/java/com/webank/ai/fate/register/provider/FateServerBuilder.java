@@ -28,7 +28,6 @@ import java.net.SocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-
 public class FateServerBuilder extends ServerBuilder {
 
     ServerBuilder serverBuilder;
@@ -44,9 +43,7 @@ public class FateServerBuilder extends ServerBuilder {
     }
 
     public static FateServerBuilder forNettyServerBuilderAddress(SocketAddress socketAddress) {
-
         return new FateServerBuilder(NettyServerBuilder.forAddress(socketAddress));
-
     }
 
     public String getPartyId() {
@@ -91,19 +88,14 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder setApplication(String application) {
         this.application = application;
-
         return this;
     }
 
     public FateServerBuilder maxConcurrentCallsPerConnection(int count) {
-
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).maxConcurrentCallsPerConnection(count);
         }
-
         return this;
-
     }
 
     @Override
@@ -119,20 +111,14 @@ public class FateServerBuilder extends ServerBuilder {
     }
 
     public FateServerBuilder sslContext(SslContext sslContext) {
-
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).sslContext(sslContext);
         }
-
         return this;
-
-
     }
 
     public FateServerBuilder flowControlWindow(int count) {
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).flowControlWindow(count);
         }
         return this;
@@ -140,7 +126,6 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder keepAliveTime(int count, TimeUnit timeUnit) {
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).keepAliveTime(count, timeUnit);
         }
         return this;
@@ -148,7 +133,6 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder keepAliveTimeout(int count, TimeUnit timeUnit) {
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).keepAliveTimeout(count, timeUnit);
         }
         return this;
@@ -156,7 +140,6 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder permitKeepAliveTime(int count, TimeUnit timeUnit) {
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).permitKeepAliveTime(count, timeUnit);
         }
         return this;
@@ -165,7 +148,6 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder permitKeepAliveWithoutCalls(boolean permit) {
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).permitKeepAliveWithoutCalls(permit);
         }
         return this;
@@ -187,17 +169,14 @@ public class FateServerBuilder extends ServerBuilder {
 
     @Override
     public ServerBuilder directExecutor() {
-
         serverBuilder.directExecutor();
         return this;
-
     }
 
     @Override
     public FateServerBuilder executor(@Nullable Executor executor) {
         serverBuilder.executor(executor);
         return this;
-
     }
 
     @Override
@@ -209,7 +188,6 @@ public class FateServerBuilder extends ServerBuilder {
 
     public FateServerBuilder maxConnectionIdle(int count, TimeUnit timeUnit) {
         if (this.serverBuilder instanceof NettyServerBuilder) {
-
             this.serverBuilder = ((NettyServerBuilder) this.serverBuilder).maxConnectionIdle(count, timeUnit);
         }
         return this;
@@ -243,14 +221,10 @@ public class FateServerBuilder extends ServerBuilder {
     }
 
     private void doRegister(Method method) {
-
         RegisterService registerService = method.getAnnotation(RegisterService.class);
 
         if (registerService != null) {
-
-
             FateServer.serviceSets.add(registerService);
-
         }
     }
 

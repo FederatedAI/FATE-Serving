@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.bean;
 
 import com.google.protobuf.ByteString;
@@ -52,14 +68,11 @@ public class ServingServerTest {
         // inboundPackage.setBody(publishRequest);
 
         inferenceClient.load(publishRequest);
-
-
     }
 
 
     @Test
     public void test_01_guest_load_fm() {
-
         URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache");
         String filePath = resource.getPath();
 //        String filePath = "/Users/kaideng/work/webank/newLocationFateserving/feature-1.2/FATE-Serving/serving-server/src/main/resources/model_2020030314574740594812_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache";
@@ -86,14 +99,10 @@ public class ServingServerTest {
         // inboundPackage.setBody(publishRequest);
 
         inferenceClient.load(publishRequest);
-
-
     }
 
     @Test
     public void test_01_host_load_fm() {
-
-
         URL resource = ServingServerTest.class.getClassLoader().getResource("model_2020030314574740594812_host#10000#arbiter-10000#guest-9999#host-10000#model_cache");
         String filePath = resource.getPath();
         filePath = filePath.replaceAll("%23", "#");
@@ -119,14 +128,10 @@ public class ServingServerTest {
         // inboundPackage.setBody(publishRequest);
 
         inferenceClient.load(publishRequest);
-
-
     }
-
 
     @Test
     public void test_01_host_load() {
-
         URL resource = ServingServerTest.class.getClassLoader().getResource("model_202004201033174706226_host#10000#guest-9999#host-10000#model_cache");
         String filePath = resource.getPath();
         filePath = filePath.replaceAll("%23", "#");
@@ -153,10 +158,7 @@ public class ServingServerTest {
         // inboundPackage.setBody(publishRequest);
 
         inferenceClient.load(publishRequest);
-
-
     }
-
 
     @Test
     public void test_02_guest_Bind() {
@@ -186,20 +188,14 @@ public class ServingServerTest {
         //   inboundPackage.setBody(publishRequest);
 
         inferenceClient.bind(publishRequest);
-
 //        ReturnResult  returnResult =(ReturnResult) modelServiceProvider.bind(context,inboundPackage,outboundPackage);
 //        Assert.assertEquals(returnResult.getRetcode(),"0");
-
     }
-
 
     @Test
     public void test_03_Inference() {
-
         InferenceRequest inferenceRequest = new InferenceRequest();
-
         inferenceRequest.setServiceId("fm");
-
         inferenceRequest.getFeatureData().put("x0", 0.100016);
         inferenceRequest.getFeatureData().put("x1", 1.210);
         inferenceRequest.getFeatureData().put("x2", 2.321);
@@ -227,8 +223,6 @@ public class ServingServerTest {
         System.err.println(inferenceMessage.getBody());
 
         InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.inference(inferenceMessage);
-
-
     }
 
     @Test

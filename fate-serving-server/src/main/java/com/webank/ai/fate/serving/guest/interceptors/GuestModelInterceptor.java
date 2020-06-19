@@ -37,8 +37,6 @@ public class GuestModelInterceptor implements Interceptor {
         if (!pass) {
             flowCounterManager.block(model.getResourceName());
         }
-
     }
-
 
 }

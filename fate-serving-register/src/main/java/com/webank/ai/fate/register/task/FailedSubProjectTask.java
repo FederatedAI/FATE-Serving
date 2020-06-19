@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.task;
 
-
 import com.webank.ai.fate.register.common.FailbackRegistry;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.timer.Timeout;
@@ -25,11 +24,8 @@ public class FailedSubProjectTask extends AbstractRetryTask {
 
     private static final String NAME = "retry subscribe project";
 
-
     public FailedSubProjectTask(URL url, FailbackRegistry registry) {
         super(url, registry, NAME);
-
-
     }
 
     @Override

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.url;
 
-
 import com.webank.ai.fate.register.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.webank.ai.fate.register.common.Constants.*;
-
 
 public class UrlUtils {
 
@@ -441,7 +439,6 @@ public class UrlUtils {
                 !ROUTE_PROTOCOL.equals(url.getProtocol()) &&
                 PROVIDERS_CATEGORY.equals(url.getParameter(CATEGORY_KEY, PROVIDERS_CATEGORY));
     }
-
 
     /**
      * Check if the given value matches the given pattern. The pattern supports wildcard "*".

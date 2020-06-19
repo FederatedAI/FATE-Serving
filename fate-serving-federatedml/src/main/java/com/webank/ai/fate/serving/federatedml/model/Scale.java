@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleMetaProto.ScaleMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleParamProto.ScaleParam;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -66,8 +65,6 @@ public class Scale extends BaseComponent {
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputDatas) {
-
-
         Map<String, Object> outputData = inputDatas.get(0);
         if (this.needRun) {
             String scaleMethod = this.scaleMeta.getMethod();

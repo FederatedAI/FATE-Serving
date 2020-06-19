@@ -16,11 +16,8 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
-import com.google.gson.Gson;
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -37,7 +34,6 @@ import static java.lang.Math.exp;
 public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Returnable {
     private static final Logger logger = LoggerFactory.getLogger(HeteroFMGuest.class);
 
-
     private double sigmod(double x) {
         return 1. / (1. + exp(-x));
     }
@@ -47,7 +43,6 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
         Map<String, Object> forwardRet = forward(input);
         return forwardRet;
     }
-
 
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> hostData) {
@@ -70,7 +65,8 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
         double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
         logger.info("host score: {}", hostScore);
         Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
-        List<Double> hostCrosses = JsonUtil.json2List(dataMap.get(Dict.FM_CROSS).toString(),new TypeReference<List<Double>>() {});
+        List<Double> hostCrosses = JsonUtil.json2List(dataMap.get(Dict.FM_CROSS).toString(), new TypeReference<List<Double>>() {
+        });
         Preconditions.checkArgument(hostCrosses.size() == guestCrosses.length, "");
         score += hostScore;
         for (int i = 0; i < guestCrosses.length; i++) {
@@ -81,8 +77,6 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
         result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE, localData.get(Dict.MODEL_WRIGHT_HIT_RATE));
         result.put(Dict.GUEST_INPUT_DATA_HIT_RATE, localData.get(Dict.INPUT_DATA_HIT_RATE));
 
-
         return result;
-
     }
 }

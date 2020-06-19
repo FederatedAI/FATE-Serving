@@ -20,7 +20,6 @@ import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.task.*;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.register.utils.NetUtils;
 import com.webank.ai.fate.serving.core.timer.HashedWheelTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +30,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.webank.ai.fate.register.common.Constants.*;
-import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
-
 
 public abstract class FailbackRegistry extends AbstractRegistry {
 
@@ -50,13 +47,11 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final ConcurrentMap<String, FailedSubProjectTask> failedSubProject = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String,FailedRegisterComponentTask>  failedRegisterComponent = new ConcurrentHashMap<>();
-
+    private final ConcurrentMap<String, FailedRegisterComponentTask> failedRegisterComponent = new ConcurrentHashMap<>();
 
     private final int retryPeriod;
 
     private final HashedWheelTimer retryTimer;
-
 
     public FailbackRegistry(URL url) {
         super(url);
@@ -80,9 +75,6 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         }
     }
 
-
-
-
     public void removeFailedRegisteredTask(URL url) {
         failedRegistered.remove(url);
     }
@@ -92,10 +84,8 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     }
 
     public void removeFailedSubscribedProjectTask(String project) {
-
         failedSubProject.remove(project);
     }
-
 
     public void removeFailedSubscribedTask(URL url, NotifyListener listener) {
         Holder h = new Holder(url, listener);
@@ -133,7 +123,8 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
         }
     }
-    public void addFailedRegisterComponentTask(URL  url) {
+
+    public void addFailedRegisterComponentTask(URL url) {
         String instanceId = url.getParameter(INSTANCE_ID);
 
         FailedRegisterComponentTask oldOne = this.failedRegisterComponent.get(instanceId);
@@ -148,20 +139,13 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         }
     }
 
-
-
-    public void removeFailedRegisterComponentTask(URL  url) {
+    public void removeFailedRegisterComponentTask(URL url) {
         String instanceId = url.getParameter(INSTANCE_ID);
         FailedRegisterComponentTask oldOne = this.failedRegisterComponent.remove(instanceId);
         if (oldOne != null) {
             oldOne.cancel();
         }
     }
-
-
-
-
-
 
     private void addFailedRegistered(URL url) {
         if (logger.isDebugEnabled()) {
@@ -191,7 +175,6 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 //            retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
 //        }
 //    }
-
 
     private void removeFailedRegistered(URL url) {
         FailedRegisteredTask f = failedRegistered.remove(url);

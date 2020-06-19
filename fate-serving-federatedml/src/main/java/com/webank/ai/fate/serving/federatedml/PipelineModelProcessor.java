@@ -1,23 +1,35 @@
-package com.webank.ai.fate.serving.federatedml;
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.webank.ai.fate.serving.federatedml;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
-import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.*;
-
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
-import com.webank.ai.fate.serving.federatedml.model.PrepareRemoteable;
 import com.webank.ai.fate.serving.federatedml.model.Returnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,17 +41,17 @@ import static com.webank.ai.fate.serving.common.rpc.core.ErrorMessageUtil.buildR
 import static com.webank.ai.fate.serving.common.rpc.core.ErrorMessageUtil.transformRemoteErrorCode;
 import static com.webank.ai.fate.serving.core.bean.Dict.PIPLELINE_IN_MODEL;
 
-
 public class PipelineModelProcessor implements ModelProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(PipelineModelProcessor.class);
     private static String flower = "pipeline.pipeline:Pipeline";
+    private static ForkJoinPool forkJoinPool = new ForkJoinPool();
     private List<BaseComponent> pipeLineNode = new ArrayList<>();
     private Map<String, BaseComponent> componentMap = new HashMap<String, BaseComponent>();
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
-    private int  splitSize =MetaInfo.BATCH_SPLIT_SIZE;
-    private  static ForkJoinPool forkJoinPool = new ForkJoinPool();
+    private int splitSize = MetaInfo.BATCH_SPLIT_SIZE;
+
     @Override
     public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String, Future> remoteFutureMap, long timeout) {
         BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
@@ -54,79 +66,15 @@ public class PipelineModelProcessor implements ModelProcessor {
                 }
                 remoteResultMap.put(partyId, remoteInferenceResult);
             } catch (Exception e) {
-                if(!(e instanceof RemoteRpcException)) {
+                if (!(e instanceof RemoteRpcException)) {
                     throw new RemoteRpcException("party id " + partyId + " remote error");
-                }
-                else {
+                } else {
                     throw (RemoteRpcException) e;
                 }
             }
         });
         batchFederatedResult = batchMergeHostResult(context, localResult, remoteResultMap);
         return batchFederatedResult;
-    }
-
-    class  LocalInferenceTask  extends RecursiveTask< Map<Integer, Map<String, Object>>> {
-        LocalInferenceTask ( Context context, List<BatchInferenceRequest.SingleInferenceData> inputList,Map<String,Map<String,Object>>  tempCache){
-            this.context = context;
-            this.inputList = inputList;
-            this.tempCache =  tempCache;
-        }
-        Context  context;
-        Map<String,Map<String,Object>>  tempCache;
-        List<BatchInferenceRequest.SingleInferenceData>   inputList ;
-        @Override
-        protected Map<Integer, Map<String, Object>>  compute() {
-            Map<Integer, Map<String, Object>> result = new HashMap<>();
-            if (inputList.size() <=splitSize) {
-                for (int i = 0; i < inputList.size(); i++) {
-                    BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
-                    try {
-                        String key = EncryptUtils.encrypt(JsonUtil.object2Json(input.getFeatureData()), EncryptMethod.MD5);
-                        Map<String, Object> singleResult =tempCache.get(key);
-                        if(singleResult==null) {
-                             singleResult = singleLocalPredict(context, input.getFeatureData());
-                             if(singleResult!=null&&singleResult.size()!=0) {
-                                 tempCache.putIfAbsent(key, singleResult);
-                             }
-                        }else{
-                            singleResult = Maps.newHashMap(tempCache.get(key));
-                        }
-                        result.put(input.getIndex(), singleResult);
-                        if (input.isNeedCheckFeature()) {
-                            if (input.getFeatureData() == null || input.getFeatureData().size() == 0) {
-                                throw new HostGetFeatureErrorException("no feature");
-                            }
-                        }
-                    } catch (Throwable e) {
-                        if (result.get(input.getIndex()) == null) {
-                            result.put(input.getIndex(), ErrorMessageUtil.handleExceptionToMap(e));
-                        } else {
-                            result.get(input.getIndex()).putAll(ErrorMessageUtil.handleExceptionToMap(e));
-                        }
-                    }
-                }
-                return result;
-            } else {
-                List<List<BatchInferenceRequest.SingleInferenceData>> splits = new ArrayList<List<BatchInferenceRequest.SingleInferenceData>>();
-                int size = inputList.size();
-                int count = (size + splitSize - 1) / splitSize;
-                List<LocalInferenceTask> subJobs = Lists.newArrayList();
-                for (int i = 0; i < count; i++) {
-                    List<BatchInferenceRequest.SingleInferenceData> subList = inputList.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
-                    LocalInferenceTask subLocalInferenceTask = new LocalInferenceTask(context, subList,tempCache);
-                    subLocalInferenceTask.fork();
-                    subJobs.add(subLocalInferenceTask);
-                }
-                subJobs.forEach(localInferenceTask -> {
-                    Map<Integer, Map<String, Object>> splitResult = localInferenceTask.join();
-                    if (splitResult != null) {
-                        result.putAll(splitResult);
-                    }
-                });
-                return result;
-            }
-        }
     }
 
     /**
@@ -171,8 +119,8 @@ public class PipelineModelProcessor implements ModelProcessor {
                     remoteResultMap.put(partId, remoteData);
                 }
             } catch (Exception e) {
-                logger.error("host " + partId + " remote error : "+e.getMessage());
-                throw new RemoteRpcException("host " + partId + " remote error : "+e.getMessage());
+                logger.error("host " + partId + " remote error : " + e.getMessage());
+                throw new RemoteRpcException("host " + partId + " remote error : " + e.getMessage());
             }
         });
         Map<String, Object> tempResult = singleMerge(context, localResult, remoteResultMap);
@@ -251,90 +199,27 @@ public class PipelineModelProcessor implements ModelProcessor {
     public Map<Integer, Map<String, Object>> batchLocalInference(Context context,
                                                                  BatchInferenceRequest batchFederatedParams) {
         List<BatchInferenceRequest.SingleInferenceData> inputList = batchFederatedParams.getBatchDataList();
-        Map<String,Map<String,Object>>  tempCache  = Maps.newConcurrentMap();
-        ForkJoinTask<Map<Integer, Map<String, Object>>> future = forkJoinPool.submit(new LocalInferenceTask(context, inputList,tempCache));
-        Map<Integer, Map<String, Object>>  result = null;
+        Map<String, Map<String, Object>> tempCache = Maps.newConcurrentMap();
+        ForkJoinTask<Map<Integer, Map<String, Object>>> future = forkJoinPool.submit(new LocalInferenceTask(context, inputList, tempCache));
+        Map<Integer, Map<String, Object>> result = null;
         try {
             result = future.get();
-        } catch (Exception e){
-            throw  new SysException("get local inference result error");
+        } catch (Exception e) {
+            throw new SysException("get local inference result error");
         }
-        return  result;
-    }
-
-    class  MergeTask  extends   RecursiveTask<List<BatchInferenceResult.SingleInferenceResult>>{
-        Map<Integer, Map<String, Object>> localResult;
-        Map<String, BatchInferenceResult> remoteResult;
-        List<Integer>  keys ;
-        MergeTask ( Context context,Map<Integer, Map<String, Object>> localResult,
-                    Map<String, BatchInferenceResult> remoteResult,List<Integer> keys){
-            this.context = context;
-            this.localResult = localResult;
-            this.remoteResult = remoteResult;
-            this.keys = keys;
-            }
-        Context  context;
-        @Override
-        protected List<BatchInferenceResult.SingleInferenceResult> compute() {
-            List<BatchInferenceResult.SingleInferenceResult>  singleResultLists =  Lists.newArrayList();
-            if(keys.size()<=splitSize){
-                localResult.forEach((index, data) -> {
-                    Map<String, Object> remoteSingleMap = Maps.newHashMap();
-                    remoteResult.forEach((partyId, batchResult) -> {
-                        if (batchResult.getSingleInferenceResultMap() != null) {
-                            if (batchResult.getSingleInferenceResultMap().get(index) != null) {
-                                BatchInferenceResult.SingleInferenceResult singleInferenceResult = batchResult.getSingleInferenceResultMap().get(index);
-                                Map<String, Object> realRemoteData = singleInferenceResult.getData();
-                                realRemoteData.put(Dict.RET_CODE, singleInferenceResult.getRetcode());
-                                remoteSingleMap.put(partyId, realRemoteData);
-                            }
-                        }
-                    });
-                    try {
-                        Map<String, Object> localData = localResult.get(index);
-                        Map<String, Object> mergeResult = singleMerge(context, localData, remoteSingleMap);
-                        String retcode = mergeResult.get(Dict.RET_CODE).toString();
-                        String msg = mergeResult.get(Dict.MESSAGE) != null ? mergeResult.get(Dict.MESSAGE).toString() : "";
-                        mergeResult.remove(Dict.RET_CODE);
-                        mergeResult.remove(Dict.MESSAGE);
-                        singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode, msg, mergeResult));
-                    } catch (Exception e) {
-                        logger.error("merge remote error", e);
-                        String retcode = ErrorMessageUtil.getLocalExceptionCode(e);
-                        singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode, e.getMessage(), null));
-                    }
-                });
-
-            }else{
-                List<List<Integer>> splits = new ArrayList<List<Integer>>();
-                int size = keys.size();
-                int count = (size + splitSize - 1) / splitSize;
-                List<MergeTask> subJobs = Lists.newArrayList();
-                for (int i = 0; i < count; i++) {
-                    List<Integer> subList = keys.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
-                    MergeTask subMergeTask = new MergeTask(context,localResult,remoteResult, subList);
-                    subMergeTask.fork();
-                    subJobs.add(subMergeTask);
-                }
-                for(MergeTask mergeTask:subJobs){
-                    List<BatchInferenceResult.SingleInferenceResult>  subResultList = mergeTask.join();
-                    singleResultLists.addAll(subResultList);
-                }
-            }
-            return singleResultLists;
-        }
+        return result;
     }
 
     private BatchInferenceResult batchMergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, Map<String, BatchInferenceResult> remoteResult) {
-        long  begin = System.currentTimeMillis();
+        long begin = System.currentTimeMillis();
         try {
             Preconditions.checkArgument(localResult != null);
             Preconditions.checkArgument(remoteResult != null);
             BatchInferenceResult batchFederatedResult = new BatchInferenceResult();
             batchFederatedResult.setRetcode(StatusCode.SUCCESS);
-            List<Integer> keys  = Lists.newArrayList(localResult.keySet().iterator());
-            ForkJoinTask<List<BatchInferenceResult.SingleInferenceResult>> forkJoinTask = forkJoinPool.submit(new MergeTask(context,localResult,remoteResult,keys));
-            List<BatchInferenceResult.SingleInferenceResult>   resultList = forkJoinTask.get();
+            List<Integer> keys = Lists.newArrayList(localResult.keySet().iterator());
+            ForkJoinTask<List<BatchInferenceResult.SingleInferenceResult>> forkJoinTask = forkJoinPool.submit(new MergeTask(context, localResult, remoteResult, keys));
+            List<BatchInferenceResult.SingleInferenceResult> resultList = forkJoinTask.get();
             batchFederatedResult.setBatchDataList(resultList);
             return batchFederatedResult;
         } catch (Exception e) {
@@ -456,7 +341,6 @@ public class PipelineModelProcessor implements ModelProcessor {
         return result;
     }
 
-
     private HashMap<String, byte[]> changeModelProto(Map<String, byte[]> modelProtoMap) {
         HashMap<String, byte[]> newModelProtoMap = new HashMap<String, byte[]>(8);
         for (Map.Entry<String, byte[]> entry : modelProtoMap.entrySet()) {
@@ -477,5 +361,134 @@ public class PipelineModelProcessor implements ModelProcessor {
             }
         }
         return newModelProtoMap;
+    }
+
+    class LocalInferenceTask extends RecursiveTask<Map<Integer, Map<String, Object>>> {
+        Context context;
+        Map<String, Map<String, Object>> tempCache;
+        List<BatchInferenceRequest.SingleInferenceData> inputList;
+        LocalInferenceTask(Context context, List<BatchInferenceRequest.SingleInferenceData> inputList, Map<String, Map<String, Object>> tempCache) {
+            this.context = context;
+            this.inputList = inputList;
+            this.tempCache = tempCache;
+        }
+
+        @Override
+        protected Map<Integer, Map<String, Object>> compute() {
+            Map<Integer, Map<String, Object>> result = new HashMap<>();
+            if (inputList.size() <= splitSize) {
+                for (int i = 0; i < inputList.size(); i++) {
+                    BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
+                    try {
+                        String key = EncryptUtils.encrypt(JsonUtil.object2Json(input.getFeatureData()), EncryptMethod.MD5);
+                        Map<String, Object> singleResult = tempCache.get(key);
+                        if (singleResult == null) {
+                            singleResult = singleLocalPredict(context, input.getFeatureData());
+                            if (singleResult != null && singleResult.size() != 0) {
+                                tempCache.putIfAbsent(key, singleResult);
+                            }
+                        } else {
+                            singleResult = Maps.newHashMap(tempCache.get(key));
+                        }
+                        result.put(input.getIndex(), singleResult);
+                        if (input.isNeedCheckFeature()) {
+                            if (input.getFeatureData() == null || input.getFeatureData().size() == 0) {
+                                throw new HostGetFeatureErrorException("no feature");
+                            }
+                        }
+                    } catch (Throwable e) {
+                        if (result.get(input.getIndex()) == null) {
+                            result.put(input.getIndex(), ErrorMessageUtil.handleExceptionToMap(e));
+                        } else {
+                            result.get(input.getIndex()).putAll(ErrorMessageUtil.handleExceptionToMap(e));
+                        }
+                    }
+                }
+                return result;
+            } else {
+                List<List<BatchInferenceRequest.SingleInferenceData>> splits = new ArrayList<List<BatchInferenceRequest.SingleInferenceData>>();
+                int size = inputList.size();
+                int count = (size + splitSize - 1) / splitSize;
+                List<LocalInferenceTask> subJobs = Lists.newArrayList();
+                for (int i = 0; i < count; i++) {
+                    List<BatchInferenceRequest.SingleInferenceData> subList = inputList.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
+                    LocalInferenceTask subLocalInferenceTask = new LocalInferenceTask(context, subList, tempCache);
+                    subLocalInferenceTask.fork();
+                    subJobs.add(subLocalInferenceTask);
+                }
+                subJobs.forEach(localInferenceTask -> {
+                    Map<Integer, Map<String, Object>> splitResult = localInferenceTask.join();
+                    if (splitResult != null) {
+                        result.putAll(splitResult);
+                    }
+                });
+                return result;
+            }
+        }
+    }
+
+    class MergeTask extends RecursiveTask<List<BatchInferenceResult.SingleInferenceResult>> {
+        Map<Integer, Map<String, Object>> localResult;
+        Map<String, BatchInferenceResult> remoteResult;
+        List<Integer> keys;
+        Context context;
+
+        MergeTask(Context context, Map<Integer, Map<String, Object>> localResult,
+                  Map<String, BatchInferenceResult> remoteResult, List<Integer> keys) {
+            this.context = context;
+            this.localResult = localResult;
+            this.remoteResult = remoteResult;
+            this.keys = keys;
+        }
+
+        @Override
+        protected List<BatchInferenceResult.SingleInferenceResult> compute() {
+            List<BatchInferenceResult.SingleInferenceResult> singleResultLists = Lists.newArrayList();
+            if (keys.size() <= splitSize) {
+                localResult.forEach((index, data) -> {
+                    Map<String, Object> remoteSingleMap = Maps.newHashMap();
+                    remoteResult.forEach((partyId, batchResult) -> {
+                        if (batchResult.getSingleInferenceResultMap() != null) {
+                            if (batchResult.getSingleInferenceResultMap().get(index) != null) {
+                                BatchInferenceResult.SingleInferenceResult singleInferenceResult = batchResult.getSingleInferenceResultMap().get(index);
+                                Map<String, Object> realRemoteData = singleInferenceResult.getData();
+                                realRemoteData.put(Dict.RET_CODE, singleInferenceResult.getRetcode());
+                                remoteSingleMap.put(partyId, realRemoteData);
+                            }
+                        }
+                    });
+                    try {
+                        Map<String, Object> localData = localResult.get(index);
+                        Map<String, Object> mergeResult = singleMerge(context, localData, remoteSingleMap);
+                        String retcode = mergeResult.get(Dict.RET_CODE).toString();
+                        String msg = mergeResult.get(Dict.MESSAGE) != null ? mergeResult.get(Dict.MESSAGE).toString() : "";
+                        mergeResult.remove(Dict.RET_CODE);
+                        mergeResult.remove(Dict.MESSAGE);
+                        singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode, msg, mergeResult));
+                    } catch (Exception e) {
+                        logger.error("merge remote error", e);
+                        String retcode = ErrorMessageUtil.getLocalExceptionCode(e);
+                        singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode, e.getMessage(), null));
+                    }
+                });
+
+            } else {
+                List<List<Integer>> splits = new ArrayList<List<Integer>>();
+                int size = keys.size();
+                int count = (size + splitSize - 1) / splitSize;
+                List<MergeTask> subJobs = Lists.newArrayList();
+                for (int i = 0; i < count; i++) {
+                    List<Integer> subList = keys.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
+                    MergeTask subMergeTask = new MergeTask(context, localResult, remoteResult, subList);
+                    subMergeTask.fork();
+                    subJobs.add(subMergeTask);
+                }
+                for (MergeTask mergeTask : subJobs) {
+                    List<BatchInferenceResult.SingleInferenceResult> subResultList = mergeTask.join();
+                    singleResultLists.addAll(subResultList);
+                }
+            }
+            return singleResultLists;
+        }
     }
 }

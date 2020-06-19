@@ -105,9 +105,7 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         }
 
         return nextTreeNodeId;
-
     }
-
 
 }
 

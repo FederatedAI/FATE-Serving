@@ -20,9 +20,7 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistryFactory;
 
-
 public class Test {
-
 
     public static void main(String[] args) {
 

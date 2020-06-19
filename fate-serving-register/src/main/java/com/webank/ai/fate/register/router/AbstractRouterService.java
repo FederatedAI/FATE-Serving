@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-
 public abstract class AbstractRouterService implements RouterService {
 
     protected LoadBalancerFactory loadBalancerFactory = new DefaultLoadBalanceFactory();
@@ -70,9 +69,7 @@ public abstract class AbstractRouterService implements RouterService {
         return doRouter(paramUrl, loadBalancer);
     }
 
-
     public abstract List<URL> doRouter(URL url, LoadBalancer loadBalancer);
-
 
     @Override
     public List<URL> router(URL url) {

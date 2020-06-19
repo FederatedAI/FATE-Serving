@@ -46,13 +46,13 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
         timestamp = System.currentTimeMillis();
     }
 
-    public BaseContext( String actionType) {
+    public BaseContext(String actionType) {
 
         timestamp = System.currentTimeMillis();
         this.actionType = actionType;
     }
 
-    private BaseContext( long timestamp, Map dataMap) {
+    private BaseContext(long timestamp, Map dataMap) {
         this.timestamp = timestamp;
         this.dataMap = dataMap;
     }
@@ -73,7 +73,6 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
             requestInProcess.addAndGet(1);
         } catch (Exception e) {
             logger.error("preProcess error", e);
-
         }
     }
 
@@ -144,7 +143,7 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     @Override
     public Context subContext() {
         Map newDataMap = Maps.newHashMap(dataMap);
-        return new BaseContext( this.timestamp, newDataMap);
+        return new BaseContext(this.timestamp, newDataMap);
     }
 
     @Override
@@ -239,7 +238,6 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
 
     @Override
     public long getDownstreamCost() {
-
         if (dataMap.get(Dict.DOWN_STREAM_COST) != null) {
 
             return (long) dataMap.get(Dict.DOWN_STREAM_COST);
@@ -324,9 +322,7 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
 
     @Override
     public ListenableFuture getRemoteFuture() {
-
         return (ListenableFuture) this.dataMap.getOrDefault(Dict.FUTURE, null);
-
     }
 
     @Override
@@ -336,16 +332,12 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
 
     @Override
     public String getResourceName() {
-
-        if(StringUtils.isNotEmpty(resourceName)) {
-            return  resourceName;
+        if (StringUtils.isNotEmpty(resourceName)) {
+            return resourceName;
+        } else {
+            resourceName = "I_" + (StringUtils.isNotEmpty(this.getActionType()) ? this.getActionType() : this.getServiceName());
         }
-        else {
-            resourceName = "I_"+(StringUtils.isNotEmpty(this.getActionType()) ? this.getActionType() : this.getServiceName());
-        }
-        return  resourceName;
+        return resourceName;
     }
-
-
 
 }

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.zookeeper;
 
-
 import com.webank.ai.fate.register.common.ChildListener;
 import com.webank.ai.fate.register.common.DataListener;
 import com.webank.ai.fate.register.common.StateListener;
@@ -35,9 +34,7 @@ public interface ZookeeperClient {
 
     List<String> addChildListener(String path, ChildListener listener);
 
-
     void addDataListener(String path, DataListener listener);
-
 
     void addDataListener(String path, DataListener listener, Executor executor);
 

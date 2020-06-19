@@ -18,7 +18,6 @@ public class GuestSingleParamInterceptor implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-
         try {
             InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
             InferenceRequest inferenceRequest = null;
@@ -36,8 +35,6 @@ public class GuestSingleParamInterceptor implements Interceptor {
         } catch (Exception e) {
             throw new GuestInvalidParamException(e.getMessage());
         }
-
     }
-
 
 }

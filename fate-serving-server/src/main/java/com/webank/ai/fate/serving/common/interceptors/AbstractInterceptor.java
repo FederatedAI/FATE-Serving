@@ -34,9 +34,7 @@ public class AbstractInterceptor<req, resp> implements Interceptor<req, resp>, E
     }
 
     protected boolean checkAddress(String address) {
-
         return address.indexOf(":") > 0;
     }
-
 
 }

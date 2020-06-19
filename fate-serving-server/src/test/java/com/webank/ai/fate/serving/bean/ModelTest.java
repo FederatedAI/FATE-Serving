@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.bean;
 
 import com.google.common.collect.Lists;
@@ -31,7 +47,7 @@ public class ModelTest {
 
     @Test
     public void testLoadModel() {
-       // test_model_load("model_20200605211120176604298_guest#9999#guest-9999#host-10000#model_cache", "guest", "20200605211120176604298");
+        // test_model_load("model_20200605211120176604298_guest#9999#guest-9999#host-10000#model_cache", "guest", "20200605211120176604298");
 
         test_model_load("model_2020040111152695637611_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache", "guest", "2020040111152695637611");
         test_model_load("model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache", "host", "2020040111152695637611");
@@ -46,7 +62,7 @@ public class ModelTest {
     }
 
     @Test
-    public void testLoadFateFlowModel(){
+    public void testLoadFateFlowModel() {
 //        http%3A%2F%2F127.0.0.1%3A9380%2Fv1%2Fmodel%2Ftransfer
         ModelServiceProto.PublishRequest.Builder publicRequestBuilder = ModelServiceProto.PublishRequest.newBuilder();
         ModelServiceProto.PublishRequest publishRequest = publicRequestBuilder.setLocal(ModelServiceProto.LocalInfo.newBuilder()
@@ -138,13 +154,12 @@ public class ModelTest {
         inferenceClient.bind(publishRequest);
     }
 
-
     @Test
     public void test_03_Inference() {
 
         InferenceRequest inferenceRequest = new InferenceRequest();
 
-        inferenceRequest.setServiceId("fm");
+        inferenceRequest.setServiceId("local_sbt");
 
         inferenceRequest.getFeatureData().put("x0", 0.100016);
         inferenceRequest.getFeatureData().put("x1", 1.210);
@@ -175,7 +190,6 @@ public class ModelTest {
         InferenceServiceProto.InferenceMessage resultMessage = inferenceClient.inference(inferenceMessage);
 
         System.err.println("result ==================" + new String(resultMessage.getBody().toByteArray()));
-
     }
 
     @Test
@@ -203,7 +217,7 @@ public class ModelTest {
 
                 }
                 batchInferenceRequest.setBatchDataList(singleInferenceDataList);
-                batchInferenceRequest.setServiceId("2020040111152695637611");
+                batchInferenceRequest.setServiceId("local_sbt");
                 InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
                         InferenceServiceProto.InferenceMessage.newBuilder();
                 String contentString = JsonUtil.object2Json(batchInferenceRequest);

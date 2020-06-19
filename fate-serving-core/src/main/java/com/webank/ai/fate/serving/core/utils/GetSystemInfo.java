@@ -16,17 +16,13 @@
 
 package com.webank.ai.fate.serving.core.utils;
 
-
-
 import com.sun.management.OperatingSystemMXBean;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-
 import sun.management.ManagementFactoryHelper;
 
+import java.io.IOException;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -53,15 +49,14 @@ public class GetSystemInfo {
     private static String LOCALHOST_KEY = "localhost";
     private static String LOCALHOST_VALUE = "127.0.0.1";
 
-    public static int getPid() {
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        return Integer.parseInt(name.split("@")[0]);
-    }
-
-
     static {
         localIp = getLocalIp();
         logger.info("set local ip : {}", localIp);
+    }
+
+    public static int getPid() {
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        return Integer.parseInt(name.split("@")[0]);
     }
 
     public static String getLocalIp() {
@@ -241,7 +236,7 @@ public class GetSystemInfo {
 ////    }
 
 
-    public static void getJVMRuntimeParam(){
+    public static void getJVMRuntimeParam() {
 
         RuntimeMXBean runtimeMXBean = ManagementFactoryHelper.getRuntimeMXBean();
 //JVM启动参数
@@ -251,12 +246,11 @@ public class GetSystemInfo {
 //JVM名字
         System.out.println(runtimeMXBean.getVmName());
 
-
     }
 
 
-    public  static void  getJvmThreadInfo(){
-        java.lang.management.ThreadMXBean threadMXBean =  ManagementFactoryHelper.getThreadMXBean();
+    public static void getJvmThreadInfo() {
+        java.lang.management.ThreadMXBean threadMXBean = ManagementFactoryHelper.getThreadMXBean();
         threadMXBean.getThreadCount();
         threadMXBean.getCurrentThreadCpuTime();
         threadMXBean.getCurrentThreadUserTime();
@@ -267,7 +261,7 @@ public class GetSystemInfo {
         long fullCount = 0, fullTime = 0, youngCount = 0, youngTime = 0;
         List<GarbageCollectorMXBean> gcs = ManagementFactory.getGarbageCollectorMXBeans();
         for (GarbageCollectorMXBean gc : gcs) {
-            System.err.println(gc.getName() +"" +gc.getCollectionCount());
+            System.err.println(gc.getName() + "" + gc.getCollectionCount());
 
 
         }
@@ -285,13 +279,11 @@ public class GetSystemInfo {
 //                    youngTime += gc.getCollectionTime();
 //                    break;
 //            }
-            //todo your deal code， perfcounter report or write log here
-        }
+        //todo your deal code， perfcounter report or write log here
+    }
 
 
-
-
-    public  static  void  getSystemLoad(){
+    public static void getSystemLoad() {
 
         java.lang.management.OperatingSystemMXBean operatingSystemMXBean = ManagementFactoryHelper.getOperatingSystemMXBean();
 //获取服务器的CPU个数
@@ -299,20 +291,16 @@ public class GetSystemInfo {
 //获取服务器的平均负载。这个指标非常重要，它可以有效的说明当前机器的性能是否正常，如果load过高，说明CPU无法及时处理任务。
         System.out.println(operatingSystemMXBean.getSystemLoadAverage());
 
-
-
     }
 
 
-    public  static  void main(String[] args){
+    public static void main(String[] args) {
 
         getSystemLoad();
+
         reportGC();
 
-
-
     }
-
 
 
 }

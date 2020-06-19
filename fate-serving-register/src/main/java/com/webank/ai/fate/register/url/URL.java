@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.url;
 
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,26 +30,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.webank.ai.fate.register.common.Constants.*;
 
-
-public /*final**/
-class URL implements Serializable {
+public class URL implements Serializable {
 
     private static final long serialVersionUID = -1985165475234910535L;
-
     private final String protocol;
-
-
     private final String host;
-
     private final int port;
-
     private final String path;
     private final Map<String, String> parameters;
     private String environment;
     private String project;
     private volatile transient Map<String, Number> numbers;
-
-    ;
     private volatile transient Map<String, URL> urls;
     private volatile transient String ip;
     private volatile transient String full;
@@ -70,7 +60,7 @@ class URL implements Serializable {
         this.parameters = null;
     }
 
-    public URL(String path,Map<String, String> parameters) {
+    public URL(String path, Map<String, String> parameters) {
         this.protocol = null;
         this.environment = null;
         this.project = null;
@@ -113,7 +103,6 @@ class URL implements Serializable {
     }
 
     public URL(String protocol, String project, String environment, String host, int port, String path, Map<String, String> parameters) {
-
         this.protocol = protocol;
         this.project = project;
         this.environment = environment;
@@ -133,7 +122,6 @@ class URL implements Serializable {
     }
 
     public static URL valueOf(String url, String project, String environment) {
-
         //grpc://fateserving/fate-cmd_fate-test")
         if (url == null || (url = url.trim()).length() == 0) {
             throw new IllegalArgumentException("url == null");
@@ -238,7 +226,6 @@ class URL implements Serializable {
      * @see URL
      */
     public static URL valueOf(String url) {
-
         //grpc://fateserving/fate-cmd_fate-test")
         if (url == null || (url = url.trim()).length() == 0) {
             throw new IllegalArgumentException("url == null");
@@ -471,10 +458,7 @@ class URL implements Serializable {
     }
 
     public URL setEnvironment(String environment) {
-
         return new URL(protocol, project, environment, host, port, path, this.parameters);
-
-
     }
 
     public String getProject() {
@@ -482,8 +466,6 @@ class URL implements Serializable {
     }
 
     public URL setProject(String project) {
-
-
         return new URL(protocol, project, environment, host, port, path, this.parameters);
     }
 
@@ -516,7 +498,6 @@ class URL implements Serializable {
      * @return ip in string format
      */
     public String getIp() {
-
         return ip;
     }
 
@@ -1314,7 +1295,6 @@ class URL implements Serializable {
         }
 
         return project + "/" + environment + "/" + inf;
-
         // return buildKey(inf, this.project, this.environment);
     }
 

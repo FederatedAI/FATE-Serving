@@ -27,9 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-
 public class FateServer extends Server {
-
 
     private static final Logger logger = LoggerFactory.getLogger(FateServer.class);
     public static Set<RegisterService> serviceSets = new HashSet<>();
@@ -38,15 +36,12 @@ public class FateServer extends Server {
     private String environment;
     private Registry registry;
 
-
     public FateServer() {
     }
 
     public FateServer(Server server) {
         this();
-
         this.server = server;
-
     }
 
     public String getProject() {
@@ -67,9 +62,7 @@ public class FateServer extends Server {
 
     @Override
     public Server start() throws IOException {
-
         Server server = this.server.start();
-
         // register();
         return this;
     }
@@ -92,7 +85,6 @@ public class FateServer extends Server {
     @Override
     public boolean isShutdown() {
         return this.server.isShutdown();
-
     }
 
     @Override
@@ -109,7 +101,6 @@ public class FateServer extends Server {
     public void awaitTermination() throws InterruptedException {
         this.server.awaitTermination();
     }
-
 
 //        public  static  void  main(String[]  args){
 //

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.common;
 
-
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.interfaces.Registry;
@@ -40,9 +39,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.webank.ai.fate.register.common.Constants.*;
 
-
 public abstract class AbstractRegistry implements Registry {
-    public final static  String  INSTANCE_ID = UUID.randomUUID().toString();
+    public final static String INSTANCE_ID = UUID.randomUUID().toString();
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRegistry.class);
     private static final char URL_SEPARATOR = ' ';
@@ -86,7 +84,7 @@ public abstract class AbstractRegistry implements Registry {
         loadProperties();
         notify(url.getBackupUrls());
 
-        String serviceCacheFileName = System.getProperty(Dict.PROPERTY_USER_HOME)+"/.fate/fate-service-" + url.getParameter(PROJECT_KEY) + "-" + url.getHost() + "-" + url.getPort() + ".cache";
+        String serviceCacheFileName = System.getProperty(Dict.PROPERTY_USER_HOME) + "/.fate/fate-service-" + url.getParameter(PROJECT_KEY) + "-" + url.getHost() + "-" + url.getPort() + ".cache";
         if (StringUtils.isNotEmpty(serviceCacheFileName)) {
             serviceCacheFile = new File(serviceCacheFileName);
             if (!serviceCacheFile.exists() && serviceCacheFile.getParentFile() != null && !serviceCacheFile.getParentFile().exists()) {
@@ -160,7 +158,7 @@ public abstract class AbstractRegistry implements Registry {
                     }
                 }
             } catch (Throwable e) {
-                logger.error("failed to doLoadCache file {}", file,e);
+                logger.error("failed to doLoadCache file {}", file, e);
             }
         }
     }
@@ -177,7 +175,6 @@ public abstract class AbstractRegistry implements Registry {
         projectSets.add(project);
 
     }
-
 
     public abstract void doRegisterComponent(URL url);
 

@@ -26,7 +26,6 @@ import java.util.Objects;
 
 import static com.webank.ai.fate.register.common.Constants.DEFAULT_KEY_PREFIX;
 
-
 public final class URLBuilder {
     private String protocol;
 

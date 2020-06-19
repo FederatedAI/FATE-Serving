@@ -20,9 +20,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerProvider;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 
-
 public class FateNettyServerProvider extends ServerProvider {
-
 
     public FateNettyServerProvider() {
 

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-
 import com.webank.ai.fate.core.mlmodel.buffer.fm.FMModelParamProto.Embedding;
 import com.webank.ai.fate.core.mlmodel.buffer.fm.FMModelParamProto.FMModelParam;
 import com.webank.ai.fate.serving.core.bean.Dict;

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.zookeeper;
 
-
 import com.webank.ai.fate.register.common.AbstractRegistryFactory;
 import com.webank.ai.fate.register.interfaces.Registry;
 import com.webank.ai.fate.register.url.URL;
@@ -27,7 +26,6 @@ import com.webank.ai.fate.register.url.URL;
 public class ZookeeperRegistryFactory extends AbstractRegistryFactory {
 
     private ZookeeperTransporter zookeeperTransporter;
-
 
     public void setZookeeperTransporter(ZookeeperTransporter zookeeperTransporter) {
         this.zookeeperTransporter = zookeeperTransporter;

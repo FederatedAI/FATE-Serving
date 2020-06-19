@@ -1,27 +1,47 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.common.flow;
 
 import com.webank.ai.fate.serving.core.utils.JVMMemoryUtils;
 
 public class JvmInfo {
-    @Override
-    public String toString() {
-        return Long.toString(this.timestamp);
-    }
-
-    long  timestamp ;
+    long timestamp;
+    JVMMemoryUtils.JVMMemoryUsage heap;
+    JVMMemoryUtils.JVMMemoryUsage eden;
+    JVMMemoryUtils.JVMMemoryUsage old;
+    long yongGcCount;
+    long yongGcTime;
+    long fullGcCount;
+    long threadCount;
+    long fullGcTime;
+    JVMMemoryUtils.JVMMemoryUsage nonHeap;
+    JVMMemoryUtils.JVMMemoryUsage survivor;
 
     public JvmInfo() {
     }
 
-    public  JvmInfo(long  timestamp){
+    public JvmInfo(long timestamp) {
         this.timestamp = timestamp;
     }
-    JVMMemoryUtils.JVMMemoryUsage    heap;
-    JVMMemoryUtils.JVMMemoryUsage    eden;
-    JVMMemoryUtils.JVMMemoryUsage    old;
-    long  yongGcCount;
-    long  yongGcTime;
-    long  fullGcCount;
+
+    @Override
+    public String toString() {
+        return Long.toString(this.timestamp);
+    }
 
     public long getThreadCount() {
         return threadCount;
@@ -30,8 +50,6 @@ public class JvmInfo {
     public void setThreadCount(long threadCount) {
         this.threadCount = threadCount;
     }
-
-    long  threadCount;
 
     public long getYongGcCount() {
         return yongGcCount;
@@ -64,8 +82,6 @@ public class JvmInfo {
     public void setFullGcTime(long fullGcTime) {
         this.fullGcTime = fullGcTime;
     }
-
-    long  fullGcTime;
 
     public long getTimestamp() {
         return timestamp;
@@ -115,10 +131,7 @@ public class JvmInfo {
         this.survivor = survivor;
     }
 
-    JVMMemoryUtils.JVMMemoryUsage  nonHeap;
-    JVMMemoryUtils.JVMMemoryUsage survivor;
-
-    public  void  reset(){
+    public void reset() {
 
     }
 }

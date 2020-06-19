@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-
 package com.webank.ai.fate.serving.model;
-
 
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -60,7 +58,6 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
         }
         return this.initPipeLine(context, modelData);
     }
-
 
     protected void store(Context context, String name, String namespace, MODELDATA data) {
         try {

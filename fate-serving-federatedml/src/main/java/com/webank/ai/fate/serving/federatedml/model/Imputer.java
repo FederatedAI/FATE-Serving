@@ -37,7 +37,7 @@ public class Imputer {
     public Map<String, Object> transform(Map<String, Object> inputData) {
         Map<String, Object> output = new HashMap<>();
 
-        for (String col: this.missingReplaceValues.keySet()) {
+        for (String col : this.missingReplaceValues.keySet()) {
             if (inputData.containsKey(col)) {
                 String value = inputData.get(col).toString();
                 if (this.missingValueSet.contains(value.toLowerCase())) {

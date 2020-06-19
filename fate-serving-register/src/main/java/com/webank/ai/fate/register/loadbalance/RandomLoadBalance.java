@@ -16,13 +16,11 @@
 
 package com.webank.ai.fate.register.loadbalance;
 
-
 import com.webank.ai.fate.register.url.URL;
 import org.apache.curator.shaded.com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-
 
 public class RandomLoadBalance extends AbstractLoadBalancer {
 

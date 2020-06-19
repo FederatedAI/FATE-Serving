@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.model;
 
 import com.google.common.base.Preconditions;
@@ -30,7 +46,6 @@ import java.nio.channels.FileLock;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
 
 @Service
 public class ModelManager implements InitializingBean {
@@ -213,10 +228,7 @@ public class ModelManager implements InitializingBean {
         doLoadCache(tempServiceIdNamespaceMap, serviceIdFile);
 
         ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
-
-
         ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.FATEFLOW);
-
 
         tempNamespaceMap.forEach((k, model) -> {
             try {
@@ -315,7 +327,6 @@ public class ModelManager implements InitializingBean {
         return returnResult;
     }
 
-
     private Model buildModelForBind(Context context, ModelServiceProto.PublishRequest req) {
         Model model = new Model();
         String role = req.getLocal().getRole();
@@ -362,7 +373,6 @@ public class ModelManager implements InitializingBean {
             hostModel.setTableName(hostTableName);
             hostModel.setRole(Dict.HOST);
             model.getFederationModelMap().put(hostModel.getPartId(), hostModel);
-
         }
         ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
@@ -477,7 +487,6 @@ public class ModelManager implements InitializingBean {
     }
 
     private String getNameSpaceKey(String tableName, String namespace) {
-
         return new StringBuilder().append(tableName).append("_").append(namespace).toString();
     }
 
@@ -572,7 +581,7 @@ public class ModelManager implements InitializingBean {
                     data.putAll(deserialize);
                 }
             } catch (Throwable e) {
-                logger.error("failed to doLoadCache file {}", file,e);
+                logger.error("failed to doLoadCache file {}", file, e);
             }
         }
     }
@@ -607,7 +616,6 @@ public class ModelManager implements InitializingBean {
             publishOnlineStoreFile = new File(publishOnlineFileName);
         }
     }
-
 
     private static class RequestWapper {
         String content;

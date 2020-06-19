@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.utils;
 
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 
@@ -26,12 +25,9 @@ import java.util.regex.Pattern;
 
 import static com.webank.ai.fate.register.common.Constants.*;
 
-
 /**
  * StringUtils
  */
-
-
 public final class StringUtils {
 
     public static final String EMPTY = "";
@@ -495,7 +491,6 @@ public final class StringUtils {
         return true;
     }
 
-
 //    /**
 //     * @param e
 //     * @return string
@@ -794,7 +789,6 @@ public final class StringUtils {
     public static String toUrlKey(String key) {
         return key.toLowerCase().replaceAll(SEPARATOR_REGEX, HIDE_KEY_PREFIX);
     }
-
 
     public static boolean isAllUpperCase(String str) {
         if (str != null && !isEmpty(str)) {

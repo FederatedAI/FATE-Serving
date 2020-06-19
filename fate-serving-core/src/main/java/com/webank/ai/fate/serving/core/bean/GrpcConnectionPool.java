@@ -171,7 +171,6 @@ public class GrpcConnectionPool {
     }
 
     public synchronized ManagedChannel createManagedChannel(String ip, int port) {
-
         if (logger.isDebugEnabled()) {
             logger.debug("create ManagedChannel");
         }
@@ -191,11 +190,7 @@ public class GrpcConnectionPool {
                 .usePlaintext();
 
         return builder.build();
-
-
     }
-
-    ;
 
     class ChannelResource {
 

@@ -51,7 +51,6 @@ public class ServiceOverloadProtectionHandle implements ServerInterceptor {
 
             @Override
             public void onComplete() {
-
                 super.onComplete();
             }
         };

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -18,8 +34,6 @@ import org.slf4j.LoggerFactory;
 public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTransferServiceImplBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ProxyRequestHandler.class);
-//    @Autowired
-//    IMetricFactory metricFactory;
 
     public abstract ProxyServiceRegister getProxyServiceRegister();
 
@@ -29,8 +43,6 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
     @Override
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
 
-//        metricFactory.counter("grpc.unaryCall.request", "grpc unaryCall request", "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
-
         if (logger.isDebugEnabled()) {
             logger.debug("unaryCall req {}", req);
         }
@@ -38,8 +50,6 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         Context context = new BaseContext();
         InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, req);
         setExtraInfo(context, inboundPackage, req);
-
-//        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "request", "grpc.type", context.getGrpcType().toString()).increment();
 
         OutboundPackage<Proxy.Packet> outboundPackage = null;
         try {
@@ -51,9 +61,6 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         Proxy.Packet result = (Proxy.Packet) outboundPackage.getData();
         responseObserver.onNext(result);
         responseObserver.onCompleted();
-
-//        metricFactory.counter("grpc.unaryCall.response", "grpc unaryCall response", "src", req.getHeader().getSrc().getPartyId(), "dst", req.getHeader().getDst().getPartyId()).increment();
-//        metricFactory.counter("grpc.unaryCall", "grpc unaryCall", "direction", "response", "grpc.type", context.getGrpcType().toString()).increment();
     }
 
     public InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {

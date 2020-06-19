@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.task;
 
-
 import com.webank.ai.fate.register.common.FailbackRegistry;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.timer.Timeout;
@@ -29,10 +28,8 @@ public class FailedRegisterComponentTask extends AbstractRetryTask {
         super(url, registry, NAME);
     }
 
-
     @Override
     protected void doRetry(URL url, FailbackRegistry registry, Timeout timeout) {
-
         registry.doRegisterComponent(url);
         registry.removeFailedRegisterComponentTask(url);
     }

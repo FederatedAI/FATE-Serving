@@ -46,20 +46,18 @@ public abstract class BaseComponent implements LocalInferenceAware {
     protected static final int IOERROR = -4;
     protected static final int RUNTIMEERROR = -5;
     private static final Logger logger = LoggerFactory.getLogger(BaseComponent.class);
+    static ForkJoinPool forkJoinPool = new ForkJoinPool();
     protected String componentName;
     protected String shortName;
     protected int index;
     protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;
     protected Cache cache;
 
-    static  ForkJoinPool   forkJoinPool= new ForkJoinPool();
-
     public abstract int initModel(byte[] protoMeta, byte[] protoParam);
 
     protected <T> T parseModel(com.google.protobuf.Parser<T> protoParser, byte[] protoString) throws com.google.protobuf.InvalidProtocolBufferException {
         return ProtobufUtils.parseProtoObject(protoParser, protoString);
     }
-
 
     protected Map<String, Object> handleRemoteReturnData(Map<String, Object> hostData) {
         Map<String, Object> result = new HashMap<>(8);
@@ -78,7 +76,6 @@ public abstract class BaseComponent implements LocalInferenceAware {
         return result;
     }
 
-
     public String getComponentName() {
         return componentName;
     }
@@ -86,7 +83,6 @@ public abstract class BaseComponent implements LocalInferenceAware {
     public void setComponentName(String componentName) {
         this.componentName = componentName;
     }
-
 
     public FederatedRpcInvoker getFederatedRpcInvoker() {
         return federatedRpcInvoker;

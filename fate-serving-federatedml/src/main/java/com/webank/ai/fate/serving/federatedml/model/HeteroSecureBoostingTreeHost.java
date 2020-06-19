@@ -26,14 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements LocalInferenceAware, Returnable {
 
     private final String site = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
     private boolean fastMode = true;
+
     private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
         while (getSite(treeId, treeNodeId).equals(this.site)) {
             treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
@@ -42,26 +40,23 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         return treeNodeId;
     }
 
-
-
-
-    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input){
+    public Map<String, Object> extractHostNodeRoute(Map<String, Object> input) {
 
         logger.info("running extractHostNodeRoute");
 
         Map<String, Object> result = new HashMap<String, Object>(8);
-        for(int i=0;i<this.treeNum;i++){
+        for (int i = 0; i < this.treeNum; i++) {
 
             DecisionTreeModelParam treeParam = this.trees.get(i);
             List<NodeParam> nodes = treeParam.getTreeList();
             Map<String, Boolean> treeRoute = new HashMap<String, Boolean>(8);
 
-            for(int j=0;j<nodes.size();j++){
+            for (int j = 0; j < nodes.size(); j++) {
 
 
                 NodeParam node = nodes.get(j);
 
-                if(!this.getSite(i, j).equals(this.site)){
+                if (!this.getSite(i, j).equals(this.site)) {
                     continue;
                 }
                 int fid = this.trees.get(i).getTree(j).getFid();
@@ -69,35 +64,30 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
 
                 boolean direction = false; // false go right, true go left
 
-                if(logger.isDebugEnabled()){
-                    logger.info("i is {}, j is {}",i,j);
+                if (logger.isDebugEnabled()) {
+                    logger.info("i is {}, j is {}", i, j);
                     logger.info("best fid is {}", fid);
                     logger.info("best split val is {}", splitValue);
                 }
 
-                if (input.containsKey(Integer.toString(fid))){
+                if (input.containsKey(Integer.toString(fid))) {
                     Object featVal = input.get(Integer.toString(fid));
                     direction = Double.parseDouble(featVal.toString()) <= splitValue + 1e-20;
-                }
-                else {
+                } else {
                     if (this.trees.get(i).getMissingDirMaskdict().containsKey(j)) {
                         int missingDir = this.trees.get(i).getMissingDirMaskdict().get(j);
                         direction = (missingDir != 1);
                     }
                 }
-                treeRoute.put(Integer.toString(j),direction);
+                treeRoute.put(Integer.toString(j), direction);
             }
-            result.put(Integer.toString(i),treeRoute);
+            result.put(Integer.toString(i), treeRoute);
         }
-        if(logger.isDebugEnabled()){
-            logger.info("show return route:{}",result);
+        if (logger.isDebugEnabled()) {
+            logger.info("show return route:{}", result);
         }
         return result;
     }
-
-
-
-
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> request) {
@@ -118,7 +108,5 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         }
         ret = this.extractHostNodeRoute(fidValueMapping);
         return ret;
-
-
     }
 }

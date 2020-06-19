@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.common;
 
-
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperTransporter;
@@ -28,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.webank.ai.fate.register.common.Constants.BACKUP_KEY;
 import static com.webank.ai.fate.register.common.Constants.TIMEOUT_KEY;
-
 
 public abstract class AbstractZookeeperTransporter implements ZookeeperTransporter {
     private static final Logger logger = LoggerFactory.getLogger(AbstractZookeeperTransporter.class);
@@ -67,9 +65,7 @@ public abstract class AbstractZookeeperTransporter implements ZookeeperTransport
 
     protected abstract ZookeeperClient createZookeeperClient(URL url);
 
-
     ZookeeperClient fetchAndUpdateZookeeperClientCache(List<String> addressList) {
-
         ZookeeperClient zookeeperClient = null;
         for (String address : addressList) {
             if ((zookeeperClient = zookeeperClientMap.get(address)) != null && zookeeperClient.isConnected()) {
@@ -126,7 +122,6 @@ public abstract class AbstractZookeeperTransporter implements ZookeeperTransport
         return new URL(url.getProtocol(), url.getProject(), url.getEnvironment(), url.getHost(), url.getPort(),
                 ZookeeperTransporter.class.getName(), parameterMap);
     }
-
 
     Map<String, ZookeeperClient> getZookeeperClientMap() {
         return zookeeperClientMap;

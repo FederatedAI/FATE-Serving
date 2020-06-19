@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
-
 import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;

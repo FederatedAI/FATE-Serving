@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.common;
 
-
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.utils.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
@@ -51,9 +50,7 @@ import java.util.concurrent.Executor;
 import static com.webank.ai.fate.register.common.Constants.TIMEOUT_KEY;
 import static com.webank.ai.fate.register.common.Constants.UTF_8;
 
-
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZookeeperClient.CuratorWatcherImpl, CuratorZookeeperClient.CuratorWatcherImpl> {
-
 
     static final Charset CHARSET = Charset.forName(UTF_8);
     private static final Logger logger = LoggerFactory.getLogger(CuratorZookeeperClient.class);

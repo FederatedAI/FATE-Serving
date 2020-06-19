@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
-
 /**
  * IP and Port Helper for RPC
  */

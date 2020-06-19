@@ -1,5 +1,20 @@
-package com.webank.ai.fate.serving.federatedml.model;
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.FeatureBinningMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.TransformMeta;
@@ -14,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class HeteroFeatureBinning extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(HeteroFeatureBinning.class);
@@ -62,7 +76,7 @@ public class HeteroFeatureBinning extends BaseComponent {
             return firstData;
         }
 
-        for (int i=0; i < this.header.size(); i ++) {
+        for (int i = 0; i < this.header.size(); i++) {
             headerMap.put(this.header.get(i), (long) i);
         }
 
@@ -81,7 +95,7 @@ public class HeteroFeatureBinning extends BaseComponent {
                 Double colValue = Double.valueOf(firstData.get(colName).toString());
                 int colIndex = Collections.binarySearch(splitPoint, colValue);
                 if (colIndex < 0) {
-                    colIndex = Math.min((- colIndex - 1), splitPoint.size() - 1);
+                    colIndex = Math.min((-colIndex - 1), splitPoint.size() - 1);
                 }
                 outputData.put(colName, colIndex);
             } catch (Throwable e) {
@@ -92,7 +106,6 @@ public class HeteroFeatureBinning extends BaseComponent {
             logger.debug("DEBUG: HeteroFeatureBinning output {}", outputData);
         }
         return outputData;
-
     }
 
 }

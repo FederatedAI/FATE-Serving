@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml;
 
-
 import com.webank.ai.fate.serving.core.bean.Dict;
 import org.json.JSONArray;
 import org.json.JSONObject;

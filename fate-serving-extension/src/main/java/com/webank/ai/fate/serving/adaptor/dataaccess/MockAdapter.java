@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
-
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;

@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOMetaProto.DataIOMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -70,27 +69,26 @@ public class DataIO extends BaseComponent {
         return OK;
     }
 
-
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         Map<String, Object> data = inputData.get(0);
         Map<String, Object> outputData = new HashMap<>();
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("input-data, not filling, {}", data);
         }
 
         if (this.inputformat.equals(Dict.TAG_INPUT_FORMAT) || this.inputformat.equals(Dict.SPARSE_INPUT_FORMAT
         )) {
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Sparse Data Filling Zeros");
             }
-            for (String col: this.header) {
+            for (String col : this.header) {
                 outputData.put(col, data.getOrDefault(col, 0));
             }
         } else {
             outputData = data;
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Dense input-format, not filling, {}", outputData);
             }
         }

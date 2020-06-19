@@ -196,7 +196,7 @@ public class AuthUtils implements InitializingBean {
         try {
             loadConfig();
         } catch (Throwable e) {
-            logger.error("load authencation keys fail. ", e);
+            logger.error("load authentication keys fail. ", e);
         }
 
     }

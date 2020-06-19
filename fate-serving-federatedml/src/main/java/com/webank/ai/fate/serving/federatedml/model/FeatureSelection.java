@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionMetaProto.FeatureSelectionMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.FeatureSelectionParam;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.LeftCols;
@@ -70,7 +69,5 @@ public class FeatureSelection extends BaseComponent {
             }
         }
         return outputData;
-
-
     }
 }

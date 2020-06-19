@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-
 public class Dict {
 
     public static final String ORIGIN_REQUEST = "origin_request";
@@ -54,8 +53,8 @@ public class Dict {
     public static final String SOURCE_IP = "sourceIp";
     public static final String SERVING_CORE_POOL_SIZE = "serving.core.pool.size";
     public static final String SERVING_MAX_POOL_ZIE = "serving.max.pool.size";
-    public static final String SERVING_POOL_ALIVE_TIME =  "serving.pool.alive.time";
-    public static final String SERVING_POOL_QUEUE_SIZE =  "serving.pool.queue.size";
+    public static final String SERVING_POOL_ALIVE_TIME = "serving.pool.alive.time";
+    public static final String SERVING_POOL_QUEUE_SIZE = "serving.pool.queue.size";
     public static final String SINGLE_INFERENCE_RPC_TIMEOUT = "single.inference.rpc.timeout";
     public static final String BATCH_INFERENCE_RPC_TIMEOUT = "batch.inference.rpc.timeout";
     public static final String FEATURE_SINGLE_ADAPTOR = "feature.single.adaptor";
@@ -70,7 +69,7 @@ public class Dict {
     public static final String PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_MAX_SIZE = "remoteModelInferenceResultCacheMaxSize";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_TTL = "inferenceResultCacheTTL";
     public static final String PROPERTY_INFERENCE_RESULT_CACHE_CACHE_MAX_SIZE = "inferenceResultCacheCacheMaxSize";
-    public static final String PROPERTY_CACHE_TYPE ="cache.type";
+    public static final String PROPERTY_CACHE_TYPE = "cache.type";
     public static final String PROPERTY_REDIS_MAX_TOTAL = "redis.maxTotal";
     public static final String PROPERTY_REDIS_MAX_IDLE = "redis.maxIdle";
     public static final String PROPERTY_REDIS_IP = "redis.ip";
@@ -252,6 +251,6 @@ public class Dict {
     public static final String PARAMS_ROLE = "role";
     public static final String PARAMS_JOB_PARAMETERS = "job_parameters";
     public static final String PARAMS_SERVICE_ID = "service_id";
-    public static final String BATCH_INFERENCE_SPLIT_SIZE="batch.inference.split.size";
+    public static final String BATCH_INFERENCE_SPLIT_SIZE = "batch.inference.split.size";
 
 }

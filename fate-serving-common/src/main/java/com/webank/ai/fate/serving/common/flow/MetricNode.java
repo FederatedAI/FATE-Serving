@@ -1,9 +1,24 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.common.flow;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 
 public class MetricNode {
 
@@ -13,13 +28,60 @@ public class MetricNode {
     private long successQps;
     private long exceptionQps;
     private long rt;
-
     private long occupiedPassQps;
-
     private String resource;
+
+    /**
+     * Parse {@link MetricNode} from thin string, see {@link #toThinString()}
+     *
+     * @param line
+     * @return
+     */
+    public static MetricNode fromThinString(String line) {
+        MetricNode node = new MetricNode();
+        String[] strs = line.split("\\|");
+        node.setTimestamp(Long.parseLong(strs[0]));
+        node.setResource(strs[1]);
+        node.setPassQps(Long.parseLong(strs[2]));
+        node.setBlockQps(Long.parseLong(strs[3]));
+        node.setSuccessQps(Long.parseLong(strs[4]));
+        node.setExceptionQps(Long.parseLong(strs[5]));
+        node.setRt(Long.parseLong(strs[6]));
+        if (strs.length == 8) {
+            node.setOccupiedPassQps(Long.parseLong(strs[7]));
+        }
+        return node;
+    }
+
+    /**
+     * Parse {@link MetricNode} from fat string, see {@link #toFatString()}
+     *
+     * @param line
+     * @return the {@link MetricNode} parsed.
+     */
+    public static MetricNode fromFatString(String line) {
+        String[] strs = line.split("\\|");
+        Long time = Long.parseLong(strs[0]);
+        MetricNode node = new MetricNode();
+        node.setTimestamp(time);
+        node.setResource(strs[2]);
+        node.setPassQps(Long.parseLong(strs[3]));
+        node.setBlockQps(Long.parseLong(strs[4]));
+        node.setSuccessQps(Long.parseLong(strs[5]));
+        node.setExceptionQps(Long.parseLong(strs[6]));
+        node.setRt(Long.parseLong(strs[7]));
+        if (strs.length == 9) {
+            node.setOccupiedPassQps(Long.parseLong(strs[8]));
+        }
+        return node;
+    }
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public long getOccupiedPassQps() {
@@ -28,10 +90,6 @@ public class MetricNode {
 
     public void setOccupiedPassQps(long occupiedPassQps) {
         this.occupiedPassQps = occupiedPassQps;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public long getSuccessQps() {
@@ -85,9 +143,9 @@ public class MetricNode {
     @Override
     public String toString() {
         return "MetricNode{" + "timestamp=" + timestamp + ", passQps=" + passQps + ", blockQps=" + blockQps
-            + ", successQps=" + successQps + ", exceptionQps=" + exceptionQps + ", rt=" + rt
-            + ", occupiedPassQps=" + occupiedPassQps + ", resource='"
-            + resource + '\'' + '}';
+                + ", successQps=" + successQps + ", exceptionQps=" + exceptionQps + ", rt=" + rt
+                + ", occupiedPassQps=" + occupiedPassQps + ", resource='"
+                + resource + '\'' + '}';
     }
 
     /**
@@ -111,28 +169,6 @@ public class MetricNode {
         sb.append(rt).append("|");
         sb.append(occupiedPassQps);
         return sb.toString();
-    }
-
-    /**
-     * Parse {@link MetricNode} from thin string, see {@link #toThinString()}
-     *
-     * @param line
-     * @return
-     */
-    public static MetricNode fromThinString(String line) {
-        MetricNode node = new MetricNode();
-        String[] strs = line.split("\\|");
-        node.setTimestamp(Long.parseLong(strs[0]));
-        node.setResource(strs[1]);
-        node.setPassQps(Long.parseLong(strs[2]));
-        node.setBlockQps(Long.parseLong(strs[3]));
-        node.setSuccessQps(Long.parseLong(strs[4]));
-        node.setExceptionQps(Long.parseLong(strs[5]));
-        node.setRt(Long.parseLong(strs[6]));
-        if (strs.length == 8) {
-            node.setOccupiedPassQps(Long.parseLong(strs[7]));
-        }
-        return node;
     }
 
     /**
@@ -160,29 +196,6 @@ public class MetricNode {
         sb.append(getOccupiedPassQps());
         sb.append('\n');
         return sb.toString();
-    }
-
-    /**
-     * Parse {@link MetricNode} from fat string, see {@link #toFatString()}
-     *
-     * @param line
-     * @return the {@link MetricNode} parsed.
-     */
-    public static MetricNode fromFatString(String line) {
-        String[] strs = line.split("\\|");
-        Long time = Long.parseLong(strs[0]);
-        MetricNode node = new MetricNode();
-        node.setTimestamp(time);
-        node.setResource(strs[2]);
-        node.setPassQps(Long.parseLong(strs[3]));
-        node.setBlockQps(Long.parseLong(strs[4]));
-        node.setSuccessQps(Long.parseLong(strs[5]));
-        node.setExceptionQps(Long.parseLong(strs[6]));
-        node.setRt(Long.parseLong(strs[7]));
-        if (strs.length == 9) {
-            node.setOccupiedPassQps(Long.parseLong(strs[8]));
-        }
-        return node;
     }
 
 }

@@ -1,5 +1,20 @@
-package com.webank.ai.fate.serving.common.flow;
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.webank.ai.fate.serving.common.flow;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -19,33 +34,29 @@ import java.util.concurrent.TimeUnit;
 
 public class FlowCounterManager {
 
+    public static final boolean USE_PID = true;
+    private static final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "FlowRule.json";
     Logger logger = LoggerFactory.getLogger(FlowCounterManager.class);
-
     String appName;
     MetricSearcher metricSearcher;
     MetricSearcher modelMetricSearcher;
-    boolean  countModelRequest;
-
+    boolean countModelRequest;
     LimitQueue<MetricNode> modelLimitQueue = new LimitQueue<MetricNode>(10);
-
-    public static final boolean USE_PID = true;
-
-    HashedWheelTimer   hashedWheelTimer =  new  HashedWheelTimer();
-
-    public MetricSearcher getMetricSearcher() {
-        return metricSearcher;
-    }
-
-    public void setMetricSearcher(MetricSearcher metricSearcher) {
-        this.metricSearcher = metricSearcher;
-    }
-
+    HashedWheelTimer hashedWheelTimer = new HashedWheelTimer();
+    MetricReport metricReport;
+    MetricReport modelMetricReport;
+    ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+    Map<String, Double> sourceQpsAllowMap = new HashMap<>();
+    private ConcurrentHashMap<String, FlowCounter> passMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, FlowCounter> successMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, FlowCounter> blockMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, FlowCounter> exceptionMap = new ConcurrentHashMap<>();
 
     public FlowCounterManager(String appName) {
-        this(appName,false);
+        this(appName, false);
     }
 
-    public FlowCounterManager(String appName,Boolean countModelRequest) {
+    public FlowCounterManager(String appName, Boolean countModelRequest) {
         this.appName = appName;
         String baseFileName = appName + "-metrics.log";
         String modelFileName = "model-metrics.log";
@@ -55,54 +66,72 @@ public class FlowCounterManager {
         }
         metricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, baseFileName);
         metricReport = new FileMetricReport(appName);
-        if(countModelRequest){
+        if (countModelRequest) {
             modelMetricReport = new FileMetricReport("model");
-            modelMetricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR,   modelFileName);
+            modelMetricSearcher = new MetricSearcher(MetricWriter.METRIC_BASE_DIR, modelFileName);
         }
     }
 
-    public  List<MetricNode>  queryMetrics(long beginTimeMs, long endTimeMs, String identity){
+    public static void main(String[] args) {
+        FlowCounterManager flowCounterManager = new FlowCounterManager("test");
+        flowCounterManager.setMetricReport(new FileMetricReport("Test"));
+        flowCounterManager.setMetricSearcher(new MetricSearcher(MetricWriter.METRIC_BASE_DIR, "Test" + "-metrics.log.pid" + GetSystemInfo.getPid()));
+        flowCounterManager.startReport();
+
+        while (true) {
+            flowCounterManager.pass("M_test");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public MetricSearcher getMetricSearcher() {
+        return metricSearcher;
+    }
+
+    public void setMetricSearcher(MetricSearcher metricSearcher) {
+        this.metricSearcher = metricSearcher;
+    }
+
+    public List<MetricNode> queryMetrics(long beginTimeMs, long endTimeMs, String identity) {
         try {
-            return  metricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
+            return metricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 
-    public  List<MetricNode>  queryAllMetrics(long beginTimeMs, int size){
+    public List<MetricNode> queryAllMetrics(long beginTimeMs, int size) {
         try {
-            return  metricSearcher.find(beginTimeMs, size);
+            return metricSearcher.find(beginTimeMs, size);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 
-    public  List<MetricNode>  queryModelMetrics(long beginTimeMs, long endTimeMs, String identity){
+    public List<MetricNode> queryModelMetrics(long beginTimeMs, long endTimeMs, String identity) {
 
         try {
-            return  modelMetricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
+            return modelMetricSearcher.findByTimeAndResource(beginTimeMs, endTimeMs, identity);
         } catch (Exception e) {
-            logger.error("find model metric error",e);
-            throw  new SysException("find model metric error");
+            logger.error("find model metric error", e);
+            throw new SysException("find model metric error");
         }
     }
 
-    public  List<MetricNode>  queryAllModelMetrics(long beginTimeMs, int size){
+    public List<MetricNode> queryAllModelMetrics(long beginTimeMs, int size) {
         try {
-            return  modelMetricSearcher.find(beginTimeMs, size);
+            return modelMetricSearcher.find(beginTimeMs, size);
         } catch (Exception e) {
-            logger.error("find mode metric error",e);
-            throw  new SysException("find mode metric error");
-
+            logger.error("find mode metric error", e);
+            throw new SysException("find mode metric error");
         }
     }
-
-
-    MetricReport metricReport;
-
-    MetricReport modelMetricReport;
 
     public MetricReport getMetricReport() {
         return metricReport;
@@ -112,136 +141,96 @@ public class FlowCounterManager {
         this.metricReport = metricReport;
     }
 
-    private ConcurrentHashMap<String, FlowCounter>   passMap =   new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, FlowCounter>   successMap =   new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, FlowCounter>   blockMap =   new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, FlowCounter>   exceptionMap =   new ConcurrentHashMap<>();
-
-
-
-    public  boolean  pass(String sourceName){
-        FlowCounter flowCounter =passMap.get(sourceName);
-        if(flowCounter==null){
-            flowCounter= passMap.putIfAbsent(sourceName,new FlowCounter(getAllowedQps(sourceName)));
-            if(flowCounter==null) {
+    public boolean pass(String sourceName) {
+        FlowCounter flowCounter = passMap.get(sourceName);
+        if (flowCounter == null) {
+            flowCounter = passMap.putIfAbsent(sourceName, new FlowCounter(getAllowedQps(sourceName)));
+            if (flowCounter == null) {
                 flowCounter = passMap.get(sourceName);
             }
         }
-        return  flowCounter.tryPass();
+        return flowCounter.tryPass();
     }
 
-    public  boolean  success(String sourceName){
-        FlowCounter flowCounter =successMap.get(sourceName);
-        if(flowCounter==null){
-            flowCounter= successMap.putIfAbsent(sourceName,new FlowCounter(Integer.MAX_VALUE));
-            if(flowCounter==null) {
+    public boolean success(String sourceName) {
+        FlowCounter flowCounter = successMap.get(sourceName);
+        if (flowCounter == null) {
+            flowCounter = successMap.putIfAbsent(sourceName, new FlowCounter(Integer.MAX_VALUE));
+            if (flowCounter == null) {
                 flowCounter = successMap.get(sourceName);
             }
         }
-        return  flowCounter.tryPass();
+        return flowCounter.tryPass();
     }
 
-    public  boolean  block(String sourceName){
-        FlowCounter flowCounter =blockMap.get(sourceName);
-        if(flowCounter==null){
-            flowCounter= blockMap.putIfAbsent(sourceName,new FlowCounter(Integer.MAX_VALUE));
-            if(flowCounter==null) {
+    public boolean block(String sourceName) {
+        FlowCounter flowCounter = blockMap.get(sourceName);
+        if (flowCounter == null) {
+            flowCounter = blockMap.putIfAbsent(sourceName, new FlowCounter(Integer.MAX_VALUE));
+            if (flowCounter == null) {
                 flowCounter = blockMap.get(sourceName);
             }
         }
-        return  flowCounter.tryPass();
+        return flowCounter.tryPass();
     }
 
-    public  boolean  exception(String sourceName){
-        FlowCounter flowCounter =exceptionMap.get(sourceName);
-        if(flowCounter==null){
-            flowCounter= exceptionMap.putIfAbsent(sourceName,new FlowCounter(Integer.MAX_VALUE));
-            if(flowCounter==null) {
+    public boolean exception(String sourceName) {
+        FlowCounter flowCounter = exceptionMap.get(sourceName);
+        if (flowCounter == null) {
+            flowCounter = exceptionMap.putIfAbsent(sourceName, new FlowCounter(Integer.MAX_VALUE));
+            if (flowCounter == null) {
                 flowCounter = exceptionMap.get(sourceName);
             }
         }
-        return  flowCounter.tryPass();
+        return flowCounter.tryPass();
     }
 
-    ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-
-    public  void  startReport(){
-
+    public void startReport() {
         init();
-        executor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-
-                long current = TimeUtil.currentTimeMillis();
-                List<MetricNode> reportList =   Lists.newArrayList();
-                List<MetricNode> modelReportList =   Lists.newArrayList();
-                passMap.forEach((sourceName,flowCounter)->{
-                        FlowCounter successCounter = successMap.get(sourceName);
-                        FlowCounter blockCounter =  blockMap.get(sourceName);
-                        FlowCounter exceptionCounter = exceptionMap.get(sourceName);
-                        MetricNode metricNode = new MetricNode();
-                        metricNode.setTimestamp(current);
-                        metricNode.setResource(sourceName);
-                        metricNode.setPassQps(flowCounter.getSum());
-                        metricNode.setBlockQps(blockCounter!=null?new Double(blockCounter.getQps()).longValue():0);
-                        metricNode.setExceptionQps(exceptionCounter!=null?new Double(exceptionCounter.getQps()).longValue():0);
-                        metricNode.setSuccessQps(successCounter!=null?new Double(successCounter.getQps()).longValue():0);
-                        if(sourceName.startsWith("I_")){
-                            reportList.add(metricNode);
-                        }
-                        if(sourceName.startsWith("M_")){
-                            modelReportList.add(metricNode);
-                        }
-                });
-            //    logger.info("try to report {}",reportList);
-                metricReport.report(reportList);
-                if (modelMetricReport != null) {
-                    modelMetricReport.report(modelReportList);
+        executor.scheduleAtFixedRate(() -> {
+            long current = TimeUtil.currentTimeMillis();
+            List<MetricNode> reportList = Lists.newArrayList();
+            List<MetricNode> modelReportList = Lists.newArrayList();
+            passMap.forEach((sourceName, flowCounter) -> {
+                FlowCounter successCounter = successMap.get(sourceName);
+                FlowCounter blockCounter = blockMap.get(sourceName);
+                FlowCounter exceptionCounter = exceptionMap.get(sourceName);
+                MetricNode metricNode = new MetricNode();
+                metricNode.setTimestamp(current);
+                metricNode.setResource(sourceName);
+                metricNode.setPassQps(flowCounter.getSum());
+                metricNode.setBlockQps(blockCounter != null ? new Double(blockCounter.getQps()).longValue() : 0);
+                metricNode.setExceptionQps(exceptionCounter != null ? new Double(exceptionCounter.getQps()).longValue() : 0);
+                metricNode.setSuccessQps(successCounter != null ? new Double(successCounter.getQps()).longValue() : 0);
+                if (sourceName.startsWith("I_")) {
+                    reportList.add(metricNode);
                 }
+                if (sourceName.startsWith("M_")) {
+                    modelReportList.add(metricNode);
+                }
+            });
+            //    logger.info("try to report {}",reportList);
+            metricReport.report(reportList);
+            if (modelMetricReport != null) {
+                modelMetricReport.report(modelReportList);
             }
-        }, 0,
-        1,
-        TimeUnit.SECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
-
-    public  void  rmAllFiles(){
+    public void rmAllFiles() {
         try {
             if (modelMetricReport instanceof FileMetricReport) {
                 FileMetricReport fileMetricReport = (FileMetricReport) modelMetricReport;
                 fileMetricReport.rmAllFile();
             }
             if (metricReport instanceof FileMetricReport) {
-
                 FileMetricReport fileMetricReport = (FileMetricReport) metricReport;
                 fileMetricReport.rmAllFile();
-
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("remove metric file error");
         }
     }
-
-    public  static  void main(String[] args){
-        FlowCounterManager flowCounterManager = new FlowCounterManager("test");
-        flowCounterManager.setMetricReport(new FileMetricReport("Test"));
-        flowCounterManager.setMetricSearcher(new MetricSearcher(MetricWriter.METRIC_BASE_DIR, "Test" + "-metrics.log.pid" + GetSystemInfo.getPid()));
-        flowCounterManager.startReport();
-
-        while(true) {
-            flowCounterManager.pass("M_test");
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-    }
-
-    private static final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "FlowRule.json";
-    Map<String, Double> sourceQpsAllowMap = new HashMap<>();
 
     /**
      * init rules
@@ -269,12 +258,12 @@ public class FlowCounterManager {
             logger.error("load flow counter rules failed, use default setting, cause by: {}", e.getMessage());
         }
 
-      //  JSONArray dataArray = JSONArray.parseArray(result);
-        Gson  gson = new Gson();
-        List configs =gson.fromJson(result,List.class);
+        //  JSONArray dataArray = JSONArray.parseArray(result);
+        Gson gson = new Gson();
+        List configs = gson.fromJson(result, List.class);
         for (int i = 0; i < configs.size(); i++) {
-            Map jsonObject = (Map)configs.get(i);
-            sourceQpsAllowMap.put(jsonObject.get("source").toString(),Double.valueOf(jsonObject.get("allow_qps").toString()));
+            Map jsonObject = (Map) configs.get(i);
+            sourceQpsAllowMap.put(jsonObject.get("source").toString(), Double.valueOf(jsonObject.get("allow_qps").toString()));
         }
 
         logger.info("load flow counter rules success");

@@ -19,4 +19,5 @@ package com.webank.ai.fate.serving.core.timer;
 public interface TimerTask {
 
     void run(Timeout timeout) throws Exception;
+
 }

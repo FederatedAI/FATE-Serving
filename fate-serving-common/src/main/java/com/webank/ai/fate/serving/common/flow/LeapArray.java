@@ -1,28 +1,36 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.webank.ai.fate.serving.common.flow;
-
-
-
-
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 public abstract class LeapArray<T> {
 
-    protected int windowLengthInMs;
-    protected int sampleCount;
-    protected int intervalInMs;
-
     protected final AtomicReferenceArray<WindowWrap<T>> array;
-
     /**
      * The conditional (predicate) update lock is used only when current bucket is deprecated.
      */
     private final ReentrantLock updateLock = new ReentrantLock();
+    protected int windowLengthInMs;
+    protected int sampleCount;
+    protected int intervalInMs;
 
     /**
      * The total bucket count is: {@code sampleCount = intervalInMs / windowLengthInMs}.
@@ -70,9 +78,9 @@ public abstract class LeapArray<T> {
 
     private int calculateTimeIdx(/*@Valid*/ long timeMillis) {
         long timeId = timeMillis / windowLengthInMs;
-       // System.err.println(timeMillis +" "+windowLengthInMs +" timeId "+timeId );
+        // System.err.println(timeMillis +" "+windowLengthInMs +" timeId "+timeId );
         // Calculate current index so we can map the timestamp to the leap array.
-        return (int)(timeId % array.length());
+        return (int) (timeId % array.length());
     }
 
     protected long calculateWindowStart(/*@Valid*/ long timeMillis) {

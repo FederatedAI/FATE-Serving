@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;

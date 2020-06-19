@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 
 import static com.webank.ai.fate.register.common.Constants.*;
 
-
 /**
  * IP and Port Helper for RPC
  */
@@ -267,13 +266,10 @@ public class NetUtils {
         return "";
     }
 
-
     public static String getOsName() {
-
         String osName = System.getProperty("os.name");
         return osName;
     }
-
 
     private static InetAddress getLocalAddress0(String name) {
         InetAddress localAddress = null;
@@ -331,7 +327,6 @@ public class NetUtils {
         }
         return localAddress;
     }
-
 
     /**
      * @param hostName

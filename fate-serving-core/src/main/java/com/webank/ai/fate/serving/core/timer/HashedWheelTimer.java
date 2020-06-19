@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.core.timer;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,16 +26,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
 
-
-
-
 public class HashedWheelTimer implements Timer {
 
-
+    public static final String NAME = "hased";
     static final String OS_NAME = "os.name";
     static final String USER_HOME = "user.home";
     static final String OS_NAME_WIN = "win";
-    public static final String NAME = "hased";
     private static final Logger logger = LoggerFactory.getLogger(HashedWheelTimer.class);
 
     private static final AtomicInteger INSTANCE_COUNTER = new AtomicInteger();
@@ -64,39 +59,32 @@ public class HashedWheelTimer implements Timer {
     private volatile int workerState;
     private volatile long startTime;
 
-
     public HashedWheelTimer() {
         this(Executors.defaultThreadFactory());
     }
-
 
     public HashedWheelTimer(long tickDuration, TimeUnit unit) {
         this(Executors.defaultThreadFactory(), tickDuration, unit);
     }
 
-
     public HashedWheelTimer(long tickDuration, TimeUnit unit, int ticksPerWheel) {
         this(Executors.defaultThreadFactory(), tickDuration, unit, ticksPerWheel);
     }
 
-
     public HashedWheelTimer(ThreadFactory threadFactory) {
         this(threadFactory, 100, TimeUnit.MILLISECONDS);
     }
-
 
     public HashedWheelTimer(
             ThreadFactory threadFactory, long tickDuration, TimeUnit unit) {
         this(threadFactory, tickDuration, unit, 512);
     }
 
-
     public HashedWheelTimer(
             ThreadFactory threadFactory,
             long tickDuration, TimeUnit unit, int ticksPerWheel) {
         this(threadFactory, tickDuration, unit, ticksPerWheel, -1);
     }
-
 
     public HashedWheelTimer(
             ThreadFactory threadFactory,

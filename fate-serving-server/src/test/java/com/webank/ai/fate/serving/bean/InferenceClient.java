@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.webank.ai.fate.serving.bean;
 
 import com.google.protobuf.ByteString;
@@ -24,8 +40,6 @@ public class InferenceClient {
     }
 
     public static ManagedChannel createManagedChannel(String ip, int port) throws Exception {
-
-
         NettyChannelBuilder builder = NettyChannelBuilder
                 .forAddress(ip, port)
                 .keepAliveTime(60, TimeUnit.SECONDS)
@@ -42,8 +56,6 @@ public class InferenceClient {
                 .usePlaintext();
 
         return builder.build();
-
-
     }
 
     public CommonServiceProto.CommonResponse queryMetrics(CommonServiceProto.QueryMetricRequest data) {
@@ -83,7 +95,6 @@ public class InferenceClient {
         inferenceMessageBuilder.setBody(ByteString.copyFrom(data));
 
         return blockingStub.inference(inferenceMessageBuilder.build());
-
     }
 
     public InferenceServiceProto.InferenceMessage inference(InferenceServiceProto.InferenceMessage inferenceMessage) {
@@ -99,7 +110,6 @@ public class InferenceClient {
                 InferenceServiceProto.InferenceMessage.newBuilder();
 
         return blockingStub.inference(inferenceMessage);
-
     }
 
     public ModelServiceProto.PublishResponse load(ModelServiceProto.PublishRequest publishRequest) {
@@ -133,7 +143,6 @@ public class InferenceClient {
         }
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
         return blockingStub.queryMetrics(data);
-
     }
 
     public CommonServiceProto.CommonResponse updateRule(CommonServiceProto.UpdateFlowRuleRequest data) {
@@ -146,7 +155,6 @@ public class InferenceClient {
 
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
         return blockingStub.updateFlowRule(data);
-
     }
 
     public CommonServiceProto.CommonResponse listProps(CommonServiceProto.QueryPropsRequest data) {
@@ -159,7 +167,6 @@ public class InferenceClient {
 
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
         return blockingStub.listProps(data);
-
     }
 
     public ModelServiceProto.QueryModelResponse queryModels(ModelServiceProto.QueryModelRequest data) {
@@ -172,9 +179,7 @@ public class InferenceClient {
 
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
         return blockingStub.queryModel(data);
-
     }
-
 
     public CommonServiceProto.CommonResponse queryJvmInfo(CommonServiceProto.QueryJvmInfoRequest data) {
         ManagedChannel managedChannel = null;
@@ -186,6 +191,5 @@ public class InferenceClient {
 
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
         return blockingStub.queryJvmInfo(data);
-
     }
 }

@@ -16,9 +16,6 @@
 
 package com.webank.ai.fate.serving;
 
-import com.google.common.collect.Sets;
-import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -35,7 +32,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.*;
 import java.util.Properties;
-import java.util.Set;
 
 @SpringBootApplication
 @ConfigurationProperties
@@ -44,6 +40,7 @@ import java.util.Set;
 public class Bootstrap {
     static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
     private static ApplicationContext applicationContext;
+
     public static void main(String[] args) {
         try {
             parseConfig();
@@ -77,7 +74,7 @@ public class Bootstrap {
             MetaInfo.SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)) : 1000;
             MetaInfo.SERVING_POOL_QUEUE_SIZE = environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)) : 100;
             MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
-            MetaInfo.BATCH_INFERENCE_MAX = environment.getProperty(Dict.BATCH_INFERENCE_MAX)!=null? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_MAX)):300;
+            MetaInfo.BATCH_INFERENCE_MAX = environment.getProperty(Dict.BATCH_INFERENCE_MAX) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_MAX)) : 300;
             MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)) : Boolean.FALSE;
             MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT)) : 3000;
             MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT)) : 3000;
@@ -102,13 +99,11 @@ public class Bootstrap {
             MetaInfo.PROPERTY_SERVICE_ROLE_NAME = environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
             MetaInfo.MODEL_TRANSFER_URL = environment.getProperty(Dict.MODEL_TRANSFER_URL);
 
-
         } catch (IOException e) {
             logger.error("init metainfo error", e);
             System.exit(1);
         }
     }
-
 
     public void start(String[] args) {
         SpringApplication springApplication = new SpringApplication(Bootstrap.class);

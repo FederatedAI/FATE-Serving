@@ -42,8 +42,6 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     HostBatchInferenceProvider hostBatchInferenceProvider;
     @Autowired
     HostSingleInferenceProvider hostSingleInferenceProvider;
-    @Autowired
-    Environment environment;
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)

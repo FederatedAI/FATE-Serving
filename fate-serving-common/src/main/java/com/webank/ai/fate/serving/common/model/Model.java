@@ -26,34 +26,30 @@ import java.util.Map;
 
 public class Model implements Comparable<Model>, Serializable, Cloneable {
 
-    private long timestamp;
-
-    private String tableName;
-
-    private String namespace;
-
     private static final long serialVersionUID = 1L;
-
+    String resourceName;
+    private long timestamp;
+    private String tableName;
+    private String namespace;
     /**
      * guest or host
      */
     private String role;
-
     private String partId;
-
     /**
      * 对端模型信息,因为需要支持多方,所以设计成Map
      */
     private Map<String, Model> federationModelMap = Maps.newHashMap();
-
     /**
      * 实例化好的模型处理类
      */
     private transient ModelProcessor modelProcessor;
-
     private String serviceId;
-
     private List<Map> rolePartyMapList;
+
+    public Model() {
+        this.timestamp = System.currentTimeMillis();
+    }
 
     public List<Map> getRolePartyMapList() {
         return rolePartyMapList;
@@ -61,10 +57,6 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
 
     public void setRolePartyMapList(List<Map> rolePartyMapList) {
         this.rolePartyMapList = rolePartyMapList;
-    }
-
-    public Model() {
-        this.timestamp = System.currentTimeMillis();
     }
 
     public long getTimestamp() {
@@ -140,7 +132,6 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
         }
     }
 
-
     @Override
     public int hashCode() {
         return (tableName + namespace).intern().hashCode();
@@ -165,23 +156,14 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
 
     @Override
     public String toString() {
-
         return JsonUtil.object2Json(this);
     }
-    String  resourceName ;
-    public String getResourceName (){
-        if(StringUtils.isNotEmpty(resourceName)) {
-            return  resourceName;
+
+    public String getResourceName() {
+        if (StringUtils.isBlank(resourceName)) {
+            resourceName = "M_" + tableName + "_" + namespace;
         }
-        else{
-            resourceName=  "M_"+tableName+"_"+namespace;
-            return  resourceName;
-        }
-
-
-
-
+        return resourceName;
     }
-
 
 }

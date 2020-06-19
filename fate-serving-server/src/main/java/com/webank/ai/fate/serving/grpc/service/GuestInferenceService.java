@@ -27,7 +27,6 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.guest.provider.GuestBatchInferenceProvider;
 import com.webank.ai.fate.serving.guest.provider.GuestSingleInferenceProvider;
@@ -44,8 +43,6 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     GuestBatchInferenceProvider guestBatchInferenceProvider;
     @Autowired
     GuestSingleInferenceProvider guestSingleInferenceProvider;
-    @Autowired
-    Environment environment;
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE)

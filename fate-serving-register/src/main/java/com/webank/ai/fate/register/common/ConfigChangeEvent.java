@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.common;
 
-
 public class ConfigChangeEvent {
     private final String key;
 

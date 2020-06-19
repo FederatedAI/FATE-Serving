@@ -16,13 +16,11 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
 import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +53,6 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
         return OK;
     }
 
-
     private boolean isDouble(String str) {
         if (null == str || "".equals(str)) {
             return false;
@@ -78,7 +75,6 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
                     continue;
                 }
                 ColsMap colsMap = this.colsMapMap.get(colName);
-
 
                 List<String> values = colsMap.getValuesList();
                 List<String> encodedVariables = colsMap.getTransformedHeadersList();
@@ -110,7 +106,6 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
             }
         }
         return outputData;
-
     }
 
 }

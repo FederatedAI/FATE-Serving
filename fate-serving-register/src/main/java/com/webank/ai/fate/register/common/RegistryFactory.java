@@ -16,12 +16,10 @@
 
 package com.webank.ai.fate.register.common;
 
-
 import com.webank.ai.fate.register.interfaces.Registry;
 import com.webank.ai.fate.register.url.URL;
 
 public interface RegistryFactory {
-
 
     Registry getRegistry(URL url);
 

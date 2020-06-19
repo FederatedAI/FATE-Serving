@@ -16,11 +16,8 @@
 
 package com.webank.ai.fate.register.task;
 
-
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.common.FailbackRegistry;
-
-
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.core.timer.Timeout;
 import com.webank.ai.fate.serving.core.timer.Timer;
@@ -30,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
-
 
 public abstract class AbstractRetryTask implements TimerTask {
 
@@ -128,8 +124,6 @@ public abstract class AbstractRetryTask implements TimerTask {
                 logger.debug("retry task cost " + (end - begin));
             }
         }
-
-
     }
 
     /**

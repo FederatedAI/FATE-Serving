@@ -18,7 +18,6 @@ package com.webank.ai.fate.register.provider;
 
 import io.grpc.NameResolver;
 
-
 public class FateNameResolver extends NameResolver {
     @Override
     public String getServiceAuthority() {

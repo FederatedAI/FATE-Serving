@@ -16,14 +16,12 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.List;
 import java.util.Map;
-
 
 public class FederatedParams {
 

@@ -1,5 +1,20 @@
-package com.webank.ai.fate.serving.common.rpc.core;
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.webank.ai.fate.serving.common.rpc.core;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -8,11 +23,12 @@ import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.utils.DisruptorUtil;
-
-import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
+import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
+import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
-
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
@@ -23,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 /**
  * @Description 默认的服务适配器
  * @Author
@@ -31,39 +46,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdaptor<req, resp> {
 
-
-    public static  class ExceptionInfo  {
-        public ExceptionInfo(){
-
-        }
-        String  code;
-        public String getCode() {
-            return code;
-        }
-        public void setCode(String code) {
-            this.code = code;
-        }
-        public String getMessage() {
-            return message != null ? message : "";
-        }
-        public void setMessage(String message) {
-            this.message = message;
-        }
-        String  message;
-    }
-
-    public FlowCounterManager getFlowCounterManager() {
-        return flowCounterManager;
-    }
-
-    public void setFlowCounterManager(FlowCounterManager flowCounterManager) {
-        this.flowCounterManager = flowCounterManager;
-    }
-
-    protected FlowCounterManager flowCounterManager;
-
     static public AtomicInteger requestInHandle = new AtomicInteger(0);
     public static boolean isOpen = true;
+    protected FlowCounterManager flowCounterManager;
     protected Logger flowLogger = LoggerFactory.getLogger("flow");
     protected String serviceName;
     Logger logger = LoggerFactory.getLogger(this.getClass().getName());
@@ -75,6 +60,15 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     public AbstractServiceAdaptor() {
 
     }
+
+    public FlowCounterManager getFlowCounterManager() {
+        return flowCounterManager;
+    }
+
+    public void setFlowCounterManager(FlowCounterManager flowCounterManager) {
+        this.flowCounterManager = flowCounterManager;
+    }
+
     public Map<String, Method> getMethodMap() {
         return methodMap;
     }
@@ -84,7 +78,6 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     }
 
     public void addPreProcessor(Interceptor interceptor) {
-
         preChain.addInterceptor(interceptor);
     }
 
@@ -168,10 +161,10 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     messageEvent.setContext(context);
                     DisruptorUtil.producer(messageEvent);
                     flowCounterManager.exception(context.getResourceName());
-                    if(context instanceof ServingServerContext) {
-                        ServingServerContext servingServerContext =(ServingServerContext)context;
-                        Model model =servingServerContext.getModel();
-                        if(model!=null) {
+                    if (context instanceof ServingServerContext) {
+                        ServingServerContext servingServerContext = (ServingServerContext) context;
+                        Model model = servingServerContext.getModel();
+                        if (model != null) {
                             flowCounterManager.exception(model.getResourceName());
                         }
                     }
@@ -180,11 +173,11 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                 }
             }
             String returnCode = context.getReturnCode();
-            if(StatusCode.SUCCESS.equals(returnCode)){
-                if(context instanceof   ServingServerContext) {
+            if (StatusCode.SUCCESS.equals(returnCode)) {
+                if (context instanceof ServingServerContext) {
                     Model model = ((ServingServerContext) context).getModel();
-                    if(model!=null) {
-                        flowCounterManager.success (model.getResourceName());
+                    if (model != null) {
+                        flowCounterManager.success(model.getResourceName());
                     }
                 }
                 flowCounterManager.success(context.getResourceName());
@@ -204,31 +197,23 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                 context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
     }
 
-
     protected OutboundPackage<resp> serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
-        ExceptionInfo  exceptionInfo = ErrorMessageUtil.handleExceptionExceptionInfo( e);
-        context.setReturnCode(exceptionInfo.getCode() != null ?exceptionInfo.getCode() : StatusCode.SYSTEM_ERROR);
+        ExceptionInfo exceptionInfo = ErrorMessageUtil.handleExceptionExceptionInfo(e);
+        context.setReturnCode(exceptionInfo.getCode() != null ? exceptionInfo.getCode() : StatusCode.SYSTEM_ERROR);
         resp rsp = transformExceptionInfo(context, exceptionInfo);
         outboundPackage.setData(rsp);
         return outboundPackage;
     }
 
-
     @Override
     public OutboundPackage<resp> serviceFail(Context context, InboundPackage<req> data, List<Throwable> errors) throws RuntimeException {
-
         Throwable e = errors.get(0);
         logger.error("service fail ", e);
         return serviceFailInner(context, data, e);
-
     }
 
-
     abstract protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo);
-
-
-
 
     /**
      * 需要支持多方host
@@ -238,7 +223,6 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
      * @return
      */
     protected BatchHostFederatedParams buildBatchHostFederatedParams(Context context, BatchInferenceRequest batchInferenceRequest, Model guestModel, Model hostModel) {
-
         BatchHostFederatedParams batchHostFederatedParams = new BatchHostFederatedParams();
         String seqNo = batchInferenceRequest.getSeqno();
         batchHostFederatedParams.setGuestPartyId(guestModel.getPartId());
@@ -256,8 +240,31 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         batchHostFederatedParams.setHostNamespace(hostModel.getNamespace());
         batchHostFederatedParams.setCaseId(batchInferenceRequest.getCaseId());
         return batchHostFederatedParams;
-
     }
 
+    public static class ExceptionInfo {
+        String code;
+        String message;
+
+        public ExceptionInfo() {
+
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getMessage() {
+            return message != null ? message : "";
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
 
 }

@@ -97,6 +97,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         packetBuilder.setAuth(authBuilder.build());
         return packetBuilder.build();
     }
+
     private String route() {
         boolean routerByzk = MetaInfo.PROPERTY_USE_ZK_ROUTER;
         String address = null;
@@ -130,6 +131,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             context.setDownstreamCost(System.currentTimeMillis() - context.getDownstreamBegin());
         }
     }
+
     private String buildCacheKey(Model guestModel, Model hostModel, Map sendToRemote) {
         String tableName = guestModel.getTableName();
         String namespace = guestModel.getNamespace();
@@ -157,6 +159,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                         returnResult.setData(data);
                         return returnResult;
                     }
+
                     @Override
                     public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                         returnResult.setData(data);
@@ -171,10 +174,12 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             public ReturnResult get() throws InterruptedException, ExecutionException {
                 return parse(future.get());
             }
+
             @Override
             public ReturnResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                 return parse(future.get(timeout, unit));
             }
+
             private ReturnResult parse(Proxy.Packet remote) {
                 if (remote != null) {
                     String remoteContent = remote.getBody().getValue().toStringUtf8();
@@ -258,6 +263,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         }
         return new BatchInferenceFuture(future, rpcDataWraper, inferenceRequest, useCache, cacheData);
     }
+
     @Override
     public ListenableFuture<Proxy.Packet> async(Context context, RpcDataWraper rpcDataWraper) {
         Proxy.Packet packet = this.build(context, rpcDataWraper);

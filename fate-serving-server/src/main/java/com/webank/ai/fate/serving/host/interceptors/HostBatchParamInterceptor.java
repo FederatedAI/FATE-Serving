@@ -34,9 +34,6 @@ import java.util.List;
 @Service
 public class HostBatchParamInterceptor implements Interceptor {
 
-    @Autowired
-    private Environment environment;
-
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         try {

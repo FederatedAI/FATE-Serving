@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.loadbalance;
 
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 

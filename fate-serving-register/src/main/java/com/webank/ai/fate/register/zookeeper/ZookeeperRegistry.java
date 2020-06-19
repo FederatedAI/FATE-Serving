@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.register.zookeeper;
 
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -30,15 +29,9 @@ import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.NetUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
-import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -46,40 +39,28 @@ import java.util.concurrent.ConcurrentMap;
 import static com.webank.ai.fate.register.common.Constants.*;
 import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
 
-
 public class ZookeeperRegistry extends FailbackRegistry {
-
 
     private static final Logger logger = LoggerFactory.getLogger(ZookeeperRegistry.class);
     private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
     private final static String DEFAULT_ROOT = "FATE-SERVICES";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
-
-
-
-
     private final static String ROOT_KEY = "root";
     public static ConcurrentMap<URL, ZookeeperRegistry> registeryMap = new ConcurrentHashMap();
     private static String DYNAMIC_KEY = "dynamic";
     private final String root;
-
-    ;
     private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<>();
     private final ZookeeperClient zkClient;
     Set<String> registedString = Sets.newHashSet();
     Set<String> anyServices = new HashSet<String>();
+    Gson gson = new Gson();
     private String environment;
     private Set<String> dynamicEnvironments = new HashSet<String>();
     private String project;
     private int port;
 
-    public  ZookeeperClient getZkClient(){
-        return this.zkClient;
-    }
-
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
-//
         String group = url.getParameter(ROOT_KEY, DEFAULT_ROOT);
         if (!group.startsWith(PATH_SEPARATOR)) {
             group = PATH_SEPARATOR + group;
@@ -91,7 +72,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
         this.root = group;
         zkClient = zookeeperTransporter.connect(url);
         zkClient.addStateListener(state -> {
-
             if (state == StateListener.RECONNECTED) {
                 logger.error("state listener reconnected");
                 try {
@@ -104,7 +84,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     public static synchronized ZookeeperRegistry getRegistry(String url, String project, String environment, int port) {
-
         if (url == null) {
             return null;
         }
@@ -123,32 +102,32 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 ZookeeperRegistry zookeeperRegistry = (ZookeeperRegistry) zookeeperRegistryFactory.createRegistry(finalRegistryUrl);
                 return zookeeperRegistry;
             });
-
         }
         return registeryMap.get(registryUrl);
-
     }
-    Gson gson = new Gson();
+
+    public ZookeeperClient getZkClient() {
+        return this.zkClient;
+    }
 
     @Override
-    public  void doRegisterComponent(URL  url){
-        String  path = url.getPath();
-        Map  content = new HashMap();
+    public void doRegisterComponent(URL url) {
+        String path = url.getPath();
+        Map content = new HashMap();
 
-        content.put(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
+        content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
         content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
-        this.zkClient.create(path, gson.toJson(content),true);
+        this.zkClient.create(path, gson.toJson(content), true);
 
         logger.info("register component {}", path);
     }
 
 
-    public void  registerComponent(){
-
+    public void registerComponent() {
         String hostAddress = NetUtils.getLocalIp();
-        String path =  PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT+PATH_SEPARATOR+project+PATH_SEPARATOR+hostAddress+":"+port;
-        URL  url = new  URL(path,Maps.newHashMap());
-        url.addParameter(Constants.INSTANCE_ID,AbstractRegistry.INSTANCE_ID);
+        String path = PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + project + PATH_SEPARATOR + hostAddress + ":" + port;
+        URL url = new URL(path, Maps.newHashMap());
+        url.addParameter(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
         try {
             doRegisterComponent(url);
         } catch (Exception e) {
@@ -178,7 +157,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     @Override
     public void doSubProject(String project) {
-
         String path = root + Constants.PATH_SEPARATOR + project;
 
         List<String> environments = zkClient.addChildListener(path, (parent, childrens) -> {
@@ -202,25 +180,18 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     private void subEnvironments(String path, String project, List<String> environments) {
-
         if (environments != null) {
-
             for (String environment : environments) {
-
                 String tempPath = path + Constants.PATH_SEPARATOR + environment;
 
                 List<String> services = zkClient.addChildListener(tempPath, (parent, childrens) -> {
-
                     if (StringUtils.isNotEmpty(parent)) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("fire services changes {}", childrens);
                         }
-
                         subServices(project, environment, childrens);
                     }
-
                 });
-
 
                 subServices(project, environment, services);
             }
@@ -228,10 +199,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     private void subServices(String project, String environment, List<String> services) {
-
         if (services != null) {
             for (String service : services) {
-
                 String subString = project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR + service;
                 if (logger.isDebugEnabled()) {
                     logger.debug("subServices sub {}", subString);
@@ -418,14 +387,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
                                             Constants.CHECK_KEY, String.valueOf(false)), listener);
                                 }
                             }
-
-
                         }
-
-
                     });
                     zkListener = listeners.get(listener);
-
                 }
                 StringBuilder sb = new StringBuilder(root);
                 sb.append("/").append(url.getProject());
@@ -450,10 +414,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     }
                 }
                 notify(url, listener, urls);
-
-
             } else {
-
                 for (String path : toCategoriesPath(url)) {
                     ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
                     if (listeners == null) {
@@ -467,7 +428,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
                                         ZookeeperRegistry.this.notify(url, listener,
                                                 toUrlsWithEmpty(url, parentPath, currentChilds));
                                     }
-
                                 }
                         );
                         zkListener = listeners.get(listener);
@@ -479,11 +439,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     }
                 }
                 notify(url, listener, urls);
-
-                // }
             }
-
-
         } catch (Throwable e) {
             throw new RuntimeException("Failed to subscribe " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
@@ -498,7 +454,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 for (String path : toCategoriesPath(url)) {
                     zkClient.removeChildListener(path, zkListener);
                 }
-
             }
         }
     }
@@ -527,8 +482,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
             return root;
         }
         return root + PATH_SEPARATOR;
-
-
     }
 
     private String toRootPath() {
@@ -562,7 +515,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     private String toCategoryPath(URL url) {
-
         String servicePath = toServicePath(url);
         String category = url.getParameter(CATEGORY_KEY, DEFAULT_CATEGORY);
         return servicePath + PATH_SEPARATOR + category;

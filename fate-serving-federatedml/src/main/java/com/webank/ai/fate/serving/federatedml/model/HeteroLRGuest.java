@@ -16,7 +16,6 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
-
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -50,12 +49,9 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
         return result;
     }
 
-
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> guestData,
                                                     Map<String, Object> hostData) {
-
-
         Map<String, Object> result = this.handleRemoteReturnData(hostData);
         hostData.forEach((k, v) -> {
             Map<String, Object> onePartyData = (Map<String, Object>) v;
@@ -69,7 +65,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                 } else {
                     throw new GuestMergeException("local result is invalid ");
                 }
-               // logger.info("local score: {}", localScore);
+                // logger.info("local score: {}", localScore);
                 Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
                 double remoteScore;
                 if (remoteComopnentData != null) {
@@ -81,7 +77,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                         throw new GuestMergeException("host data score is null");
                     }
                 }
-               // logger.info("host score: {}", remoteScore);
+                // logger.info("host score: {}", remoteScore);
                 score = localScore;
                 score += remoteScore;
                 double prob = sigmod(score);
@@ -90,10 +86,8 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
 
         });
 
-
         return result;
     }
-
 
 //         if(partyData.get(Dict.RET_CODE)!=null&&!StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))){
 //        String remoteCode = partyData.get(Dict.RET_CODE).toString();
