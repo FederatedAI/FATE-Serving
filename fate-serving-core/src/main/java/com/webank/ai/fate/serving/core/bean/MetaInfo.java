@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MetaInfo {
-    public static long currentVersion = 200;
+    public static final  long currentVersion = 200;
     public static List<AdaptorDescriptor.ParamDescriptor> inferenceParamDescriptorList;
     public static List<AdaptorDescriptor.ParamDescriptor> batchInferenceParamDescriptorList;
     public static Boolean PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH;

@@ -33,6 +33,10 @@ public class FateServer extends Server {
 
     private static final Logger logger = LoggerFactory.getLogger(FateServer.class);
     public static Set<RegisterService> serviceSets = new HashSet<>();
+
+    public static Set<RegisterService> guestServiceSets = new HashSet<>();
+    public static Set<RegisterService> hostServiceSets = new HashSet<>();
+    public static Set<RegisterService> commonServiceSets = new HashSet<>();
     public String project;
     Server server;
     private String environment;

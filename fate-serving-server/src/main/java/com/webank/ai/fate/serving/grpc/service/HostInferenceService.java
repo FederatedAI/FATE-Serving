@@ -21,6 +21,7 @@ import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.api.networking.proxy.Proxy.Packet;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.register.common.Role;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
@@ -46,7 +47,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     Environment environment;
 
     @Override
-    @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true)
+    @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true,role = Role.HOST)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
         String actionType = req.getHeader().getCommand().getName();
         ServingServerContext context = (ServingServerContext) prepareContext();

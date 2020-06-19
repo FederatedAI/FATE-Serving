@@ -1,8 +1,5 @@
 package com.webank.ai.fate.serving.core.bean;
-
-
 import com.google.common.collect.Maps;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,19 +8,15 @@ public class BatchInferenceResult extends ReturnResult {
 
     List<SingleInferenceResult> batchDataList;
     private Map<Integer, SingleInferenceResult> singleInferenceResultMap;
-
     public List<SingleInferenceResult> getBatchDataList() {
         if (batchDataList == null) {
             batchDataList = new ArrayList<>();
         }
         return batchDataList;
     }
-
-
     public void setBatchDataList(List<SingleInferenceResult> batchDataList) {
         this.batchDataList = batchDataList;
     }
-
     public void rebuild() {
         Map result = Maps.newHashMap();
         List<BatchInferenceResult.SingleInferenceResult> batchInferences = this.getBatchDataList();
@@ -31,33 +24,20 @@ public class BatchInferenceResult extends ReturnResult {
             result.put(singleInferenceResult.getIndex(), singleInferenceResult);
         }
         singleInferenceResultMap = result;
-
     }
 
     public Map<Integer, SingleInferenceResult> getSingleInferenceResultMap() {
-
-
         if (singleInferenceResultMap == null) {
-
             rebuild();
         }
-
         return singleInferenceResultMap;
-
-
     }
 
     static public class SingleInferenceResult {
-
         Integer index;
-
         String retcode;
-
-
         String retmsg;
-
         Map<String, Object> data;
-
         public SingleInferenceResult() {
         }
 

@@ -16,11 +16,11 @@
 
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
+import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

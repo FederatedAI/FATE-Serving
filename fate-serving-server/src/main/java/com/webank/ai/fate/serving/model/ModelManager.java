@@ -409,7 +409,7 @@ public class ModelManager implements InitializingBean {
             }
             String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
             zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
-            zookeeperRegistry.register(FateServer.serviceSets);
+            zookeeperRegistry.register(FateServer.hostServiceSets);
         }
         // update cache
         this.store(namespaceMap, namespaceFile);

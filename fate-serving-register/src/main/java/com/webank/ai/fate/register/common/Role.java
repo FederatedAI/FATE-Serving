@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.bean;
+package com.webank.ai.fate.register.common;
 
-public class FederatedParty {
-    private String role;
-    private String partyId;
-    public FederatedParty() {
+public enum Role {
 
+    COMMON,
+    GUEST,
+    HOST;
+
+    public static boolean contains(String routerMode) {
+        Role[] values = Role.values();
+        for (Role value : values) {
+            if (String.valueOf(value).equals(routerMode)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public FederatedParty(String role, String partyId) {
-        this.role = role;
-        this.partyId = partyId;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getPartyId() {
-        return partyId;
-    }
-
-    public void setPartyId(String partyId) {
-        this.partyId = partyId;
-    }
 }

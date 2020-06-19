@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.core.utils;
+package com.webank.ai.fate.serving.common.utils;
  
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;

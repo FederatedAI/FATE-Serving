@@ -243,14 +243,14 @@ public class FateServerBuilder extends ServerBuilder {
     }
 
     private void doRegister(Method method) {
-
         RegisterService registerService = method.getAnnotation(RegisterService.class);
-
         if (registerService != null) {
-
-
             FateServer.serviceSets.add(registerService);
-
+            switch(registerService.role()){
+                case HOST: FateServer.hostServiceSets.add(registerService);break;
+                case COMMON: FateServer.commonServiceSets.add(registerService);break;
+                case GUEST: FateServer.guestServiceSets.add(registerService);break;
+            }
         }
     }
 

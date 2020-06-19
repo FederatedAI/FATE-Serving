@@ -7,7 +7,7 @@ import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.bean.BaseContext;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.utils.HttpClientPool;
+import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.grpc.service.*;
 import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.Server;

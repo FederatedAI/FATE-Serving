@@ -3,9 +3,9 @@ package com.webank.ai.fate.serving.common.flow;
 
 
 import com.google.common.collect.Lists;
-import com.webank.ai.fate.serving.core.utils.JVMGCUtils;
-import com.webank.ai.fate.serving.core.utils.JVMMemoryUtils;
-import com.webank.ai.fate.serving.core.utils.JVMThreadUtils;
+import com.webank.ai.fate.serving.common.utils.JVMGCUtils;
+import com.webank.ai.fate.serving.common.utils.JVMMemoryUtils;
+import com.webank.ai.fate.serving.common.utils.JVMThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

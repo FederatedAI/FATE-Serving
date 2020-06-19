@@ -1,4 +1,4 @@
-package com.webank.ai.fate.serving.core.utils;
+package com.webank.ai.fate.serving.common.utils;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;

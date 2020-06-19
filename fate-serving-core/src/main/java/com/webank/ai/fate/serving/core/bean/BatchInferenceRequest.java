@@ -1,10 +1,6 @@
 package com.webank.ai.fate.serving.core.bean;
-
-
-
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
-
 import java.util.List;
 import java.util.Map;
 
