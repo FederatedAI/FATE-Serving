@@ -18,9 +18,9 @@ package com.webank.ai.fate.serving.common.flow;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.webank.ai.fate.serving.common.utils.GetSystemInfo;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.timer.HashedWheelTimer;
-import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

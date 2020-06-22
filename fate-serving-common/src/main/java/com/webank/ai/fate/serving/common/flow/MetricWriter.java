@@ -16,8 +16,8 @@
 
 package com.webank.ai.fate.serving.common.flow;
 
+import com.webank.ai.fate.serving.common.utils.GetSystemInfo;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.utils.GetSystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

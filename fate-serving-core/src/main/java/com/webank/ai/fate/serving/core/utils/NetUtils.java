@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.*;
@@ -31,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class NetUtils {
 
-    private static final Logger logger = null;
+    private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
     //LoggerFactory.getLogger(NetUtils.class);
     // returned port range is [30000, 39999]
     private static final int RND_PORT_START = 30000;

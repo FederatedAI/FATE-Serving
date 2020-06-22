@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Client {
+
     RouterService routerService;
     GrpcConnectionPool  grpcConnectionPool =  GrpcConnectionPool.getPool();
     final static String PROJECT ="serving";
@@ -81,10 +82,6 @@ public class Client {
         ReturnResult  returnResult = JsonUtil.json2Object(result.getBody().toByteArray(),ReturnResult.class);
         return  returnResult;
     }
-
-
-
-
 
     public BatchInferenceResult batchInference(BatchInferenceRequest batchInferenceRequest) throws Exception{
         Preconditions.checkArgument(batchInferenceRequest!=null);

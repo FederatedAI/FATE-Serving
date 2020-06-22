@@ -16,7 +16,9 @@
 
 package com.webank.ai.fate.register.annotions;
 
+import com.webank.ai.fate.register.common.Role;
 import com.webank.ai.fate.register.common.RouterMode;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,29 +31,13 @@ public @interface RegisterService {
 
     String serviceName();
 
-    // default 1.0.0
-    long version() default 100;
+    long version() default MetaInfo.currentVersion;
 
     boolean useDynamicEnvironment() default false;
 
     RouterMode routerMode() default RouterMode.ALL_ALLOWED;
 
-
-//    String threadPoolKey() default "";
-//
-//    String fallbackMethod() default "";
-//
-//    HystrixProperty[] commandProperties() default {};
-//
-//    HystrixProperty[] threadPoolProperties() default {};
-//
-//    Class<? extends Throwable>[] ignoreExceptions() default {};
-//
-//    ObservableExecutionMode observableExecutionMode() default ObservableExecutionMode.EAGER;
-//
-//    HystrixException[] raiseHystrixExceptions() default {};
-//
-//    String defaultFallback() default "";
+    Role  role()  default   Role.COMMON;
 
 
 }

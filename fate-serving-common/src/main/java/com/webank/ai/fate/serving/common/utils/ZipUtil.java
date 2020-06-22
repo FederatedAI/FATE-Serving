@@ -15,6 +15,7 @@
  */
 
 package com.webank.ai.fate.serving.core.utils;
+package com.webank.ai.fate.serving.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

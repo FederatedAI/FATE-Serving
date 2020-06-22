@@ -25,16 +25,7 @@ import java.util.Map;
 
 public class FederatedParams {
 
-
-//            federatedParams.put(Dict.CASEID, inferenceRequest.getCaseid());
-//        federatedParams.put(Dict.SEQNO, inferenceRequest.getSeqno());
-//        federatedParams.put("local", modelNamespaceData.getLocal());
-//        federatedParams.put("model_info", new ModelInfo(modelName, modelNamespace));
-//        federatedParams.put("role", modelNamespaceData.getRole());
-//        federatedParams.put("feature_id", featureIds);
-
     String caseId;
-
     String seqNo;
     boolean isBatch;
     FederatedParty local;
@@ -103,11 +94,6 @@ public class FederatedParams {
     public Map<String, Object> getFeatureIdMap() {
         return featureIdMap;
     }
-
-//    public void setFeatureIdda(Map<String, Object> featureIdMap) {
-//        this.featureIdMap = featureIdMap;
-//    }
-
 
     public Map<String, Object> getData() {
         return data;

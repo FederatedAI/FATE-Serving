@@ -16,7 +16,7 @@
 
 package com.webank.ai.fate.serving.common.flow;
 
-import com.webank.ai.fate.serving.core.utils.JVMMemoryUtils;
+import com.webank.ai.fate.serving.common.utils.JVMMemoryUtils;
 
 public class JvmInfo {
     long timestamp;

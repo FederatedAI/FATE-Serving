@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.utils;
+package com.webank.ai.fate.serving.common.utils;
 
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
