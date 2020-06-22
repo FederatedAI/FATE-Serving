@@ -24,6 +24,7 @@ public class ServiceDataWrapper {
     private String project;
     private String environment;
     private String name;
+    private String callName;
     private String host;
     private Integer port;
     private String routerMode;
@@ -109,6 +110,14 @@ public class ServiceDataWrapper {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public String getCallName() {
+        return callName;
+    }
+
+    public void setCallName(String callName) {
+        this.callName = callName;
     }
 
     @Override

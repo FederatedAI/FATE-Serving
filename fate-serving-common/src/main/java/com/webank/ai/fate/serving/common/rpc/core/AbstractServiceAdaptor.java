@@ -160,12 +160,15 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     messageEvent.setData(exceptions);
                     messageEvent.setContext(context);
                     DisruptorUtil.producer(messageEvent);
-                    flowCounterManager.exception(context.getResourceName());
-                    if (context instanceof ServingServerContext) {
-                        ServingServerContext servingServerContext = (ServingServerContext) context;
-                        Model model = servingServerContext.getModel();
-                        if (model != null) {
-                            flowCounterManager.exception(model.getResourceName());
+
+                    if (flowCounterManager != null) {
+                        flowCounterManager.exception(context.getResourceName());
+                        if (context instanceof ServingServerContext) {
+                            ServingServerContext servingServerContext = (ServingServerContext) context;
+                            Model model = servingServerContext.getModel();
+                            if (model != null) {
+                                flowCounterManager.exception(model.getResourceName());
+                            }
                         }
                     }
                 } catch (Throwable e) {
@@ -174,13 +177,15 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
             }
             String returnCode = context.getReturnCode();
             if (StatusCode.SUCCESS.equals(returnCode)) {
-                if (context instanceof ServingServerContext) {
-                    Model model = ((ServingServerContext) context).getModel();
-                    if (model != null) {
-                        flowCounterManager.success(model.getResourceName());
+                if (flowCounterManager != null) {
+                    if (context instanceof ServingServerContext) {
+                        Model model = ((ServingServerContext) context).getModel();
+                        if (model != null) {
+                            flowCounterManager.success(model.getResourceName());
+                        }
                     }
+                    flowCounterManager.success(context.getResourceName());
                 }
-                flowCounterManager.success(context.getResourceName());
             }
             printFlowLog(context);
         }

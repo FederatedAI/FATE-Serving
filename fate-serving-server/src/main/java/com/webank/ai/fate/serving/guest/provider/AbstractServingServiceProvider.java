@@ -26,6 +26,7 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
+import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
@@ -51,9 +52,12 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
     protected resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage) {
         Map<String, Method> methodMap = this.getMethodMap();
         String actionType = context.getActionType();
-        Method method = methodMap.get(actionType);
         resp result = null;
         try {
+            Method method = methodMap.get(actionType);
+            if (method == null) {
+                throw new UnSupportMethodException();
+            }
             result = (resp) method.invoke(this, context, data);
         } catch (Throwable e) {
             if (e.getCause() != null && e.getCause() instanceof BaseException) {

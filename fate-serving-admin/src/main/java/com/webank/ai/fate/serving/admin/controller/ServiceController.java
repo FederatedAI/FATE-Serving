@@ -73,6 +73,7 @@ public class ServiceController {
                         wrapper.setProject(split[0]);
                         wrapper.setEnvironment(split[1]);
                         wrapper.setName(key);
+                        wrapper.setCallName(split[2]);
                         wrapper.setHost(url.getHost());
                         wrapper.setPort(url.getPort());
                         wrapper.setRouterMode(String.valueOf(url.getParameter("router_mode")));

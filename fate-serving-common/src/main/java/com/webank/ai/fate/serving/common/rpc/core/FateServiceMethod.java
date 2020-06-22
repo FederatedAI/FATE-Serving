@@ -22,5 +22,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface FateServiceMethod {
-    String name();
+    String[] name();
 }

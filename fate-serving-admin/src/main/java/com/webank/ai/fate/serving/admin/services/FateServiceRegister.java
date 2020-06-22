@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving;
+package com.webank.ai.fate.serving.admin.services;
 
-import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.common.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import org.slf4j.Logger;
@@ -57,10 +56,10 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
         String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
-        FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
+//        FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
         for (String beanName : beans) {
             AbstractServiceAdaptor serviceAdaptor = applicationContext.getBean(beanName, AbstractServiceAdaptor.class);
-            serviceAdaptor.setFlowCounterManager(flowCounterManager);
+//            serviceAdaptor.setFlowCounterManager(flowCounterManager);
             FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
             Method[] methods = serviceAdaptor.getClass().getMethods();
             for (Method method : methods) {

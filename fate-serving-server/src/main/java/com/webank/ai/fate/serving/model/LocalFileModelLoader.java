@@ -84,7 +84,7 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
         String filePath = modelLoaderParam.getFilePath();
         File file = new File(filePath);
         if (!file.exists()) {
-            throw new ModelLoadException("model file" + file.getAbsolutePath() + " is not exist");
+            throw new ModelLoadException("model file " + file.getAbsolutePath() + " is not exist");
         }
         byte[] content = readFile(file);
         Map<String, byte[]> data = unserialize(context, content);

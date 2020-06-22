@@ -67,13 +67,16 @@ public class ProxyServiceRegister implements ServiceRegister, ApplicationContext
             for (String beanName : beans) {
                 AbstractServiceAdaptor serviceAdaptor = applicationContext.getBean(beanName, AbstractServiceAdaptor.class);
                 serviceAdaptor.setFlowCounterManager(flowCounterManager);
-                FateService proxyService = (FateService) serviceAdaptor.getClass().getAnnotation(FateService.class);
+                FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
                 if (proxyService != null) {
                     Method[] methods = serviceAdaptor.getClass().getMethods();
                     for (Method method : methods) {
                         FateServiceMethod fateServiceMethod = method.getAnnotation(FateServiceMethod.class);
                         if (fateServiceMethod != null) {
-                            serviceAdaptor.getMethodMap().put(fateServiceMethod.name(), method);
+                            String[] names = fateServiceMethod.name();
+                            for (String name : names) {
+                                serviceAdaptor.getMethodMap().put(name, method);
+                            }
                         }
                     }
                     serviceAdaptor.setServiceName(proxyService.name());
