@@ -596,8 +596,8 @@ public class ModelManager implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
-        logger.info("user home is {} , try to find model cache", locationPre);
+        String locationPre = MetaInfo.PROPERTY_MODEL_CACHE_PATH;
+        logger.info("try to find model cache {}", locationPre);
         if (StringUtils.isNotEmpty(locationPre)) {
             // new version
             String loadModelStoreFileName = locationPre + "/.fate/loadModelStore.cache";
@@ -610,6 +610,7 @@ public class ModelManager implements InitializingBean {
             generateParent(serviceIdFile);
 
             // compatible 1.2.x
+            locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
             String publishLoadFileName = locationPre + "/.fate/publishLoadStore.cache";
             String publishOnlineFileName = locationPre + "/.fate/publishOnlineStore.cache";
             publishLoadStoreFile = new File(publishLoadFileName);

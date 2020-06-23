@@ -134,7 +134,7 @@ public class Dict {
     public static final String PROPERTY_PROXY_ASYNC_CORESIZE = "proxy.async.coresize";
     public static final String PROPERTY_PROXY_ASYNC_MAXSIZE = "proxy.async.maxsize";
     public static final String PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT = "proxy.grpc.batch.inference.timeout";
-
+    public static final String PROPERTY_MODEL_CACHE_PATH = "model.cache.path";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 

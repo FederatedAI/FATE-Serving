@@ -80,6 +80,7 @@ public class MetaInfo {
     public static Integer PROPERTY_PROXY_ASYNC_CORESIZE;
     public static Integer PROPERTY_PROXY_ASYNC_MAXSIZE;
     public static Integer PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT;
+    public static String PROPERTY_MODEL_CACHE_PATH;
 
 
     public static Map toMap() {

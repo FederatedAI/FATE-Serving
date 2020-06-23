@@ -20,6 +20,7 @@ import com.webank.ai.fate.serving.common.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -98,6 +99,7 @@ public class Bootstrap {
             MetaInfo.LR_SPLIT_SIZE = environment.getProperty(Dict.LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.LR_SPLIT_SIZE)) : 500;
             MetaInfo.PROPERTY_SERVICE_ROLE_NAME = environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
             MetaInfo.MODEL_TRANSFER_URL = environment.getProperty(Dict.MODEL_TRANSFER_URL);
+            MetaInfo.PROPERTY_MODEL_CACHE_PATH = StringUtils.isNotBlank(environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH)) ? environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH) : new File("").getCanonicalPath();
 
         } catch (IOException e) {
             logger.error("init metainfo error", e);

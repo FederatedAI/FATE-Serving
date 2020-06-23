@@ -18,7 +18,7 @@ package com.webank.ai.fate.serving.model;
 
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.ModelSerializeException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -99,7 +99,7 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
 
     private String getCachePath(Context context, String name, String namespace) {
         StringBuilder sb = new StringBuilder();
-        String locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
+        String locationPre = MetaInfo.PROPERTY_MODEL_CACHE_PATH;
         if (StringUtils.isNotEmpty(locationPre) && StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(namespace)) {
             String cacheFilePath = sb.append(locationPre).append("/.fate/model_").append(name).append("_").append(namespace).append("_").append("cache").toString();
             return cacheFilePath;
