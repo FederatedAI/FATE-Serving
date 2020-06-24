@@ -67,7 +67,7 @@ public class RegistryConfig {
             System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
             System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
             System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
-            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.getRegistry(zkUrl, Dict.SERVICE_PROXY,
+            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(zkUrl, Dict.SERVICE_PROXY,
                     Dict.ONLINE_ENVIRONMENT, Integer.valueOf(port));
             zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
             zookeeperRegistry.registerComponent();

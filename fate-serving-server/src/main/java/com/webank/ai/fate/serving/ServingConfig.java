@@ -44,7 +44,7 @@ public class ServingConfig {
     @Conditional({UseZkCondition.class})
     ZookeeperRegistry getServiceRegistry() {
         Preconditions.checkArgument(StringUtils.isNotEmpty(MetaInfo.PROPERTY_ZK_URL));
-        return ZookeeperRegistry.getRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.PROPERTY_SERVING_ADDRESS, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PORT);
+        return ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.PROPERTY_SERVING_ADDRESS, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PORT);
     }
 
     @Bean

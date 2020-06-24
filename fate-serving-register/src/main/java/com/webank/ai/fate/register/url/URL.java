@@ -1607,4 +1607,21 @@ public class URL implements Serializable {
         return true;
     }
 
+    public static String generateZkUrl(String hosts) {
+        if (StringUtils.isBlank(hosts)) {
+            return null;
+        }
+        String[] split = hosts.split(",");
+        StringBuilder sb = new StringBuilder("zookeeper://" + split[0]);
+        if (split.length > 1) {
+            sb.append("?backup=");
+            for (int i = 1; i < split.length; i++) {
+                sb.append(split[i]);
+                if (i != (split.length - 1)) {
+                    sb.append(",");
+                }
+            }
+        }
+        return sb.toString();
+    }
 }

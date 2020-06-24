@@ -3,8 +3,6 @@ package com.webank.ai.fate.serving.sdk.client;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
-//import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
-//import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.register.router.DefaultRouterService;
@@ -17,11 +15,12 @@ import io.grpc.ManagedChannel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+//import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
+//import com.webank.ai.fate.api.serving.InferenceServiceProto;
 
 public class Client {
 
@@ -36,7 +35,7 @@ public class Client {
 
     public static synchronized Client getClient(String  zkAddress){
         if(clientMap.get(zkAddress)==null){
-            ZookeeperRegistry  zookeeperRegistry = ZookeeperRegistry.getRegistry(zkAddress,"client","online",12202);
+            ZookeeperRegistry  zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress,"client","online",12202);
             zookeeperRegistry.subProject(PROJECT);
             DefaultRouterService  defaultRouterService = new DefaultRouterService();
             defaultRouterService.setRegistry(zookeeperRegistry);

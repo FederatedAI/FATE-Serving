@@ -83,6 +83,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
         });
     }
 
+    public static synchronized ZookeeperRegistry createRegistry(String host, String project, String environment, int port) {
+        String url = URL.generateZkUrl(host);
+        return getRegistry(url, project, environment, port);
+    }
+
     public static synchronized ZookeeperRegistry getRegistry(String url, String project, String environment, int port) {
         if (url == null) {
             return null;
