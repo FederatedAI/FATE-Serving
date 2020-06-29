@@ -72,8 +72,7 @@ export default {
             this.$store.dispatch('Logout').then(res => {
                 this.$router.push({ path: '/home/login' })
                 this.visible = false
-            }).catch(err => {
-            })
+            }).catch()
         }
     }
 }

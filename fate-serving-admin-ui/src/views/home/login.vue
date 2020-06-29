@@ -119,7 +119,7 @@ export default {
         submit() {
             this.$store.dispatch('Login', this.form).then(res => {
                 this.$router.push({ path: '/home/cluster' })
-            }).catch(err => {
+            }).catch(() => {
                 this.passwordWarn = true
                 this.$refs.pwdInput.focus()
             })
