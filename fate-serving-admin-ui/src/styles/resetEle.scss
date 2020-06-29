@@ -1,0 +1,68 @@
+button, input {
+    font-family: productsans;
+}
+
+.el-button {
+    border-radius: 0;
+}
+
+.el-input__icon {
+    color: #848C99;
+    line-height: 34px;
+}
+.el-input__inner {
+    background-color: #E6EBF0;
+    color: #848C99;
+    border: 0px;
+    outline: none;
+    height: 34px;
+    line-height: 34px;
+    border-radius: 0;
+}
+
+.el-icon-arrow-up:before {
+    content: "\E78F";
+}
+
+.el-input__suffix {
+    color: #848C99;
+}
+
+.table {
+    .el-table {
+        margin: 24px 30px;
+    }
+}
+
+.tableHead {
+    color: #4E5766;
+}
+.tableHeadCell {
+    border: 0!important;
+}
+.tableCell {
+    border-bottom: 2px solid #E6EBF0!important;
+}
+.add {
+    float: left;
+    width: 125px;
+    height: 34px;
+    font-size: 18px;
+    line-height: 34px;
+    padding: 0;
+}
+.go {
+    float: right;
+    width: 65px;
+    font-weight: 400;
+    margin-left: 16px;
+    height: 34px;
+    line-height: 34px;
+    padding: 0;
+}
+
+.pagination {
+    position: absolute;
+    bottom: 36px;
+    right: 88px;
+}

@@ -1,0 +1,271 @@
+.home {
+    // vw 相对于视窗的宽度
+    // vh 相对于视窗的高度
+    // vmin 相对于视口的宽度或高度中较小的那个被均分为100单位的vmin
+    // vmax 相对于视口的宽度或高度中较大的那个被均分为100单位的vmax
+    // px：绝对单位，页面按精确像素展示。
+    // em：相对单位，基准点为父节点字体的大小，如果自身定义了font-size按自身来计算（浏览器默认字体是16px），整个页面内1em不是一个固定的值。
+    // rem：相对单位，可理解为”root em”, 相对根节点html的字体大小来计算，CSS3新加属性，chrome/firefox/IE9+支持
+    float: left;
+    width: 100%;
+
+    .el-header {
+        padding: 0;
+        background-color: #217ad9;
+        color: #fff;
+        text-align: center;
+        height: 65px !important;
+        line-height: 65px;
+
+        .logo {
+            position: absolute;
+            width: calc(100% - 49px);
+            left: 36px;
+            display: flex;
+            justify-content:space-between;
+            .logo-t {
+                cursor: pointer;
+                font-size: 2em;
+                font-weight: 550;
+                font-weight: bold;
+            }
+            .name {
+                // float: right;
+                margin-right: 20px;
+                cursor: pointer;
+            }
+            .el-icon-caret-bottom {
+                color: #F5F8FA;
+            }
+        }
+    }
+
+    .el-main {
+        padding: 0;
+        background-color: #f5f8fa;
+
+        .welcomepage {
+            text-align: center;
+
+            .title {
+                font-size: 4.5em;
+                color: #217ad9;
+                font-weight: 800;
+                margin: 0px 0 2vw 0;
+            }
+
+            .line {
+                margin: 0 auto;
+                width: 500px;
+                height: 2px;
+                background-color: #e6ebf0;
+            }
+
+            .text {
+                margin: 2vw 0;
+                font-size: 1.75em;
+                font-weight: 650;
+                color: #4e5766;
+            }
+
+            .text-two {
+                font-size: 1.25em;
+                color: #848c99;
+            }
+
+            .begin-btn {
+                margin: 5vw 0 0 0;
+                // width: 360px;
+                width: 18%;
+                font-size: 2.25em;
+            }
+
+            .round {
+                margin-top: 2.5vw;
+
+                .circul {
+                    display: block;
+                    width: 1vw;
+                    height: 1vw;
+                    background: #217ad9;
+                    border-radius: 50%;
+                    margin: 0 auto;
+                    margin-bottom: 0.8vw;
+                }
+
+                .circul:nth-child(1) {
+                    opacity: 1;
+                }
+
+                .circul:nth-child(2) {
+                    opacity: 0.4;
+                }
+
+                .circul:nth-child(3) {
+                    opacity: 0.2;
+                }
+            }
+        }
+
+        .login {
+            text-align: center;
+            font-family: 'Product Sans';
+            background-color: #fff;
+            margin-top: -15px;
+            padding-top: 5px;
+            position: relative;
+            .warning {
+                // display: flex;
+                // text-align: left;
+                // margin: 0 auto;
+                position: absolute;
+                left: 50%;
+                margin-left: -210px;
+                top: 5vw;
+                i {
+                    display: inline-block;
+                    vertical-align: 7px;
+                    color:rgba(255,157,0,1);
+                    font-size:18px;
+                    margin-right: 10px;
+                }
+                span {
+                    text-align: left;
+                    display: inline-block;
+                    font-size:14px;
+                    font-weight:400;
+                    line-height:17px;
+                    color:rgba(255,157,0,1);
+                    opacity:1;
+                }
+            }
+            .el-checkbox__label {
+                font-size:14px;
+                font-family:Product Sans;
+                font-weight:400;
+                line-height:17px;
+                color:rgba(33,122,217,1);
+                opacity:1;
+            }
+            .el-checkbox__inner {
+                display: inline-block;
+                position: relative;
+                border: 2px solid #4E5766;
+                 border-radius: 0px; 
+                box-sizing: border-box;
+                width: 15px;
+                height: 15px;
+            }
+            .el-checkbox__input.is-checked .el-checkbox__inner {
+                border-color: #217AD9 !important;
+            }
+            .el-checkbox__inner::after {
+                top: 0
+            }
+            .title {
+                font-size: 3.5em;
+                color: #217ad9;
+                font-weight: 800;
+                margin: 0px 0 4vw 0;
+            }
+
+            .form {
+                margin-bottom: 2vw;
+               
+                .label {
+                    color: #848C99;
+                    font-size: 1.125em;
+                }
+                .nameIn {
+                    border-bottom: 2px solid #217AD9 !important;
+                }
+                .view{
+                    cursor: pointer;
+                    margin-right: 5px;
+                    margin-top: 10px;
+                    // margin-left: 5px;
+                  }
+                 
+                .name {
+                    margin: 0 auto;
+                    width: 27vmax;
+                    margin-top: 0.75vw;
+                    border-bottom: 2px solid #E6EBF0;
+                    position: relative;
+                    text-align: center;
+                    .el-autocomplete {
+                        width: 100%;
+                    }
+                    input {
+                        width: 100%;
+                        padding-right: 10px !important;
+                    }
+                    .el-input__inner {
+                        text-align: center;
+                        border: 0px;
+                        outline: none;
+                        font-size: 1.8em;
+                        color: #2D3642;
+                        background-color: #fff;
+                    }
+
+                    .active {
+                        input{
+                            color: #2D3642;
+                            font-weight: 400;
+                            font-size: 1.5em
+                        }
+                    }
+                }
+                .name-warn{
+                    border-bottom: 2px solid #FF9D00 !important;
+                }
+                .warn-text{
+                    position: absolute;
+                    top:37px;
+                    width: 100%;
+                    color: #FF9D00;
+                    text-align: center;
+                    font-size: 1em;
+
+                }
+            }
+            .btn{
+                .OK-btn {
+                    margin-top: 2.5vw;
+                    width: 12vw;
+                    font-size: 1.5em
+                }
+                .is-disabled {
+                    background: #B8BFCC;
+                    border-color: #B8BFCC;
+                }
+                .Cancel-btn {
+                    margin-left: 1.75vw;
+                    width: 12vw;
+                    font-size: 1.5em;
+                }
+            }
+        
+        }
+    }
+
+
+}
+.pname {
+    font-size:18px;
+    font-family:Product Sans;
+    font-weight:bold;
+    line-height:20px;
+    color:rgba(33,122,217,1);
+    opacity:1;
+}
+.exits {
+    width: 18px;
+    height: 18px;
+    vertical-align: -4px;
+}
+.exitbut {
+        width:120px;
+        font-size: 14px;
+    }

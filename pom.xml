@@ -32,6 +32,7 @@
         <module>fate-serving-common</module>
         <module>fate-serving-proxy</module>
         <module>fate-serving-admin</module>
+        <module>fate-serving-admin-ui</module>
         <module>fate-serving-extension</module>
         <module>fate-serving-sdk</module>
     </modules>
