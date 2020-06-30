@@ -27,25 +27,16 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractServingServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> implements EnvironmentAware {
-
-    Environment environment;
+public abstract class AbstractServingServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
 
     @Override
     protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         return null;
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
     }
 
     @Override

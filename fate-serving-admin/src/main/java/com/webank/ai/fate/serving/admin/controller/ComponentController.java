@@ -6,6 +6,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -39,8 +40,6 @@ public class ComponentController {
     @Autowired
     ComponentService componentServices;
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-    @Value("${grpc.timeout:5000}")
-    private int timeout;
 
     @GetMapping("/component/list")
     public ReturnResult list() {
@@ -52,7 +51,7 @@ public class ComponentController {
     public ReturnResult listProps(String host, int port, String keyword) {
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
-        blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
         CommonServiceProto.QueryPropsRequest.Builder builder = CommonServiceProto.QueryPropsRequest.newBuilder();
         if (StringUtils.isNotBlank(keyword)) {

@@ -151,7 +151,7 @@ public abstract class HeteroLR extends BaseComponent {
 
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
-        int splitSize = MetaInfo.LR_SPLIT_SIZE;
+        int splitSize = MetaInfo.PROPERTY_LR_SPLIT_SIZE;
         List<String> keys;
         Map<String, Object> inputData;
         Map<String, Double> weight;

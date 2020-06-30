@@ -69,7 +69,7 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String adaptorClass = MetaInfo.FEATURE_BATCH_ADAPTOR;
+        String adaptorClass = MetaInfo.PROPERTY_FEATURE_BATCH_ADAPTOR;
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}", adaptorClass);
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);

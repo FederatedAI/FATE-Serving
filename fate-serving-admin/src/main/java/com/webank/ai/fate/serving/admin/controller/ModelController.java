@@ -8,10 +8,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -41,12 +38,6 @@ public class ModelController {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelController.class);
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-    @Value("${fateflow.load.url}")
-    private String loadUrl;
-    @Value("${fateflow.bind.url}")
-    private String bindUrl;
-    @Value("${grpc.timeout:5000}")
-    private int timeout;
 
     @Autowired
     private ComponentService componentService;
@@ -126,7 +117,7 @@ public class ModelController {
             Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
 
-            String resp = HttpClientPool.post(loadUrl, data, null);
+            String resp = HttpClientPool.post(MetaInfo.PROPERTY_FATEFLOW_LOAD_URL, data, null);
 
             logger.info("publishLoad response : {}", resp);
 
@@ -155,7 +146,7 @@ public class ModelController {
             Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
             Preconditions.checkArgument(data.get(Dict.PARAMS_SERVICE_ID) != null, "parameter service_id not exist");
 
-            String resp = HttpClientPool.post(bindUrl, data);
+            String resp = HttpClientPool.post(MetaInfo.PROPERTY_FATEFLOW_BIND_URL, data);
 
             logger.info("publishBind response : {}", resp);
 
@@ -195,7 +186,7 @@ public class ModelController {
                     .build();
 
             ListenableFuture<ModelServiceProto.UnloadResponse> future = futureStub.unload(unloadRequest);
-            ModelServiceProto.UnloadResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
+            ModelServiceProto.UnloadResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", response);
@@ -236,7 +227,7 @@ public class ModelController {
                     .build();
 
             ListenableFuture<ModelServiceProto.UnbindResponse> future = futureStub.unbind(unbindRequest);
-            ModelServiceProto.UnbindResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
+            ModelServiceProto.UnbindResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", response);
@@ -254,7 +245,7 @@ public class ModelController {
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
-        blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
         return blockingStub;
     }
 

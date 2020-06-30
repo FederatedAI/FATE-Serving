@@ -22,6 +22,7 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
@@ -41,7 +42,7 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
         RouterInfo routerInfo = new RouterInfo();
         String address = null;
         if (routerService == null) {
-            address = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
+            address = MetaInfo.PROPERTY_PROXY_ADDRESS;
             if (!checkAddress(address)) {
                 throw new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR, "address is error in config file");
             }
@@ -49,7 +50,7 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
             routerInfo.setHost(args[0]);
             routerInfo.setPort(new Integer(args[1]));
         } else {
-            List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIRONMENT, Dict.UNARYCALL);
+            List<URL> urls = routerService.router(Dict.SERVICE_PROXY, Dict.ONLINE_ENVIRONMENT, Dict.UNARYCALL);
             if (urls != null && urls.size() > 0) {
                 URL url = urls.get(0);
                 String ip = url.getHost();

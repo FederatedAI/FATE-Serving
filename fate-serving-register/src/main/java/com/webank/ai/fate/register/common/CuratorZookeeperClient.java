@@ -18,6 +18,7 @@ package com.webank.ai.fate.register.common;
 
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.utils.StringUtils;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
@@ -71,15 +72,9 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                     .retryPolicy(new RetryNTimes(1, 1000))
                     .connectionTimeoutMs(timeout);
 
-            try {
-                aclEnable = Boolean.parseBoolean(System.getProperty("acl.enable", "false"));
-            } catch (Exception e) {
-                aclEnable = false;
-            }
-
-            if (aclEnable) {
-                aclUsername = System.getProperty("acl.username", "");
-                aclPassword = System.getProperty("acl.password", "");
+            if (MetaInfo.PROPERTY_ACL_ENABLE) {
+                aclUsername = MetaInfo.PROPERTY_ACL_USERNAME;
+                aclPassword = MetaInfo.PROPERTY_ACL_PASSWORD;
 
                 if (StringUtils.isBlank(aclUsername) || StringUtils.isBlank(aclPassword)) {
                     aclEnable = false;

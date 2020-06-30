@@ -51,15 +51,15 @@ public class Dict {
     public static final String DOWN_STREAM_BEGIN = "downstreamBegin";
     public static final String ROUTE_BASIS = "routeBasis";
     public static final String SOURCE_IP = "sourceIp";
-    public static final String SERVING_CORE_POOL_SIZE = "serving.core.pool.size";
+    public static final String PROPERTY_SERVING_CORE_POOL_SIZE = "serving.core.pool.size";
     public static final String SERVING_MAX_POOL_ZIE = "serving.max.pool.size";
-    public static final String SERVING_POOL_ALIVE_TIME = "serving.pool.alive.time";
-    public static final String SERVING_POOL_QUEUE_SIZE = "serving.pool.queue.size";
-    public static final String SINGLE_INFERENCE_RPC_TIMEOUT = "single.inference.rpc.timeout";
-    public static final String BATCH_INFERENCE_RPC_TIMEOUT = "batch.inference.rpc.timeout";
-    public static final String FEATURE_SINGLE_ADAPTOR = "feature.single.adaptor";
-    public static final String BATCH_SPLIT_SIZE = "batch.split.size";
-    public static final String LR_SPLIT_SIZE = "lr.split.size";
+    public static final String PROPERTY_SERVING_POOL_ALIVE_TIME = "serving.pool.alive.time";
+    public static final String PROPERTY_SERVING_POOL_QUEUE_SIZE = "serving.pool.queue.size";
+    public static final String PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT = "single.inference.rpc.timeout";
+    public static final String PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT = "batch.inference.rpc.timeout";
+    public static final String PROPERTY_FEATURE_SINGLE_ADAPTOR = "feature.single.adaptor";
+    public static final String PROPERTY_BATCH_SPLIT_SIZE = "batch.split.size";
+    public static final String PROPERTY_LR_SPLIT_SIZE = "lr.split.size";
 
 
     /**
@@ -80,6 +80,9 @@ public class Dict {
     public static final String PROPERTY_LOCAL_CACHE_MAXSIZE = "local.cache.maxsize";
     public static final String PROPERTY_LOCAL_CACHE_EXPIRE = "local.cache.expire";
     public static final String PROPERTY_LOCAL_CACHE_INTERVAL = "local.cache.interval";
+    public static final String PROPERTY_FATEFLOW_LOAD_URL = "fateflow.load.url";
+    public static final String PROPERTY_FATEFLOW_BIND_URL = "fateflow.bind.url";
+    public static final String PROPERTY_GRPC_TIMEOUT = "grpc.timeout";
     public static final String PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_DB_INDEX = "external.inferenceResultCacheDBIndex";
     public static final String PROPERTY_EXTERNAL_INFERENCE_RESULT_CACHE_TTL = "external.inferenceResultCacheTTL";
     public static final String PROPERTY_EXTERNAL_REMOTE_MODEL_INFERENCE_RESULT_CACHE_DB_INDEX = "external.remoteModelInferenceResultCacheDBIndex";
@@ -107,14 +110,14 @@ public class Dict {
     public static final String PROPERTY_ZK_URL = "zk.url";
     public static final String PROPERTY_USE_ZK_ROUTER = "useZkRouter";
     public static final String PROPERTY_USE_REGISTER = "useRegister";
-    public static final String MODEL_TRANSFER_URL = "model.transfer.url";
-    public static final String SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
-    public static final String FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
-    public static final String ACL_ENABLE = "acl.enable";
-    public static final String ACL_USERNAME = "acl.username";
-    public static final String ACL_PASSWORD = "acl.password";
+    public static final String PROPERTY_MODEL_TRANSFER_URL = "model.transfer.url";
+    public static final String PROPERTY_SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
+    public static final String PROPERTY_FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
+    public static final String PROPERTY_ACL_ENABLE = "acl.enable";
+    public static final String PROPERTY_ACL_USERNAME = "acl.username";
+    public static final String PROPERTY_ACL_PASSWORD = "acl.password";
     public static final String PROXY_ROUTER_TABLE = "proxy.router.table";
-    public static final String BATCH_INFERENCE_MAX = "batch.inference.max";
+    public static final String PROPERTY_BATCH_INFERENCE_MAX = "batch.inference.max";
 
     public static final String PROPERTY_COORDINATOR = "coordinator";
     public static final String PROPERTY_SERVER_PORT = "server.port";

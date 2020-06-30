@@ -58,7 +58,7 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String adaptorClass = MetaInfo.FEATURE_SINGLE_ADAPTOR;
+        String adaptorClass = MetaInfo.PROPERTY_FEATURE_SINGLE_ADAPTOR;
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}", adaptorClass);
             singleFeatureDataAdaptor = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);

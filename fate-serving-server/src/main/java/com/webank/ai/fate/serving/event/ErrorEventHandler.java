@@ -27,17 +27,13 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ErrorEventHandler extends AbstractAsyncMessageProcessor implements EnvironmentAware, InitializingBean {
+public class ErrorEventHandler extends AbstractAsyncMessageProcessor implements InitializingBean {
 
     @Autowired
     FlowCounterManager flowCounterManager;
-
-    Environment environment;
 
     @Subscribe(value = Dict.EVENT_ERROR)
     public void handleMetricsEvent(AsyncMessageEvent event) {
@@ -53,11 +49,6 @@ public class ErrorEventHandler extends AbstractAsyncMessageProcessor implements 
                 flowCounterManager.exception(model.getResourceName());
             }
         }
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
     }
 
     @Override

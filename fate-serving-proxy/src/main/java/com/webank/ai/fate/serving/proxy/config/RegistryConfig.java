@@ -20,6 +20,7 @@ import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,40 +36,18 @@ public class RegistryConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(GrpcConfigration.class);
 
-    @Value("${proxy.grpc.intra.port:8867}")
-    private Integer port;
-
-    @Value("${zk.url:}")
-    private String zkUrl;
-
-    @Value("${useZkRouter:true}")
-    private String useZkRouter;
-
-    @Value("${acl.enable:false}")
-    private String aclEnable;
-
-    @Value("${acl.username:}")
-    private String aclUsername;
-
-    @Value("${acl.password:}")
-    private String aclPassword;
-
     @Bean(destroyMethod = "destroy")
     public ZookeeperRegistry zookeeperRegistry() {
         if (logger.isDebugEnabled()) {
-            logger.info("prepare to create zookeeper registry ,use zk {}", useZkRouter);
+            logger.info("prepare to create zookeeper registry ,use zk {}", MetaInfo.PROPERTY_USE_ZK_ROUTER);
         }
-        if ("true".equals(useZkRouter)) {
-
-            if (StringUtils.isEmpty(zkUrl)) {
+        if (MetaInfo.PROPERTY_USE_ZK_ROUTER) {
+            if (StringUtils.isEmpty(MetaInfo.PROPERTY_ZK_URL)) {
                 logger.error("useZkRouter is true,but zkUrl is empty,please check zk.url in the config file");
                 throw new RuntimeException("wrong zk url");
             }
-            System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
-            System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
-            System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
-            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(zkUrl, Dict.SERVICE_PROXY,
-                    Dict.ONLINE_ENVIRONMENT, Integer.valueOf(port));
+            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_PROXY,
+                    Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PROXY_GRPC_INTRA_PORT);
             zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
             zookeeperRegistry.registerComponent();
 

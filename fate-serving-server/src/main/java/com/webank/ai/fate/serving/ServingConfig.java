@@ -36,15 +36,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServingConfig {
 
-    public static final int VERSION = 200;
-
     Logger logger = LoggerFactory.getLogger(ServingConfig.class);
 
     @Bean(destroyMethod = "destroy")
     @Conditional({UseZkCondition.class})
     ZookeeperRegistry getServiceRegistry() {
         Preconditions.checkArgument(StringUtils.isNotEmpty(MetaInfo.PROPERTY_ZK_URL));
-        return ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.PROPERTY_SERVING_ADDRESS, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PORT);
+        return ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_SERVING, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PORT);
     }
 
     @Bean

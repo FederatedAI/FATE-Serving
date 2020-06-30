@@ -11,6 +11,7 @@ import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -33,13 +34,10 @@ public class MonitorController {
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
-    @Value("${grpc.timeout:5000}")
-    private int timeout;
-
     @GetMapping("/monitor/queryJvm")
     public ReturnResult queryJvmData(String host, int port) {
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
-        blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryJvmInfoRequest.Builder builder = CommonServiceProto.QueryJvmInfoRequest.newBuilder();
         CommonServiceProto.CommonResponse commonResponse = blockingStub.queryJvmInfo(builder.build());
         List<JvmInfo> resultList = Lists.newArrayList();
@@ -64,7 +62,7 @@ public class MonitorController {
     @GetMapping("/monitor/query")
     public ReturnResult queryMonitorData(String host, int port, String source) {
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
-        blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
 
         long now = System.currentTimeMillis();
@@ -106,7 +104,7 @@ public class MonitorController {
     public ReturnResult queryModelMonitorData(String host, int port, String source) {
         Preconditions.checkArgument(StringUtils.isNotBlank(source), "parameter source is blank");
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
-        blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
         CommonServiceProto.QueryMetricRequest.Builder builder = CommonServiceProto.QueryMetricRequest.newBuilder();
         long now = System.currentTimeMillis();
         builder.setBeginMs(now - 15000);

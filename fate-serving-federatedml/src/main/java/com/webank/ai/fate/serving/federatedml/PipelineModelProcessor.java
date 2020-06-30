@@ -50,7 +50,7 @@ public class PipelineModelProcessor implements ModelProcessor {
     private Map<String, BaseComponent> componentMap = new HashMap<String, BaseComponent>();
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
-    private int splitSize = MetaInfo.BATCH_SPLIT_SIZE;
+    private int splitSize = MetaInfo.PROPERTY_BATCH_SPLIT_SIZE;
 
     @Override
     public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String, Future> remoteFutureMap, long timeout) {

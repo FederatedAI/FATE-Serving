@@ -18,54 +18,30 @@ package com.webank.ai.fate.serving.admin.config;
 
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Optional;
 
 @Configuration
 public class RegistryConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistryConfig.class);
 
-    @Value("${server.port:8350}")
-    private Integer port;
-
-    @Value("${zk.url:}")
-    private String zkUrl;
-
-    @Value("${useZkRouter:true}")
-    private boolean useZkRouter;
-
-    @Value("${acl.enable:false}")
-    private String aclEnable;
-
-    @Value("${acl.username:}")
-    private String aclUsername;
-
-    @Value("${acl.password:}")
-    private String aclPassword;
-
     @Bean(destroyMethod = "destroy")
     public ZookeeperRegistry zookeeperRegistry() {
         if (logger.isDebugEnabled()) {
-            logger.info("prepare to create zookeeper registry ,use zk {}", useZkRouter);
+            logger.info("prepare to create zookeeper registry ,use zk {}", MetaInfo.PROPERTY_USE_ZK_ROUTER);
         }
-        if (useZkRouter) {
-            if (StringUtils.isEmpty(zkUrl)) {
+        if (MetaInfo.PROPERTY_USE_ZK_ROUTER) {
+            if (StringUtils.isEmpty(MetaInfo.PROPERTY_ZK_URL)) {
                 logger.error("useZkRouter is true,but zkUrl is empty,please check zk.url in the config file");
                 throw new RuntimeException("wrong zk url");
             }
 
-            System.setProperty("acl.enable", Optional.ofNullable(aclEnable).orElse(""));
-            System.setProperty("acl.username", Optional.ofNullable(aclUsername).orElse(""));
-            System.setProperty("acl.password", Optional.ofNullable(aclPassword).orElse(""));
-
-            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(zkUrl, Dict.SERVICE_ADMIN, Dict.ONLINE_ENVIRONMENT, port);
+            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_ADMIN, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_SERVER_PORT);
             zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
             zookeeperRegistry.subProject(Dict.SERVICE_PROXY);
 

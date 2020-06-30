@@ -58,7 +58,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
             ListenableFuture<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context, buildRpcDataWraper(model, remoteModel, batchHostFederatedParams), MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH);
             futureMap.put(hostPartyId, originBatchResultFuture);
         });
-        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT);
+        BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, MetaInfo.PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT);
         batchFederatedResult.setCaseid(context.getCaseId());
         return batchFederatedResult;
     }

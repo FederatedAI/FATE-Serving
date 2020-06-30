@@ -44,7 +44,7 @@ public class HostBatchParamInterceptor implements Interceptor {
             Preconditions.checkArgument(batchHostFederatedParams != null, "");
             Preconditions.checkArgument(batchHostFederatedParams.getBatchDataList() != null && batchHostFederatedParams.getBatchDataList().size() > 0);
             List<BatchHostFederatedParams.SingleInferenceData> datalist = batchHostFederatedParams.getBatchDataList();
-            int batchSizeLimit = MetaInfo.BATCH_INFERENCE_MAX;
+            int batchSizeLimit = MetaInfo.PROPERTY_BATCH_INFERENCE_MAX;
             Preconditions.checkArgument(datalist.size() <= batchSizeLimit, "batch size is big than " + batchSizeLimit);
         } catch (Exception e) {
             throw new HostInvalidParamException(e.getMessage());

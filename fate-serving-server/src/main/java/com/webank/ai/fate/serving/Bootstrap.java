@@ -70,16 +70,16 @@ public class Bootstrap {
             }
             int processors = Runtime.getRuntime().availableProcessors();
             MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
-            MetaInfo.SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.SERVING_CORE_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_CORE_POOL_SIZE)) : processors;
-            MetaInfo.SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.SERVING_MAX_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_MAX_POOL_SIZE)) : processors * 2;
-            MetaInfo.SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_ALIVE_TIME)) : 1000;
-            MetaInfo.SERVING_POOL_QUEUE_SIZE = environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.SERVING_POOL_QUEUE_SIZE)) : 100;
-            MetaInfo.FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.FEATURE_BATCH_ADAPTOR);
-            MetaInfo.BATCH_INFERENCE_MAX = environment.getProperty(Dict.BATCH_INFERENCE_MAX) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_MAX)) : 300;
+            MetaInfo.PROPERTY_SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_CORE_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_CORE_POOL_SIZE)) : processors;
+            MetaInfo.PROPERTY_SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_MAX_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_MAX_POOL_SIZE)) : processors * 2;
+            MetaInfo.PROPERTY_SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.PROPERTY_SERVING_POOL_ALIVE_TIME) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_POOL_ALIVE_TIME)) : 1000;
+            MetaInfo.PROPERTY_SERVING_POOL_QUEUE_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_POOL_QUEUE_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_POOL_QUEUE_SIZE)) : 100;
+            MetaInfo.PROPERTY_FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.PROPERTY_FEATURE_BATCH_ADAPTOR);
+            MetaInfo.PROPERTY_BATCH_INFERENCE_MAX = environment.getProperty(Dict.PROPERTY_BATCH_INFERENCE_MAX) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_BATCH_INFERENCE_MAX)) : 300;
             MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)) : Boolean.FALSE;
-            MetaInfo.SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.SINGLE_INFERENCE_RPC_TIMEOUT)) : 3000;
-            MetaInfo.BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_INFERENCE_RPC_TIMEOUT)) : 3000;
-            MetaInfo.FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.FEATURE_SINGLE_ADAPTOR);
+            MetaInfo.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT)) : 3000;
+            MetaInfo.PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT)) : 3000;
+            MetaInfo.PROPERTY_FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.PROPERTY_FEATURE_SINGLE_ADAPTOR);
             MetaInfo.PROPERTY_USE_REGISTER = environment.getProperty(Dict.PROPERTY_USE_REGISTER) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_REGISTER)) : true;
             MetaInfo.PROPERTY_USE_ZK_ROUTER = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)) : true;
             MetaInfo.PROPERTY_PORT = environment.getProperty(Dict.PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PORT)) : 8000;
@@ -95,12 +95,14 @@ public class Bootstrap {
             MetaInfo.PROPERTY_LOCAL_CACHE_MAXSIZE = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_MAXSIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_MAXSIZE)) : 10000;
             MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_EXPIRE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_EXPIRE)) : 30;
             MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL = environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LOCAL_CACHE_INTERVAL)) : 3;
-            MetaInfo.BATCH_SPLIT_SIZE = environment.getProperty(Dict.BATCH_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.BATCH_SPLIT_SIZE)) : 100;
-            MetaInfo.LR_SPLIT_SIZE = environment.getProperty(Dict.LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.LR_SPLIT_SIZE)) : 500;
+            MetaInfo.PROPERTY_BATCH_SPLIT_SIZE = environment.getProperty(Dict.PROPERTY_BATCH_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_BATCH_SPLIT_SIZE)) : 100;
+            MetaInfo.PROPERTY_LR_SPLIT_SIZE = environment.getProperty(Dict.PROPERTY_LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LR_SPLIT_SIZE)) : 500;
             MetaInfo.PROPERTY_SERVICE_ROLE_NAME = environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
-            MetaInfo.MODEL_TRANSFER_URL = environment.getProperty(Dict.MODEL_TRANSFER_URL);
+            MetaInfo.PROPERTY_MODEL_TRANSFER_URL = environment.getProperty(Dict.PROPERTY_MODEL_TRANSFER_URL);
             MetaInfo.PROPERTY_MODEL_CACHE_PATH = StringUtils.isNotBlank(environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH)) ? environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH) : new File("").getCanonicalPath();
-
+            MetaInfo.PROPERTY_ACL_ENABLE = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ACL_ENABLE, "false"));
+            MetaInfo.PROPERTY_ACL_USERNAME = environment.getProperty(Dict.PROPERTY_ACL_USERNAME);
+            MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);
         } catch (IOException e) {
             logger.error("init metainfo error", e);
             System.exit(1);

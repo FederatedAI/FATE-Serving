@@ -109,7 +109,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             }
 
             if (StringUtils.isBlank(requestUrl)) {
-                requestUrl = MetaInfo.MODEL_TRANSFER_URL;
+                requestUrl = MetaInfo.PROPERTY_MODEL_TRANSFER_URL;
             }
 
             if (StringUtils.isBlank(requestUrl)) {

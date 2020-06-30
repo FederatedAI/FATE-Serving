@@ -54,17 +54,15 @@ public class ServingServer implements InitializingBean {
     HostInferenceService hostInferenceService;
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
-    @Autowired
-    Environment environment;
     private Server server;
 
     @Override
     public void afterPropertiesSet() throws Exception {
         logger.info("try to star server ,meta info {}", MetaInfo.toMap());
-        Executor executor = new ThreadPoolExecutor(MetaInfo.SERVING_CORE_POOL_SIZE, MetaInfo.SERVING_MAX_POOL_SIZE, MetaInfo.SERVING_POOL_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                MetaInfo.SERVING_POOL_QUEUE_SIZE == 0 ? new SynchronousQueue<Runnable>() :
-                        (MetaInfo.SERVING_POOL_QUEUE_SIZE < 0 ? new LinkedBlockingQueue<Runnable>()
-                                : new LinkedBlockingQueue<Runnable>(MetaInfo.SERVING_POOL_QUEUE_SIZE)), new NamedThreadFactory("ServingServer", true));
+        Executor executor = new ThreadPoolExecutor(MetaInfo.PROPERTY_SERVING_CORE_POOL_SIZE, MetaInfo.PROPERTY_SERVING_MAX_POOL_SIZE, MetaInfo.PROPERTY_SERVING_POOL_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                MetaInfo.PROPERTY_SERVING_POOL_QUEUE_SIZE == 0 ? new SynchronousQueue<Runnable>() :
+                        (MetaInfo.PROPERTY_SERVING_POOL_QUEUE_SIZE < 0 ? new LinkedBlockingQueue<Runnable>()
+                                : new LinkedBlockingQueue<Runnable>(MetaInfo.PROPERTY_SERVING_POOL_QUEUE_SIZE)), new NamedThreadFactory("ServingServer", true));
         FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(MetaInfo.PROPERTY_PORT);
         serverBuilder.keepAliveTime(100, TimeUnit.MILLISECONDS);
         serverBuilder.executor(executor);

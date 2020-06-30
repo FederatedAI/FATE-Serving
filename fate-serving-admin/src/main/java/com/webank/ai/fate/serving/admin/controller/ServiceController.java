@@ -35,8 +35,6 @@ public class ServiceController {
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
     @Autowired
     private ZookeeperRegistry zookeeperRegistry;
-    @Value("${grpc.timeout:5000}")
-    private int timeout;
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     // 列出集群中所注册的所有接口
@@ -146,7 +144,7 @@ public class ServiceController {
 
         ListenableFuture<CommonServiceProto.CommonResponse> future = commonServiceFutureStub.updateService(builder.build());
 
-        CommonServiceProto.CommonResponse response = future.get(timeout, TimeUnit.MILLISECONDS);
+        CommonServiceProto.CommonResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
         ReturnResult result = new ReturnResult();
         result.setRetcode(response.getStatusCode());

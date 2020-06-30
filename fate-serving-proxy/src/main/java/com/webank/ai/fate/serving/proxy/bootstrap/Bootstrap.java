@@ -92,6 +92,9 @@ public class Bootstrap {
             MetaInfo.PROPERTY_PROXY_ASYNC_CORESIZE = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PROXY_ASYNC_CORESIZE, "10"));
             MetaInfo.PROPERTY_PROXY_ASYNC_MAXSIZE = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PROXY_ASYNC_MAXSIZE, "100"));
             MetaInfo.PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT, "10000"));
+            MetaInfo.PROPERTY_ACL_ENABLE = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ACL_ENABLE, "false"));
+            MetaInfo.PROPERTY_ACL_USERNAME = environment.getProperty(Dict.PROPERTY_ACL_USERNAME);
+            MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);
         } catch (IOException e) {
             e.printStackTrace();
         }
