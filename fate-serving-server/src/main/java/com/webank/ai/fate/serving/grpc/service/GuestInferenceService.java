@@ -21,19 +21,24 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
+import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import com.webank.ai.fate.serving.guest.provider.GuestBatchInferenceProvider;
 import com.webank.ai.fate.serving.guest.provider.GuestSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.*;
 
 @Service
 public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
@@ -44,32 +49,38 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     @Autowired
     GuestSingleInferenceProvider guestSingleInferenceProvider;
 
+    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
+
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE)
     public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
-        InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        Context context = prepareContext();
-        InboundPackage inboundPackage = new InboundPackage();
-        inboundPackage.setBody(req);
-        OutboundPackage outboundPackage = this.guestSingleInferenceProvider.service(context, inboundPackage);
-        ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
-        response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-        responseObserver.onNext(response.build());
-        responseObserver.onCompleted();
+        executor.submit(() -> {
+            InferenceMessage.Builder response = InferenceMessage.newBuilder();
+            Context context = prepareContext();
+            InboundPackage inboundPackage = new InboundPackage();
+            inboundPackage.setBody(req);
+            OutboundPackage outboundPackage = this.guestSingleInferenceProvider.service(context, inboundPackage);
+            ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
+            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+        });
     }
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = BATCH_INFERENCE)
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
-        InferenceMessage.Builder response = InferenceMessage.newBuilder();
-        Context context = prepareContext();
-        InboundPackage inboundPackage = new InboundPackage();
-        inboundPackage.setBody(req);
-        OutboundPackage outboundPackage = this.guestBatchInferenceProvider.service(context, inboundPackage);
-        BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
-        response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-        responseObserver.onNext(response.build());
-        responseObserver.onCompleted();
+        executor.submit(() -> {
+            InferenceMessage.Builder response = InferenceMessage.newBuilder();
+            Context context = prepareContext();
+            InboundPackage inboundPackage = new InboundPackage();
+            inboundPackage.setBody(req);
+            OutboundPackage outboundPackage = this.guestBatchInferenceProvider.service(context, inboundPackage);
+            BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
+            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+        });
     }
 
     private Context prepareContext() {

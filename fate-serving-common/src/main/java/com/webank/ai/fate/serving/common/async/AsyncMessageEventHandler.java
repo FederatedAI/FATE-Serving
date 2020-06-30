@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.common.async;
 
 import com.lmax.disruptor.EventHandler;
 import com.webank.ai.fate.serving.core.exceptions.AsyncMessageException;
+import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +41,7 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
 
     public AsyncMessageEventHandler() {
 
-        int processors = Runtime.getRuntime().availableProcessors();
-
-        executorService = new ThreadPoolExecutor(processors, processors * 2, 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>());
+        executorService = ThreadPoolUtil.newThreadPoolExecutor();
 
     }
 

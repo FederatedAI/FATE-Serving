@@ -27,15 +27,22 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import com.webank.ai.fate.serving.host.provider.HostBatchInferenceProvider;
 import com.webank.ai.fate.serving.host.provider.HostSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class HostInferenceService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
@@ -44,52 +51,55 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     @Autowired
     HostSingleInferenceProvider hostSingleInferenceProvider;
 
+    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
+
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true,role = Role.HOST)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
-        String actionType = req.getHeader().getCommand().getName();
-        ServingServerContext context = (ServingServerContext) prepareContext();
-        String namespace = req.getHeader().getTask().getModel().getNamespace();
-        String tableName = req.getHeader().getTask().getModel().getTableName();
-        context.setActionType(actionType);
-        context.setModelNamesapce(namespace);
-        context.setModelTableName(tableName);
-        context.setCaseId(req.getAuth().getNonce());
-        Object result = null;
-        byte[] data = req.getBody().getValue().toByteArray();
+        executor.submit(() -> {
+            String actionType = req.getHeader().getCommand().getName();
+            ServingServerContext context = (ServingServerContext) prepareContext();
+            String namespace = req.getHeader().getTask().getModel().getNamespace();
+            String tableName = req.getHeader().getTask().getModel().getTableName();
+            context.setActionType(actionType);
+            context.setModelNamesapce(namespace);
+            context.setModelTableName(tableName);
+            context.setCaseId(req.getAuth().getNonce());
+            Object result = null;
+            byte[] data = req.getBody().getValue().toByteArray();
 
-        InboundPackage inboundPackage = new InboundPackage();
-        switch (actionType) {
-            case Dict.FEDERATED_INFERENCE:
-                context.setActionType(Dict.FEDERATED_INFERENCE);
-                inboundPackage.setBody(data);
-                OutboundPackage singleInferenceOutbound = hostSingleInferenceProvider.service(context, inboundPackage);
-                result = singleInferenceOutbound.getData();
-                break;
-            case Dict.FEDERATED_INFERENCE_FOR_TREE:
-                context.setActionType(Dict.FEDERATED_INFERENCE_FOR_TREE);
-                inboundPackage.setBody(data);
-                OutboundPackage secureBoostTreeOutboundPackage = hostSingleInferenceProvider.service(context, inboundPackage);
-                result = secureBoostTreeOutboundPackage.getData();
-                break;
-            case Dict.REMOTE_METHOD_BATCH:
-                inboundPackage.setBody(data);
-                OutboundPackage outboundPackage = this.hostBatchInferenceProvider.service(context, inboundPackage);
-                ReturnResult responseResult = null;
-                result = (ReturnResult) outboundPackage.getData();
-                break;
-            default:
-                responseResult = new ReturnResult();
-                responseResult.setRetcode(StatusCode.HOST_UNSUPPORTED_COMMAND_ERROR);
-                break;
-        }
-        Packet.Builder packetBuilder = Packet.newBuilder();
-        packetBuilder.setBody(Proxy.Data.newBuilder()
-                .setValue(ByteString.copyFrom(JsonUtil.object2Json(result).getBytes()))
-                .build());
-        responseObserver.onNext(packetBuilder.build());
-        responseObserver.onCompleted();
-
+            InboundPackage inboundPackage = new InboundPackage();
+            switch (actionType) {
+                case Dict.FEDERATED_INFERENCE:
+                    context.setActionType(Dict.FEDERATED_INFERENCE);
+                    inboundPackage.setBody(data);
+                    OutboundPackage singleInferenceOutbound = hostSingleInferenceProvider.service(context, inboundPackage);
+                    result = singleInferenceOutbound.getData();
+                    break;
+                case Dict.FEDERATED_INFERENCE_FOR_TREE:
+                    context.setActionType(Dict.FEDERATED_INFERENCE_FOR_TREE);
+                    inboundPackage.setBody(data);
+                    OutboundPackage secureBoostTreeOutboundPackage = hostSingleInferenceProvider.service(context, inboundPackage);
+                    result = secureBoostTreeOutboundPackage.getData();
+                    break;
+                case Dict.REMOTE_METHOD_BATCH:
+                    inboundPackage.setBody(data);
+                    OutboundPackage outboundPackage = this.hostBatchInferenceProvider.service(context, inboundPackage);
+                    ReturnResult responseResult = null;
+                    result = (ReturnResult) outboundPackage.getData();
+                    break;
+                default:
+                    responseResult = new ReturnResult();
+                    responseResult.setRetcode(StatusCode.HOST_UNSUPPORTED_COMMAND_ERROR);
+                    break;
+            }
+            Packet.Builder packetBuilder = Packet.newBuilder();
+            packetBuilder.setBody(Proxy.Data.newBuilder()
+                    .setValue(ByteString.copyFrom(JsonUtil.object2Json(result).getBytes()))
+                    .build());
+            responseObserver.onNext(packetBuilder.build());
+            responseObserver.onCompleted();
+        });
     }
 
     private Context prepareContext() {
