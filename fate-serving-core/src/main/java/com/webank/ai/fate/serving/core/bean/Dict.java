@@ -174,6 +174,8 @@ public class Dict {
     public static final String APP_ID = "appid";
     public static final String PARTY_ID = "partyId";
     public static final String  FEATURE_DATA = "featureData";
+    public static final String EXPECT_FILL_RATE = "expectFillRate";
+    public static final String EXPECT_DATA_LIST = "expectDataList";
 
     public static final String DEFAULT_VERSION = "1.0";
     public static final String SELF_PROJECT_NAME = "proxy";

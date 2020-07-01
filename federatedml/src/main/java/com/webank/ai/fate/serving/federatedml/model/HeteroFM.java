@@ -26,6 +26,7 @@ import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,14 @@ public abstract class HeteroFM extends BaseModel {
         }
         logger.info("Finish init HeteroFM class, model weight is {}, model embedding is {}", this.weight, this.embedding);
         return StatusCode.OK;
+    }
+
+    @Override
+    public List<String> getWeightKeys() {
+        if (weight != null) {
+            return new ArrayList<>(weight.keySet());
+        }
+        return null;
     }
 
     Map<String, Object> forward(List<Map<String, Object>> inputDatas) {
