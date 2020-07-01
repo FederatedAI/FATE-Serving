@@ -45,7 +45,7 @@
         <grpc.version>1.25.0</grpc.version>
         <protobuf.version>3.6.1</protobuf.version>
         <junit.version>4.12</junit.version>
-        <log4j.version>2.11.1</log4j.version>
+        <log4j.version>2.13.3</log4j.version>
         <spring.version>5.2.0.RELEASE</spring.version>
 
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
