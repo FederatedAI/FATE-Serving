@@ -25,6 +25,7 @@ import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,14 @@ public abstract class HeteroLR extends BaseModel {
         }
         logger.info("Finish init HeteroLR class, model weight is {}", this.weight);
         return StatusCode.OK;
+    }
+
+    @Override
+    public List<String> getWeightKeys() {
+        if (weight != null) {
+            return new ArrayList<>(weight.keySet());
+        }
+        return null;
     }
 
     Map<String, Double> forward(Context context, List<Map<String, Object>> inputDatas) {

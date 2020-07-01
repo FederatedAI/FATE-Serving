@@ -167,4 +167,25 @@ public class PipelineTask {
 
         return newModelProtoMap;
     }
+
+    public void collectExpectDataList(Context context) {
+        if (this.pipeLineNode == null) {
+            return;
+        }
+        for (int i = 0; i < this.pipeLineNode.size(); i++) {
+            BaseModel node = this.pipeLineNode.get(i);
+            if (node != null) {
+                List<String> weightKeys = node.getWeightKeys();
+                List<String> expectDataList = (List<String>) context.getData(Dict.EXPECT_DATA_LIST);
+                if (expectDataList != null) {
+                    if (weightKeys != null) {
+                        expectDataList.addAll(node.getWeightKeys());
+                        context.putData(Dict.EXPECT_DATA_LIST, expectDataList);
+                    }
+                } else {
+                    context.putData(Dict.EXPECT_DATA_LIST, weightKeys);
+                }
+            }
+        }
+    }
 }

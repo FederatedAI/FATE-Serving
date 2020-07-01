@@ -43,27 +43,29 @@ public class TestFilePick implements FeatureData {
         try {
             if(featureMaps.isEmpty()){
                 List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
-                lines.forEach(line -> {
-                    String[] idFeats = StringUtils.split(line, ",");
-                    if(idFeats.length > 1){
+                for (int i = 0; i < lines.size(); i++) {
+                    String[] idFeats = StringUtils.split(lines.get(i), ",");
+                    if(idFeats.length == 2){
                         Map<String, Object> data = new HashMap<>();
                         for (String kv : StringUtils.split(idFeats[1], ";")) {
                             String[] a = StringUtils.split(kv, ":");
                             data.put(a[0], Double.valueOf(a[1]));
                         }
                         featureMaps.put(idFeats[0], data);
+                    } else {
+                        featureMaps.clear();
+                        throw new IllegalArgumentException("please check the format for line " + (i + 1));
                     }
-                });
+                }
             }
             Map<String, Object> fdata = featureMaps.get(featureIds.get(Dict.DEVICE_ID));
-
-            Map clone = (Map) ((HashMap)fdata).clone();
-            if(clone != null) {
+            if(fdata != null) {
+                Map clone = (Map) ((HashMap)fdata).clone();
                 returnResult.setData(clone);
                 returnResult.setRetcode(InferenceRetCode.OK);
             } else{
                 logger.error("cant not find features for {}.", featureIds.get(Dict.DEVICE_ID));
-                returnResult.setRetcode(InferenceRetCode.GET_FEATURE_FAILED);
+                returnResult.setRetcode(InferenceRetCode.NO_FEATURE);
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage());
