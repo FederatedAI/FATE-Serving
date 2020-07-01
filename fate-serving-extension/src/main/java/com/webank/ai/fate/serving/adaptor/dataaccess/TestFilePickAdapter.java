@@ -20,6 +20,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.FeatureDataAdaptorException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,27 +47,31 @@ public class TestFilePickAdapter extends AbstractSingleFeatureDataAdaptor {
         try {
             if (featureMaps.isEmpty()) {
                 List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
-                lines.forEach(line -> {
-                    String[] idFeats = StringUtils.split(line, ",");
-                    if (idFeats.length > 1) {
+                for (int i = 0; i < lines.size(); i++) {
+                    String[] idFeats = StringUtils.split(lines.get(i), ",");
+                    if(idFeats.length == 2){
                         Map<String, Object> data = new HashMap<>();
                         for (String kv : StringUtils.split(idFeats[1], ";")) {
                             String[] a = StringUtils.split(kv, ":");
                             data.put(a[0], Double.valueOf(a[1]));
                         }
                         featureMaps.put(idFeats[0], data);
+                    } else {
+                        logger.error("please check the format for line " + (i + 1));
+                        featureMaps.clear();
+                        throw new FeatureDataAdaptorException("please check the host_data.csv format for line " + (i + 1));
                     }
-                });
+                }
             }
-            Map<String, Object> featureData = featureMaps.get(featureIds.get(Dict.DEVICE_ID));
 
-            Map clone = (Map) ((HashMap) featureData).clone();
-            if (clone != null) {
+            Map<String, Object> featureData = featureMaps.get(featureIds.get(Dict.DEVICE_ID));
+            if (featureData != null) {
+                Map clone = (Map) ((HashMap) featureData).clone();
                 returnResult.setData(clone);
                 returnResult.setRetcode(StatusCode.SUCCESS);
             } else {
                 logger.error("cant not find features for {}.", featureIds.get(Dict.DEVICE_ID));
-                returnResult.setRetcode(StatusCode.HOST_FEATURE_ERROR);
+                returnResult.setRetcode(StatusCode.HOST_FEATURE_NOT_EXIST);
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage());

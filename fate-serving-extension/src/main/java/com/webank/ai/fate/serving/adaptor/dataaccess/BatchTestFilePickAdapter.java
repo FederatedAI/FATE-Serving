@@ -21,6 +21,7 @@ import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.FeatureDataAdaptorException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +41,20 @@ public class BatchTestFilePickAdapter extends AbstractBatchFeatureDataAdaptor {
         try {
             if (featureMaps.isEmpty()) {
                 List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
-                lines.forEach(line -> {
-                    String[] idFeats = StringUtils.split(line, ",");
-                    if (idFeats.length > 1) {
+                for (int i = 0; i < lines.size(); i++) {
+                    String[] idFeats = StringUtils.split(lines.get(i), ",");
+                    if(idFeats.length == 2){
                         Map<String, Object> data = new HashMap<>();
                         for (String kv : StringUtils.split(idFeats[1], ";")) {
                             String[] a = StringUtils.split(kv, ":");
                             data.put(a[0], Double.valueOf(a[1]));
                         }
                         featureMaps.put(idFeats[0], data);
+                    } else {
+                        logger.error("please check the format for line " + (i + 1));
+                        throw new FeatureDataAdaptorException("please check the host_data.csv format for line " + (i + 1));
                     }
-                });
+                }
             }
         } catch (Exception e) {
             logger.error("init BatchTestFilePick error, {}", e.getMessage());
@@ -70,10 +74,14 @@ public class BatchTestFilePickAdapter extends AbstractBatchFeatureDataAdaptor {
 
                 if (singleInferenceData.getSendToRemoteFeatureData().containsKey(Dict.DEVICE_ID)) {
                     Map<String, Object> featureData = featureMaps.get(singleInferenceData.getSendToRemoteFeatureData().get(Dict.DEVICE_ID));
-                    Map clone = (Map) ((HashMap) featureData).clone();
-
-                    singleBatchHostFeatureAdaptorResult.setFeatures(clone);
-                    singleBatchHostFeatureAdaptorResult.setRetcode(StatusCode.SUCCESS);
+                    if (featureData != null) {
+                        Map clone = (Map) ((HashMap) featureData).clone();
+                        singleBatchHostFeatureAdaptorResult.setFeatures(clone);
+                        singleBatchHostFeatureAdaptorResult.setRetcode(StatusCode.SUCCESS);
+                    } else {
+                        logger.error("cant not find features for {}.", singleInferenceData.getSendToRemoteFeatureData().get(Dict.DEVICE_ID));
+                        singleBatchHostFeatureAdaptorResult.setRetcode(StatusCode.HOST_FEATURE_NOT_EXIST);
+                    }
                     indexMap.put(singleInferenceData.getIndex(), singleBatchHostFeatureAdaptorResult);
                 }
             });
