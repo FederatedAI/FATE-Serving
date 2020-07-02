@@ -276,10 +276,10 @@ public class ModelManager implements InitializingBean {
 
         if (serviceIdNamespaceMap != null && serviceIdNamespaceMap.size() > 0) {
             List<String> environments = Lists.newArrayList();
-            for (String modelKey : serviceIdNamespaceMap.values()) {
-                Model model = namespaceMap.get(modelKey);
-                if (StringUtils.isNotEmpty(model.getServiceId())) {
-                    environments.add(model.getServiceId());
+            for (Map.Entry<String, String> modelEntry : serviceIdNamespaceMap.entrySet()) {
+                Model model = namespaceMap.get(modelEntry.getValue());
+                if (model != null) {
+                    environments.add(modelEntry.getKey());
                 }
                 environments.add(model.getPartId());
             }
