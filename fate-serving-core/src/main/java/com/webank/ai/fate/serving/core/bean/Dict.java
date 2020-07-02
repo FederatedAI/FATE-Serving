@@ -118,6 +118,7 @@ public class Dict {
     public static final String PROPERTY_ACL_PASSWORD = "acl.password";
     public static final String PROXY_ROUTER_TABLE = "proxy.router.table";
     public static final String PROPERTY_BATCH_INFERENCE_MAX = "batch.inference.max";
+    public static final String CURRENT_VERSION = "currentVersion";
 
     public static final String PROPERTY_COORDINATOR = "coordinator";
     public static final String PROPERTY_SERVER_PORT = "server.port";
