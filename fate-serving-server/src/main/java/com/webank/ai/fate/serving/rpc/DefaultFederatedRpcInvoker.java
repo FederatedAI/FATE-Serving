@@ -72,7 +72,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         metaDataBuilder.setSrc(topicBuilder.setPartyId(String.valueOf(model.getPartId())).setRole(MetaInfo.PROPERTY_SERVICE_ROLE_NAME).setName(Dict.PARTNER_PARTY_NAME).build());
         metaDataBuilder.setDst(topicBuilder.setPartyId(String.valueOf(rpcDataWraper.getHostModel().getPartId())).setRole(MetaInfo.PROPERTY_SERVICE_ROLE_NAME).setName(Dict.PARTY_NAME).build());
         metaDataBuilder.setCommand(Proxy.Command.newBuilder().setName(rpcDataWraper.getRemoteMethodName()).build());
-        String version = Long.toString(MetaInfo.currentVersion);
+        String version = Long.toString(MetaInfo.CURRENT_VERSION);
         metaDataBuilder.setOperator(version);
         Proxy.Task.Builder taskBuilder = com.webank.ai.fate.api.networking.proxy.Proxy.Task.newBuilder();
         Proxy.Model.Builder modelBuilder = Proxy.Model.newBuilder();

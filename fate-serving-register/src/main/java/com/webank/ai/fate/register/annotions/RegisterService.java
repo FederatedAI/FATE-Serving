@@ -31,7 +31,7 @@ public @interface RegisterService {
 
     String serviceName();
 
-    long version() default MetaInfo.currentVersion;
+    long version() default MetaInfo.CURRENT_VERSION;
 
     boolean useDynamicEnvironment() default false;
 
