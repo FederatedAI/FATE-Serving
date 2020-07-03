@@ -28,13 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class FlowCounterManager {
 
@@ -307,21 +305,17 @@ public class FlowCounterManager {
         logger.info("update {} allowed qps to {}", sourceName, allowQps);
         sourceQpsAllowMap.put(sourceName, allowQps);
 
-        this.store(file, JsonUtil.object2Json(convertToList(sourceQpsAllowMap)).getBytes());
-    }
+        List<Map> list = sourceQpsAllowMap.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .map(entry -> {
+                    Map map = Maps.newHashMap();
+                    map.put("source", entry.getKey());
+                    map.put("allow_qps", entry.getValue());
+                    return map;
+                })
+                .collect(Collectors.toList());
 
-    private List<Map> convertToList(Map map) {
-        if (map == null) {
-            return null;
-        }
-        List<Map> resultList = new ArrayList<>();
-        sourceQpsAllowMap.forEach((k,v) -> {
-            Map data = Maps.newHashMap();
-            data.put("source", k);
-            data.put("allow_qps", v);
-            resultList.add(data);
-        });
-        return resultList;
+        this.store(file, JsonUtil.object2Json(list).getBytes());
     }
 
     public void destroy() {
