@@ -69,6 +69,7 @@ public class Bootstrap {
                 throw e;
             }
             int processors = Runtime.getRuntime().availableProcessors();
+            MetaInfo.PROPERTY_ROOT_PATH = new File("").getCanonicalPath();
             MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             MetaInfo.PROPERTY_SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_CORE_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_CORE_POOL_SIZE)) : processors;
             MetaInfo.PROPERTY_SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_MAX_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_MAX_POOL_SIZE)) : processors * 2;
@@ -99,7 +100,7 @@ public class Bootstrap {
             MetaInfo.PROPERTY_LR_SPLIT_SIZE = environment.getProperty(Dict.PROPERTY_LR_SPLIT_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_LR_SPLIT_SIZE)) : 500;
             MetaInfo.PROPERTY_SERVICE_ROLE_NAME = environment.getProperty(Dict.PROPERTY_SERVICE_ROLE_NAME, Dict.PROPERTY_SERVICE_ROLE_NAME_DEFAULT_VALUE);
             MetaInfo.PROPERTY_MODEL_TRANSFER_URL = environment.getProperty(Dict.PROPERTY_MODEL_TRANSFER_URL);
-            MetaInfo.PROPERTY_MODEL_CACHE_PATH = StringUtils.isNotBlank(environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH)) ? environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH) : new File("").getCanonicalPath();
+            MetaInfo.PROPERTY_MODEL_CACHE_PATH = StringUtils.isNotBlank(environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH)) ? environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH) : MetaInfo.PROPERTY_ROOT_PATH;
             MetaInfo.PROPERTY_ACL_ENABLE = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ACL_ENABLE, "false"));
             MetaInfo.PROPERTY_ACL_USERNAME = environment.getProperty(Dict.PROPERTY_ACL_USERNAME);
             MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);

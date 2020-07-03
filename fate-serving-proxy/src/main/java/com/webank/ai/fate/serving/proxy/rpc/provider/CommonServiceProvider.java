@@ -94,7 +94,7 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     @FateServiceMethod(name = "UPDATE_FLOW_RULE")
     public CommonServiceProto.CommonResponse updateFlowRule(Context context, InboundPackage inboundPackage) {
         CommonServiceProto.UpdateFlowRuleRequest updateFlowRuleRequest = (CommonServiceProto.UpdateFlowRuleRequest) inboundPackage.getBody();
-        flowCounterManager.updateAllowQps(updateFlowRuleRequest.getSource(), updateFlowRuleRequest.getAllowQps());
+        flowCounterManager.setAllowQps(updateFlowRuleRequest.getSource(), updateFlowRuleRequest.getAllowQps());
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);

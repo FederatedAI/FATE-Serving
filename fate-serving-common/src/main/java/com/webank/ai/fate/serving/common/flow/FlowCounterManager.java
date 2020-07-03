@@ -16,15 +16,19 @@
 
 package com.webank.ai.fate.serving.common.flow;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.common.utils.GetSystemInfo;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.timer.HashedWheelTimer;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class FlowCounterManager {
 
     public static final boolean USE_PID = true;
-    private static final String DEFAULT_CONFIG_FILE = "conf" + File.separator + "FlowRule.json";
+    private static final String DEFAULT_CONFIG_FILE = MetaInfo.PROPERTY_ROOT_PATH + File.separator + ".fate" + File.separator + "flowRules.json";
     Logger logger = LoggerFactory.getLogger(FlowCounterManager.class);
     String appName;
     MetricSearcher metricSearcher;
@@ -47,6 +51,7 @@ public class FlowCounterManager {
     MetricReport modelMetricReport;
     ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
     Map<String, Double> sourceQpsAllowMap = new HashMap<>();
+    File file = new File(DEFAULT_CONFIG_FILE);
     private ConcurrentHashMap<String, FlowCounter> passMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, FlowCounter> successMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, FlowCounter> blockMap = new ConcurrentHashMap<>();
@@ -72,20 +77,34 @@ public class FlowCounterManager {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        MetaInfo.PROPERTY_ROOT_PATH = new File("").getCanonicalPath();
+
         FlowCounterManager flowCounterManager = new FlowCounterManager("test");
         flowCounterManager.setMetricReport(new FileMetricReport("Test"));
         flowCounterManager.setMetricSearcher(new MetricSearcher(MetricWriter.METRIC_BASE_DIR, "Test" + "-metrics.log.pid" + GetSystemInfo.getPid()));
         flowCounterManager.startReport();
+        flowCounterManager.file = new File(MetaInfo.PROPERTY_ROOT_PATH + File.separator + ".fate" + File.separator + "flowRules.json");
+        flowCounterManager.initialize();
 
+        int i = 0;
         while (true) {
+            flowCounterManager.setAllowQps("source-" + i, i);
+            i++;
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        /*while (true) {
             flowCounterManager.pass("M_test");
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     public MetricSearcher getMetricSearcher() {
@@ -186,7 +205,7 @@ public class FlowCounterManager {
     }
 
     public void startReport() {
-        init();
+//        init();
         executor.scheduleAtFixedRate(() -> {
             long current = TimeUtil.currentTimeMillis();
             List<MetricNode> reportList = Lists.newArrayList();
@@ -235,38 +254,45 @@ public class FlowCounterManager {
     /**
      * init rules
      */
-    private void init() {
-        File file = new File(DEFAULT_CONFIG_FILE);
+    private void initialize() throws IOException {
         logger.info("try to load flow counter rules, {}", file.getAbsolutePath());
 
-        if (!file.exists()) {
-            logger.error("flow counter rule config not found, {}", file.getAbsolutePath());
-            return;
-        }
+        if (file.exists()) {
+            String result = "";
+            try (
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
+                    BufferedReader reader = new BufferedReader(inputStreamReader)
+            ) {
+                String tempString;
+                while ((tempString = reader.readLine()) != null) {
+                    result += tempString;
+                }
 
-        String result = "";
-        try (
-                FileInputStream fileInputStream = new FileInputStream(file);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
-                BufferedReader reader = new BufferedReader(inputStreamReader)
-        ) {
-            String tempString = null;
-            while ((tempString = reader.readLine()) != null) {
-                result += tempString;
+                List<Map> list = JsonUtil.json2Object(result, new TypeReference<List<Map>>() {});
+                if (list != null) {
+                    list.forEach(map -> {
+                        sourceQpsAllowMap.put((String) map.get("source"), Double.valueOf(String.valueOf(map.get("allow_qps"))));
+                    });
+                }
+            } catch (IOException e) {
+                logger.error("load flow counter rules failed, use default setting, cause by: {}", e.getMessage());
             }
-        } catch (IOException e) {
-            logger.error("load flow counter rules failed, use default setting, cause by: {}", e.getMessage());
+            logger.info("load flow counter rules success");
         }
+    }
 
-        //  JSONArray dataArray = JSONArray.parseArray(result);
-        Gson gson = new Gson();
-        List configs = gson.fromJson(result, List.class);
-        for (int i = 0; i < configs.size(); i++) {
-            Map jsonObject = (Map) configs.get(i);
-            sourceQpsAllowMap.put(jsonObject.get("source").toString(), Double.valueOf(jsonObject.get("allow_qps").toString()));
+    private void store(File file, byte[] data) {
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            try (FileOutputStream outputFile = new FileOutputStream(file)) {
+                outputFile.write(data);
+            }
+        } catch (Throwable e) {
+            logger.error("store rules file failed, cause: {}", e.getMessage());
         }
-
-        logger.info("load flow counter rules success");
     }
 
     private double getAllowedQps(String sourceName) {
@@ -277,9 +303,25 @@ public class FlowCounterManager {
         }
     }
 
-    public void updateAllowQps(String sourceName, double allowQps) {
+    public void setAllowQps(String sourceName, double allowQps) {
         logger.info("update {} allowed qps to {}", sourceName, allowQps);
         sourceQpsAllowMap.put(sourceName, allowQps);
+
+        this.store(file, JsonUtil.object2Json(convertToList(sourceQpsAllowMap)).getBytes());
+    }
+
+    private List<Map> convertToList(Map map) {
+        if (map == null) {
+            return null;
+        }
+        List<Map> resultList = new ArrayList<>();
+        sourceQpsAllowMap.forEach((k,v) -> {
+            Map data = Maps.newHashMap();
+            data.put("source", k);
+            data.put("allow_qps", v);
+            resultList.add(data);
+        });
+        return resultList;
     }
 
     public void destroy() {

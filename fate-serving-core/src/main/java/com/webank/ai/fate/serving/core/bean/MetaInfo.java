@@ -83,6 +83,7 @@ public class MetaInfo {
     public static Boolean PROPERTY_ACL_ENABLE;
     public static String PROPERTY_ACL_USERNAME;
     public static String PROPERTY_ACL_PASSWORD;
+    public static String PROPERTY_ROOT_PATH;
 
 
     public static Map toMap() {

@@ -53,7 +53,7 @@ public class ServingConfig {
         return routerService;
     }
 
-    @Bean(destroyMethod = "destroy")
+    @Bean(initMethod = "initialize", destroyMethod = "destroy")
     public FlowCounterManager flowCounterManager() {
         FlowCounterManager flowCounterManager = new FlowCounterManager(Dict.SERVICE_SERVING, true);
         flowCounterManager.startReport();
