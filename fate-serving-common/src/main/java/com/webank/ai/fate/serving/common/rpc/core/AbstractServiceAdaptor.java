@@ -160,7 +160,6 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     messageEvent.setData(exceptions);
                     messageEvent.setContext(context);
                     DisruptorUtil.producer(messageEvent);
-
                     if (flowCounterManager != null) {
                         flowCounterManager.exception(context.getResourceName());
                         if (context instanceof ServingServerContext) {

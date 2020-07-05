@@ -34,6 +34,7 @@ public class AsyncMessageEventProducer {
                     event.setAction(argEvent.getAction());
                     event.setData(argEvent.getData());
                     event.setTimestamp(argEvent.getTimestamp());
+                    event.setContext(argEvent.getContext());
                     if (event.getTimestamp() == 0) {
                         event.setTimestamp(System.currentTimeMillis());
                     }

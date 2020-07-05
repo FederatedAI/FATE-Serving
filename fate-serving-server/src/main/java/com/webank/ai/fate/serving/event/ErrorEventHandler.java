@@ -41,14 +41,14 @@ public class ErrorEventHandler extends AbstractAsyncMessageProcessor implements 
         String serviceName = context.getServiceName();
         String actionType = context.getActionType();
         String resource = StringUtils.isNotEmpty(actionType) ? actionType : serviceName;
-        flowCounterManager.exception(resource);
-        if (context instanceof ServingServerContext) {
-            ServingServerContext servingServerContext = (ServingServerContext) context;
-            Model model = servingServerContext.getModel();
-            if (model != null) {
-                flowCounterManager.exception(model.getResourceName());
-            }
-        }
+//        flowCounterManager.exception(resource);
+//        if (context instanceof ServingServerContext) {
+//            ServingServerContext servingServerContext = (ServingServerContext) context;
+//            Model model = servingServerContext.getModel();
+//            if (model != null) {
+//                flowCounterManager.exception(model.getResourceName());
+//            }
+//        }
     }
 
     @Override

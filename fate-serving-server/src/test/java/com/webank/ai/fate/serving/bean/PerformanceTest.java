@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class PerformanceTest {
 
-    private static int PROCESS_NUM = 20;// 并发线程数
+    private static int PROCESS_NUM = 1;// 并发线程数
     private static int BATCH_DATA_SIZE = 300;// 单批次数量
     private static String HOST = "localhost";
     private static int PORT = 8000;
@@ -97,7 +97,6 @@ public class PerformanceTest {
             List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
             for (int i = 0; i < BATCH_DATA_SIZE; i++) {
                 BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
-
                 singleInferenceData.getFeatureData().put("x0", random.nextDouble());
                 singleInferenceData.getFeatureData().put("x1", random.nextDouble());
                 singleInferenceData.getFeatureData().put("x2", random.nextDouble());
@@ -106,7 +105,6 @@ public class PerformanceTest {
                 singleInferenceData.getFeatureData().put("x5", random.nextDouble());
                 singleInferenceData.getFeatureData().put("x6", random.nextDouble());
                 singleInferenceData.getFeatureData().put("x7", random.nextDouble());
-
                 singleInferenceData.getSendToRemoteFeatureData().putAll(singleInferenceData.getFeatureData());
                 singleInferenceData.setIndex(i);
                 singleInferenceDataList.add(singleInferenceData);

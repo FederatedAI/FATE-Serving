@@ -252,7 +252,7 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
 
     @Override
     public long getDownstreamBegin() {
-        return (long) dataMap.get(Dict.DOWN_STREAM_BEGIN);
+        return  dataMap.get(Dict.DOWN_STREAM_BEGIN)!=null? (long) dataMap.get(Dict.DOWN_STREAM_BEGIN):0;
     }
 
     @Override
@@ -262,7 +262,7 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
 
     @Override
     public long getRouteBasis() {
-        return (long) dataMap.get(Dict.ROUTE_BASIS);
+        return dataMap.get(Dict.ROUTE_BASIS)!=null?(long) dataMap.get(Dict.ROUTE_BASIS):0;
     }
 
     @Override
