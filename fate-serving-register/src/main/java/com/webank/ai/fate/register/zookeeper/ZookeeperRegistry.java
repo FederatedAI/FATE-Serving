@@ -19,7 +19,6 @@ package com.webank.ai.fate.register.zookeeper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.register.common.*;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
@@ -29,6 +28,7 @@ import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.NetUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,11 +53,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
     private final ZookeeperClient zkClient;
     Set<String> registedString = Sets.newHashSet();
     Set<String> anyServices = new HashSet<String>();
-    Gson gson = new Gson();
     private String environment;
     private Set<String> dynamicEnvironments = new HashSet<String>();
     private String project;
     private int port;
+    private URL  componentUrl ;
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
@@ -97,7 +97,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
         registryUrl = registryUrl.addParameter(Constants.SERVER_PORT, port);
         registryUrl = registryUrl.addParameter(Constants.PROJECT_KEY, project);
         List<URL> backups = registryUrl.getBackupUrls();
-
         if (registeryMap.get(registryUrl) == null) {
             URL finalRegistryUrl = registryUrl;
             registeryMap.computeIfAbsent(registryUrl, n -> {
@@ -119,11 +118,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
     public void doRegisterComponent(URL url) {
         String path = url.getPath();
         Map content = new HashMap();
-
         content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
         content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
-        this.zkClient.create(path, gson.toJson(content), true);
-
+        this.zkClient.create(path, JsonUtil.object2Json(content), true);
+        this.componentUrl = url;
         logger.info("register component {}", path);
     }
 
@@ -139,6 +137,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
             addFailedRegisterComponentTask(url);
         }
     }
+
+    public void unRegisterComponent() {
+        if(componentUrl!=null) {
+            tryUnregister(this.componentUrl);
+        }
+    }
+
 
     public boolean tryUnregister(URL url) {
         try {
@@ -335,6 +340,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     @Override
     public void destroy() {
         System.err.println("try to destroy zookeeper registry");
+        this.unRegisterComponent();
         super.destroy();
         try {
             zkClient.close();

@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class PerformanceTest {
 
-    private static int PROCESS_NUM = 100;// 并发线程数
+    private static int PROCESS_NUM = 20;// 并发线程数
     private static int BATCH_DATA_SIZE = 300;// 单批次数量
     private static String HOST = "localhost";
     private static int PORT = 8000;

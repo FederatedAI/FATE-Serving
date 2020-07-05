@@ -43,6 +43,13 @@ public class ServingServerTest {
     public static void init() {
 
     }
+    @Test
+    public  void  test_08_guest_load_bind(){
+        this.test_01_guest_load();
+        this.test_02_guest_Bind();
+    }
+
+
 
     @Test
     public void test_01_guest_load() {

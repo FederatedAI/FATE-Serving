@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-//import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
-//import com.webank.ai.fate.api.serving.InferenceServiceProto;
 
 public class Client {
 
@@ -69,8 +67,7 @@ public class Client {
         URL url = urls.get(0);
         managedChannel = grpcConnectionPool.getManagedChannel(url.getIp(), url.getPort());
         inferenceRequest.getSendToRemoteFeatureData().putAll(inferenceRequest.getFeatureData());
-        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
-                InferenceServiceProto.InferenceMessage.newBuilder();
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         String contentString = JsonUtil.object2Json(inferenceRequest);
         inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
         InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
@@ -90,8 +87,7 @@ public class Client {
         ManagedChannel managedChannel = null;
         URL url = urls.get(0);
         managedChannel = grpcConnectionPool.getManagedChannel(url.getIp(), url.getPort());
-        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder =
-                InferenceServiceProto.InferenceMessage.newBuilder();
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         String contentString = JsonUtil.object2Json(batchInferenceRequest);
         inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
         InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
