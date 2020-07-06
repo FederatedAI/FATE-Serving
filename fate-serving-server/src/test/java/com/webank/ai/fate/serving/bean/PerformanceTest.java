@@ -17,7 +17,10 @@
 package com.webank.ai.fate.serving.bean;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
+import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
+import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
@@ -39,7 +42,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class PerformanceTest {
 
-    private static int PROCESS_NUM = 1;// 并发线程数
+    private static int PROCESS_NUM = 8;// 并发线程数
     private static int BATCH_DATA_SIZE = 300;// 单批次数量
     private static String HOST = "localhost";
     private static int PORT = 8000;
@@ -48,7 +51,7 @@ public class PerformanceTest {
     private static File ERROR_OUTPUT_FILE = new File("logs/performance-error.log");
     private static Random random = new Random();
     private static GrpcConnectionPool GRPC_CONNECTION_POOL = GrpcConnectionPool.getPool();
-    private static ThreadPoolExecutor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors(), 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1000), new ThreadPoolExecutor.AbortPolicy());
+    private static ThreadPoolExecutor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), 2 * Runtime.getRuntime().availableProcessors(), 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(65535));
     private static ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2);
     private static AtomicLong atomicLong = new AtomicLong(0);
 
@@ -74,11 +77,11 @@ public class PerformanceTest {
      * 并发调用
      */
     private static void concurrentCall() {
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
-            for (int i = 0; i < PROCESS_NUM; i++) {
-                call();
-            }
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
+//        scheduledExecutorService.scheduleAtFixedRate(() -> {
+        for (int i = 0; i < PROCESS_NUM; i++) {
+            call();
+        }
+//        }, 1000, 1000, TimeUnit.MILLISECONDS);
 
 //        scheduledExecutorService.scheduleAtFixedRate(() -> {
 //            System.out.println("==============" + atomicLong.get() + " times");
@@ -90,35 +93,50 @@ public class PerformanceTest {
      */
     private static void call() {
         THREAD_POOL_EXECUTOR.submit(() -> {
-            long startTime = System.currentTimeMillis();
-            BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
-            batchInferenceRequest.setServiceId("fm");
-            batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
-            List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
-            for (int i = 0; i < BATCH_DATA_SIZE; i++) {
-                BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
-                singleInferenceData.getFeatureData().put("x0", random.nextDouble());
-                singleInferenceData.getFeatureData().put("x1", random.nextDouble());
-                singleInferenceData.getFeatureData().put("x2", random.nextDouble());
-                singleInferenceData.getFeatureData().put("x3", random.nextDouble());
-                singleInferenceData.getFeatureData().put("x4", random.nextDouble());
-                singleInferenceData.getFeatureData().put("x5", random.nextDouble());
-                singleInferenceData.getFeatureData().put("x6", random.nextDouble());
-                singleInferenceData.getFeatureData().put("x7", random.nextDouble());
-                singleInferenceData.getSendToRemoteFeatureData().putAll(singleInferenceData.getFeatureData());
-                singleInferenceData.setIndex(i);
-                singleInferenceDataList.add(singleInferenceData);
-            }
+            batchInference();
+//            listProps();
+        });
+    }
 
-            batchInferenceRequest.setBatchDataList(singleInferenceDataList);
+    private static void listProps() {
+        CommonServiceProto.QueryPropsRequest.Builder builder = CommonServiceProto.QueryPropsRequest.newBuilder();
+        ManagedChannel managedChannel = GRPC_CONNECTION_POOL.getManagedChannel(HOST, PORT);
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+        CommonServiceProto.CommonResponse response = blockingStub.listProps(builder.build());
 
-            try {
+        System.err.println("StatusCode ==================" + response.getStatusCode());
+    }
+
+    private static void batchInference() {
+        Map featureMap = Maps.newHashMap();
+        for (int j = 0; j < 250; j++) {
+            String a = String.format("x%s", j);
+            featureMap.put(a, random.nextDouble());
+        }
+
+        long startTime = System.currentTimeMillis();
+        BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
+        batchInferenceRequest.setServiceId("2020040111152695637611");
+        batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
+        List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
+
+        for (int i = 0; i < BATCH_DATA_SIZE; i++) {
+            BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
+            singleInferenceData.getFeatureData().putAll(featureMap);
+
+            singleInferenceData.getSendToRemoteFeatureData().put("user_id", "01a9a79f583bcd0ac8bc39f61f542e16");
+            singleInferenceData.setIndex(i);
+            singleInferenceDataList.add(singleInferenceData);
+        }
+
+        batchInferenceRequest.setBatchDataList(singleInferenceDataList);
+
+        try {
+            while (true) {
                 ManagedChannel managedChannel = GRPC_CONNECTION_POOL.getManagedChannel(HOST, PORT);
 
                 InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
                 inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(batchInferenceRequest), "UTF-8"));
-
-                inferenceMessageBuilder.setBody(ByteString.copyFrom(inferenceMessageBuilder.build().toByteArray()));
 
                 InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
                 InferenceServiceProto.InferenceMessage inferenceMessage = blockingStub.batchInference(inferenceMessageBuilder.build());
@@ -143,10 +161,10 @@ public class PerformanceTest {
 //                resultObject.remove("batchDataList");
 //                resultObject.remove("singleInferenceResultMap");
 //                output(INFO_OUTPUT_FILE_SAMPLE, StringUtils.join(Arrays.asList(startTime, endTime, endTime - startTime, JSONObject.toJSONString(resultObject)), " | "));
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void output(File file, String content) {
