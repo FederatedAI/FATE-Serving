@@ -77,17 +77,20 @@ public class DataIO extends BaseModel {
         Map<String, Object> data = inputData.get(0);
         Map<String, Object> outputData = new HashMap<>();
 
-        if(logger.isDebugEnabled()) {
-            logger.debug("input-data, not filling, {}", data);
-        }
-
         if (this.inputformat.equals(Dict.TAG_INPUT_FORMAT) || this.inputformat.equals(Dict.SPARSE_INPUT_FORMAT
         )) {
             if(logger.isDebugEnabled()) {
-                logger.debug("Sparse Data Filling Zeros");
+                logger.debug("Sparse Data Filling");
             }
             for (String col: this.header) {
+                if (this.isImputer) {
+                    outputData.put(col, data.getOrDefault(col, ""));
+                } else {
                     outputData.put(col, data.getOrDefault(col, 0));
+                }
+            }
+            if(logger.isDebugEnabled()) {
+                logger.debug("sparse input-format, data {}", outputData);
             }
         } else {
             outputData = data;

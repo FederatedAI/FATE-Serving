@@ -26,6 +26,7 @@ import com.webank.ai.fate.serving.core.bean.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +75,14 @@ public abstract class HeteroSecureBoost extends BaseModel {
         }
         logger.info("Finish init HeteroSecureBoost class");
         return StatusCode.OK;
+    }
+
+    @Override
+    public List<String> getWeightKeys() {
+        if (featureNameFidMapping != null) {
+            return new ArrayList<>(featureNameFidMapping.keySet());
+        }
+        return null;
     }
 
     protected String getSite(int treeId, int treeNodeId) {
