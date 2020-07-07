@@ -5,69 +5,69 @@
                 Service
             </div>
             <el-table
-                    :data="serviceData"
-                    :header-cell-style="{background:'#fff'}"
-                    height="calc(100% - 100px)"
-                    class="table">
-                    <el-table-column sortable width="150px" prop="project" label="Project" show-overflow-tooltip />
-                    <el-table-column sortable width="250px" prop="environment" label="Environment" show-overflow-tooltip />
-                    <el-table-column sortable width="350px"  prop="name" label="Name" show-overflow-tooltip />
-                    <el-table-column sortable width="180px" prop="host" label="Host" show-overflow-tooltip />
-                    <el-table-column sortable width="150px" prop="port" label="Port" show-overflow-tooltip />
-                    <el-table-column sortable width="200px" prop="routerMode" label="Router Mode" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <span v-if="!(showEdit === scope.$index)">
-                                {{ scope.row.routerMode }}
-                            </span>
-                            <div v-else>
-                                <el-select popper-class="router-mode" v-model="routerMode" placeholder="请选择">
-                                    <el-option
-                                    v-for="item in options"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column sortable  prop="version" label="Version" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <span v-if="!(showEdit === scope.$index)">
-                                {{ scope.row.version }}
-                            </span>
-                            <el-input class="input"  v-else v-model.number="version" @input='inputversion' placeholder="请输入version"></el-input>
-                        </template>
-                    </el-table-column>
-                    <el-table-column sortable  prop="weight" label="Weight" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <span v-if="!(showEdit === scope.$index)">
-                                {{ scope.row.weight }}
-                            </span>
-                            <el-input class="input" v-else v-model.number="weight" @input='inputweight' placeholder="请输入weight"></el-input>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="Operation">
-                        <template slot-scope="scope">
-                            <el-button v-if="!(showEdit === scope.$index)" type="text" style="font-size: 16px;margin-left:15px" class="el-icon-edit" @click="edit(scope.row,scope.$index)"></el-button>
-                            <span v-else>
-                                <el-button type="text" style="font-size: 16px" class="el-icon-check" @click="confirmEdit"></el-button>
-                                <el-button type="text" style="font-size: 16px" class="el-icon-close" @click="showEdit = -1"></el-button>
-                            </span>
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <div class="pagination">
-                    <el-pagination
-                        background
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page.sync="currentPage1"
-                        :page-size="20"
-                        layout="total, prev, pager, next, jumper"
-                        :total="total"
-                    ></el-pagination>
-                </div>
+                :data="serviceData"
+                :header-cell-style="{background:'#fff'}"
+                height="calc(100% - 100px)"
+                class="table">
+                <el-table-column sortable  prop="project" label="Project" show-overflow-tooltip />
+                <el-table-column sortable  prop="environment" label="Environment" show-overflow-tooltip />
+                <el-table-column sortable  prop="name" label="Name" show-overflow-tooltip />
+                <el-table-column sortable  prop="host" label="Host" show-overflow-tooltip />
+                <el-table-column sortable  prop="port" label="Port" show-overflow-tooltip />
+                <!-- <el-table-column sortable width="200px" prop="routerMode" label="Router Mode" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <span v-if="!(showEdit === scope.$index)">
+                            {{ scope.row.routerMode }}
+                        </span>
+                        <div v-else>
+                            <el-select popper-class="router-mode" v-model="routerMode" placeholder="请选择">
+                                <el-option
+                                v-for="item in options"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </template>
+                </el-table-column> -->
+                <!-- <el-table-column sortable  prop="version" label="Version" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <span v-if="!(showEdit === scope.$index)">
+                            {{ scope.row.version }}
+                        </span>
+                        <el-input class="input"  v-else v-model.number="version" @input='inputversion' placeholder="请输入version"></el-input>
+                    </template>
+                </el-table-column> -->
+                <el-table-column sortable  prop="weight" label="Weight" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                        <span v-if="!(showEdit === scope.$index)">
+                            {{ scope.row.weight }}
+                        </span>
+                        <el-input class="input" v-else v-model.number="weight" @input='inputweight' placeholder="请输入weight"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column label="Operation">
+                    <template slot-scope="scope">
+                        <el-button v-if="!(showEdit === scope.$index)" type="text" style="font-size: 16px;margin-left:15px" class="el-icon-edit" @click="edit(scope.row,scope.$index)"></el-button>
+                        <span v-else>
+                            <el-button type="text" style="font-size: 16px" class="el-icon-check" @click="confirmEdit"></el-button>
+                            <el-button type="text" style="font-size: 16px" class="el-icon-close" @click="showEdit = -1"></el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="pagination">
+                <el-pagination
+                    background
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="currentPage"
+                    :page-size="20"
+                    layout="total, prev, pager, next, jumper"
+                    :total="total"
+                ></el-pagination>
+            </div>
         </div>
     </div>
 </template>
@@ -79,7 +79,7 @@ export default {
     components: {},
     data() {
         return {
-            currentPage1: 1,
+            currentPage: 1,
             total: 0,
             serviceData: [],
             showEdit: -1,
@@ -132,8 +132,8 @@ export default {
         edit(row, index) {
             this.showEdit = index
             this.rowData = row
-            this.routerMode = row.routerMode
-            this.version = row.version
+            // this.routerMode = row.routerMode
+            // this.version = row.version
             this.weight = row.weight
         },
         confirmEdit() {
@@ -142,8 +142,8 @@ export default {
                 host: this.rowData.host,
                 port: this.rowData.port,
                 url: this.rowData.url,
-                routerMode: this.routerMode,
-                version: this.version,
+                // routerMode: this.routerMode,
+                // version: this.version,
                 weight: this.weight
             }
             serviceUpdate(params).then(res => {

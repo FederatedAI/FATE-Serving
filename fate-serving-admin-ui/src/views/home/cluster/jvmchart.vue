@@ -27,20 +27,6 @@ export default {
     },
     watch: {
         callsData: function() {
-            // const xDateArr = [] // X轴数组
-            // const providerCalls = [] // 提供方数据
-            // const userCalls = [] // 应用方数据
-            // this.callsData.providerDayList.forEach(item => {
-            //     xDateArr.push(item.formatDs)
-            //     providerCalls.push(item.reqDay)
-            // })
-            // this.callsData.userDayList.forEach(item => {
-            //     userCalls.push(item.reqDay)
-            // })
-            // this.options.xAxis.data = xDateArr
-            // this.options.series[0].data = userCalls
-            const JvmData = this.callsData.JvmData
-            const JVMInfo = this.callsData.JVMInfo
             this.JVMseries = []
             var xDate = []
             var Memory = []
@@ -50,7 +36,7 @@ export default {
             var fullGcTime = []
             var threadCount = []
             var Yname = ''
-            JvmData.length > 0 && JvmData.forEach((item, index) => {
+            this.callsData.JvmData.length > 0 && this.callsData.JvmData.forEach((item, index) => {
                 if (item) {
                     xDate.push(this.date(item.timestamp))
                     Memory.push([item.old.used, item.eden.used, item.heap.used, item.nonHeap.used, item.survivor.used])
@@ -62,7 +48,7 @@ export default {
                 }
             })
             var jvmrArr = []
-            if (JVMInfo === 0) {
+            if (this.callsData.JVMInfo === 0) {
                 this.JVMseries = []
                 Yname = 'mb'
                 jvmrArr = ['old', 'eden', 'heap', 'nonHeap', 'survivor']
@@ -80,7 +66,7 @@ export default {
                         type: 'line'
                     })
                 }
-            } else if (JVMInfo === 1) {
+            } else if (this.callsData.JVMInfo === 1) {
                 this.JVMseries = []
                 Yname = ''
                 jvmrArr = ['fullGcCount', 'yongGcCount']
@@ -94,7 +80,7 @@ export default {
                     data: yongGcCount,
                     type: 'line'
                 }]
-            } else if (JVMInfo === 2) {
+            } else if (this.callsData.JVMInfo === 2) {
                 this.JVMseries = []
                 Yname = 'ms'
                 jvmrArr = ['yongGcTime', 'fullGcTime']
@@ -108,7 +94,7 @@ export default {
                     data: fullGcTime,
                     type: 'line'
                 }]
-            } else if (JVMInfo === 3) {
+            } else if (this.callsData.JVMInfo === 3) {
                 this.JVMseries = []
                 Yname = ''
                 this.JVMseries = [{

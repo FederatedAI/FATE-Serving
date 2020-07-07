@@ -33,7 +33,6 @@ export default {
 
     },
     mounted() {
-    // this.initChart()
     },
     methods: {
         initChart() {

@@ -27,25 +27,12 @@ export default {
     },
     watch: {
         callsData: function() {
-            // const xDateArr = [] // X轴数组
-            // const providerCalls = [] // 提供方数据
-            // const userCalls = [] // 应用方数据
-            // this.callsData.providerDayList.forEach(item => {
-            //     xDateArr.push(item.formatDs)
-            //     providerCalls.push(item.reqDay)
-            // })
-            // this.callsData.userDayList.forEach(item => {
-            //     userCalls.push(item.reqDay)
-            // })
-            // this.options.xAxis.data = xDateArr
-            // this.options.series[0].data = userCalls
             this.options = this.callsData
             this.initChart()
         }
 
     },
     mounted() {
-    // this.initChart()
     },
     methods: {
         initChart() {

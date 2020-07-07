@@ -4,7 +4,7 @@
   <div class="login">
     <div class="title">Welcome</div>
     <div class="warning" v-if="passwordWarn">
-       <i class="el-icon-warning"></i>
+        <i class="el-icon-warning"></i>
         <span>
             Incorrect username or password. <br>
             The default username is admin, the default password is admin.
@@ -15,31 +15,23 @@
         <span>User name</span>
       </div>
       <div class="username" :class="{ name:true,'name-warn': passwordWarn,nameIn:nameInputStatus }">
-        <!-- <el-input
-          v-model.trim="form.username"
-          :class="{ 'active': nameInput }"
-          placeholder=""
-          clearable
-          @focus="nameInputStatus = true"
-          @blur="nameInputStatus = false"
-        ></el-input> -->
         <el-autocomplete
-                popper-class="autopopper"
-              v-model="form.username"
-              :fetch-suggestions="querySearchAsync"
-              @focus="nameInputStatus = true"
-             @blur="nameInputStatus = false"
-             @select="handleSelect"
+            popper-class="autopopper"
+            v-model="form.username"
+            :fetch-suggestions="querySearchAsync"
+            @focus="nameInputStatus = true"
+            @blur="nameInputStatus = false"
+            @select="handleSelect"
             >
             <template slot-scope="{ item }">
-            <i class="el-icon-s-custom"></i>
-            <div>
-                <div class="name">{{ item.value }}</div>
-                <span class="addr">******</span>
-            </div>
-            <span  class="default" v-if="item.value === 'admin'">(default)</span>
-        </template>
-  </el-autocomplete>
+                <i class="el-icon-s-custom"></i>
+                <div>
+                    <div class="name">{{ item.value }}</div>
+                    <span class="addr">******</span>
+                </div>
+                <span  class="default" v-if="item.value === 'admin'">(default)</span>
+            </template>
+        </el-autocomplete>
       </div>
     </div>
     <div class="form">
@@ -48,18 +40,14 @@
       </div>
       <div :class="{ name:true,'name-warn': passwordWarn,nameIn:pwdInputStatus}">
         <el-input
-        :type="pwdType"
+          :type="pwdType"
           v-model.trim="form.password"
           :class="{ 'active': passwordInput }"
           placeholder=""
           @focus="pwdInputStatus = true"
           @blur="pwdInputStatus = false"
-          ref='pwdInput'
-        >
+          ref='pwdInput'>
         <i slot="suffix" class="el-icon-view view" @click="showPwd"/></el-input>
-         <!-- <div class="warn-text">
-            <span v-show='passwordWarn'>The password is invalid. Please enter again.</span>
-        </div> -->
       </div>
     </div>
     <div>
@@ -73,7 +61,6 @@
 </template>
 
 <script>
-// import { login } from '@/api/user'
 
 export default {
     name: 'home',
@@ -83,7 +70,6 @@ export default {
             pwdType: 'password',
             nameInputStatus: false,
             pwdInputStatus: false,
-            nameInput: false, // 是否显示输入框样式
             passwordInput: false, // 是否显示输入框样式
             passwordWarn: false, // 显示警告样式
             disabledbtn: true, // 按钮可点击
@@ -98,9 +84,6 @@ export default {
     watch: {
         form: {
             handler: function(val) {
-                if (val.username) {
-                    this.nameInput = true
-                }
                 if (val.username && val.password) {
                     this.disabledbtn = false
                 } else {
@@ -132,13 +115,8 @@ export default {
             }
         },
         querySearchAsync(queryString, cb) {
-            var restaurants = this.restaurants
-            var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants
-
-            clearTimeout(this.timeout)
-            this.timeout = setTimeout(() => {
-                cb(results)
-            })
+            var results = queryString ? this.restaurants.filter(this.createStateFilter(queryString)) : this.restaurants
+            cb(results)
         },
         createStateFilter(queryString) {
             return (state) => {
@@ -165,7 +143,7 @@ export default {
      top: 0 !important;
 }
 .autopopper {
-    margin: 0 auto !important;
+    margin: 0 auto;
     width: 27vmax !important;
     left: 36.5vmax !important;
     margin-top: 9px !important;

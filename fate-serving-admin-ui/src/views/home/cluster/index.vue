@@ -4,18 +4,17 @@
         <div class="overview">
             <div class="cluster">
                 Cluster
-                <!-- <i class="el-icon-caret-bottom"></i> -->
             </div>
             <ul>
-            <li v-if="ArrProxy[0] && ArrProxy[0].children.length" class="proxy" :class="selected === 1 ? 'active' : ''" @click="tabNav(1)">serving-proxy</li>
-            <li v-else class="proxy disabled">serving-proxy</li>
-            <li class="admin">admin</li>
-            <li v-if="ArrServing[0] && ArrServing[0].children.length" class="serving" :class="selected === 2 ? 'active' : ''" @click="tabNav(2)">serving-server</li>
-            <li v-else class="serving disabled">serving-server</li>
-            <li class="caret-l caret"><p></p><i class="el-icon-caret-bottom"></i></li>
-            <li class="caret-r caret"><p></p><i class="el-icon-caret-bottom"></i></li>
-            <li class="caret-c caret"><i class="el-icon-caret-left" /><p></p><i class="el-icon-caret-right"/></li>
-        </ul>
+                <li v-if="ArrProxy[0] && ArrProxy[0].children.length" class="proxy" :class="selected === 1 ? 'active' : ''" @click="tabNav(1)">serving-proxy</li>
+                <li v-else class="proxy disabled">serving-proxy</li>
+                <li class="admin">admin</li>
+                <li v-if="ArrServing[0] && ArrServing[0].children.length" class="serving" :class="selected === 2 ? 'active' : ''" @click="tabNav(2)">serving-server</li>
+                <li v-else class="serving disabled">serving-server</li>
+                <li class="caret-l caret"><p></p><i class="el-icon-caret-bottom"></i></li>
+                <li class="caret-r caret"><p></p><i class="el-icon-caret-bottom"></i></li>
+                <li class="caret-c caret"><i class="el-icon-caret-left" /><p></p><i class="el-icon-caret-right"/></li>
+            </ul>
         </div>
         <div class="ip-list">
             <div class="ip-list-top">
@@ -87,17 +86,6 @@
                         </template>
                     </el-table-column>
                 </el-table>
-                <!-- <div class="pagination">
-                    <el-pagination
-                        background
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page.sync="currentPage1"
-                        :page-size="20"
-                        layout="total, prev, pager, next, jumper"
-                        :total="total"
-                    ></el-pagination>
-                </div> -->
             </div>
             <div v-if="ipInfo === 1" class="ip-info-Models">
                 <div class="search">
@@ -125,7 +113,7 @@
                     <el-table-column sortable width="160" prop="serviceId" label="Service ID" show-overflow-tooltip />
                     <el-table-column sortable width="200" prop="RolePartyID" label="Role & Party ID">
                          <template slot-scope="scope">
-                               <el-popover
+                            <el-popover
                                 placement="bottom"
                                 trigger="hover">
                                 <div>
@@ -151,7 +139,6 @@
                 <div class="pagination">
                     <el-pagination
                         background
-                        @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
                         :current-page.sync="currentPage1"
                         :page-size="20"
@@ -189,13 +176,13 @@
                         <el-button type="primary" @click="sureUnload">Sure</el-button>
                         <el-button type="primary" @click="unloadVisible = false" style="background:#B8BFCC;border: 1px solid #B8BFCC">Cancel</el-button>
                     </span>
-                    </el-dialog>
+                </el-dialog>
             </div>
             <div v-if="ipInfo === 2" class="ip-info-Monitor">
                 <div class="Monitor-chart">
                     <div class="Monitor">
-                    <Monitorchart v-loading="loadingEchart" :callsData="MonitorPolar"/>
-                </div>
+                        <Monitorchart v-loading="loadingEchart" :callsData="MonitorPolar"/>
+                    </div>
                 </div>
             </div>
             <div v-if="ipInfo === 3" class="ip-info-JVM">
@@ -309,21 +296,19 @@ export default {
         getClusterlist() { // 初始化数据
             getCluster().then(res => {
                 this.clusterData = res.data.children
-                if (this.flag) {
-                    this.tabNav()
-                    this.flag = false
-                }
+                this.tabNav()
             })
         },
         tabNav(index) { // proxy，serving tab切换
-            clearInterval(this.trafficTimer)
-            clearInterval(this.JvmTimer)
-            clearInterval(this.JTimer)
-            clearInterval(this.mTimer)
-
+            if (index) {
+                clearInterval(this.trafficTimer)
+                clearInterval(this.JvmTimer)
+                clearInterval(this.JTimer)
+                clearInterval(this.mTimer)
+            }
             this.searchkey = ''
             this.serviceid = ''
-            this.ipInfo = 0
+            // this.ipInfo = 0
             this.activeip = 0
             this.ArrServing = this.clusterData.filter(item => {
                 return item.name === 'serving'
@@ -341,16 +326,21 @@ export default {
             this.selected = +index
             if (this.selected === 2) {
                 this.ipDataArr = this.ArrServing
-                this.ipData = this.ipDataArr[0]
-                this.ipchildrenData = this.ipData.children[0]
-                this.ipPort = this.ipchildrenData.name.split(':')
-                this.listProps()
-            } else if (this.selected === 1) {
+            } else {
                 this.ipDataArr = this.ArrProxy
+            }
+            if (this.ipDataArr[0].children.length) {
                 this.ipData = this.ipDataArr[0]
                 this.ipchildrenData = this.ipData.children[0]
                 this.ipPort = this.ipchildrenData.name.split(':')
-                this.listProps()
+                if (this.flag) {
+                    this.listProps()
+                    this.flag = false
+                }
+            } else {
+                this.ipchildrenData = []
+                this.basicData = []
+                this.ipData = []
             }
         },
         listProps(data) { // 获取 Basic 数据
@@ -479,7 +469,6 @@ export default {
                 port: this.ipPort[1],
                 source: row.resourceName
             }
-
             queryModel(parmas).then(res => {
                 this.oledata = res.data[row.resourceName]
                 if (!this.oledata) {
@@ -549,8 +538,14 @@ export default {
                     this.total = res.data.total
                 })
             } else if (this.ipInfo === 0) {
+                if (this.ipPort.length === 0) {
+                    return false
+                }
                 this.listProps()
             } else if (this.ipInfo === 2) {
+                if (this.ipPort.length === 0) {
+                    return false
+                }
                 const parmas = {
                     host: this.ipPort[0],
                     port: this.ipPort[1]
@@ -564,12 +559,15 @@ export default {
                     var MonitorArr = []
                     for (var j = 0; j < legendArr.length; j++) {
                         const mData = this.Monitordata[legendArr[j]]
+                        if (mData.length === 16) {
+                            mData.pop()
+                        }
                         var xDate = []
                         var dataArr = []
                         for (var z = 0; z < mData.length; z++) {
                             if (mData[z]) {
                                 dataArr.push(mData[z].passQps)
-                                xDate.push(this.date(this.Monitordata[legendArr[0]][z].timestamp))
+                                xDate.push(this.date(mData[z].timestamp))
                             }
                             var op = {
                                 name: legendArr[j],
@@ -588,7 +586,7 @@ export default {
                         for (var i in data) {
                             legendArr.push(i)
                         }
-                        var q = 11
+                        var q = 10
                         clearInterval(this.mTimer)
                         this.mTimer = setInterval(() => {
                             var MonitorArr = []
@@ -620,8 +618,11 @@ export default {
                             this.TrafficMonitor(MonitorArr, xDate, legendArr)
                         }, 1000)
                     })
-                }, 5100)
+                }, 5120)
             } else if (this.ipInfo === 3) {
+                if (this.ipPort.length === 0) {
+                    return false
+                }
                 const parmas = {
                     host: this.ipPort[0],
                     port: this.ipPort[1]
@@ -643,7 +644,7 @@ export default {
                                 j++
                             }, 1000)
                         })
-                    }, 6100)
+                    }, 5100)
                 })
             }
         },
@@ -671,12 +672,8 @@ export default {
                     trigger: 'axis'
                 },
                 legend: {
-
                     right: '150px',
-                    // y: '20px',
                     orient: 'horizontal',
-                    // left: 'center',
-                    // bottom: 'bottom',
                     top: 10,
                     data: MonitorArr,
                     textStyle: {
@@ -702,8 +699,6 @@ export default {
                 },
                 series: MonitorArr
             }
-        },
-        handleSizeChange(val) {
         },
         handleCurrentChange(val) {
             this.page = val
