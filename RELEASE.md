@@ -1,3 +1,7 @@
+# Release 1.3.2
+## Major Features and Improvements
+* Add input feature hitting rate counting for HeteroLR and Hetero SecureBoost
+
 # Release 1.3.0
 ## Major Features and Improvements
 * Hetero Secureboosting communication optimization: communication round is reduced to 1 by letting the host send a pre-computed host node route, which is used for inferencing, to the guest. 

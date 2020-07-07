@@ -41,9 +41,10 @@ public class HeteroLRGuest extends HeteroLR {
     @Override
     public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputData, FederatedParams predictParams) {
         Map<String, Object> result = new HashMap<>(8);
-        Map<String, Double> forwardRet = forward(inputData);
+        Map<String, Double> forwardRet = forward(context, inputData);
+        result.put(Dict.MODELING_FEATURE_HIT_RATE, forwardRet.get(Dict.MODELING_FEATURE_HIT_RATE));
+        result.put(Dict.INPUT_DATA_HIT_RATE, forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
         double score = forwardRet.get(Dict.SCORE);
-
         logger.info("caseid {} guest score:{}", context.getCaseId(), score);
 
         try {
@@ -58,6 +59,8 @@ public class HeteroLRGuest extends HeteroLR {
                     logger.info("caseid {} host score:{}", context.getCaseId(), hostScore);
                     score += hostScore;
                 }
+
+
             }else{
                 logger.info("caseid {} host response is null",context.getCaseId());
             }
@@ -70,6 +73,7 @@ public class HeteroLRGuest extends HeteroLR {
             result.put(Dict.RET_CODE,InferenceRetCode.SYSTEM_ERROR);
         }
         double prob = sigmod(score);
+
         result.put(Dict.PROB, prob);
         //result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE + ":{}", forwardRet.get(Dict.MODEL_WRIGHT_HIT_RATE));
         //result.put(Dict.GUEST_INPUT_DATA_HIT_RATE + ":{}", forwardRet.get(Dict.INPUT_DATA_HIT_RATE));
