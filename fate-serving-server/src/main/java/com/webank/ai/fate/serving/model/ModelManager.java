@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.register.provider.FateServer;
@@ -45,7 +44,9 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 public class ModelManager implements InitializingBean {
@@ -68,9 +69,9 @@ public class ModelManager implements InitializingBean {
 
     public synchronized ModelServiceProto.UnbindResponse unbind(Context context, ModelServiceProto.UnbindRequest req) {
         ModelServiceProto.UnbindResponse.Builder resultBuilder = ModelServiceProto.UnbindResponse.newBuilder();
-        String serviceId = req.getServiceId();
-        Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
-        logger.info("try to unbind model, service id : {}", serviceId);
+        List<String> serviceIds = req.getServiceIdsList();
+        Preconditions.checkArgument(serviceIds != null && serviceIds.size() != 0, "param service id is blank");
+        logger.info("try to unbind model, service id : {}", serviceIds);
         String modelKey = this.getNameSpaceKey(req.getTableName(), req.getNamespace());
         if (!this.namespaceMap.containsKey(modelKey)) {
             logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", req.getTableName(), req.getNamespace());
@@ -78,15 +79,19 @@ public class ModelManager implements InitializingBean {
         }
         Model model = this.namespaceMap.get(modelKey);
         String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-        if (!tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
-            logger.info("unbind request info is error {}", req);
-            throw new ModelNullException("unbind request info is error");
-        }
+
+        serviceIds.forEach(serviceId -> {
+            if (!tableNamekey.equals(this.serviceIdNamespaceMap.get(serviceId))) {
+                logger.info("unbind request info is error {}", req);
+                throw new ModelNullException("unbind request info is error");
+            }
+        });
+
         if (zookeeperRegistry != null) {
             Set<URL> registered = zookeeperRegistry.getRegistered();
             List<URL> unRegisterUrls = Lists.newArrayList();
             for (URL url : registered) {
-                if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceIds.contains(url.getEnvironment())) {
                     unRegisterUrls.add(url);
                 }
             }
@@ -95,7 +100,9 @@ public class ModelManager implements InitializingBean {
             }
             logger.info("Unregister urls: {}", unRegisterUrls);
         }
-        this.serviceIdNamespaceMap.remove(serviceId);
+        serviceIds.forEach(serviceId -> {
+            this.serviceIdNamespaceMap.remove(serviceId);
+        });
         this.store(serviceIdNamespaceMap, serviceIdFile);
         logger.info("unbind model success");
         resultBuilder.setStatusCode(StatusCode.SUCCESS);
@@ -264,9 +271,6 @@ public class ModelManager implements InitializingBean {
             List<String> environments = Lists.newArrayList();
             for (Model model : namespaceMap.values()) {
                 if (Dict.HOST.equals(model.getRole())) {
-                    if (StringUtils.isNotEmpty(model.getServiceId())) {
-                        environments.add(model.getServiceId());
-                    }
                     String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
                     environments.add(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
                 }
@@ -280,8 +284,8 @@ public class ModelManager implements InitializingBean {
                 Model model = namespaceMap.get(modelEntry.getValue());
                 if (model != null) {
                     environments.add(modelEntry.getKey());
+                    environments.add(model.getPartId());
                 }
-                environments.add(model.getPartId());
             }
             this.registerService(environments);
         }
@@ -333,7 +337,7 @@ public class ModelManager implements InitializingBean {
         model.setPartId(req.getLocal().getPartyId());
         model.setRole(Dict.GUEST.equals(role) ? Dict.GUEST : Dict.HOST);
         String serviceId = req.getServiceId();
-        model.setServiceId(serviceId);
+        model.getServiceIds().add(serviceId);
         Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
         ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole());
         Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
@@ -353,8 +357,8 @@ public class ModelManager implements InitializingBean {
         String role = req.getLocal().getRole();
         model.setPartId(req.getLocal().getPartyId());
         model.setRole(Dict.GUEST.equals(role) ? Dict.GUEST : Dict.HOST);
-        String serviceId = req.getServiceId();
-        model.setServiceId(serviceId);
+//        String serviceId = req.getServiceId();
+//        model.setServiceId(serviceId);
         Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
         ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole());
         Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
@@ -414,9 +418,6 @@ public class ModelManager implements InitializingBean {
          *  host model
          */
         if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
-            if (StringUtils.isNotEmpty(model.getServiceId())) {
-                zookeeperRegistry.addDynamicEnvironment(model.getServiceId());
-            }
             String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
             zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
             zookeeperRegistry.register(FateServer.hostServiceSets);
@@ -432,33 +433,66 @@ public class ModelManager implements InitializingBean {
         switch (queryType) {
             case 0:
                 List<Model> allModels = listAllModel();
-                allModels.forEach(model -> {
+                return allModels.stream().map(e -> {
+                    Model clone = (Model) e.clone();
                     this.serviceIdNamespaceMap.forEach((k, v) -> {
-                        String nameSpaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+                        String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
                         if (nameSpaceKey.equals(v)) {
-                            model.setServiceId(k);
+                            clone.getServiceIds().add(k);
                         }
                     });
-                });
-                return allModels;
+                    return clone;
+                }).collect(Collectors.toList());
             case 1:
                 // Fuzzy query
-                Map<String, String> matchModelMap = Maps.newHashMap();
-                this.serviceIdNamespaceMap.forEach((k, v) -> {
-                    if (k.toLowerCase().indexOf(queryModelRequest.getServiceId().toLowerCase()) > -1) {
-                        matchModelMap.put(k, v);
-                    }
-                });
-                if (matchModelMap.isEmpty()) {
-                    return null;
-                }
-                List<Model> models = Lists.newArrayList();
-                matchModelMap.forEach((k, v) -> {
-                    Model model = this.namespaceMap.get(v);
-                    model.setServiceId(k);
-                    models.add(model);
-                });
-                return models;
+                String serviceId = queryModelRequest.getServiceId();
+                return this.namespaceMap.values().stream()
+                    .filter(e -> {
+                        String nameSpaceKey = this.getNameSpaceKey(e.getTableName(), e.getNamespace());
+                        boolean isMatch = false;
+                        for (Map.Entry<String, String> entry : this.serviceIdNamespaceMap.entrySet()) {
+                            if (entry.getKey().toLowerCase().indexOf(serviceId.toLowerCase()) > -1 && nameSpaceKey.equals(entry.getValue())) {
+                                isMatch = true;
+                                break;
+                            }
+                        }
+                        return isMatch;
+                    })
+                    .map(e -> {
+                        Model clone = (Model) e.clone();
+                        String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
+
+                        this.serviceIdNamespaceMap.forEach((k, v) -> {
+                            if (v.equals(nameSpaceKey)) {
+                                clone.getServiceIds().add(k);
+                            }
+                        });
+                        return clone;
+                    })
+                    .collect(Collectors.toList());
+                /*return this.serviceIdNamespaceMap.entrySet().stream()
+                    .filter(entry -> {
+                        if (entry.getKey().toLowerCase().indexOf(serviceId.toLowerCase()) > -1) {
+                            Model model = this.namespaceMap.get(entry.getValue());
+                            if (model != null) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    })
+                    .map(entry -> {
+                        Model model = this.namespaceMap.get(entry.getValue());
+                        Model clone = (Model) model.clone();
+                        String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
+
+                        this.serviceIdNamespaceMap.forEach((k, v) -> {
+                            if (v.equals(nameSpaceKey)) {
+                                clone.getServiceIds().add(k);
+                            }
+                        });
+                        return clone;
+                    })
+                    .collect(Collectors.toList());*/
             default:
                 return null;
         }
@@ -501,23 +535,31 @@ public class ModelManager implements InitializingBean {
             logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", request.getTableName(), request.getNamespace());
             throw new ModelNullException(" found model info, please check if the model is already loaded.");
         }
-        String serviceId = model.getServiceId();
+//        String serviceId = model.getServiceId();
+        List<String> serviceIds = Lists.newArrayList();
+        String nameSpaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        serviceIdNamespaceMap.forEach((k,v) -> {
+            if (v.equals(nameSpaceKey)) {
+                serviceIds.add(k);
+            }
+        });
+
         boolean useRegister = MetaInfo.PROPERTY_USE_REGISTER;
         if (useRegister) {
             String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
             modelKey = EncryptUtils.encrypt(modelKey, EncryptMethod.MD5);
-            logger.info("Unregister environments: {}", StringUtils.join(modelKey, ",", serviceId));
+            logger.info("Unregister environments: {}", StringUtils.join(modelKey, ",", serviceIds));
             Set<URL> registered = zookeeperRegistry.getRegistered();
             List<URL> unRegisterUrls = Lists.newArrayList();
             if (Dict.HOST.equals(model.getRole())) {
                 for (URL url : registered) {
-                    if (modelKey.equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                    if (modelKey.equalsIgnoreCase(url.getEnvironment()) || serviceIds.contains(url.getEnvironment())) {
                         unRegisterUrls.add(url);
                     }
                 }
             } else if (Dict.GUEST.equals(model.getRole())) {
                 for (URL url : registered) {
-                    if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceId.equalsIgnoreCase(url.getEnvironment())) {
+                    if (model.getPartId().equalsIgnoreCase(url.getEnvironment()) || serviceIds.contains(url.getEnvironment())) {
                         unRegisterUrls.add(url);
                     }
                 }
@@ -527,8 +569,10 @@ public class ModelManager implements InitializingBean {
             }
             logger.info("unregister urls: {}", unRegisterUrls);
         }
-        this.namespaceMap.remove(getNameSpaceKey(request.getTableName(), request.getNamespace()));
-        this.serviceIdNamespaceMap.remove(serviceId);
+        this.namespaceMap.remove(nameSpaceKey);
+        serviceIds.forEach(serviceId -> {
+            this.serviceIdNamespaceMap.remove(serviceId);
+        });
         logger.info("unload model success");
         this.store();
         return resultBuilder.build();

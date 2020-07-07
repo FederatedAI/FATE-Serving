@@ -206,11 +206,11 @@ public class ModelController {
             Integer port = requestParams.getPort();
             String tableName = requestParams.getTableName();
             String namespace = requestParams.getNamespace();
-            String serviceId = requestParams.getServiceId();
+            List<String> serviceIds = requestParams.getServiceIds();
 
             Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
-            Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "parameter serviceId is blank");
+            Preconditions.checkArgument(serviceIds != null && serviceIds.size() != 0, "parameter serviceId is blank");
 
             ReturnResult result = new ReturnResult();
 
@@ -223,7 +223,7 @@ public class ModelController {
             ModelServiceProto.UnbindRequest unbindRequest = ModelServiceProto.UnbindRequest.newBuilder()
                     .setTableName(tableName)
                     .setNamespace(namespace)
-                    .setServiceId(serviceId)
+                    .addAllServiceIds(serviceIds)
                     .build();
 
             ListenableFuture<ModelServiceProto.UnbindResponse> future = futureStub.unbind(unbindRequest);

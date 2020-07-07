@@ -52,13 +52,14 @@ public class ModelTest {
         test_model_load("model_2020040111152695637611_guest#9999#arbiter-10000#guest-9999#host-10000#model_cache", "guest", "2020040111152695637611");
         test_model_load("model_2020040111152695637611_host#10000#arbiter-10000#guest-9999#host-10000#model_cache", "host", "2020040111152695637611");
         test_model_Bind("2020040111152695637611", "2020040111152695637611");
+        test_model_Bind("20200707", "2020040111152695637611");
     }
 
     @Test
     public void testLoadSbtModel() {
         test_model_load("model_20200604203524746623105_guest#9999#guest-9999#host-10000#model_cache", "guest", "20200604203524746623105");
         test_model_load("model_20200604203524746623105_host#10000#guest-9999#host-10000#model_cache", "host", "20200604203524746623105");
-        test_model_Bind("local_sbt", "20200604203524746623105");
+        test_model_Bind("local_sbt_20200707", "20200604203524746623105");
     }
 
     @Test

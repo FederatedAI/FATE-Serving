@@ -16,6 +16,8 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
+import java.util.List;
+
 public class RequestParamWrapper {
 
     String username;
@@ -24,7 +26,7 @@ public class RequestParamWrapper {
     Integer port;
     String tableName;
     String namespace;
-    String serviceId;
+    List<String> serviceIds;
     String url;
     String routerMode;
     Integer weight;
@@ -78,12 +80,12 @@ public class RequestParamWrapper {
         this.namespace = namespace;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public List<String> getServiceIds() {
+        return serviceIds;
     }
 
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
+    public void setServiceIds(List<String> serviceIds) {
+        this.serviceIds = serviceIds;
     }
 
     public String getUrl() {

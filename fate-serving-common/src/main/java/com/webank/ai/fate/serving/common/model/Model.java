@@ -18,9 +18,11 @@ package com.webank.ai.fate.serving.common.model;
 
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +46,7 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
      * 实例化好的模型处理类
      */
     private transient ModelProcessor modelProcessor;
-    private String serviceId;
+    private List<String> serviceIds = new ArrayList<>();
     private List<Map> rolePartyMapList;
 
     public Model() {
@@ -107,12 +109,12 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
         this.namespace = namespace;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public List<String> getServiceIds() {
+        return serviceIds;
     }
 
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
+    public void setServiceIds(List<String> serviceIds) {
+        this.serviceIds = serviceIds;
     }
 
     public Map<String, Model> getFederationModelMap() {
@@ -145,13 +147,7 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
 
     @Override
     public Object clone() {
-        Object obj = null;
-        try {
-            obj = super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return obj;
+        return SerializationUtils.clone(this);
     }
 
     @Override

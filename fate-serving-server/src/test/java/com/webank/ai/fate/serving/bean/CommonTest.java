@@ -91,7 +91,10 @@ public class CommonTest {
 
         System.err.println("StatusCode ==================" + response.getRetcode());
         System.err.println("Message ==================" + response.getMessage());
-        System.err.println("result ==================" + JsonUtil.object2Json(response.getModelInfosList()));
+        List<ModelServiceProto.ModelInfoEx> modelInfosList = response.getModelInfosList();
+        for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
+            System.err.println("result ==================" + JsonUtil.object2Json(modelInfoEx.getContent()));
+        }
     }
 
 

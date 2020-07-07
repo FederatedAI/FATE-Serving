@@ -68,7 +68,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.QueryModelResponse.Builder builder = ModelServiceProto.QueryModelResponse.newBuilder();
         if (CollectionUtils.isNotEmpty(models)) {
             for (int i = 0; i < models.size(); i++) {
-                Model model = (Model) models.get(i).clone();
+                Model model = models.get(i);
                 if (model == null) {
                     continue;
                 }
@@ -98,7 +98,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 modelExBuilder.setIndex(i);
                 modelExBuilder.setTableName(model.getTableName());
                 modelExBuilder.setNamespace(model.getNamespace());
-                modelExBuilder.setServiceId(model.getServiceId());
+                modelExBuilder.addAllServiceIds(model.getServiceIds());
                 modelExBuilder.setContent(JsonUtil.object2Json(model));
                 builder.addModelInfos(modelExBuilder.build());
             }

@@ -31,7 +31,7 @@ message UnloadResponse{
 }
 
 message UnbindRequest{
-    string serviceId = 1;
+    repeated string serviceIds = 1;
     string tableName = 2;
     string namespace = 3;
 }
@@ -56,7 +56,7 @@ message ModelBindInfo{
 message ModelInfoEx{
     string tableName = 1;
     string namespace = 2;
-    string serviceId = 3;
+    repeated string serviceIds = 3;
     string content = 4;
     int32    index = 5;
 
