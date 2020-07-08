@@ -42,11 +42,11 @@
                 <version>${frontend-maven-plugin.version}</version>
                 <configuration>
                     <!-- optional: where to download node from. Defaults to https://nodejs.org/dist/ -->
-                    <nodeDownloadRoot>http://npm.taobao.org/mirrors/node</nodeDownloadRoot>
+                    <nodeDownloadRoot>http://npm.taobao.org/mirrors/node/</nodeDownloadRoot>
                     <!-- optional: where to download npm from. Defaults to https://registry.npmjs.org/npm/-/ -->
                     <npmDownloadRoot>https://npm.taobao.org/mirrors/npm/</npmDownloadRoot>
                     <!-- optional: registry override, passed as the registry option during npm install if set. -->
-                    <npmRegistryURL>https://registry.npm.taobao.org</npmRegistryURL>
+                    <npmRegistryURL>https://registry.npm.taobao.org/</npmRegistryURL>
                 </configuration>
                 <executions>
                     <execution>
