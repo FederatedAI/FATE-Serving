@@ -31,6 +31,7 @@ public class ServiceDataWrapper {
     private Long version;
     private Integer weight;
     private int index;
+    private boolean needVerify;
 
     public String getUrl() {
         return url;
@@ -118,6 +119,14 @@ public class ServiceDataWrapper {
 
     public void setCallName(String callName) {
         this.callName = callName;
+    }
+
+    public boolean isNeedVerify() {
+        return needVerify;
+    }
+
+    public void setNeedVerify(boolean needVerify) {
+        this.needVerify = needVerify;
     }
 
     @Override

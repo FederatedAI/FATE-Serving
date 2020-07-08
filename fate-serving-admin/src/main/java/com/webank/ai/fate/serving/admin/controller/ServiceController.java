@@ -8,6 +8,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.admin.bean.VerifyService;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import io.grpc.ManagedChannel;
@@ -78,6 +79,7 @@ public class ServiceController {
                         wrapper.setVersion(Long.parseLong(url.getParameter("version", "100")));
                         wrapper.setWeight(Integer.parseInt(url.getParameter("weight", "100")));
                         wrapper.setIndex(index);
+                        wrapper.setNeedVerify(VerifyService.contains(wrapper.getCallName()));
                         resultList.add(wrapper);
                         index++;
                     }
