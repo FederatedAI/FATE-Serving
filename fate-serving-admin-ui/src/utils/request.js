@@ -16,7 +16,7 @@ const service = axios.create({
 service.interceptors.request.use(
     config => {
         // 开启全局loading
-        if (config.url !== '/api/component/list' && config.url !== '/api/monitor/query' && config.url !== '/api/monitor/queryJvm') {
+        if (config.url !== '/api/component/list' && config.url !== '/api/monitor/query' && config.url !== '/api/monitor/queryJvm' && config.url !== '/api/monitor/queryModel') {
             let loading = document.getElementById('ajaxLoading')
             loading.style.display = 'block'
         }

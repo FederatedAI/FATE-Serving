@@ -11,10 +11,11 @@ import 'echarts'
 import App from './App'
 import store from './store'
 import router from './router'
-import waterfall from 'vue-waterfall2'
 import '@/icons' // icon
 
 import '@/permission' // permission control
+
+import * as filters from './filters'
 
 /**
  * This project originally used easy-mock to simulate data,
@@ -28,12 +29,9 @@ import '@/permission' // permission control
 if (process.env.NODE_ENV === 'mock') {
     require('../mock') // simulation data
 }
-Vue.use(waterfall)
+Object.keys(filters).forEach(key => Vue.filter(key, filters[key]))
 Vue.use(ElementUI, { locale })
-// Vue.use(VueClipboard)
-// Vue.use(mavonEditor)
-// Vue.component('my-tooltip', Tooltip)
-Vue.component('v-chart', ECharts)// 全局使用
+Vue.component('v-chart', ECharts)
 Vue.config.productionTip = false
 /* eslint-disable no-new */
 new Vue({

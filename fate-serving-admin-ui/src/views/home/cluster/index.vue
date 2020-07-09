@@ -1,228 +1,319 @@
 <template>
-<div class="main">
-    <div class="ip-selector">
-        <div class="overview">
-            <div class="cluster">
-                Cluster
+    <div class="main">
+        <div class="ip-selector">
+            <div class="overview">
+                <div class="cluster">Cluster</div>
+                <overview :selected="selected" :ArrProxy="ArrProxy" :ArrServing="ArrServing" @tabNav="tabNav"/>
             </div>
-            <ul>
-                <li v-if="ArrProxy[0] && ArrProxy[0].children.length" class="proxy" :class="selected === 1 ? 'active' : ''" @click="tabNav(1)">serving-proxy</li>
-                <li v-else class="proxy disabled">serving-proxy</li>
-                <li class="admin">admin</li>
-                <li v-if="ArrServing[0] && ArrServing[0].children.length" class="serving" :class="selected === 2 ? 'active' : ''" @click="tabNav(2)">serving-server</li>
-                <li v-else class="serving disabled">serving-server</li>
-                <li class="caret-l caret"><p></p><i class="el-icon-caret-bottom"></i></li>
-                <li class="caret-r caret"><p></p><i class="el-icon-caret-bottom"></i></li>
-                <li class="caret-c caret"><i class="el-icon-caret-left" /><p></p><i class="el-icon-caret-right"/></li>
-            </ul>
-        </div>
-        <div class="ip-list">
-            <div class="ip-list-top">
-                <span class="ip-list-tit">{{ selected === 1 ? 'serving-proxy' : 'serving-server' }}</span>
-                <span class="ip-list-des">Click IP to view the  instance details</span>
-            </div>
-            <div class="instance">
-                <!-- <el-input
+            <div class="ip-list">
+                <div class="ip-list-top">
+                    <span
+                        class="ip-list-tit"
+                    >{{ selected === 1 ? 'serving-proxy' : 'serving-server' }}</span>
+                    <span class="ip-list-des">Click IP to view the instance details</span>
+                </div>
+                <div class="instance">
+                    <!-- <el-input
                     placeholder="search for instance"
                     v-model="instance"
                     @change="searchInstance">
                     <el-button slot="prepend" icon="el-icon-search"></el-button>
-                </el-input> -->
-            </div>
-            <div class="ip-list-line" ></div>
-            <div class="ip-list-main">
-                <div>
-                    <div class="ip-list-li" v-for="(item,index) in ipData.children" :key = index @click="selectIP(item,index)">
-                        <span :class="activeip === index ? 'activeip' : ''">{{ item && item.name }}</span>
-                        <span class="iptime" :class="activeip === index ? 'activetime' : ''">{{ item.timestamp | datefrom}}</span>
-                    </div>
+                    </el-input>-->
+                </div>
+                <div class="ip-list-line"></div>
+                <div class="ip-list-main">
+                    <iplist :activeip="activeip" :ipData="ipData" @selectIP="selectIP"/>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="ip-info">
-        <el-popover
-            placement="bottom"
-            width="400"
-            popper-class="titpopover"
-            trigger="click">
-            <div class="titpopover-main">
-                <div class="titpopover-label" v-for="(item, index) in ipData.children" :key="index" @click="selectIP(item, index)">
-                    {{item && item.label}}
+        <div class="ip-info">
+            <el-popover placement="bottom" width="400" popper-class="titpopover" trigger="click">
+                <div class="titpopover-main">
+                    <div
+                        class="titpopover-label"
+                        v-for="(item, index) in ipData.children"
+                        :key="index"
+                        @click="selectIP(item, index)"
+                    >{{item && item.label}}</div>
                 </div>
-            </div>
-            <div class="ip-info-tit" slot="reference">
-                {{ ipchildrenData && ipchildrenData.label }}<i class="el-icon-caret-bottom"></i>
-            </div>
-        </el-popover>
-        <ul class="ul" :class="ipInfo === 1 || ipInfo === 0   ? 'ulBasic' : ''">
-            <li :class="ipInfo === 0 ? 'activeInfo' : ''" @click="tabipInfo(0)">Basic</li>
-            <li v-if="selected === 2" :class="ipInfo === 1 ? 'activeInfo' : ''" @click="tabipInfo(1)">Models</li>
-            <li :class="ipInfo === 2 ? 'activeInfo' : ''" @click="tabipInfo(2)">Traffic Monitor</li>
-            <li :class="ipInfo === 3 ? 'activeInfo' : ''" @click="tabipInfo(3)">JVM</li>
-        </ul>
-        <div class="ip-info-main" :class="ipInfo === 3 ?'info-main' : ''">
-            <div v-if="ipInfo === 0" class="ip-info-Basic">
-                <div class="search">
-                    <el-input
-                        placeholder="Keyword"
-                        v-model="searchkey"
-                        @change="searchKeyword">
-                        <el-button slot="prepend" icon="el-icon-search"></el-button>
-                    </el-input>
+                <div class="ip-info-tit" slot="reference">
+                    {{ ipchildrenData && ipchildrenData.label }}
+                    <i class="el-icon-caret-bottom"></i>
                 </div>
-                <el-table
-                    :data="basicData"
-                    :header-cell-style="{background:'#fff'}"
-                    style="width: 100%;margin-bottom: 20px;"
-                    max-height="668px"
-                    class="table">
-                    <el-table-column sortable prop="key" label="key" show-overflow-tooltip />
-                    <el-table-column sortable prop="value" label="value" show-overflow-tooltip >
-                        <template slot-scope="scope">
-                            <span>
-                                {{ scope.row.value }}
-                            </span>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </div>
-            <div v-if="ipInfo === 1" class="ip-info-Models">
-                <div class="search">
-                    <el-input
-                        placeholder="Service ID"
-                        v-model="serviceid"
-                        @change="searchServiceID">
-                        <el-button slot="prepend" icon="el-icon-search"></el-button>
-                    </el-input>
+            </el-popover>
+            <ul class="ul" :class="ipInfo === 1 || ipInfo === 0   ? 'ulBasic' : ''">
+                <li :class="ipInfo === 0 ? 'activeInfo' : ''" @click="tabipInfo(0)">Basic</li>
+                <li
+                    v-if="selected === 2"
+                    :class="ipInfo === 1 ? 'activeInfo' : ''"
+                    @click="tabipInfo(1)"
+                >Models</li>
+                <li :class="ipInfo === 2 ? 'activeInfo' : ''" @click="tabipInfo(2)">Traffic Monitor</li>
+                <li :class="ipInfo === 3 ? 'activeInfo' : ''" @click="tabipInfo(3)">JVM</li>
+            </ul>
+            <div class="ip-info-main" :class="ipInfo === 3 ?'info-main' : ''">
+                <div v-if="ipInfo === 0" class="ip-info-Basic">
+                    <div class="search">
+                        <el-input placeholder="Keyword" v-model="searchkey" @change="searchKeyword">
+                            <el-button slot="prepend" icon="el-icon-search"></el-button>
+                        </el-input>
+                    </div>
+                    <el-table
+                        :data="basicData"
+                        :header-cell-style="{background:'#fff'}"
+                        style="width: 100%;margin-bottom: 20px;"
+                        max-height="668px"
+                        class="table"
+                    >
+                        <el-table-column sortable prop="key" label="key" show-overflow-tooltip />
+                        <el-table-column sortable prop="value" label="value" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                <span>{{ scope.row.value }}</span>
+                            </template>
+                        </el-table-column>
+                    </el-table>
                 </div>
-                <el-table
-                    :data="ModelsData"
-                    :header-cell-style="{background:'#fff'}"
-                    style="width: 100%;margin-bottom: 20px;"
-                    height="calc(100% - 320px)"
-                    class="table">
-                    <el-table-column sortable width="350" prop="namespace" label="Model ID" show-overflow-tooltip />
-                    <el-table-column sortable width="220" prop="tableName" label="Model Version" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <span>
-                                {{ scope.row.tableName }}
-                            </span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column sortable width="160" prop="serviceId" label="Service ID" show-overflow-tooltip />
-                    <el-table-column sortable width="200" prop="RolePartyID" label="Role & Party ID">
-                         <template slot-scope="scope">
-                            <el-popover
-                                placement="bottom"
-                                trigger="hover">
-                                <div>
-                                    <div style="wadth:75px"><span v-for="(item,index) in scope.row.rolePartyMapList" :key="index">{{item.role}}-{{item.partId}}<span v-if="index+1 !== scope.row.rolePartyMapList.length">,</span></span></div>
-                                </div>
-                                <span slot="reference" style="white-space: nowrap;"><span v-for="(item,index) in scope.row.rolePartyMapList" :key="index">{{item.role}}-{{item.partId}}<span v-if="index+1 !== scope.row.rolePartyMapList.length">,</span></span></span>
-                            </el-popover>
-                        </template>
-                    </el-table-column>
-                    <el-table-column sortable width="180" prop="timestamp" label="Timestamp" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <span>{{ scope.row.timestamp | datefrom }}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column width="200" label="Operation">
-                        <template slot-scope="scope">
-                            <el-button type="text" style="font-size: 18px" class="marketing" size="mini" @click="showDialog(scope.row)"></el-button>
-                            <el-button type="text" style="font-size: 14px" size="mini" @click="unload(scope.row)">Unload</el-button>
-                            <el-button type="text" style="font-size: 14px" size="mini" @click="unbind(scope.row )">Unbind</el-button>
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <div class="pagination">
-                    <el-pagination
-                        background
-                        @current-change="handleCurrentChange"
-                        :current-page.sync="currentPage1"
-                        :page-size="20"
-                        layout="total, prev, pager, next, jumper"
-                        :total="total"
-                    ></el-pagination>
-                </div>
-                <el-dialog title="Model monitor" width="50%" custom-class="dialogtit" :visible.sync="dialogVisible">
-                    <div class="chart">
-                         <modelchart :callsData="polar"/>
-                         <!-- <div v-else class="no-data">
+                <div v-if="ipInfo === 1" class="ip-info-Models">
+                    <div class="search">
+                        <el-input
+                            placeholder="Service ID"
+                            v-model="serviceid"
+                            @change="searchServiceID"
+                        >
+                            <el-button slot="prepend" icon="el-icon-search"></el-button>
+                        </el-input>
+                    </div>
+                    <el-table
+                        :data="ModelsData"
+                        :header-cell-style="{background:'#fff'}"
+                        style="width: 100%;margin-bottom: 20px;"
+                        height="calc(100% - 320px)"
+                        class="table"
+                    >
+                        <el-table-column
+                            sortable
+                            width="350"
+                            prop="namespace"
+                            label="Model ID"
+                            show-overflow-tooltip
+                        />
+                        <el-table-column
+                            sortable
+                            width="220"
+                            prop="tableName"
+                            label="Model Version"
+                            show-overflow-tooltip
+                        >
+                            <template slot-scope="scope">
+                                <span>{{ scope.row.tableName }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column sortable width="160" prop="serviceId" label="Service ID">
+                            <template slot-scope="scope">
+                                <el-popover
+                                    placement="bottom"
+                                    trigger="hover">
+                                    <div>
+                                        <div style="wadth:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
+                                    </div>
+                                    <span slot="reference" style="white-space: nowrap;">
+                                        <span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}
+                                            <span v-if="index+1 !== scope.row.serviceIds.length">,</span>
+                                        </span>
+                                    </span>
+                                </el-popover>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            sortable
+                            width="200"
+                            prop="RolePartyID"
+                            label="Role & Party ID"
+                        >
+                            <template slot-scope="scope">
+                                <el-popover placement="bottom" trigger="hover">
+                                    <div>
+                                        <div style="wadth:75px">
+                                            <span
+                                                v-for="(item,index) in scope.row.rolePartyMapList"
+                                                :key="index"
+                                            >
+                                                {{item.role}}-{{item.partId}}
+                                                <span
+                                                    v-if="index+1 !== scope.row.rolePartyMapList.length"
+                                                >,</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span slot="reference" style="white-space: nowrap;">
+                                        <span
+                                            v-for="(item,index) in scope.row.rolePartyMapList"
+                                            :key="index"
+                                        >
+                                            {{item.role}}-{{item.partId}}
+                                            <span
+                                                v-if="index+1 !== scope.row.rolePartyMapList.length"
+                                            >,</span>
+                                        </span>
+                                    </span>
+                                </el-popover>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            sortable
+                            width="180"
+                            prop="timestamp"
+                            label="Timestamp"
+                            show-overflow-tooltip
+                        >
+                            <template slot-scope="scope">
+                                <span>{{ scope.row.timestamp | dateform }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column width="200" label="Operation">
+                            <template slot-scope="scope">
+                                <el-button
+                                    type="text"
+                                    style="font-size: 18px"
+                                    class="marketing"
+                                    size="mini"
+                                    @click="showDialog(scope.row)"
+                                ></el-button>
+                                <el-button
+                                    type="text"
+                                    style="font-size: 14px"
+                                    size="mini"
+                                    @click="unload(scope.row)"
+                                >Unload</el-button>
+                                <el-button
+                                    type="text"
+                                    style="font-size: 14px"
+                                    size="mini"
+                                    @click="unbind(scope.row )"
+                                >Unbind</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <div class="pagination">
+                        <el-pagination
+                            background
+                            @current-change="handleCurrentChange"
+                            :current-page.sync="currentPage1"
+                            :page-size="20"
+                            layout="total, prev, pager, next, jumper"
+                            :total="total"
+                        ></el-pagination>
+                    </div>
+                    <el-dialog
+                        title="Model monitor"
+                        width="50%"
+                        custom-class="dialogtit"
+                        :visible.sync="dialogVisible"
+                    >
+                        <div class="chart">
+                            <modelchart :callsData="polar" />
+                            <!-- <div v-else class="no-data">
                              no Data
-                         </div> -->
-                    </div>
-                </el-dialog>
-                <el-dialog
-                    :visible.sync="unbindVisible"
-                    width="35%"
-                    top="15%"
-                    center>
-                    <span>Unbind the Service "<span style="color:#217AD9">{{ rowData.serviceId }}</span>"</span><br>
-                    <span>with this model ? ? </span>
-                    <span slot="footer" class="dialog-footer dialog-but">
-                        <el-button type="primary" @click="sureUnbind">Sure</el-button>
-                        <el-button type="primary" @click="unbindVisible = false" style="background:#B8BFCC;border: 1px solid #B8BFCC">Cancel</el-button>
-                    </span>
-                </el-dialog>
-                <el-dialog
-                    :visible.sync="unloadVisible"
-                    width="35%"
-                    top="15%"
-                    center>
-                    <span>Unload model "<span style="color:#217AD9">{{ rowData.tableName }}</span>" ?</span>
-                    <span slot="footer" class="dialog-footer dialog-but">
-                        <el-button type="primary" @click="sureUnload">Sure</el-button>
-                        <el-button type="primary" @click="unloadVisible = false" style="background:#B8BFCC;border: 1px solid #B8BFCC">Cancel</el-button>
-                    </span>
-                </el-dialog>
-            </div>
-            <div v-if="ipInfo === 2" class="ip-info-Monitor">
-                <div class="Monitor-chart">
-                    <div class="Monitor">
-                        <Monitorchart v-loading="loadingEchart" :callsData="MonitorPolar"/>
+                            </div>-->
+                        </div>
+                    </el-dialog>
+                    <el-dialog :visible.sync="unbindVisible" width="35%" top="15%" center>
+                        <span>Please select the Service IDs</span><br>
+                        <span>you want to unbind with this model,</span>
+                        <div class="choose-serviceid">
+                            <el-checkbox-group v-model="serviceIDCheckList">
+                            <el-checkbox v-for="(item,index) in rowData.serviceIds"
+                                :key="index" :label="item">
+                            </el-checkbox>
+                        </el-checkbox-group>
+                        </div>
+                        <span slot="footer" class="dialog-footer dialog-but">
+                            <el-button type="primary" :disabled="!serviceIDCheckList.length" @click="sureUnbind">Sure</el-button>
+                            <el-button
+                                type="primary"
+                                @click="unbindVisible = false"
+                                style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                            >Cancel</el-button>
+                        </span>
+                    </el-dialog>
+                    <el-dialog :visible.sync="unloadVisible" width="35%" top="15%" center>
+                        <span>
+                            Unload model "
+                            <span style="color:#217AD9">{{ rowData.tableName }}</span>" ?
+                        </span>
+                        <span slot="footer" class="dialog-footer dialog-but">
+                            <el-button type="primary" @click="sureUnload">Sure</el-button>
+                            <el-button
+                                type="primary"
+                                @click="unloadVisible = false"
+                                style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                            >Cancel</el-button>
+                        </span>
+                    </el-dialog>
+                </div>
+                <div v-if="ipInfo === 2" class="ip-info-Monitor">
+                    <div class="Monitor-chart">
+                        <div class="Monitor">
+                            <monitorchart v-loading="loadingEchart" :callsData="MonitorPolar" />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div v-if="ipInfo === 3" class="ip-info-JVM">
-                <ul class="JVM-ul" :class="JVMInfo === 1 || JVMInfo === 0  ? 'ulBasic' : ''">
-                    <li :class="JVMInfo === 0 ? 'activeInfo' : ''" @click="tabJVMInfo(0)">Memory</li>
-                    <li :class="JVMInfo === 1 ? 'activeInfo' : ''" @click="tabJVMInfo(1)">GC Frequency</li>
-                    <li :class="JVMInfo === 2 ? 'activeInfo' : ''" @click="tabJVMInfo(2)">GC Time</li>
-                    <li :class="JVMInfo === 3 ? 'activeInfo' : ''" @click="tabJVMInfo(3)">Thread Count</li>
-                </ul>
-                <div class="jvm-chart" ref="jvm">
-                    <div class="jvm-ch">
-                        <jvmchart v-if="ipInfo === 3" :callsData="{JvmData,JVMInfo}"/>
+                <div v-if="ipInfo === 3" class="ip-info-JVM">
+                    <ul class="JVM-ul" :class="JVMInfo === 1 || JVMInfo === 0  ? 'ulBasic' : ''">
+                        <li :class="JVMInfo === 0 ? 'activeInfo' : ''" @click="tabJVMInfo(0)">Memory</li>
+                        <li
+                            :class="JVMInfo === 1 ? 'activeInfo' : ''"
+                            @click="tabJVMInfo(1)"
+                        >GC Frequency</li>
+                        <li
+                            :class="JVMInfo === 2 ? 'activeInfo' : ''"
+                            @click="tabJVMInfo(2)"
+                        >GC Time</li>
+                        <li
+                            :class="JVMInfo === 3 ? 'activeInfo' : ''"
+                            @click="tabJVMInfo(3)"
+                        >Thread Count</li>
+                    </ul>
+                    <div class="jvm-chart" ref="jvm">
+                        <div class="jvm-ch">
+                            <jvmchart v-if="ipInfo === 3" :callsData="{JvmData,JVMInfo}" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </template>
 
 <script>
 import moment from 'moment'
-import jvmchart from './jvmchart'
-import Monitorchart from './Monitorchart'
-import modelchart from './modelchart'
-import { getCluster, getlistProps, getmodellist, modelUnload, modelUnbind, queryModel, queryMonitor, queryJvm } from '@/api/cluster'
+import overview from './components/overview'
+import iplist from './components/iplist'
+import jvmchart from './components/jvmchart'
+import monitorchart from './components/monitorchart'
+import modelchart from './components/modelchart'
+import {
+    getCluster,
+    getlistProps,
+    getmodellist,
+    modelUnload,
+    modelUnbind,
+    queryModel,
+    queryMonitor,
+    queryJvm
+} from '@/api/cluster'
 export default {
     name: 'cluster',
-    filters: {
-        datefrom(value) {
-            return value ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '--'
-        }
-    },
     components: {
+        overview,
+        iplist,
         jvmchart,
-        Monitorchart,
+        monitorchart,
         modelchart
     },
     data() {
         return {
+            serviceIDCheckList: [],
             polar: {}, // model图表信息
             MonitorPolar: {}, // Monitor图表信息
             JVMPolar: {}, // JVM图表信息
@@ -247,29 +338,27 @@ export default {
             unbindVisible: false, // unbind
             unloadVisible: false, // unload
             flag: true,
-            clusterTimer: null, // ip列表定时器
             ModelsData: [], // Models数据
             JVMInfo: 0, //  JVM tab
             JvmData: [], //  JVM 数据
             Monitordata: {}, // Traffic Monitor数据
+            MonitorXdate: [], // Traffic Monitor数据横坐标
+            MonitorYvalue: [],
             oledata: [], // Models 弹框图表数据
-            JvmTimer: null, // Jvm 5秒定时期
-            JTimer: null, // Jvm 1秒定时期
-            trafficTimer: null, // Traffic Monitor定时器
-            mTimer: null, // Traffic Monitor1秒定时期
-            modelsTimer: null, // Models 弹框图表定时器
-            moTimer: null, // Models 弹框图表1秒定时器
             JVMseries: [],
             ArrServing: [],
-            ArrProxy: []
+            ArrProxy: [],
+            clusterTimer: null, // ip列表定时器
+            chartTimer: null // 视图定时器
         }
     },
     watch: {
         dialogVisible: {
             handler: function(val) {
                 if (!val) {
-                    clearInterval(this.modelsTimer)
-                    clearInterval(this.moTimer)
+                    // clearInterval(this.modelsTimer)
+                    // clearInterval(this.moTimer)
+                    this.clearChartTimer()
                 }
             },
             immediate: true,
@@ -284,43 +373,41 @@ export default {
         }, 5000)
     },
     beforeDestroy() {
+        this.clearChartTimer()
         clearInterval(this.clusterTimer)
-        clearInterval(this.trafficTimer)
-        clearInterval(this.JvmTimer)
-        clearInterval(this.JTimer)
-        clearInterval(this.mTimer)
-        clearInterval(this.modelsTimer)
-        clearInterval(this.moTimer)
     },
     methods: {
-        getClusterlist() { // 初始化数据
+        getClusterlist() {
+            // 初始化数据
             getCluster().then(res => {
                 this.clusterData = res.data.children
                 this.tabNav()
             })
         },
-        tabNav(index) { // proxy，serving tab切换
+        tabNav(index) {
             if (index) {
-                clearInterval(this.trafficTimer)
-                clearInterval(this.JvmTimer)
-                clearInterval(this.JTimer)
-                clearInterval(this.mTimer)
+                this.searchkey = ''
+                this.serviceid = ''
             }
-            this.searchkey = ''
-            this.serviceid = ''
             // this.ipInfo = 0
             this.activeip = 0
             this.ArrServing = this.clusterData.filter(item => {
                 return item.name === 'serving'
-            }
-            )
+            })
             this.ArrProxy = this.clusterData.filter(item => {
                 return item.name === 'proxy'
-            }
-            )
-            if (this.ArrServing[0] && this.ArrServing[0].children.length && !index) {
+            })
+            if (
+                this.ArrServing[0] &&
+                this.ArrServing[0].children.length &&
+                !index
+            ) {
                 index = 2
-            } else if (this.ArrProxy[0] && this.ArrProxy[0].children.length && !index) {
+            } else if (
+                this.ArrProxy[0] &&
+                this.ArrProxy[0].children.length &&
+                !index
+            ) {
                 index = 1
             }
             this.selected = +index
@@ -343,7 +430,8 @@ export default {
                 this.ipData = []
             }
         },
-        listProps(data) { // 获取 Basic 数据
+        listProps(data) {
+            // 获取 Basic 数据
             const params = {
                 host: this.ipPort[0],
                 port: this.ipPort[1],
@@ -354,11 +442,13 @@ export default {
                 this.total = res.data.total
             })
         },
-        unload(row) { // unload
+        unload(row) {
+            // unload
             this.rowData = row
             this.unloadVisible = true
         },
-        sureUnload() { // 确定unload
+        sureUnload() {
+            // 确定unload
             this.unloadVisible = false
             const params = {
                 host: this.ipPort[0],
@@ -372,20 +462,24 @@ export default {
                 }
             })
         },
-        date(value) { // 时间格式函数
+        date(value) {
+            // 时间格式函数
             return value ? moment(value).format('HH:mm:ss') : '--'
         },
-        unbind(row) { // unbind
+        unbind(row) {
+            // unbind
             this.rowData = row
             this.unbindVisible = true
+            this.serviceIDCheckList = []
         },
-        sureUnbind() { // 确定unbind
+        sureUnbind() {
+            // 确定unbind
             const params = {
                 host: this.ipPort[0],
                 port: this.ipPort[1],
                 tableName: this.rowData.tableName,
                 namespace: this.rowData.namespace,
-                serviceId: this.rowData.serviceId
+                serviceIds: this.serviceIDCheckList
             }
             this.unbindVisible = false
             modelUnbind(params).then(res => {
@@ -394,15 +488,17 @@ export default {
                 }
             })
         },
-        modelpolar() { // 获取model 弹框数据
+        modelpolar() {
+            // 获取model 弹框数据
             const xDate = []
             const yData = []
-            this.oledata && this.oledata.forEach((item, index) => {
-                if (item) {
-                    xDate.push(this.date(item.timestamp))
-                    yData.push(item.passQps)
-                }
-            })
+            this.oledata &&
+                this.oledata.forEach((item, index) => {
+                    if (item) {
+                        xDate.push(this.date(item.timestamp))
+                        yData.push(item.passQps)
+                    }
+                })
             this.polar = {
                 xAxis: {
                     type: 'category',
@@ -413,7 +509,7 @@ export default {
                         lineStyle: {
                             type: 'solid',
                             color: '#848C99', // y轴的颜色
-                            width: '3'// y坐标轴线的宽度
+                            width: '3' // y坐标轴线的宽度
                         }
                     },
                     axisLabel: {
@@ -443,7 +539,7 @@ export default {
                         lineStyle: {
                             type: 'solid',
                             color: '#848C99', // y轴的颜色
-                            width: '1'// y坐标轴线的宽度
+                            width: '1' // y坐标轴线的宽度
                         }
                     },
                     axisLabel: {
@@ -452,60 +548,66 @@ export default {
                         }
                     }
                 },
-                series: [{
-                    name: '',
-                    data: yData,
-                    type: 'line',
-                    itemStyle: {
-                        color: '#4AA2FF'
+                series: [
+                    {
+                        name: '',
+                        data: yData,
+                        type: 'line',
+                        itemStyle: {
+                            color: '#4AA2FF'
+                        }
                     }
-                }]
+                ]
             }
         },
-        showDialog(row) { // 显示model 弹框
+        showDialog(row) {
+            // 显示model 弹框
             this.dialogVisible = true
-            const parmas = {
+            const params = {
                 host: this.ipPort[0],
                 port: this.ipPort[1],
                 source: row.resourceName
             }
-            queryModel(parmas).then(res => {
-                this.oledata = res.data[row.resourceName]
-                if (!this.oledata) {
-                    this.modelpolar(this.oledata)
-                    return
-                }
-                this.modelpolar(this.oledata)
-                this.modelsTimer = setInterval(() => {
-                    queryModel(parmas).then(res => {
-                        const oledata = res.data[row.resourceName]
-                        if (!oledata) {
-                            return
-                        }
-                        var im = 4
-                        clearInterval(this.moTimer)
-                        this.moTimer = setInterval(() => {
-                            if (this.oledata.length > 100) {
-                                this.oledata.shift()
-                            }
-                            this.oledata.push(oledata[im])
-                            this.modelpolar(this.oledata)
-                            im++
-                        }, 1000)
-                    })
-                }, 5100)
+            this.handleModelData(params)
+            this.setChartTimer(() => {
+                this.handleModelData(params)
             })
         },
-        searchServiceID() { // Models 搜索ServiceID
+        handleModelData(params) {
+            // 1获得数据
+            queryModel(params).then(res => {
+                // 2获取增量数据
+                let data, incomingData
+                ;[data, incomingData] = this.getIncomingData(
+                    this.oledata,
+                    res.data[params.source]
+                )
+                if (!incomingData) {
+                    return
+                }
+                // 3处理数据
+                if (data.length > 60) {
+                    data.shift()
+                }
+                // 4赋值图表
+                this.oledata = data
+                this.modelpolar(this.oledata)
+            })
+        },
+        searchServiceID() {
+            // Models 搜索ServiceID
             this.tabipInfo(this.ipInfo)
         },
-        searchKeyword() { // Basic 搜索key
+        searchKeyword() {
+            // Basic 搜索key
             this.listProps(this.searchkey)
         },
-        searchInstance() { // ip搜索
+        searchInstance() {
+            // ip搜索
             // console.log(this.instance)
         },
-        selectIP(item, index) { // 选中ip
+        selectIP(item, index) {
+            // 选中ip
             this.activeip = +index
             this.ipchildrenData = item
             this.ipPort = this.ipchildrenData.name.split(':')
@@ -515,14 +617,13 @@ export default {
                 this.tabipInfo(this.ipInfo)
             }
         },
-        tabJVMInfo(index) { // JVM tab
+        tabJVMInfo(index) {
+            // JVM tab
             this.JVMInfo = +index
         },
-        tabipInfo(index) { //  Basic、Models  tab
-            clearInterval(this.trafficTimer)
-            clearInterval(this.JvmTimer)
-            clearInterval(this.JTimer)
-            clearInterval(this.mTimer)
+        tabipInfo(index) {
+            //  Basic、Models  tab
+            this.clearChartTimer()
             this.ipInfo = +index
             if (this.ipInfo === 1) {
                 this.MonitorPolar = {}
@@ -546,109 +647,123 @@ export default {
                 if (this.ipPort.length === 0) {
                     return false
                 }
-                const parmas = {
+                const params = {
                     host: this.ipPort[0],
                     port: this.ipPort[1]
                 }
-                queryMonitor(parmas).then(res => {
-                    this.Monitordata = res.data
-                    var legendArr = []
-                    for (var i in res.data) {
-                        legendArr.push(i)
-                    }
-                    var MonitorArr = []
-                    for (var j = 0; j < legendArr.length; j++) {
-                        const mData = this.Monitordata[legendArr[j]]
-                        if (mData.length === 16) {
-                            mData.pop()
-                        }
-                        var xDate = []
-                        var dataArr = []
-                        for (var z = 0; z < mData.length; z++) {
-                            if (mData[z]) {
-                                dataArr.push(mData[z].passQps)
-                                xDate.push(this.date(mData[z].timestamp))
-                            }
-                            var op = {
-                                name: legendArr[j],
-                                data: dataArr,
-                                type: 'line'
-                            }
-                        }
-                        MonitorArr.push(op)
-                    }
-                    this.TrafficMonitor(MonitorArr, xDate, legendArr)
+                this.Monitordata = {}
+                this.MonitorXdate = []
+                this.handleMonitorData(params)
+                // 5计时器，重复1-4
+                this.setChartTimer(() => {
+                    this.handleMonitorData(params)
                 })
-                this.trafficTimer = setInterval(() => {
-                    queryMonitor(parmas).then(res => {
-                        const data = res.data
-                        var legendArr = []
-                        for (var i in data) {
-                            legendArr.push(i)
-                        }
-                        var q = 10
-                        clearInterval(this.mTimer)
-                        this.mTimer = setInterval(() => {
-                            var MonitorArr = []
-                            for (var j = 0; j < legendArr.length; j++) {
-                                const mData = data[legendArr[j]]
-                                const oldMdata = this.Monitordata[legendArr[j]]
-                                if (oldMdata.length > 100) {
-                                    oldMdata.shift()
-                                }
-                                // oldMdata.shift()
-                                oldMdata.push(mData[q])
-                                var xDate = []
-                                var dataArr = []
-                                for (var z = 0; z < oldMdata.length; z++) {
-                                    if (oldMdata[z]) {
-                                        dataArr.push(oldMdata[z].passQps)
-                                        xDate.push(this.date(oldMdata[z].timestamp))
-                                    }
-
-                                    var op = {
-                                        name: legendArr[j],
-                                        data: dataArr,
-                                        type: 'line'
-                                    }
-                                }
-                                MonitorArr.push(op)
-                            }
-                            q++
-                            this.TrafficMonitor(MonitorArr, xDate, legendArr)
-                        }, 1000)
-                    })
-                }, 5120)
             } else if (this.ipInfo === 3) {
                 if (this.ipPort.length === 0) {
                     return false
                 }
-                const parmas = {
+                const params = {
                     host: this.ipPort[0],
                     port: this.ipPort[1]
                 }
-                queryJvm(parmas).then(res => {
-                    this.JvmData = res.data.rows
-                    this.tabJVMInfo(this.JVMInfo)
-                    this.JvmTimer = setInterval(() => {
-                        queryJvm(parmas).then(res => {
-                            clearInterval(this.JTimer)
-                            const JvmData = res.data.rows
-                            var j = 4
-                            this.JTimer = setInterval(() => {
-                                if (this.JvmData.length > 100) {
-                                    this.JvmData.shift()
-                                }
-                                this.JvmData.push(JvmData[j])
-                                this.tabJVMInfo(this.JVMInfo)
-                                j++
-                            }, 1000)
-                        })
-                    }, 5100)
+                this.JvmData = []
+                this.handleJvmData(params)
+                // 5设定计时器
+                this.setChartTimer(() => {
+                    this.handleJvmData(params)
                 })
             }
         },
-        TrafficMonitor(MonitorArr, xDate, legendArr) { // TrafficMonitor 图表
+        handleMonitorData(params) {
+            // 1获得数据
+            queryMonitor(params).then(res => {
+                // 2获取增量数据
+                var legendArr = []
+                var incomingData = {}
+                for (var i in res.data) {
+                    if (this.Monitordata[i] === undefined) {
+                        this.Monitordata[i] = []
+                    }
+                    ;[
+                        this.Monitordata[i],
+                        incomingData[i]
+                    ] = this.getIncomingData(this.Monitordata[i], res.data[i])
+                    legendArr.push(i)
+                }
+                // 3处理数据
+                var MonitorArr = []
+                var xDate = []
+                var monitorXdate = []
+                for (var j = 0; j < legendArr.length; j++) {
+                    const mData = incomingData[legendArr[j]]
+                    if (mData.length === 16) {
+                        mData.pop()
+                    }
+                    var dataArr = []
+                    for (var z = 0; z < mData.length; z++) {
+                        if (mData[z]) {
+                            dataArr.push(mData[z].passQps)
+                            if (j === 0) {
+                                xDate.push(this.date(mData[z].timestamp))
+                            }
+                        }
+                        this.MonitorYvalue[legendArr[j]] =
+                            this.MonitorYvalue[legendArr[j]] &&
+                            this.MonitorYvalue[legendArr[j]].length > 0
+                                ? this.MonitorYvalue[legendArr[j]].concat(
+                                    dataArr
+                                )
+                                : dataArr
+                        var op = {
+                            name: legendArr[j],
+                            data: this.MonitorYvalue[legendArr[j]],
+                            type: 'line'
+                        }
+                    }
+                    MonitorArr.push(op)
+                }
+                monitorXdate = this.MonitorXdate.concat(xDate)
+                if (monitorXdate.length > 60) {
+                    monitorXdate.shift()
+                    MonitorArr.forEach((m) => {
+                        m.data.shift()
+                    })
+                }
+                this.MonitorXdate = monitorXdate
+                // 4赋值图表
+                this.TrafficMonitor(MonitorArr, this.MonitorXdate, legendArr)
+            })
+        },
+        handleJvmData(params) {
+            // 1获得数据
+            queryJvm(params).then(res => {
+                // 2获取增量数据
+                let data
+                ;[data] = this.getIncomingData(this.JvmData, res.data.rows)
+                // 3处理数据
+                if (data.length > 60) {
+                    data.shift()
+                }
+                // 4赋值组件
+                this.JvmData = data
+                this.tabJVMInfo(this.JVMInfo)
+            })
+        },
+        getIncomingData(current, incoming = []) {
+            var index = 0
+            if (current.length > 0) {
+                const lastTimeStamp = current[current.length - 1].timestamp
+                incoming.forEach((item, i) => {
+                    if (+item.timestamp === +lastTimeStamp) {
+                        index = i
+                    }
+                })
+            }
+            current = current.concat(incoming.slice(index))
+            return [current, incoming.slice(index, incoming.length - 1)]
+        },
+        TrafficMonitor(MonitorArr, xDate, legendArr) {
+            // TrafficMonitor 图表
             this.MonitorPolar = {
                 xAxis: {
                     type: 'category',
@@ -659,7 +774,7 @@ export default {
                         lineStyle: {
                             type: 'solid',
                             color: '#848C99', // y轴的颜色
-                            width: '3'// y坐标轴线的宽度
+                            width: '3' // y坐标轴线的宽度
                         }
                     },
                     axisLabel: {
@@ -688,7 +803,7 @@ export default {
                         lineStyle: {
                             type: 'solid',
                             color: '#848C99', // y轴的颜色
-                            width: '1'// y坐标轴线的宽度
+                            width: '1' // y坐标轴线的宽度
                         }
                     },
                     axisLabel: {
@@ -703,6 +818,13 @@ export default {
         handleCurrentChange(val) {
             this.page = val
             this.listProps()
+        },
+        setChartTimer(cb, interval) {
+            clearInterval(this.chartTimer)
+            this.chartTimer = setInterval(cb, interval || 5000)
+        },
+        clearChartTimer() {
+            clearInterval(this.chartTimer)
         }
     }
 }

@@ -5,6 +5,9 @@
         list-style: none;
     }
 }
+.el-popover {
+    min-width: 100px;
+}
 .ip-selector {
     width: 430px;
     background: #fff;
@@ -279,7 +282,7 @@
                 height: 588px !important;
             }
             .el-dialog__body {
-                padding: 5px 20px 20px 20px;
+                padding: 5px 30px 20px 30px;
             }
             .dialogtit {
                 font-size:32px;
@@ -307,6 +310,21 @@
                     line-height:50px;
                     color:rgba(78,87,102,1);
                     opacity:1;
+                }
+                .choose-serviceid {
+                    margin-top: 25px;
+                    width: 100%;
+                    background: #F5F8FA;
+                    min-height: 100px;
+                    text-align: left;
+                    padding: 24px 0 24px 24px;
+                    box-sizing: border-box;
+                    max-height: 300px;
+                    overflow-y: auto;
+                    span {
+                        font-size: 14px;
+                        line-height: 20px;
+                    }
                 }
             }
             .search {
@@ -369,13 +387,6 @@
         }
     }
 }
-// .popover {
-//     max-width: 136px !important;
-//     min-width: 136px !important;
-//     box-sizing: border-box;
-//     margin-left: -39px !important;
-//     margin-top: -34px !important;
-// }
 .titpopover {
     margin-left: -95px !important;
     margin-top: 3px !important;
@@ -409,6 +420,7 @@
          position: relative;
          vertical-align: middle;
          min-height: 50%;
+         overflow: hidden;
          .no-data {
              color: #666;
              display: inline-block;
@@ -512,3 +524,4 @@
             }
         }
     }
+   
