@@ -129,7 +129,7 @@ public class ModelTest {
                         ModelServiceProto.ModelInfo.newBuilder().setTableName(tablename).setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
                         ModelServiceProto.ModelInfo.newBuilder().setTableName(tablename).setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
-                .setLoadType("FILE")
+                .setLoadType("CACHE")
                 .setFilePath(filePath)
                 .build();
 
