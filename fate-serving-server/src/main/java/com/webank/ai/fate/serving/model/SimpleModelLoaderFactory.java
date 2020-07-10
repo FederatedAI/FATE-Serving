@@ -32,10 +32,10 @@ public class SimpleModelLoaderFactory implements ModelLoaderFactory, Application
         switch (loadModelType.toString()) {
             case "FATEFLOW":
                 return (ModelLoader) applicationContext.getBean("fateFlowModelLoader");
+            case "CACHE":
+                return (ModelLoader) applicationContext.getBean("localCacheModelLoader");
             case "FILE":
                 return (ModelLoader) applicationContext.getBean("localFileModelLoader");
-            case "PB":
-                return (ModelLoader) applicationContext.getBean("localPbModelLoader");
             default:
                 return null;
         }

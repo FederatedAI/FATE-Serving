@@ -69,7 +69,7 @@ public class ServingServerTest {
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
-                .setLoadType("FILE")
+                .setLoadType("CACHE")
                 .setFilePath(filePath)
                 .build();
         // inboundPackage.setBody(publishRequest);
@@ -100,7 +100,7 @@ public class ServingServerTest {
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("2020030314574740594812").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("2020030314574740594812").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
-                .setLoadType("FILE")
+                .setLoadType("CACHE")
                 .setFilePath(filePath)
                 .build();
         // inboundPackage.setBody(publishRequest);
@@ -129,7 +129,7 @@ public class ServingServerTest {
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("2020030314574740594812").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("2020030314574740594812").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
-                .setLoadType("FILE")
+                .setLoadType("CACHE")
                 .setFilePath(filePath)
                 .build();
         // inboundPackage.setBody(publishRequest);
@@ -159,7 +159,7 @@ public class ServingServerTest {
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("202004201033174706226").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
-                .setLoadType("FILE")
+                .setLoadType("CACHE")
                 .setFilePath(filePath)
                 .build();
         // inboundPackage.setBody(publishRequest);
@@ -188,7 +188,7 @@ public class ServingServerTest {
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("2020030314574740594812").setNamespace("host#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
                 .putModel("arbiter", ModelServiceProto.RoleModelInfo.newBuilder().putRoleModelInfo("10000",
                         ModelServiceProto.ModelInfo.newBuilder().setTableName("2020030314574740594812").setNamespace("arbiter#10000#arbiter-10000#guest-9999#host-10000#model").build()).build())
-                .setLoadType("FILE")
+                .setLoadType("CACHE")
                 .setServiceId("fm")
                 //   .setFilePath(filePath)
                 .build();

@@ -28,7 +28,7 @@ public interface ModelLoader {
     public enum LoadModelType {
         FATEFLOW,
         FILE,
-        PB
+        CACHE
     }
 
     public class ModelLoaderParam {
