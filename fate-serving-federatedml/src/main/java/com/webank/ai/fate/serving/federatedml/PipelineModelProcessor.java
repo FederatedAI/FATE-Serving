@@ -112,7 +112,7 @@ public class PipelineModelProcessor implements ModelProcessor {
             try {
                 ReturnResult remoteReturnResult = (ReturnResult) future.get(timeout, TimeUnit.MILLISECONDS);
                 if (remoteReturnResult != null) {
-                    Map<String, Object> remoteData = remoteReturnResult.getData();
+                    HashMap<String, Object> remoteData = Maps.newHashMap(remoteReturnResult.getData());
                     remoteData.put(Dict.RET_CODE, remoteReturnResult.getRetcode());
                     remoteData.put(Dict.MESSAGE, remoteReturnResult.getRetmsg());
                     remoteData.put(Dict.DATA, remoteReturnResult.getData());

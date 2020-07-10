@@ -64,6 +64,7 @@ public abstract class BaseComponent implements LocalInferenceAware {
         result.put(Dict.RET_CODE, StatusCode.SUCCESS);
         hostData.forEach((partId, partyDataObject) -> {
             Map partyData = (Map) partyDataObject;
+            result.put(Dict.MESSAGE, partyData.get(Dict.MESSAGE));
             if (partyData.get(Dict.RET_CODE) != null && !StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))) {
                 String remoteCode = partyData.get(Dict.RET_CODE).toString();
                 String remoteMsg = partyData.get(Dict.MESSAGE) != null ? partyData.get(Dict.MESSAGE).toString() : "";
