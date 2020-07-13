@@ -19,14 +19,15 @@ package com.webank.ai.fate.serving;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.register.router.DefaultRouterService;
 import com.webank.ai.fate.register.router.RouterService;
-import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.cache.Cache;
 import com.webank.ai.fate.serving.common.cache.ExpiringLRUCache;
 import com.webank.ai.fate.serving.common.cache.RedisCache;
+import com.webank.ai.fate.serving.common.cache.RedisClusterCache;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +68,6 @@ public class ServingConfig {
         Cache cache = null;
         switch (cacheType) {
             case "redis":
-                RedisCache redisCache = new RedisCache();
                 String ip = MetaInfo.PROPERTY_REDIS_IP;
                 String password = MetaInfo.PROPERTY_REDIS_PASSWORD;
                 Integer port = MetaInfo.PROPERTY_REDIS_PORT;
@@ -75,6 +75,16 @@ public class ServingConfig {
                 Integer maxTotal = MetaInfo.PROPERTY_REDIS_MAX_TOTAL;
                 Integer maxIdle = MetaInfo.PROPERTY_REDIS_MAX_IDLE;
                 Integer expire = MetaInfo.PROPERTY_REDIS_EXPIRE;
+                String clusterNodes = MetaInfo.PROPERTY_REDIS_CLUSTER_NODES;
+
+                RedisCache redisCache;
+                if (StringUtils.isNotBlank(clusterNodes)) {
+                    redisCache = new RedisClusterCache(clusterNodes);
+                    logger.info("redis cache mode: cluster");
+                } else {
+                    redisCache = new RedisCache();
+                    logger.info("redis cache mode: standalone");
+                }
                 redisCache.setExpireTime(timeout);
                 redisCache.setMaxTotal(maxTotal);
                 redisCache.setMaxIdel(maxIdle);

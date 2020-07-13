@@ -35,22 +35,19 @@ public class RedisCache implements Cache {
     JedisPool jedisPool;
 
     synchronized public void init() {
+        initStandaloneConfiguration();
+    }
+
+    private void initStandaloneConfiguration() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(maxTotal);
         jedisPoolConfig.setMaxIdle(maxIdel);
-        this.jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, password);
+        jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, password);
     }
 
     @Override
     public void put(Object key, Object value) {
-        try (Jedis jedis = jedisPool.getResource()) {
-            Pipeline redisPipeline = jedis.pipelined();
-            redisPipeline.set(key.toString(), value.toString());
-            if (expireTime > 0) {
-                redisPipeline.expire(key.toString(), expireTime);
-            }
-            redisPipeline.sync();
-        }
+        this.put(key, value, expireTime);
     }
 
     @Override

@@ -77,6 +77,7 @@ public class Dict {
     public static final String PROPERTY_REDIS_TIMEOUT = "redis.timeout";
     public static final String PROPERTY_REDIS_PASSWORD = "redis.password";
     public static final String PROPERTY_REDIS_EXPIRE = "redis.expire";
+    public static final String PROPERTY_REDIS_CLUSTER_NODES = "redis.cluster.nodes";
     public static final String PROPERTY_LOCAL_CACHE_MAXSIZE = "local.cache.maxsize";
     public static final String PROPERTY_LOCAL_CACHE_EXPIRE = "local.cache.expire";
     public static final String PROPERTY_LOCAL_CACHE_INTERVAL = "local.cache.interval";

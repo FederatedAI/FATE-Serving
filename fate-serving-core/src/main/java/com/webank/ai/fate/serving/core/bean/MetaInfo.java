@@ -50,6 +50,7 @@ public class MetaInfo {
     public static Integer PROPERTY_REDIS_MAX_TOTAL;
     public static Integer PROPERTY_REDIS_MAX_IDLE;
     public static Integer PROPERTY_REDIS_EXPIRE;
+    public static String PROPERTY_REDIS_CLUSTER_NODES;
     public static String PROPERTY_CACHE_TYPE;
     public static Integer PROPERTY_LOCAL_CACHE_MAXSIZE;
     public static Integer PROPERTY_LOCAL_CACHE_EXPIRE;
