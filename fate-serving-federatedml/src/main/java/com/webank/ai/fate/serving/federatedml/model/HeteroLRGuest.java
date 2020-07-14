@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -53,39 +54,40 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> guestData,
                                                     Map<String, Object> hostData) {
         Map<String, Object> result = this.handleRemoteReturnData(hostData);
-        hostData.forEach((k, v) -> {
-            Map<String, Object> onePartyData = (Map<String, Object>) v;
-            double score;
-            if (CollectionUtils.isNotEmpty(guestData)) {
-                Map<String, Object> tempMap = guestData.get(0);
-                Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
-                double localScore = 0;
-                if (componentData != null && componentData.get(Dict.SCORE) != null) {
-                    localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
-                } else {
-                    throw new GuestMergeException("local result is invalid ");
-                }
-                // logger.info("local score: {}", localScore);
-                Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
-                double remoteScore;
-                if (remoteComopnentData != null) {
-                    remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
-                } else {
-                    if (onePartyData.get(Dict.PROB) != null) {
-                        remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
+        if (result.get(Dict.RET_CODE).equals(StatusCode.SUCCESS)) {
+            hostData.forEach((k, v) -> {
+                Map<String, Object> onePartyData = (Map<String, Object>) v;
+                double score;
+                if (CollectionUtils.isNotEmpty(guestData)) {
+                    Map<String, Object> tempMap = guestData.get(0);
+                    Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
+                    double localScore = 0;
+                    if (componentData != null && componentData.get(Dict.SCORE) != null) {
+                        localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
                     } else {
-                        throw new GuestMergeException("host data score is null");
+                        throw new GuestMergeException("local result is invalid ");
                     }
+                    // logger.info("local score: {}", localScore);
+                    Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
+                    double remoteScore;
+                    if (remoteComopnentData != null) {
+                        remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
+                    } else {
+                        if (onePartyData.get(Dict.PROB) != null) {
+                            remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
+                        } else {
+                            throw new GuestMergeException("host data score is null");
+                        }
+                    }
+                    // logger.info("host score: {}", remoteScore);
+                    score = localScore;
+                    score += remoteScore;
+                    double prob = sigmod(score);
+                    result.put(Dict.SCORE, prob);
                 }
-                // logger.info("host score: {}", remoteScore);
-                score = localScore;
-                score += remoteScore;
-                double prob = sigmod(score);
-                result.put(Dict.SCORE, prob);
-            }
 
-        });
-
+            });
+        }
         return result;
     }
 

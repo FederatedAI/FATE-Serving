@@ -51,7 +51,7 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
             throw new HostGetFeatureErrorException("adaptor return null");
         }
         if (!StatusCode.SUCCESS.equals(singleFeatureDataAdaptorData.getRetcode())) {
-            throw new HostGetFeatureErrorException("adaptor return code is invalid {}", singleFeatureDataAdaptorData.getRetcode());
+            throw new HostGetFeatureErrorException(singleFeatureDataAdaptorData.getRetcode(), "adaptor return error");
         }
         inferenceRequest.getFeatureData().putAll(singleFeatureDataAdaptorData.getData());
     }
