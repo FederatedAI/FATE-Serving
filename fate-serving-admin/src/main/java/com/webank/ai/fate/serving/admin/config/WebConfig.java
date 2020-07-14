@@ -31,7 +31,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor())
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/admin/login");
+                .excludePathPatterns("/api/admin/login", "api/component/list", "api/monitor/queryJvm", "api/monitor/query", "api/monitor/queryModel");
 
 //        registry.addInterceptor(requestInterceptor()).addPathPatterns("/api/model/**");
     }

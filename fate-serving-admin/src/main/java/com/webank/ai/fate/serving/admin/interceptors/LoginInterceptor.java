@@ -3,6 +3,7 @@ package com.webank.ai.fate.serving.admin.interceptors;
 import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.common.cache.Cache;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -35,7 +36,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         String userInfo = (String) cache.get(token);
         if (StringUtils.isNotBlank(userInfo)) {
-            cache.put(token, userInfo, 600);
+            cache.put(token, userInfo, MetaInfo.PROPERTY_CACHE_TYPE.equalsIgnoreCase("local") ? MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE : MetaInfo.PROPERTY_REDIS_EXPIRE);
             return true;
         } else {
             if (logger.isDebugEnabled()) {
