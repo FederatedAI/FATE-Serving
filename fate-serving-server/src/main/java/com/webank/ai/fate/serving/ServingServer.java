@@ -83,7 +83,6 @@ public class ServingServer implements InitializingBean {
             logger.warn("serving-server not use register center");
         }
         modelManager.restore(new BaseContext());
-        HttpClientPool.initPool();
         logger.warn("serving-server start over");
     }
 }

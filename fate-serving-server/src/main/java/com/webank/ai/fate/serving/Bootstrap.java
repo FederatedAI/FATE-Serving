@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving;
 
 import com.webank.ai.fate.serving.common.flow.JvmInfoCounter;
 import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
+import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -112,6 +113,7 @@ public class Bootstrap {
     }
 
     public void start(String[] args) {
+        HttpClientPool.initPool();
         SpringApplication springApplication = new SpringApplication(Bootstrap.class);
         applicationContext = springApplication.run(args);
         JvmInfoCounter.start();
