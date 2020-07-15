@@ -154,6 +154,32 @@ public class ServiceController {
         return result;
     }
 
+    @PostMapping("/service/updateFlowRule")
+    public ReturnResult updateFlowRule(@RequestBody RequestParamWrapper requestParams) throws Exception {
+        String source = requestParams.getSource();
+        Integer allowQps = requestParams.getAllowQps();
+
+        Preconditions.checkArgument(StringUtils.isNotBlank(source), "parameter source is blank");
+        Preconditions.checkArgument(allowQps != null, "parameter allowQps is null");
+
+        logger.info("update source: {}, allowQps: {}", source, allowQps);
+
+        CommonServiceGrpc.CommonServiceFutureStub commonServiceFutureStub = getCommonServiceFutureStub(requestParams.getHost(), requestParams.getPort());
+        CommonServiceProto.UpdateFlowRuleRequest.Builder builder = CommonServiceProto.UpdateFlowRuleRequest.newBuilder();
+
+        builder.setSource(source);
+        builder.setAllowQps(allowQps);
+
+        ListenableFuture<CommonServiceProto.CommonResponse> future = commonServiceFutureStub.updateFlowRule(builder.build());
+
+        CommonServiceProto.CommonResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+
+        ReturnResult result = new ReturnResult();
+        result.setRetcode(response.getStatusCode());
+        result.setRetmsg(response.getMessage());
+        return result;
+    }
+
     private CommonServiceGrpc.CommonServiceFutureStub getCommonServiceFutureStub(String host, Integer port) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");

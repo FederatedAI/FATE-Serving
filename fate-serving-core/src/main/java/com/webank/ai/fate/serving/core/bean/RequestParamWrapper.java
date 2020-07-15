@@ -31,6 +31,24 @@ public class RequestParamWrapper {
     String routerMode;
     Integer weight;
     Long version;
+    String source;
+    Integer allowQps;
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public Integer getAllowQps() {
+        return allowQps;
+    }
+
+    public void setAllowQps(Integer allowQps) {
+        this.allowQps = allowQps;
+    }
 
     public String getUsername() {
         return username;
