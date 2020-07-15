@@ -29,7 +29,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.exceptions.NoResultException;
+import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -75,7 +75,7 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
 
         } catch (Exception e) {
             logger.error("get grpc channel error", e);
-            throw new NoResultException();
+            throw new RemoteRpcException("remote rpc exception");
         }
         Map reqBodyMap = data.getBody();
         Map reqHeadMap = data.getHead();
@@ -101,7 +101,7 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
             resultString = new String(result.getBody().toByteArray());
         } catch (Exception e) {
             logger.error("get grpc result error", e);
-            throw new NoResultException();
+            throw new RemoteRpcException("remote rpc exception");
         }
         if (StringUtils.isNotEmpty(resultString)) {
             resultMap = JsonUtil.json2Object(resultString, Map.class);

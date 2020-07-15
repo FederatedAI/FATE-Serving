@@ -73,8 +73,8 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}", adaptorClass);
             batchFeatureDataAdaptor = (BatchFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
-            ((AbstractBatchFeatureDataAdaptor) batchFeatureDataAdaptor).setEnvironment(environment);
             try {
+                ((AbstractBatchFeatureDataAdaptor) batchFeatureDataAdaptor).setEnvironment(environment);
                 batchFeatureDataAdaptor.init();
             } catch (Exception e) {
                 logger.error("batch adaptor init error");

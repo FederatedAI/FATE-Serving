@@ -63,8 +63,8 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
         if (StringUtils.isNotEmpty(adaptorClass)) {
             logger.info("try to load adaptor {}", adaptorClass);
             singleFeatureDataAdaptor = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
-            ((AbstractSingleFeatureDataAdaptor) singleFeatureDataAdaptor).setEnvironment(environment);
             try {
+                ((AbstractSingleFeatureDataAdaptor) singleFeatureDataAdaptor).setEnvironment(environment);
                 singleFeatureDataAdaptor.init();
             } catch (Exception e) {
                 logger.error("single adaptor init error");
