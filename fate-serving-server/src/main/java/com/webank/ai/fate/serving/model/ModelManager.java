@@ -524,6 +524,22 @@ public class ModelManager implements InitializingBean {
         return new StringBuilder().append(tableName).append("_").append(namespace).toString();
     }
 
+    private void clearCache(String name, String namespace) {
+        StringBuilder sb = new StringBuilder();
+        String locationPre = MetaInfo.PROPERTY_MODEL_CACHE_PATH;
+        if (StringUtils.isNotEmpty(locationPre) && StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(namespace)) {
+            String cacheFilePath = sb.append(locationPre).append("/.fate/model_").append(name).append("_").append(namespace).append("_").append("cache").toString();
+            File cacheFile = new File(cacheFilePath);
+            if (cacheFile.exists()) {
+                cacheFile.delete();
+            }
+            File lockFile = new File(cacheFilePath + ".lock");
+            if (lockFile.exists()) {
+                lockFile.delete();
+            }
+        }
+    }
+
     public synchronized ModelServiceProto.UnloadResponse unload(Context context, ModelServiceProto.UnloadRequest request) {
         ModelServiceProto.UnloadResponse.Builder resultBuilder = ModelServiceProto.UnloadResponse.newBuilder();
         if (logger.isDebugEnabled()) {
@@ -575,6 +591,7 @@ public class ModelManager implements InitializingBean {
         });
         logger.info("unload model success");
         this.store();
+        this.clearCache(model.getTableName(), model.getNamespace());
         return resultBuilder.build();
     }
 
