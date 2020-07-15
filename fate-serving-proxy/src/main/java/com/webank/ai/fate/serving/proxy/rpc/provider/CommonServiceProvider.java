@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.proxy.rpc.provider;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -57,7 +58,7 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     @Autowired
     FlowCounterManager flowCounterManager;
 
-    @Autowired
+    @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
 
     @Override
@@ -141,6 +142,7 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     @FateServiceMethod(name = "UPDATE_SERVICE")
     public CommonServiceProto.CommonResponse updateService(Context context, InboundPackage inboundPackage) {
         try {
+            Preconditions.checkArgument(zookeeperRegistry != null);
             CommonServiceProto.UpdateServiceRequest request = (CommonServiceProto.UpdateServiceRequest) inboundPackage.getBody();
             String url = request.getUrl();
             String routerMode = request.getRouterMode();

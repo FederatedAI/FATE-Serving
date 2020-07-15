@@ -43,7 +43,7 @@ public class IntraGrpcServer implements InitializingBean {
     IntraRequestHandler intraRequestHandler;
     @Autowired
     CommonRequestHandler commonRequestHandler;
-    @Autowired
+    @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
     @Resource(name = "grpcExecutorPool")
     Executor executor;
@@ -60,8 +60,10 @@ public class IntraGrpcServer implements InitializingBean {
         server = serverBuilder.build();
         server.start();
 
-        logger.info("register zk , {}", FateServer.serviceSets);
-        zookeeperRegistry.register(FateServer.serviceSets);
+        if (zookeeperRegistry != null) {
+            logger.info("register zk , {}", FateServer.serviceSets);
+            zookeeperRegistry.register(FateServer.serviceSets);
+        }
     }
 }
 
