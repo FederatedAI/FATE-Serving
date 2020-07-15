@@ -53,6 +53,7 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
         if (!StatusCode.SUCCESS.equals(singleFeatureDataAdaptorData.getRetcode())) {
             throw new HostGetFeatureErrorException(singleFeatureDataAdaptorData.getRetcode(), "adaptor return error");
         }
+        inferenceRequest.getFeatureData().clear();
         inferenceRequest.getFeatureData().putAll(singleFeatureDataAdaptorData.getData());
     }
 
