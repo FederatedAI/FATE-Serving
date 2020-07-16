@@ -5,6 +5,7 @@ import com.webank.ai.fate.serving.common.bean.BaseContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,8 @@ public class ValidateController {
 
     // 列出集群中所注册的所有接口
     @PostMapping("/validate/{callName}")
-    public Map validate(@PathVariable String callName, @RequestBody Map params) {
-        Map resultMap = new HashMap();
+    public ReturnResult validate(@PathVariable String callName, @RequestBody Map params) {
+        ReturnResult result = new ReturnResult();
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("try to validate {}, receive params: {}", callName, params);
@@ -38,17 +39,20 @@ public class ValidateController {
             InboundPackage inboundPackage = new InboundPackage();
             inboundPackage.setBody(params);
             OutboundPackage outboundPackage = validateServiceProvider.service(context, inboundPackage);
-            resultMap = (Map) outboundPackage.getData();
+            Map resultMap = (Map) outboundPackage.getData();
 
             if (resultMap != null && resultMap.get(Dict.RET_CODE).toString().equals(StatusCode.SUCCESS)) {
                 logger.info("validate {} success", callName);
             }
+
+            result.setRetcode(StatusCode.SUCCESS);
+            result.setData(resultMap);
         } catch (Exception e) {
             logger.error(e.getMessage());
-            resultMap.put(Dict.RET_CODE, StatusCode.SYSTEM_ERROR);
-            resultMap.put(Dict.RET_MSG, e.getMessage());
+            result.setRetcode(StatusCode.SYSTEM_ERROR);
+            result.setRetmsg(e.getMessage());
         }
-        return resultMap;
+        return result;
     }
 
     /*
