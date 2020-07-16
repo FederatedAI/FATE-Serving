@@ -282,6 +282,11 @@ public class FlowCounterManager {
 
     private void store(File file, byte[] data) {
         try {
+            if (!file.exists() && file.getParentFile() != null && !file.getParentFile().exists()) {
+                if (!file.getParentFile().mkdirs()) {
+                    throw new IllegalArgumentException("invalid flow control cache file " + file + ", cause: Failed to create directory " + file.getParentFile() + "!");
+                }
+            }
             if (!file.exists()) {
                 file.createNewFile();
             }

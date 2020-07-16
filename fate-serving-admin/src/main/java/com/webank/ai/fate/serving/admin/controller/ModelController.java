@@ -105,7 +105,7 @@ public class ModelController {
         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
 
-    @PostMapping("/model/publishLoad")
+    /*@PostMapping("/model/publishLoad")
     public Callable<ReturnResult> publishLoad(@RequestBody String requestData) {
         return () -> {
             if (logger.isDebugEnabled()) {
@@ -159,7 +159,7 @@ public class ModelController {
             }
             return result;
         };
-    }
+    }*/
 
     @PostMapping("/model/unload")
     public Callable<ReturnResult> unload(@RequestBody RequestParamWrapper requestParams) throws Exception {

@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.admin.config;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +43,15 @@ public class RegistryConfig {
             }
 
             ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_ADMIN, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_SERVER_PORT);
-            zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
-            zookeeperRegistry.subProject(Dict.SERVICE_PROXY);
+
+            if (!zookeeperRegistry.isAvailable()) {
+                logger.error("zookeeper registry connection is not available");
+                throw new SysException("zookeeper registry connection loss");
+            }
 
             zookeeperRegistry.registerComponent();
-
+            zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
+            zookeeperRegistry.subProject(Dict.SERVICE_PROXY);
             return zookeeperRegistry;
         }
         return null;

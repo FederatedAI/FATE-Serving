@@ -49,7 +49,8 @@ public class Bootstrap {
                 logger.error("parse config error, {}", e.getMessage());
             }
 
-            MetaInfo.PROPERTY_USE_ZK_ROUTER = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)) : true;
+            // serving-admin must open the zookeeper registry
+            MetaInfo.PROPERTY_USE_ZK_ROUTER = true;
             MetaInfo.PROPERTY_SERVER_PORT = environment.getProperty(Dict.PROPERTY_SERVER_PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVER_PORT)) : 8350;
             MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL);
 
