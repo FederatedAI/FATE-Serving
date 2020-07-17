@@ -44,14 +44,15 @@ public class RegistryConfig {
 
             ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_ADMIN, Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_SERVER_PORT);
 
+            zookeeperRegistry.registerComponent();
+            zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
+            zookeeperRegistry.subProject(Dict.SERVICE_PROXY);
+
             if (!zookeeperRegistry.isAvailable()) {
                 logger.error("zookeeper registry connection is not available");
                 throw new SysException("zookeeper registry connection loss");
             }
 
-            zookeeperRegistry.registerComponent();
-            zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
-            zookeeperRegistry.subProject(Dict.SERVICE_PROXY);
             return zookeeperRegistry;
         }
         return null;

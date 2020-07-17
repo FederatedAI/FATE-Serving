@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.common.provider;
 
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.url.CollectionUtils;
+import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
@@ -46,6 +47,9 @@ import java.util.Map;
 public class ModelServiceProvider extends AbstractServingServiceProvider {
     @Autowired
     ModelManager modelManager;
+
+    @Autowired
+    FlowCounterManager flowCounterManager;
 
     @FateServiceMethod(name = "MODEL_LOAD")
     public Object load(Context context, InboundPackage data) {
@@ -93,6 +97,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 }
 
                 model.setRolePartyMapList(rolePartyMapList);
+                model.setAllowQps(flowCounterManager.getAllowedQps(model.getResourceName()));
 
                 ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();
                 modelExBuilder.setIndex(i);

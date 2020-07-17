@@ -161,7 +161,8 @@ public class FlowCounterManager {
     public boolean pass(String sourceName) {
         FlowCounter flowCounter = passMap.get(sourceName);
         if (flowCounter == null) {
-            flowCounter = passMap.putIfAbsent(sourceName, new FlowCounter(getAllowedQps(sourceName)));
+            Double allowedQps = getAllowedQps(sourceName);
+            flowCounter = passMap.putIfAbsent(sourceName, new FlowCounter(allowedQps != null ? allowedQps : Integer.MAX_VALUE));
             if (flowCounter == null) {
                 flowCounter = passMap.get(sourceName);
             }
@@ -298,12 +299,8 @@ public class FlowCounterManager {
         }
     }
 
-    private double getAllowedQps(String sourceName) {
-        try {
-            return sourceQpsAllowMap.get(sourceName);
-        } catch (Exception e) {
-            return Integer.MAX_VALUE;
-        }
+    public Double getAllowedQps(String sourceName) {
+        return sourceQpsAllowMap.get(sourceName);
     }
 
     public void setAllowQps(String sourceName, double allowQps) {

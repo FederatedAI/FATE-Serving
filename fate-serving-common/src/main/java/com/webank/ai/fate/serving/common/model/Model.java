@@ -49,6 +49,16 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
     private List<String> serviceIds = new ArrayList<>();
     private List<Map> rolePartyMapList;
 
+    private Double allowQps;
+
+    public Double getAllowQps() {
+        return allowQps;
+    }
+
+    public void setAllowQps(Double allowQps) {
+        this.allowQps = allowQps;
+    }
+
     public Model() {
         this.timestamp = System.currentTimeMillis();
     }
