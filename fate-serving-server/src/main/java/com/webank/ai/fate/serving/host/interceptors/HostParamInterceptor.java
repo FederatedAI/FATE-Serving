@@ -23,7 +23,9 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,8 +45,13 @@ public class HostParamInterceptor implements Interceptor {
             Preconditions.checkArgument(params != null, "parse inference params error");
             inboundPackage.setBody(params);
         } else {
-            InferenceRequest inferenceRequest = null;
-            inferenceRequest = JsonUtil.json2Object(reqBody, InferenceRequest.class);
+            InferenceRequest inferenceRequest = JsonUtil.json2Object(reqBody, InferenceRequest.class);
+            if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < MetaInfo.CURRENT_VERSION) {
+                Map hostParams = JsonUtil.json2Object(reqBody, Map.class);
+                Preconditions.checkArgument(hostParams != null, "parse inference params error");
+                Preconditions.checkArgument(hostParams.get("featureIdMap") != null, "parse inference params featureIdMap error");
+                inferenceRequest.getSendToRemoteFeatureData().putAll((Map) hostParams.get("featureIdMap"));
+            }
             Preconditions.checkArgument(inferenceRequest != null, "parse inference params error");
             inboundPackage.setBody(inferenceRequest);
         }

@@ -23,8 +23,10 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
 import com.webank.ai.fate.serving.model.ModelManager;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +47,12 @@ public class HostModelInterceptor implements Interceptor {
         ServingServerContext servingServerContext = ((ServingServerContext) context);
         String tableName = servingServerContext.getModelTableName();
         String nameSpace = servingServerContext.getModelNamesapce();
-        Model model = modelManager.getModelByTableNameAndNamespace(tableName, nameSpace);
+        Model model;
+        if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < MetaInfo.CURRENT_VERSION) {
+            model = modelManager.getPartnerModel(tableName, nameSpace);
+        } else {
+            model = modelManager.getModelByTableNameAndNamespace(tableName, nameSpace);
+        }
         if (model == null) {
             logger.error("table name {} namepsace {} is not exist", tableName, nameSpace);
             throw new HostModelNullException("mode is null");

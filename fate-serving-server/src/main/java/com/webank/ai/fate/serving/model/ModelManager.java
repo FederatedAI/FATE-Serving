@@ -66,6 +66,8 @@ public class ModelManager implements InitializingBean {
             new LinkedBlockingQueue<>(), new NamedThreadFactory("ModelService", true));
     private ConcurrentMap<String, String> serviceIdNamespaceMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, Model> namespaceMap = new ConcurrentHashMap<String, Model>();
+    // (guest) name + namespace -> (host) model
+    private ConcurrentMap<String, Model> partnerModelMap = new ConcurrentHashMap<String, Model>();
 
     public synchronized ModelServiceProto.UnbindResponse unbind(Context context, ModelServiceProto.UnbindRequest req) {
         ModelServiceProto.UnbindResponse.Builder resultBuilder = ModelServiceProto.UnbindResponse.newBuilder();
@@ -251,6 +253,13 @@ public class ModelManager implements InitializingBean {
                         }
                     }
                     namespaceMap.put(k, model);
+                    if (Dict.HOST.equals(model.getRole())) {
+                        model.getFederationModelMap().values().forEach(remoteModel -> {
+                            String remoteNamespaceKey = this.getNameSpaceKey(remoteModel.getTableName(), remoteModel.getNamespace());
+                            this.partnerModelMap.put(remoteNamespaceKey, model);
+                        });
+                    }
+
                     logger.info("restore model {} success ", k);
                 }
 
@@ -357,27 +366,26 @@ public class ModelManager implements InitializingBean {
         String role = req.getLocal().getRole();
         model.setPartId(req.getLocal().getPartyId());
         model.setRole(Dict.GUEST.equals(role) ? Dict.GUEST : Dict.HOST);
-//        String serviceId = req.getServiceId();
-//        model.setServiceId(serviceId);
+
         Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
         ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole());
         Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
 
-        if (model.getRole().equals(Dict.GUEST)) {
-            ModelServiceProto.Party hostParty = roleMap.get(Dict.HOST);
-            String hostPartyId = hostParty.getPartyIdList().get(0);
-            ModelServiceProto.RoleModelInfo hostRoleModelInfo = modelMap.get(Dict.HOST);
-            ModelServiceProto.ModelInfo hostModelInfo = hostRoleModelInfo.getRoleModelInfoMap().get(hostPartyId);
-            String hostNamespace = hostModelInfo.getNamespace();
-            String hostTableName = hostModelInfo.getTableName();
-            Model hostModel = new Model();
-            hostModel.setPartId(hostPartyId);
-            hostModel.setNamespace(hostNamespace);
-            hostModel.setTableName(hostTableName);
-            hostModel.setRole(Dict.HOST);
-            model.getFederationModelMap().put(hostModel.getPartId(), hostModel);
-        }
+        String remotePartyRole = model.getRole().equals(Dict.GUEST) ? Dict.HOST : Dict.GUEST;
+        ModelServiceProto.Party remoteParty = roleMap.get(remotePartyRole);
+        String remotePartyId = remoteParty.getPartyIdList().get(0);
+        ModelServiceProto.RoleModelInfo remoteRoleModelInfo = modelMap.get(remotePartyRole);
+        ModelServiceProto.ModelInfo remoteModelInfo = remoteRoleModelInfo.getRoleModelInfoMap().get(remotePartyId);
+        String remoteNamespace = remoteModelInfo.getNamespace();
+        String remoteTableName = remoteModelInfo.getTableName();
+        Model remoteModel = new Model();
+        remoteModel.setPartId(remotePartyId);
+        remoteModel.setNamespace(remoteNamespace);
+        remoteModel.setTableName(remoteTableName);
+        remoteModel.setRole(remotePartyRole);
+        model.getFederationModelMap().put(remoteModel.getPartId(), remoteModel);
+
         ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
@@ -414,6 +422,13 @@ public class ModelManager implements InitializingBean {
         }
         model.setModelProcessor(modelProcessor);
         this.namespaceMap.put(namespaceKey, model);
+
+        if (Dict.HOST.equals(model.getRole())) {
+            model.getFederationModelMap().values().forEach(remoteModel -> {
+                String remoteNamespaceKey = this.getNameSpaceKey(remoteModel.getTableName(), remoteModel.getNamespace());
+                this.partnerModelMap.put(remoteNamespaceKey, model);
+            });
+        }
         /**
          *  host model
          */
@@ -653,6 +668,10 @@ public class ModelManager implements InitializingBean {
                 throw new IllegalArgumentException("Invalid model cache file " + file + ", cause: Failed to create directory " + file.getParentFile() + "!");
             }
         }
+    }
+
+    public Model getPartnerModel(String tableName, String namespace) {
+        return this.partnerModelMap.get(getNameSpaceKey(tableName, namespace));
     }
 
     @Override

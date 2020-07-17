@@ -35,14 +35,12 @@ import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import com.webank.ai.fate.serving.host.provider.HostBatchInferenceProvider;
 import com.webank.ai.fate.serving.host.provider.HostSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class HostInferenceService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
@@ -62,6 +60,15 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
             String namespace = req.getHeader().getTask().getModel().getNamespace();
             String tableName = req.getHeader().getTask().getModel().getTableName();
             context.setActionType(actionType);
+            context.setVersion(req.getHeader().getOperator());
+            if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < MetaInfo.CURRENT_VERSION) {
+                // 1.x
+                Map hostFederatedParams = JsonUtil.json2Object(req.getBody().getValue().toStringUtf8(), Map.class);
+                Map partnerModelInfo = (Map) hostFederatedParams.get("partnerModelInfo");
+                namespace = partnerModelInfo.get("namespace").toString();
+                tableName = partnerModelInfo.get("name").toString();
+            }
+
             context.setModelNamesapce(namespace);
             context.setModelTableName(tableName);
             context.setCaseId(req.getAuth().getNonce());
