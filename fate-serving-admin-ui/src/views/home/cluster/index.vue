@@ -12,14 +12,14 @@
                     >{{ selected === 1 ? 'serving-proxy' : 'serving-server' }}</span>
                     <span class="ip-list-des">Click IP to view the instance details</span>
                 </div>
-                <div class="instance">
+                <!-- <div class="instance"> -->
                     <!-- <el-input
                     placeholder="search for instance"
                     v-model="instance"
                     @change="searchInstance">
                     <el-button slot="prepend" icon="el-icon-search"></el-button>
                     </el-input>-->
-                </div>
+                <!-- </div> -->
                 <div class="ip-list-line"></div>
                 <div class="ip-list-main">
                     <iplist :activeip="activeip" :ipData="ipData" @selectIP="selectIP"/>
@@ -65,8 +65,12 @@
                         max-height="668px"
                         class="table"
                     >
-                        <el-table-column sortable prop="key" label="key" show-overflow-tooltip />
-                        <el-table-column sortable prop="value" label="value" show-overflow-tooltip>
+                        <el-table-column sortable prop="key" label="key" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                <span>{{ scope.row.key }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column sortable :sort-method="(a, b) => { return sortMix(a, b, 'value') }" prop="value" label="value" show-overflow-tooltip>
                             <template slot-scope="scope">
                                 <span>{{ scope.row.value }}</span>
                             </template>
@@ -91,15 +95,17 @@
                         class="table"
                     >
                         <el-table-column
-                            sortable
-                            width="350"
+                            width="320"
                             prop="namespace"
                             label="Model ID"
                             show-overflow-tooltip
-                        />
+                        >
+                            <template slot-scope="scope">
+                                <span>{{ scope.row.namespace }}</span>
+                            </template>
+                        </el-table-column>
                         <el-table-column
-                            sortable
-                            width="220"
+                            width="200"
                             prop="tableName"
                             label="Model Version"
                             show-overflow-tooltip
@@ -108,9 +114,10 @@
                                 <span>{{ scope.row.tableName }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column sortable width="160" prop="serviceId" label="Service ID">
+                        <el-table-column sortable width="160" :sort-method="(a, b) => { return sortMix(a, b, 'serviceIds') }" prop="serviceId" label="Service ID">
                             <template slot-scope="scope">
                                 <el-popover
+                                    v-if="scope.row.serviceIds[0] !== '--'"
                                     placement="bottom"
                                     trigger="hover">
                                     <div>
@@ -122,11 +129,11 @@
                                         </span>
                                     </span>
                                 </el-popover>
+                                <span v-else style="wadth:75px"><span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</span></span>
                             </template>
                         </el-table-column>
                         <el-table-column
-                            sortable
-                            width="200"
+                            width="180"
                             prop="RolePartyID"
                             label="Role & Party ID"
                         >
@@ -170,7 +177,7 @@
                                 <span>{{ scope.row.timestamp | dateform }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column width="200" label="Operation">
+                        <el-table-column width="250" label="Operation">
                             <template slot-scope="scope">
                                 <el-button
                                     type="text"
@@ -183,13 +190,20 @@
                                     type="text"
                                     style="font-size: 14px"
                                     size="mini"
-                                    @click="unload(scope.row)"
-                                >Unload</el-button>
+                                    @click="flowControl(scope.row)"
+                                >FlowControl</el-button>
                                 <el-button
                                     type="text"
                                     style="font-size: 14px"
                                     size="mini"
-                                    @click="unbind(scope.row )"
+                                    @click="unload(scope.row)"
+                                >Unload</el-button>
+                                <el-button
+                                    v-if="scope.row.serviceIds[0] !=='--'"
+                                    type="text"
+                                    style="font-size: 14px"
+                                    size="mini"
+                                    @click="unbind(scope.row)"
                                 >Unbind</el-button>
                             </template>
                         </el-table-column>
@@ -198,7 +212,7 @@
                         <el-pagination
                             background
                             @current-change="handleCurrentChange"
-                            :current-page.sync="currentPage1"
+                            :current-page.sync="currentPage"
                             :page-size="20"
                             layout="total, prev, pager, next, jumper"
                             :total="total"
@@ -211,21 +225,24 @@
                         :visible.sync="dialogVisible"
                     >
                         <div class="chart">
-                            <modelchart :callsData="polar" />
+                            <div class="modelchart">
+                                <modelchart :callsData="polar" />
+                            </div>
+
                             <!-- <div v-else class="no-data">
                              no Data
                             </div>-->
                         </div>
                     </el-dialog>
-                    <el-dialog :visible.sync="unbindVisible" width="35%" top="15%" center>
+                    <el-dialog :visible.sync="unbindVisible" :showClose='cancel' width="35%" top="15%" center>
                         <span>Please select the Service IDs</span><br>
                         <span>you want to unbind with this model,</span>
                         <div class="choose-serviceid">
-                            <el-checkbox-group v-model="serviceIDCheckList">
-                            <el-checkbox v-for="(item,index) in rowData.serviceIds"
-                                :key="index" :label="item">
-                            </el-checkbox>
-                        </el-checkbox-group>
+                            <el-checkbox-group v-if="rowData.serviceIds && rowData.serviceIds[0] !== '--'" v-model="serviceIDCheckList">
+                                <el-checkbox v-for="(item,index) in rowData.serviceIds"
+                                    :key="index" :label="item">
+                                </el-checkbox>
+                            </el-checkbox-group>
                         </div>
                         <span slot="footer" class="dialog-footer dialog-but">
                             <el-button type="primary" :disabled="!serviceIDCheckList.length" @click="sureUnbind">Sure</el-button>
@@ -236,7 +253,7 @@
                             >Cancel</el-button>
                         </span>
                     </el-dialog>
-                    <el-dialog :visible.sync="unloadVisible" width="35%" top="15%" center>
+                    <el-dialog :visible.sync="unloadVisible" :showClose='cancel' width="35%" top="15%" center>
                         <span>
                             Unload model "
                             <span style="color:#217AD9">{{ rowData.tableName }}</span>" ?
@@ -246,6 +263,19 @@
                             <el-button
                                 type="primary"
                                 @click="unloadVisible = false"
+                                style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                            >Cancel</el-button>
+                        </span>
+                    </el-dialog>
+                    <el-dialog :visible.sync="flowControlVisible" :showClose='cancel' title="FlowControl" class="flowControl" width="35%" top="15%" center>
+                        <div class="name">
+                            <el-input v-model.number="qps" @input='inputqps'></el-input>
+                        </div><span style="color:#217AD9;font-size:18px;">qps</span>
+                        <span slot="footer" class="dialog-footer  dialog-but">
+                            <el-button type="primary" :disabled="!qps" @click="sureflowControl">OK</el-button>
+                            <el-button
+                                type="primary"
+                                @click="flowControlVisible = false"
                                 style="background:#B8BFCC;border: 1px solid #B8BFCC"
                             >Cancel</el-button>
                         </span>
@@ -300,7 +330,8 @@ import {
     modelUnbind,
     queryModel,
     queryMonitor,
-    queryJvm
+    queryJvm,
+    updateFlowRule
 } from '@/api/cluster'
 export default {
     name: 'cluster',
@@ -313,13 +344,15 @@ export default {
     },
     data() {
         return {
+            qps: '',
             serviceIDCheckList: [],
+            cancel: false,
             polar: {}, // model图表信息
             MonitorPolar: {}, // Monitor图表信息
             JVMPolar: {}, // JVM图表信息
             loadingEchart: false,
             dialogVisible: false, // model图表弹窗
-            currentPage1: 1, // 当前页
+            currentPage: 1, // 当前页
             total: 0, // 数据总数
             page: 1, // 页数
             pageSize: 20, // 每页条数
@@ -337,6 +370,7 @@ export default {
             ipchildrenData: {}, // ip 子集数据
             unbindVisible: false, // unbind
             unloadVisible: false, // unload
+            flowControlVisible: false,
             flag: true,
             ModelsData: [], // Models数据
             JVMInfo: 0, //  JVM tab
@@ -363,6 +397,15 @@ export default {
             },
             immediate: true,
             deep: true
+        },
+        flowControlVisible: {
+            handler: function(val) {
+                if (!val) {
+                    this.qps = ''
+                }
+            },
+            immediate: true,
+            deep: true
         }
     },
     computed: {},
@@ -381,16 +424,18 @@ export default {
             // 初始化数据
             getCluster().then(res => {
                 this.clusterData = res.data.children
-                this.tabNav()
+                this.tabNav(this.selected)
             })
         },
-        tabNav(index) {
-            if (index) {
+        tabNav(index, info) {
+            if (info) {
                 this.searchkey = ''
                 this.serviceid = ''
+                this.ipInfo = 0
+                this.selected = index
+                this.clearChartTimer()
             }
-            // this.ipInfo = 0
-            this.activeip = 0
+            // this.activeip = 0
             this.ArrServing = this.clusterData.filter(item => {
                 return item.name === 'serving'
             })
@@ -399,35 +444,36 @@ export default {
             })
             if (
                 this.ArrServing[0] &&
-                this.ArrServing[0].children.length &&
-                !index
-            ) {
-                index = 2
-            } else if (
-                this.ArrProxy[0] &&
-                this.ArrProxy[0].children.length &&
-                !index
+                !this.ArrServing[0].children.length
             ) {
                 index = 1
+            } else if (
+                this.ArrProxy[0] &&
+                !this.ArrProxy[0].children.length
+            ) {
+                index = 2
             }
-            this.selected = +index
-            if (this.selected === 2) {
-                this.ipDataArr = this.ArrServing
-            } else {
+            // if (index) {
+            //     this.selected = index
+            // }
+            this.selected = index
+            if (this.selected === 1) {
                 this.ipDataArr = this.ArrProxy
+            } else {
+                this.ipDataArr = this.ArrServing
             }
             if (this.ipDataArr[0].children.length) {
                 this.ipData = this.ipDataArr[0]
-                this.ipchildrenData = this.ipData.children[0]
+                this.ipchildrenData = this.ipData.children[this.activeip]
                 this.ipPort = this.ipchildrenData.name.split(':')
-                if (this.flag) {
+                if (this.flag || info) {
                     this.listProps()
                     this.flag = false
                 }
             } else {
                 this.ipchildrenData = []
                 this.basicData = []
-                this.ipData = []
+                this.ipData = {}
             }
         },
         listProps(data) {
@@ -439,7 +485,9 @@ export default {
             }
             getlistProps(params).then(res => {
                 this.basicData = res.data.rows
-                this.total = res.data.total
+                for (var i = 0; i < this.basicData.length; i++) {
+                    this.basicData[i].value = this.basicData[i].value + ''
+                }
             })
         },
         unload(row) {
@@ -488,6 +536,38 @@ export default {
                 }
             })
         },
+        inputqps() {
+            var re = /^[0-9]+$/
+            if (!re.test(this.qps)) {
+                this.qps = ''
+            }
+            this.qps = this.qps + ''
+            if (this.qps.length >= 10) {
+                this.qps = this.qps.substring(0, 10)
+            } else if (this.qps < 0 && this.qps !== '') {
+                this.qps = 0
+            }
+        },
+        flowControl(row) {
+            this.rowData = row
+            this.qps = row.allowQps
+            this.flowControlVisible = true
+        },
+        sureflowControl() {
+            const params = {
+                host: this.ipPort[0],
+                port: this.ipPort[1],
+                source: this.rowData.resourceName,
+                allowQps: this.qps - 0
+            }
+            this.unbindVisible = false
+            updateFlowRule(params).then(res => {
+                if (res.retcode) {
+                    this.flowControlVisible = false
+                    this.tabipInfo(this.ipInfo)
+                }
+            })
+        },
         modelpolar() {
             // 获取model 弹框数据
             const xDate = []
@@ -522,7 +602,7 @@ export default {
                     trigger: 'axis'
                 },
                 title: {
-                    show: !this.oledata,
+                    show: !this.oledata.length,
                     text: 'no data',
                     left: 'center',
                     top: 'center',
@@ -553,6 +633,8 @@ export default {
                         name: '',
                         data: yData,
                         type: 'line',
+                        symbol: 'circle',
+                        symbolSize: 4,
                         itemStyle: {
                             color: '#4AA2FF'
                         }
@@ -562,6 +644,7 @@ export default {
         },
         showDialog(row) {
             // 显示model 弹框
+            this.oledata = []
             this.dialogVisible = true
             const params = {
                 host: this.ipPort[0],
@@ -637,6 +720,11 @@ export default {
                 getmodellist(params).then(res => {
                     this.ModelsData = res.data.rows
                     this.total = res.data.total
+                    for (var i = 0; i < this.ModelsData.length; i++) {
+                        if (this.ModelsData[i].serviceIds.length === 0) {
+                            this.ModelsData[i].serviceIds.push('--')
+                        }
+                    }
                 })
             } else if (this.ipInfo === 0) {
                 if (this.ipPort.length === 0) {
@@ -717,16 +805,18 @@ export default {
                         var op = {
                             name: legendArr[j],
                             data: this.MonitorYvalue[legendArr[j]],
-                            type: 'line'
+                            type: 'line',
+                            symbol: 'circle',
+                            symbolSize: 4
                         }
                     }
                     MonitorArr.push(op)
                 }
                 monitorXdate = this.MonitorXdate.concat(xDate)
                 if (monitorXdate.length > 60) {
-                    monitorXdate.shift()
+                    monitorXdate = monitorXdate.slice(monitorXdate.length - 60)
                     MonitorArr.forEach((m) => {
-                        m.data.shift()
+                        m.data = m.data.slice(monitorXdate.length - 60)
                     })
                 }
                 this.MonitorXdate = monitorXdate
@@ -742,7 +832,7 @@ export default {
                 ;[data] = this.getIncomingData(this.JvmData, res.data.rows)
                 // 3处理数据
                 if (data.length > 60) {
-                    data.shift()
+                    data = data.slice(data.length - 60)
                 }
                 // 4赋值组件
                 this.JvmData = data
@@ -817,7 +907,7 @@ export default {
         },
         handleCurrentChange(val) {
             this.page = val
-            this.listProps()
+            this.tabipInfo(this.ipInfo)
         },
         setChartTimer(cb, interval) {
             clearInterval(this.chartTimer)
@@ -825,6 +915,19 @@ export default {
         },
         clearChartTimer() {
             clearInterval(this.chartTimer)
+        },
+        sortMix(a, b, key) {
+            if (Object.prototype.toString.call(a) === '[object Array]') {
+                a = a[key][0] + ''
+                b = b[key][0] + ''
+            } else {
+                a = a[key] + ''
+                b = b[key] + ''
+            }
+            a = (a.split('')[0] || '').charCodeAt()
+            b = (b.split('')[0] || '').charCodeAt()
+
+            return a - b < 0 ? -1 : 1
         }
     }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="echart">
-    <div ref="callsLine" class="echarts" style="height: 400px;" />
+    <div ref="callsLine" class="echarts" />
   </div>
 </template>
 

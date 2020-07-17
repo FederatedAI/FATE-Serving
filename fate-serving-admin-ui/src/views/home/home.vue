@@ -46,6 +46,7 @@ export default {
                     this.showNav = false
                 } else {
                     this.showNav = true
+                    this.username = localStorage.name
                 }
             },
             immediate: true

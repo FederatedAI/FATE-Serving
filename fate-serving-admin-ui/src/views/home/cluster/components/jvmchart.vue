@@ -48,10 +48,17 @@ export default {
                 }
             })
             var jvmrArr = []
+            var colorArr = []
             if (this.callsData.JVMInfo === 0) {
                 this.JVMseries = []
                 Yname = 'mb'
-                jvmrArr = ['old', 'eden', 'heap', 'nonHeap', 'survivor']
+                // jvmrArr = ['old', 'eden', 'heap', 'nonHeap', 'survivor']
+                jvmrArr = [{ name: 'old', textStyle: { color: '#4AA2FF' } },
+                    { name: 'eden', textStyle: { color: '#00C99E' } },
+                    { name: 'heap', textStyle: { color: '#FF9D00' } },
+                    { name: 'nonHeap', textStyle: { color: '#FE6363' } },
+                    { name: 'survivor', textStyle: { color: '#AD81EF' } }]
+                colorArr = ['#4AA2FF', '#00C99E', '#FF9D00', '#FE6363', '#AD81EF']
                 for (var a = 0; a < jvmrArr.length; a++) {
                     var pam = []
                     for (var q = 0; q < Memory.length; q++) {
@@ -61,38 +68,80 @@ export default {
                         return (item / 1024 / 1024).toFixed(2)
                     })
                     this.JVMseries.push({
-                        name: jvmrArr[a],
+                        name: jvmrArr[a].name,
                         data: pam,
-                        type: 'line'
+                        type: 'line',
+                        symbol: 'circle',
+                        symbolSize: 4,
+                        lineStyle: {
+                            color: colorArr[a]
+                        },
+                        itemStyle: {
+                            color: colorArr[a]
+                        }
                     })
                 }
             } else if (this.callsData.JVMInfo === 1) {
                 this.JVMseries = []
                 Yname = ''
-                jvmrArr = ['fullGcCount', 'yongGcCount']
+                jvmrArr = [{ name: 'fullGcCount', textStyle: { color: '#4AA2FF' } },
+                    { name: 'yongGcCount', textStyle: { color: '#00C99E' } }]
                 this.JVMseries = [{
                     name: 'fullGcCount',
                     data: fullGcCount,
-                    type: 'line'
+                    type: 'line',
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    lineStyle: {
+                        color: '#4AA2FF'
+                    },
+                    itemStyle: {
+                        color: '#4AA2FF'
+                    }
                 },
                 {
                     name: 'yongGcCount',
                     data: yongGcCount,
-                    type: 'line'
+                    type: 'line',
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    lineStyle: {
+                        color: '#00C99E'
+                    },
+                    itemStyle: {
+                        color: '#00C99E'
+                    }
                 }]
             } else if (this.callsData.JVMInfo === 2) {
                 this.JVMseries = []
                 Yname = 'ms'
-                jvmrArr = ['yongGcTime', 'fullGcTime']
+                jvmrArr = [{ name: 'yongGcTime', textStyle: { color: '#4AA2FF' } },
+                    { name: 'fullGcTime', textStyle: { color: '#00C99E' } }]
                 this.JVMseries = [{
                     name: 'yongGcTime',
                     data: yongGcTime,
-                    type: 'line'
+                    type: 'line',
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    lineStyle: {
+                        color: '#4AA2FF'
+                    },
+                    itemStyle: {
+                        color: '#4AA2FF'
+                    }
                 },
                 {
                     name: 'fullGcTime',
                     data: fullGcTime,
-                    type: 'line'
+                    type: 'line',
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    lineStyle: {
+                        color: '#00C99E'
+                    },
+                    itemStyle: {
+                        color: '#00C99E'
+                    }
                 }]
             } else if (this.callsData.JVMInfo === 3) {
                 this.JVMseries = []
@@ -100,7 +149,15 @@ export default {
                 this.JVMseries = [{
                     name: 'threadCount',
                     data: threadCount,
-                    type: 'line'
+                    type: 'line',
+                    symbol: 'circle',
+                    symbolSize: 4,
+                    lineStyle: {
+                        color: '#4AA2FF'
+                    },
+                    itemStyle: {
+                        color: '#4AA2FF'
+                    }
                 }]
             }
             this.options = {

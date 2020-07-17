@@ -16,3 +16,11 @@ export function serviceUpdate(data) {
         data
     })
 }
+//  更新服务
+export function validate(data, name) {
+    return request({
+        url: '/api/validate/' + name,
+        method: 'post',
+        data
+    })
+}

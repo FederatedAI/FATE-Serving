@@ -69,3 +69,12 @@ export function queryJvm(params) {
         params
     })
 }
+
+// /api/service/updateFlowRule
+export function updateFlowRule(data) {
+    return request({
+        url: '/api/service/updateFlowRule',
+        method: 'post',
+        data
+    })
+}

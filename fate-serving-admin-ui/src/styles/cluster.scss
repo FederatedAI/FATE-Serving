@@ -176,7 +176,7 @@
             height:2px;
             background:rgba(230,235,240,1);
             opacity:1;
-            margin: 13px 0 0 26px;
+            margin: 12px 0 0 26px;
         }
         .ip-list-main {
             width: 385px;
@@ -193,7 +193,6 @@
                 margin-bottom: 12px;
                 color:rgba(132,140,153,1);
                 opacity:1;
-                cursor: pointer;
                 .iptime {
                     color: #B8BFCC;
                     float: right;
@@ -296,9 +295,56 @@
             }
             .dialog-but {
                 .el-button {
-                    width: 200px;
+                    width: 32%;
                     padding: 10px 0;
                     margin-bottom: 20px;
+                }
+            }
+            .flowControl {
+                padding-bottom: 48px;
+                .el-dialog__header {
+                    text-align: left;
+                    padding: 36px 0px 0px 36px;
+                    .el-dialog__title {
+                        font-size:32px;
+                        font-weight:bold;
+                        color:rgba(33,122,217,1);
+                    }
+                }
+                .el-dialog__body {
+                    margin-top: 20px;
+                }
+                .name {
+                    margin: 0 auto;
+                    width: calc(66% - 20px);
+                    margin-top: 0.75vw;
+                    border-bottom: 2px solid #E6EBF0;
+                    position: relative;
+                    text-align: center;
+                    display: inline-block;
+                    .el-autocomplete {
+                        width: 100%;
+                    }
+                    input {
+                        width: 100%;
+                        padding-right: 10px !important;
+                    }
+                    .el-input__inner {
+                        text-align: center;
+                        border: 0px;
+                        outline: none;
+                        font-size: 1.8em;
+                        color: #2D3642;
+                        background-color: #fff;
+                    }
+
+                    .active {
+                        input{
+                            color: #2D3642;
+                            font-weight: 400;
+                            font-size: 1.5em
+                        }
+                    }
                 }
             }
             .el-dialog__body {
@@ -319,8 +365,12 @@
                     text-align: left;
                     padding: 24px 0 24px 24px;
                     box-sizing: border-box;
-                    max-height: 300px;
+                    max-height: 240px;
                     overflow-y: auto;
+                    .el-checkbox {
+                        display: block;
+                        line-height: 30px;
+                    }
                     span {
                         font-size: 14px;
                         line-height: 20px;
@@ -337,7 +387,7 @@
                 .el-input__inner  {
                     height: 36px;
                     background: #F5F8FA;
-                    color: #B8BFCC;
+                    color: #4E5766;
                     font-size: 14px;
                     padding: 0 8px;
                 }
@@ -397,6 +447,7 @@
     }
     .titpopover-label {
         height:30px;
+        padding-left: 3px;
         font-size:18px;
         font-family:Product Sans;
         font-weight:400;
@@ -404,6 +455,9 @@
         color:rgba(78,87,102,1);
         opacity:1;
         cursor: pointer;
+    }
+    .titpopover-label:hover {
+        background: #f5f7fa;
     }
 }
    .popper__arrow {
@@ -415,25 +469,26 @@
     display: none;
     }
     .chart {
-         background: #F5F8FA;
+        //  background: #F5F8FA;
+        background: #F5F8FA;
          padding: 33px 32px 32px 42px;
          position: relative;
          vertical-align: middle;
          min-height: 50%;
+         height: 100%;
          overflow: hidden;
-         .no-data {
-             color: #666;
-             display: inline-block;
+         .modelchart {
+            background: #fff;
+            width: 100%;
+            height: 400px !important;
+            padding: 0 ;
          }
         .echarts{
                 margin: 0 auto;
-                width: 100%;
-               background: #fff;
-               canvas {
-                   transform: scale(1.25,1.38);
-                    left: 1px !important;
-                    top: 5px !important;
-               }
+                width: 124.6%;
+                height: 520px !important;
+                left: -12.6% !important;
+                top: -55px !important;
             }
     }
     .ip-info-Monitor{

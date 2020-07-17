@@ -10,20 +10,13 @@ __pycache__
 *.prefs
 
 # excluded paths
-/fate-serving/federatedml/target/
-/fate-serving/serving-server/target/
-/fate-serving/target/
-/fate-serving/fate-serving-core/target/
 .idea/*
 .vscode/*
-/fate-metrics-api/target/maven-status/maven-compiler-plugin/compile/default-compile/
-/fate-metrics-micrometer/target/
-/register/target/
 /logs/
-/fate-serving-admin/target/
-/fate-serving-core/target/
-/federatedml/target/
-/serving-proxy/target/
-/serving-server/logs/
-/serving-server/target/
-/fate-serving-extension/target/
+/*/logs/
+/fate-serving-admin/src/main/resources/public/
+/*/target/
+/fate-serving-admin-ui/node/
+/fate-serving-admin-ui/node_modules/
+/.fate/
+/conf/

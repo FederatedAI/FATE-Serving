@@ -4,9 +4,8 @@
             class="ip-list-li"
             v-for="(item,index) in ipData.children"
             :key="index"
-            @click="selectIP(item,index)"
         >
-            <span :class="activeip === index ? 'activeip' : ''">{{ item && item.name }}</span>
+            <span style="cursor: pointer;" @click="selectIP(item,index)" :class="activeip === index ? 'activeip' : ''">{{ item && item.name }}</span>
             <span
                 class="iptime"
                 :class="activeip === index ? 'activetime' : ''"
@@ -33,8 +32,8 @@ export default {
         }
     },
     methods: {
-        selectIP(index) {
-            this.$emit('selectIP', index)
+        selectIP(item, index) {
+            this.$emit('selectIP', item, index)
         }
     }
 }
