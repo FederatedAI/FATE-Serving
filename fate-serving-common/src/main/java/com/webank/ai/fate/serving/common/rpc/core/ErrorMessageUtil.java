@@ -46,21 +46,17 @@ public class ErrorMessageUtil {
         return returnResult;
     }
 
-    public static String buildRemoteRpcErrorMsg(String code, String msg) {
+    public static String buildRemoteRpcErrorMsg(int code, String msg) {
         return new StringBuilder().append("host return code ").append(code)
                 .append(" host msg :").append(msg).toString();
     }
 
-    public static String transformRemoteErrorCode(String code) {
-        if (code != null) {
-            return new StringBuilder().append("2").append(code).toString();
-        } else {
-            return new StringBuilder().append("2").append(StatusCode.SYSTEM_ERROR).toString();
-        }
+    public static int transformRemoteErrorCode(int code) {
+        return Integer.valueOf(new StringBuilder().append("2").append(code).toString());
     }
 
-    public static String getLocalExceptionCode(Exception e) {
-        String retcode = StatusCode.SYSTEM_ERROR;
+    public static int getLocalExceptionCode(Exception e) {
+        int retcode = StatusCode.SYSTEM_ERROR;
         if (e instanceof BaseException) {
             retcode = ((BaseException) e).getRetcode();
         }

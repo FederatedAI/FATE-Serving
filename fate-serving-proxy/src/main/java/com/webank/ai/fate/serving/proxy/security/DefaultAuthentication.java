@@ -49,7 +49,7 @@ public class DefaultAuthentication implements Interceptor {
         boolean isAuthPass = authUtils.checkAuthentication(sourcePackage);
         if (!isAuthPass) {
             logger.error("invalid signature");
-            throw new InvalidRoleInfoException();
+            throw new InvalidRoleInfoException("invalid signature");
         }
     }
 

@@ -26,7 +26,7 @@ message UnloadRequest{
     string namespace = 2;
 }
 message UnloadResponse{
-    string statusCode = 1;
+    int32 statusCode = 1;
     string message = 2;
 }
 
@@ -36,7 +36,7 @@ message UnbindRequest{
     string namespace = 3;
 }
 message UnbindResponse{
-    string statusCode = 1;
+    int32 statusCode = 1;
     string message = 2;
 }
 
@@ -65,7 +65,7 @@ message ModelInfoEx{
 
 
 message QueryModelResponse{
-    string retcode = 1;
+    int32 retcode = 1;
     string message = 2;
     repeated  ModelInfoEx modelInfos = 3;
 }

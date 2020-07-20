@@ -41,7 +41,7 @@ public class ValidateController {
             OutboundPackage outboundPackage = validateServiceProvider.service(context, inboundPackage);
             Map resultMap = (Map) outboundPackage.getData();
 
-            if (resultMap != null && resultMap.get(Dict.RET_CODE).toString().equals(StatusCode.SUCCESS)) {
+            if (resultMap != null && resultMap.get(Dict.RET_CODE) != null && (int) resultMap.get(Dict.RET_CODE) == StatusCode.SUCCESS) {
                 logger.info("validate {} success", callName);
             }
 

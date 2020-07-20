@@ -16,13 +16,11 @@
 
 package com.webank.ai.fate.serving.core.exceptions;
 
-/**
- * @Description TODO
- * @Author
- **/
-public class InvalidRoleInfoException extends RuntimeException {
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 
-    public InvalidRoleInfoException() {
-        super("InvalidRole");
+public class InvalidRoleInfoException extends BaseException {
+
+    public InvalidRoleInfoException(String message) {
+        super(StatusCode.INVALID_ROLE_ERROR, message);
     }
 }

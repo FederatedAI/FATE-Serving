@@ -21,10 +21,10 @@ import com.webank.ai.fate.serving.core.constant.StatusCode;
 public class ModelProcessorInitException extends BaseException {
 
     public ModelProcessorInitException(String message) {
-        this(StatusCode.MODEL_INIT_ERROR, message);
+        super(StatusCode.MODEL_INIT_ERROR, message);
     }
 
-    public ModelProcessorInitException(String retCode, String message) {
+    public ModelProcessorInitException(int retCode, String message) {
         super(retCode, message);
     }
 

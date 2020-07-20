@@ -52,24 +52,24 @@ public class BatchInferenceResult extends ReturnResult {
 
     static public class SingleInferenceResult {
         Integer index;
-        String retcode;
+        int retcode;
         String retmsg;
         Map<String, Object> data;
         public SingleInferenceResult() {
         }
 
-        public SingleInferenceResult(Integer index, String retcode, String msg, Map<String, Object> data) {
+        public SingleInferenceResult(Integer index, int retcode, String msg, Map<String, Object> data) {
             this.index = index;
             this.retcode = retcode;
             this.retmsg = msg;
             this.data = data;
         }
 
-        public String getRetcode() {
+        public int getRetcode() {
             return retcode;
         }
 
-        public void setRetcode(String retcode) {
+        public void setRetcode(int retcode) {
             this.retcode = retcode;
         }
 

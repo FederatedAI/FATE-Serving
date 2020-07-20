@@ -109,13 +109,13 @@ public class BatchInferenceFuture extends AbstractFuture {
         if (remote != null) {
             String remoteContent = remote.getBody().getValue().toStringUtf8();
             BatchInferenceResult remoteInferenceResult = JsonUtil.json2Object(remoteContent, BatchInferenceResult.class);
-            if (useCache && StatusCode.SUCCESS.equals(remoteInferenceResult.getRetcode())) {
+            if (useCache && StatusCode.SUCCESS == remoteInferenceResult.getRetcode()) {
                 try {
                     AsyncMessageEvent asyncMessageEvent = new AsyncMessageEvent();
                     List<Cache.DataWrapper> cacheEventDataList = Lists.newArrayList();
                     for (BatchInferenceRequest.SingleInferenceData singleInferenceData : batchInferenceRequest.getBatchDataList()) {
                         BatchInferenceResult.SingleInferenceResult singleInferenceResult = remoteInferenceResult.getSingleInferenceResultMap().get(singleInferenceData.getIndex());
-                        if (singleInferenceResult != null && StatusCode.SUCCESS.equals(singleInferenceResult.getRetcode())) {
+                        if (singleInferenceResult != null && StatusCode.SUCCESS == singleInferenceResult.getRetcode()) {
                             Cache.DataWrapper dataWrapper = new Cache.DataWrapper(buildCacheKey(rpcDataWraper.getGuestModel(), rpcDataWraper.getHostModel(),
                                     singleInferenceData.getSendToRemoteFeatureData()), JsonUtil.object2Json(singleInferenceResult.getData()));
                             cacheEventDataList.add(dataWrapper);

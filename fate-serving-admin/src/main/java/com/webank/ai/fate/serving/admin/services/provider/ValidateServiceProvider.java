@@ -53,7 +53,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         ModelServiceProto.PublishResponse response = future.get(timeout * 2, TimeUnit.MILLISECONDS);
 
         Map returnResult = new HashMap();
-        returnResult.put(Dict.RET_CODE, String.valueOf(response.getStatusCode()));
+        returnResult.put(Dict.RET_CODE, response.getStatusCode());
         returnResult.put(Dict.RET_MSG, response.getMessage());
         return returnResult;
     }
@@ -72,7 +72,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         ModelServiceProto.PublishResponse response = future.get(timeout * 2, TimeUnit.MILLISECONDS);
 
         Map returnResult = new HashMap();
-        returnResult.put(Dict.RET_CODE, String.valueOf(response.getStatusCode()));
+        returnResult.put(Dict.RET_CODE, response.getStatusCode());
         returnResult.put(Dict.RET_MSG, response.getMessage());
         return returnResult;
     }
@@ -231,7 +231,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         String actionType = context.getActionType();
         Map returnResult = new HashMap();
         if (data != null) {
-            String code = data.getCode() != null ? data.getCode() : StatusCode.SYSTEM_ERROR;
+            int code = data.getCode();
             String msg = data.getMessage() != null ? data.getMessage() : "";
             returnResult.put(Dict.RET_CODE, code);
             returnResult.put(Dict.RET_MSG, msg);

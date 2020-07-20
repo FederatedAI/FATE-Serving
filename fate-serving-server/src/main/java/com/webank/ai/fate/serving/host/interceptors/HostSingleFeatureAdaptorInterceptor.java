@@ -50,7 +50,7 @@ public class HostSingleFeatureAdaptorInterceptor extends AbstractInterceptor<Inf
         if (singleFeatureDataAdaptorData == null) {
             throw new HostGetFeatureErrorException("adaptor return null");
         }
-        if (!StatusCode.SUCCESS.equals(singleFeatureDataAdaptorData.getRetcode())) {
+        if (StatusCode.SUCCESS != singleFeatureDataAdaptorData.getRetcode()) {
             throw new HostGetFeatureErrorException(singleFeatureDataAdaptorData.getRetcode(), "adaptor return error");
         }
         inferenceRequest.getFeatureData().clear();

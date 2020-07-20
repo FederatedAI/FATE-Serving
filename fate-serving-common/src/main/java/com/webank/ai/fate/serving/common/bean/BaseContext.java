@@ -227,12 +227,12 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     }
 
     @Override
-    public String getReturnCode() {
-        return (String) dataMap.get(Dict.RETURN_CODE);
+    public int getReturnCode() {
+        return (int) dataMap.get(Dict.RETURN_CODE);
     }
 
     @Override
-    public void setReturnCode(String returnCode) {
+    public void setReturnCode(int returnCode) {
         dataMap.put(Dict.RETURN_CODE, returnCode);
     }
 

@@ -174,8 +174,8 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     logger.error("error ", e);
                 }
             }
-            String returnCode = context.getReturnCode();
-            if (StatusCode.SUCCESS.equals(returnCode)) {
+            int returnCode = context.getReturnCode();
+            if (StatusCode.SUCCESS == returnCode) {
                 if (flowCounterManager != null) {
                     if (context instanceof ServingServerContext) {
                         Model model = ((ServingServerContext) context).getModel();
@@ -204,7 +204,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     protected OutboundPackage<resp> serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {
         OutboundPackage<resp> outboundPackage = new OutboundPackage<resp>();
         ExceptionInfo exceptionInfo = ErrorMessageUtil.handleExceptionExceptionInfo(e);
-        context.setReturnCode(exceptionInfo.getCode() != null ? exceptionInfo.getCode() : StatusCode.SYSTEM_ERROR);
+        context.setReturnCode(exceptionInfo.getCode());
         resp rsp = transformExceptionInfo(context, exceptionInfo);
         outboundPackage.setData(rsp);
         return outboundPackage;
@@ -247,18 +247,18 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
     }
 
     public static class ExceptionInfo {
-        String code;
+        int code;
         String message;
 
         public ExceptionInfo() {
 
         }
 
-        public String getCode() {
+        public int getCode() {
             return code;
         }
 
-        public void setCode(String code) {
+        public void setCode(int code) {
             this.code = code;
         }
 

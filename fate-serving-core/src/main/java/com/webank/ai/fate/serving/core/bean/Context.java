@@ -90,9 +90,9 @@ public interface Context<Req, Resp> {
 
     public void setResultData(Object resultData);
 
-    public String getReturnCode();
+    public int getReturnCode();
 
-    public void setReturnCode(String returnCode);
+    public void setReturnCode(int returnCode);
 
     public long getDownstreamCost();
 

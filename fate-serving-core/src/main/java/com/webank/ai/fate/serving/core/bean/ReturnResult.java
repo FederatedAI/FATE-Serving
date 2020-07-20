@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class ReturnResult {
     private static final Logger logger = LoggerFactory.getLogger(ReturnResult.class);
-    private String retcode;
+    private int retcode;
     private String retmsg = "";
     private String caseid = "";
     private Map<String, Object> data;
@@ -39,7 +39,7 @@ public class ReturnResult {
         this.warn = new HashMap<>();
     }
 
-    public static ReturnResult build(String retcode, String retmsg, Map<String, Object> data) {
+    public static ReturnResult build(int retcode, String retmsg, Map<String, Object> data) {
         ReturnResult returnResult = new ReturnResult();
         returnResult.setRetcode(retcode);
         returnResult.setRetmsg(retmsg);
@@ -47,14 +47,14 @@ public class ReturnResult {
         return returnResult;
     }
 
-    public static ReturnResult build(String retcode, String retmsg) {
+    public static ReturnResult build(int retcode, String retmsg) {
         ReturnResult returnResult = new ReturnResult();
         returnResult.setRetcode(retcode);
         returnResult.setRetmsg(retmsg);
         return returnResult;
     }
 
-    public static ReturnResult build(String retcode, Map<String, Object> data) {
+    public static ReturnResult build(int retcode, Map<String, Object> data) {
         ReturnResult returnResult = new ReturnResult();
         returnResult.setRetcode(retcode);
         returnResult.setData(data);
@@ -69,11 +69,11 @@ public class ReturnResult {
         this.flag = flag;
     }
 
-    public String getRetcode() {
+    public int getRetcode() {
         return retcode;
     }
 
-    public void setRetcode(String retcode) {
+    public void setRetcode(int retcode) {
         this.retcode = retcode;
     }
 

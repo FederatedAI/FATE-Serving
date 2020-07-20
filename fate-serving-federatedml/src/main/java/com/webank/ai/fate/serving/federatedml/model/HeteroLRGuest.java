@@ -54,7 +54,7 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> guestData,
                                                     Map<String, Object> hostData) {
         Map<String, Object> result = this.handleRemoteReturnData(hostData);
-        if (result.get(Dict.RET_CODE).equals(StatusCode.SUCCESS)) {
+        if ((int) result.get(Dict.RET_CODE) == StatusCode.SUCCESS) {
             hostData.forEach((k, v) -> {
                 Map<String, Object> onePartyData = (Map<String, Object>) v;
                 double score;

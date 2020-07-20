@@ -20,11 +20,12 @@ import com.webank.ai.fate.serving.core.constant.StatusCode;
 
 public class OverLoadException extends BaseException {
 
-    public OverLoadException(String retCode, String message) {
+    public OverLoadException(int retCode, String message) {
         super(retCode, message);
     }
 
     public OverLoadException(String message) {
         super(StatusCode.OVER_LOAD_ERROR, message);
     }
+
 }

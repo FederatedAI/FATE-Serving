@@ -134,8 +134,8 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                 return null;
             }
             Map responseData = JsonUtil.json2Object(responseBody, Map.class);
-            if (responseData.get(Dict.RET_CODE) != null && !responseData.get(Dict.RET_CODE).toString().equals(StatusCode.SUCCESS)) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get("retmsg"));
+            if (responseData.get(Dict.RET_CODE) != null && (int) responseData.get(Dict.RET_CODE) != StatusCode.SUCCESS) {
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get(Dict.RET_MSG));
                 return null;
             }
             Map<String, byte[]> resultMap = new HashMap<>(8);

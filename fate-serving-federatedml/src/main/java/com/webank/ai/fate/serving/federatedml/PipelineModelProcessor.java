@@ -61,7 +61,7 @@ public class PipelineModelProcessor implements ModelProcessor {
             Proxy.Packet packet = null;
             try {
                 BatchInferenceResult remoteInferenceResult = (BatchInferenceResult) future.get(timeout, TimeUnit.MILLISECONDS);
-                if (!StatusCode.SUCCESS.equals(remoteInferenceResult.getRetcode())) {
+                if (StatusCode.SUCCESS != remoteInferenceResult.getRetcode()) {
                     throw new RemoteRpcException(transformRemoteErrorCode(remoteInferenceResult.getRetcode()), buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(), remoteInferenceResult.getRetmsg()));
                 }
                 remoteResultMap.put(partyId, remoteInferenceResult);
@@ -91,7 +91,7 @@ public class PipelineModelProcessor implements ModelProcessor {
         localResult.forEach((index, data) -> {
             BatchInferenceResult.SingleInferenceResult singleInferenceResult = new BatchInferenceResult.SingleInferenceResult();
             if (data != null) {
-                String retcode = data.get(Dict.RET_CODE) != null ? data.get(Dict.RET_CODE).toString() : StatusCode.SYSTEM_ERROR;
+                int retcode = data.get(Dict.RET_CODE) != null ? (int) data.get(Dict.RET_CODE) : StatusCode.SYSTEM_ERROR;
                 data.remove(Dict.RET_CODE);
                 singleInferenceResult.setData(data);
                 singleInferenceResult.setIndex(index);
@@ -124,7 +124,7 @@ public class PipelineModelProcessor implements ModelProcessor {
             }
         });
         Map<String, Object> tempResult = singleMerge(context, localResult, remoteResultMap);
-        String retcode = tempResult.get(Dict.RET_CODE).toString();
+        int retcode = (int) tempResult.get(Dict.RET_CODE);
         String message = tempResult.get(Dict.MESSAGE) == null ? "" : tempResult.get(Dict.MESSAGE).toString();
         tempResult.remove(Dict.RET_CODE);
         tempResult.remove(Dict.MESSAGE);
@@ -234,8 +234,8 @@ public class PipelineModelProcessor implements ModelProcessor {
         if (result.get(Dict.RET_CODE) == null) {
             return false;
         }
-        String retCode = result.get(Dict.RET_CODE).toString();
-        if (!StatusCode.SUCCESS.equals(retCode)) {
+        int retCode = (int) result.get(Dict.RET_CODE);
+        if (StatusCode.SUCCESS != retCode) {
             return false;
         }
         return true;
@@ -460,14 +460,14 @@ public class PipelineModelProcessor implements ModelProcessor {
                     try {
                         Map<String, Object> localData = localResult.get(index);
                         Map<String, Object> mergeResult = singleMerge(context, localData, remoteSingleMap);
-                        String retcode = mergeResult.get(Dict.RET_CODE).toString();
+                        int retcode = (int) mergeResult.get(Dict.RET_CODE);
                         String msg = mergeResult.get(Dict.MESSAGE) != null ? mergeResult.get(Dict.MESSAGE).toString() : "";
                         mergeResult.remove(Dict.RET_CODE);
                         mergeResult.remove(Dict.MESSAGE);
                         singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode, msg, mergeResult));
                     } catch (Exception e) {
                         logger.error("merge remote error", e);
-                        String retcode = ErrorMessageUtil.getLocalExceptionCode(e);
+                        int retcode = ErrorMessageUtil.getLocalExceptionCode(e);
                         singleResultLists.add(new BatchInferenceResult.SingleInferenceResult(index, retcode, e.getMessage(), null));
                     }
                 });

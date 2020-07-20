@@ -25,18 +25,18 @@ import java.util.Map;
  */
 public class BatchHostFeatureAdaptorResult {
 
-    String retcode;
+    int retcode;
     String caseId;
     /**
      * key 为请求中的index
      */
     Map<Integer, SingleBatchHostFeatureAdaptorResult> indexResultMap = Maps.newHashMap();
 
-    public String getRetcode() {
+    public int getRetcode() {
         return retcode;
     }
 
-    public void setRetcode(String retcode) {
+    public void setRetcode(int retcode) {
         this.retcode = retcode;
     }
 
@@ -59,7 +59,7 @@ public class BatchHostFeatureAdaptorResult {
     public static class SingleBatchHostFeatureAdaptorResult {
 
         int index;
-        String retcode;
+        int retcode;
         String msg;
         Map<String, Object> features;
 
@@ -79,11 +79,11 @@ public class BatchHostFeatureAdaptorResult {
             this.index = index;
         }
 
-        public String getRetcode() {
+        public int getRetcode() {
             return retcode;
         }
 
-        public void setRetcode(String retcode) {
+        public void setRetcode(int retcode) {
             this.retcode = retcode;
         }
 

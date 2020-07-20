@@ -183,8 +183,8 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
             private ReturnResult parse(Proxy.Packet remote) {
                 if (remote != null) {
                     String remoteContent = remote.getBody().getValue().toStringUtf8();
-                    ReturnResult remoteInferenceResult = (ReturnResult) JsonUtil.json2Object(remoteContent, ReturnResult.class);
-                    if (useCache && StatusCode.SUCCESS.equals(remoteInferenceResult.getRetcode())) {
+                    ReturnResult remoteInferenceResult = JsonUtil.json2Object(remoteContent, ReturnResult.class);
+                    if (useCache && StatusCode.SUCCESS == remoteInferenceResult.getRetcode()) {
                         try {
                             AsyncMessageEvent asyncMessageEvent = new AsyncMessageEvent();
                             CacheEventData cacheEventData = new CacheEventData(buildCacheKey(rpcDataWraper.getGuestModel(), rpcDataWraper.getHostModel(), inferenceRequest.getSendToRemoteFeatureData()), remoteInferenceResult.getData());

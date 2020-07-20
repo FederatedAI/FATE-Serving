@@ -52,14 +52,14 @@ public class HostBatchFeatureAdaptorInterceptor extends AbstractInterceptor<Batc
         if (batchHostFeatureAdaptorResult == null) {
             throw new HostGetFeatureErrorException("adaptor return null");
         }
-        if (!StatusCode.SUCCESS.equals(batchHostFeatureAdaptorResult.getRetcode())) {
+        if (StatusCode.SUCCESS != batchHostFeatureAdaptorResult.getRetcode()) {
             throw new HostGetFeatureErrorException(batchHostFeatureAdaptorResult.getRetcode(), "adaptor return error");
         }
         Map<Integer, BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult> featureResultMap = batchHostFeatureAdaptorResult.getIndexResultMap();
         batchInferenceRequest.getBatchDataList().forEach(request -> {
             request.setNeedCheckFeature(true);
             BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult featureAdaptorResult = featureResultMap.get(request.getIndex());
-            if (featureAdaptorResult != null && StatusCode.SUCCESS.equals(featureAdaptorResult.getRetcode()) && featureAdaptorResult.getFeatures() != null) {
+            if (featureAdaptorResult != null && StatusCode.SUCCESS == featureAdaptorResult.getRetcode() && featureAdaptorResult.getFeatures() != null) {
                 request.setFeatureData(featureAdaptorResult.getFeatures());
             }
         });

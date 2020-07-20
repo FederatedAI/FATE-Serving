@@ -233,7 +233,7 @@ public class ModelController {
                 logger.debug("response: {}", response);
             }
 
-            result.setRetcode(String.valueOf(response.getStatusCode()));
+            result.setRetcode(response.getStatusCode());
             result.setRetmsg(response.getMessage());
             return result;
         };

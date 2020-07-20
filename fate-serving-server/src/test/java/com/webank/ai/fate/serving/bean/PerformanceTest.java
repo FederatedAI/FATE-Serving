@@ -151,7 +151,7 @@ public class PerformanceTest {
                 output(INFO_OUTPUT_FILE, content);
 
                 // print error log
-                if (resultObject.get("retcode") == null || !resultObject.get("retcode").equals(StatusCode.SUCCESS)) {
+                if (resultObject.get("retcode") == null || (int) resultObject.get("retcode") != StatusCode.SUCCESS) {
                     output(ERROR_OUTPUT_FILE, content);
                 }
 

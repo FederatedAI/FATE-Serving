@@ -130,7 +130,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
     protected Object transformExceptionInfo(Context context, ExceptionInfo data) {
         String actionType = context.getActionType();
         if (data != null) {
-            String code = data.getCode() != null ? data.getCode() : StatusCode.SYSTEM_ERROR;
+            int code = data.getCode();
             String msg = data.getMessage() != null ? data.getMessage().toString() : "";
             if (StringUtils.isNotEmpty(actionType)) {
                 switch (actionType) {

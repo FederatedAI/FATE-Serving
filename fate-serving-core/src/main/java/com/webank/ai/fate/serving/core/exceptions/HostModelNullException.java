@@ -24,7 +24,7 @@ public class HostModelNullException extends BaseException {
         super(StatusCode.HOST_MODEL_NULL, message);
     }
 
-    public HostModelNullException(String retCode, String message) {
+    public HostModelNullException(int retCode, String message) {
         super(retCode, message);
     }
 }
