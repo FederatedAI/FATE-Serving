@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,36 +48,37 @@ public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Retu
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> hostData) {
         Map<String, Object> result = this.handleRemoteReturnData(hostData);
-        Map<String, Object> localData = (Map<String, Object>) localDataList.get(0).get(this.getComponentName());
-        Preconditions.checkArgument(localData != null);
-        Preconditions.checkArgument(hostData != null);
-        Preconditions.checkArgument(localData.get(Dict.SCORE) != null);
-        Preconditions.checkArgument(localData.get(Dict.FM_CROSS) != null);
-        Set<String> set = hostData.keySet();
-        String partyId = (String) set.toArray()[0];
-        Map<String, Object> remoteData = (Map<String, Object>) hostData.get(partyId);
-        Preconditions.checkArgument(remoteData.get(Dict.RET_CODE) != null);
-        Map<String, Object> dataMap = (Map<String, Object>) remoteData.get(this.getComponentName());
-        double localScore = ((Number) localData.get(Dict.SCORE)).doubleValue();
-        logger.info("local score: {}", localScore);
-        double[] guestCrosses = (double[]) localData.get(Dict.FM_CROSS);
-        localData.get(Dict.FM_CROSS);
-        double score = localScore;
-        double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
-        logger.info("host score: {}", hostScore);
-        Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
-        List<Double> hostCrosses = JsonUtil.json2List(dataMap.get(Dict.FM_CROSS).toString(), new TypeReference<List<Double>>() {
-        });
-        Preconditions.checkArgument(hostCrosses.size() == guestCrosses.length, "");
-        score += hostScore;
-        for (int i = 0; i < guestCrosses.length; i++) {
-            score += hostCrosses.get(i) * guestCrosses[i];
+        if ((int) result.get(Dict.RET_CODE) == StatusCode.SUCCESS) {
+            Map<String, Object> localData = (Map<String, Object>) localDataList.get(0).get(this.getComponentName());
+            Preconditions.checkArgument(localData != null);
+            Preconditions.checkArgument(hostData != null);
+            Preconditions.checkArgument(localData.get(Dict.SCORE) != null);
+            Preconditions.checkArgument(localData.get(Dict.FM_CROSS) != null);
+            Set<String> set = hostData.keySet();
+            String partyId = (String) set.toArray()[0];
+            Map<String, Object> remoteData = (Map<String, Object>) hostData.get(partyId);
+            Preconditions.checkArgument(remoteData.get(Dict.RET_CODE) != null);
+            Map<String, Object> dataMap = (Map<String, Object>) remoteData.get(this.getComponentName());
+            double localScore = ((Number) localData.get(Dict.SCORE)).doubleValue();
+            logger.info("local score: {}", localScore);
+            double[] guestCrosses = (double[]) localData.get(Dict.FM_CROSS);
+            localData.get(Dict.FM_CROSS);
+            double score = localScore;
+            double hostScore = ((Number) dataMap.get(Dict.SCORE)).doubleValue();
+            logger.info("host score: {}", hostScore);
+            Preconditions.checkArgument(dataMap.get(Dict.FM_CROSS) != null);
+            List<Double> hostCrosses = JsonUtil.json2List(dataMap.get(Dict.FM_CROSS).toString(), new TypeReference<List<Double>>() {
+            });
+            Preconditions.checkArgument(hostCrosses.size() == guestCrosses.length, "");
+            score += hostScore;
+            for (int i = 0; i < guestCrosses.length; i++) {
+                score += hostCrosses.get(i) * guestCrosses[i];
+            }
+            double prob = sigmod(score);
+            result.put(Dict.SCORE, prob);
+            result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE, localData.get(Dict.MODEL_WRIGHT_HIT_RATE));
+            result.put(Dict.GUEST_INPUT_DATA_HIT_RATE, localData.get(Dict.INPUT_DATA_HIT_RATE));
         }
-        double prob = sigmod(score);
-        result.put(Dict.SCORE, prob);
-        result.put(Dict.GUEST_MODEL_WEIGHT_HIT_RATE, localData.get(Dict.MODEL_WRIGHT_HIT_RATE));
-        result.put(Dict.GUEST_INPUT_DATA_HIT_RATE, localData.get(Dict.INPUT_DATA_HIT_RATE));
-
         return result;
     }
 }

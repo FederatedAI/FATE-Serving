@@ -21,6 +21,7 @@ import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
 
 import java.util.ArrayList;
@@ -205,9 +206,12 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
 
-        Map<String, Object> localData = (Map<String, Object>) localDataList.get(0).get(this.getComponentName());
-
         Map<String, Object> result = this.handleRemoteReturnData(remoteData);
+        if ((int) result.get(Dict.RET_CODE) != StatusCode.SUCCESS) {
+            return result;
+        }
+
+        Map<String, Object> localData = (Map<String, Object>) localDataList.get(0).get(this.getComponentName());
 
         int[] treeNodeIds = (int[]) localData.get(Dict.SBT_TREE_NODE_ID_ARRAY);
         double[] weights = new double[this.treeNum];
