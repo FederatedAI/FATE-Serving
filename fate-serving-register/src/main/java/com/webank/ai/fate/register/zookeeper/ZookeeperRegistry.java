@@ -134,6 +134,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
             doRegisterComponent(url);
         } catch (Exception e) {
+            logger.error(e.getMessage());
             addFailedRegisterComponentTask(url);
         }
     }

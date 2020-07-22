@@ -275,8 +275,8 @@ public abstract class AbstractRegistry implements Registry {
             try {
                 in = new FileInputStream(file);
                 properties.load(in);
-                if (logger.isInfoEnabled()) {
-                    logger.info("Load registry cache file " + file + ", data: " + properties);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Load registry cache file " + file + ", data: " + properties);
                 }
             } catch (Throwable e) {
                 logger.warn("Failed to load registry cache file " + file, e);
