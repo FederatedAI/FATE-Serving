@@ -453,7 +453,12 @@ public class ModelManager implements InitializingBean {
                     this.serviceIdNamespaceMap.forEach((k, v) -> {
                         String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
                         if (nameSpaceKey.equals(v)) {
-                            clone.getServiceIds().add(k);
+                            List<String> serviceIds = clone.getServiceIds();
+                            if (serviceIds == null) {
+                                serviceIds = Lists.newArrayList();
+                            }
+                            serviceIds.add(k);
+                            clone.setServiceIds(serviceIds);
                         }
                     });
                     return clone;
