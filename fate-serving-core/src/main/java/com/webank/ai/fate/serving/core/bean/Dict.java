@@ -213,6 +213,7 @@ public class Dict {
     public static final String MESSAGE = "message";
     public static final String MODEL_ID = "modelId";
     public static final String MODEL_VERSION = "modelVersion";
+    public static final String TIMESTAMP = "timestamp";
     public static final String APP_ID = "appid";
     public static final String PARTY_ID = "partyId";
     public static final String ROLE = "role";

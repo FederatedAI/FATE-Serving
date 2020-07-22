@@ -55,6 +55,7 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
             futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);
         }));
         ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap, MetaInfo.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT);
+        postProcess(context, returnResult);
         return returnResult;
     }
 
@@ -62,6 +63,7 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
     protected OutboundPackage<ReturnResult> serviceFailInner(Context context, InboundPackage<InferenceRequest> data, Throwable e) {
         OutboundPackage<ReturnResult> outboundPackage = new OutboundPackage<ReturnResult>();
         ReturnResult returnResult = ErrorMessageUtil.handleExceptionToReturnResult(e);
+        postProcess(context, returnResult);
         outboundPackage.setData(returnResult);
         context.setReturnCode(returnResult.getRetcode());
         return outboundPackage;

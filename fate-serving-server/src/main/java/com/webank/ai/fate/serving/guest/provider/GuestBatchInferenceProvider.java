@@ -60,6 +60,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         });
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, MetaInfo.PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT);
         batchFederatedResult.setCaseid(context.getCaseId());
+        postProcess(context, batchFederatedResult);
         return batchFederatedResult;
     }
 
@@ -74,6 +75,7 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         } else {
             batchInferenceResult.setRetcode(StatusCode.SYSTEM_ERROR);
         }
+        postProcess(context, batchInferenceResult);
         context.setReturnCode(batchInferenceResult.getRetcode());
         outboundPackage.setData(batchInferenceResult);
         return outboundPackage;

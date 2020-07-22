@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
@@ -24,6 +25,8 @@ import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
@@ -85,6 +88,20 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
         });
 
         return result;
+    }
+
+    protected void postProcess(Context context, ReturnResult returnResult) {
+        Model model = ((ServingServerContext) context).getModel();
+        if (model != null) {
+            Map<String, Object> data = returnResult.getData();
+            if (data == null) {
+                data = Maps.newHashMap();
+            }
+            data.put(Dict.MODEL_ID, model.getNamespace());
+            data.put(Dict.MODEL_VERSION, model.getTableName());
+            data.put(Dict.TIMESTAMP, model.getTimestamp());
+            returnResult.setData(data);
+        }
     }
 
 }
