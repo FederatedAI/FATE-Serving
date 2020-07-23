@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 public class DefaultServingRouter implements Interceptor {
     Logger logger = LoggerFactory.getLogger(DefaultServingRouter.class);
 
-    @Autowired
+    @Autowired(required = false)
     private ZkServingRouter zkServingRouter;
 
     @Autowired
@@ -43,7 +43,10 @@ public class DefaultServingRouter implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        RouterInfo routerInfo = zkServingRouter.route(context, inboundPackage);
+        RouterInfo routerInfo = null;
+        if (zkServingRouter != null) {
+            routerInfo = zkServingRouter.route(context, inboundPackage);
+        }
         if (null == routerInfo) {
             routerInfo = configFileBasedServingRouter.route(context, inboundPackage);
         }
