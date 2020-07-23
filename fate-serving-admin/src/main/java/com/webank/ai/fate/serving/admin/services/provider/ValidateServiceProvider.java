@@ -215,12 +215,12 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
             builder.setLoadType(loadType);
         }
 
-        if (StringUtils.isNotBlank(loadType)) {
+        if (StringUtils.isNotBlank(filePath)) {
             builder.setFilePath(filePath);
         }
 
         if (StringUtils.isNotBlank(serviceId)) {
-            builder.setServiceId(serviceId);
+            builder.setServiceId(StringUtils.trim(serviceId));
         }
 
         return builder.build();
