@@ -58,7 +58,8 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <el-dialog :visible.sync="fverifyVisible" title="Request body" :showClose='cancel' class="fverifydialog" width="35%" :top="fverifydialogTop" center>
+            <div v-if="fverifyVisible">
+                <el-dialog :visible.sync="fverifyVisible" title="Request body" :showClose='cancel' class="fverifydialog" width="35%" :top="fverifydialogTop" center>
                 <div class="verifyinput">
                     <el-form ref="json" :model="json" :rules="rules" label-width="0px">
                         <el-form-item prop="verifydata">
@@ -92,6 +93,7 @@
                 </span>
                 </div>
             </el-dialog>
+            </div>
             <div class="pagination">
                 <el-pagination
                     background
@@ -153,7 +155,9 @@ export default {
                 label: 'VERSION_EQUALS'
             }],
             routerMode: '',
-            json: {},
+            json: {
+                verifydata: ''
+            },
             rules: {
                 verifydata: [
                     { trigger: 'blur', validator: checkRule }

@@ -16,7 +16,15 @@ export default {
             selected: 0
         }
     },
-    watch: {},
+    watch: {
+        '$route.name'(val) {
+            if (val === 'service') {
+                this.selected = 1
+            } else if (val === 'cluster') {
+                this.selected = 0
+            }
+        }
+    },
     computed: {},
     created() {
         if (this.$route.name === 'service') {

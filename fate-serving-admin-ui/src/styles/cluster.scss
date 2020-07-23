@@ -277,6 +277,13 @@
         .ip-info-Basic,.ip-info-Models,.ip-info-Monitor,.ip-info-JVM {
             // position: relative;
             // height: 71vh;
+            .service_id {
+                width: 112px;
+                display: inline-block;
+                overflow: hidden;
+                text-overflow:ellipsis;
+                white-space: nowrap;
+            }
             .el-table__body-wrapper {
                 height: 588px !important;
             }

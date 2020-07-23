@@ -123,7 +123,7 @@
                                     <div>
                                         <div style="wadth:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
                                     </div>
-                                    <span slot="reference" style="white-space: nowrap;">
+                                    <span slot="reference" class="service_id" style="white-space: nowrap;">
                                         <span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}
                                             <span v-if="index+1 !== scope.row.serviceIds.length">,</span>
                                         </span>
@@ -218,7 +218,8 @@
                             :total="total"
                         ></el-pagination>
                     </div>
-                    <el-dialog
+                    <div v-if="dialogVisible">
+                        <el-dialog
                         title="Model monitor"
                         width="50%"
                         custom-class="dialogtit"
@@ -228,12 +229,9 @@
                             <div class="modelchart">
                                 <modelchart :callsData="polar" />
                             </div>
-
-                            <!-- <div v-else class="no-data">
-                             no Data
-                            </div>-->
                         </div>
                     </el-dialog>
+                    </div>
                     <el-dialog :visible.sync="unbindVisible" :showClose='cancel' width="35%" top="15%" center>
                         <span>Please select the Service IDs</span><br>
                         <span>you want to unbind with this model,</span>
@@ -505,7 +503,7 @@ export default {
                 namespace: this.rowData.namespace
             }
             modelUnload(params).then(res => {
-                if (res.retcode) {
+                if (+res.retcode === 0) {
                     this.tabipInfo(this.ipInfo)
                 }
             })
@@ -531,7 +529,7 @@ export default {
             }
             this.unbindVisible = false
             modelUnbind(params).then(res => {
-                if (res.retcode) {
+                if (+res.retcode === 0) {
                     this.tabipInfo(this.ipInfo)
                 }
             })
@@ -562,23 +560,25 @@ export default {
             }
             this.unbindVisible = false
             updateFlowRule(params).then(res => {
-                if (res.retcode) {
-                    this.flowControlVisible = false
-                    this.tabipInfo(this.ipInfo)
-                }
+                this.flowControlVisible = false
+                this.tabipInfo(this.ipInfo)
             })
         },
         modelpolar() {
             // 获取model 弹框数据
             const xDate = []
             const yData = []
+            const eData = []
             this.oledata &&
                 this.oledata.forEach((item, index) => {
                     if (item) {
                         xDate.push(this.date(item.timestamp))
                         yData.push(item.passQps)
+                        eData.push(item.exceptionQps)
                     }
                 })
+            const Arr = [{ name: 'passQps', textStyle: { color: '#00C99E' } },
+                { name: 'exceptionQps', textStyle: { color: '#eb3941' } }]
             this.polar = {
                 xAxis: {
                     type: 'category',
@@ -628,15 +628,34 @@ export default {
                         }
                     }
                 },
+                legend: {
+                    right: '100px',
+                    orient: 'horizontal',
+                    top: 28,
+                    data: Arr,
+                    textStyle: {
+                        fontSize: 13
+                    }
+                },
                 series: [
                     {
-                        name: '',
+                        name: 'passQps',
                         data: yData,
                         type: 'line',
                         symbol: 'circle',
                         symbolSize: 4,
                         itemStyle: {
-                            color: '#4AA2FF'
+                            color: '#00C99E'
+                        }
+                    },
+                    {
+                        name: 'exceptionQps',
+                        data: eData,
+                        type: 'line',
+                        symbol: 'circle',
+                        symbolSize: 4,
+                        itemStyle: {
+                            color: '#eb3941'
                         }
                     }
                 ]
@@ -778,10 +797,12 @@ export default {
                     ] = this.getIncomingData(this.Monitordata[i], res.data[i])
                     legendArr.push(i)
                 }
+
                 // 3处理数据
                 var MonitorArr = []
                 var xDate = []
                 var monitorXdate = []
+                debugger
                 for (var j = 0; j < legendArr.length; j++) {
                     const mData = incomingData[legendArr[j]]
                     if (mData.length === 16) {
@@ -880,7 +901,7 @@ export default {
                     right: '150px',
                     orient: 'horizontal',
                     top: 10,
-                    data: MonitorArr,
+                    data: legendArr,
                     textStyle: {
                         fontSize: 11
                     }
