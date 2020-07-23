@@ -186,6 +186,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     flowCounterManager.success(context.getResourceName());
                 }
             }
+            context.postProcess(data, outboundPackage);
             printFlowLog(context);
         }
         return outboundPackage;
