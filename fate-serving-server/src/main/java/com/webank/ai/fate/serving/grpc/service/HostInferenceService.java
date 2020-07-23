@@ -49,12 +49,12 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     @Autowired
     HostSingleInferenceProvider hostSingleInferenceProvider;
 
-    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
+//    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true,role = Role.HOST)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
-        executor.submit(() -> {
+//        executor.submit(() -> {
             String actionType = req.getHeader().getCommand().getName();
             ServingServerContext context = (ServingServerContext) prepareContext();
             String namespace = req.getHeader().getTask().getModel().getNamespace();
@@ -106,7 +106,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
                     .build());
             responseObserver.onNext(packetBuilder.build());
             responseObserver.onCompleted();
-        });
+//        });
     }
 
     private Context prepareContext() {
