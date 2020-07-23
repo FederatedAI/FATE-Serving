@@ -56,7 +56,7 @@ public class NetUtils {
 //        System.out.println(NetUtils.getLocalAddress());
 //        System.out.println(NetUtils.getLocalIp());
 //        System.out.println(NetUtils.getIpByHost("127.0.0.1"));
-        System.out.println(NetUtils.getLocalAddress0(""));
+//        System.out.println(NetUtils.getLocalAddress0(""));
     }
 
     public static int getRandomPort() {

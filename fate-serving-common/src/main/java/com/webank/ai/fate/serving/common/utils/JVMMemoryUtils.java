@@ -268,19 +268,19 @@ public class JVMMemoryUtils {
     public static void main(String[] args) {
     	List<List<Long>> listRoot = new ArrayList<List<Long>>();
     	for(;;) {
-    		System.out.println("=======================================================================");
-	        System.out.println("getHeapMemoryUsage: " + JVMMemoryUtils.getHeapMemoryUsage());
-	        System.out.println("getNonHeapMemoryUsage: " + JVMMemoryUtils.getNonHeapMemoryUsage());
-	        System.out.println("getEdenSpaceMemoryUsage: " + JVMMemoryUtils.getEdenSpaceMemoryUsage());
-	        System.out.println("getAndResetEdenSpaceMemoryPeakUsage: " + JVMMemoryUtils.getAndResetEdenSpaceMemoryPeakUsage());
-	        System.out.println("getSurvivorSpaceMemoryUsage: " + JVMMemoryUtils.getSurvivorSpaceMemoryUsage());
-	        System.out.println("getAndResetSurvivorSpaceMemoryPeakUsage: " + JVMMemoryUtils.getAndResetSurvivorSpaceMemoryPeakUsage());
-	        System.out.println("getOldGenMemoryUsage: " + JVMMemoryUtils.getOldGenMemoryUsage());
-	        System.out.println("getAndResetOldGenMemoryPeakUsage: " + JVMMemoryUtils.getAndResetOldGenMemoryPeakUsage());
-	        System.out.println("getPermGenMemoryUsage: " + JVMMemoryUtils.getPermGenMemoryUsage());
-	        System.out.println("getAndResetPermGenMemoryPeakUsage: " + JVMMemoryUtils.getAndResetPermGenMemoryPeakUsage());
-	        System.out.println("getCodeCacheMemoryUsage: " + JVMMemoryUtils.getCodeCacheMemoryUsage());
-	        System.out.println("getAndResetCodeCacheMemoryPeakUsage: " + JVMMemoryUtils.getAndResetCodeCacheMemoryPeakUsage());
+//    		System.out.println("=======================================================================");
+//	        System.out.println("getHeapMemoryUsage: " + JVMMemoryUtils.getHeapMemoryUsage());
+//	        System.out.println("getNonHeapMemoryUsage: " + JVMMemoryUtils.getNonHeapMemoryUsage());
+//	        System.out.println("getEdenSpaceMemoryUsage: " + JVMMemoryUtils.getEdenSpaceMemoryUsage());
+//	        System.out.println("getAndResetEdenSpaceMemoryPeakUsage: " + JVMMemoryUtils.getAndResetEdenSpaceMemoryPeakUsage());
+//	        System.out.println("getSurvivorSpaceMemoryUsage: " + JVMMemoryUtils.getSurvivorSpaceMemoryUsage());
+//	        System.out.println("getAndResetSurvivorSpaceMemoryPeakUsage: " + JVMMemoryUtils.getAndResetSurvivorSpaceMemoryPeakUsage());
+//	        System.out.println("getOldGenMemoryUsage: " + JVMMemoryUtils.getOldGenMemoryUsage());
+//	        System.out.println("getAndResetOldGenMemoryPeakUsage: " + JVMMemoryUtils.getAndResetOldGenMemoryPeakUsage());
+//	        System.out.println("getPermGenMemoryUsage: " + JVMMemoryUtils.getPermGenMemoryUsage());
+//	        System.out.println("getAndResetPermGenMemoryPeakUsage: " + JVMMemoryUtils.getAndResetPermGenMemoryPeakUsage());
+//	        System.out.println("getCodeCacheMemoryUsage: " + JVMMemoryUtils.getCodeCacheMemoryUsage());
+//	        System.out.println("getAndResetCodeCacheMemoryPeakUsage: " + JVMMemoryUtils.getAndResetCodeCacheMemoryPeakUsage());
 	        List<Long> list = new ArrayList<Long>(10000);
 	        listRoot.add(list);
 	        try {	        	

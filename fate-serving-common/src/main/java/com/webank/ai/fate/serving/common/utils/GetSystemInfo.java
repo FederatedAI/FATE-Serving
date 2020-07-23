@@ -238,13 +238,13 @@ public class GetSystemInfo {
 
     public static void getJVMRuntimeParam(){
 
-        RuntimeMXBean runtimeMXBean = ManagementFactoryHelper.getRuntimeMXBean();
+//        RuntimeMXBean runtimeMXBean = ManagementFactoryHelper.getRuntimeMXBean();
 //JVM启动参数
-        System.out.println(runtimeMXBean.getInputArguments());
+//        System.out.println(runtimeMXBean.getInputArguments());
 //系统属性
-        System.out.println(runtimeMXBean.getSystemProperties());
+//        System.out.println(runtimeMXBean.getSystemProperties());
 //JVM名字
-        System.out.println(runtimeMXBean.getVmName());
+//        System.out.println(runtimeMXBean.getVmName());
 
 
     }
@@ -292,7 +292,7 @@ public class GetSystemInfo {
 //获取服务器的CPU个数
 //          System.out.println(operatingSystemMXBean.());
 //获取服务器的平均负载。这个指标非常重要，它可以有效的说明当前机器的性能是否正常，如果load过高，说明CPU无法及时处理任务。
-        System.out.println(operatingSystemMXBean.getSystemLoadAverage());
+//        System.out.println(operatingSystemMXBean.getSystemLoadAverage());
 
 
 

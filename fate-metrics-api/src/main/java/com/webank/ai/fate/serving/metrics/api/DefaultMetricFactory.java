@@ -19,7 +19,7 @@ public class DefaultMetricFactory implements IMetricFactory {
     }
 
     public DefaultMetricFactory(int period, boolean mute) {
-        System.out.println("default metrics factory created");
+//        System.out.println("default metrics factory created");
         timer = new Timer("default_metrics_factory_timer", true);
         this.period = period;
         this.mute = mute;
@@ -35,18 +35,18 @@ public class DefaultMetricFactory implements IMetricFactory {
             @Override
             public void increment() {
                 if (!mute) {
-                    System.out.println(
+                    /*System.out.println(
                             "metric name: " + metricName + ", desc: " + description
-                                    + ", counter: " + counter.incrementAndGet());
+                                    + ", counter: " + counter.incrementAndGet());*/
                 }
             }
 
             @Override
             public void increment(double delta) {
                 if (!mute) {
-                    System.out.println(
+                    /*System.out.println(
                             "metric name: " + metricName + ", desc: " + description
-                                    + ", counter: " + counter.addAndGet((long) delta));
+                                    + ", counter: " + counter.addAndGet((long) delta));*/
                 }
             }
         };
@@ -69,7 +69,7 @@ public class DefaultMetricFactory implements IMetricFactory {
                 }
                 storage.put(System.currentTimeMillis(), milliSeconds);
                 if (!mute) {
-                    System.out.println("time consumed: " + milliSeconds + " ms.");
+//                    System.out.println("time consumed: " + milliSeconds + " ms.");
                 }
             }
 
@@ -88,9 +88,9 @@ public class DefaultMetricFactory implements IMetricFactory {
                     @Override
                     public void run() {
                         try {
-                            System.out.println(
+                            /*System.out.println(
                                     "metric name: " + name + ", desc: " + desc
-                                            + ", value: " + callable.call());
+                                            + ", value: " + callable.call());*/
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
