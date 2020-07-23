@@ -71,6 +71,8 @@ public class PipelineModelProcessor implements ModelProcessor {
                 } else {
                     throw (RemoteRpcException) e;
                 }
+            } finally {
+                context.setDownstreamCost(System.currentTimeMillis() - context.getDownstreamBegin());
             }
         });
         batchFederatedResult = batchMergeHostResult(context, localResult, remoteResultMap);
@@ -121,6 +123,8 @@ public class PipelineModelProcessor implements ModelProcessor {
             } catch (Exception e) {
                 logger.error("host " + partId + " remote error : " + e.getMessage());
                 throw new RemoteRpcException("host " + partId + " remote error : " + e.getMessage());
+            } finally {
+                context.setDownstreamCost(System.currentTimeMillis() - context.getDownstreamBegin());
             }
         });
         Map<String, Object> tempResult = singleMerge(context, localResult, remoteResultMap);
