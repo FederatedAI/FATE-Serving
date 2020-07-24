@@ -17,6 +17,8 @@
 package com.webank.ai.fate.serving.common.cache;
 
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -25,6 +27,8 @@ import redis.clients.jedis.Pipeline;
 import java.util.List;
 
 public class RedisCache implements Cache {
+    private static final Logger logger = LoggerFactory.getLogger(RedisCache.class);
+
     int expireTime;
     String host;
     int port;
@@ -39,6 +43,9 @@ public class RedisCache implements Cache {
     }
 
     private void initStandaloneConfiguration() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("redis cache init, mode: standalone");
+        }
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(maxTotal);
         jedisPoolConfig.setMaxIdle(maxIdel);
@@ -52,6 +59,9 @@ public class RedisCache implements Cache {
 
     @Override
     public void put(Object key, Object value, int expire) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("put cache key: {} value: {} expire: {}", key, value, expire);
+        }
         try (Jedis jedis = jedisPool.getResource()) {
             Pipeline redisPipeline = jedis.pipelined();
             redisPipeline.set(key.toString(), value.toString());
@@ -64,6 +74,9 @@ public class RedisCache implements Cache {
 
     @Override
     public Object get(Object key) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("get cache key: {}", key);
+        }
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.get(key.toString());
         }
@@ -84,6 +97,9 @@ public class RedisCache implements Cache {
 
     @Override
     public void delete(Object key) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("remove cache key: {}", key);
+        }
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.del(key.toString());
         }

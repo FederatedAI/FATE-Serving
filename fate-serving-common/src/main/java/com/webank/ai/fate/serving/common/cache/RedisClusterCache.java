@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class RedisClusterCache extends RedisCache {
-    Logger logger = LoggerFactory.getLogger(RedisClusterCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisClusterCache.class);
 
     String clusterNodes;
     JedisCluster jedisCluster;
@@ -43,6 +43,9 @@ public class RedisClusterCache extends RedisCache {
     }
 
     private void initClusterConfiguration() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("redis cache init, mode: cluster");
+        }
         if (StringUtils.isNotBlank(clusterNodes)) {
             Set<HostAndPort> nodeSet = new HashSet<>();
             try {
@@ -75,6 +78,9 @@ public class RedisClusterCache extends RedisCache {
 
     @Override
     public void put(Object key, Object value, int expire) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("put cache key: {} value: {} expire: {}", key, value, expire);
+        }
         jedisCluster.set(key.toString(), value.toString());
         if (expire > 0) {
             jedisCluster.expire(key.toString(), expire);
@@ -83,6 +89,9 @@ public class RedisClusterCache extends RedisCache {
 
     @Override
     public Object get(Object key) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("get cache key: {}", key);
+        }
         return jedisCluster.get(key.toString());
     }
 
@@ -93,6 +102,9 @@ public class RedisClusterCache extends RedisCache {
 
     @Override
     public void delete(Object key) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("remove cache key: {}", key);
+        }
         jedisCluster.del(key.toString());
     }
 
