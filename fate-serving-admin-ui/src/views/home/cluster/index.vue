@@ -91,7 +91,6 @@
                         :data="ModelsData"
                         :header-cell-style="{background:'#fff'}"
                         style="width: 100%;margin-bottom: 20px;"
-                        height="calc(100% - 320px)"
                         class="table"
                     >
                         <el-table-column
@@ -678,7 +677,6 @@ export default {
         handleModelData(params) {
             // 1获得数据
             queryModel(params).then(res => {
-                // 2获取增量数据
                 let data, incomingData
                 ;[data, incomingData] = this.getIncomingData(
                     this.oledata,
@@ -687,11 +685,9 @@ export default {
                 if (!incomingData) {
                     return
                 }
-                // 3处理数据
                 if (data.length > 60) {
-                    data.shift()
+                    data = data.slice(incomingData.length - 1)
                 }
-                // 4赋值图表
                 this.oledata = data
                 this.modelpolar(this.oledata)
             })
@@ -782,9 +778,7 @@ export default {
             }
         },
         handleMonitorData(params) {
-            // 1获得数据
             queryMonitor(params).then(res => {
-                // 2获取增量数据
                 var legendArr = []
                 var incomingData = {}
                 for (var i in res.data) {
@@ -797,65 +791,61 @@ export default {
                     ] = this.getIncomingData(this.Monitordata[i], res.data[i])
                     legendArr.push(i)
                 }
-
-                // 3处理数据
                 var MonitorArr = []
                 var xDate = []
                 var monitorXdate = []
-                debugger
                 for (var j = 0; j < legendArr.length; j++) {
+                    // 每一组新增的数据,
                     const mData = incomingData[legendArr[j]]
-                    if (mData.length === 16) {
-                        mData.pop()
-                    }
+                    // if (mData.length === 16) {
+                    //     mData.pop()
+                    // }
                     var dataArr = []
                     for (var z = 0; z < mData.length; z++) {
                         if (mData[z]) {
                             dataArr.push(mData[z].passQps)
                             if (j === 0) {
+                                // 只需要拿某一组的横坐标，都是统一的
                                 xDate.push(this.date(mData[z].timestamp))
                             }
                         }
-                        this.MonitorYvalue[legendArr[j]] =
+                    }
+                    this.MonitorYvalue[legendArr[j]] =
                             this.MonitorYvalue[legendArr[j]] &&
                             this.MonitorYvalue[legendArr[j]].length > 0
                                 ? this.MonitorYvalue[legendArr[j]].concat(
                                     dataArr
                                 )
                                 : dataArr
-                        var op = {
-                            name: legendArr[j],
-                            data: this.MonitorYvalue[legendArr[j]],
-                            type: 'line',
-                            symbol: 'circle',
-                            symbolSize: 4
-                        }
+                    var op = {
+                        name: legendArr[j],
+                        data: this.MonitorYvalue[legendArr[j]],
+                        type: 'line',
+                        symbol: 'circle',
+                        symbolSize: 4
                     }
                     MonitorArr.push(op)
                 }
                 monitorXdate = this.MonitorXdate.concat(xDate)
                 if (monitorXdate.length > 60) {
-                    monitorXdate = monitorXdate.slice(monitorXdate.length - 60)
+                    let index = monitorXdate.length - 60
+                    monitorXdate = monitorXdate.slice(index)
                     MonitorArr.forEach((m) => {
-                        m.data = m.data.slice(monitorXdate.length - 60)
+                        m.data = m.data.slice(index)
+                        this.MonitorYvalue[m.name] = m.data
                     })
                 }
                 this.MonitorXdate = monitorXdate
-                // 4赋值图表
                 this.TrafficMonitor(MonitorArr, this.MonitorXdate, legendArr)
             })
         },
         handleJvmData(params) {
-            // 1获得数据
             queryJvm(params).then(res => {
-                // 2获取增量数据
                 let data
                 ;[data] = this.getIncomingData(this.JvmData, res.data.rows)
-                // 3处理数据
                 if (data.length > 60) {
                     data = data.slice(data.length - 60)
                 }
-                // 4赋值组件
                 this.JvmData = data
                 this.tabJVMInfo(this.JVMInfo)
             })
@@ -871,7 +861,7 @@ export default {
                 })
             }
             current = current.concat(incoming.slice(index))
-            return [current, incoming.slice(index, incoming.length - 1)]
+            return [current, incoming.slice(index)]
         },
         TrafficMonitor(MonitorArr, xDate, legendArr) {
             // TrafficMonitor 图表

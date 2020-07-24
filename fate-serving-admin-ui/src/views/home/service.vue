@@ -7,7 +7,6 @@
             <el-table
                 :data="serviceData"
                 :header-cell-style="{background:'#fff'}"
-                height="calc(100% - 100px)"
                 class="table">
                 <el-table-column prop="project" label="Project" show-overflow-tooltip />
                 <el-table-column sortable  prop="environment" label="Environment" show-overflow-tooltip />
@@ -88,7 +87,7 @@
                 <span slot="footer" class="dialog-footer  dialog-but">
                     <el-button
                         type="primary"
-                        @click="fverifyVisible = false"
+                        @click="fverifyVis"
                     >Close</el-button>
                 </span>
                 </div>
@@ -210,6 +209,10 @@ export default {
             // this.version = row.version
             // this.weight = row.weight
         },
+        fverifyVis() {
+            this.fverifyVisible = false
+            this.initserviceList()
+        },
         isJSON(str) {
             if (typeof str === 'string') {
                 try {
@@ -312,6 +315,17 @@ export default {
         font-size: 24px;
         margin-left: 10px;
         padding-top: 25px;
+    }
+    .el-table td {
+        padding: 0;
+    }
+    .el-table{
+        height: calc(100% - 100px);
+        overflow-y: auto;
+    }
+    .el-table th {
+
+        padding: 5px 0;
     }
     .el-select {
         border-bottom: 2px solid #B8BFCC;

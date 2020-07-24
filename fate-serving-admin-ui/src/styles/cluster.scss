@@ -14,6 +14,7 @@
     padding: 5px 10px;
     min-height: 815px;
     box-sizing: border-box;
+    
     .overview{
         .cluster {
             font-size:24px;
@@ -214,6 +215,9 @@
     }
 }
 .ip-info {
+    .el-table td {
+        padding:9px 0;
+    }
     position: relative;
     // float: left;
     width: calc(100% - 490px);
@@ -405,6 +409,9 @@
                     padding: 0 0 0 13px;
                 }
             }
+        }
+        .ip-info-Models {
+            height: calc(100% - 320px);
         }
         .ip-info-Monitor,.ip-info-JVM {
             width: 100%;
