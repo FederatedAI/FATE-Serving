@@ -31,6 +31,7 @@ import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
 import com.webank.ai.fate.serving.federatedml.model.Returnable;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -336,6 +337,9 @@ public class PipelineModelProcessor implements ModelProcessor {
                     result.put(component.getComponentName(), componentResult);
                     if (logger.isDebugEnabled()) {
                         logger.debug("component {} is Returnable return data {}", component, result);
+                    }
+                    if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < 200) {
+                        result.putAll(componentResult);
                     }
                 }
             } else {

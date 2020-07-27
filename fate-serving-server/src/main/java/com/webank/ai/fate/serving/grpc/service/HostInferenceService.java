@@ -61,7 +61,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
             String tableName = req.getHeader().getTask().getModel().getTableName();
             context.setActionType(actionType);
             context.setVersion(req.getHeader().getOperator());
-            if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < MetaInfo.CURRENT_VERSION) {
+            if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < 200) {
                 // 1.x
                 Map hostFederatedParams = JsonUtil.json2Object(req.getBody().getValue().toStringUtf8(), Map.class);
                 Map partnerModelInfo = (Map) hostFederatedParams.get("partnerModelInfo");
