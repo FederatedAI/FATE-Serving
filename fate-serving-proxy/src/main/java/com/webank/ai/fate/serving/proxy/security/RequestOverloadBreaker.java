@@ -25,9 +25,9 @@ public class RequestOverloadBreaker implements Interceptor {
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         String resource = context.getResourceName();
-        boolean pass = flowCounterManager.pass(resource);
+        boolean pass = flowCounterManager.pass(resource, 1);
         if (!pass) {
-            flowCounterManager.block(context.getServiceName());
+            flowCounterManager.block(context.getServiceName(), 1);
             logger.warn("request was block by over load, service name: {}", context.getServiceName());
             throw new OverLoadException("request was block by over load, service name: " + context.getServiceName());
         }

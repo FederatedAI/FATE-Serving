@@ -158,7 +158,7 @@ public class FlowCounterManager {
         this.metricReport = metricReport;
     }
 
-    public boolean pass(String sourceName) {
+    public boolean pass(String sourceName, int times) {
         FlowCounter flowCounter = passMap.get(sourceName);
         if (flowCounter == null) {
             Double allowedQps = getAllowedQps(sourceName);
@@ -167,10 +167,10 @@ public class FlowCounterManager {
                 flowCounter = passMap.get(sourceName);
             }
         }
-        return flowCounter.tryPass();
+        return flowCounter.tryPass(times);
     }
 
-    public boolean success(String sourceName) {
+    public boolean success(String sourceName, int times) {
         FlowCounter flowCounter = successMap.get(sourceName);
         if (flowCounter == null) {
             flowCounter = successMap.putIfAbsent(sourceName, new FlowCounter(Integer.MAX_VALUE));
@@ -178,10 +178,10 @@ public class FlowCounterManager {
                 flowCounter = successMap.get(sourceName);
             }
         }
-        return flowCounter.tryPass();
+        return flowCounter.tryPass(times);
     }
 
-    public boolean block(String sourceName) {
+    public boolean block(String sourceName, int times) {
         FlowCounter flowCounter = blockMap.get(sourceName);
         if (flowCounter == null) {
             flowCounter = blockMap.putIfAbsent(sourceName, new FlowCounter(Integer.MAX_VALUE));
@@ -189,10 +189,10 @@ public class FlowCounterManager {
                 flowCounter = blockMap.get(sourceName);
             }
         }
-        return flowCounter.tryPass();
+        return flowCounter.tryPass(times);
     }
 
-    public boolean exception(String sourceName) {
+    public boolean exception(String sourceName, int times) {
         FlowCounter flowCounter = exceptionMap.get(sourceName);
         if (flowCounter == null) {
             flowCounter = exceptionMap.putIfAbsent(sourceName, new FlowCounter(Integer.MAX_VALUE));
@@ -200,7 +200,7 @@ public class FlowCounterManager {
                 flowCounter = exceptionMap.get(sourceName);
             }
         }
-        return flowCounter.tryPass();
+        return flowCounter.tryPass(times);
     }
 
     public void startReport() {

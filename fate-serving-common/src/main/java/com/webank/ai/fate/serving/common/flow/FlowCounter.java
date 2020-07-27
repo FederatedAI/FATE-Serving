@@ -77,13 +77,13 @@ public class FlowCounter {
         return this;
     }
 
-    public boolean canPass() {
-        return getQps() + 1 <= qpsAllowed;
+    public boolean canPass(int times) {
+        return getQps() + times <= qpsAllowed;
     }
 
-    public boolean tryPass() {
-        if (canPass()) {
-            add(1);
+    public boolean tryPass(int times) {
+        if (canPass(times)) {
+            add(times);
             return true;
         }
         return false;

@@ -22,8 +22,7 @@ import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.apache.commons.lang3.StringUtils;
@@ -58,9 +57,17 @@ public class HostModelInterceptor implements Interceptor {
             throw new HostModelNullException("mode is null");
         }
         servingServerContext.setModel(model);
-        boolean pass = flowCounterManager.pass(model.getResourceName());
+
+        int times = 1;
+        if (context.getServiceName().equalsIgnoreCase(Dict.SERVICENAME_BATCH_INFERENCE)) {
+            BatchHostFederatedParams batchHostFederatedParams = (BatchHostFederatedParams) inboundPackage.getBody();
+            times = batchHostFederatedParams.getBatchDataList().size();
+        }
+        context.putData(Dict.PASS_QPS, times);
+
+        boolean pass = flowCounterManager.pass(model.getResourceName(), times);
         if (!pass) {
-            flowCounterManager.block(model.getResourceName());
+            flowCounterManager.block(model.getResourceName(), times);
         }
     }
 

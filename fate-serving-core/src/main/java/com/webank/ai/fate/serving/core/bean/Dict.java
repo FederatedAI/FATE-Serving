@@ -252,6 +252,7 @@ public class Dict {
     public static final String SERVICE_ADMIN = "admin";
     public static final String FAILED = "failed";
     public static final String BATCH_PRC_TIMEOUT = "batch.rpc.timeout";
+    public static final String PASS_QPS = "passQps";
     // parameters
     public static final String PARAMS_INITIATOR = "initiator";
     public static final String PARAMS_ROLE = "role";

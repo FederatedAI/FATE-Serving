@@ -161,12 +161,13 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     messageEvent.setContext(context);
                     DisruptorUtil.producer(messageEvent);
                     if (flowCounterManager != null) {
-                        flowCounterManager.exception(context.getResourceName());
+                        flowCounterManager.exception(context.getResourceName(), 1);
                         if (context instanceof ServingServerContext) {
                             ServingServerContext servingServerContext = (ServingServerContext) context;
                             Model model = servingServerContext.getModel();
                             if (model != null) {
-                                flowCounterManager.exception(model.getResourceName());
+                                int times = (int) context.getData(Dict.PASS_QPS);
+                                flowCounterManager.exception(model.getResourceName(), times);
                             }
                         }
                     }
@@ -180,10 +181,11 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     if (context instanceof ServingServerContext) {
                         Model model = ((ServingServerContext) context).getModel();
                         if (model != null) {
-                            flowCounterManager.success(model.getResourceName());
+                            int times = (int) context.getData(Dict.PASS_QPS);
+                            flowCounterManager.success(model.getResourceName(), times);
                         }
                     }
-                    flowCounterManager.success(context.getResourceName());
+                    flowCounterManager.success(context.getResourceName(), 1);
                 }
             }
             context.postProcess(data, outboundPackage);
