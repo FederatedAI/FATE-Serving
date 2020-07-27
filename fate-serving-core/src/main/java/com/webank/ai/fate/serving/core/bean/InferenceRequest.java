@@ -31,6 +31,11 @@ public class InferenceRequest implements Request {
     protected String seqno;
     protected String caseId;
     protected String serviceId;
+
+    public void setFeatureData(Map<String, Object> featureData) {
+        this.featureData = featureData;
+    }
+
     protected Map<String, Object> featureData;
     protected String applyId;
     protected Map<String, Object> sendToRemoteFeatureData;
@@ -130,7 +135,6 @@ public class InferenceRequest implements Request {
     @Override
     public String toString() {
         String result = "";
-
         try {
             result = JsonUtil.object2Json(this);
         } catch (Throwable e) {

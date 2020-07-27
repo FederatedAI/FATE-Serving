@@ -32,6 +32,9 @@ public class Client {
     }
 
     public static synchronized Client getClient(String  zkAddress){
+
+
+        MetaInfo.PROPERTY_ACL_ENABLE = false;
         if(clientMap.get(zkAddress)==null){
             ZookeeperRegistry  zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress,"client","online",12202);
             zookeeperRegistry.subProject(PROJECT);
@@ -53,16 +56,20 @@ public class Client {
         }
         System.setProperty("acl.username", aclUserName!=null?aclUserName:"");
         System.setProperty("acl.password", aclPassword!=null?aclPassword:"");
+
+        MetaInfo.PROPERTY_ACL_ENABLE=useAcl;
+
+
         return getClient(zkAddress);
     }
 
     private  static Map<String,Client>  clientMap = new ConcurrentHashMap<>();
 
     public ReturnResult singleInference(InferenceRequest  inferenceRequest) throws Exception{
-        Preconditions.checkArgument(inferenceRequest!=null);
+        Preconditions.checkArgument(inferenceRequest!=null,"inferenceRequest is null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(inferenceRequest.getServiceId()));
         List<URL> urls = routerService.router(PROJECT,inferenceRequest.getServiceId(),SINGLE_INFERENCE);
-        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls));
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls),"serviceId "+inferenceRequest.getServiceId()+" found no url in zk");
         ManagedChannel managedChannel = null;
         URL url = urls.get(0);
         managedChannel = grpcConnectionPool.getManagedChannel(url.getIp(), url.getPort());
@@ -80,10 +87,10 @@ public class Client {
     }
 
     public BatchInferenceResult batchInference(BatchInferenceRequest batchInferenceRequest) throws Exception{
-        Preconditions.checkArgument(batchInferenceRequest!=null);
+        Preconditions.checkArgument(batchInferenceRequest!=null,"batchInferenceRequest is null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(batchInferenceRequest.getServiceId()));
         List<URL> urls = routerService.router(PROJECT,batchInferenceRequest.getServiceId(),SINGLE_INFERENCE);
-        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls));
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls),"serviceId "+batchInferenceRequest.getServiceId()+" found no url in zk");
         ManagedChannel managedChannel = null;
         URL url = urls.get(0);
         managedChannel = grpcConnectionPool.getManagedChannel(url.getIp(), url.getPort());
@@ -97,5 +104,10 @@ public class Client {
         BatchInferenceResult  returnResult = JsonUtil.json2Object(result.getBody().toByteArray(),BatchInferenceResult.class);
         return  returnResult;
     }
+
+
+
+
+
 
 }
