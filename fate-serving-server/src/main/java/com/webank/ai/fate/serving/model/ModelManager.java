@@ -451,14 +451,12 @@ public class ModelManager implements InitializingBean {
                 return allModels.stream().map(e -> {
                     Model clone = (Model) e.clone();
                     this.serviceIdNamespaceMap.forEach((k, v) -> {
+                        if (clone.getServiceIds() == null) {
+                            clone.setServiceIds(Lists.newArrayList());
+                        }
                         String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
                         if (nameSpaceKey.equals(v)) {
-                            List<String> serviceIds = clone.getServiceIds();
-                            if (serviceIds == null) {
-                                serviceIds = Lists.newArrayList();
-                            }
-                            serviceIds.add(k);
-                            clone.setServiceIds(serviceIds);
+                            clone.getServiceIds().add(k);
                         }
                     });
                     return clone;
@@ -480,6 +478,9 @@ public class ModelManager implements InitializingBean {
                     })
                     .map(e -> {
                         Model clone = (Model) e.clone();
+                        if (clone.getServiceIds() == null) {
+                            clone.setServiceIds(Lists.newArrayList());
+                        }
                         String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
 
                         this.serviceIdNamespaceMap.forEach((k, v) -> {
@@ -490,29 +491,6 @@ public class ModelManager implements InitializingBean {
                         return clone;
                     })
                     .collect(Collectors.toList());
-                /*return this.serviceIdNamespaceMap.entrySet().stream()
-                    .filter(entry -> {
-                        if (entry.getKey().toLowerCase().indexOf(serviceId.toLowerCase()) > -1) {
-                            Model model = this.namespaceMap.get(entry.getValue());
-                            if (model != null) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    })
-                    .map(entry -> {
-                        Model model = this.namespaceMap.get(entry.getValue());
-                        Model clone = (Model) model.clone();
-                        String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
-
-                        this.serviceIdNamespaceMap.forEach((k, v) -> {
-                            if (v.equals(nameSpaceKey)) {
-                                clone.getServiceIds().add(k);
-                            }
-                        });
-                        return clone;
-                    })
-                    .collect(Collectors.toList());*/
             default:
                 return null;
         }
