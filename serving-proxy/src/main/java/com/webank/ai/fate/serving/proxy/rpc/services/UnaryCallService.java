@@ -9,6 +9,7 @@ import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.NettyServerInfo;
 import com.webank.ai.fate.serving.core.exceptions.ErrorCode;
 import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
@@ -55,6 +56,18 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     @Value("${proxy.grpc.unaryCall.timeout:3000}")
     private  int  timeout;
 
+    @Value("${proxy.grpc.inter.negotiationType:PLAINTEXT}")
+    private String negotiationType;
+
+    @Value("${proxy.grpc.inter.server.certChain.file:}")
+    private String certChainFilePath;
+
+    @Value("${proxy.grpc.inter.server.privateKey.file:}")
+    private String privateKeyFilePath;
+
+    @Value("${proxy.grpc.inter.CA.file:}")
+    private String trustCertCollectionFilePath;
+
     Logger logger  = LoggerFactory.getLogger(UnaryCallService.class);
 
     static  final  String  RETURN_CODE= "retcode";
@@ -68,7 +81,8 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
             Proxy.Packet  sourcePackage = data.getBody();
             sourcePackage = authUtils.addAuthInfo(sourcePackage);
 
-            managedChannel =   grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
+            managedChannel =   grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(),
+                    new NettyServerInfo (negotiationType, certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath));
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
 
             stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);

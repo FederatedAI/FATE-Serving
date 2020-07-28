@@ -21,11 +21,16 @@ import com.google.common.collect.Lists;
 import io.grpc.Channel;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -48,9 +53,20 @@ public class GrpcConnectionPool {
     class ChannelResource{
 
         public  ChannelResource(String address){
-            this.address = address;
+            this(address, null);
         }
         String  address;
+
+        NettyServerInfo nettyServerInfo;
+
+        public NettyServerInfo getNettyServerInfo() {
+            return nettyServerInfo;
+        }
+
+        public  ChannelResource(String address, NettyServerInfo nettyServerInfo) {
+            this.address = address;
+            this.nettyServerInfo = nettyServerInfo;
+        }
 
         List<ManagedChannel> channels = Lists.newArrayList();
 
@@ -139,7 +155,7 @@ public class GrpcConnectionPool {
                                     String[] ipPort = k.split(":");
                                     String ip = ipPort[0];
                                     int port = Integer.parseInt(ipPort[1]);
-                                    ManagedChannel managedChannel = createManagedChannel(ip, port);
+                                    ManagedChannel managedChannel = createManagedChannel(ip, port, v.getNettyServerInfo());
                                     v.getChannels().add(managedChannel);
                                 }
                                 v.getChannels().forEach(e -> {
@@ -173,13 +189,23 @@ public class GrpcConnectionPool {
 
 
     public ManagedChannel getManagedChannel(String key) throws Exception {
+        return getAManagedChannel(key, new NettyServerInfo());
+    }
+
+    private ManagedChannel getAManagedChannel(String key, NettyServerInfo nettyServerInfo) throws Exception {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
-            return createInner(key);
+            return createInner(key, nettyServerInfo);
         } else {
             return getRandomManagedChannel(channelResource);
         }
 
+    }
+
+
+    public ManagedChannel getManagedChannel(String ip,int port, NettyServerInfo nettyServerInfo) throws Exception {
+        String key = new StringBuilder().append(ip).append(":").append(port).toString();
+        return this.getAManagedChannel(key, nettyServerInfo);
     }
 
 
@@ -198,16 +224,16 @@ public class GrpcConnectionPool {
         return  result;
 
     }
-    private synchronized ManagedChannel createInner(String key) throws Exception {
+    private synchronized ManagedChannel createInner(String key, NettyServerInfo nettyServerInfo) throws Exception {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
             String[] ipPort = key.split(":");
             String ip = ipPort[0];
             int port = Integer.parseInt(ipPort[1]);
-            ManagedChannel managedChannel = createManagedChannel(ip, port);
+            ManagedChannel managedChannel = createManagedChannel(ip, port, nettyServerInfo);
             List<ManagedChannel> managedChannelList = new ArrayList<ManagedChannel>();
             managedChannelList.add(managedChannel);
-            channelResource = new  ChannelResource(key);
+            channelResource = new  ChannelResource(key, nettyServerInfo);
             channelResource.setChannels(managedChannelList);
             channelResource.getRequestCount().addAndGet(1);
             poolMap.put(key, channelResource);
@@ -222,12 +248,12 @@ public class GrpcConnectionPool {
 
 
 
-    public synchronized ManagedChannel createManagedChannel(String ip, int port) throws Exception {
+    public synchronized ManagedChannel createManagedChannel(String ip, int port, NettyServerInfo nettyServerInfo) throws Exception {
 
         if (logger.isDebugEnabled()) {
             logger.debug("create ManagedChannel");
         }
-        NettyChannelBuilder builder = NettyChannelBuilder
+        NettyChannelBuilder channelBuilder = NettyChannelBuilder
                 .forAddress(ip, port)
                 .keepAliveTime(60, TimeUnit.SECONDS)
                 .keepAliveTimeout(60, TimeUnit.SECONDS)
@@ -239,12 +265,20 @@ public class GrpcConnectionPool {
                 .enableRetry()
                 .retryBufferSize(16 << 20)
                 .maxRetryAttempts(20);      // todo: configurable
-                builder.negotiationType(NegotiationType.PLAINTEXT)
-                .usePlaintext();
+        channelBuilder.usePlaintext();
 
-        return builder.build();
+        if(nettyServerInfo != null){
+            channelBuilder.negotiationType(nettyServerInfo.getNegotiationType());
+            if(nettyServerInfo.getNegotiationType() == NegotiationType.TLS) {
+                SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
+                sslContextBuilder.keyManager(new File(nettyServerInfo.getCertChainFilePath()), new File(nettyServerInfo.getPrivateKeyFilePath()));
+                sslContextBuilder.trustManager(new File(nettyServerInfo.getTrustCertCollectionFilePath()));
 
+                channelBuilder.sslContext(sslContextBuilder.build());
+            }
+        }
 
+        return channelBuilder.build();
     }
 
 }
