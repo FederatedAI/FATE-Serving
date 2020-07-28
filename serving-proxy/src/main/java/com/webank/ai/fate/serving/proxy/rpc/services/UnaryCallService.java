@@ -15,6 +15,7 @@ import com.webank.ai.fate.serving.core.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.core.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.rpc.core.ProxyService;
+import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 
@@ -80,9 +81,13 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         try {
             Proxy.Packet  sourcePackage = data.getBody();
             sourcePackage = authUtils.addAuthInfo(sourcePackage);
-
-            managedChannel =   grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(),
-                    new NettyServerInfo (negotiationType, certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath));
+            NettyServerInfo nettyServerInfo = null;
+            if(GrpcType.INTER_GRPC == context.getGrpcType()) {
+                nettyServerInfo = new NettyServerInfo(negotiationType, certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath);
+            } else {
+                nettyServerInfo = new NettyServerInfo();
+            }
+            managedChannel =   grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(), nettyServerInfo);
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
 
             stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
