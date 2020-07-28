@@ -95,7 +95,7 @@ public class HeteroFeatureBinning extends BaseComponent {
                 Double colValue = Double.valueOf(firstData.get(colName).toString());
                 int colIndex = Collections.binarySearch(splitPoint, colValue);
                 if (colIndex < 0) {
-                    colIndex = Math.min((-colIndex - 1), splitPoint.size() - 1);
+                    colIndex = Math.min((- colIndex - 1), splitPoint.size() - 1);
                 }
                 outputData.put(colName, colIndex);
             } catch (Throwable e) {
