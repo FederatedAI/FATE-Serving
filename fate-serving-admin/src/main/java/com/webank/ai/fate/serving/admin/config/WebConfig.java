@@ -5,7 +5,9 @@ import com.webank.ai.fate.serving.admin.interceptors.LoginInterceptor;
 import com.webank.ai.fate.serving.common.cache.Cache;
 import com.webank.ai.fate.serving.common.cache.ExpiringLRUCache;
 import com.webank.ai.fate.serving.common.cache.RedisCache;
+import com.webank.ai.fate.serving.common.cache.RedisClusterCache;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -34,15 +36,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/admin/login");
     }
 
-//    @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler("swagger-ui.html")
-//                .addResourceLocations("classpath:/META-INF/resources/");
-//        registry.addResourceHandler("/webjars/**")
-//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
-//    }
+    /*@Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }*/
 
-    @Override
+    /*@Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("*")
@@ -50,7 +52,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(86400);
-    }
+    }*/
 
     @Bean
     public Cache cache() {
@@ -59,7 +61,6 @@ public class WebConfig implements WebMvcConfigurer {
         Cache cache = null;
         switch (cacheType) {
             case "redis":
-                RedisCache redisCache = new RedisCache();
                 String ip = MetaInfo.PROPERTY_REDIS_IP;
                 String password = MetaInfo.PROPERTY_REDIS_PASSWORD;
                 Integer port = MetaInfo.PROPERTY_REDIS_PORT;
@@ -67,6 +68,16 @@ public class WebConfig implements WebMvcConfigurer {
                 Integer maxTotal = MetaInfo.PROPERTY_REDIS_MAX_TOTAL;
                 Integer maxIdle = MetaInfo.PROPERTY_REDIS_MAX_IDLE;
                 Integer expire = MetaInfo.PROPERTY_REDIS_EXPIRE;
+                String clusterNodes = MetaInfo.PROPERTY_REDIS_CLUSTER_NODES;
+
+                RedisCache redisCache;
+                if (StringUtils.isNotBlank(clusterNodes)) {
+                    redisCache = new RedisClusterCache(clusterNodes);
+                    logger.info("redis cache mode: cluster");
+                } else {
+                    redisCache = new RedisCache();
+                    logger.info("redis cache mode: standalone");
+                }
                 redisCache.setExpireTime(timeout);
                 redisCache.setMaxTotal(maxTotal);
                 redisCache.setMaxIdel(maxIdle);

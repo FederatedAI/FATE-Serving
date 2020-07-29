@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ComponentService {
@@ -25,9 +27,21 @@ public class ComponentService {
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
     NodeData cachedNodeData;
+    Set<String> whitelist = new HashSet<>();
 
     public NodeData getCachedNodeData() {
         return cachedNodeData;
+    }
+
+    public Set<String> getWhitelist() {
+        return whitelist;
+    }
+
+    public boolean isAllowAccess(String host, int port) {
+        if (whitelist.contains(host + ":" + port)) {
+            return true;
+        }
+        return false;
     }
 
     @Scheduled(cron = "0/5 * * * * ?")
@@ -38,8 +52,13 @@ public class ComponentService {
         root.setLabel(root.getName());
         List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
         if (componentLists != null) {
+            Set<String> registeredNodes = new HashSet<>();
             componentLists.forEach(name -> {
                 List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
+                if (nodes != null) {
+                    registeredNodes.addAll(nodes);
+                }
+
                 NodeData componentData = new NodeData();
                 componentData.setName(name);
                 componentData.setLabel(root.getLabel() + "-" + componentData.getName());
@@ -57,6 +76,9 @@ public class ComponentService {
                     });
                 }
             });
+
+            whitelist.clear();
+            whitelist.addAll(registeredNodes);
         }
         cachedNodeData = root;
 

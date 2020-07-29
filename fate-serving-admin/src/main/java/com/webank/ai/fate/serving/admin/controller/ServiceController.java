@@ -9,8 +9,12 @@ import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.bean.VerifyService;
+import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,8 +38,12 @@ import java.util.stream.Collectors;
 public class ServiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
+
     @Autowired
     private ZookeeperRegistry zookeeperRegistry;
+    @Autowired
+    ComponentService componentService;
+
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     // 列出集群中所注册的所有接口
@@ -183,6 +191,14 @@ public class ServiceController {
     private CommonServiceGrpc.CommonServiceFutureStub getCommonServiceFutureStub(String host, Integer port) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
+
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
+        }
+
+        if (!componentService.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         CommonServiceGrpc.CommonServiceFutureStub futureStub = CommonServiceGrpc.newFutureStub(managedChannel);

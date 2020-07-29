@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -14,9 +15,13 @@ import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +38,9 @@ import java.util.stream.Collectors;
 public class MonitorController {
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+
+    @Autowired
+    ComponentService componentService;
 
     @GetMapping("/monitor/queryJvm")
     public ReturnResult queryJvmData(String host, int port) {
@@ -144,6 +152,15 @@ public class MonitorController {
     private CommonServiceGrpc.CommonServiceBlockingStub getMonitorServiceBlockStub(String host, int port) {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port was wrong");
+
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
+        }
+
+        if (!componentService.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
+
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
         return blockingStub;

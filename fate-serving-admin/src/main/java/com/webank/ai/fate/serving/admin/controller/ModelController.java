@@ -8,16 +8,19 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.common.utils.HttpClientPool;
+import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
+import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
@@ -243,6 +246,14 @@ public class ModelController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
+        }
+
+        if (!componentService.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
+
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
         blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -252,6 +263,14 @@ public class ModelController {
     private ModelServiceGrpc.ModelServiceFutureStub getModelServiceFutureStub(String host, Integer port) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
+
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
+        }
+
+        if (!componentService.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);

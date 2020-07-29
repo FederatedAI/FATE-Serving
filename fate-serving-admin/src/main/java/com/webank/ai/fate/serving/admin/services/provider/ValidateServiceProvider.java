@@ -10,16 +10,20 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.admin.controller.ValidateController;
 import com.webank.ai.fate.serving.admin.services.AbstractAdminServiceProvider;
+import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +41,9 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(ValidateController.class);
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+
+    @Autowired
+    ComponentService componentService;
 
     @Value("${grpc.timeout:5000}")
     private int timeout;
@@ -241,6 +248,14 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
     }
 
     private ModelServiceGrpc.ModelServiceBlockingStub getModelServiceBlockingStub(String host, Integer port) throws Exception {
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
+        }
+
+        if (!componentService.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
+
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
         blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
@@ -248,12 +263,28 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
     }
 
     private ModelServiceGrpc.ModelServiceFutureStub getModelServiceFutureStub(String host, Integer port) throws Exception {
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
+        }
+
+        if (!componentService.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
+
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
         return futureStub;
     }
 
     private InferenceServiceGrpc.InferenceServiceFutureStub getInferenceServiceFutureStub(String host, Integer port) throws Exception {
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
+        }
+
+        if (!componentService.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
+
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
         return futureStub;

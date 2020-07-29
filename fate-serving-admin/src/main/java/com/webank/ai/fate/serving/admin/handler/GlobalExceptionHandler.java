@@ -33,14 +33,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {StatusRuntimeException.class, RemoteRpcException.class})
     public ReturnResult statusRuntimeExceptionHandle(Exception e) {
         logger.error("[RemoteRpcException]Exception:", e);
-        return ReturnResult.build(StatusCode.NET_ERROR, "remote rpc request timeout");
+        return ReturnResult.build(StatusCode.NET_ERROR, "remote rpc request exception, detail: " + e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(value = Exception.class)
     public ReturnResult commonExceptionHandle(Exception e) {
         logger.error("[SystemException]Exception:", e);
-        return ReturnResult.build(StatusCode.SYSTEM_ERROR, "System Error, please try again later");
+        return ReturnResult.build(StatusCode.SYSTEM_ERROR, "System Error, please try again later, detail: " + e.getMessage());
     }
 
 }
