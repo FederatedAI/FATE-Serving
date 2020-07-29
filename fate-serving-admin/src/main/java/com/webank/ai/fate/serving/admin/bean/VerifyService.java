@@ -4,9 +4,9 @@ import com.webank.ai.fate.register.common.RouterMode;
 
 public enum  VerifyService {
 
-    PUBLISH_LOAD("publishLoad"),
-    PUBLISH_BIND("publishBind"),
-    PUBLISH_ONLINE("publishOnline"),
+//    PUBLISH_LOAD("publishLoad"),
+//    PUBLISH_BIND("publishBind"),
+//    PUBLISH_ONLINE("publishOnline"),
     INFERENCE("inference"),
     BATCH_INFERENCE("batchInference");
 

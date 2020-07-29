@@ -26,21 +26,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class, IllegalArgumentException.class})
     public ReturnResult paramValidationExceptionHandle(Exception e) {
         logger.error("[ParamValidationException]Exception:", e);
-        return ReturnResult.build(StatusCode.PARAM_ERROR, e.getMessage());
+        return ReturnResult.build(StatusCode.PARAM_ERROR, "request parameter error");
     }
 
     @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(value = {StatusRuntimeException.class, RemoteRpcException.class})
     public ReturnResult statusRuntimeExceptionHandle(Exception e) {
         logger.error("[RemoteRpcException]Exception:", e);
-        return ReturnResult.build(StatusCode.NET_ERROR, "remote rpc request exception, detail: " + e.getMessage());
+        return ReturnResult.build(StatusCode.NET_ERROR, "remote rpc request exception");
     }
 
     @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(value = Exception.class)
     public ReturnResult commonExceptionHandle(Exception e) {
         logger.error("[SystemException]Exception:", e);
-        return ReturnResult.build(StatusCode.SYSTEM_ERROR, "System Error, please try again later, detail: " + e.getMessage());
+        return ReturnResult.build(StatusCode.SYSTEM_ERROR, "system error, please check the log for detail");
     }
 
 }

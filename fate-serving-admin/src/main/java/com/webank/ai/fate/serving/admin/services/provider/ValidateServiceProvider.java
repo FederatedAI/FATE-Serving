@@ -48,7 +48,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
     @Value("${grpc.timeout:5000}")
     private int timeout;
 
-    @FateServiceMethod(name = "publishLoad")
+    /*@FateServiceMethod(name = "publishLoad")
     public Object publishLoad(Context context, InboundPackage data) throws Exception {
         Map params = (Map) data.getBody();
         String host = (String) params.get(Dict.HOST);
@@ -82,7 +82,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         returnResult.put(Dict.RET_CODE, response.getStatusCode());
         returnResult.put(Dict.RET_MSG, response.getMessage());
         return returnResult;
-    }
+    }*/
 
     @FateServiceMethod(name = "inference")
     public Object inference(Context context, InboundPackage data) throws Exception {
@@ -175,7 +175,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         return returnResult;
     }
 
-    private ModelServiceProto.PublishRequest buildPublishRequest(Map params) {
+    /*private ModelServiceProto.PublishRequest buildPublishRequest(Map params) {
         Map<String, String> local = (Map<String, String>) params.get("local");
         Map<String, Map> roleMap = (Map<String, Map>) params.get("role");
         Map<String, Map> modelMap = (Map<String, Map>) params.get("model");
@@ -231,7 +231,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         }
 
         return builder.build();
-    }
+    }*/
 
     @Override
     protected Object transformExceptionInfo(Context context, ExceptionInfo data) {
