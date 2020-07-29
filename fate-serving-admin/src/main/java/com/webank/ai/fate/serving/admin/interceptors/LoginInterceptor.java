@@ -17,6 +17,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
 
 public class LoginInterceptor implements HandlerInterceptor {
 
@@ -24,6 +26,8 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Autowired
     private Cache cache;
+
+    private static List<String> EXCLUDES = Arrays.asList("/api/component/list", "/api/monitor/queryJvm", "/api/monitor/query", "/api/monitor/queryModel");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -36,7 +40,9 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         String userInfo = (String) cache.get(token);
         if (StringUtils.isNotBlank(userInfo)) {
-            cache.put(token, userInfo, MetaInfo.PROPERTY_CACHE_TYPE.equalsIgnoreCase("local") ? MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE : MetaInfo.PROPERTY_REDIS_EXPIRE);
+            if (!EXCLUDES.contains(request.getRequestURI())) {
+                cache.put(token, userInfo, MetaInfo.PROPERTY_CACHE_TYPE.equalsIgnoreCase("local") ? MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE : MetaInfo.PROPERTY_REDIS_EXPIRE);
+            }
             return true;
         } else {
             if (logger.isDebugEnabled()) {
