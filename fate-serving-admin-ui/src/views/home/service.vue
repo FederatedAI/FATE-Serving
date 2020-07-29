@@ -6,7 +6,7 @@
             </div>
             <el-table
                 :data="serviceData"
-                max-height="690px"
+                 max-height="690px"
                 :header-cell-style="{background:'#fff'}"
                 class="table">
                 <el-table-column prop="project" label="Project" show-overflow-tooltip />

@@ -91,6 +91,7 @@
                         :data="ModelsData"
                         :header-cell-style="{background:'#fff'}"
                         style="width: 100%;margin-bottom: 20px;"
+                        max-height="668px"
                         class="table"
                     >
                         <el-table-column
@@ -116,7 +117,7 @@
                         <el-table-column sortable width="160" :sort-method="(a, b) => { return sortMix(a, b, 'serviceIds') }" prop="serviceId" label="Service ID">
                             <template slot-scope="scope">
                                 <el-popover
-                                    v-if="scope.row.serviceIds[0] !== '--'"
+                                    v-if="scope.row.serviceIds && scope.row.serviceIds[0] !== '--'"
                                     placement="bottom"
                                     trigger="hover">
                                     <div>
@@ -198,7 +199,7 @@
                                     @click="unload(scope.row)"
                                 >Unload</el-button>
                                 <el-button
-                                    v-if="scope.row.serviceIds[0] !=='--'"
+                                    v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'"
                                     type="text"
                                     style="font-size: 14px"
                                     size="mini"
@@ -736,7 +737,7 @@ export default {
                     this.ModelsData = res.data.rows
                     this.total = res.data.total
                     for (var i = 0; i < this.ModelsData.length; i++) {
-                        if (this.ModelsData[i].serviceIds.length === 0) {
+                        if (this.ModelsData[i].serviceIds && this.ModelsData[i].serviceIds.length === 0) {
                             this.ModelsData[i].serviceIds.push('--')
                         }
                     }
@@ -791,6 +792,7 @@ export default {
                     ] = this.getIncomingData(this.Monitordata[i], res.data[i])
                     legendArr.push(i)
                 }
+
                 var MonitorArr = []
                 var xDate = []
                 var monitorXdate = []
@@ -807,9 +809,11 @@ export default {
                             if (j === 0) {
                                 // 只需要拿某一组的横坐标，都是统一的
                                 xDate.push(this.date(mData[z].timestamp))
+                                // xDate.push(mData[z].timestamp)
                             }
                         }
                     }
+
                     this.MonitorYvalue[legendArr[j]] =
                             this.MonitorYvalue[legendArr[j]] &&
                             this.MonitorYvalue[legendArr[j]].length > 0
@@ -856,7 +860,7 @@ export default {
                 const lastTimeStamp = current[current.length - 1].timestamp
                 incoming.forEach((item, i) => {
                     if (+item.timestamp === +lastTimeStamp) {
-                        index = i
+                        index = i + 1
                     }
                 })
             }
@@ -890,7 +894,7 @@ export default {
                 legend: {
                     right: '150px',
                     orient: 'horizontal',
-                    top: 10,
+                    top: -5,
                     data: legendArr,
                     textStyle: {
                         fontSize: 11
