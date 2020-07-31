@@ -21,6 +21,7 @@ import com.webank.ai.fate.serving.common.cache.Cache;
 import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.common.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 
 public abstract class BaseComponent implements LocalInferenceAware {
@@ -58,6 +60,46 @@ public abstract class BaseComponent implements LocalInferenceAware {
     protected <T> T parseModel(com.google.protobuf.Parser<T> protoParser, byte[] protoString) throws com.google.protobuf.InvalidProtocolBufferException {
         return ProtobufUtils.parseProtoObject(protoParser, protoString);
     }
+
+
+    public Map<String, Double> featureHitRateStatistics(Context context, Set<String> features) {
+        Map<String, Object> data = (Map)context.getData(Dict.ORIGINAL_PREDICT_DATA);
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("original input data is {}, modeling features is {}", data, features);
+        }
+
+
+        int inputDataShape = data.size();
+        int featureShape = features.size();
+        int featureHit = 0;
+
+        Map<String, Double> ret = new HashMap<>();
+
+        for (String name : features) {
+            if (data.containsKey(name)) {
+                featureHit++;
+            }
+        }
+
+        double featureHitRate = -1.0;
+        double inputDataHitRate = -1.0;
+        try {
+            featureHitRate = 1.0 * featureHit / featureShape;
+            inputDataHitRate = 1.0 * featureHit / inputDataShape;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("input feature data's shape is {}, header shape is {}, input feature hit rate is {}, modeling feature hit rate is {}", inputDataShape, featureShape, inputDataHitRate, featureHitRate);
+        }
+
+        ret.put(Dict.MODELING_FEATURE_HIT_RATE, featureHitRate);
+        ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
+        return ret;
+    }
+
 
     protected Map<String, Object> handleRemoteReturnData(Map<String, Object> hostData) {
         Map<String, Object> result = new HashMap<>(8);

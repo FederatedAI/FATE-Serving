@@ -32,8 +32,6 @@ public class Client {
     }
 
     public static synchronized Client getClient(String  zkAddress){
-
-
         MetaInfo.PROPERTY_ACL_ENABLE = false;
         if(clientMap.get(zkAddress)==null){
             ZookeeperRegistry  zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress,"client","online",12202);
@@ -47,7 +45,6 @@ public class Client {
     }
 
     public static  Client getClient(String  zkAddress,boolean useAcl,String aclUserName,String aclPassword){
-
         if(useAcl) {
             System.setProperty("acl.enable", "true");
         }
@@ -56,10 +53,7 @@ public class Client {
         }
         System.setProperty("acl.username", aclUserName!=null?aclUserName:"");
         System.setProperty("acl.password", aclPassword!=null?aclPassword:"");
-
         MetaInfo.PROPERTY_ACL_ENABLE=useAcl;
-
-
         return getClient(zkAddress);
     }
 

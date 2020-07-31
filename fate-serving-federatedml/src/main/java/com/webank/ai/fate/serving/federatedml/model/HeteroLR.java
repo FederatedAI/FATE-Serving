@@ -17,16 +17,14 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.webank.ai.fate.core.mlmodel.buffer.LRModelParamProto.LRModelParam;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 
@@ -103,6 +101,12 @@ public abstract class HeteroLR extends BaseComponent {
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
 
+        Set<String> inputKeys =inputData.keySet();
+        Set<String> weightKeys = weight.keySet();
+        Set<String> joinKeys = Sets.newHashSet();
+        joinKeys.addAll(inputKeys);
+        joinKeys.retainAll(weightKeys);
+
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
         int weightNum = this.weight.size();
@@ -113,19 +117,7 @@ public abstract class HeteroLR extends BaseComponent {
             logger.debug("input data features number:{}", inputFeaturesNum);
         }
         double score = 0;
-        for (String key : inputData.keySet()) {
-            if (this.weight.containsKey(key)) {
-                Double x = new Double(inputData.get(key).toString());
-                Double w = new Double(this.weight.get(key).toString());
-                score += w * x;
-                modelWeightHitCount += 1;
-                inputDataHitCount += 1;
-                if (logger.isDebugEnabled()) {
-                    logger.debug("key {} weight is {}, value is {}", key, this.weight.get(key), inputData.get(key));
-                }
-            }
-        }
-        ForkJoinTask<LRTaskResult> result = forkJoinPool.submit(new LRTask(weight, inputData, Lists.newArrayList(inputData.keySet())));
+        ForkJoinTask<LRTaskResult> result = forkJoinPool.submit(new LRTask(weight, inputData, Lists.newArrayList(joinKeys)));
         if (result != null) {
             try {
                 LRTaskResult lrTaskResult = result.get();
@@ -138,6 +130,8 @@ public abstract class HeteroLR extends BaseComponent {
                 inputDataHitRate = (double) inputDataHitCount / inputFeaturesNum;
                 ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
                 ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
+
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -218,4 +212,23 @@ public abstract class HeteroLR extends BaseComponent {
             this.inputDataHitCount = inputDataHitCount;
         }
     }
+    public static  void main(String[] args){
+
+        Set set1 =  new HashSet();
+        set1.add("1");
+        set1.add("2");
+        set1.add("3");
+        Set set2 =  new HashSet();
+        set2.add("2");
+        set2.add("3");
+
+        Set set3 = new HashSet();
+        set3.addAll(set1);
+        set3.retainAll(set2);
+        System.err.println(set3);
+
+    }
+
+
+
 }

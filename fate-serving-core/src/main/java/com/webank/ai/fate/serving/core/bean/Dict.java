@@ -30,7 +30,7 @@ public class Dict {
     public static final String FEDERATED_RESULT = "federatedResult";
     public static final String PORT = "port";
     public static final String INSTANCE_ID = "instanceId";
-
+    public static final String ORIGINAL_PREDICT_DATA = "originalPredictData";
     public static final String HIT_CACHE = "hitCache";
 
     public static final String REQUEST_SEQNO = "REQUEST_SEQNO";
@@ -152,6 +152,7 @@ public class Dict {
     public static final String ACCESS = "access";
     public static final String MODEL_WRIGHT_HIT_RATE = "modelWrightHitRate";
     public static final String INPUT_DATA_HIT_RATE = "inputDataHitRate";
+    public static final String MODELING_FEATURE_HIT_RATE = "modelingFeatureHitRate";
     public static final String GUEST_MODEL_WEIGHT_HIT_RATE = "guestModelWeightHitRate";
     public static final String GUEST_INPUT_DATA_HIT_RATE = "guestInputDataHitRate";
     public static final String TAG_INPUT_FORMAT = "tag";
