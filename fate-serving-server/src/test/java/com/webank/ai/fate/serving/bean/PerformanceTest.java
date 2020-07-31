@@ -191,7 +191,7 @@ public class PerformanceTest {
             BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
             singleInferenceData.getFeatureData().putAll(featureMap);
 
-            singleInferenceData.getSendToRemoteFeatureData().put("user_id", "01a9a79f583bcd0ac8bc39f61f542e16");
+            singleInferenceData.getSendToRemoteFeatureData().put("device_id", String.valueOf(i + 1));
             singleInferenceData.setIndex(i);
             singleInferenceDataList.add(singleInferenceData);
         }
@@ -215,7 +215,7 @@ public class PerformanceTest {
                 String content = StringUtils.join(Arrays.asList(startTime, endTime, endTime - startTime, result), " | ");
 
                 // print info log
-                output(INFO_OUTPUT_FILE, content);
+//                output(INFO_OUTPUT_FILE, content);
 
                 // print error log
                 if (resultObject.get("retcode") == null || (int) resultObject.get("retcode") != StatusCode.SUCCESS) {

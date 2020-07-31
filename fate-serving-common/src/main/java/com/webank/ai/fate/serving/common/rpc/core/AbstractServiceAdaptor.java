@@ -23,10 +23,7 @@ import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.utils.DisruptorUtil;
-import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ShowDownRejectException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -38,6 +35,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @Description 默认的服务适配器
@@ -166,8 +164,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                             ServingServerContext servingServerContext = (ServingServerContext) context;
                             Model model = servingServerContext.getModel();
                             if (model != null) {
-                                int times = (int) context.getData(Dict.PASS_QPS);
-                                flowCounterManager.exception(model.getResourceName(), times);
+                                flowCounterManager.exception(model.getResourceName(), 1);
                             }
                         }
                     }
@@ -181,8 +178,25 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     if (context instanceof ServingServerContext) {
                         Model model = ((ServingServerContext) context).getModel();
                         if (model != null) {
-                            int times = (int) context.getData(Dict.PASS_QPS);
-                            flowCounterManager.success(model.getResourceName(), times);
+                            // batch exceptions
+                            if (context.getServiceName().equalsIgnoreCase(Dict.SERVICENAME_BATCH_INFERENCE)) {
+                                BatchInferenceResult batchInferenceResult = (BatchInferenceResult) outboundPackage.getData();
+                                if (batchInferenceResult != null && batchInferenceResult.getBatchDataList() != null) {
+                                    int successCount = 0;
+                                    int failedConunt = 0;
+                                    for (BatchInferenceResult.SingleInferenceResult singleInferenceResult : batchInferenceResult.getBatchDataList()) {
+                                        if (singleInferenceResult.getRetcode() != StatusCode.SUCCESS) {
+                                            failedConunt++;
+                                        } else {
+                                            successCount++;
+                                        }
+                                    }
+                                    flowCounterManager.success(model.getResourceName(), successCount);
+                                    flowCounterManager.exception(model.getResourceName(), failedConunt);
+                                }
+                            } else {
+                                flowCounterManager.success(model.getResourceName(), 1);
+                            }
                         }
                     }
                     flowCounterManager.success(context.getResourceName(), 1);
