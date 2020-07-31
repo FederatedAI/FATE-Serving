@@ -22,6 +22,7 @@ import com.webank.ai.fate.serving.metrics.api.IMetricFactory;
 
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
 import io.grpc.ManagedChannel;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     @Autowired
     AuthUtils authUtils;
 
+    @Value("${coordinator}")
+    private String selfPartyId;
+
     @Value("${proxy.grpc.unaryCall.timeout:3000}")
     private  int  timeout;
 
@@ -82,10 +86,10 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
             Proxy.Packet  sourcePackage = data.getBody();
             sourcePackage = authUtils.addAuthInfo(sourcePackage);
             NettyServerInfo nettyServerInfo = null;
-            if(GrpcType.INTER_GRPC == context.getGrpcType()) {
-                nettyServerInfo = new NettyServerInfo(negotiationType, certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath);
-            } else {
+            if(StringUtils.equals(selfPartyId, sourcePackage.getHeader().getDst().getPartyId())) {
                 nettyServerInfo = new NettyServerInfo();
+            } else {
+                nettyServerInfo = new NettyServerInfo(negotiationType, certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath);
             }
             managedChannel =   grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(), nettyServerInfo);
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
