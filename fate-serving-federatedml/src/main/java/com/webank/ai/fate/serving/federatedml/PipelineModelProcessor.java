@@ -464,7 +464,7 @@ public class PipelineModelProcessor implements ModelProcessor {
         protected List<BatchInferenceResult.SingleInferenceResult> compute() {
             List<BatchInferenceResult.SingleInferenceResult> singleResultLists = Lists.newArrayList();
             if (keys.size() <= splitSize) {
-                localResult.forEach((index, data) -> {
+                keys.forEach((index) -> {
                     Map<String, Object> remoteSingleMap = Maps.newHashMap();
                     remoteResult.forEach((partyId, batchResult) -> {
                         if (batchResult.getSingleInferenceResultMap() != null) {
