@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.bean;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
@@ -23,6 +24,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
+import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -42,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class PerformanceTest {
 
-    private static int PROCESS_NUM = 8;// 并发线程数
+    private static int PROCESS_NUM = 30;// 并发线程数
     private static int BATCH_DATA_SIZE = 300;// 单批次数量
     private static String HOST = "localhost";
     private static int PORT = 8000;
@@ -51,11 +53,12 @@ public class PerformanceTest {
     private static File ERROR_OUTPUT_FILE = new File("logs/performance-error.log");
     private static Random random = new Random();
     private static GrpcConnectionPool GRPC_CONNECTION_POOL = GrpcConnectionPool.getPool();
-    private static ThreadPoolExecutor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), 2 * Runtime.getRuntime().availableProcessors(), 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(65535));
+    private static ThreadPoolExecutor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, 1000, TimeUnit.MILLISECONDS, new SynchronousQueue<>());
     private static ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2);
     private static AtomicLong atomicLong = new AtomicLong(0);
 
     public static void main(String[] args) throws IOException {
+        HttpClientPool.initPool();
         init();
         concurrentCall();
 //        call();
@@ -93,7 +96,8 @@ public class PerformanceTest {
      */
     private static void call() {
         THREAD_POOL_EXECUTOR.submit(() -> {
-            batchInference();
+//            batchInference();
+            batchInferenceByHttp();
 //            listProps();
         });
     }
@@ -105,6 +109,69 @@ public class PerformanceTest {
         CommonServiceProto.CommonResponse response = blockingStub.listProps(builder.build());
 
         System.err.println("StatusCode ==================" + response.getStatusCode());
+    }
+
+    private static Map<String, Object> params = Maps.newHashMap();
+    static {
+        Map featureMap = Maps.newHashMap();
+        for (int j = 0; j < 300; j++) {
+            String a = String.format("x%s", j);
+            featureMap.put(a, random.nextDouble());
+        }
+
+        BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
+        batchInferenceRequest.setServiceId("lr-001");
+        batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
+        List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
+
+        for (int i = 0; i < BATCH_DATA_SIZE; i++) {
+            BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
+            singleInferenceData.getFeatureData().putAll(featureMap);
+
+            singleInferenceData.getSendToRemoteFeatureData().put("device_id", String.valueOf(i + 1));
+            singleInferenceData.setIndex(i);
+            singleInferenceDataList.add(singleInferenceData);
+        }
+
+        batchInferenceRequest.setBatchDataList(singleInferenceDataList);
+
+        params.put("head", Maps.newHashMap());
+        params.put("body", Maps.newHashMap());
+
+        ((Map) params.get("head")).put("serviceId", batchInferenceRequest.getServiceId());
+        ((Map) params.get("body")).put("batchDataList", JsonUtil.json2Object(JsonUtil.object2Json(batchInferenceRequest.getBatchDataList()), new TypeReference<Object>() {}));
+
+    }
+
+    private static void batchInferenceByHttp() {
+//        Map requestData = JsonUtil.json2Object(JsonUtil.object2Json(batchInferenceRequest), Map.class);
+        try {
+            while (true) {
+                long startTime = System.currentTimeMillis();
+                String result = HttpClientPool.post("http://127.0.0.1:8059/federation/v1/batchInference", params);
+                long endTime = System.currentTimeMillis();
+                Map resultObject = JsonUtil.json2Object(result, Map.class);
+                // startTime | endTime | cost | result
+                String content = StringUtils.join(Arrays.asList(startTime, endTime, endTime - startTime, result), " | ");
+
+                // print info log
+//                output(INFO_OUTPUT_FILE, content);
+
+                // print error log
+                if (resultObject.get("retcode") == null || (int) resultObject.get("retcode") != StatusCode.SUCCESS) {
+                    output(ERROR_OUTPUT_FILE, content);
+                }
+
+//                atomicLong.addAndGet(1);
+
+                // print sample log
+//                resultObject.remove("batchDataList");
+//                resultObject.remove("singleInferenceResultMap");
+//                output(INFO_OUTPUT_FILE_SAMPLE, StringUtils.join(Arrays.asList(startTime, endTime, endTime - startTime, JSONObject.toJSONString(resultObject)), " | "));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void batchInference() {
