@@ -30,6 +30,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -267,15 +268,20 @@ public class GrpcConnectionPool {
                 .maxRetryAttempts(20);      // todo: configurable
         channelBuilder.usePlaintext();
 
-        if(nettyServerInfo != null){
-            channelBuilder.negotiationType(nettyServerInfo.getNegotiationType());
-            if(nettyServerInfo.getNegotiationType() == NegotiationType.TLS) {
-                SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
-                sslContextBuilder.keyManager(new File(nettyServerInfo.getCertChainFilePath()), new File(nettyServerInfo.getPrivateKeyFilePath()));
-                sslContextBuilder.trustManager(new File(nettyServerInfo.getTrustCertCollectionFilePath()));
-
-                channelBuilder.sslContext(sslContextBuilder.build());
+        if(nettyServerInfo != null && nettyServerInfo.getNegotiationType() == NegotiationType.TLS){
+            try{
+                SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient()
+                        .keyManager(new File(nettyServerInfo.getCertChainFilePath()), new File(nettyServerInfo.getPrivateKeyFilePath()))
+                        .trustManager(new File(nettyServerInfo.getTrustCertCollectionFilePath()))
+                        .sessionTimeout(3600 << 4)
+                        .sessionCacheSize(65536);
+                channelBuilder.sslContext(sslContextBuilder.build()).useTransportSecurity();
+            } catch (SSLException e) {
+                throw new SecurityException(e);
             }
+            logger.debug("running in secure mode for endpoint {}:{}, server crt path: {}, server key path: {}, ca crt path: {}.",
+                    ip, port,
+                    nettyServerInfo.getCertChainFilePath(), nettyServerInfo.getPrivateKeyFilePath(), nettyServerInfo.getTrustCertCollectionFilePath());
         }
 
         return channelBuilder.build();

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.net.ssl.SSLException;
 import java.io.File;
 import java.util.concurrent.Executor;
 
@@ -61,15 +62,23 @@ public class InterGrpcServer implements InitializingBean {
             if(certChainFilePath.isEmpty() || privateKeyFilePath.isEmpty() || trustCertCollectionFilePath.isEmpty()) {
                 throw new RuntimeException("using TLS, but certificates file paths are missing!");
             }
+            try {
+                SslContextBuilder sslContextBuilder = GrpcSslContexts.forServer(new File(certChainFilePath), new File(privateKeyFilePath))
+                        .trustManager(new File(trustCertCollectionFilePath))
+                        .clientAuth(ClientAuth.REQUIRE)
+                        .sessionTimeout(3600 << 4)
+                        .sessionCacheSize(65536);
 
-            SslContextBuilder sslContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath), new File(privateKeyFilePath));
-            sslContextBuilder.trustManager(new File(trustCertCollectionFilePath));
-            sslContextBuilder.clientAuth(ClientAuth.REQUIRE);
-
-            serverBuilder = new FateServerBuilder(NettyServerBuilder.forPort(port));
-            serverBuilder.sslContext(GrpcSslContexts.configure(sslContextBuilder, SslProvider.OPENSSL).build());
+                serverBuilder = new FateServerBuilder(NettyServerBuilder.forPort(port));
+                serverBuilder.sslContext(sslContextBuilder.build());
+            } catch (SSLException e) {
+                throw new SecurityException(e);
+            }
+            logger.info("running in secure mode. server crt path: {}, server key path: {}, ca crt path: {}.",
+                    certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath);
         } else {
             serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
+            logger.info("running in insecure mode.");
         }
 
         serverBuilder.executor(executor);
