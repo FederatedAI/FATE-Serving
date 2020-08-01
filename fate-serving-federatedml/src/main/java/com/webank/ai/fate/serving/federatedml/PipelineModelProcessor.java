@@ -401,7 +401,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                                 }
                             } else {
                                 singleResult = Maps.newHashMap(tempCache.get(key));
-                                logger.info("hit cache");
                             }
                             result.put(input.getIndex(), singleResult);
                             if (input.isNeedCheckFeature()) {
@@ -416,11 +415,7 @@ public class PipelineModelProcessor implements ModelProcessor {
                                 result.get(input.getIndex()).putAll(ErrorMessageUtil.handleExceptionToMap(e));
                             }
                         }
-
                     }
-
-
-
                     return result;
                 } else {
                     List<List<BatchInferenceRequest.SingleInferenceData>> splits = new ArrayList<List<BatchInferenceRequest.SingleInferenceData>>();

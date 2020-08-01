@@ -122,7 +122,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
         this.zkClient.create(path, JsonUtil.object2Json(content), true);
         this.componentUrl = url;
-        logger.info("register component {}", path);
+        logger.info("register component {} {}", path,toUrlPath(url));
     }
 
 
@@ -140,9 +140,14 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     public void unRegisterComponent() {
+
         if(componentUrl!=null) {
-            tryUnregister(this.componentUrl);
+            System.err.println("delete component "+this.componentUrl.getPath());
+            zkClient.delete(this.componentUrl.getPath());
+        }else{
+            System.err.println("componentUrl is null");
         }
+
     }
 
 
@@ -150,11 +155,16 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
             CuratorZookeeperClient client = (CuratorZookeeperClient) zkClient;
             boolean exists = client.checkExists(toUrlPath(url));
+            String urlPath = toUrlPath(url);
             if (exists) {
+                System.err.println("delete zk path "+urlPath);
                 zkClient.delete(toUrlPath(url));
                 registedString.remove(url.getServiceInterface() + url.getEnvironment());
                 syncServiceCacheFile();
                 return true;
+            }
+            else{
+                System.err.println(urlPath +"is not exist");
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to unregister " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
@@ -340,7 +350,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     @Override
     public void destroy() {
-        System.err.println("try to destroy zookeeper registry");
+        System.err.println("try to destroy zookeeper registry !");
         this.unRegisterComponent();
         super.destroy();
         try {

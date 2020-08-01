@@ -92,7 +92,6 @@ public class Bootstrap {
             ZookeeperRegistry zookeeperRegistry = applicationContext.getBean(ZookeeperRegistry.class);
             zookeeperRegistry.destroy();
         }
-
         int tryNum = 0;
         while (AbstractServiceAdaptor.requestInHandle.get() > 0 && tryNum < 30) {
             logger.info("try to shutdown,try count {}, remain {}", tryNum, AbstractServiceAdaptor.requestInHandle.get());
