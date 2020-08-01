@@ -15,6 +15,8 @@ import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -93,11 +95,14 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         String serviceId = (String) params.get("serviceId");
         Map<String, Object> featureData = (Map<String, Object>) params.get("featureData");
         Map<String, Object> sendToRemoteFeatureData = (Map<String, Object>) params.get("sendToRemoteFeatureData");
-
-        Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "parameter serviceId is required");
-        Preconditions.checkArgument(featureData != null, "parameter featureData is required");
-        Preconditions.checkArgument(sendToRemoteFeatureData != null, "parameter sendToRemoteFeatureData is required");
-
+        try {
+            Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "parameter serviceId is required");
+            Preconditions.checkArgument(featureData != null, "parameter featureData is required");
+            Preconditions.checkArgument(sendToRemoteFeatureData != null, "parameter sendToRemoteFeatureData is required");
+        }
+        catch(Exception e){
+            throw new BaseException(StatusCode.GUEST_PARAM_ERROR, e.getMessage());
+        }
         InferenceRequest inferenceRequest = new InferenceRequest();
 
         if (StringUtils.isNotBlank(serviceId)) {

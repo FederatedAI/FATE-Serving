@@ -22,10 +22,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Client {
 
-    RouterService routerService;
-    GrpcConnectionPool  grpcConnectionPool =  GrpcConnectionPool.getPool();
-    final static String PROJECT ="serving";
-    final String SINGLE_INFERENCE = "inference";
+    static final  String PROJECT ="serving";
+    static final String SINGLE_INFERENCE = "inference";
+    static final String ClIENT_PROJECT = "client";
+    static final int   port =  36578;
+    static final String ENVIRONMENT = "online";
+    private RouterService routerService;
+    private GrpcConnectionPool  grpcConnectionPool =  GrpcConnectionPool.getPool();
 
     private  Client(RouterService  routerService){
         this.routerService = routerService;
@@ -34,7 +37,7 @@ public class Client {
     public static synchronized Client getClient(String  zkAddress){
         MetaInfo.PROPERTY_ACL_ENABLE = false;
         if(clientMap.get(zkAddress)==null){
-            ZookeeperRegistry  zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress,"client","online",12202);
+            ZookeeperRegistry  zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress,ClIENT_PROJECT,ENVIRONMENT,port);
             zookeeperRegistry.subProject(PROJECT);
             DefaultRouterService  defaultRouterService = new DefaultRouterService();
             defaultRouterService.setRegistry(zookeeperRegistry);
@@ -98,10 +101,5 @@ public class Client {
         BatchInferenceResult  returnResult = JsonUtil.json2Object(result.getBody().toByteArray(),BatchInferenceResult.class);
         return  returnResult;
     }
-
-
-
-
-
 
 }

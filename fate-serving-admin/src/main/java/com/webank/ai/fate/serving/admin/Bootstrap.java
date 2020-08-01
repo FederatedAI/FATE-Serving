@@ -53,7 +53,6 @@ public class Bootstrap {
             MetaInfo.PROPERTY_USE_ZK_ROUTER = true;
             MetaInfo.PROPERTY_SERVER_PORT = environment.getProperty(Dict.PROPERTY_SERVER_PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVER_PORT)) : 8350;
             MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL);
-
             MetaInfo.PROPERTY_CACHE_TYPE = environment.getProperty(Dict.PROPERTY_CACHE_TYPE, "local");
             MetaInfo.PROPERTY_REDIS_IP = environment.getProperty(Dict.PROPERTY_REDIS_IP);
             MetaInfo.PROPERTY_REDIS_PASSWORD = environment.getProperty(Dict.PROPERTY_REDIS_PASSWORD);

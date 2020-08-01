@@ -33,13 +33,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
     public static AtomicLong requestInProcess = new AtomicLong(0);
-    long timestamp;
-
-    String interfaceName;
-    String actionType;
-    Map dataMap = Maps.newHashMap();
+    protected long timestamp;
+    protected String interfaceName;
+    protected String actionType;
+    protected Map dataMap = Maps.newHashMap();
     long costTime;
-
     String resourceName;
 
     public BaseContext() {
