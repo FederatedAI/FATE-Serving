@@ -424,7 +424,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                     List<LocalInferenceTask> subJobs = Lists.newArrayList();
                     for (int i = 0; i < count; i++) {
                         List<BatchInferenceRequest.SingleInferenceData> subList = inputList.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
-                        logger.info("input size {} splitsize {} count {}",inputList.size(),splitSize,count);
                         LocalInferenceTask subLocalInferenceTask = new LocalInferenceTask(context, subList, tempCache);
                         subLocalInferenceTask.fork();
                         subJobs.add(subLocalInferenceTask);

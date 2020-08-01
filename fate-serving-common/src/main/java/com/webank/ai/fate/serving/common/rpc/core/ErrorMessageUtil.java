@@ -72,6 +72,7 @@ public class ErrorMessageUtil {
             exceptionInfo.setMessage(baseException.getMessage());
         } else {
             exceptionInfo.setCode(StatusCode.SYSTEM_ERROR);
+            exceptionInfo.setMessage(e.getMessage());
         }
         return exceptionInfo;
     }

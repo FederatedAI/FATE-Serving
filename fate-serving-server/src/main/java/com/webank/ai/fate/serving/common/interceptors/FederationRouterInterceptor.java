@@ -58,7 +58,7 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
                 routerInfo.setHost(ip);
                 routerInfo.setPort(port);
             } else {
-                throw new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR, "address is error");
+                throw new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR, "serving-proxy address is not found in zk");
             }
         }
         context.setRouterInfo(routerInfo);

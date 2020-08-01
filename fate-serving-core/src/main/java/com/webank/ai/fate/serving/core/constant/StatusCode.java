@@ -44,5 +44,7 @@ public class StatusCode {
     public static final int HOST_UNSUPPORTED_COMMAND_ERROR = 125;
     public static final int UNREGISTER_ERROR = 126;
     public static final int INVALID_TOKEN = 127;
+    public static final int PROXY_ROUTER_ERROR = 128;
+
 
 }

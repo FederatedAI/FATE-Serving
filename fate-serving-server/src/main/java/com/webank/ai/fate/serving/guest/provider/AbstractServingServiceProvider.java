@@ -92,6 +92,7 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
 
     protected void postProcess(Context context, ReturnResult returnResult) {
         Model model = ((ServingServerContext) context).getModel();
+        context.setReturnCode(returnResult.getRetcode());
         if (model != null) {
             Map<String, Object> data = returnResult.getData();
             if (data == null) {
