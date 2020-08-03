@@ -119,6 +119,8 @@ public class Dict {
     public static final String PROPERTY_ACL_PASSWORD = "acl.password";
     public static final String PROXY_ROUTER_TABLE = "proxy.router.table";
     public static final String PROPERTY_BATCH_INFERENCE_MAX = "batch.inference.max";
+    public static final String PROPERTY_PRINT_INPUT_DATA = "print.input.data";
+    public static final String PROPERTY_PRINT_OUTPUT_DATA = "print.output.data";
     public static final String CURRENT_VERSION = "currentVersion";
 
     public static final String PROPERTY_COORDINATOR = "coordinator";
@@ -189,6 +191,7 @@ public class Dict {
     public static final String HTTPS = "https";
     public static final String TAG = "tag";
     public static final String INPUT_DATA = "input_data";
+    public static final String OUTPUT_DATA = "output_data";
     public static final String COMPONENT_NAME = "componentName";
     public static final String TREE_COMPUTE_ROUND = "treeComputeRound";
     public static final String SERVICE_NAME = "serviceName";

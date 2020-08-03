@@ -52,12 +52,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         setExtraInfo(context, inboundPackage, req);
 
         OutboundPackage<Proxy.Packet> outboundPackage = null;
-        try {
-            outboundPackage = unaryCallService.service(context, inboundPackage);
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
+        outboundPackage = unaryCallService.service(context, inboundPackage);
         Proxy.Packet result = (Proxy.Packet) outboundPackage.getData();
         responseObserver.onNext(result);
         responseObserver.onCompleted();
@@ -71,7 +66,6 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         }
         context.setGuestAppId(req.getHeader().getSrc().getPartyId());
         context.setHostAppid(req.getHeader().getDst().getPartyId());
-
         InboundPackage<Proxy.Packet> inboundPackage = new InboundPackage<Proxy.Packet>();
         inboundPackage.setBody(req);
 

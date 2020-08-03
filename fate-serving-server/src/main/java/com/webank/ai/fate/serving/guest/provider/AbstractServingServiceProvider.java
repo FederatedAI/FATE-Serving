@@ -26,6 +26,7 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
@@ -63,15 +64,18 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
         }
         return result;
     }
+    final  String  baseLogString = "{}|{}|{}|{}|{}|{}|{}|{}";
 
     @Override
     protected void printFlowLog(Context context) {
 
-        flowLogger.info("{}|{}|" +
-                        "{}|{}|{}|{}|" +
-                        "{}|{}",
+        flowLogger.info( baseLogString,
+
                 context.getCaseId(), context.getReturnCode(), context.getCostTime(),
-                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
+                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO",
+                MetaInfo.PROPERTY_PRINT_INPUT_DATA?context.getData(Dict.INPUT_DATA):"",
+                MetaInfo.PROPERTY_PRINT_OUTPUT_DATA?context.getData(Dict.OUTPUT_DATA):""
+        );
     }
 
     protected List<FederatedRpcInvoker.RpcDataWraper> buildRpcDataWraper(Context context, String methodName, Object data) {

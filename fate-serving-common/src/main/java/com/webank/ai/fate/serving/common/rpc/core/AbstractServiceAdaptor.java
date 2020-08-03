@@ -125,6 +125,10 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         if (!isOpen) {
             return this.serviceFailInner(context, data, new ShowDownRejectException());
         }
+        if(data.getBody()!=null) {
+            context.putData(Dict.INPUT_DATA, data.getBody());
+        }
+
         try {
             requestInHandle.addAndGet(1);
             resp result = null;
@@ -202,6 +206,9 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
                     flowCounterManager.success(context.getResourceName(), 1);
                 }
             }
+            if(outboundPackage.getData()!=null) {
+                context.putData(Dict.OUTPUT_DATA, outboundPackage.getData());
+            }
             context.postProcess(data, outboundPackage);
             printFlowLog(context);
         }
@@ -212,10 +219,12 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
 
         flowLogger.info("{}|{}|{}|{}|" +
                         "{}|{}|{}|{}|" +
-                        "{}|{}",
+                        "{}|{}|{}",
                 context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
                 context.getHostAppid(), context.getReturnCode(), context.getCostTime(),
-                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
+                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO",
+                MetaInfo.PROPERTY_PRINT_INPUT_DATA?context.getData(Dict.INPUT_DATA):"",
+                MetaInfo.PROPERTY_PRINT_OUTPUT_DATA?context.getData(Dict.OUTPUT_DATA):"");
     }
 
     protected OutboundPackage<resp> serviceFailInner(Context context, InboundPackage<req> data, Throwable e) {

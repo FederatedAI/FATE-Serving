@@ -85,7 +85,8 @@ public class MetaInfo {
     public static String PROPERTY_ACL_USERNAME;
     public static String PROPERTY_ACL_PASSWORD;
     public static String PROPERTY_ROOT_PATH;
-
+    public static Boolean PROPERTY_PRINT_INPUT_DATA;
+    public static Boolean PROPERTY_PRINT_OUTPUT_DATA;
 
     public static Map toMap() {
         Map result = Maps.newHashMap();
