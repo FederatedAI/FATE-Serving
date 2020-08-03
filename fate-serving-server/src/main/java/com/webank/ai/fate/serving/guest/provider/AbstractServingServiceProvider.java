@@ -38,6 +38,8 @@ import java.util.Map;
 
 public abstract class AbstractServingServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
 
+    final String baseLogString = "{}|{}|{}|{}|{}|{}|{}|{}";
+
     @Override
     protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         return null;
@@ -64,17 +66,16 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
         }
         return result;
     }
-    final  String  baseLogString = "{}|{}|{}|{}|{}|{}|{}|{}";
 
     @Override
     protected void printFlowLog(Context context) {
 
-        flowLogger.info( baseLogString,
+        flowLogger.info(baseLogString,
 
                 context.getCaseId(), context.getReturnCode(), context.getCostTime(),
                 context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO",
-                MetaInfo.PROPERTY_PRINT_INPUT_DATA?context.getData(Dict.INPUT_DATA):"",
-                MetaInfo.PROPERTY_PRINT_OUTPUT_DATA?context.getData(Dict.OUTPUT_DATA):""
+                MetaInfo.PROPERTY_PRINT_INPUT_DATA ? context.getData(Dict.INPUT_DATA) : "",
+                MetaInfo.PROPERTY_PRINT_OUTPUT_DATA ? context.getData(Dict.OUTPUT_DATA) : ""
         );
     }
 

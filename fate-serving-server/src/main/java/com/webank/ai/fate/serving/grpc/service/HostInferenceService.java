@@ -27,7 +27,6 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -44,15 +43,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 public class HostInferenceService extends DataTransferServiceGrpc.DataTransferServiceImplBase {
+    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
     @Autowired
     HostBatchInferenceProvider hostBatchInferenceProvider;
     @Autowired
     HostSingleInferenceProvider hostSingleInferenceProvider;
 
-    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
-
     @Override
-    @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true,role = Role.HOST)
+    @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true, role = Role.HOST)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
         executor.submit(() -> {
             String actionType = req.getHeader().getCommand().getName();

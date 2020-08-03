@@ -44,7 +44,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -465,32 +464,32 @@ public class ModelManager implements InitializingBean {
                 // Fuzzy query
                 String serviceId = queryModelRequest.getServiceId();
                 return this.namespaceMap.values().stream()
-                    .filter(e -> {
-                        String nameSpaceKey = this.getNameSpaceKey(e.getTableName(), e.getNamespace());
-                        boolean isMatch = false;
-                        for (Map.Entry<String, String> entry : this.serviceIdNamespaceMap.entrySet()) {
-                            if (entry.getKey().toLowerCase().indexOf(serviceId.toLowerCase()) > -1 && nameSpaceKey.equals(entry.getValue())) {
-                                isMatch = true;
-                                break;
+                        .filter(e -> {
+                            String nameSpaceKey = this.getNameSpaceKey(e.getTableName(), e.getNamespace());
+                            boolean isMatch = false;
+                            for (Map.Entry<String, String> entry : this.serviceIdNamespaceMap.entrySet()) {
+                                if (entry.getKey().toLowerCase().indexOf(serviceId.toLowerCase()) > -1 && nameSpaceKey.equals(entry.getValue())) {
+                                    isMatch = true;
+                                    break;
+                                }
                             }
-                        }
-                        return isMatch;
-                    })
-                    .map(e -> {
-                        Model clone = (Model) e.clone();
-                        if (clone.getServiceIds() == null) {
-                            clone.setServiceIds(Lists.newArrayList());
-                        }
-                        String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
+                            return isMatch;
+                        })
+                        .map(e -> {
+                            Model clone = (Model) e.clone();
+                            if (clone.getServiceIds() == null) {
+                                clone.setServiceIds(Lists.newArrayList());
+                            }
+                            String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
 
-                        this.serviceIdNamespaceMap.forEach((k, v) -> {
-                            if (v.equals(nameSpaceKey)) {
-                                clone.getServiceIds().add(k);
-                            }
-                        });
-                        return clone;
-                    })
-                    .collect(Collectors.toList());
+                            this.serviceIdNamespaceMap.forEach((k, v) -> {
+                                if (v.equals(nameSpaceKey)) {
+                                    clone.getServiceIds().add(k);
+                                }
+                            });
+                            return clone;
+                        })
+                        .collect(Collectors.toList());
             default:
                 return null;
         }
@@ -552,7 +551,7 @@ public class ModelManager implements InitializingBean {
 //        String serviceId = model.getServiceId();
         List<String> serviceIds = Lists.newArrayList();
         String nameSpaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
-        serviceIdNamespaceMap.forEach((k,v) -> {
+        serviceIdNamespaceMap.forEach((k, v) -> {
             if (v.equals(nameSpaceKey)) {
                 serviceIds.add(k);
             }

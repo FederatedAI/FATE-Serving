@@ -35,6 +35,7 @@ public abstract class AbstractSingleFeatureDataAdaptor implements SingleFeatureD
         this.environment = environment;
     }
 
+    @Override
     public abstract void init();
 
     public abstract ReturnResult getData(Context context, Map<String, Object> featureIds);

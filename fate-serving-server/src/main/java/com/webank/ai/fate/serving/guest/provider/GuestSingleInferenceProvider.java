@@ -45,7 +45,7 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
 
-    Logger logger  = LoggerFactory.getLogger(GuestSingleInferenceProvider.class);
+    Logger logger = LoggerFactory.getLogger(GuestSingleInferenceProvider.class);
 
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {

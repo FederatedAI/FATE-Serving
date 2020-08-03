@@ -18,12 +18,12 @@ package com.webank.ai.fate.serving.model;
 
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
+import com.webank.ai.fate.serving.common.utils.TransferUtils;
+import com.webank.ai.fate.serving.common.utils.ZipUtil;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.ModelLoadException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
-import com.webank.ai.fate.serving.common.utils.TransferUtils;
-import com.webank.ai.fate.serving.common.utils.ZipUtil;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.springframework.stereotype.Service;
 

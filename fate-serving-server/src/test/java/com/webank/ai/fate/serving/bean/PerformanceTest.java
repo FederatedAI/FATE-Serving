@@ -56,6 +56,39 @@ public class PerformanceTest {
     private static ThreadPoolExecutor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, 1000, TimeUnit.MILLISECONDS, new SynchronousQueue<>());
     private static ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(2);
     private static AtomicLong atomicLong = new AtomicLong(0);
+    private static Map<String, Object> params = Maps.newHashMap();
+
+    static {
+        Map featureMap = Maps.newHashMap();
+        for (int j = 0; j < 300; j++) {
+            String a = String.format("x%s", j);
+            featureMap.put(a, random.nextDouble());
+        }
+
+        BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
+        batchInferenceRequest.setServiceId("lr-001");
+        batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
+        List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
+
+        for (int i = 0; i < BATCH_DATA_SIZE; i++) {
+            BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
+            singleInferenceData.getFeatureData().putAll(featureMap);
+
+            singleInferenceData.getSendToRemoteFeatureData().put("device_id", String.valueOf(i + 1));
+            singleInferenceData.setIndex(i);
+            singleInferenceDataList.add(singleInferenceData);
+        }
+
+        batchInferenceRequest.setBatchDataList(singleInferenceDataList);
+
+        params.put("head", Maps.newHashMap());
+        params.put("body", Maps.newHashMap());
+
+        ((Map) params.get("head")).put("serviceId", batchInferenceRequest.getServiceId());
+        ((Map) params.get("body")).put("batchDataList", JsonUtil.json2Object(JsonUtil.object2Json(batchInferenceRequest.getBatchDataList()), new TypeReference<Object>() {
+        }));
+
+    }
 
     public static void main(String[] args) throws IOException {
         HttpClientPool.initPool();
@@ -109,38 +142,6 @@ public class PerformanceTest {
         CommonServiceProto.CommonResponse response = blockingStub.listProps(builder.build());
 
         System.err.println("StatusCode ==================" + response.getStatusCode());
-    }
-
-    private static Map<String, Object> params = Maps.newHashMap();
-    static {
-        Map featureMap = Maps.newHashMap();
-        for (int j = 0; j < 300; j++) {
-            String a = String.format("x%s", j);
-            featureMap.put(a, random.nextDouble());
-        }
-
-        BatchInferenceRequest batchInferenceRequest = new BatchInferenceRequest();
-        batchInferenceRequest.setServiceId("lr-001");
-        batchInferenceRequest.setCaseId(Long.toString(System.currentTimeMillis()));
-        List<BatchInferenceRequest.SingleInferenceData> singleInferenceDataList = Lists.newArrayList();
-
-        for (int i = 0; i < BATCH_DATA_SIZE; i++) {
-            BatchInferenceRequest.SingleInferenceData singleInferenceData = new BatchInferenceRequest.SingleInferenceData();
-            singleInferenceData.getFeatureData().putAll(featureMap);
-
-            singleInferenceData.getSendToRemoteFeatureData().put("device_id", String.valueOf(i + 1));
-            singleInferenceData.setIndex(i);
-            singleInferenceDataList.add(singleInferenceData);
-        }
-
-        batchInferenceRequest.setBatchDataList(singleInferenceDataList);
-
-        params.put("head", Maps.newHashMap());
-        params.put("body", Maps.newHashMap());
-
-        ((Map) params.get("head")).put("serviceId", batchInferenceRequest.getServiceId());
-        ((Map) params.get("body")).put("batchDataList", JsonUtil.json2Object(JsonUtil.object2Json(batchInferenceRequest.getBatchDataList()), new TypeReference<Object>() {}));
-
     }
 
     private static void batchInferenceByHttp() {

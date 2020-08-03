@@ -103,7 +103,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 modelExBuilder.setIndex(i);
                 modelExBuilder.setTableName(model.getTableName());
                 modelExBuilder.setNamespace(model.getNamespace());
-                if(model.getServiceIds()!=null) {
+                if (model.getServiceIds() != null) {
                     modelExBuilder.addAllServiceIds(model.getServiceIds());
                 }
                 modelExBuilder.setContent(JsonUtil.object2Json(model));

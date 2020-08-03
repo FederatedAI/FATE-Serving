@@ -27,7 +27,6 @@ import com.webank.ai.fate.serving.core.bean.CommonActionType;
 import com.webank.ai.fate.serving.core.bean.Context;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

@@ -21,13 +21,11 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
-import com.webank.ai.fate.register.common.NamedThreadFactory;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
@@ -35,21 +33,19 @@ import com.webank.ai.fate.serving.guest.provider.GuestBatchInferenceProvider;
 import com.webank.ai.fate.serving.guest.provider.GuestSingleInferenceProvider;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
     static final String BATCH_INFERENCE = "batchInference";
     static final String INFERENCE = "inference";
+    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
     @Autowired
     GuestBatchInferenceProvider guestBatchInferenceProvider;
     @Autowired
     GuestSingleInferenceProvider guestSingleInferenceProvider;
-
-    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
 
     @Override
     @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE)
