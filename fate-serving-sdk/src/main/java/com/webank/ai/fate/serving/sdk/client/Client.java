@@ -69,7 +69,7 @@ public class Client {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls),"serviceId "+inferenceRequest.getServiceId()+" found no url in zk");
         ManagedChannel managedChannel = null;
         URL url = urls.get(0);
-        managedChannel = grpcConnectionPool.getManagedChannel(url.getIp(), url.getPort());
+        managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
         inferenceRequest.getSendToRemoteFeatureData().putAll(inferenceRequest.getFeatureData());
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         String contentString = JsonUtil.object2Json(inferenceRequest);
@@ -90,7 +90,7 @@ public class Client {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls),"serviceId "+batchInferenceRequest.getServiceId()+" found no url in zk");
         ManagedChannel managedChannel = null;
         URL url = urls.get(0);
-        managedChannel = grpcConnectionPool.getManagedChannel(url.getIp(), url.getPort());
+        managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         String contentString = JsonUtil.object2Json(batchInferenceRequest);
         inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));

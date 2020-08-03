@@ -78,7 +78,6 @@ public class ServingServer implements InitializingBean {
             zookeeperRegistry.subProject(Dict.PROPERTY_PROXY_ADDRESS);
             zookeeperRegistry.subProject(Dict.PROPERTY_FLOW_ADDRESS);
             zookeeperRegistry.register(FateServer.serviceSets);
-            zookeeperRegistry.registerComponent();
         } else {
             logger.warn("serving-server not use register center");
         }

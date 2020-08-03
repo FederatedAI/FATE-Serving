@@ -22,9 +22,7 @@
     "moment": "^2.24.0",
     "nprogress": "^0.2.0",
     "vue": "^2.6.10",
-    "vue-echarts": "^5.0.0-beta.0",
     "vue-router": "^3.0.3",
-    "vue-waterfall2": "^1.9.6",
     "vuex": "^3.0.1"
   },
   "devDependencies": {

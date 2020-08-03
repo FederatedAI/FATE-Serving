@@ -92,14 +92,11 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
 
     @Override
     protected Proxy.Packet transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
-
-
         Proxy.Packet.Builder builder = Proxy.Packet.newBuilder();
         Proxy.Data.Builder dataBuilder = Proxy.Data.newBuilder();
         Map fateMap = Maps.newHashMap();
         fateMap.put(Dict.RET_CODE, exceptionInfo.getCode());
         fateMap.put(Dict.RET_MSG, exceptionInfo.getMessage());
-        System.err.println("kaideng  test ppppppppppppppppppp"+ fateMap);
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JsonUtil.object2Json(fateMap))));
         return builder.build();
     }

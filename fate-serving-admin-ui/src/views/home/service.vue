@@ -209,6 +209,55 @@ export default {
             this.fverifyVisible = true
             // this.version = row.version
             // this.weight = row.weight
+            if (row.callName === 'batchInference') {
+                this.json.verifydata = {
+                    'serviceId': row.environment,
+                    'batchDataList': [
+                        {
+                            'featureData': {
+                                'x0': 1.88669,
+                                'x1': -1.359293,
+                                'x2': 2.303601,
+                                'x3': 2.00137,
+                                'x4': 1.307686
+                            },
+                            'sendToRemoteFeatureData': {
+                                'device_id': 'aaaaa',
+                                'phone_num': '122222222'
+                            }
+                        },
+                        {
+                            'featureData': {
+                                'x0': 1.88669,
+                                'x1': -1.359293,
+                                'x2': 2.303601,
+                                'x3': 2.00137,
+                                'x4': 1.307686
+                            },
+                            'sendToRemoteFeatureData': {
+                                'device_id': 'aaaaa',
+                                'phone_num': '122222222'
+                            }
+                        }
+                    ]
+                }
+                this.json.verifydata = JSON.stringify(JSON.parse(JSON.stringify(this.json.verifydata)), null, 4)
+            } else if (row.callName === 'inference') {
+                this.json.verifydata = {
+                    'serviceId': row.environment,
+                    'featureData': {
+                        'x0': 1.88669,
+                        'x1': -1.359293,
+                        'x2': 2.303601,
+                        'x3': 2.00137,
+                        'x4': 1.307686
+                    },
+                    'sendToRemoteFeatureData': {
+                        'phone_num': '122222222'
+                    }
+                }
+                this.json.verifydata = JSON.stringify(JSON.parse(JSON.stringify(this.json.verifydata)), null, 4)
+            }
         },
         fverifyVis() {
             this.fverifyVisible = false
@@ -257,7 +306,6 @@ export default {
             validate(params, this.rowData.callName).then(res => {
                 // this.responseData = res.data
                 this.responseData = JSON.stringify(res.data, null, 4)
-                console.log(this.responseData)
             })
         },
         confirmEdit() {
