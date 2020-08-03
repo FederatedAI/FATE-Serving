@@ -1,6 +1,7 @@
 .main {
     padding:5px 0 14px 40px;
     display: flex;
+    height: 100%;
     li {
         list-style: none;
     }
@@ -217,6 +218,17 @@
 .ip-info {
     .el-table td {
         padding:9px 0;
+    }
+    .ip-info-welcome {
+        margin: 300px calc(50% - 160px);
+        width:304px;
+        height:87px;
+        font-size:72px;
+        font-family:Product Sans;
+        font-weight:bold;
+        line-height:20px;
+        color:rgba(236,246,255,1);
+        opacity:1;
     }
     position: relative;
     // float: left;
@@ -519,9 +531,9 @@
                 padding: 0 ;
             }
             .echarts{
-                width: 125%;
+                width: 114.5%;
                 height: 120%;
-                left: -12.6% !important;
+                left: -3.2% !important;
                 top: -55px !important;
             }
         }

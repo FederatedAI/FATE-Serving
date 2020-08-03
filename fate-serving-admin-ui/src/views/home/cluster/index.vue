@@ -27,120 +27,134 @@
             </div>
         </div>
         <div class="ip-info">
-            <el-popover placement="bottom" width="400" popper-class="titpopover" trigger="click">
-                <div class="titpopover-main">
-                    <div
-                        class="titpopover-label"
-                        v-for="(item, index) in ipData.children"
-                        :key="index"
-                        @click="selectIP(item, index)"
-                    >{{item && item.label}}</div>
-                </div>
-                <div class="ip-info-tit" slot="reference">
-                    {{ ipchildrenData && ipchildrenData.label }}
-                    <i class="el-icon-caret-bottom"></i>
-                </div>
-            </el-popover>
-            <ul class="ul" :class="ipInfo === 1 || ipInfo === 0   ? 'ulBasic' : ''">
-                <li :class="ipInfo === 0 ? 'activeInfo' : ''" @click="tabipInfo(0)">Basic</li>
-                <li
-                    v-if="selected === 2"
-                    :class="ipInfo === 1 ? 'activeInfo' : ''"
-                    @click="tabipInfo(1)"
-                >Models</li>
-                <li :class="ipInfo === 2 ? 'activeInfo' : ''" @click="tabipInfo(2)">Traffic Monitor</li>
-                <li :class="ipInfo === 3 ? 'activeInfo' : ''" @click="tabipInfo(3)">JVM</li>
-            </ul>
-            <div class="ip-info-main" :class="ipInfo === 3 ?'info-main' : ''">
-                <div v-if="ipInfo === 0" class="ip-info-Basic">
-                    <div class="search">
-                        <el-input placeholder="Keyword" v-model="searchkey" @change="searchKeyword">
-                            <el-button slot="prepend" icon="el-icon-search"></el-button>
-                        </el-input>
+            <div v-if="noSelectedData" class="ip-info-welcome">welcome</div>
+            <div v-else>
+                <el-popover placement="bottom" width="400" popper-class="titpopover" trigger="click">
+                    <div class="titpopover-main">
+                        <div
+                            class="titpopover-label"
+                            v-for="(item, index) in ipData.children"
+                            :key="index"
+                            @click="selectIP(item, index)"
+                        >{{item && item.label}}</div>
                     </div>
-                    <el-table
-                        :data="basicData"
-                        :header-cell-style="{background:'#fff'}"
-                        style="width: 100%;margin-bottom: 20px;"
-                        max-height="668px"
-                        class="table"
-                    >
-                        <el-table-column sortable prop="key" label="key" show-overflow-tooltip>
-                            <template slot-scope="scope">
-                                <span>{{ scope.row.key }}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column sortable :sort-method="(a, b) => { return sortMix(a, b, 'value') }" prop="value" label="value" show-overflow-tooltip>
-                            <template slot-scope="scope">
-                                <span>{{ scope.row.value }}</span>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </div>
-                <div v-if="ipInfo === 1" class="ip-info-Models">
-                    <div class="search">
-                        <el-input
-                            placeholder="Service ID"
-                            v-model="serviceid"
-                            @change="searchServiceID"
-                        >
-                            <el-button slot="prepend" icon="el-icon-search"></el-button>
-                        </el-input>
+                    <div class="ip-info-tit" slot="reference">
+                        {{ ipchildrenData && ipchildrenData.label }}
+                        <i class="el-icon-caret-bottom"></i>
                     </div>
-                    <el-table
-                        :data="ModelsData"
-                        :header-cell-style="{background:'#fff'}"
-                        style="width: 100%;margin-bottom: 20px;"
-                        max-height="668px"
-                        class="table"
-                    >
-                        <el-table-column
-                            width="320"
-                            prop="namespace"
-                            label="Model ID"
-                            show-overflow-tooltip
+                </el-popover>
+                <ul class="ul" :class="ipInfo === 1 || ipInfo === 0   ? 'ulBasic' : ''">
+                    <li :class="ipInfo === 0 ? 'activeInfo' : ''" @click="tabipInfo(0)">Basic</li>
+                    <li
+                        v-if="selected === 2"
+                        :class="ipInfo === 1 ? 'activeInfo' : ''"
+                        @click="tabipInfo(1)"
+                    >Models</li>
+                    <li :class="ipInfo === 2 ? 'activeInfo' : ''" @click="tabipInfo(2)">Traffic Monitor</li>
+                    <li :class="ipInfo === 3 ? 'activeInfo' : ''" @click="tabipInfo(3)">JVM</li>
+                </ul>
+                <div class="ip-info-main" :class="ipInfo === 3 ?'info-main' : ''">
+                    <div v-if="ipInfo === 0" class="ip-info-Basic">
+                        <div class="search">
+                            <el-input placeholder="Keyword" v-model="searchkey" @change="searchKeyword">
+                                <el-button slot="prepend" icon="el-icon-search"></el-button>
+                            </el-input>
+                        </div>
+                        <el-table
+                            :data="basicData"
+                            :header-cell-style="{background:'#fff'}"
+                            style="width: 100%;margin-bottom: 20px;"
+                            max-height="668px"
+                            class="table"
                         >
-                            <template slot-scope="scope">
-                                <span>{{ scope.row.namespace }}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                            width="200"
-                            prop="tableName"
-                            label="Model Version"
-                            show-overflow-tooltip
+                            <el-table-column sortable prop="key" label="key" show-overflow-tooltip>
+                                <template slot-scope="scope">
+                                    <span>{{ scope.row.key }}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column sortable :sort-method="(a, b) => { return sortMix(a, b, 'value') }" prop="value" label="value" show-overflow-tooltip>
+                                <template slot-scope="scope">
+                                    <span>{{ scope.row.value }}</span>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <div v-if="ipInfo === 1" class="ip-info-Models">
+                        <div class="search">
+                            <el-input
+                                placeholder="Service ID"
+                                v-model="serviceid"
+                                @change="searchServiceID"
+                            >
+                                <el-button slot="prepend" icon="el-icon-search"></el-button>
+                            </el-input>
+                        </div>
+                        <el-table
+                            :data="ModelsData"
+                            :header-cell-style="{background:'#fff'}"
+                            style="width: 100%;margin-bottom: 20px;"
+                            max-height="668px"
+                            class="table"
                         >
-                            <template slot-scope="scope">
-                                <span>{{ scope.row.tableName }}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column sortable width="160" :sort-method="(a, b) => { return sortMix(a, b, 'serviceIds') }" prop="serviceId" label="Service ID">
-                            <template slot-scope="scope">
-                                <el-popover
-                                    v-if="scope.row.serviceIds && scope.row.serviceIds[0] !== '--'"
-                                    placement="bottom"
-                                    trigger="hover">
-                                    <div>
-                                        <div style="wadth:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
-                                    </div>
-                                    <span slot="reference" class="service_id" style="white-space: nowrap;">
-                                        <span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}
-                                            <span v-if="index+1 !== scope.row.serviceIds.length">,</span>
+                            <el-table-column
+                                width="320"
+                                prop="namespace"
+                                label="Model ID"
+                                show-overflow-tooltip
+                            >
+                                <template slot-scope="scope">
+                                    <span>{{ scope.row.namespace }}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                width="200"
+                                prop="tableName"
+                                label="Model Version"
+                                show-overflow-tooltip
+                            >
+                                <template slot-scope="scope">
+                                    <span>{{ scope.row.tableName }}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column sortable width="160" :sort-method="(a, b) => { return sortMix(a, b, 'serviceIds') }" prop="serviceId" label="Service ID">
+                                <template slot-scope="scope">
+                                    <el-popover
+                                        v-if="scope.row.serviceIds && scope.row.serviceIds[0] !== '--'"
+                                        placement="bottom"
+                                        trigger="hover">
+                                        <div>
+                                            <div style="wadth:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
+                                        </div>
+                                        <span slot="reference" class="service_id" style="white-space: nowrap;">
+                                            <span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}
+                                                <span v-if="index+1 !== scope.row.serviceIds.length">,</span>
+                                            </span>
                                         </span>
-                                    </span>
-                                </el-popover>
-                                <span v-else style="wadth:75px"><span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</span></span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                            width="180"
-                            prop="RolePartyID"
-                            label="Role & Party ID"
-                        >
-                            <template slot-scope="scope">
-                                <el-popover placement="bottom" trigger="hover">
-                                    <div>
-                                        <div style="wadth:75px">
+                                    </el-popover>
+                                    <span v-else style="wadth:75px"><span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</span></span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                width="180"
+                                prop="RolePartyID"
+                                label="Role & Party ID"
+                            >
+                                <template slot-scope="scope">
+                                    <el-popover placement="bottom" trigger="hover">
+                                        <div>
+                                            <div style="wadth:75px">
+                                                <span
+                                                    v-for="(item,index) in scope.row.rolePartyMapList"
+                                                    :key="index"
+                                                >
+                                                    {{item.role}}-{{item.partId}}
+                                                    <span
+                                                        v-if="index+1 !== scope.row.rolePartyMapList.length"
+                                                    >,</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <span slot="reference" style="white-space: nowrap;">
                                             <span
                                                 v-for="(item,index) in scope.row.rolePartyMapList"
                                                 :key="index"
@@ -150,161 +164,150 @@
                                                     v-if="index+1 !== scope.row.rolePartyMapList.length"
                                                 >,</span>
                                             </span>
-                                        </div>
-                                    </div>
-                                    <span slot="reference" style="white-space: nowrap;">
-                                        <span
-                                            v-for="(item,index) in scope.row.rolePartyMapList"
-                                            :key="index"
-                                        >
-                                            {{item.role}}-{{item.partId}}
-                                            <span
-                                                v-if="index+1 !== scope.row.rolePartyMapList.length"
-                                            >,</span>
                                         </span>
-                                    </span>
-                                </el-popover>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                            sortable
-                            width="180"
-                            prop="timestamp"
-                            label="Timestamp"
-                            show-overflow-tooltip
+                                    </el-popover>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                sortable
+                                width="180"
+                                prop="timestamp"
+                                label="Timestamp"
+                                show-overflow-tooltip
+                            >
+                                <template slot-scope="scope">
+                                    <span>{{ scope.row.timestamp | dateform }}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column width="250" label="Operation">
+                                <template slot-scope="scope">
+                                    <el-button
+                                        type="text"
+                                        style="font-size: 18px"
+                                        class="marketing"
+                                        size="mini"
+                                        @click="showDialog(scope.row)"
+                                    ></el-button>
+                                    <el-button
+                                        type="text"
+                                        style="font-size: 14px"
+                                        size="mini"
+                                        @click="flowControl(scope.row)"
+                                    >FlowControl</el-button>
+                                    <el-button
+                                        type="text"
+                                        style="font-size: 14px"
+                                        size="mini"
+                                        @click="unload(scope.row)"
+                                    >Unload</el-button>
+                                    <el-button
+                                        v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'"
+                                        type="text"
+                                        style="font-size: 14px"
+                                        size="mini"
+                                        @click="unbind(scope.row)"
+                                    >Unbind</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                        <div class="pagination">
+                            <el-pagination
+                                background
+                                @current-change="handleCurrentChange"
+                                :current-page.sync="currentPage"
+                                :page-size="20"
+                                layout="total, prev, pager, next, jumper"
+                                :total="total"
+                            ></el-pagination>
+                        </div>
+                        <div v-if="dialogVisible">
+                            <el-dialog
+                            title="Model monitor"
+                            width="50%"
+                            custom-class="dialogtit"
+                            :visible.sync="dialogVisible"
                         >
-                            <template slot-scope="scope">
-                                <span>{{ scope.row.timestamp | dateform }}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column width="250" label="Operation">
-                            <template slot-scope="scope">
+                            <div class="chart">
+                                <div class="modelchart">
+                                    <modelchart :callsData="polar" />
+                                </div>
+                            </div>
+                        </el-dialog>
+                        </div>
+                        <el-dialog :visible.sync="unbindVisible" :showClose='cancel' width="35%" top="15%" center>
+                            <span>Please select the Service IDs</span><br>
+                            <span>you want to unbind with this model,</span>
+                            <div class="choose-serviceid">
+                                <el-checkbox-group v-if="rowData.serviceIds && rowData.serviceIds[0] !== '--'" v-model="serviceIDCheckList">
+                                    <el-checkbox v-for="(item,index) in rowData.serviceIds"
+                                        :key="index" :label="item">
+                                    </el-checkbox>
+                                </el-checkbox-group>
+                            </div>
+                            <span slot="footer" class="dialog-footer dialog-but">
+                                <el-button type="primary" :disabled="!serviceIDCheckList.length" @click="sureUnbind">Sure</el-button>
                                 <el-button
-                                    type="text"
-                                    style="font-size: 18px"
-                                    class="marketing"
-                                    size="mini"
-                                    @click="showDialog(scope.row)"
-                                ></el-button>
+                                    type="primary"
+                                    @click="unbindVisible = false"
+                                    style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                                >Cancel</el-button>
+                            </span>
+                        </el-dialog>
+                        <el-dialog :visible.sync="unloadVisible" :showClose='cancel' width="35%" top="15%" center>
+                            <span>
+                                Unload model "
+                                <span style="color:#217AD9">{{ rowData.tableName }}</span>" ?
+                            </span>
+                            <span slot="footer" class="dialog-footer dialog-but">
+                                <el-button type="primary" @click="sureUnload">Sure</el-button>
                                 <el-button
-                                    type="text"
-                                    style="font-size: 14px"
-                                    size="mini"
-                                    @click="flowControl(scope.row)"
-                                >FlowControl</el-button>
+                                    type="primary"
+                                    @click="unloadVisible = false"
+                                    style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                                >Cancel</el-button>
+                            </span>
+                        </el-dialog>
+                        <el-dialog :visible.sync="flowControlVisible" :showClose='cancel' title="FlowControl" class="flowControl" width="35%" top="15%" center>
+                            <div class="name">
+                                <el-input v-model.number="qps" @input='inputqps'></el-input>
+                            </div><span style="color:#217AD9;font-size:18px;">qps</span>
+                            <span slot="footer" class="dialog-footer  dialog-but">
+                                <el-button type="primary" :disabled="!qps" @click="sureflowControl">OK</el-button>
                                 <el-button
-                                    type="text"
-                                    style="font-size: 14px"
-                                    size="mini"
-                                    @click="unload(scope.row)"
-                                >Unload</el-button>
-                                <el-button
-                                    v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'"
-                                    type="text"
-                                    style="font-size: 14px"
-                                    size="mini"
-                                    @click="unbind(scope.row)"
-                                >Unbind</el-button>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                    <div class="pagination">
-                        <el-pagination
-                            background
-                            @current-change="handleCurrentChange"
-                            :current-page.sync="currentPage"
-                            :page-size="20"
-                            layout="total, prev, pager, next, jumper"
-                            :total="total"
-                        ></el-pagination>
+                                    type="primary"
+                                    @click="flowControlVisible = false"
+                                    style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                                >Cancel</el-button>
+                            </span>
+                        </el-dialog>
                     </div>
-                    <div v-if="dialogVisible">
-                        <el-dialog
-                        title="Model monitor"
-                        width="50%"
-                        custom-class="dialogtit"
-                        :visible.sync="dialogVisible"
-                    >
-                        <div class="chart">
-                            <div class="modelchart">
-                                <modelchart :callsData="polar" />
+                    <div v-if="ipInfo === 2" class="ip-info-Monitor">
+                        <div class="Monitor-chart">
+                            <div class="Monitor">
+                                <monitorchart v-loading="loadingEchart" :callsData="MonitorPolar" />
                             </div>
                         </div>
-                    </el-dialog>
                     </div>
-                    <el-dialog :visible.sync="unbindVisible" :showClose='cancel' width="35%" top="15%" center>
-                        <span>Please select the Service IDs</span><br>
-                        <span>you want to unbind with this model,</span>
-                        <div class="choose-serviceid">
-                            <el-checkbox-group v-if="rowData.serviceIds && rowData.serviceIds[0] !== '--'" v-model="serviceIDCheckList">
-                                <el-checkbox v-for="(item,index) in rowData.serviceIds"
-                                    :key="index" :label="item">
-                                </el-checkbox>
-                            </el-checkbox-group>
-                        </div>
-                        <span slot="footer" class="dialog-footer dialog-but">
-                            <el-button type="primary" :disabled="!serviceIDCheckList.length" @click="sureUnbind">Sure</el-button>
-                            <el-button
-                                type="primary"
-                                @click="unbindVisible = false"
-                                style="background:#B8BFCC;border: 1px solid #B8BFCC"
-                            >Cancel</el-button>
-                        </span>
-                    </el-dialog>
-                    <el-dialog :visible.sync="unloadVisible" :showClose='cancel' width="35%" top="15%" center>
-                        <span>
-                            Unload model "
-                            <span style="color:#217AD9">{{ rowData.tableName }}</span>" ?
-                        </span>
-                        <span slot="footer" class="dialog-footer dialog-but">
-                            <el-button type="primary" @click="sureUnload">Sure</el-button>
-                            <el-button
-                                type="primary"
-                                @click="unloadVisible = false"
-                                style="background:#B8BFCC;border: 1px solid #B8BFCC"
-                            >Cancel</el-button>
-                        </span>
-                    </el-dialog>
-                    <el-dialog :visible.sync="flowControlVisible" :showClose='cancel' title="FlowControl" class="flowControl" width="35%" top="15%" center>
-                        <div class="name">
-                            <el-input v-model.number="qps" @input='inputqps'></el-input>
-                        </div><span style="color:#217AD9;font-size:18px;">qps</span>
-                        <span slot="footer" class="dialog-footer  dialog-but">
-                            <el-button type="primary" :disabled="!qps" @click="sureflowControl">OK</el-button>
-                            <el-button
-                                type="primary"
-                                @click="flowControlVisible = false"
-                                style="background:#B8BFCC;border: 1px solid #B8BFCC"
-                            >Cancel</el-button>
-                        </span>
-                    </el-dialog>
-                </div>
-                <div v-if="ipInfo === 2" class="ip-info-Monitor">
-                    <div class="Monitor-chart">
-                        <div class="Monitor">
-                            <monitorchart v-loading="loadingEchart" :callsData="MonitorPolar" />
-                        </div>
-                    </div>
-                </div>
-                <div v-if="ipInfo === 3" class="ip-info-JVM">
-                    <ul class="JVM-ul" :class="JVMInfo === 1 || JVMInfo === 0  ? 'ulBasic' : ''">
-                        <li :class="JVMInfo === 0 ? 'activeInfo' : ''" @click="tabJVMInfo(0)">Memory</li>
-                        <li
-                            :class="JVMInfo === 1 ? 'activeInfo' : ''"
-                            @click="tabJVMInfo(1)"
-                        >GC Frequency</li>
-                        <li
-                            :class="JVMInfo === 2 ? 'activeInfo' : ''"
-                            @click="tabJVMInfo(2)"
-                        >GC Time</li>
-                        <li
-                            :class="JVMInfo === 3 ? 'activeInfo' : ''"
-                            @click="tabJVMInfo(3)"
-                        >Thread Count</li>
-                    </ul>
-                    <div class="jvm-chart" ref="jvm">
-                        <div class="jvm-ch">
-                            <jvmchart v-if="ipInfo === 3" :callsData="{JvmData,JVMInfo}" />
+                    <div v-if="ipInfo === 3" class="ip-info-JVM">
+                        <ul class="JVM-ul" :class="JVMInfo === 1 || JVMInfo === 0  ? 'ulBasic' : ''">
+                            <li :class="JVMInfo === 0 ? 'activeInfo' : ''" @click="tabJVMInfo(0)">Memory</li>
+                            <li
+                                :class="JVMInfo === 1 ? 'activeInfo' : ''"
+                                @click="tabJVMInfo(1)"
+                            >GC Frequency</li>
+                            <li
+                                :class="JVMInfo === 2 ? 'activeInfo' : ''"
+                                @click="tabJVMInfo(2)"
+                            >GC Time</li>
+                            <li
+                                :class="JVMInfo === 3 ? 'activeInfo' : ''"
+                                @click="tabJVMInfo(3)"
+                            >Thread Count</li>
+                        </ul>
+                        <div class="jvm-chart" ref="jvm">
+                            <div class="jvm-ch">
+                                <jvmchart v-if="ipInfo === 3" :callsData="{JvmData,JVMInfo}" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -343,6 +346,7 @@ export default {
     data() {
         return {
             qps: '',
+            noSelectedData: false,
             serviceIDCheckList: [],
             cancel: false,
             polar: {}, // model图表信息
@@ -354,7 +358,7 @@ export default {
             total: 0, // 数据总数
             page: 1, // 页数
             pageSize: 20, // 每页条数
-            selected: 1, // proxy，serving  tab
+            selected: 2, // proxy，serving  tab
             activeip: 0, // ip列表选中高亮
             ipInfo: 0, // Basic，model  tab
             serviceid: '', // 按serviceid搜索
@@ -404,6 +408,31 @@ export default {
             },
             immediate: true,
             deep: true
+        },
+        // selected: {
+        //     handler: function(val, old) {
+        //         console.log(val, old)
+        //         if (old) {
+        //             this.ipInfo = 0
+        //             this.listProps()
+        //             clearInterval(this.clusterTimer)
+        //         }
+        //     },
+        //     immediate: true,
+        //     deep: true
+        // }
+        ipPort: {
+            handler: function(val, old) {
+                if (old) {
+                    if (val[0] !== old[0] || val[1] !== old[1]) {
+                        this.clearChartTimer()
+                        this.listProps()
+                        this.ipInfo = 0
+                    }
+                }
+            },
+            immediate: true,
+            deep: true
         }
     },
     computed: {},
@@ -422,6 +451,8 @@ export default {
             // 初始化数据
             getCluster().then(res => {
                 this.clusterData = res.data.children
+                // this.clusterData[1].children = []
+                // this.clusterData[2].children = []
                 this.tabNav(this.selected)
             })
         },
@@ -432,6 +463,7 @@ export default {
                 this.ipInfo = 0
                 this.selected = index
                 this.clearChartTimer()
+                this.activeip = 0
             }
             // this.activeip = 0
             this.ArrServing = this.clusterData.filter(item => {
@@ -451,23 +483,27 @@ export default {
             ) {
                 index = 2
             }
-            // if (index) {
-            //     this.selected = index
-            // }
+            if (this.ArrProxy && this.ArrProxy[0].children.length === 0 && this.ArrServing && this.ArrServing[0].children.length === 0) {
+                this.clearChartTimer()
+                this.noSelectedData = true
+            } else {
+                this.noSelectedData = false
+            }
             this.selected = index
+
             if (this.selected === 1) {
                 this.ipDataArr = this.ArrProxy
             } else {
                 this.ipDataArr = this.ArrServing
             }
-            if (this.ipDataArr[0].children.length) {
+            if (this.ipDataArr[0] && this.ipDataArr[0].children.length) {
                 this.ipData = this.ipDataArr[0]
                 this.ipchildrenData = this.ipData.children[this.activeip]
                 this.ipPort = this.ipchildrenData.name.split(':')
-                if (this.flag || info) {
-                    this.listProps()
-                    this.flag = false
-                }
+                // if (this.flag || info) {
+                //     this.listProps()
+                //     this.flag = false
+                // }
             } else {
                 this.ipchildrenData = []
                 this.basicData = []
@@ -703,7 +739,6 @@ export default {
         },
         searchInstance() {
             // ip搜索
-            // console.log(this.instance)
         },
         selectIP(item, index) {
             // 选中ip
@@ -899,6 +934,15 @@ export default {
                     textStyle: {
                         fontSize: 11
                     }
+                },
+                grid: {
+                    left: '3%'
+                    // 是否显示网格
+                    // show: true,
+                    // // 是否显示刻度标签
+                    // containLabel: true,
+                    // borderColor: 'green'
+
                 },
                 yAxis: {
                     type: 'value',

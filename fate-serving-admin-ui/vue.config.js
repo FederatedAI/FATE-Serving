@@ -43,6 +43,7 @@ module.exports = {
     // 通过这个选项可以显式转译一个依赖。
     transpileDependencies: [
         /* string or regex */
+        // /[/\\]node_modules[/\\]echarts[/\\]/
     ],
 
     // 是否为生产环境构建生成 source map？
