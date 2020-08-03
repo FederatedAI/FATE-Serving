@@ -24,18 +24,12 @@ import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Optional;
 
 @Configuration
 public class RegistryConfig {
@@ -55,9 +49,15 @@ public class RegistryConfig {
         ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_PROXY,
                 Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PROXY_GRPC_INTRA_PORT);
         zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
-        zookeeperRegistry.registerComponent();
 
         return zookeeperRegistry;
+    }
+
+    @Bean
+    @Conditional(UseZkCondition.class)
+    @ConditionalOnBean(ZookeeperRegistry.class)
+    public ApplicationListener<ApplicationReadyEvent> registerComponent(ZookeeperRegistry zookeeperRegistry) {
+        return applicationReadyEvent -> zookeeperRegistry.registerComponent();
     }
 
     @Bean
