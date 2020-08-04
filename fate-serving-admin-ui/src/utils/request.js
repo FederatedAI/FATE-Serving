@@ -26,6 +26,10 @@ service.interceptors.request.use(
             // config.headers['Authorization'] = getToken()
             config.headers['sessionToken'] = getToken()
         }
+        config.params = {
+            _t: +new Date(),
+            ...config.params
+        }
         return config
     },
     error => {
