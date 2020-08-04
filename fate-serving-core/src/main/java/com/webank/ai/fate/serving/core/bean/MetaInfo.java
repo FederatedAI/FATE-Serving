@@ -87,6 +87,8 @@ public class MetaInfo {
     public static String PROPERTY_ROOT_PATH;
     public static Boolean PROPERTY_PRINT_INPUT_DATA;
     public static Boolean PROPERTY_PRINT_OUTPUT_DATA;
+    public static Boolean PROPERTY_LR_USE_PARALLEL;
+
 
     public static Map toMap() {
         Map result = Maps.newHashMap();

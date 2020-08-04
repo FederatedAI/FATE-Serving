@@ -16,8 +16,10 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +34,13 @@ public class HeteroLRHost extends HeteroLR implements Returnable {
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> result = new HashMap<>(8);
-        Map<String, Double> ret = forwardParallel(inputData);
+        Map<String, Double> ret = Maps.newHashMap();
+        if(MetaInfo.PROPERTY_LR_USE_PARALLEL){
+            ret = forwardParallel(inputData);
+        }
+        else{
+            ret = forward(inputData);
+        }
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
         return result;
     }

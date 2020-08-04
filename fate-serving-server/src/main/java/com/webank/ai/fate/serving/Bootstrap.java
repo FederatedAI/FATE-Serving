@@ -108,9 +108,8 @@ public class Bootstrap {
             MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);
             MetaInfo.PROPERTY_PRINT_INPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA)) : false;
             MetaInfo.PROPERTY_PRINT_OUTPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA)) : false;
-
-
-        } catch (IOException e) {
+            MetaInfo.PROPERTY_LR_USE_PARALLEL = environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL)) : false;
+        } catch (Exception e) {
             logger.error("init metainfo error", e);
             System.exit(1);
         }
