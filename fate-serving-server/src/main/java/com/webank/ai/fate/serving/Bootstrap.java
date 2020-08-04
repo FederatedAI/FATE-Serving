@@ -110,6 +110,7 @@ public class Bootstrap {
             MetaInfo.PROPERTY_PRINT_OUTPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA)) : false;
             MetaInfo.PROPERTY_LR_USE_PARALLEL = environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL)) : false;
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("init metainfo error", e);
             System.exit(1);
         }
