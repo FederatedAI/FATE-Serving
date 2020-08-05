@@ -1,14 +1,13 @@
 <template>
     <div  class="service-main">
-        <div style="height:100%">
+        <div class="service-b">
             <div class="service-tit">
                 Service
             </div>
             <el-table
                 :data="serviceData"
-                 max-height="690px"
-                :header-cell-style="{background:'#fff'}"
-                class="table">
+                height="100%"
+                :header-cell-style="{background:'#fff'}">
                 <el-table-column prop="project" label="Project" show-overflow-tooltip />
                 <el-table-column sortable  prop="environment" label="Environment" show-overflow-tooltip />
                 <el-table-column prop="name" label="Name" show-overflow-tooltip />
@@ -54,7 +53,7 @@
                             <el-button type="text" style="font-size: 16px" class="el-icon-check" @click="confirmEdit"></el-button>
                             <el-button type="text" style="font-size: 16px;color:#C6C8CC" class="el-icon-close" @click="showEdit = -1"></el-button>
                         </span>
-                        <el-button v-if="scope.row.needVerify" type="text" style="font-size: 16px;margin-left:15px" @click="verify(scope.row)">Verify</el-button>
+                        <el-button v-if="scope.row.needVerify" type="text" style="font-size: 14px;margin-left:15px" @click="verify(scope.row)">Verify</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -351,10 +350,17 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss">
 .service-main {
-    height: calc(100vh - 158px);
+    height: calc(100% - 100px);
     background: #fff;
     margin: 20px 40px 20px 40px ;
     padding-left: 20px;
+    .pagination  {
+        // position: absolute;
+        bottom: 55px;
+    }
+    .service-b {
+        height: calc(100% - 120px);
+    }
     .service-tit {
         font-family:Product Sans;
         font-weight:bold;
@@ -365,12 +371,11 @@ export default {
         margin-left: 10px;
         padding-top: 25px;
     }
+    .el-table {
+        height: 100% !important;
+    }
     .el-table td {
         padding: 0;
-    }
-    .el-table{
-        height: calc(100% - 100px);
-        overflow-y: auto;
     }
     .el-table th {
 
