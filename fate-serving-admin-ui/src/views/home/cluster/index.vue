@@ -138,34 +138,18 @@
                                 width="180"
                                 prop="RolePartyID"
                                 label="Role & Party ID"
+                                show-overflow-tooltip
                             >
                                 <template slot-scope="scope">
-                                    <el-popover placement="bottom" trigger="hover">
-                                        <div>
-                                            <div style="wadth:75px">
-                                                <span
-                                                    v-for="(item,index) in scope.row.rolePartyMapList"
-                                                    :key="index"
-                                                >
-                                                    {{item.role}}-{{item.partId}}
-                                                    <span
-                                                        v-if="index+1 !== scope.row.rolePartyMapList.length"
-                                                    >,</span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <span slot="reference" style="white-space: nowrap;">
-                                            <span
-                                                v-for="(item,index) in scope.row.rolePartyMapList"
-                                                :key="index"
-                                            >
-                                                {{item.role}}-{{item.partId}}
-                                                <span
-                                                    v-if="index+1 !== scope.row.rolePartyMapList.length"
-                                                >,</span>
-                                            </span>
-                                        </span>
-                                    </el-popover>
+                                    <span
+                                        v-for="(item,index) in scope.row.rolePartyMapList"
+                                        :key="index"
+                                    >
+                                        {{item.role}}-{{item.partId}}
+                                        <span
+                                            v-if="index+1 !== scope.row.rolePartyMapList.length"
+                                        >,</span>
+                                    </span>
                                 </template>
                             </el-table-column>
                             <el-table-column
@@ -825,6 +809,7 @@ export default {
                         this.Monitordata[i],
                         incomingData[i]
                     ] = this.getIncomingData(this.Monitordata[i], res.data[i])
+
                     legendArr.push(i)
                 }
 
@@ -875,6 +860,7 @@ export default {
                     })
                 }
                 this.MonitorXdate = monitorXdate
+
                 this.TrafficMonitor(MonitorArr, this.MonitorXdate, legendArr)
             })
         },
@@ -904,6 +890,37 @@ export default {
         },
         TrafficMonitor(MonitorArr, xDate, legendArr) {
             // TrafficMonitor 图表
+            var arr = []
+            var MonArr = [{ name: 'I_QUERY_METRICS', textStyle: { color: '#b74c8d' } },
+                { name: 'I_UPDATE_FLOW_RULE', textStyle: { color: '#eb75d7' } },
+                { name: 'I_LIST_PROPS', textStyle: { color: '#ad81ef' } },
+                { name: 'I_QUERY_JVM', textStyle: { color: '#6666ff' } },
+                { name: 'I_UPDATE_SERVICE', textStyle: { color: '#4aa2ff' } },
+                { name: 'I_unaryCall', textStyle: { color: '#29bccc' } },
+                { name: 'I_inference', textStyle: { color: '#30ddf0' } },
+                { name: 'I_batchInference', textStyle: { color: '#00c99e' } },
+                { name: 'I_singleInference', textStyle: { color: '#85ab4b' } },
+                { name: 'I_hostInferenceProvider', textStyle: { color: '#abcc29' } },
+                { name: 'I_MODEL_LOAD', textStyle: { color: '#fad900' } },
+                { name: 'I_MODEL_PUBLISH_ONLINE', textStyle: { color: '#ff9d00' } },
+                { name: 'I_QUERY_MODEL', textStyle: { color: '#ef6363' } },
+                { name: 'I_UNLOAD', textStyle: { color: '#c65f5f' } },
+                { name: 'I_UNBIND', textStyle: { color: '#848c99' } }]
+            for (var y = 0; y < legendArr.length; y++) {
+                for (var p = 0; p < MonArr.length; p++) {
+                    if (legendArr[y] === MonArr[p].name) {
+                        arr.push(MonArr[p])
+                    }
+                    if (MonitorArr[y].name === MonArr[p].name) {
+                        MonitorArr[y].lineStyle = {
+                            color: MonArr[p].textStyle.color
+                        }
+                        MonitorArr[y].itemStyle = {
+                            color: MonArr[p].textStyle.color
+                        }
+                    }
+                }
+            }
             this.MonitorPolar = {
                 xAxis: {
                     type: 'category',
@@ -930,7 +947,7 @@ export default {
                     right: '150px',
                     orient: 'horizontal',
                     top: -5,
-                    data: legendArr,
+                    data: arr,
                     textStyle: {
                         fontSize: 11
                     }
@@ -994,4 +1011,22 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss">
 @import 'src/styles/cluster.scss';
+.el-tooltip__popper {
+     transform:translateY(100px);
+     font-size:14px;
+    font-family:Product Sans;
+    font-weight:400;
+    line-height:17px;
+    color:rgba(45,54,66,1);
+}
+.el-tooltip__popper.is-dark {
+    background: #fff;
+    color: #606266;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    height: 28px;
+    line-height: 28px;
+    .popper__arrow {
+        display: none !important;
+    }
+}
 </style>

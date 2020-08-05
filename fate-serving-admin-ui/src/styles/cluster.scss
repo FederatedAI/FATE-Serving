@@ -1,7 +1,6 @@
 .main {
     padding:5px 0 14px 40px;
     display: flex;
-    height: 100%;
     li {
         list-style: none;
     }
@@ -13,7 +12,7 @@
     width: 430px;
     background: #fff;
     padding: 5px 10px;
-    min-height: 815px;
+    // min-height: 815px;
     box-sizing: border-box;
     
     .overview{
@@ -527,7 +526,7 @@
             .Monitor {
                 background: #fff;
                 width: 100%;
-                height: 100%;
+                height: 572px;
                 padding: 0 ;
             }
             .echarts{
@@ -548,7 +547,8 @@
             .jvm-ch {
                 background: #fff;
                 width: 100%;
-                height: 100%;
+                height: 533px;
+                box-sizing: border-box;
             }
             .echarts{
                 margin: 0 auto;

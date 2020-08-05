@@ -8,7 +8,7 @@
     // rem：相对单位，可理解为”root em”, 相对根节点html的字体大小来计算，CSS3新加属性，chrome/firefox/IE9+支持
     float: left;
     width: 100%;
-
+    height: 100%;
     .el-header {
         padding: 0;
         background-color: #217ad9;
@@ -43,7 +43,7 @@
     .el-main {
         padding: 0;
         background-color: #f5f8fa;
-
+        height: calc(100% - 65px);
         .welcomepage {
             text-align: center;
 
