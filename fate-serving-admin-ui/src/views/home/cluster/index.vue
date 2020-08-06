@@ -29,7 +29,7 @@
         <div class="ip-info">
             <div v-if="noSelectedData" class="ip-info-welcome">welcome</div>
             <div v-else>
-                <el-popover placement="bottom" width="400" popper-class="titpopover" trigger="click">
+                <el-popover placement="bottom" width="400" v-model="titvisible" popper-class="titpopover" trigger="click">
                     <div class="titpopover-main">
                         <div
                             class="titpopover-label"
@@ -329,6 +329,7 @@ export default {
     },
     data() {
         return {
+            titvisible: false,
             qps: '',
             noSelectedData: false,
             serviceIDCheckList: [],
@@ -728,6 +729,7 @@ export default {
             // 选中ip
             this.activeip = +index
             this.ipchildrenData = item
+            this.titvisible = false
             this.ipPort = this.ipchildrenData.name.split(':')
             if (this.ipInfo === 0) {
                 this.listProps()
