@@ -96,8 +96,11 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
             throw new UnSupportMethodException();
         }
         try {
+            logger.info("routerinfo {}", routerInfo);
             InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout, TimeUnit.MILLISECONDS);
-            logger.info("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
+            if (logger.isDebugEnabled()) {
+                logger.debug("send {} result {}", routerInfo, inferenceReqMap, result);
+            }
             resultString = new String(result.getBody().toByteArray());
         } catch (Exception e) {
             logger.error("get grpc result error", e);
