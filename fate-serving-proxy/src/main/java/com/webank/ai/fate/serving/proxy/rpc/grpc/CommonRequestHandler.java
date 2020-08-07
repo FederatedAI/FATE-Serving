@@ -34,7 +34,6 @@ import java.util.UUID;
 @Service
 public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBase {
 
-    //    private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
     private static final String QUERY_METRICS = "queryMetrics";
     private static final String UPDATE_FLOW_RULE = "updateFlowRule";
     private static final String LIST_PROPS = "listProps";

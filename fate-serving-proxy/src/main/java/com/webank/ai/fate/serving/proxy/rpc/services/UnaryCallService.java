@@ -103,6 +103,5 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JsonUtil.object2Json(fateMap))));
         return builder.build();
     }
-
 }
 

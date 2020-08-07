@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RegistryConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(GrpcConfigration.class);
+    private static final Logger logger = LoggerFactory.getLogger(RegistryConfig.class);
 
     @Bean(destroyMethod = "destroy")
     @Conditional(UseZkCondition.class)

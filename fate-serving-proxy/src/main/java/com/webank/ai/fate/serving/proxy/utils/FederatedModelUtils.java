@@ -33,11 +33,7 @@ public class FederatedModelUtils {
 
     public static String getModelRouteKey(Proxy.Packet packet) {
         String data = packet.getBody().getValue().toStringUtf8();
-
         Proxy.Model model = packet.getHeader().getTask().getModel();
-//        HostFederatedParams requestData = JSON.parseObject(data, HostFederatedParams.class);
-//        ModelInfo partnerModelInfo = requestData.getPartnerModelInfo();
-
         String key = genModelKey(model.getTableName(), model.getNamespace());
         String md5Key = EncryptUtils.encrypt(key, EncryptMethod.MD5);
         return md5Key;

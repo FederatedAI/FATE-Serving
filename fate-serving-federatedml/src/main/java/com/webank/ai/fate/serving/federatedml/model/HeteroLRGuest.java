@@ -34,7 +34,6 @@ import static java.lang.Math.exp;
 public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Returnable {
 
     private static final Logger logger = LoggerFactory.getLogger(HeteroLRGuest.class);
-
     private double sigmod(double x) {
         return 1. / (1. + exp(-x));
     }
@@ -45,7 +44,6 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
         Map<String, Object> result = new HashMap<>(8);
         Map<String, Double> forwardRet = forward(input);
         double score = forwardRet.get(Dict.SCORE);
-        // logger.info("caseid {} score:{}", context.getCaseId(), score);
         result.put(Dict.SCORE, score);
         return result;
     }
@@ -67,7 +65,6 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                     } else {
                         throw new GuestMergeException("local result is invalid ");
                     }
-                    // logger.info("local score: {}", localScore);
                     Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
                     double remoteScore;
                     if (remoteComopnentData != null) {
@@ -79,7 +76,6 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                             throw new GuestMergeException("host data score is null");
                         }
                     }
-                    // logger.info("host score: {}", remoteScore);
                     score = localScore;
                     score += remoteScore;
                     double prob = sigmod(score);
@@ -91,11 +87,5 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
         return result;
     }
 
-//         if(partyData.get(Dict.RET_CODE)!=null&&!StatusCode.SUCCESS.equals(partyData.get(Dict.RET_CODE))){
-//        String remoteCode = partyData.get(Dict.RET_CODE).toString();
-//        String remoteMsg = partyData.get(Dict.MESSAGE)!=null?partyData.get(Dict.MESSAGE).toString():"";
-//        String  errorMsg = ErrorMessageUtil.buildRemoteRpcErrorMsg(remoteCode,remoteMsg);
-//        String  retcode  = ErrorMessageUtil.transformRemoteErrorCode(remoteCode);
-//        throw  new RemoteRpcException(retcode,errorMsg);
-//    }
+
 }
