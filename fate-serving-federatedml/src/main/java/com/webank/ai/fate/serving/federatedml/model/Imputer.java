@@ -36,7 +36,6 @@ public class Imputer {
 
     public Map<String, Object> transform(Map<String, Object> inputData) {
         Map<String, Object> output = new HashMap<>();
-
         for (String col : this.missingReplaceValues.keySet()) {
             if (inputData.containsKey(col)) {
                 String value = inputData.get(col).toString();
@@ -49,7 +48,6 @@ public class Imputer {
                 output.put(col, this.missingReplaceValues.get(col));
             }
         }
-
         return output;
     }
 }

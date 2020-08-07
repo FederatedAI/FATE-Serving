@@ -24,7 +24,6 @@ import java.util.Map;
 
 public class MinMaxScale {
     private static final Logger logger = LoggerFactory.getLogger(MinMaxScale.class);
-
     public Map<String, Object> transform(Map<String, Object> inputData, Map<String, ColumnScaleParam> scales) {
         if (logger.isDebugEnabled()) {
             logger.info("Start MinMaxScale transform");

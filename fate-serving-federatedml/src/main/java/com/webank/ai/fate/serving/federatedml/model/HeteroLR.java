@@ -52,8 +52,6 @@ public abstract class HeteroLR extends BaseComponent {
         Map<String, Object> inputData = inputDatas.get(0);
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
-
-
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
         if (logger.isDebugEnabled()) {
@@ -90,28 +88,23 @@ public abstract class HeteroLR extends BaseComponent {
         ret.put(Dict.SCORE, score);
         ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
         ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
-
         return ret;
     }
 
     Map<String, Double> forwardParallel(List<Map<String, Object>> inputDatas) {
         Map<String, Object> inputData = inputDatas.get(0);
-        //logger.info("size {}",inputData.size());
         Map<String, Double> ret = new HashMap<>(8);
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
-
         Set<String> inputKeys =inputData.keySet();
         Set<String> weightKeys = weight.keySet();
         Set<String> joinKeys = Sets.newHashSet();
         joinKeys.addAll(inputKeys);
         joinKeys.retainAll(weightKeys);
-
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
         int weightNum = this.weight.size();
         int inputFeaturesNum = inputData.size();
-        //logger.info("model weight number:{}", weightNum);
         if (logger.isDebugEnabled()) {
             logger.debug("model weight number:{}", weightNum);
             logger.debug("input data features number:{}", inputFeaturesNum);
@@ -130,14 +123,10 @@ public abstract class HeteroLR extends BaseComponent {
                 inputDataHitRate = (double) inputDataHitCount / inputFeaturesNum;
                 ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
                 ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
-
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
-
         return ret;
     }
 
@@ -157,11 +146,9 @@ public abstract class HeteroLR extends BaseComponent {
 
         @Override
         protected LRTaskResult compute() {
-
             double score = 0;
             int modelWeightHitCount = 0;
             int inputDataHitCount = 0;
-
             if (keys.size() <= splitSize) {
                 for (String key : keys) {
                     inputData.get(key);

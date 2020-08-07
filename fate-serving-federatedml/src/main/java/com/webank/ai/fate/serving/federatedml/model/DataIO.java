@@ -50,18 +50,16 @@ public class DataIO extends BaseComponent {
                 this.imputer = new Imputer(this.dataIOMeta.getImputerMeta().getMissingValueList(),
                         this.dataIOParam.getImputerParam().getMissingReplaceValue());
             }
-
             this.isOutlier = this.dataIOMeta.getOutlierMeta().getIsOutlier();
             logger.info("data io isOutlier {}", this.isOutlier);
             if (this.isOutlier) {
                 this.outlier = new Outlier(this.dataIOMeta.getOutlierMeta().getOutlierValueList(),
                         this.dataIOParam.getOutlierParam().getOutlierReplaceValue());
             }
-
             this.header = this.dataIOParam.getHeaderList();
             this.inputformat = this.dataIOMeta.getInputFormat();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
             logger.error("init DataIo error", ex);
             return ILLEGALDATA;
         }
@@ -73,7 +71,6 @@ public class DataIO extends BaseComponent {
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         Map<String, Object> data = inputData.get(0);
         Map<String, Object> outputData = new HashMap<>();
-
         if (this.inputformat.equals(Dict.TAG_INPUT_FORMAT) || this.inputformat.equals(Dict.SPARSE_INPUT_FORMAT
         )) {
             if (logger.isDebugEnabled()) {
@@ -95,15 +92,12 @@ public class DataIO extends BaseComponent {
                 logger.debug("Dense input-format, not filling, {}", outputData);
             }
         }
-
         if (this.isImputer) {
             outputData = this.imputer.transform(outputData);
         }
-
         if (this.isOutlier) {
             outputData = this.outlier.transform(outputData);
         }
-
         return outputData;
     }
 }

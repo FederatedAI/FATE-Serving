@@ -35,7 +35,6 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
     private List<String> cols;
     private Map<String, ColsMap> colsMapMap;
     private boolean needRun;
-
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         logger.info("start init OneHot Encoder class");
@@ -64,7 +63,6 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> outputData = new HashMap<>();
         Map<String, Object> firstData = inputData.get(0);
-
         if (!this.needRun) {
             return firstData;
         }
@@ -75,10 +73,8 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
                     continue;
                 }
                 ColsMap colsMap = this.colsMapMap.get(colName);
-
                 List<String> values = colsMap.getValuesList();
                 List<String> encodedVariables = colsMap.getTransformedHeadersList();
-
                 Integer inputValue = 0;
                 try {
                     String thisInputValue = firstData.get(colName).toString();
@@ -91,7 +87,6 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
                 } catch (Throwable e) {
                     logger.error("Onehot component accept number input value only");
                 }
-
                 for (int i = 0; i < values.size(); i++) {
                     Integer possibleValue = Integer.parseInt(values.get(i));
                     String newColName = encodedVariables.get(i);
