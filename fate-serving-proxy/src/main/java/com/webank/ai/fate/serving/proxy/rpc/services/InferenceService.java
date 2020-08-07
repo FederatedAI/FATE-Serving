@@ -70,9 +70,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         RouterInfo routerInfo = data.getRouterInfo();
         ManagedChannel managedChannel = null;
         String resultString = null;
-        String callName = context.getCallName();
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
-
         try {
             managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
         } catch (Exception e) {
@@ -86,27 +84,15 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
-        int timeWait = timeout;
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("inference req : {}", JsonUtil.object2Json(inferenceReqMap));
-        }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-        if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
-            resultFuture = futureStub.inference(reqBuilder.build());
-            timeWait = timeout;
-        } else {
-            logger.error("unknown callName {}.", callName);
-            throw new UnSupportMethodException();
-        }
+        resultFuture = futureStub.inference(reqBuilder.build());
         try {
-            InferenceServiceProto.InferenceMessage result = resultFuture.get(timeWait, TimeUnit.MILLISECONDS);
-            //logger.info("routerinfo {} send {} result {}", routerInfo, inferenceReqMap, result);
+            InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout, TimeUnit.MILLISECONDS);
             resultString = new String(result.getBody().toByteArray());
         } catch (Exception e) {
-            logger.error("get grpc result error", e);
+            logger.error("remote {} get grpc result error", routerInfo);
             throw new RemoteRpcException("remote rpc exception");
         }
         if (StringUtils.isNotEmpty(resultString)) {
