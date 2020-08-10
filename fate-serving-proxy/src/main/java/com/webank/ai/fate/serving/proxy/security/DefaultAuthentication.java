@@ -21,7 +21,7 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.exceptions.InvalidRoleInfoException;
+import com.webank.ai.fate.serving.core.exceptions.ProxyAuthException;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +48,8 @@ public class DefaultAuthentication implements Interceptor {
         Proxy.Packet sourcePackage = (Proxy.Packet) inboundPackage.getBody();
         boolean isAuthPass = authUtils.checkAuthentication(sourcePackage);
         if (!isAuthPass) {
-            logger.error("invalid signature");
-            throw new InvalidRoleInfoException("invalid signature");
+            logger.error("check authentication failed");
+            throw new ProxyAuthException("check authentication failed");
         }
     }
 
