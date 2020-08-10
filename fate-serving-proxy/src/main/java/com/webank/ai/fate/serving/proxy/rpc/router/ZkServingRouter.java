@@ -22,6 +22,7 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouteType;
 import com.webank.ai.fate.serving.core.rpc.router.RouteTypeConvertor;
@@ -31,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -41,13 +41,7 @@ import java.util.List;
 public class ZkServingRouter extends BaseServingRouter implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(ZkServingRouter.class);
-    @Value("${useZkRouter:true}")
-    private String useZkRouter;
-    @Value("${routeType:random}")
-    private String routeTypeString;
     private RouteType routeType;
-    @Value("${coordinator:9999}")
-    private String selfCoordinator;
     @Autowired(required = false)
     private RouterService zkRouterService;
 
@@ -58,7 +52,7 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
 
     @Override
     public List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage) {
-        if (!"true".equals(useZkRouter)) {
+        if (!MetaInfo.PROPERTY_USE_ZK_ROUTER) {
             return null;
         }
         String environment = getEnvironment(context, inboundPackage);
@@ -97,7 +91,7 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
             return null;
         } else {
             Proxy.Packet sourcePacket = (Proxy.Packet) inboundPackage.getBody();
-            if (selfCoordinator.equals(sourcePacket.getHeader().getDst().getPartyId())) {
+            if (MetaInfo.PROPERTY_COORDINATOR.equals(sourcePacket.getHeader().getDst().getPartyId())) {
                 // host, proxy -> serving
                 return FederatedModelUtils.getModelRouteKey(sourcePacket);
             } else {
@@ -110,6 +104,6 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        routeType = RouteTypeConvertor.string2RouteType(routeTypeString);
+        routeType = RouteTypeConvertor.string2RouteType(MetaInfo.PROPERTY_ROUTE_TYPE);
     }
 }

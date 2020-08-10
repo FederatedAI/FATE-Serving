@@ -22,13 +22,13 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -50,9 +50,6 @@ public class ProxyController {
 
     @Autowired
     ProxyServiceRegister proxyServiceRegister;
-
-    @Value("${coordinator:9999}")
-    private String selfCoordinator;
 
     @RequestMapping(value = "/federation/{version}/{callName}", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
@@ -93,7 +90,7 @@ public class ProxyController {
                                                               HttpServletRequest httpServletRequest) {
         String sourceIp = WebUtil.getIpAddr(httpServletRequest);
         context.setSourceIp(sourceIp);
-        context.setGuestAppId(selfCoordinator);
+        context.setGuestAppId(String.valueOf(MetaInfo.PROPERTY_COORDINATOR));
         Map jsonObject = JsonUtil.json2Object(data, Map.class);
 
         Map head = (Map) jsonObject.getOrDefault(Dict.HEAD, new HashMap<>());

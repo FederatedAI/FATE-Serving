@@ -33,10 +33,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.io.*;
 import java.util.Properties;
 
-/**
- * @Description TODO
- * @Author
- **/
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.webank.ai.fate.serving.proxy.*"})
 @PropertySource("classpath:application.properties")
@@ -78,6 +74,7 @@ public class Bootstrap {
             MetaInfo.PROPERTY_ROUTE_TYPE = environment.getProperty(Dict.PROPERTY_ROUTE_TYPE, "random");
             MetaInfo.PROPERTY_ROUTE_TABLE = environment.getProperty(Dict.PROPERTY_ROUTE_TABLE);
             MetaInfo.PROPERTY_AUTH_FILE = environment.getProperty(Dict.PROPERTY_AUTH_FILE);
+            MetaInfo.PROPERTY_AUTH_OPEN = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_AUTH_OPEN, "false"));
             MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL);
             MetaInfo.PROPERTY_USE_ZK_ROUTER = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER, "true"));
             MetaInfo.PROPERTY_PROXY_GRPC_INTRA_PORT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTRA_PORT, "8879"));

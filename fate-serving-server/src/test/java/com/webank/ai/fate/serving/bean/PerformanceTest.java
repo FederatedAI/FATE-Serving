@@ -20,8 +20,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
-import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
-import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.common.utils.HttpClientPool;

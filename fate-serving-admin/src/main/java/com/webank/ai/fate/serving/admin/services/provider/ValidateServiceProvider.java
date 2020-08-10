@@ -41,7 +41,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.Charset;
@@ -61,9 +60,6 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
     @Autowired
     ComponentService componentService;
-
-    @Value("${grpc.timeout:5000}")
-    private int timeout;
 
     /*@FateServiceMethod(name = "publishLoad")
     public Object publishLoad(Context context, InboundPackage data) throws Exception {
@@ -137,7 +133,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
         InferenceServiceGrpc.InferenceServiceFutureStub inferenceServiceFutureStub = getInferenceServiceFutureStub(host, port);
         ListenableFuture<InferenceServiceProto.InferenceMessage> future = inferenceServiceFutureStub.inference(builder.build());
-        InferenceServiceProto.InferenceMessage response = future.get(timeout * 2, TimeUnit.MILLISECONDS);
+        InferenceServiceProto.InferenceMessage response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT * 2, TimeUnit.MILLISECONDS);
 
         Map returnResult = JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
         return returnResult;
@@ -189,7 +185,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
         InferenceServiceGrpc.InferenceServiceFutureStub inferenceServiceFutureStub = getInferenceServiceFutureStub(host, port);
         ListenableFuture<InferenceServiceProto.InferenceMessage> future = inferenceServiceFutureStub.batchInference(builder.build());
-        InferenceServiceProto.InferenceMessage response = future.get(timeout * 2, TimeUnit.MILLISECONDS);
+        InferenceServiceProto.InferenceMessage response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT * 2, TimeUnit.MILLISECONDS);
 
         Map returnResult = JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
         return returnResult;
@@ -278,7 +274,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
-        blockingStub = blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
         return blockingStub;
     }
 

@@ -36,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -55,16 +54,8 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private static final String DEFAULT = "default";
     private final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
-    @Value("${routeType:random}")
-    private String routeTypeString;
     private RouteType routeType;
     private String userDir = System.getProperty(Dict.PROPERTY_USER_DIR);
-    @Value("${route.table:}")
-    private String routeTableFile;
-    @Value("${coordinator}")
-    private String selfCoordinator;
-    @Value("${inference.service.name:serving}")
-    private String inferenceServiceName;
     private String lastFileMd5;
     private Map<Proxy.Topic, Set<Proxy.Topic>> allow;
     private Map<Proxy.Topic, Set<Proxy.Topic>> deny;
@@ -84,11 +75,11 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
         Proxy.Topic srcTopic;
         if (Dict.SERVICENAME_INFERENCE.equals(context.getServiceName()) || Dict.SERVICENAME_BATCH_INFERENCE.equals(context.getServiceName())) {
             Proxy.Topic.Builder topicBuilder = Proxy.Topic.newBuilder();
-            dstTopic = topicBuilder.setPartyId(selfCoordinator).
-                    setRole(inferenceServiceName)
+            dstTopic = topicBuilder.setPartyId(String.valueOf(MetaInfo.PROPERTY_COORDINATOR)).
+                    setRole(MetaInfo.PROPERTY_INFERENCE_SERVICE_NAME)
                     .setName(Dict.PARTNER_PARTY_NAME)
                     .build();
-            srcTopic = topicBuilder.setPartyId(selfCoordinator).
+            srcTopic = topicBuilder.setPartyId(String.valueOf(MetaInfo.PROPERTY_COORDINATOR)).
                     setRole(Dict.SELF_PROJECT_NAME)
                     .setName(Dict.PARTNER_PARTY_NAME)
                     .build();
@@ -231,8 +222,8 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     @Scheduled(fixedRate = 10000)
     public void loadRouteTable() {
         String filePath = "";
-        if (StringUtils.isNotEmpty(routeTableFile)) {
-            filePath = routeTableFile;
+        if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
+            filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
         } else {
             filePath = userDir + this.fileSeparator + DEFAULT_ROUTER_FILE;
         }
@@ -282,7 +273,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
         if (logger.isDebugEnabled()) {
             logger.debug("in ConfigFileBasedServingRouter:afterPropertiesSet");
         }
-        routeType = RouteTypeConvertor.string2RouteType(routeTypeString);
+        routeType = RouteTypeConvertor.string2RouteType(MetaInfo.PROPERTY_ROUTE_TYPE);
         routeTable = new ConcurrentHashMap<>();
         topicEndpointMapping = new WeakHashMap<>();
         endpointBuilder = BasicMeta.Endpoint.newBuilder();

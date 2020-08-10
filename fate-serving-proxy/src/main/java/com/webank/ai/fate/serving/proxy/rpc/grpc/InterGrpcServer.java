@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.register.provider.FateServerBuilder;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -24,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,12 +43,10 @@ public class InterGrpcServer implements InitializingBean {
     InterRequestHandler interRequestHandler;
     @Resource(name = "grpcExecutorPool")
     Executor executor;
-    @Value("${proxy.grpc.inter.port:8869}")
-    private Integer port;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(port);
+        FateServerBuilder serverBuilder = (FateServerBuilder) ServerBuilder.forPort(MetaInfo.PROPERTY_PROXY_GRPC_INTER_PORT);
         serverBuilder.executor(executor);
         serverBuilder.addService(ServerInterceptors.intercept(interRequestHandler, new ServiceExceptionHandler()), InterRequestHandler.class);
         server = serverBuilder.build();

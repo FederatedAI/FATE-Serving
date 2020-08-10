@@ -23,7 +23,6 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.GuestInvalidParamException;
-import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 

@@ -16,9 +16,7 @@
 
 package com.webank.ai.fate.serving.proxy.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,28 +30,18 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
-    private final Logger logger = LoggerFactory.getLogger(WebConfiguration.class);
     int processors = Runtime.getRuntime().availableProcessors();
-
-    @Value("${proxy.async.timeout:5000}")
-    long timeout;
-
-    @Value("${proxy.async.coresize:0}")
-    int coreSize;
-
-    @Value("${proxy.async.maxsize:0}")
-    int maxSize;
 
     @Override
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(coreSize > 0 ? coreSize : processors);
-        executor.setMaxPoolSize(maxSize > 0 ? maxSize : 2 * processors);
+        executor.setCorePoolSize(MetaInfo.PROPERTY_PROXY_ASYNC_CORESIZE > 0 ? MetaInfo.PROPERTY_PROXY_ASYNC_CORESIZE : processors);
+        executor.setMaxPoolSize(MetaInfo.PROPERTY_PROXY_ASYNC_MAXSIZE > 0 ? MetaInfo.PROPERTY_PROXY_ASYNC_MAXSIZE : 2 * processors);
         executor.setThreadNamePrefix("ProxyAsync");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.initialize();
         configurer.setTaskExecutor(executor);
-        configurer.setDefaultTimeout(timeout);
+        configurer.setDefaultTimeout(MetaInfo.PROPERTY_PROXY_ASYNC_TIMEOUT);
         configurer.registerCallableInterceptors(new TimeoutCallableProcessingInterceptor());
     }
 

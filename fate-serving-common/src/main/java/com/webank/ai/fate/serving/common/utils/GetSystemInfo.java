@@ -25,7 +25,6 @@ import sun.management.ManagementFactoryHelper;
 import java.io.IOException;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;

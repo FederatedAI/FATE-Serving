@@ -23,6 +23,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import com.webank.ai.fate.serving.proxy.utils.ToStringUtils;
@@ -31,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -56,22 +56,18 @@ public class AuthUtils implements InitializingBean {
     private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
     @Autowired
     private ToStringUtils toStringUtils;
-    @Value("${auth.file:}")
-    private String confFilePath;
-    @Value("${auth.open:false}")
-    private String openAuth;
-    @Value("${coordinator}")
+
     private String selfPartyId;
 
     private String lastFileMd5 = "";
 
     @Scheduled(fixedRate = 10000)
     public void loadConfig() {
-        if (Boolean.valueOf(openAuth)) {
+        if (Boolean.valueOf(MetaInfo.PROPERTY_AUTH_OPEN)) {
 
             String filePath = "";
-            if (StringUtils.isNotEmpty(confFilePath)) {
-                filePath = confFilePath;
+            if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_AUTH_FILE)) {
+                filePath = MetaInfo.PROPERTY_AUTH_FILE;
             } else {
                 filePath = userDir + this.fileSeparator + DEFAULT_AUTH_FILE;
             }
@@ -148,7 +144,7 @@ public class AuthUtils implements InitializingBean {
     }
 
     public Proxy.Packet addAuthInfo(Proxy.Packet packet) throws Exception {
-        if (Boolean.valueOf(openAuth) && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
+        if (Boolean.valueOf(MetaInfo.PROPERTY_AUTH_OPEN) && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
             Proxy.Packet.Builder packetBuilder = packet.toBuilder();
 
             Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
@@ -172,7 +168,7 @@ public class AuthUtils implements InitializingBean {
     }
 
     public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
-        if (Boolean.valueOf(openAuth)) {
+        if (Boolean.valueOf(MetaInfo.PROPERTY_AUTH_OPEN)) {
             // check timestamp
             long currentTimeMillis = System.currentTimeMillis();
             long requestTimeMillis = packet.getAuth().getTimestamp();

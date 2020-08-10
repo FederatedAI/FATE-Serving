@@ -129,6 +129,7 @@ public class Dict {
     public static final String PROPERTY_ROUTE_TYPE = "routeType";
     public static final String PROPERTY_ROUTE_TABLE = "route.table";
     public static final String PROPERTY_AUTH_FILE = "auth.file";
+    public static final String PROPERTY_AUTH_OPEN = "auth.open";
     public static final String PROPERTY_PROXY_GRPC_INTRA_PORT = "proxy.grpc.intra.port";
     public static final String PROPERTY_PROXY_GRPC_INTER_PORT = "proxy.grpc.inter.port";
     public static final String PROPERTY_PROXY_GRPC_INFERENCE_TIMEOUT = "proxy.grpc.inference.timeout";

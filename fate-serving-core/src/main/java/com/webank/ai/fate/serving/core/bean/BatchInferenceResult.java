@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.core.bean;
 
 import com.google.common.collect.Maps;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
