@@ -36,8 +36,10 @@ public abstract class AbstractBatchFeatureDataAdaptor implements BatchFeatureDat
         this.environment = environment;
     }
 
+    @Override
     public abstract void init();
 
+    @Override
     public abstract BatchHostFeatureAdaptorResult getFeatures(Context context, List<BatchHostFederatedParams.SingleInferenceData> featureIdList);
 
     @Override

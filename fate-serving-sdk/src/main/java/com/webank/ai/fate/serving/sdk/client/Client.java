@@ -1,5 +1,20 @@
-package com.webank.ai.fate.serving.sdk.client;
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.webank.ai.fate.serving.sdk.client;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
@@ -19,57 +34,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 public class Client {
 
-    static final  String PROJECT ="serving";
+    static final String PROJECT = "serving";
     static final String SINGLE_INFERENCE = "inference";
     static final String ClIENT_PROJECT = "client";
-    static final int   port =  36578;
+    static final int port = 36578;
     static final String ENVIRONMENT = "online";
     private RouterService routerService;
-    private GrpcConnectionPool  grpcConnectionPool =  GrpcConnectionPool.getPool();
+    private GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
-    private  Client(RouterService  routerService){
+    private Client(RouterService routerService) {
         this.routerService = routerService;
     }
 
-    public static synchronized Client getClient(String  zkAddress){
+    public static synchronized Client getClient(String zkAddress) {
         MetaInfo.PROPERTY_ACL_ENABLE = false;
-        if(clientMap.get(zkAddress)==null){
-            ZookeeperRegistry  zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress,ClIENT_PROJECT,ENVIRONMENT,port);
+        if (clientMap.get(zkAddress) == null) {
+            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress, ClIENT_PROJECT, ENVIRONMENT, port);
             zookeeperRegistry.subProject(PROJECT);
-            DefaultRouterService  defaultRouterService = new DefaultRouterService();
+            DefaultRouterService defaultRouterService = new DefaultRouterService();
             defaultRouterService.setRegistry(zookeeperRegistry);
-            Client  client = new  Client(defaultRouterService);
-            clientMap.put(zkAddress,client);
+            Client client = new Client(defaultRouterService);
+            clientMap.put(zkAddress, client);
         }
-       return clientMap.get(zkAddress);
+        return clientMap.get(zkAddress);
     }
 
-    public static  Client getClient(String  zkAddress,boolean useAcl,String aclUserName,String aclPassword){
-        if(useAcl) {
+    public static Client getClient(String zkAddress, boolean useAcl, String aclUserName, String aclPassword) {
+        if (useAcl) {
             System.setProperty("acl.enable", "true");
-        }
-        else {
+        } else {
             System.setProperty("acl.enable", "false");
         }
-        System.setProperty("acl.username", aclUserName!=null?aclUserName:"");
-        System.setProperty("acl.password", aclPassword!=null?aclPassword:"");
-        MetaInfo.PROPERTY_ACL_ENABLE=useAcl;
+        System.setProperty("acl.username", aclUserName != null ? aclUserName : "");
+        System.setProperty("acl.password", aclPassword != null ? aclPassword : "");
+        MetaInfo.PROPERTY_ACL_ENABLE = useAcl;
         return getClient(zkAddress);
     }
 
-    private  static Map<String,Client>  clientMap = new ConcurrentHashMap<>();
+    private static Map<String, Client> clientMap = new ConcurrentHashMap<>();
 
-    public ReturnResult singleInference(InferenceRequest  inferenceRequest) throws Exception{
-        Preconditions.checkArgument(inferenceRequest!=null,"inferenceRequest is null");
+    public ReturnResult singleInference(InferenceRequest inferenceRequest) throws Exception {
+        Preconditions.checkArgument(inferenceRequest != null, "inferenceRequest is null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(inferenceRequest.getServiceId()));
-        List<URL> urls = routerService.router(PROJECT,inferenceRequest.getServiceId(),SINGLE_INFERENCE);
-        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls),"serviceId "+inferenceRequest.getServiceId()+" found no url in zk");
-        ManagedChannel managedChannel = null;
+        List<URL> urls = routerService.router(PROJECT, inferenceRequest.getServiceId(), SINGLE_INFERENCE);
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls), "serviceId " + inferenceRequest.getServiceId() + " found no url in zk");
         URL url = urls.get(0);
-        managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
         inferenceRequest.getSendToRemoteFeatureData().putAll(inferenceRequest.getFeatureData());
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         String contentString = JsonUtil.object2Json(inferenceRequest);
@@ -77,29 +89,28 @@ public class Client {
         InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
         InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
         InferenceServiceProto.InferenceMessage result = blockingStub.inference(inferenceMessage);
-        Preconditions.checkArgument(result!=null);
-        Preconditions.checkArgument(result.getBody()!=null);
-        ReturnResult  returnResult = JsonUtil.json2Object(result.getBody().toByteArray(),ReturnResult.class);
-        return  returnResult;
+        Preconditions.checkArgument(result != null);
+        Preconditions.checkArgument(result.getBody() != null);
+        ReturnResult returnResult = JsonUtil.json2Object(result.getBody().toByteArray(), ReturnResult.class);
+        return returnResult;
     }
 
-    public BatchInferenceResult batchInference(BatchInferenceRequest batchInferenceRequest) throws Exception{
-        Preconditions.checkArgument(batchInferenceRequest!=null,"batchInferenceRequest is null");
+    public BatchInferenceResult batchInference(BatchInferenceRequest batchInferenceRequest) throws Exception {
+        Preconditions.checkArgument(batchInferenceRequest != null, "batchInferenceRequest is null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(batchInferenceRequest.getServiceId()));
-        List<URL> urls = routerService.router(PROJECT,batchInferenceRequest.getServiceId(),SINGLE_INFERENCE);
-        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls),"serviceId "+batchInferenceRequest.getServiceId()+" found no url in zk");
-        ManagedChannel managedChannel = null;
+        List<URL> urls = routerService.router(PROJECT, batchInferenceRequest.getServiceId(), SINGLE_INFERENCE);
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls), "serviceId " + batchInferenceRequest.getServiceId() + " found no url in zk");
         URL url = urls.get(0);
-        managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         String contentString = JsonUtil.object2Json(batchInferenceRequest);
         inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
         InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
         InferenceServiceProto.InferenceMessage result = blockingStub.batchInference(inferenceMessageBuilder.build());
-        Preconditions.checkArgument(result!=null);
-        Preconditions.checkArgument(result.getBody()!=null);
-        BatchInferenceResult  returnResult = JsonUtil.json2Object(result.getBody().toByteArray(),BatchInferenceResult.class);
-        return  returnResult;
+        Preconditions.checkArgument(result != null);
+        Preconditions.checkArgument(result.getBody() != null);
+        BatchInferenceResult returnResult = JsonUtil.json2Object(result.getBody().toByteArray(), BatchInferenceResult.class);
+        return returnResult;
     }
 
 }

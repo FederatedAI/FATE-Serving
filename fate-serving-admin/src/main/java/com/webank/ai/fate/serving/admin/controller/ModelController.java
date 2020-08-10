@@ -1,5 +1,20 @@
-package com.webank.ai.fate.serving.admin.controller;
+/*
+ * Copyright 2019 The FATE Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -104,65 +119,8 @@ public class ModelController {
 
         data.put("total", totalSize);
         data.put("rows", rows);
-//        return response;
         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
-
-    /*@PostMapping("/model/publishLoad")
-    public Callable<ReturnResult> publishLoad(@RequestBody String requestData) {
-        return () -> {
-            if (logger.isDebugEnabled()) {
-                logger.debug("try to publishLoad, receive : {}", requestData);
-            }
-            ReturnResult result = new ReturnResult();
-            Map data = JsonUtil.json2Object(requestData, Map.class);
-            Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
-            Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
-            Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
-
-            String resp = HttpClientPool.post(MetaInfo.PROPERTY_FATEFLOW_LOAD_URL, data, null);
-
-            logger.info("publishLoad response : {}", resp);
-
-            if (StringUtils.isNotBlank(resp)) {
-                result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JsonUtil.json2Object(resp, Map.class));
-            } else {
-                result.setRetcode(StatusCode.GUEST_LOAD_MODEL_ERROR);
-                result.setRetmsg("publishLoad failed");
-            }
-            return result;
-        };
-    }
-
-    @PostMapping("/model/publishBind")
-    public Callable<ReturnResult> publishBind(@RequestBody String requestData) {
-        return () -> {
-            if (logger.isDebugEnabled()) {
-                logger.debug("try to publishBind, receive : {}", requestData);
-            }
-            ReturnResult result = new ReturnResult();
-
-            Map data = JsonUtil.json2Object(requestData, Map.class);
-            Preconditions.checkArgument(data.get(Dict.PARAMS_INITIATOR) != null, "parameter initiator not exist");
-            Preconditions.checkArgument(data.get(Dict.PARAMS_ROLE) != null, "parameter role not exist");
-            Preconditions.checkArgument(data.get(Dict.PARAMS_JOB_PARAMETERS) != null, "parameter job_parameters not exist");
-            Preconditions.checkArgument(data.get(Dict.PARAMS_SERVICE_ID) != null, "parameter service_id not exist");
-
-            String resp = HttpClientPool.post(MetaInfo.PROPERTY_FATEFLOW_BIND_URL, data);
-
-            logger.info("publishBind response : {}", resp);
-
-            if (StringUtils.isNotBlank(resp)) {
-                result.setRetcode(StatusCode.SUCCESS);
-                result.setData(JsonUtil.json2Object(resp, Map.class));
-            } else {
-                result.setRetcode(StatusCode.GUEST_BIND_MODEL_ERROR);
-                result.setRetmsg("publishBind failed");
-            }
-            return result;
-        };
-    }*/
 
     @PostMapping("/model/unload")
     public Callable<ReturnResult> unload(@RequestBody RequestParamWrapper requestParams) throws Exception {

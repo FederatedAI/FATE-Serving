@@ -38,6 +38,7 @@ public abstract class AbstractSingleFeatureDataAdaptor implements SingleFeatureD
     @Override
     public abstract void init();
 
+    @Override
     public abstract ReturnResult getData(Context context, Map<String, Object> featureIds);
 
 }

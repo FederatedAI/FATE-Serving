@@ -32,7 +32,7 @@ import java.util.List;
 
 @RunWith(JUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class CommonTest {
+public class CommonServiceTest {
 
     InferenceClient inferenceClient = new InferenceClient("localhost", 8000);
 

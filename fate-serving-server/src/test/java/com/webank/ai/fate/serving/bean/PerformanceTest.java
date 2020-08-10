@@ -85,8 +85,7 @@ public class PerformanceTest {
         params.put("body", Maps.newHashMap());
 
         ((Map) params.get("head")).put("serviceId", batchInferenceRequest.getServiceId());
-        ((Map) params.get("body")).put("batchDataList", JsonUtil.json2Object(JsonUtil.object2Json(batchInferenceRequest.getBatchDataList()), new TypeReference<Object>() {
-        }));
+        ((Map) params.get("body")).put("batchDataList", JsonUtil.json2Object(JsonUtil.object2Json(batchInferenceRequest.getBatchDataList()), new TypeReference<Object>() {}));
 
     }
 
@@ -135,17 +134,7 @@ public class PerformanceTest {
         });
     }
 
-    private static void listProps() {
-        CommonServiceProto.QueryPropsRequest.Builder builder = CommonServiceProto.QueryPropsRequest.newBuilder();
-        ManagedChannel managedChannel = GRPC_CONNECTION_POOL.getManagedChannel(HOST, PORT);
-        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
-        CommonServiceProto.CommonResponse response = blockingStub.listProps(builder.build());
-
-        System.err.println("StatusCode ==================" + response.getStatusCode());
-    }
-
     private static void batchInferenceByHttp() {
-//        Map requestData = JsonUtil.json2Object(JsonUtil.object2Json(batchInferenceRequest), Map.class);
         try {
             while (true) {
                 long startTime = System.currentTimeMillis();

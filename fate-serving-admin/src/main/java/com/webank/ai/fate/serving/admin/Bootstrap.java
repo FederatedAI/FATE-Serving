@@ -75,7 +75,6 @@ public class Bootstrap {
             e.printStackTrace();
             logger.error("init meta info error", e);
         }
-
     }
 
     public void start(String[] args) {

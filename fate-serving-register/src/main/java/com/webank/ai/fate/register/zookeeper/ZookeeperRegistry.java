@@ -25,10 +25,10 @@ import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
-import com.webank.ai.fate.register.utils.NetUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

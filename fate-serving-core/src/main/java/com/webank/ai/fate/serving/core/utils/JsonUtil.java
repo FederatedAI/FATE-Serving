@@ -47,8 +47,9 @@ public class JsonUtil {
     }
 
     public static <T> T json2Object(String json, Class<T> c) {
-        if (StringUtils.isBlank(json))
+        if (StringUtils.isBlank(json)) {
             return null;
+        }
         T t = null;
         try {
             t = mapper.readValue(json, c);
@@ -70,8 +71,9 @@ public class JsonUtil {
     }
 
     public static <T> T json2List(String json, TypeReference<T> typeReference) {
-        if (StringUtils.isBlank(json))
+        if (StringUtils.isBlank(json)) {
             return null;
+        }
         T result = null;
         try {
             result = mapper.readValue(json, typeReference);
@@ -83,9 +85,9 @@ public class JsonUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> T json2Object(String json, TypeReference<T> tr) {
-        if (StringUtils.isBlank(json))
+        if (StringUtils.isBlank(json)) {
             return null;
-
+        }
         T t = null;
         try {
             t = (T) mapper.readValue(json, tr);

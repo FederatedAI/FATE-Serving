@@ -56,10 +56,8 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationEvent) {
         String[] beans = applicationContext.getBeanNamesForType(AbstractServiceAdaptor.class);
-//        FlowCounterManager flowCounterManager = applicationContext.getBean(FlowCounterManager.class);
         for (String beanName : beans) {
             AbstractServiceAdaptor serviceAdaptor = applicationContext.getBean(beanName, AbstractServiceAdaptor.class);
-//            serviceAdaptor.setFlowCounterManager(flowCounterManager);
             FateService proxyService = serviceAdaptor.getClass().getAnnotation(FateService.class);
             Method[] methods = serviceAdaptor.getClass().getMethods();
             for (Method method : methods) {
