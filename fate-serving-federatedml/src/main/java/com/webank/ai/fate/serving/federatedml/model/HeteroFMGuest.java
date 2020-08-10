@@ -34,11 +34,9 @@ import static java.lang.Math.exp;
 
 public class HeteroFMGuest extends HeteroFM implements MergeInferenceAware, Returnable {
     private static final Logger logger = LoggerFactory.getLogger(HeteroFMGuest.class);
-
     private double sigmod(double x) {
         return 1. / (1. + exp(-x));
     }
-
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> input) {
         Map<String, Object> forwardRet = forward(input);

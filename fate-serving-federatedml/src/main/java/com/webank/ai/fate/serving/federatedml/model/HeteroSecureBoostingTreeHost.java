@@ -27,11 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements LocalInferenceAware, Returnable {
-
     private final String site = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
     private boolean fastMode = true;
-
     private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
         while (getSite(treeId, treeNodeId).equals(this.site)) {
             treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
@@ -41,29 +39,19 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
     }
 
     public Map<String, Object> extractHostNodeRoute(Map<String, Object> input) {
-
-        logger.info("running extractHostNodeRoute");
-
         Map<String, Object> result = new HashMap<String, Object>(8);
         for (int i = 0; i < this.treeNum; i++) {
-
             DecisionTreeModelParam treeParam = this.trees.get(i);
             List<NodeParam> nodes = treeParam.getTreeList();
             Map<String, Boolean> treeRoute = new HashMap<String, Boolean>(8);
-
             for (int j = 0; j < nodes.size(); j++) {
-
-
                 NodeParam node = nodes.get(j);
-
                 if (!this.getSite(i, j).equals(this.site)) {
                     continue;
                 }
                 int fid = this.trees.get(i).getTree(j).getFid();
                 double splitValue = this.trees.get(i).getSplitMaskdict().get(j);
-
                 boolean direction = false; // false go right, true go left
-
                 if (logger.isDebugEnabled()) {
                     logger.info("i is {}, j is {}", i, j);
                     logger.info("best fid is {}", fid);
@@ -91,13 +79,9 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> request) {
-
         String tag = context.getCaseId() + "." + this.componentName + "." + Dict.INPUT_DATA;
-
         Map<String, Object> input = request.get(0);
-
         Map<String, Object> ret = new HashMap<String, Object>(8);
-
         HashMap<String, Object> fidValueMapping = new HashMap<String, Object>(8);
         int featureHit = 0;
         for (String key : input.keySet()) {

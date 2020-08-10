@@ -28,6 +28,10 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.exceptions.BaseException;
+import com.webank.ai.fate.serving.core.exceptions.ProxyAuthException;
+import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
@@ -45,7 +49,6 @@ import java.util.concurrent.TimeUnit;
  * @Description TODO
  * @Author
  **/
-// TODO utu: may load from cfg file is a better choice compare to using annotation?
 @Service
 @FateService(name = "unaryCall", preChain = {
         "requestOverloadBreaker",
@@ -60,34 +63,34 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
 
     @Autowired
     AuthUtils authUtils;
-    @Value("${proxy.grpc.unaryCall.timeout:3000}")
-    private int timeout;
+
+    private int timeout= MetaInfo.PROPERTY_PROXY_GRPC_UNARYCALL_TIMEOUT;
 
     @Override
     public Proxy.Packet doService(Context context, InboundPackage<Proxy.Packet> data, OutboundPackage<Proxy.Packet> outboundPackage) {
+        Proxy.Packet sourcePackage = data.getBody();
         try {
-            Proxy.Packet sourcePackage = data.getBody();
             sourcePackage = authUtils.addAuthInfo(sourcePackage);
-
-            RouterInfo routerInfo = data.getRouterInfo();
-            ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
-            DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
-            stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
-
+        } catch (Exception e) {
+            logger.error("add auth info error",e);
+            throw  new ProxyAuthException("add auth info error");
+        }
+        RouterInfo routerInfo = data.getRouterInfo();
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
+        DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
+        stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        try {
             context.setDownstreamBegin(System.currentTimeMillis());
-
             ListenableFuture<Proxy.Packet> future = stub1.unaryCall(sourcePackage);
             Proxy.Packet packet = future.get(timeout, TimeUnit.MILLISECONDS);
-
             return packet;
         } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("unaryCall error ", e);
+            throw new RemoteRpcException("unaryCall error " + routerInfo.toString());
         } finally {
             long end = System.currentTimeMillis();
             context.setDownstreamCost(end - context.getDownstreamBegin());
         }
-        return null;
+
     }
 
     @Override
@@ -100,6 +103,5 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JsonUtil.object2Json(fateMap))));
         return builder.build();
     }
-
 }
 

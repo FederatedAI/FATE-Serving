@@ -47,22 +47,6 @@ public class Scale extends BaseComponent {
         return OK;
     }
 
-//    @Override
-//    public Map<String, Object> handlePredict(Context context, List<Map<String, Object>> inputDatas, FederatedParams predictParams) {
-//        Map<String, Object> outputData = inputDatas.get(0);
-//        if (this.needRun) {
-//            String scaleMethod = this.scaleMeta.getMethod();
-//            if (scaleMethod.toLowerCase().equals(Dict.MIN_MAX_SCALE)) {
-//                MinMaxScale minMaxScale = new MinMaxScale();
-//                outputData = minMaxScale.transform(inputDatas.get(0), this.scaleParam.getColScaleParamMap());
-//            } else if (scaleMethod.toLowerCase().equals(Dict.STANDARD_SCALE)) {
-//                StandardScale standardScale = new StandardScale();
-//                outputData = standardScale.transform(inputDatas.get(0), this.scaleParam.getColScaleParamMap());
-//            }
-//        }
-//        return outputData;
-//    }
-
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputDatas) {
         Map<String, Object> outputData = inputDatas.get(0);

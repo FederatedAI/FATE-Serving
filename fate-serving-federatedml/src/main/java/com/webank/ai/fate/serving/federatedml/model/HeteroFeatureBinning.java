@@ -42,13 +42,11 @@ public class HeteroFeatureBinning extends BaseComponent {
         logger.info("start init Feature Binning class");
         this.needRun = false;
         this.splitPoints = new HashMap<>(8);
-
         try {
             FeatureBinningMeta featureBinningMeta = this.parseModel(FeatureBinningMeta.parser(), protoMeta);
             this.needRun = featureBinningMeta.getNeedRun();
             TransformMeta transformMeta = featureBinningMeta.getTransformParam();
             this.transformCols = transformMeta.getTransformColsList();
-
             FeatureBinningParam featureBinningParam = this.parseModel(FeatureBinningParam.parser(), protoParam);
             this.header = featureBinningParam.getHeaderList();
             FeatureBinningResult featureBinningResult = featureBinningParam.getBinningResult();
@@ -68,18 +66,15 @@ public class HeteroFeatureBinning extends BaseComponent {
 
     @Override
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
-
         HashMap<String, Object> outputData = new HashMap<>(8);
         HashMap<String, Long> headerMap = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
             return firstData;
         }
-
         for (int i = 0; i < this.header.size(); i++) {
             headerMap.put(this.header.get(i), (long) i);
         }
-
         for (String colName : firstData.keySet()) {
             try {
                 if (!this.splitPoints.containsKey(colName)) {

@@ -45,11 +45,9 @@ public abstract class HeteroSecureBoost extends BaseComponent {
             BoostingTreeModelParam param = this.parseModel(BoostingTreeModelParam.parser(), protoParam);
             BoostingTreeModelMeta meta = this.parseModel(BoostingTreeModelMeta.parser(), protoMeta);
             Map<Integer, String> featureNameMapping = param.getFeatureNameFidMapping();
-
             featureNameMapping.forEach((k, v) -> {
                 featureNameFidMapping.put(v, k);
             });
-
             this.treeNum = param.getTreeNum();
             this.initScore = param.getInitScoreList();
             this.trees = param.getTreesList();
@@ -75,7 +73,6 @@ public abstract class HeteroSecureBoost extends BaseComponent {
     }
 
     protected String[] parseTag(String tag) {
-
         return tag.split("_");
     }
 
@@ -84,7 +81,6 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         int fid = this.trees.get(treeId).getTree(treeNodeId).getFid();
         double splitValue = this.trees.get(treeId).getSplitMaskdict().get(treeNodeId);
         String fidStr = String.valueOf(fid);
-
         if (input.containsKey(fidStr)) {
             if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
@@ -103,7 +99,6 @@ public abstract class HeteroSecureBoost extends BaseComponent {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
             }
         }
-
         return nextTreeNodeId;
     }
 

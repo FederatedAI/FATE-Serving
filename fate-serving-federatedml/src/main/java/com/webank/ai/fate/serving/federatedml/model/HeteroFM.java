@@ -52,7 +52,6 @@ public abstract class HeteroFM extends BaseComponent {
 
     Map<String, Object> forward(List<Map<String, Object>> inputDatas) {
         Map<String, Object> inputData = inputDatas.get(0);
-
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
         int weightNum = this.weight.size();
@@ -93,7 +92,6 @@ public abstract class HeteroFM extends BaseComponent {
         }
         score += cross * 0.5;
         score += this.intercept;
-
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
         try {
@@ -107,13 +105,11 @@ public abstract class HeteroFM extends BaseComponent {
             logger.debug("model weight hit rate:{}", modelWeightHitRate);
             logger.debug("input data features hit rate:{}", inputDataHitRate);
         }
-
         Map<String, Object> ret = new HashMap<>();
         ret.put(Dict.SCORE, score);
         ret.put(Dict.MODEL_WRIGHT_HIT_RATE, modelWeightHitRate);
         ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
         ret.put(Dict.FM_CROSS, multiplies);
-
         return ret;
     }
 

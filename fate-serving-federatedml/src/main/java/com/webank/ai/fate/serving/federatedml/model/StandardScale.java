@@ -30,7 +30,6 @@ public class StandardScale {
             try {
                 if (standardScalesMap.containsKey(key)) {
                     ColumnScaleParam standardScale = standardScalesMap.get(key);
-
                     double value = Double.parseDouble(inputData.get(key).toString());
                     double upper = standardScale.getColumnUpper();
                     double lower = standardScale.getColumnLower();
@@ -39,7 +38,6 @@ public class StandardScale {
                     } else if (value < lower) {
                         value = lower;
                     }
-
                     double std = standardScale.getStd();
                     if (std == 0) {
                         std = 1;

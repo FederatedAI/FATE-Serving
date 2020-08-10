@@ -64,24 +64,18 @@ public abstract class BaseComponent implements LocalInferenceAware {
 
     public Map<String, Double> featureHitRateStatistics(Context context, Set<String> features) {
         Map<String, Object> data = (Map)context.getData(Dict.ORIGINAL_PREDICT_DATA);
-
         if(logger.isDebugEnabled()) {
             logger.debug("original input data is {}, modeling features is {}", data, features);
         }
-
-
         int inputDataShape = data.size();
         int featureShape = features.size();
         int featureHit = 0;
-
         Map<String, Double> ret = new HashMap<>();
-
         for (String name : features) {
             if (data.containsKey(name)) {
                 featureHit++;
             }
         }
-
         double featureHitRate = -1.0;
         double inputDataHitRate = -1.0;
         try {
@@ -90,11 +84,9 @@ public abstract class BaseComponent implements LocalInferenceAware {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
         if(logger.isDebugEnabled()) {
             logger.debug("input feature data's shape is {}, header shape is {}, input feature hit rate is {}, modeling feature hit rate is {}", inputDataShape, featureShape, inputDataHitRate, featureHitRate);
         }
-
         ret.put(Dict.MODELING_FEATURE_HIT_RATE, featureHitRate);
         ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
         return ret;

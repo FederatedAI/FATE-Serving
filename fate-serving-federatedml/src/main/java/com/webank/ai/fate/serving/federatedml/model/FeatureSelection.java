@@ -55,11 +55,9 @@ public class FeatureSelection extends BaseComponent {
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> inputData) {
         HashMap<String, Object> outputData = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
-
         if (!this.needRun) {
             return firstData;
         }
-
         for (String key : firstData.keySet()) {
             if (this.finalLeftCols.getLeftCols().containsKey(key)) {
                 Boolean isLeft = this.finalLeftCols.getLeftCols().get(key);

@@ -44,5 +44,4 @@ public class HeteroLRHost extends HeteroLR implements Returnable {
         result.put(Dict.SCORE, ret.get(Dict.SCORE));
         return result;
     }
-
 }
