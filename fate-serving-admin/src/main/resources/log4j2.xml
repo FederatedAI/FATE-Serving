@@ -34,14 +34,16 @@
             <DefaultRolloverStrategy max="24"/>
         </RollingFile>
 
-        <!--<RollingFile name="flow" fileName="${logdir}/flow.log"
+        <!--
+        <RollingFile name="flow" fileName="${logdir}/flow.log"
                      filePattern="${logdir}/%d{yyyy-MM-dd}/flow.log.%d{yyyy-MM-dd}.log">
             <PatternLayout charset="UTF-8" pattern="%d{yyyy-MM-dd HH:mm:ss,SSS}|%m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
             </Policies>
             <DefaultRolloverStrategy max="24"/>
-        </RollingFile>-->
+        </RollingFile>
+        -->
 
         <RollingFile name="error" fileName="${logdir}/${project}-${module}-error.log"
                      filePattern="${logdir}/${project}-${module}-error.log.%d{yyyy-MM-dd}.log">
@@ -51,7 +53,6 @@
             </Policies>
             <DefaultRolloverStrategy max="24"/>
         </RollingFile>
-
 
         <RollingFile name="debug" fileName="${logdir}/${project}-${module}-debug.log"
                      filePattern="${logdir}/${project}-${module}-debug.log.%d{yyyy-MM-dd}.log">
@@ -67,9 +68,11 @@
     <Loggers>
         <logger name="org.apache.zookeeper" level="WARN"></logger>
 
-        <!--<AsyncLogger name="flow" level="info" includeLocation="true" additivity="true">
+        <!--
+        <AsyncLogger name="flow" level="info" includeLocation="true" additivity="true">
             <AppenderRef ref="flow"/>
-        </AsyncLogger>-->
+        </AsyncLogger>
+        -->
 
         <AsyncRoot level="info" includeLocation="true">
             <AppenderRef ref="console" level="info"/>
