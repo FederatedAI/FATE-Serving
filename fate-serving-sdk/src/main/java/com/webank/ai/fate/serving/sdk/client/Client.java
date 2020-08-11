@@ -33,32 +33,42 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class Client {
 
     static final String PROJECT = "serving";
     static final String SINGLE_INFERENCE = "inference";
+    static final String BATCH_INFERENCE = "batchInference";
     static final String ClIENT_PROJECT = "client";
     static final int port = 36578;
     static final String ENVIRONMENT = "online";
     private RouterService routerService;
     private GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+    private static Map<String, Client> clientMap = new ConcurrentHashMap<>();
 
-    private Client(RouterService routerService) {
-        this.routerService = routerService;
+    public static synchronized Client getClient() {
+        return new Client();
     }
 
     public static synchronized Client getClient(String zkAddress) {
         MetaInfo.PROPERTY_ACL_ENABLE = false;
         if (clientMap.get(zkAddress) == null) {
-            ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(zkAddress, ClIENT_PROJECT, ENVIRONMENT, port);
-            zookeeperRegistry.subProject(PROJECT);
-            DefaultRouterService defaultRouterService = new DefaultRouterService();
-            defaultRouterService.setRegistry(zookeeperRegistry);
-            Client client = new Client(defaultRouterService);
+            Client client = new Client();
+            client.setRegistryAddress(zkAddress);
             clientMap.put(zkAddress, client);
         }
         return clientMap.get(zkAddress);
+    }
+
+    public Client setRegistryAddress(String address) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(address), "address is blank");
+        ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(address, ClIENT_PROJECT, ENVIRONMENT, port);
+        zookeeperRegistry.subProject(PROJECT);
+        DefaultRouterService defaultRouterService = new DefaultRouterService();
+        defaultRouterService.setRegistry(zookeeperRegistry);
+        this.routerService = defaultRouterService;
+        return this;
     }
 
     public static Client getClient(String zkAddress, boolean useAcl, String aclUserName, String aclPassword) {
@@ -73,44 +83,69 @@ public class Client {
         return getClient(zkAddress);
     }
 
-    private static Map<String, Client> clientMap = new ConcurrentHashMap<>();
-
     public ReturnResult singleInference(InferenceRequest inferenceRequest) throws Exception {
         Preconditions.checkArgument(inferenceRequest != null, "inferenceRequest is null");
+        Preconditions.checkArgument(this.routerService != null, "router service is null, please call setRegistryAddress(String address) to config registry");
         Preconditions.checkArgument(StringUtils.isNotEmpty(inferenceRequest.getServiceId()));
         List<URL> urls = routerService.router(PROJECT, inferenceRequest.getServiceId(), SINGLE_INFERENCE);
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls), "serviceId " + inferenceRequest.getServiceId() + " found no url in zk");
         URL url = urls.get(0);
-        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
-        inferenceRequest.getSendToRemoteFeatureData().putAll(inferenceRequest.getFeatureData());
+
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
-        String contentString = JsonUtil.object2Json(inferenceRequest);
-        inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
+        inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceRequest), "UTF-8"));
         InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
-        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = this.getInferenceServiceBlockingStub(url.getHost(), url.getPort());
         InferenceServiceProto.InferenceMessage result = blockingStub.inference(inferenceMessage);
-        Preconditions.checkArgument(result != null);
-        Preconditions.checkArgument(result.getBody() != null);
-        ReturnResult returnResult = JsonUtil.json2Object(result.getBody().toByteArray(), ReturnResult.class);
-        return returnResult;
+        Preconditions.checkArgument(result != null && result.getBody() != null);
+        return JsonUtil.json2Object(result.getBody().toByteArray(), ReturnResult.class);
+    }
+
+    public ReturnResult singleInference(String host, int port, InferenceRequest inferenceRequest) throws Exception {
+        Preconditions.checkArgument(inferenceRequest != null, "inferenceRequest is null");
+        Preconditions.checkArgument(StringUtils.isNotEmpty(inferenceRequest.getServiceId()));
+
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
+        inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceRequest), "UTF-8"));
+        InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = this.getInferenceServiceBlockingStub(host, port);
+        InferenceServiceProto.InferenceMessage result = blockingStub.inference(inferenceMessage);
+        Preconditions.checkArgument(result != null && result.getBody() != null);
+        return JsonUtil.json2Object(result.getBody().toByteArray(), ReturnResult.class);
     }
 
     public BatchInferenceResult batchInference(BatchInferenceRequest batchInferenceRequest) throws Exception {
         Preconditions.checkArgument(batchInferenceRequest != null, "batchInferenceRequest is null");
+        Preconditions.checkArgument(this.routerService != null, "router service is null, please call setRegistryAddress(String address) to config registry");
         Preconditions.checkArgument(StringUtils.isNotEmpty(batchInferenceRequest.getServiceId()));
-        List<URL> urls = routerService.router(PROJECT, batchInferenceRequest.getServiceId(), SINGLE_INFERENCE);
+        List<URL> urls = routerService.router(PROJECT, batchInferenceRequest.getServiceId(), BATCH_INFERENCE);
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(urls), "serviceId " + batchInferenceRequest.getServiceId() + " found no url in zk");
         URL url = urls.get(0);
-        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(url.getHost(), url.getPort());
+
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
-        String contentString = JsonUtil.object2Json(batchInferenceRequest);
-        inferenceMessageBuilder.setBody(ByteString.copyFrom(contentString, "UTF-8"));
-        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
+        inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(batchInferenceRequest), "UTF-8"));
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = this.getInferenceServiceBlockingStub(url.getHost(), url.getPort());
         InferenceServiceProto.InferenceMessage result = blockingStub.batchInference(inferenceMessageBuilder.build());
-        Preconditions.checkArgument(result != null);
-        Preconditions.checkArgument(result.getBody() != null);
-        BatchInferenceResult returnResult = JsonUtil.json2Object(result.getBody().toByteArray(), BatchInferenceResult.class);
-        return returnResult;
+        Preconditions.checkArgument(result != null && result.getBody() != null);
+        return JsonUtil.json2Object(result.getBody().toByteArray(), BatchInferenceResult.class);
+    }
+
+    public BatchInferenceResult batchInference(String host, int port, BatchInferenceRequest batchInferenceRequest) throws Exception {
+        Preconditions.checkArgument(batchInferenceRequest != null, "batchInferenceRequest is null");
+        Preconditions.checkArgument(StringUtils.isNotEmpty(batchInferenceRequest.getServiceId()));
+
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
+        inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(batchInferenceRequest), "UTF-8"));
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = this.getInferenceServiceBlockingStub(host, port);
+        InferenceServiceProto.InferenceMessage result = blockingStub.batchInference(inferenceMessageBuilder.build());
+        Preconditions.checkArgument(result != null && result.getBody() != null);
+        return JsonUtil.json2Object(result.getBody().toByteArray(), BatchInferenceResult.class);
+    }
+
+    private InferenceServiceGrpc.InferenceServiceBlockingStub getInferenceServiceBlockingStub(String host, int port) throws Exception {
+        Preconditions.checkArgument(StringUtils.isNotBlank(host), "host is blank");
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.withDeadlineAfter(5000, TimeUnit.MILLISECONDS);
     }
 
 }
