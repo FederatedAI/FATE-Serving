@@ -72,47 +72,11 @@ public class WebConfig implements WebMvcConfigurer {
     public Cache cache() {
         String cacheType = MetaInfo.PROPERTY_CACHE_TYPE;
         logger.info("cache type is {},prepare to build cache", cacheType);
-        Cache cache = null;
-        switch (cacheType) {
-            case "redis":
-                String ip = MetaInfo.PROPERTY_REDIS_IP;
-                String password = MetaInfo.PROPERTY_REDIS_PASSWORD;
-                Integer port = MetaInfo.PROPERTY_REDIS_PORT;
-                Integer timeout = MetaInfo.PROPERTY_REDIS_TIMEOUT;
-                Integer maxTotal = MetaInfo.PROPERTY_REDIS_MAX_TOTAL;
-                Integer maxIdle = MetaInfo.PROPERTY_REDIS_MAX_IDLE;
-                Integer expire = MetaInfo.PROPERTY_REDIS_EXPIRE;
-                String clusterNodes = MetaInfo.PROPERTY_REDIS_CLUSTER_NODES;
-
-                RedisCache redisCache;
-                if (StringUtils.isNotBlank(clusterNodes)) {
-                    redisCache = new RedisClusterCache(clusterNodes);
-                    logger.info("redis cache mode: cluster");
-                } else {
-                    redisCache = new RedisCache();
-                    logger.info("redis cache mode: standalone");
-                }
-                redisCache.setExpireTime(timeout);
-                redisCache.setMaxTotal(maxTotal);
-                redisCache.setMaxIdel(maxIdle);
-                redisCache.setHost(ip);
-                redisCache.setPort(port);
-                redisCache.setExpireTime(expire != null ? expire : -1);
-                redisCache.setPassword(password);
-                redisCache.init();
-                cache = redisCache;
-                break;
-            case "local":
-                Integer maxSize = MetaInfo.PROPERTY_LOCAL_CACHE_MAXSIZE;
-                Integer expireTime = MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE;
-                Integer interval = MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL;
-                ExpiringLRUCache lruCache = new ExpiringLRUCache(maxSize, expireTime, interval);
-                cache = lruCache;
-                break;
-            default:
-        }
-
-        return cache;
+        Integer maxSize = MetaInfo.PROPERTY_LOCAL_CACHE_MAXSIZE;
+        Integer expireTime = MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE;
+        Integer interval = MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL;
+        ExpiringLRUCache lruCache = new ExpiringLRUCache(maxSize, expireTime, interval);
+        return lruCache;
     }
 
 
