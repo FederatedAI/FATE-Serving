@@ -27,11 +27,16 @@ public class CommonPostProcessing implements PostProcessing {
                 rcode = (Integer) modelResult.get(Dict.RET_CODE);
             }
             else {
-                rcode= InferenceRetCode.NO_RESULT;
+                rcode= InferenceRetCode.OK;
             }
-
-            Double prob = Double.parseDouble(modelResult.get("prob").toString());
-            data.put(Dict.SCORE, prob);
+            if(modelResult.get(Dict.SCORE)==null) {
+                if(modelResult.get("prob")!=null) {
+                    Double prob = Double.parseDouble(modelResult.get("prob").toString());
+                    data.put(Dict.SCORE, prob);
+                }
+            }else{
+                data.put(Dict.SCORE,modelResult.get(Dict.SCORE));
+            }
         }else{
             rcode= InferenceRetCode.NO_RESULT;
         }
