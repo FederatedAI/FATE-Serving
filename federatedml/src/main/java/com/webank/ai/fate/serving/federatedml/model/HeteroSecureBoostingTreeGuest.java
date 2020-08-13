@@ -175,15 +175,15 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
         }
 
 
-        int featureHit = 0;
+        // int featureHit = 0;
         for (String key : input.keySet()) {
             if (this.featureNameFidMapping.containsKey(key)) {
                 fidValueMapping.put(this.featureNameFidMapping.get(key).toString(), input.get(key));
-                ++featureHit;
+                // ++featureHit;
             }
         }
 
-        logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
+        // logger.info("feature hit rate : {}", 1.0 * featureHit / this.featureNameFidMapping.size());
         int[] treeNodeIds = new int[this.treeNum];
         double[] weights = new double[this.treeNum];
         int communicationRound = 0;
@@ -277,6 +277,11 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost {
             logger.info("weights is {}", weights);
         }
 
-        return getFinalPredict(weights);
+        Map<String, Object> ret = this.getFinalPredict(weights);
+        Map<String, Double>  featureStat = this.featureHitRateStatistics(context, this.featureNameFidMapping.keySet());
+        ret.put(Dict.MODELING_FEATURE_HIT_RATE, featureStat.get(Dict.MODELING_FEATURE_HIT_RATE));
+        ret.put(Dict.INPUT_DATA_HIT_RATE, featureStat.get(Dict.INPUT_DATA_HIT_RATE));
+        return ret;
+        //return getFinalPredict(weights);
     }
 }
