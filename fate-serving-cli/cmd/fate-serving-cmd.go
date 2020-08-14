@@ -33,6 +33,10 @@ type InferenceCmd struct {
 	Cmd
 }
 
+type BatchInferenceCmd struct {
+	Cmd
+}
+
 func (cmd *QuitCmd) Run() {
 	os.Exit(1)
 }
@@ -84,6 +88,7 @@ func (cmd *HelpCmd) Run() {
 	fmt.Println("showmodel  -- list the models in mermory")
 	fmt.Println("showconfig -- list the configs in use")
 	fmt.Println("inference  -- single inference request, e.g. inference #{body_json}")
+	fmt.Println("batchInference  -- batch inference request, e.g. inference #{body_json_file_path}")
 	fmt.Println("help       -- show all cmd")
 	fmt.Println("quit       -- quit")
 }
@@ -119,27 +124,6 @@ type InferenceRequest struct {
 }
 
 func (cmd *InferenceCmd) Run() {
-	/* featureData := make(map[string]interface{})
-	sendToRemoteFeatureData := make(map[string]interface{})
-	featureData["x0"] = 0.100016
-	featureData["x1"] = 1.210
-	featureData["x2"] = 2.321
-	featureData["x3"] = 3.432
-	featureData["x4"] = 4.543
-	featureData["x5"] = 5.654
-	featureData["x6"] = 5.654
-	featureData["x7"] = 0.102345
-
-	sendToRemoteFeatureData["device_id"] = "8"
-
-	InferenceReq := InferenceRequest{"lr-test", featureData, sendToRemoteFeatureData}
-
-	b, err := json.Marshal(InferenceReq)
-	if err != nil {
-		fmt.Println("Umarshal failed:", err)
-		return
-	}*/
-
 	// 参数{0}直接传body字符串
 	// inference {"serviceId":"lr-test","featureData":{"x0":0.100016,"x1":1.21,"x2":2.321,"x3":3.432,"x4":4.543,"x5":5.654,"x6":5.654,"x7":0.102345},"sendToRemoteFeatureData":{"device_id":"8"}}
 	if len(cmd.Param) == 0 {
@@ -154,6 +138,75 @@ func (cmd *InferenceCmd) Run() {
 	}
 
 	inferenceResp, error := rpc.Inference(cmd.Address, &inferenceMsg)
+	if error != nil {
+		fmt.Println(error)
+	}
+	if inferenceResp != nil {
+		dataString := string(inferenceResp.GetBody())
+		resp := common.JsonToMap(dataString)
+		fmt.Println(resp)
+	}
+}
+
+func (cmd *BatchInferenceCmd) Run() {
+	/*{
+		"serviceId": "lr-test",
+		"batchDataList": [
+			{
+				"index": 0,
+				"featureData": {
+					"x0": 0.4853,
+					"x1": 1.1996,
+					"x2": -1.574,
+					"x3": -0.8811,
+					"x4": -0.6176,
+					"x5": 0.5997,
+					"x6": -0.5361,
+					"x7": -0.1189,
+					"x8": -1.5728
+				},
+				"sendToRemoteFeatureData": {
+					"device_id": "299",
+					"phone_num": 585
+				}
+			}
+		]
+	}*/
+	var err error
+	if len(cmd.Param) == 0 {
+		fmt.Println("params empty")
+		return
+	}
+
+	// params file path
+	path := cmd.Param[0]
+
+	// read file content
+	file, err := os.Open(path)
+
+	if err != nil {
+		fmt.Println("cannot open file %s", path)
+		return
+	}
+
+	stat, _ := file.Stat()
+	if size := stat.Size(); size == 0 {
+		fmt.Println("file content empty")
+		return
+	}
+
+	buffer := make([]byte, stat.Size())
+	_, err = file.Read(buffer)
+	if err != nil {
+		fmt.Println("read failed:", err)
+		return
+	}
+
+	inferenceMsg := pb.InferenceMessage{
+		Body: buffer,
+	}
+
+	inferenceResp, error := rpc.BatchInference(cmd.Address, &inferenceMsg)
 	if error != nil {
 		fmt.Println(error)
 	}

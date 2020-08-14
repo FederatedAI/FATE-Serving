@@ -103,6 +103,12 @@ func parseCmd(cmdString string) cmd.Run {
 		inferenceCmd.Param = cmdField[1:]
 		inferenceCmd.Address = address
 		return &inferenceCmd
+	case "batchInference":
+		var batchInferenceCmd cmd.BatchInferenceCmd
+		batchInferenceCmd.Name = name
+		batchInferenceCmd.Param = cmdField[1:]
+		batchInferenceCmd.Address = address
+		return &batchInferenceCmd
 	case "help":
 		var helpCmd cmd.HelpCmd
 		helpCmd.Name = name

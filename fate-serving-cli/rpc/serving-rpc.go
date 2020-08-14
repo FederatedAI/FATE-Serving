@@ -84,11 +84,32 @@ func Inference(address string, message *pb.InferenceMessage) (*pb.InferenceMessa
 	return r, nil
 }
 
-func usage() {
-	fmt.Fprintf(os.Stderr, `
-Usage:  [-h host] [-p port]
-`)
+func BatchInference(address string, message *pb.InferenceMessage) (*pb.InferenceMessage, error) {
+	var conn *grpc.ClientConn
+	var err error
 
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	c := pb.NewInferenceServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	r, err := c.BatchInference(ctx, message)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, `Usage:  [-h host] [-p port]`)
 }
 
 func TestConn(host string, port int) {
