@@ -1,14 +1,14 @@
 package main
 
 import (
+	"bufio"
+	"fate-serving-client/cmd"
+	"fate-serving-client/rpc"
 	"flag"
 	"fmt"
 	"os"
-	"fate-serving-client/cmd"
-	"fate-serving-client/rpc"
-	"bufio"
-	"strings"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"strconv"
@@ -37,7 +37,7 @@ func init() {
 
 func main() {
 	flag.Parse()
-	rpc.TestConn(host, port);
+	rpc.TestConn(host, port)
 	go func() {
 		handleCmd()
 
@@ -97,15 +97,21 @@ func parseCmd(cmdString string) cmd.Run {
 		showConfigCmd.Param = cmdField[1:]
 		showConfigCmd.Address = address
 		return &showConfigCmd
+	case "inference":
+		var inferenceCmd cmd.InferenceCmd
+		inferenceCmd.Name = name
+		inferenceCmd.Param = cmdField[1:]
+		inferenceCmd.Address = address
+		return &inferenceCmd
 	case "help":
 		var helpCmd cmd.HelpCmd
-		helpCmd.Name = name;
+		helpCmd.Name = name
 		helpCmd.Param = cmdField[1:]
 		helpCmd.Address = address
 		return &helpCmd
 	case "quit":
 		var quitCmd cmd.QuitCmd
-		quitCmd.Name = name;
+		quitCmd.Name = name
 		quitCmd.Param = cmdField[1:]
 		quitCmd.Address = address
 		return &quitCmd
