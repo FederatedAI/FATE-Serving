@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"strconv"
 )
@@ -37,11 +38,22 @@ func init() {
 
 func main() {
 	flag.Parse()
-	rpc.TestConn(host, port)
+	go func() {
+		for true {
+			ok := rpc.TestConn(host, port)
+			if !ok {
+				os.Exit(1)
+			}
+			time.Sleep(time.Duration(5) * time.Second)
+		}
+	}()
+
 	go func() {
 		handleCmd()
 
 	}()
+
+	fmt.Println("connect to ", host, ":", port)
 
 	signalChan := make(chan os.Signal, 1) //创建一个信号量的chan，缓存为1，（0,1）意义不大
 

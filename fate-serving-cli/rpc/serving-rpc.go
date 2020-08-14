@@ -112,14 +112,15 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `Usage:  [-h host] [-p port]`)
 }
 
-func TestConn(host string, port int) {
+func TestConn(host string, port int) bool {
 	portString := strconv.Itoa(port)
 	_, err := net.Dial("tcp", host+":"+portString)
 	if err != nil {
-		fmt.Println("can not connect to ", host, ":", portString)
+		fmt.Println("\n\rcan not connect to ", host, ":", portString)
 		usage()
-		os.Exit(1)
+		//os.Exit(1)
+		return false
 	} else {
-		fmt.Println("connect to ", host, ":", portString)
+		return true
 	}
 }
