@@ -57,7 +57,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     private Set<String> dynamicEnvironments = new HashSet<String>();
     private String project;
     private int port;
-    private URL  componentUrl ;
+
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
@@ -116,13 +116,15 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     @Override
     public void doRegisterComponent(URL url) {
-        String path = url.getPath();
-        Map content = new HashMap();
-        content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
-        content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
-        this.zkClient.create(path, JsonUtil.object2Json(content), true);
-        this.componentUrl = url;
-        logger.info("register component {} {}", path,toUrlPath(url));
+        if(url !=null) {
+            String path = url.getPath();
+            Map content = new HashMap();
+            content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
+            content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
+            this.zkClient.create(path, JsonUtil.object2Json(content), true);
+            this.componentUrl = url;
+            logger.info("register component {} {}", path, toUrlPath(url));
+        }
     }
 
 

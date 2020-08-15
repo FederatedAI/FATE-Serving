@@ -436,8 +436,6 @@ export default {
             // 初始化数据
             getCluster().then(res => {
                 this.clusterData = res.data.children
-                // this.clusterData[1].children = []
-                // this.clusterData[2].children = []
                 this.tabNav(this.selected)
             })
         },
@@ -468,7 +466,7 @@ export default {
             ) {
                 index = 2
             }
-            if (this.ArrProxy && this.ArrProxy[0].children.length === 0 && this.ArrServing && this.ArrServing[0].children.length === 0) {
+            if (this.ArrProxy.length > 0 && this.ArrProxy[0].children.length === 0 && this.ArrServing && this.ArrServing[0].children.length === 0) {
                 this.clearChartTimer()
                 this.noSelectedData = true
             } else {

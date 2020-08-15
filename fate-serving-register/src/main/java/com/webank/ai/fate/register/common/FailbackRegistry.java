@@ -53,6 +53,9 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     private final HashedWheelTimer retryTimer;
 
+
+    protected URL  componentUrl ;
+
     public FailbackRegistry(URL url) {
         super(url);
         this.retryPeriod = url.getParameter(REGISTRY_RETRY_PERIOD_KEY, 5000);
@@ -471,6 +474,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 }
             }
         }
+        doRegisterComponent(this.componentUrl);
         if (logger.isDebugEnabled()) {
             logger.debug("recover over !!!!!!");
         }
