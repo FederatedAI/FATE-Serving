@@ -474,7 +474,11 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 }
             }
         }
-        doRegisterComponent(this.componentUrl);
+        if(this.componentUrl!=null) {
+            this.addFailedRegisterComponentTask(this.componentUrl);
+        }else{
+            this.addFailedRegisterComponentTask(null);
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("recover over !!!!!!");
         }

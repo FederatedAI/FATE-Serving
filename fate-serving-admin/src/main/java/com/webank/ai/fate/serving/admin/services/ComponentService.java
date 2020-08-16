@@ -61,44 +61,48 @@ public class ComponentService {
 
     @Scheduled(cron = "0/5 * * * * ?")
     public void schedulePullComponent() {
-        ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
-        NodeData root = new NodeData();
-        root.setName("cluster");
-        root.setLabel(root.getName());
-        List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
-        if (componentLists != null) {
-            Set<String> registeredNodes = new HashSet<>();
-            componentLists.forEach(name -> {
-                List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
-                if (nodes != null) {
-                    registeredNodes.addAll(nodes);
-                }
+        try {
+            ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
+            NodeData root = new NodeData();
+            root.setName("cluster");
+            root.setLabel(root.getName());
+            List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
+            if (componentLists != null) {
+                Set<String> registeredNodes = new HashSet<>();
+                componentLists.forEach(name -> {
+                    List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
+                    if (nodes != null) {
+                        registeredNodes.addAll(nodes);
+                    }
+                    NodeData componentData = new NodeData();
+                    componentData.setName(name);
+                    componentData.setLabel(root.getLabel() + "-" + componentData.getName());
+                    root.getChildren().add(componentData);
+                    if (CollectionUtils.isNotEmpty(nodes)) {
+                        nodes.forEach(nodeName -> {
+                            String content = zkClient.getContent(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name + PATH_SEPARATOR + nodeName);
+                            Map contentMap = JsonUtil.json2Object(content, Map.class);
+                            NodeData nodeData = new NodeData();
+                            nodeData.setName(nodeName);
+                            nodeData.setLeaf(true);
+                            nodeData.setLabel(componentData.getLabel() + "-" + nodeData.getName());
+                            nodeData.setTimestamp((Long) contentMap.get(Constants.TIMESTAMP_KEY));
+                            componentData.getChildren().add(nodeData);
+                        });
+                    }
+                });
 
-                NodeData componentData = new NodeData();
-                componentData.setName(name);
-                componentData.setLabel(root.getLabel() + "-" + componentData.getName());
-                root.getChildren().add(componentData);
-                if (CollectionUtils.isNotEmpty(nodes)) {
-                    nodes.forEach(nodeName -> {
-                        String content = zkClient.getContent(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name + PATH_SEPARATOR + nodeName);
-                        Map contentMap = JsonUtil.json2Object(content, Map.class);
-                        NodeData nodeData = new NodeData();
-                        nodeData.setName(nodeName);
-                        nodeData.setLeaf(true);
-                        nodeData.setLabel(componentData.getLabel() + "-" + nodeData.getName());
-                        nodeData.setTimestamp((Long) contentMap.get(Constants.TIMESTAMP_KEY));
-                        componentData.getChildren().add(nodeData);
-                    });
-                }
-            });
+                whitelist.clear();
+                whitelist.addAll(registeredNodes);
+            }
+            cachedNodeData = root;
 
-            whitelist.clear();
-            whitelist.addAll(registeredNodes);
-        }
-        cachedNodeData = root;
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("refresh  component info ");
+            if (logger.isDebugEnabled()) {
+                logger.debug("refresh  component info ");
+            }
+        }catch(Exception e){
+            logger.error("get component from zk error",e);
+            cachedNodeData=null;
         }
     }
 

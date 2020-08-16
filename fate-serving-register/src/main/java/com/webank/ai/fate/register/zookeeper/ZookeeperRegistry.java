@@ -116,6 +116,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     @Override
     public void doRegisterComponent(URL url) {
+        if(url==null) {
+            String hostAddress = NetUtils.getLocalIp();
+            String path = PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + project + PATH_SEPARATOR + hostAddress + ":" + port;
+            url = new URL(path, Maps.newHashMap());
+            url.addParameter(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
+        }
+
         if(url !=null) {
             String path = url.getPath();
             Map content = new HashMap();
@@ -129,15 +136,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
 
     public void registerComponent() {
-        String hostAddress = NetUtils.getLocalIp();
-        String path = PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + project + PATH_SEPARATOR + hostAddress + ":" + port;
-        URL url = new URL(path, Maps.newHashMap());
-        url.addParameter(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
         try {
-            doRegisterComponent(url);
+            doRegisterComponent(null);
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            addFailedRegisterComponentTask(url);
+            logger.error("registerComponent error",e);
+            addFailedRegisterComponentTask(null);
         }
     }
 

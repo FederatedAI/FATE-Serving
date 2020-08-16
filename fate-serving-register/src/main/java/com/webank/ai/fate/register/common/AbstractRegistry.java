@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.register.common;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.register.interfaces.NotifyListener;
 import com.webank.ai.fate.register.interfaces.Registry;
@@ -25,6 +26,7 @@ import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.webank.ai.fate.register.common.Constants.*;
+import static org.apache.curator.utils.ZKPaths.PATH_SEPARATOR;
 
 public abstract class AbstractRegistry implements Registry {
     public final static String INSTANCE_ID = UUID.randomUUID().toString();
