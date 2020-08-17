@@ -6,6 +6,7 @@ import (
 	"fate-serving-client/rpc"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Cmd struct {
@@ -131,7 +132,12 @@ func (cmd *InferenceCmd) Run() {
 		return
 	}
 
-	b := []byte(cmd.Param[0])
+	param := cmd.Param[0]
+	param = strings.ReplaceAll(param, "\n", "")
+	param = strings.ReplaceAll(param, "\r", "")
+	param = strings.ReplaceAll(param, "\t", "")
+
+	b := []byte(param)
 
 	inferenceMsg := pb.InferenceMessage{
 		Body: b,
@@ -202,8 +208,13 @@ func (cmd *BatchInferenceCmd) Run() {
 		return
 	}
 
+	request := string(buffer)
+	request = strings.ReplaceAll(request, "\n", "")
+	request = strings.ReplaceAll(request, "\r", "")
+	request = strings.ReplaceAll(request, "\t", "")
+
 	inferenceMsg := pb.InferenceMessage{
-		Body: buffer,
+		Body: []byte(request),
 	}
 
 	inferenceResp, error := rpc.BatchInference(cmd.Address, &inferenceMsg)
