@@ -191,7 +191,7 @@ func (cmd *BatchInferenceCmd) Run() {
 	file, err := os.Open(path)
 
 	if err != nil {
-		fmt.Println("cannot open file %s", path)
+		fmt.Println("cannot open file ", path)
 		return
 	}
 
