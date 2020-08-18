@@ -13,31 +13,6 @@
                 <el-table-column prop="name" label="Name" show-overflow-tooltip />
                 <el-table-column prop="host" label="Host" show-overflow-tooltip />
                 <el-table-column prop="port" label="Port" show-overflow-tooltip />
-                <!-- <el-table-column sortable width="200px" prop="routerMode" label="Router Mode" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <span v-if="!(showEdit === scope.$index)">
-                            {{ scope.row.routerMode }}
-                        </span>
-                        <div v-else>
-                            <el-select popper-class="router-mode" v-model="routerMode" placeholder="请选择">
-                                <el-option
-                                v-for="item in options"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </div>
-                    </template>
-                </el-table-column> -->
-                <!-- <el-table-column sortable  prop="version" label="Version" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <span v-if="!(showEdit === scope.$index)">
-                            {{ scope.row.version }}
-                        </span>
-                        <el-input class="input"  v-else v-model.number="version" @input='inputversion' placeholder="请输入version"></el-input>
-                    </template>
-                </el-table-column> -->
                 <el-table-column sortable  prop="weight" label="Weight" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span v-if="!(showEdit === scope.$index)">
@@ -199,15 +174,11 @@ export default {
         edit(row, index) {
             this.showEdit = index
             this.rowData = row
-            // this.routerMode = row.routerMode
-            // this.version = row.version
             this.weight = row.weight
         },
         verify(row) {
             this.rowData = row
             this.fverifyVisible = true
-            // this.version = row.version
-            // this.weight = row.weight
             if (row.callName === 'batchInference') {
                 this.json.verifydata = {
                     'serviceId': row.environment,
@@ -313,21 +284,12 @@ export default {
                 host: this.rowData.host,
                 port: this.rowData.port,
                 url: this.rowData.url,
-                // routerMode: this.routerMode,
-                // version: this.version,
                 weight: this.weight
             }
             serviceUpdate(params).then(res => {
                 this.initserviceList()
             })
         },
-        // inputversion() {
-        //     if (this.version > 100) {
-        //         this.version = 100
-        //     } else if (this.version < 0 && this.weight !== '') {
-        //         this.version = 0
-        //     }
-        // },
         inputweight() {
             var re = /^[0-9]+$/
             if (!re.test(this.weight)) {
@@ -437,7 +399,6 @@ export default {
             .el-button{
                 width:200px;
                 height:36px;
-                // background:rgba(33,122,217,1);
                 opacity:1;
                 margin: 24px 0 24px;
             }

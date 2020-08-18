@@ -68,8 +68,6 @@ export default {
             })
         },
         exit() {
-            // this.visible = false
-            // setCookie('sessionToken', '', -1)
             this.$store.dispatch('Logout').then(res => {
                 this.$router.push({ path: '/home/login' })
                 this.visible = false

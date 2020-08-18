@@ -12,14 +12,6 @@
                     >{{ selected === 1 ? 'serving-proxy' : 'serving-server' }}</span>
                     <span class="ip-list-des">Click IP to view the instance details</span>
                 </div>
-                <!-- <div class="instance"> -->
-                    <!-- <el-input
-                    placeholder="search for instance"
-                    v-model="instance"
-                    @change="searchInstance">
-                    <el-button slot="prepend" icon="el-icon-search"></el-button>
-                    </el-input>-->
-                <!-- </div> -->
                 <div class="ip-list-line"></div>
                 <div class="ip-list-main">
                     <iplist :activeip="activeip" :ipData="ipData" @selectIP="selectIP"/>
@@ -331,7 +323,7 @@ export default {
         return {
             titvisible: false,
             qps: '',
-            noSelectedData: false,
+            noSelectedData: true,
             serviceIDCheckList: [],
             cancel: false,
             polar: {}, // model图表信息
@@ -377,8 +369,6 @@ export default {
         dialogVisible: {
             handler: function(val) {
                 if (!val) {
-                    // clearInterval(this.modelsTimer)
-                    // clearInterval(this.moTimer)
                     this.clearChartTimer()
                 }
             },
@@ -394,18 +384,6 @@ export default {
             immediate: true,
             deep: true
         },
-        // selected: {
-        //     handler: function(val, old) {
-        //         console.log(val, old)
-        //         if (old) {
-        //             this.ipInfo = 0
-        //             this.listProps()
-        //             clearInterval(this.clusterTimer)
-        //         }
-        //     },
-        //     immediate: true,
-        //     deep: true
-        // }
         ipPort: {
             handler: function(val, old) {
                 if (old) {
@@ -414,6 +392,16 @@ export default {
                         this.listProps()
                         this.ipInfo = 0
                     }
+                }
+            },
+            immediate: true,
+            deep: true
+        },
+        ipchildrenData: {
+            handler: function(val, old) {
+                if (!val) {
+                    this.activeip = 0
+                    this.ipchildrenData = this.ipData.children[0]
                 }
             },
             immediate: true,
@@ -482,11 +470,9 @@ export default {
             if (this.ipDataArr[0] && this.ipDataArr[0].children.length) {
                 this.ipData = this.ipDataArr[0]
                 this.ipchildrenData = this.ipData.children[this.activeip]
-                this.ipPort = this.ipchildrenData.name.split(':')
-                // if (this.flag || info) {
-                //     this.listProps()
-                //     this.flag = false
-                // }
+                setTimeout(() => {
+                    this.ipPort = this.ipData.children[this.activeip].name.split(':')
+                })
             } else {
                 this.ipchildrenData = []
                 this.basicData = []
@@ -720,11 +706,10 @@ export default {
             // Basic 搜索key
             this.listProps(this.searchkey)
         },
-        searchInstance() {
-            // ip搜索
-        },
         selectIP(item, index) {
             // 选中ip
+            this.searchkey = ''
+            this.serviceid = ''
             this.activeip = +index
             this.ipchildrenData = item
             this.titvisible = false
