@@ -417,7 +417,7 @@ public class ModelManager implements InitializingBean {
         Preconditions.checkArgument(modelLoader != null, "model loader not found");
         ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
         if (modelProcessor == null) {
-            throw new ModelProcessorInitException("modelProcessor is null");
+            throw new ModelProcessorInitException("model initialization error, please check if the model exists and the configuration of the FATEFLOW load model process is correct.");
         }
         model.setModelProcessor(modelProcessor);
         this.namespaceMap.put(namespaceKey, model);
