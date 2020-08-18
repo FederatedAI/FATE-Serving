@@ -128,22 +128,24 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     }
 
     public void addFailedRegisterComponentTask(URL url) {
-        String instanceId = url.getParameter(INSTANCE_ID);
+        if(url!=null) {
+            String instanceId = AbstractRegistry.INSTANCE_ID;
 
-        FailedRegisterComponentTask oldOne = this.failedRegisterComponent.get(instanceId);
-        if (oldOne != null) {
-            return;
-        }
-        FailedRegisterComponentTask newTask = new FailedRegisterComponentTask(url, this);
-        oldOne = failedRegisterComponent.putIfAbsent(instanceId, newTask);
-        if (oldOne == null) {
-            // never has a retry task. then start a new task for retry.
-            retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
+            FailedRegisterComponentTask oldOne = this.failedRegisterComponent.get(instanceId);
+            if (oldOne != null) {
+                return;
+            }
+            FailedRegisterComponentTask newTask = new FailedRegisterComponentTask(url, this);
+            oldOne = failedRegisterComponent.putIfAbsent(instanceId, newTask);
+            if (oldOne == null) {
+                // never has a retry task. then start a new task for retry.
+                retryTimer.newTimeout(newTask, retryPeriod, TimeUnit.MILLISECONDS);
+            }
         }
     }
 
     public void removeFailedRegisterComponentTask(URL url) {
-        String instanceId = url.getParameter(INSTANCE_ID);
+        String instanceId = AbstractRegistry.INSTANCE_ID;
         FailedRegisterComponentTask oldOne = this.failedRegisterComponent.remove(instanceId);
         if (oldOne != null) {
             oldOne.cancel();

@@ -120,7 +120,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             String hostAddress = NetUtils.getLocalIp();
             String path = PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + project + PATH_SEPARATOR + hostAddress + ":" + port;
             url = new URL(path, Maps.newHashMap());
-            url.addParameter(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
+            //url=url.addParameter(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
         }
 
         if(url !=null) {
@@ -130,7 +130,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
             content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
             this.zkClient.create(path, JsonUtil.object2Json(content), true);
             this.componentUrl = url;
-            logger.info("register component {} {}", path, toUrlPath(url));
+
+            logger.info("register component {} ", path);
         }
     }
 
