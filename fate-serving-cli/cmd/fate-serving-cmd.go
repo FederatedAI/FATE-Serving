@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fate-serving-client/common"
 	"fate-serving-client/pb"
 	"fate-serving-client/rpc"
@@ -125,31 +126,31 @@ type InferenceRequest struct {
 }
 
 func (cmd *InferenceCmd) Run() {
-	// 参数{0}直接传body字符串
-	// inference {"serviceId":"lr-test","featureData":{"x0":0.100016,"x1":1.21,"x2":2.321,"x3":3.432,"x4":4.543,"x5":5.654,"x6":5.654,"x7":0.102345},"sendToRemoteFeatureData":{"device_id":"8"}}
+	// inference /data/projects/request.json
+	// {"serviceId":"lr-test","featureData":{"x0":0.100016,"x1":1.21,"x2":2.321,"x3":3.432,"x4":4.543,"x5":5.654,"x6":5.654,"x7":0.102345},"sendToRemoteFeatureData":{"device_id":"8"}}
+	var err error
 	if len(cmd.Param) == 0 {
 		fmt.Println("params empty")
 		return
 	}
 
-	param := cmd.Param[0]
-	param = strings.ReplaceAll(param, "\n", "")
-	param = strings.ReplaceAll(param, "\r", "")
-	param = strings.ReplaceAll(param, "\t", "")
-
-	b := []byte(param)
+	content, err := readParams(cmd.Param[0])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	inferenceMsg := pb.InferenceMessage{
-		Body: b,
+		Body: content,
 	}
 
-	inferenceResp, error := rpc.Inference(cmd.Address, &inferenceMsg)
-	if error != nil {
-		fmt.Println(error)
+	inferenceResp, err := rpc.Inference(cmd.Address, &inferenceMsg)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 	if inferenceResp != nil {
-		dataString := string(inferenceResp.GetBody())
-		resp := common.JsonToMap(dataString)
+		resp := string(inferenceResp.GetBody())
 		fmt.Println(resp)
 	}
 }
@@ -185,45 +186,49 @@ func (cmd *BatchInferenceCmd) Run() {
 	}
 
 	// params file path
-	path := cmd.Param[0]
+	content, err := readParams(cmd.Param[0])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
+	inferenceMsg := pb.InferenceMessage{
+		Body: content,
+	}
+
+	inferenceResp, err := rpc.BatchInference(cmd.Address, &inferenceMsg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if inferenceResp != nil {
+		resp := string(inferenceResp.GetBody())
+		fmt.Println(resp)
+	}
+}
+
+func readParams(path string) ([]byte, error) {
 	// read file content
 	file, err := os.Open(path)
 
 	if err != nil {
-		fmt.Println("cannot open file ", path)
-		return
+		return nil, err
 	}
 
 	stat, _ := file.Stat()
 	if size := stat.Size(); size == 0 {
-		fmt.Println("file content empty")
-		return
+		return nil, errors.New("file content empty")
 	}
 
 	buffer := make([]byte, stat.Size())
 	_, err = file.Read(buffer)
 	if err != nil {
-		fmt.Println("read failed:", err)
-		return
+		return nil, err
 	}
 
 	request := string(buffer)
 	request = strings.ReplaceAll(request, "\n", "")
 	request = strings.ReplaceAll(request, "\r", "")
 	request = strings.ReplaceAll(request, "\t", "")
-
-	inferenceMsg := pb.InferenceMessage{
-		Body: []byte(request),
-	}
-
-	inferenceResp, error := rpc.BatchInference(cmd.Address, &inferenceMsg)
-	if error != nil {
-		fmt.Println(error)
-	}
-	if inferenceResp != nil {
-		dataString := string(inferenceResp.GetBody())
-		resp := common.JsonToMap(dataString)
-		fmt.Println(resp)
-	}
+	return []byte(request), err
 }
