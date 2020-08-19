@@ -292,7 +292,7 @@ public class ModelManager implements InitializingBean {
                 Model model = namespaceMap.get(modelEntry.getValue());
                 if (model != null) {
                     environments.add(modelEntry.getKey());
-                    environments.add(model.getPartId());
+                    //environments.add(model.getPartId());
                 }
             }
             this.registerService(environments);
@@ -331,7 +331,7 @@ public class ModelManager implements InitializingBean {
             if (StringUtils.isNotEmpty(serviceId)) {
                 zookeeperRegistry.addDynamicEnvironment(serviceId);
             }
-            zookeeperRegistry.addDynamicEnvironment(model.getPartId());
+         //   zookeeperRegistry.addDynamicEnvironment(model.getPartId());
             zookeeperRegistry.register(FateServer.serviceSets);
         }
         //update cache
