@@ -41,11 +41,6 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description TODO
- * @Author
- **/
-// TODO utu: may load from cfg file is a better choice compare to using annotation?
 @Service
 @FateService(name = Dict.SERVICENAME_INFERENCE, preChain = {
         "requestOverloadBreaker",

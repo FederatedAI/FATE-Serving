@@ -43,10 +43,6 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description TODO
- * @Author
- **/
 @Service
 @FateService(name = "unaryCall", preChain = {
         "requestOverloadBreaker",
