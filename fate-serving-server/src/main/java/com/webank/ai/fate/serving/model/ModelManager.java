@@ -52,7 +52,6 @@ public class ModelManager implements InitializingBean {
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
-
     @Autowired
     ModelLoaderFactory modelLoaderFactory;
     File serviceIdFile;
@@ -87,7 +86,6 @@ public class ModelManager implements InitializingBean {
                 throw new ModelNullException("unbind request info is error");
             }
         });
-
         if (zookeeperRegistry != null) {
             Set<URL> registered = zookeeperRegistry.getRegistered();
             List<URL> unRegisterUrls = Lists.newArrayList();
@@ -187,7 +185,6 @@ public class ModelManager implements InitializingBean {
                     }
                 });
             }
-
             try {
                 // Create new cache file after restore
                 generateParent(namespaceFile);
@@ -226,10 +223,8 @@ public class ModelManager implements InitializingBean {
     }
 
     public synchronized void restore(Context context) {
-
         // compatible 1.2.x
         restoreOldVersionCache();
-
         ConcurrentMap<String, String> tempServiceIdNamespaceMap = new ConcurrentHashMap<>(8);
         ConcurrentMap<String, Model> tempNamespaceMap = new ConcurrentHashMap<>(8);
         doLoadCache(tempNamespaceMap, namespaceFile);
@@ -313,25 +308,20 @@ public class ModelManager implements InitializingBean {
             logger.debug("try to bind model, receive request : {}", req);
         }
         ReturnResult returnResult = new ReturnResult();
-
         String serviceId = req.getServiceId();
         Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
-
         returnResult.setRetcode(StatusCode.SUCCESS);
         Model model = this.buildModelForBind(context, req);
-
         String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
         Model loadedModel = this.namespaceMap.get(modelKey);
         if (loadedModel == null) {
             throw new ModelNullException("model " + modelKey + " is not exist ");
         }
-
         this.serviceIdNamespaceMap.put(serviceId, modelKey);
         if (zookeeperRegistry != null) {
             if (StringUtils.isNotEmpty(serviceId)) {
                 zookeeperRegistry.addDynamicEnvironment(serviceId);
             }
-         //   zookeeperRegistry.addDynamicEnvironment(model.getPartId());
             zookeeperRegistry.register(FateServer.serviceSets);
         }
         //update cache
@@ -365,12 +355,10 @@ public class ModelManager implements InitializingBean {
         String role = req.getLocal().getRole();
         model.setPartId(req.getLocal().getPartyId());
         model.setRole(Dict.GUEST.equals(role) ? Dict.GUEST : Dict.HOST);
-
         Map<String, ModelServiceProto.RoleModelInfo> modelMap = req.getModelMap();
         ModelServiceProto.RoleModelInfo roleModelInfo = modelMap.get(model.getRole());
         Map<String, ModelServiceProto.ModelInfo> modelInfoMap = roleModelInfo.getRoleModelInfoMap();
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
-
         String remotePartyRole = model.getRole().equals(Dict.GUEST) ? Dict.HOST : Dict.GUEST;
         ModelServiceProto.Party remoteParty = roleMap.get(remotePartyRole);
         String remotePartyId = remoteParty.getPartyIdList().get(0);
@@ -384,7 +372,6 @@ public class ModelManager implements InitializingBean {
         remoteModel.setTableName(remoteTableName);
         remoteModel.setRole(remotePartyRole);
         model.getFederationModelMap().put(remoteModel.getPartId(), remoteModel);
-
         ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
@@ -548,7 +535,6 @@ public class ModelManager implements InitializingBean {
             logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", request.getTableName(), request.getNamespace());
             throw new ModelNullException(" found model info, please check if the model is already loaded.");
         }
-//        String serviceId = model.getServiceId();
         List<String> serviceIds = Lists.newArrayList();
         String nameSpaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
         serviceIdNamespaceMap.forEach((k, v) -> {
@@ -664,13 +650,10 @@ public class ModelManager implements InitializingBean {
             // new version
             String loadModelStoreFileName = locationPre + "/.fate/loadModelStore.cache";
             String bindModelStoreFileName = locationPre + "/.fate/bindModelStore.cache";
-
             namespaceFile = new File(loadModelStoreFileName);
             generateParent(namespaceFile);
-
             serviceIdFile = new File(bindModelStoreFileName);
             generateParent(serviceIdFile);
-
             // compatible 1.2.x
             locationPre = System.getProperty(Dict.PROPERTY_USER_HOME);
             String publishLoadFileName = locationPre + "/.fate/publishLoadStore.cache";
