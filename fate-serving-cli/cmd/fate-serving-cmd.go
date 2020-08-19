@@ -65,7 +65,7 @@ type Run interface {
 
 func (cmd *ShowModelCmd) Run() {
 	request := pb.QueryModelRequest{
-		QueryType: 1,
+		QueryType: 0,
 	}
 	queryModelResponse, error := rpc.QueryModelInfo(cmd.Address, &request)
 
