@@ -35,18 +35,16 @@ public class InferenceParamValidator implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-
         try {
             Preconditions.checkArgument(StringUtils.isNotEmpty(context.getCaseId()), "case id is null");
             Preconditions.checkArgument(null != inboundPackage.getHead(), Dict.HEAD + " is null");
             //Preconditions.checkArgument(null != inboundPackage.getBody(),Dict.BODY + " is null");
             //Preconditions.checkArgument(StringUtils.isNotEmpty((String) inboundPackage.getHead().get(Dict.SERVICE_ID)), Dict.SERVICE_ID + " is null");
-            Preconditions.checkArgument(Dict.SERVICENAME_INFERENCE.equals(context.getCallName()),"invalid call name") ;
-        }catch(Exception e){
-
+            Preconditions.checkArgument(Dict.SERVICENAME_INFERENCE.equals(context.getCallName())
+                    || Dict.SERVICENAME_BATCH_INFERENCE.equals(context.getCallName()),"invalid call name") ;
+        } catch (Exception e){
             throw new GuestInvalidParamException(e.getMessage());
         }
-
     }
 
     @Override
