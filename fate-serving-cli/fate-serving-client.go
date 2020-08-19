@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- package main
+package main
 
 import (
 	"bufio"
@@ -72,7 +72,7 @@ func main() {
 
 	signalChan := make(chan os.Signal, 1) //创建一个信号量的chan，缓存为1，（0,1）意义不大
 
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM) //让进城收集信号量。
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM) //让进程收集信号量。
 
 	<-signalChan
 

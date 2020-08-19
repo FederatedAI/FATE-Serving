@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- package rpc
+package rpc
 
 import (
 	"context"
@@ -31,6 +31,8 @@ func QueryServingServerConfig(address string, queryPropsRequest *pb.QueryPropsRe
 	//glogger.Info("try to UnaryCall,address",address)
 	var conn *grpc.ClientConn
 	var err error
+
+	defer panicRecover()
 
 	conn, err = grpc.Dial(address, grpc.WithInsecure())
 
@@ -56,6 +58,8 @@ func QueryModelInfo(address string, queryModelRequest *pb.QueryModelRequest) (*p
 	var conn *grpc.ClientConn
 	var err error
 
+	defer panicRecover()
+
 	conn, err = grpc.Dial(address, grpc.WithInsecure())
 
 	if err != nil {
@@ -79,6 +83,8 @@ func QueryModelInfo(address string, queryModelRequest *pb.QueryModelRequest) (*p
 func Inference(address string, message *pb.InferenceMessage) (*pb.InferenceMessage, error) {
 	var conn *grpc.ClientConn
 	var err error
+
+	defer panicRecover()
 
 	conn, err = grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
@@ -104,6 +110,8 @@ func BatchInference(address string, message *pb.InferenceMessage) (*pb.Inference
 	var conn *grpc.ClientConn
 	var err error
 
+	defer panicRecover()
+
 	conn, err = grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
@@ -125,7 +133,7 @@ func BatchInference(address string, message *pb.InferenceMessage) (*pb.Inference
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `Usage:  [-h host] [-p port]`)
+	fmt.Fprintf(os.Stderr, "Usage:  [-h host] [-p port]\n\r")
 }
 
 func TestConn(host string, port int) bool {
@@ -133,10 +141,15 @@ func TestConn(host string, port int) bool {
 	_, err := net.Dial("tcp", host+":"+portString)
 	if err != nil {
 		fmt.Println("\n\rcan not connect to ", host, ":", portString)
-		usage()
-		//os.Exit(1)
+		//usage()
 		return false
 	} else {
 		return true
+	}
+}
+
+func panicRecover() {
+	if r := recover(); r != nil {
+		fmt.Printf("error occurred: %v\r\n", r)
 	}
 }

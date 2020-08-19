@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- package cmd
+package cmd
 
 import (
 	"errors"
@@ -56,7 +56,7 @@ type BatchInferenceCmd struct {
 }
 
 func (cmd *QuitCmd) Run() {
-	os.Exit(1)
+	os.Exit(0)
 }
 
 type Run interface {
@@ -101,14 +101,36 @@ func (cmd *ShowModelCmd) Run() {
 }
 
 func (cmd *HelpCmd) Run() {
+	if len(cmd.Param) == 0 {
+		fmt.Println("Usage:")
+		fmt.Println("	./fate-serving-client [-h host] [-p port]")
+		fmt.Println("The commands are:")
+		fmt.Println("	showmodel		-- list the models in mermory")
+		fmt.Println("	showconfig		-- list the configs in use")
+		fmt.Println("	inference		-- single inference request, e.g. inference request.json")
+		fmt.Println("	batchInference		-- batch inference request, e.g. batchInference request.json")
+		fmt.Println("	help       		-- show all cmd")
+		fmt.Println("	quit       		-- quit")
+		fmt.Println("Use \"help <command>\" for more information about inference command.\n")
+	} else {
+		command := cmd.Param[0]
+		switch {
+		case command == "inference":
+			fmt.Println("Usage: inference [args...]")
+			fmt.Println("args:")
+			fmt.Println("	{0}: request the absolute path of the json file")
+			fmt.Println("file content format:")
+			fmt.Println("	{\"serviceId\":\"lr-test\",\"featureData\":{\"x0\":0.100016,\"x1\":1.21,\"x2\":2.321,\"x3\":3.432,\"x4\":4.543,\"x5\":5.654,\"x6\":5.654,\"x7\":0.102345},\"sendToRemoteFeatureData\":{\"device_id\":\"8\"}}\n")
+		case command == "batchInference":
+			fmt.Println("Usage: batchInference [args...]")
+			fmt.Println("args:")
+			fmt.Println("	{0}: request the absolute path of the json file")
+			fmt.Println("file content format:")
+			fmt.Println("	{\"serviceId\":\"lr-test\",\"batchDataList\":[{\"index\":0,\"featureData\":{\"x0\":0.4853,\"x1\":1.1996,\"x2\":-1.574,\"x3\":-0.8811,\"x4\":-0.6176,\"x5\":0.5997,\"x6\":-0.5361,\"x7\":-0.1189,\"x8\":-1.5728},\"sendToRemoteFeatureData\":{\"device_id\":\"299\",\"phone_num\":585}}]}\n")
+		default:
 
-	fmt.Println("surport cmd:")
-	fmt.Println("showmodel  -- list the models in mermory")
-	fmt.Println("showconfig -- list the configs in use")
-	fmt.Println("inference  -- single inference request, e.g. inference #{body_json}")
-	fmt.Println("batchInference  -- batch inference request, e.g. inference #{body_json_file_path}")
-	fmt.Println("help       -- show all cmd")
-	fmt.Println("quit       -- quit")
+		}
+	}
 }
 
 func (cmd *ShowConfigCmd) Run() {
