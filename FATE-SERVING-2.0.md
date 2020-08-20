@@ -16,22 +16,37 @@ FATE-SERVING 2.0 支持的特性：
 
 
 ## 架构图
-![image-20200812100310796](/Users/kaideng/Library/Application Support/typora-user-images/image-20200812100310796.png)
-## 工作时序图
-![image-20200812100121588](/Users/kaideng/Library/Application Support/typora-user-images/image-20200812100121588.png)
-
+![image-20200812100310796](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200812100310796.png)
 
 ## 部署架构 
 
 fate-serving 的部署架构图如下
-![image-20200812102459733](/Users/kaideng/Library/Application Support/typora-user-images/image-20200812102459733.png)
+![image-20200812102459733](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200812102459733.png)
 
 如上图所示，整个集群需要有几个组件
 
    - serving-server 
+
+     serving-server用于实时处理在线预测请求,理论上serving-server需要从fate-flow加载模型成功之后才能对外提供服务。在FATE中建好模型之后，通过fate-flow的推送模型脚本可以将模型推送至serving-server。 推送成功之后，serving-server会将该模型相关的预测接口注册进zookeeper ，外部系统可以通过服务发现获取接口地址并调用。同时本地文件持久化该模型,以便在serving-server实例在集群中某些组件不可用的情况下，仍然能够从本地文件中恢复模型。 
+
    - serving-proxy
-   - serving-admin(非必选)
-   - [zookeeper](https://zookeeper.apache.org/) 3.5.5 以上版本
+
+     serving-proxy 是serving-server的代理，对外提供了grpc接口以及http的接口，主要用于联邦预测请求的路由转发以及鉴权。在离线的联邦建模时，每一个参与方都会分配一个唯一的partId。serving-proxy维护了一个各参与方partId的路由表，并通过路由表中的信息来转发请求。
+
+   - serving-admin
+
+     serving-admin 提供在线集群的可视化操作界面，可以查看管理集群中各节点的配置以及状态、查看模型列表、流量的调控、并能提供一定的监控的功能。
+
+   - [zookeeper](https://zookeeper.apache.org/) 
+
+     zookeeper 用户各组件的信息同步协调以及服务注册于发现
+
+## 工作时序图
+
+![image-20200812100121588](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200812100121588.png)
+
+
+## 
 
 ## 源码打包部署
 fate-serving 使用mvn作为jar包管理以及打包的工具，在打包前需要检查以下条件是否满足：
@@ -39,26 +54,43 @@ fate-serving 使用mvn作为jar包管理以及打包的工具，在打包前需�
  - 有良好的网络
  - 已安装maven
 
+> 可以选择从源码打包部署，也可以选择下载已编译好的版本 ，下载链接见github
+
 
 ### serving-server的部署
 
-serving-server用于实时处理在线预测请求,serving-server需要从fate-flow加载模型成功之后才能对外提供服务。在FATE中建好模型之后，通过fate-flow的推送模型脚本可以将模型推送至serving-server。 推送成功之后，serving-server会将该模型相关的预测接口注册进zookeeper ，外部系统可以通过服务发现获取接口地址并调用。同时本地文件持久化该模型,以便在serving-server实例在集群中某些组件不可用的情况下，仍然能够从本地文件中恢复模型。 
+- 
+  源码打包部署步骤
 
-   > 部署serving-server时，可以根据实际业务请求量来动态扩缩容。
-
-
-部署步骤
 1. 从github上克隆代码git clone https://github.com/FederatedAI/FATE-Serving.git
+
 2. 执行 cd  FATE-Serving ，进入源码的根目录。
-3. 执行 mvn clean package -Dmaven.test.skip=true命令
+
+3. 执行 mvn clean package命令
+
 4. 拷贝 serving-server/target/fate-serving-server-{version}-release.zip 到想要部署的路径下，并解压。（version为当前版本）
-5. 根据需要修改或者不修改部署目录下conf/serving-server.properties文件
- > 默认使用端口为8000 ，以及默认使用zookeeper，一般情况下需要检查并修改zookeeper地址
+
+5. 根据需要修改或者不修改部署目录下conf/serving-server.properties文件，具体的配置项见serving-server.properties的配置详解
+
+   > 需要检查配置文件中以下几点：
+   >
+   >  zk.url 是否配置正确
+   >
+   > model.transfer.url是否配置正确
+
 6. sh service.sh restart 启动应用（windows 脚本暂时不 支持，如有需要可自行编写）
+
+   > 有可能出现的问题：
+   >
+   > jdk 没有安装成功，可以尝试执行  java  -version 查看java命令是否能正常执行
 
 7. 检查日志与端口看启动是否正常
 
-   
+   > 默认日志目录：
+   >
+   > 安装目录下logs文件夹，查看fate-serving-server.log  和fate-serving-server-error.log  
+   >
+   > 可以结合 ps 命令以及netstat命令查看进程以及端口状态
 
 
 #### serving-server.properties的配置详解
@@ -106,29 +138,26 @@ serving-server用于实时处理在线预测请求,serving-server需要从fate-f
 
 ### serving-proxy的部署
 
-serving-proxy 是serving-server的代理，对外提供了grpc接口以及http的接口，主要用于联邦预测请求的路由转发以及鉴权。在离线的联邦建模时，每一个参与方都会分配一个唯一的partId。serving-proxy维护了一个各参与方partId的路由表，并通过路由表中的信息来转发请求。
-
-
-   >serving-proxy的路由是根据接口中的
-
 
 1. 从github上克隆代码git clone https://github.com/FederatedAI/FATE-Serving.git  (若已执行过，则不需要再次执行)
 
 2. 执行 cd  FATE-Serving ，进入源码的根目录。
 
-3. 执行 mvn clean package -Dmaven.test.skip=true命令 (若已执行过，则不需要再次执行)
+3. 执行 mvn clean package命令 (若已执行过，则不需要再次执行)
 
 4. 拷贝 fate-serving-proxy/target/fate-serving-proxy-{version}-release.zip 到想要部署的路径下，并解压。（version为当前版本）
 
-5. 修改部署目录下 config/application.properties文件，具体的配置项解释见 
+5. 修改部署目录下 conf/application.properties文件，具体的配置项解释见下面配置文件详解
 
-6. router_table.json文件
+6. 配置router_table.json ，具体的配置项解释见下面router_table.json文件详解，可以结合下文中具体的案例理解。
+
+   > 对router_table.json 的修改是实时生效，不需要重启serving-proxy。配置本身为json格式，修改时需要注意是否满足json格式。
 
 7. sh service.sh restart 启动应用（windows 脚本暂时不 支持，如有需要可自行编写）
 
 8. 检查日志与端口看启动是否正常 
 
-  
+   
 ### serving-proxy配置文件application.properties的详解 
 
 
@@ -215,23 +244,40 @@ serving-admin提供了集群的可视化操作界面，可以展示集群中各�
 2. 执行 cd  FATE-Serving ，进入源码的根目录。
 3. 执行 mvn clean package -Dmaven.test.skip=true命令 (若已执行过，则不需要再次执行)
 4. 拷贝 fate-serving-admin/target/fate-serving-admin-{version}-release.zip 到想要部署的路径下，并解压。（version为当前版本）
-5. 修改部署目录下 application.properties文件，具体的配置项解释见 
+5. 修改部署目录下 conf/application.properties文件，具体的配置项解释见下文
 6. sh service.sh restart 启动应用（windows脚本暂时不支持，如有需要可自行编写）
 7. 通过浏览器访问admin页面，默认端口8350  
 
 
 
+#### serving-admin配置文件application.properties的详解 
+
+| 配置项             | 配置项含义                                     | 默认值                                       |
+| ------------------ | ---------------------------------------------- | -------------------------------------------- |
+| server.port        | 服务端口                                       | 8350                                         |
+| local.cache.expire | 内置缓存过期时间，单位：秒                     | 300                                          |
+| zk.url             | zookeeper集群地址，serving-admin需开启注册中心 | localhost:2181,localhost:2182,localhost:2183 |
+| grpc.timeout       | grpc请求超时时间                               | 5000                                         |
+| admin.username     | 预设用户名                                     | admin                                        |
+| admin.username     | 预设密码                                       | admin                                        |
+| acl.enable         | 是否使用zookeeper acl鉴权                      | false                                        |
+| acl.username       | acl 用户名                                     | 默认空                                       |
+| acl.password       | acl 密码                                       | 默认空                                       |
+| print.input.data   | flow日志打印请求参数                           | false                                        |
+| print.output.data  | flow日志打印返回参数                           | false                                        |
+
 
 
 ###部署案例
 
-![image-20200818205024739](/Users/kaideng/Library/Application Support/typora-user-images/image-20200818205024739.png)
+![image-20200818205024739](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200818205024739.png)
 
 上图橙色代表guest ，蓝色代表host。
 
 #### guest部署
 
-guest 的serving-proxy  application.properties 配置
+- guest 的serving-proxy  application.properties 配置：
+
 ```
 coordinator=9999 
 server.port=8059
@@ -241,7 +287,8 @@ proxy.grpc.inter.port=9370
 
 ```
 
-guest 的serving-proxy router_table.json配置：
+- guest 的serving-proxy router_table.json配置：
+
 
 ```json
 {
@@ -261,19 +308,28 @@ guest 的serving-proxy router_table.json配置：
 ```
 由于guest的请求只会向外发送，所以只需要配置出口ip端口就好，  如以上代码所示只需要配置default转发规则，则会将所有请求转发至出口ip
 
-guest 的 serving-server配置
+- guest 的 serving-server配置：
+
 
 ```
 port=8000
-model.transfer.url=http://72.168.0.2:9380/v1/model/transfer
+model.transfer.url=http://172.168.0.2:9380/v1/model/transfer
 zk.url=172.168.0.1:2181,172.168.0.2:2181,172.168.0.2:2181
 ```
 
+- guest 的 serving-admin配置
 
+```
+server.port=8350
+zk.url=172.168.0.1:2181,172.168.0.2:2181,172.168.0.2:2181
+admin.username=admin
+admin.password=admin
+```
 
 #### host 配置：
 
-host 的serving-proxy  application.properties 配置
+- host 的serving-proxy  application.properties 配置：
+
 
 ```
 coordinator=10000 
@@ -284,7 +340,8 @@ proxy.grpc.inter.port=9370
 
 ```
 
-host 的serving-proxy router_table.json配置：
+- host 的serving-proxy router_table.json配置：
+
 
 ```json
 {
@@ -314,7 +371,8 @@ host 的serving-proxy router_table.json配置：
 
 ```
 
-host 的 serving-server配置
+- host 的 serving-server配置：
+
 
 ```
 port=8000
@@ -324,26 +382,39 @@ feature.single.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.MockAdapter
 feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.MockBatchAdapter
 ```
 
+- host 的 serving-admin配置
+
+```
+server.port=8350
+zk.url=172.134.0.1:2181,172.134.0.2:2181,172.134.0.2:2181
+admin.username=admin
+admin.password=admin
+```
+
+#### 
 
 
+## 如何加载模型及验证 
+> Tips：源码中提供了简单的LR模型用于进行简单测试，可以在没有安装FATE的情况下使用该模式。将 [example/model_cache_example.zip](https://github.com/FederatedAI/FATE-Serving/tree/feature-2.0-self/example/model_cache_example.zip) 解压至guest与host双方serving-server实例部署目录下的`.fate`目录下（若是不存在可手动新建该目录），重启即可自动加载模型并绑定到`lr-test`
 
-## 如何加载模型 
 前面介绍了如何安装各个组件，在各组件都成功安装后，接下来需要将模型推送至serving-server。
 推送模型的一般流程是  
 
 1.  通过FATE建模
 2.  分别部署guest方 Fate-serving 与host方Fate-serving
-3.  分别配置好guest方FATE-FLOW与guest方Fate-serving、host方FATE-FLOW 与host方Fate-serving，请参考[FATE-Flow配置](#fateflow)
-4.  推送模型
-5.  将模型绑定serviceId
+3.  分别配置好guest方Fate-flow与guest方Fate-serving、host方Fate-flow 与host方Fate-serving ，Fateflow配置见github上的介绍，下文简单罗列了Fateflow的配置，可用作参考。
+4.  Fate-flow推送模型
+5.  Fate-flow将模型绑定serviceId
 
-> 如果是为了验证以及学习用，可以简化部署。代码中提供了简单的LR模型，用于进行简单测试，将 [example/model_cache_example.zip](https://github.com/FederatedAI/FATE-Serving/tree/feature-2.0-self/example/model_cache_example.zip) 解压至guest与host双方serving-server实例部署目录下的`.fate`目录下，重启即可自动加载模型并绑定到`lr-test`（Service ID）
->
-> 
+6 .  以上操作完成后，可以在serving-admin页面上查看模型相关信息（此步操作非必需）
+
+7. 可以在serving-admin页面上测试调用（此步操作非必需）
+
+
 
 具体的工作流程如下图所示 蓝色为guest集群，灰色代表host集群  
 
-![image-20200818155326883](/Users/kaideng/Library/Application Support/typora-user-images/image-20200818155326883.png)
+![image-20200818155326883](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200818155326883.png)
 
 ### FATE-Flow的配置（1.4.x 版本）
 
@@ -351,10 +422,6 @@ feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.MockBatchAda
 > 注意多方都需要修改成各自FATE-Serving的实际部署地址
 
 #### 1.未启用注册中心
-当FATE-Serving集群未启用注册中心时：
-
-**修改服务配置**
-
 - 修改arch/conf/server_conf.json，填入FATE-Serving集群实际部署serving-server服务的ip:port，如：
 
 ```json
@@ -367,10 +434,6 @@ feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.MockBatchAda
 - 重启FATE-Flow服务
 
 #### 2.启用注册中心
-当FATE-Serving集群启用注册中心时：
-
-**修改服务配置**
-
 - 修改部署目录下arch/conf/base_conf.yaml
 
 ```yaml
@@ -474,13 +537,19 @@ zookeeper:
 
 
 ## 推理接口
-FATE-Serving的在线推理功能，需要通过Guest和Host双方对模型数据样本进行联合预测，入口则是Guest方提供的inference接口。目前可以通过serving-proxy提供的http接口访问，由serving-proxy转发至serving-server，或者使用提供的sdk（目前提供了java版）直接访问serving-server
-推理接口目前支持单笔以及批量接口
 
-目前有以下几方式调用推理接口，具体采用哪种方式可以根据实际情况选择。
+推理接口目前支持单笔以及批量接口，目前有以下几方式调用推理接口，具体采用哪种方式可以根据实际情况选择。
+
+- 使用guest方serving-admin页面发送请求。优点：使用简单，可用作测试。
+
+  ![image-20200819160640098](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200819160640098.png)
+
+  ![image-20200819160748275](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200819160748275.png)
 
 - 访问serving-proxy的http接口 ，由serving-proxy转发请求至serving-server。优点：接入简单，可在serving-proxy前面增加nginx作为反向代理。
+
 - 使用源码中自带的SDK访问serving-server。 优点：省去了中间serving-proxy作为转发节点 ，提高通信效率。并将使用fate-serving的服务注册以及发现等功能，直接调用serving-server的grpc接口
+
 - 自行开发并直接调用serving-server提供的grpc接口。优点：目前sdk部分只提供了java版，若是其他未支持的语言，可以自行开发并调用相关接口 。部署时可以采用 nginx前置部署，用于反向代理grpc请求。
 
 
@@ -884,7 +953,7 @@ mvn clean package -pl fate-serving-extension -am
 
 单独打包``fate-serving-extension``，将``target/fate-serving-extension-{version}.jar``拷贝到``serving-server``部署目录下``extension``中覆盖，重启服务即可生效。
 
->``serving-server``部署目录下``extension``已加载到类路径
+>serving-server``部署目录下``extension``已加载到类路径
 
 ### 预设Adapter
 fate-serving-extension中预设了6种Adapter的简单实现
@@ -1006,30 +1075,35 @@ print.input.data=true   // flow日志打印参数
 print.output.data=true  // flow日志打印返回值
 ```
 
-
-
-
-
-
-
 ## fate-serving-client命令行工具
-FATE-Serving提供了fate-serving-client工具进行便捷调用。
+FATE-Serving提供了fate-serving-client工具进行
 下载系统对应版本fate-serving-client：
 
 - linux版本：[fate-serving-client-2.0.0-linux.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.0.0-linux.tar.gz)
 - mac版本：[fate-serving-client-2.0.0-darwin.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.0.0-darwin.tar.gz)
 
 在终端中使用``./fate-serving-client``启动，
-默认情况下，client连接localhost:8000，使用参数可以指定目标地址``./fate-serving-client [-h host] [-p port]``
+默认情况下，client连接localhost:8000，使用参数可以指定目标地址``./fate-serving-client [-h host] [-p port]``     host为需要连接的serving-server的ip ，  port 为serving-server对外暴露的端口。
 
 ```
-./fate-serving-client 127.0.0.1 8000
+./fate-serving-client -h 127.0.0.1 -p 8000
 ```
+![image-20200819204720045](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200819204720045.png)
+
+
+
 提供了以下几种指令：
+
 - showconfig 查看服务配置
+
+  ![image-20200819204819579](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200819204819579.png)
+
 - showmodel 查看已发布的模型信息
+
+  ![image-20200819204935228](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200819204935228.png)
+
 - inference		在线单笔预测，参数为参数文件路径，如：inference /data/projects/request.json
-**参数格式**
+/data/projects/request.json文件的内容为：
 {
     "serviceId": "lr-test",
     "featureData": {
@@ -1047,32 +1121,34 @@ FATE-Serving提供了fate-serving-client工具进行便捷调用。
     }
 }
 
-- batchInference	在线批量预测，参数为参数文件路径，如：inference /data/projects/request.json
-**参数格式**
-{
-	"serviceId": "lr-test",
-	"batchDataList": [
-		{
-			"index": 0,
-			"featureData": {
-				"x0": 0.4853,
-				"x1": 1.1996,
-				"x2": -1.574,
-				"x3": -0.8811,
-				"x4": -0.6176,
-				"x5": 0.5997,
-				"x6": -0.5361,
-				"x7": -0.1189,
-				"x8": -1.5728
-			},
-			"sendToRemoteFeatureData": {
-				"device_id": "299",
-				"phone_num": 585
-			}
-		}
-	]
-}
+- batchInference	在线批量预测，参数为参数文件路径，如：batchInference /data/projects/request.json
+  /data/projects/request.json 的内容为：
+  {
+  "serviceId": "lr-test",
+  "batchDataList": [
+  	{
+  		"index": 0,
+  		"featureData": {
+  			"x0": 0.4853,
+  			"x1": 1.1996,
+  			"x2": -1.574,
+  			"x3": -0.8811,
+  			"x4": -0.6176,
+  			"x5": 0.5997,
+  			"x6": -0.5361,
+  			"x7": -0.1189,
+  			"x8": -1.5728
+  		},
+  		"sendToRemoteFeatureData": {
+  			"device_id": "299",
+  			"phone_num": 585
+  		}
+  	}
+  ]
+  }
+
 - help		查看帮助信息
+
 - quit		关闭连接
 
 
@@ -1130,7 +1206,7 @@ serving-admin提供了FATE-Serving集群的可视化操作界面，依赖zookeep
 
 在安装serving-admin并启动之后，可以通过浏览器进行访问 ,默认用户名 admin  密码admin
 
-![image-20200817153000630](/Users/kaideng/Library/Application Support/typora-user-images/image-20200817153000630.png)
+![image-20200817153000630](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/image-20200817153000630.png)
 
 
 
