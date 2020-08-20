@@ -177,15 +177,6 @@
         </dependency>
     </dependencies>
 
-    <!--
-     Contributors are welcomed to join FATE-Serving project. Please check readme about how to contribute to this project.
-     contributors:
-      - kaideng<forgive_dengkai@163.com>
-      - dylanxu<dylanxu666@foxmail.com>
-
-     If there is a problem, please send the question to the contributor's email, the developer will answer it for you.
-     -->
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -396,3 +387,12 @@
     </build>
 
 </project>
+
+<!--
+ Contributors are welcomed to join FATE-Serving project. Please check readme about how to contribute to this project.
+ contributors:
+  - kaideng<forgive_dengkai@163.com>
+  - dylanxu<dylanxu666@foxmail.com>
+
+ If there is a problem, please send the question to the contributor's email, the developer will answer it for you.
+ -->
