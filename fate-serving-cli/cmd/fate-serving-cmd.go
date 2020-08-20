@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fate-serving-client/common"
 	"fate-serving-client/pb"
@@ -79,21 +80,32 @@ func (cmd *ShowModelCmd) Run() {
 			modelInfo := queryModelResponse.ModelInfos[i]
 			tableName := modelInfo.TableName
 			namespace := modelInfo.Namespace
-			fmt.Println("tableName: ", tableName)
-			fmt.Println("namesapce: ", namespace)
-			fmt.Println("content: ", modelInfo.Content)
+			fmt.Println("tableName:	", tableName)
+			fmt.Println("namesapce:	", namespace)
+			//fmt.Println("content: ", modelInfo.Content)
 			contentMap := common.JsonToMap(modelInfo.Content)
 			serviceIds := modelInfo.ServiceIds
-			fmt.Println("timestamp: ", contentMap["timestamp"])
-			fmt.Println("role: ", contentMap["role"])
-			fmt.Println("partId: ", contentMap["partId"])
-			fmt.Println("remote info: ", contentMap["federationModelMap"])
+			fmt.Println("resourceName:	", contentMap["resourceName"])
+			timestamp := contentMap["timestamp"]
+			fmt.Println("timestamp:	", int(timestamp.(float64)))
+			fmt.Println("role:		", contentMap["role"])
+			fmt.Println("partId:		", contentMap["partId"])
+			federationModelMap, err := json.Marshal(contentMap["federationModelMap"])
+			if err == nil {
+				fmt.Println("remoteInfo:	", string(federationModelMap))
+			}
+
+			rolePartyMapList, err := json.Marshal(contentMap["rolePartyMapList"])
+			if err == nil {
+				fmt.Println("roleParty:	", string(rolePartyMapList))
+			}
+
 			if serviceIds != nil {
-				fmt.Printf("serviceIds: ")
+				var ids string
 				for i := 0; i < len(serviceIds); i++ {
-					fmt.Printf(serviceIds[i] + " ")
+					ids = ids + serviceIds[i] + ""
 				}
-				fmt.Println()
+				fmt.Println("serviceId:	", ids)
 			}
 			fmt.Println("=========================================")
 		}
