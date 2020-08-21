@@ -41,6 +41,7 @@ public class NetUtils {
     private static final int MIN_PORT = 0;
     private static final int MAX_PORT = 65535;
     private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
+    private static final Pattern LOCALHOST_PATTERN = Pattern.compile("localhost\\:\\d{1,5}$");
     private static final Pattern LOCAL_IP_PATTERN = Pattern.compile("127(\\.\\d{1,3}){3}$");
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
     private static final String SPLIT_IPV4_CHARECTER = "\\.";
@@ -63,6 +64,10 @@ public class NetUtils {
         return RND_PORT_START + ThreadLocalRandom.current().nextInt(RND_PORT_RANGE);
     }
 
+
+    public static boolean isLocalhostAddress(String address){
+       return LOCALHOST_PATTERN.matcher(address).matches();
+    }
     public static int getAvailablePort() {
         try (ServerSocket ss = new ServerSocket()) {
             ss.bind(null);
