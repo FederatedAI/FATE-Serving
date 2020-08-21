@@ -16,32 +16,40 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.List;
 import java.util.Map;
-
 
 public class FederatedParams {
 
-
-//            federatedParams.put(Dict.CASEID, inferenceRequest.getCaseid());
-//        federatedParams.put(Dict.SEQNO, inferenceRequest.getSeqno());
-//        federatedParams.put("local", modelNamespaceData.getLocal());
-//        federatedParams.put("model_info", new ModelInfo(modelName, modelNamespace));
-//        federatedParams.put("role", modelNamespaceData.getRole());
-//        federatedParams.put("feature_id", featureIds);
-
     String caseId;
-
     String seqNo;
-
+    boolean isBatch;
     FederatedParty local;
     ModelInfo modelInfo;
     FederatedRoles role;
     Map<String, Object> featureIdMap = Maps.newHashMap();
+    List<Map<String, Object>> batchFeatureIdMapList = Lists.newArrayList();
     Map<String, Object> data = Maps.newHashMap();
+
+    public boolean isBatch() {
+        return isBatch;
+    }
+
+    public void setBatch(boolean batch) {
+        isBatch = batch;
+    }
+
+    public List<Map<String, Object>> getBatchFeatureIdMapList() {
+        return batchFeatureIdMapList;
+    }
+
+    public void setBatchFeatureIdMapList(List<Map<String, Object>> batchFeatureIdMapList) {
+        this.batchFeatureIdMapList = batchFeatureIdMapList;
+    }
 
     public ModelInfo getModelInfo() {
         return modelInfo;
@@ -86,10 +94,6 @@ public class FederatedParams {
     public Map<String, Object> getFeatureIdMap() {
         return featureIdMap;
     }
-
-//    public void setFeatureIdda(Map<String, Object> featureIdMap) {
-//        this.featureIdMap = featureIdMap;
-//    }
 
     public Map<String, Object> getData() {
         return data;

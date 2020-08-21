@@ -1,0 +1,11 @@
+[
+  {
+    "source": "commonService",
+    "allow_qps": 0
+  },
+  {
+    "source": "singleInference",
+    "allow_qps": 2
+  }
+]
+

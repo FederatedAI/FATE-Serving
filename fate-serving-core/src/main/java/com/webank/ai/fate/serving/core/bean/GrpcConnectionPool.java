@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.core.bean;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import io.grpc.Channel;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
@@ -36,94 +35,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class GrpcConnectionPool {
+
     private static final Logger logger = LoggerFactory.getLogger(GrpcConnectionPool.class);
+
     static private GrpcConnectionPool pool = new GrpcConnectionPool();
+
     public ConcurrentHashMap<String, ChannelResource> poolMap = new ConcurrentHashMap<String, ChannelResource>();
-    private int maxTotalPerAddress = Configuration.getPropertyInt("rpc.connections.per.address",Runtime.getRuntime().availableProcessors());
-    private long defaultLoadFactor = Configuration.getPropertyInt("rpc.per.channel.loadfactor",10);
-
-    private void fireChannelError(String k ,ConnectivityState  status) {
-        logger.error("grpc channel {} status is {}", k,status);
-    }
-    class ChannelResource{
-
-        public  ChannelResource(String address){
-            this.address = address;
-        }
-        String  address;
-
-        List<ManagedChannel> channels = Lists.newArrayList();
-
-        AtomicLong requestCount = new AtomicLong(0);
-
-        public List<ManagedChannel> getChannels() {
-            return channels;
-        }
-
-        public void setChannels(List<ManagedChannel> channels) {
-            this.channels = channels;
-        }
-
-        public AtomicLong getRequestCount() {
-            return requestCount;
-        }
-
-        public void setRequestCount(AtomicLong requestCount) {
-            this.requestCount = requestCount;
-        }
-
-
-        public long getLatestChecktimestamp() {
-            return latestChecktimestamp;
-        }
-
-        public void setLatestChecktimestamp(long latestChecktimestamp) {
-            this.latestChecktimestamp = latestChecktimestamp;
-        }
-
-        long  latestChecktimestamp = 0;
-
-        public long getPreCheckCount() {
-            return preCheckCount;
-        }
-
-        public void setPreCheckCount(long preCheckCount) {
-            this.preCheckCount = preCheckCount;
-        }
-
-        long  preCheckCount = 0;
-    }
-
-    private  boolean needAddChannel(ChannelResource  channelResource){
-        long requestCount = channelResource.getRequestCount().longValue();
-        long preCount = channelResource.getPreCheckCount();
-        long latestTimestamp = channelResource.getLatestChecktimestamp();
-
-        int channelSize  = channelResource.getChannels().size();
-        long now = System.currentTimeMillis();
-        long loadFactor = ((requestCount - preCount) * 1000) / (channelSize * (now - latestTimestamp));
-        channelResource.setLatestChecktimestamp(now);
-        channelResource.setPreCheckCount(requestCount);
-        if(channelSize>maxTotalPerAddress){
-            return  false;
-        }
-        if(latestTimestamp==0){
-            return false;
-        }
-        if(channelSize>0) {
-
-            if (loadFactor >defaultLoadFactor){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        else{
-            return true;
-        }
-    }
+    Random r = new Random();
+    private int maxTotalPerAddress = Runtime.getRuntime().availableProcessors();
+    private long defaultLoadFactor = 10;
     private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
+
     private GrpcConnectionPool() {
 
         scheduledExecutorService.scheduleAtFixedRate(
@@ -133,7 +55,7 @@ public class GrpcConnectionPool {
 
                         poolMap.forEach((k, v) -> {
                             try {
-                                logger.info("grpc pool {} channel size {} req count {}",k,v.getChannels().size(),v.getRequestCount().get()-v.getPreCheckCount());
+                                logger.info("grpc pool {} channel size {} req count {}", k, v.getChannels().size(), v.getRequestCount().get() - v.getPreCheckCount());
 
                                 if (needAddChannel(v)) {
                                     String[] ipPort = k.split(":");
@@ -146,7 +68,7 @@ public class GrpcConnectionPool {
                                     try {
                                         ConnectivityState state = e.getState(true);
                                         if (state.equals(ConnectivityState.TRANSIENT_FAILURE) || state.equals(ConnectivityState.SHUTDOWN)) {
-                                            fireChannelError(k,state);
+                                            fireChannelError(k, state);
                                         }
                                     } catch (Exception ex) {
                                         ex.printStackTrace();
@@ -166,13 +88,43 @@ public class GrpcConnectionPool {
 
     }
 
-
     static public GrpcConnectionPool getPool() {
         return pool;
     }
 
+    private void fireChannelError(String k, ConnectivityState status) {
+        logger.error("grpc channel {} status is {}", k, status);
+    }
 
-    public ManagedChannel getManagedChannel(String key) throws Exception {
+    private boolean needAddChannel(ChannelResource channelResource) {
+        long requestCount = channelResource.getRequestCount().longValue();
+        long preCount = channelResource.getPreCheckCount();
+        long latestTimestamp = channelResource.getLatestChecktimestamp();
+
+        int channelSize = channelResource.getChannels().size();
+        long now = System.currentTimeMillis();
+        long loadFactor = ((requestCount - preCount) * 1000) / (channelSize * (now - latestTimestamp));
+        channelResource.setLatestChecktimestamp(now);
+        channelResource.setPreCheckCount(requestCount);
+        if (channelSize > maxTotalPerAddress) {
+            return false;
+        }
+        if (latestTimestamp == 0) {
+            return false;
+        }
+        if (channelSize > 0) {
+
+            if (loadFactor > defaultLoadFactor) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    public ManagedChannel getManagedChannel(String key) {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
             return createInner(key);
@@ -183,22 +135,22 @@ public class GrpcConnectionPool {
     }
 
 
-    public ManagedChannel getManagedChannel(String ip,int port) throws Exception {
+    public ManagedChannel getManagedChannel(String ip, int port) {
         String key = new StringBuilder().append(ip).append(":").append(port).toString();
         return this.getManagedChannel(key);
     }
-    Random r = new Random();
 
-    private ManagedChannel getRandomManagedChannel(ChannelResource  channelResource) {
-        List<ManagedChannel>  list =  channelResource.getChannels();
+    private ManagedChannel getRandomManagedChannel(ChannelResource channelResource) {
+        List<ManagedChannel> list = channelResource.getChannels();
         Preconditions.checkArgument(list != null && list.size() > 0);
         int index = r.nextInt(list.size());
         ManagedChannel result = list.get(index);
         channelResource.getRequestCount().addAndGet(1);
-        return  result;
+        return result;
 
     }
-    private synchronized ManagedChannel createInner(String key) throws Exception {
+
+    private synchronized ManagedChannel createInner(String key) {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
             String[] ipPort = key.split(":");
@@ -207,7 +159,7 @@ public class GrpcConnectionPool {
             ManagedChannel managedChannel = createManagedChannel(ip, port);
             List<ManagedChannel> managedChannelList = new ArrayList<ManagedChannel>();
             managedChannelList.add(managedChannel);
-            channelResource = new  ChannelResource(key);
+            channelResource = new ChannelResource(key);
             channelResource.setChannels(managedChannelList);
             channelResource.getRequestCount().addAndGet(1);
             poolMap.put(key, channelResource);
@@ -217,13 +169,8 @@ public class GrpcConnectionPool {
         }
 
     }
-    ;
 
-
-
-
-    public synchronized ManagedChannel createManagedChannel(String ip, int port) throws Exception {
-
+    public synchronized ManagedChannel createManagedChannel(String ip, int port) {
         if (logger.isDebugEnabled()) {
             logger.debug("create ManagedChannel");
         }
@@ -239,12 +186,55 @@ public class GrpcConnectionPool {
                 .enableRetry()
                 .retryBufferSize(16 << 20)
                 .maxRetryAttempts(20);      // todo: configurable
-                builder.negotiationType(NegotiationType.PLAINTEXT)
+        builder.negotiationType(NegotiationType.PLAINTEXT)
                 .usePlaintext();
 
         return builder.build();
+    }
 
+    class ChannelResource {
 
+        String address;
+        List<ManagedChannel> channels = Lists.newArrayList();
+        AtomicLong requestCount = new AtomicLong(0);
+        long latestChecktimestamp = 0;
+        long preCheckCount = 0;
+
+        public ChannelResource(String address) {
+            this.address = address;
+        }
+
+        public List<ManagedChannel> getChannels() {
+            return channels;
+        }
+
+        public void setChannels(List<ManagedChannel> channels) {
+            this.channels = channels;
+        }
+
+        public AtomicLong getRequestCount() {
+            return requestCount;
+        }
+
+        public void setRequestCount(AtomicLong requestCount) {
+            this.requestCount = requestCount;
+        }
+
+        public long getLatestChecktimestamp() {
+            return latestChecktimestamp;
+        }
+
+        public void setLatestChecktimestamp(long latestChecktimestamp) {
+            this.latestChecktimestamp = latestChecktimestamp;
+        }
+
+        public long getPreCheckCount() {
+            return preCheckCount;
+        }
+
+        public void setPreCheckCount(long preCheckCount) {
+            this.preCheckCount = preCheckCount;
+        }
     }
 
 }
