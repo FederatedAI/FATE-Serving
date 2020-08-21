@@ -48,43 +48,44 @@ public class GrpcConnectionPool {
 
     private GrpcConnectionPool() {
 
-        scheduledExecutorService.scheduleAtFixedRate(
-                new Runnable() {
-                    @Override
-                    public void run() {
+            scheduledExecutorService.scheduleAtFixedRate(
+                    new Runnable() {
+                        @Override
+                        public void run() {
 
-                        poolMap.forEach((k, v) -> {
-                            try {
-                                logger.info("grpc pool {} channel size {} req count {}", k, v.getChannels().size(), v.getRequestCount().get() - v.getPreCheckCount());
+                            poolMap.forEach((k, v) -> {
+                                try {
+                                    //logger.info("grpc pool {} channel size {} req count {}", k, v.getChannels().size(), v.getRequestCount().get() - v.getPreCheckCount());
 
-                                if (needAddChannel(v)) {
-                                    String[] ipPort = k.split(":");
-                                    String ip = ipPort[0];
-                                    int port = Integer.parseInt(ipPort[1]);
-                                    ManagedChannel managedChannel = createManagedChannel(ip, port);
-                                    v.getChannels().add(managedChannel);
-                                }
-                                v.getChannels().forEach(e -> {
-                                    try {
-                                        ConnectivityState state = e.getState(true);
-                                        if (state.equals(ConnectivityState.TRANSIENT_FAILURE) || state.equals(ConnectivityState.SHUTDOWN)) {
-                                            fireChannelError(k, state);
-                                        }
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                        logger.error("channel {} check status error", k);
+                                    if (needAddChannel(v)) {
+                                        String[] ipPort = k.split(":");
+                                        String ip = ipPort[0];
+                                        int port = Integer.parseInt(ipPort[1]);
+                                        ManagedChannel managedChannel = createManagedChannel(ip, port);
+                                        v.getChannels().add(managedChannel);
                                     }
+                                    v.getChannels().forEach(e -> {
+                                        try {
+                                            ConnectivityState state = e.getState(true);
+                                            if (state.equals(ConnectivityState.TRANSIENT_FAILURE) || state.equals(ConnectivityState.SHUTDOWN)) {
+                                                fireChannelError(k, state);
+                                            }
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                            logger.error("channel {} check status error", k);
+                                        }
 
-                                });
-                            } catch (Exception e) {
-                                logger.error("channel {} check status error", k);
-                            }
-                        });
-                    }
-                },
-                1000,
-                10000,
-                TimeUnit.MILLISECONDS);
+                                    });
+                                } catch (Exception e) {
+                                    logger.error("channel {} check status error", k);
+                                }
+                            });
+                        }
+                    },
+                    1000,
+                    10000,
+                    TimeUnit.MILLISECONDS);
+
 
     }
 
