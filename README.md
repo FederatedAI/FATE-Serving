@@ -6,8 +6,7 @@
 
 ## Introduction
 
-FATE-Serving is a high-performance, industrialized serving system for federated learning models, designed for production environments. for more detail, You can click [document](https://github.com/FederatedAI/FATE-Serving/wiki) for more information for more information 
-
+FATE-Serving is a high-performance, industrialized serving system for federated learning models, designed for production environments. 
 ### FATE-Serving now supports
 
 - High performance online Federated Learning algorithms.
