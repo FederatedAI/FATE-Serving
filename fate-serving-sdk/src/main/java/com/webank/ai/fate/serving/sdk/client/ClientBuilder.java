@@ -33,7 +33,6 @@ public class ClientBuilder {
      */
     private static  RegistedClient  registedClient;
 
-
     private static  synchronized RegistedClient  getClientUseRegister(String zkAddress,boolean useAcl) {
         Preconditions.checkArgument(StringUtils.isNotEmpty(zkAddress));
         MetaInfo.PROPERTY_ACL_ENABLE=useAcl;
@@ -45,11 +44,10 @@ public class ClientBuilder {
             RegistedClient client = new RegistedClient(zkAddress);
             registedClient= client;
         }else{
-            throw  new  RuntimeException("register is already exist ,register address is"+registedClient.getRegisterAddress());
+            throw  new  RuntimeException("register is already exist ,register address is "+ registedClient.getRegisterAddress());
         }
         return  registedClient;
     }
-
 
     /**
      *
@@ -59,16 +57,10 @@ public class ClientBuilder {
      * @param aclPassword
      * @return
      */
-
     public static synchronized RegistedClient getClientUseRegister(String zkAddress, boolean useAcl, String aclUserName, String aclPassword) {
-        if (useAcl) {
-            System.setProperty("acl.enable", "true");
-        } else {
-            System.setProperty("acl.enable", "false");
-        }
-        System.setProperty("acl.username", aclUserName != null ? aclUserName : "");
-        System.setProperty("acl.password", aclPassword != null ? aclPassword : "");
         MetaInfo.PROPERTY_ACL_ENABLE = useAcl;
+        MetaInfo.PROPERTY_ACL_USERNAME = aclUserName;
+        MetaInfo.PROPERTY_ACL_PASSWORD = aclPassword;
         return getClientUseRegister(zkAddress,useAcl);
     }
 
