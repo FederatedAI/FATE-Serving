@@ -72,12 +72,14 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                     .retryPolicy(new RetryNTimes(1, 1000))
                     .connectionTimeoutMs(timeout);
 
-            if (MetaInfo.PROPERTY_ACL_ENABLE) {
+            aclEnable = MetaInfo.PROPERTY_ACL_ENABLE;
+            if (aclEnable) {
                 aclUsername = MetaInfo.PROPERTY_ACL_USERNAME;
                 aclPassword = MetaInfo.PROPERTY_ACL_PASSWORD;
 
                 if (StringUtils.isBlank(aclUsername) || StringUtils.isBlank(aclPassword)) {
                     aclEnable = false;
+                    MetaInfo.PROPERTY_ACL_ENABLE = false;
                 } else {
                     builder.authorization(SCHEME, (aclUsername + ":" + aclPassword).getBytes());
 
