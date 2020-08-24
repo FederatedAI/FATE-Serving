@@ -29,4 +29,9 @@ public enum InferenceActionType {
      * GET_RESULT
      */
     GET_RESULT,
+    /**
+     *
+     */
+    BATCH
+
 }

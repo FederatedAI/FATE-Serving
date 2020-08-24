@@ -16,7 +16,7 @@
 
 package com.webank.ai.fate.serving.core.bean;
 
-
+import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 
@@ -50,6 +50,10 @@ public interface Context<Req, Resp> {
     public void hitCache(boolean hitCache);
 
     public Context subContext();
+
+    public String getInterfaceName();
+
+    public void setInterfaceName(String interfaceName);
 
     public String getActionType();
 
@@ -86,9 +90,9 @@ public interface Context<Req, Resp> {
 
     public void setResultData(Object resultData);
 
-    public String getReturnCode();
+    public int getReturnCode();
 
-    public void setReturnCode(String returnCode);
+    public void setReturnCode(int returnCode);
 
     public long getDownstreamCost();
 
@@ -110,9 +114,9 @@ public interface Context<Req, Resp> {
 
     public void setServiceName(String serviceName);
 
-    public void setCallName(String callName);
-
     public String getCallName();
+
+    public void setCallName(String callName);
 
     public String getServiceId();
 
@@ -121,4 +125,11 @@ public interface Context<Req, Resp> {
     public String getApplyId();
 
     public void setApplyId(String applyId);
+
+    public ListenableFuture getRemoteFuture();
+
+    public void setRemoteFuture(ListenableFuture future);
+
+    public String getResourceName();
+
 }

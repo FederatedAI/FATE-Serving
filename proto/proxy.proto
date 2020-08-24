@@ -22,8 +22,8 @@ package com.webank.ai.fate.api.networking.proxy;
 
 // metadata of event
 message Model {
-    string name = 1;
-    string dataKey = 2;
+    string namespace = 1;
+    string tableName = 2;
 }
 
 // metadata of task
@@ -58,7 +58,7 @@ message Metadata {
     Topic dst = 3;                      // destincation topic
     Command command = 4;                // task managing command (if any)
     string operator = 5;                // model operator
-    int64 seq = 6;                      // stream seq (reserved)
+    int64 version = 6;                      // 接口版本
     int64 ack = 7;                      // stream ack (reserved)
     Conf conf = 8;                      // operation config
 }
@@ -87,29 +87,14 @@ message Packet {
     AuthInfo auth = 3;      // authentication info, optional
 }
 
-// returned by service heartbeat to decide next operation
-enum Operation {
-    START = 0;
-    RUN = 1;
-    STOP = 2;
-    KILL = 3;
-    GET_DATA = 4;
-    PUT_DATA = 5;
-}
 
-// response of heartbeat
-message HeartbeatResponse {
-    Metadata header = 1;
-    Operation operation = 2;
-}
+
+
 
 // data transfer service
 service DataTransferService {
-    rpc push (stream Packet) returns (Metadata);
-    rpc pull (Metadata) returns (stream Packet);
+
     rpc unaryCall (Packet) returns (Packet);
 }
 
-service RouteService {
-    rpc query (Topic) returns (com.webank.ai.fate.api.core.Endpoint);
-}
+
