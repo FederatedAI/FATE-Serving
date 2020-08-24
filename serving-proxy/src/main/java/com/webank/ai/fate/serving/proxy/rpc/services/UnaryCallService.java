@@ -64,10 +64,10 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     @Value("${proxy.grpc.inter.negotiationType:PLAINTEXT}")
     private String negotiationType;
 
-    @Value("${proxy.grpc.inter.server.certChain.file:}")
+    @Value("${proxy.grpc.inter.client.certChain.file:}")
     private String certChainFilePath;
 
-    @Value("${proxy.grpc.inter.server.privateKey.file:}")
+    @Value("${proxy.grpc.inter.client.privateKey.file:}")
     private String privateKeyFilePath;
 
     @Value("${proxy.grpc.inter.CA.file:}")
