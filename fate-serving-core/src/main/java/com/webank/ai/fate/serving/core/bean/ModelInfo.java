@@ -45,5 +45,4 @@ public class ModelInfo {
         this.namespace = namespace;
     }
 
-
 }

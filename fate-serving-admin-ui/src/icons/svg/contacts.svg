@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   t="1557219714859"
+   class="icon"
+   viewBox="0 0 128 129"
+   version="1.1"
+   p-id="23254"
+   width="128"
+   height="128"
+   id="svg3731"
+   sodipodi:docname="contacts.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <metadata
+     id="metadata3735">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     id="namedview3733"
+     showgrid="false"
+     inkscape:zoom="6.234375"
+     inkscape:cx="81.099471"
+     inkscape:cy="64"
+     inkscape:window-x="2391"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3731" />
+  <defs
+     id="defs3727">
+    <style
+       type="text/css"
+       id="style3725" />
+  </defs>
+  <path
+     d="M 114.06089,1.7493735 H 12.946133 c -4.8612889,0 -9.7225741,4.4874685 -9.7225741,8.9749365 V 30.469172 H 21.696446 V 43.034083 H 3.2235589 V 59.188966 H 21.696446 V 71.753881 H 3.2235589 V 87.908767 H 21.696446 V 100.47369 H 3.2235589 v 17.94986 c 0,4.48747 4.8612852,8.97494 9.7225741,8.97494 H 114.06089 c 4.86129,0 9.72257,-4.48747 9.72257,-8.97494 V 10.72431 c 0,-4.487468 -4.86128,-8.9749365 -9.72257,-8.9749365 z M 74.198341,34.95664 c 7.778057,0 14.583858,6.282454 14.583858,13.462404 0,7.179946 -6.805801,13.462405 -14.583858,13.462405 -7.778058,0 -14.583861,-6.282459 -14.583861,-13.462405 0,-7.17995 5.833547,-13.462404 14.583861,-13.462404 z M 40.169334,97.781199 c 0,-17.949875 14.583861,-31.412283 34.029007,-31.412283 19.445146,0 34.028999,14.359903 34.028999,31.412283 z"
+     p-id="23255"
+     id="path3729"
+     inkscape:connector-curvature="0"
+     style="stroke-width:0.14595747" />
+</svg>

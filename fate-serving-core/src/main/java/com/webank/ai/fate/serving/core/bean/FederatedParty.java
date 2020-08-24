@@ -19,10 +19,10 @@ package com.webank.ai.fate.serving.core.bean;
 public class FederatedParty {
     private String role;
     private String partyId;
-
     public FederatedParty() {
 
     }
+
     public FederatedParty(String role, String partyId) {
         this.role = role;
         this.partyId = partyId;

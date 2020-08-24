@@ -24,5 +24,8 @@ public enum ModelActionType {
     /**
      * MODEL_PUBLISH_ONLINE
      */
-    MODEL_PUBLISH_ONLINE
+    MODEL_PUBLISH_ONLINE,
+    UNLOAD,
+    UNBIND,
+    QUERY_MODEL
 }
