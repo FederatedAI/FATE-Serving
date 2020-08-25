@@ -279,7 +279,7 @@ public class GrpcConnectionPool {
             } catch (SSLException e) {
                 throw new SecurityException(e);
             }
-            logger.debug("running in secure mode for endpoint {}:{}, server crt path: {}, server key path: {}, ca crt path: {}.",
+            logger.debug("running in secure mode for endpoint {}:{}, client crt path: {}, client key path: {}, ca crt path: {}.",
                     ip, port,
                     nettyServerInfo.getCertChainFilePath(), nettyServerInfo.getPrivateKeyFilePath(), nettyServerInfo.getTrustCertCollectionFilePath());
         }
