@@ -1,3 +1,7 @@
+# Release 1.3.3
+## Major Features and Improvements
+* To secure gRPC inter-parties connection with SSL/TLS
+
 # Release 1.3.2
 ## Major Features and Improvements
 * Add input feature hitting rate counting for HeteroLR and Hetero SecureBoost
