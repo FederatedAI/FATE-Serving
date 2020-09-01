@@ -33,6 +33,7 @@ public class RequestParamWrapper {
     Long version;
     String source;
     Integer allowQps;
+    String data;
 
     public String getSource() {
         return source;
@@ -138,4 +139,11 @@ public class RequestParamWrapper {
         this.version = version;
     }
 
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
 }
