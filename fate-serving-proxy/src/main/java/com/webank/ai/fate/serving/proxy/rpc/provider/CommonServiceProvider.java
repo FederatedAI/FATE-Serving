@@ -38,10 +38,15 @@ import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +59,8 @@ import java.util.concurrent.ConcurrentMap;
 })
 @Service
 public class CommonServiceProvider extends AbstractProxyServiceProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(CommonServiceProvider.class);
 
     @Autowired
     FlowCounterManager flowCounterManager;
@@ -201,6 +208,50 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             } else {
                 builder.setMessage("no change");
             }
+            return builder.build();
+        } catch (Exception e) {
+            throw new SysException(e.getMessage());
+        }
+    }
+
+    @FateServiceMethod(name = "UPDATE_ROUTE_TABLE")
+    public CommonServiceProto.CommonResponse updateRouteTable(Context context, InboundPackage inboundPackage) {
+        try {
+            CommonServiceProto.UpdateRouteTableRequest request = (CommonServiceProto.UpdateRouteTableRequest) inboundPackage.getBody();
+            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+
+            Preconditions.checkArgument(StringUtils.isNotBlank(request.getData()), "data is blank");
+
+            Map routeTable = null;
+            try {
+                // valid json
+                routeTable = JsonUtil.json2Object(request.getData(), Map.class);
+            } catch (Exception e) {
+                logger.error("invalid json format");
+                throw e;
+            }
+
+            if (routeTable == null) {
+                logger.error("parse json error");
+                throw new SysException("parse json error");
+            }
+
+            String filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
+            if (StringUtils.isBlank(filePath)) {
+                filePath = System.getProperty(Dict.PROPERTY_USER_DIR) + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
+            }
+
+            // file exist check
+            File file = new File(filePath);
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            try (FileOutputStream outputFile = new FileOutputStream(file)) {
+                outputFile.write(JsonUtil.object2Json(routeTable).getBytes());
+                builder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS);
+            }
+
             return builder.build();
         } catch (Exception e) {
             throw new SysException(e.getMessage());

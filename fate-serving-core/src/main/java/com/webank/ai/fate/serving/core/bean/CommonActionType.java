@@ -21,5 +21,6 @@ public enum CommonActionType {
     UPDATE_FLOW_RULE,
     LIST_PROPS,
     QUERY_JVM,
-    UPDATE_SERVICE
+    UPDATE_SERVICE,
+    UPDATE_ROUTE_TABLE
 }
