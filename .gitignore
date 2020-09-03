@@ -10,9 +10,11 @@ __pycache__
 *.prefs
 
 # excluded paths
-/fate-serving/federatedml/target/
-/fate-serving/serving-server/target/
-/fate-serving/target/
-/fate-serving/fate-serving-core/target/
+/*/target/
+/*/logs/
+/logs/
+/conf/
+/.fate/
 .idea/*
 .vscode/*
+/fate-serving-admin/src/main/resources/public/
