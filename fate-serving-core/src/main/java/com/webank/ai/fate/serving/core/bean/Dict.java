@@ -121,6 +121,12 @@ public class Dict {
     public static final String PROPERTY_BATCH_INFERENCE_MAX = "batch.inference.max";
     public static final String PROPERTY_PRINT_INPUT_DATA = "print.input.data";
     public static final String PROPERTY_PRINT_OUTPUT_DATA = "print.output.data";
+    public static final String PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE = "proxy.grpc.inter.negotiationType";
+    public static final String PROPERTY_PROXY_GRPC_INTER_CA_FILE = "proxy.grpc.inter.CA.file";
+    public static final String PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE = "proxy.grpc.inter.client.certChain.file";
+    public static final String PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE = "proxy.grpc.inter.client.privateKey.file";
+    public static final String PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE = "proxy.grpc.inter.server.certChain.file";
+    public static final String PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE = "proxy.grpc.inter.server.privateKey.file";
     public static final String CURRENT_VERSION = "currentVersion";
 
     public static final String PROPERTY_COORDINATOR = "coordinator";

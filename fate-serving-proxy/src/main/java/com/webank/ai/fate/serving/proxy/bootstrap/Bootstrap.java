@@ -94,7 +94,13 @@ public class Bootstrap {
             MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);
             MetaInfo.PROPERTY_PRINT_INPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA)) : false;
             MetaInfo.PROPERTY_PRINT_OUTPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA)) : false;
-
+            // TLS
+            MetaInfo.PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE, "PLAINTEXT");
+            MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_CA_FILE);
+            MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE);
+            MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE);
+            MetaInfo.PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE);
+            MetaInfo.PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("init metainfo error", e);

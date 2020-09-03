@@ -20,11 +20,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -61,7 +66,7 @@ public class GrpcConnectionPool {
                                         String[] ipPort = k.split(":");
                                         String ip = ipPort[0];
                                         int port = Integer.parseInt(ipPort[1]);
-                                        ManagedChannel managedChannel = createManagedChannel(ip, port);
+                                        ManagedChannel managedChannel = createManagedChannel(ip, port, v.getNettyServerInfo());
                                         v.getChannels().add(managedChannel);
                                     }
                                     v.getChannels().forEach(e -> {
@@ -126,15 +131,22 @@ public class GrpcConnectionPool {
     }
 
     public ManagedChannel getManagedChannel(String key) {
+        return getAManagedChannel(key, new NettyServerInfo());
+    }
+
+    private ManagedChannel getAManagedChannel(String key, NettyServerInfo nettyServerInfo) {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
-            return createInner(key);
+            return createInner(key, nettyServerInfo);
         } else {
             return getRandomManagedChannel(channelResource);
         }
-
     }
 
+    public ManagedChannel getManagedChannel(String ip,int port, NettyServerInfo nettyServerInfo) {
+        String key = new StringBuilder().append(ip).append(":").append(port).toString();
+        return this.getAManagedChannel(key, nettyServerInfo);
+    }
 
     public ManagedChannel getManagedChannel(String ip, int port) {
         String key = new StringBuilder().append(ip).append(":").append(port).toString();
@@ -151,16 +163,16 @@ public class GrpcConnectionPool {
 
     }
 
-    private synchronized ManagedChannel createInner(String key) {
+    private synchronized ManagedChannel createInner(String key, NettyServerInfo nettyServerInfo) {
         ChannelResource channelResource = poolMap.get(key);
         if (channelResource == null) {
             String[] ipPort = key.split(":");
             String ip = ipPort[0];
             int port = Integer.parseInt(ipPort[1]);
-            ManagedChannel managedChannel = createManagedChannel(ip, port);
+            ManagedChannel managedChannel = createManagedChannel(ip, port, nettyServerInfo);
             List<ManagedChannel> managedChannelList = new ArrayList<ManagedChannel>();
             managedChannelList.add(managedChannel);
-            channelResource = new ChannelResource(key);
+            channelResource = new ChannelResource(key, nettyServerInfo);
             channelResource.setChannels(managedChannelList);
             channelResource.getRequestCount().addAndGet(1);
             poolMap.put(key, channelResource);
@@ -171,26 +183,52 @@ public class GrpcConnectionPool {
 
     }
 
-    public synchronized ManagedChannel createManagedChannel(String ip, int port) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("create ManagedChannel");
-        }
-        NettyChannelBuilder builder = NettyChannelBuilder
-                .forAddress(ip, port)
-                .keepAliveTime(60, TimeUnit.SECONDS)
-                .keepAliveTimeout(60, TimeUnit.SECONDS)
-                .keepAliveWithoutCalls(true)
-                .idleTimeout(60, TimeUnit.SECONDS)
-                .perRpcBufferLimit(128 << 20)
-                .flowControlWindow(32 << 20)
-                .maxInboundMessageSize(32 << 20)
-                .enableRetry()
-                .retryBufferSize(16 << 20)
-                .maxRetryAttempts(20);      // todo: configurable
-        builder.negotiationType(NegotiationType.PLAINTEXT)
-                .usePlaintext();
+    public synchronized ManagedChannel createManagedChannel(String ip, int port, NettyServerInfo nettyServerInfo) {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("create ManagedChannel");
+            }
 
-        return builder.build();
+            NettyChannelBuilder channelBuilder = NettyChannelBuilder
+                    .forAddress(ip, port)
+                    .keepAliveTime(60, TimeUnit.SECONDS)
+                    .keepAliveTimeout(60, TimeUnit.SECONDS)
+                    .keepAliveWithoutCalls(true)
+                    .idleTimeout(60, TimeUnit.SECONDS)
+                    .perRpcBufferLimit(128 << 20)
+                    .flowControlWindow(32 << 20)
+                    .maxInboundMessageSize(32 << 20)
+                    .enableRetry()
+                    .retryBufferSize(16 << 20)
+                    .maxRetryAttempts(20);
+
+            if (nettyServerInfo != null && nettyServerInfo.getNegotiationType() == NegotiationType.TLS) {
+                if (StringUtils.isBlank(nettyServerInfo.getCertChainFilePath()) || StringUtils.isBlank(nettyServerInfo.getPrivateKeyFilePath()) || StringUtils.isBlank(nettyServerInfo.getTrustCertCollectionFilePath())) {
+                    throw new RuntimeException("using TLS, but certificates file paths are missing!");
+                }
+                SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient()
+                        .keyManager(new File(nettyServerInfo.getCertChainFilePath()), new File(nettyServerInfo.getPrivateKeyFilePath()))
+                        .trustManager(new File(nettyServerInfo.getTrustCertCollectionFilePath()))
+                        .sessionTimeout(3600 << 4)
+                        .sessionCacheSize(65536);
+                channelBuilder.sslContext(sslContextBuilder.build()).useTransportSecurity();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("running in secure mode for endpoint {}:{}, client crt path: {}, client key path: {}, ca crt path: {}.",
+                            ip, port, nettyServerInfo.getCertChainFilePath(), nettyServerInfo.getPrivateKeyFilePath(),
+                            nettyServerInfo.getTrustCertCollectionFilePath());
+                }
+            } else {
+                channelBuilder.usePlaintext();
+            }
+
+            return channelBuilder.build();
+        } catch (SSLException e) {
+            throw new SecurityException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     class ChannelResource {
@@ -200,9 +238,19 @@ public class GrpcConnectionPool {
         AtomicLong requestCount = new AtomicLong(0);
         long latestChecktimestamp = 0;
         long preCheckCount = 0;
+        NettyServerInfo nettyServerInfo;
 
         public ChannelResource(String address) {
+            this(address, null);
+        }
+
+        public NettyServerInfo getNettyServerInfo() {
+            return nettyServerInfo;
+        }
+
+        public  ChannelResource(String address, NettyServerInfo nettyServerInfo) {
             this.address = address;
+            this.nettyServerInfo = nettyServerInfo;
         }
 
         public List<ManagedChannel> getChannels() {
