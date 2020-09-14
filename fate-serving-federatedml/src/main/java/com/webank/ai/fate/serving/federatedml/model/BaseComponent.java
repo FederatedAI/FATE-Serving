@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
@@ -141,6 +142,10 @@ public abstract class BaseComponent implements LocalInferenceAware {
 
     public void setCache(Cache cache) {
         this.cache = cache;
+    }
+
+    public List<String> getWeightKeys() {
+        return null;
     }
 
 }

@@ -23,6 +23,7 @@ import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionT
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -102,5 +103,12 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         return nextTreeNodeId;
     }
 
+    @Override
+    public List<String> getWeightKeys() {
+        if (featureNameFidMapping != null) {
+            return new ArrayList<>(featureNameFidMapping.keySet());
+        }
+        return null;
+    }
 }
 
