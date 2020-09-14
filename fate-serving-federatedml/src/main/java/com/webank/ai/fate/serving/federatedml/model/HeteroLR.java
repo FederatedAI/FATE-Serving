@@ -216,6 +216,11 @@ public abstract class HeteroLR extends BaseComponent {
 
     }
 
-
-
+    @Override
+    public List<String> getWeightKeys() {
+        if (weight != null) {
+            return new ArrayList<>(weight.keySet());
+        }
+        return null;
+    }
 }

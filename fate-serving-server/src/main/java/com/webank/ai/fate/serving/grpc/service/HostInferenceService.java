@@ -67,6 +67,9 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
                 tableName = partnerModelInfo.get("name").toString();
             }
 
+            context.putData(Dict.GUEST_APP_ID, req.getHeader().getSrc().getPartyId());
+            context.putData(Dict.HOST_APP_ID, req.getHeader().getDst().getPartyId());
+
             context.setModelNamesapce(namespace);
             context.setModelTableName(tableName);
             context.setCaseId(req.getAuth().getNonce());

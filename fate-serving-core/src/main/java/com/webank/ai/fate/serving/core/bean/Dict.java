@@ -226,6 +226,8 @@ public class Dict {
     public static final String PART_ID = "partId";
     public static final String FEATURE_DATA = "featureData";
     public static final String SESSION_TOKEN = "sessionToken";
+    public static final String EXPECT_FILL_RATE = "expectFillRate";
+    public static final String EXPECT_DATA_LIST = "expectDataList";
 
     public static final String DEFAULT_VERSION = "1.0";
     public static final String SELF_PROJECT_NAME = "proxy";

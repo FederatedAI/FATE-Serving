@@ -33,4 +33,5 @@ public interface ModelProcessor {
 
     public Object getComponent(String name);
 
+    void collectExpectDataList(Context context);
 }

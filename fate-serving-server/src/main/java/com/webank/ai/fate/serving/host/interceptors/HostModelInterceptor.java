@@ -58,6 +58,7 @@ public class HostModelInterceptor implements Interceptor {
             logger.error("table name {} namepsace {} is not exist", tableName, nameSpace);
             throw new HostModelNullException("mode is null");
         }
+        model.getModelProcessor().collectExpectDataList(context);
         servingServerContext.setModel(model);
 
         int times = 1;
