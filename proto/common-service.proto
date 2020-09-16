@@ -55,8 +55,9 @@ message UpdateServiceRequest{
     int64 version = 4;
 }
 
-message UpdateRouteTableRequest{
-    string data = 1;
+message UpdateConfigRequest{
+    string filePath = 1;
+    string data = 2;
 }
 
 message CommonResponse{
@@ -71,7 +72,7 @@ service CommonService {
     rpc listProps(QueryPropsRequest)  returns (CommonResponse);
     rpc queryJvmInfo(QueryJvmInfoRequest)  returns (CommonResponse);
     rpc updateService(UpdateServiceRequest)  returns (CommonResponse);
-    rpc updateRouteTable(UpdateRouteTableRequest)  returns (CommonResponse);
+    rpc updateConfig(UpdateConfigRequest)  returns (CommonResponse);
 }
 
 

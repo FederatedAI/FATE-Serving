@@ -105,8 +105,8 @@ public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBas
     }
 
     @Override
-    public void updateRouteTable(CommonServiceProto.UpdateRouteTableRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
-        Context context = prepareContext(CommonActionType.UPDATE_ROUTE_TABLE.name());
+    public void updateConfig(CommonServiceProto.UpdateConfigRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
+        Context context = prepareContext(CommonActionType.UPDATE_CONFIG.name());
         InboundPackage inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
