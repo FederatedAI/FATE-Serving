@@ -19,9 +19,19 @@ package com.webank.ai.fate.serving.admin.bean;
 import java.util.Arrays;
 
 public enum ServiceConfiguration {
+    /**
+     * name equal Dict.SERVICE_PROXY
+     */
     PROXY("route_table.json"),
+    /**
+     * name equal Dict.SERVICE_SERVING
+     */
     SERVING();
 
+    /**
+     * support multiple
+     * @param config configuration file name
+     */
     ServiceConfiguration(String... config) {
         this.config = config;
     }
