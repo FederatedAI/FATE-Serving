@@ -75,7 +75,8 @@ public class ComponentService {
     }
 
     public boolean isAllowAccess(String host, int port) {
-        if (getWhitelist().contains(host + ":" + port)) {
+        Set<String> whitelist = getWhitelist();
+        if (whitelist != null && whitelist.contains(host + ":" + port)) {
             return true;
         }
         return false;
@@ -93,15 +94,9 @@ public class ComponentService {
                 componentLists.forEach(name -> {
                     List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
                     if (nodes != null) {
-                        projectNodes.compute(name, (k, v) -> {
-                            if (v == null) {
-                                return new HashSet<>(nodes);
-                            } else {
-                                v.clear();
-                                v.addAll(nodes);
-                                return v;
-                            }
-                        });
+                        Set<String> set = projectNodes.computeIfAbsent(name, k -> new HashSet<>());
+                        set.clear();
+                        set.addAll(nodes);
                     }
                     NodeData componentData = new NodeData();
                     componentData.setName(name);
@@ -129,7 +124,8 @@ public class ComponentService {
             }
         }catch(Exception e){
             logger.error("get component from zk error",e);
-            cachedNodeData=null;
+            cachedNodeData = null;
+            projectNodes.clear();
         }
     }
 
