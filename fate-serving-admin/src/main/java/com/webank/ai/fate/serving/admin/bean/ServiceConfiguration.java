@@ -14,13 +14,28 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.bean;
+package com.webank.ai.fate.serving.admin.bean;
 
-public enum CommonActionType {
-    QUERY_METRICS,
-    UPDATE_FLOW_RULE,
-    LIST_PROPS,
-    QUERY_JVM,
-    UPDATE_SERVICE,
-    UPDATE_CONFIG
+import java.util.Arrays;
+
+public enum ServiceConfiguration {
+    PROXY("route_table.json"),
+    SERVING();
+
+    ServiceConfiguration(String... config) {
+        this.config = config;
+    }
+
+    private String[] config;
+
+    public static boolean isAllowModify(String project, String config) {
+        ServiceConfiguration value = ServiceConfiguration.valueOf(project.toUpperCase());
+        if (value == null) {
+            return Boolean.FALSE;
+        }
+
+        boolean match = Arrays.asList(value.config).contains(config);
+        return match;
+    }
+
 }

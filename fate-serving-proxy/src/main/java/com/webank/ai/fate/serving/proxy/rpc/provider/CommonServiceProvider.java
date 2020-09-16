@@ -214,14 +214,16 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         }
     }
 
-    @FateServiceMethod(name = "UPDATE_ROUTE_TABLE")
-    public CommonServiceProto.CommonResponse updateRouteTable(Context context, InboundPackage inboundPackage) {
+    @FateServiceMethod(name = "UPDATE_CONFIG")
+    public CommonServiceProto.CommonResponse updateConfig(Context context, InboundPackage inboundPackage) {
         try {
-            CommonServiceProto.UpdateRouteTableRequest request = (CommonServiceProto.UpdateRouteTableRequest) inboundPackage.getBody();
+            CommonServiceProto.UpdateConfigRequest request = (CommonServiceProto.UpdateConfigRequest) inboundPackage.getBody();
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
 
+            Preconditions.checkArgument(StringUtils.isNotBlank(request.getFilePath()), "file path is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(request.getData()), "data is blank");
 
+            // serving-proxy can only modify the route table
             Map routeTable = null;
             try {
                 // valid json
@@ -236,19 +238,16 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
                 throw new SysException("parse json error");
             }
 
-            String filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
-            if (StringUtils.isBlank(filePath)) {
-                filePath = System.getProperty(Dict.PROPERTY_USER_DIR) + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
-            }
-
+            String filePath = request.getFilePath();
             // file exist check
             File file = new File(filePath);
 
             if (!file.exists()) {
+                logger.info("file {} not exist, create new file.", filePath);
                 file.createNewFile();
             }
             try (FileOutputStream outputFile = new FileOutputStream(file)) {
-                outputFile.write(JsonUtil.object2Json(routeTable).getBytes());
+                outputFile.write(request.getDataBytes().toByteArray());
                 builder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS);
             }
 
