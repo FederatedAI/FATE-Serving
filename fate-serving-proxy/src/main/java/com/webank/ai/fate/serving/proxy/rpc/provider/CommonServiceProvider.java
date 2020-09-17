@@ -38,6 +38,7 @@ import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.proxy.bean.RouteTableWrapper;
 import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -224,18 +225,13 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             Preconditions.checkArgument(StringUtils.isNotBlank(request.getData()), "data is blank");
 
             // serving-proxy can only modify the route table
-            Map routeTable = null;
             try {
                 // valid json
-                routeTable = JsonUtil.json2Object(request.getData(), Map.class);
+                RouteTableWrapper wrapper = new RouteTableWrapper();
+                wrapper.parse(request.getData());
             } catch (Exception e) {
-                logger.error("invalid json format");
-                throw e;
-            }
-
-            if (routeTable == null) {
-                logger.error("parse json error");
-                throw new SysException("parse json error");
+                logger.error("invalid json format, parse json error");
+                throw new SysException("invalid json format, parse json error");
             }
 
             String filePath = request.getFilePath();
