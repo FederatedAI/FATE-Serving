@@ -116,10 +116,8 @@ public class ComponentController {
         String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
 
         String project = componentServices.getProject(host, port);
-        if (project != null) {
-            if (!ServiceConfiguration.isAllowModify(project, fileName)) {
-                throw new SysException("the file is not allowed to be modified");
-            }
+        if (project != null && !ServiceConfiguration.isAllowModify(project, fileName)) {
+            throw new SysException("the file is not allowed to be modified");
         }
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
