@@ -31,6 +31,7 @@ import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.ModelProcessorInitException;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,8 @@ public class ModelManager implements InitializingBean {
     private ConcurrentMap<String, Model> namespaceMap = new ConcurrentHashMap<String, Model>();
     // (guest) name + namespace -> (host) model
     private ConcurrentMap<String, Model> partnerModelMap = new ConcurrentHashMap<String, Model>();
+
+    private static String[] URL_FILTER_CHARACTER = {"?", ":", "/", "&"};
 
     public synchronized ModelServiceProto.UnbindResponse unbind(Context context, ModelServiceProto.UnbindRequest req) {
         ModelServiceProto.UnbindResponse.Builder resultBuilder = ModelServiceProto.UnbindResponse.newBuilder();
@@ -310,6 +313,8 @@ public class ModelManager implements InitializingBean {
         ReturnResult returnResult = new ReturnResult();
         String serviceId = req.getServiceId();
         Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
+        Preconditions.checkArgument(!StringUtils.containsAny(serviceId, URL_FILTER_CHARACTER), "Service id contains special characters, " + JsonUtil.object2Json(URL_FILTER_CHARACTER));
+
         returnResult.setRetcode(StatusCode.SUCCESS);
         Model model = this.buildModelForBind(context, req);
         String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
