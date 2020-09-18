@@ -137,7 +137,10 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
     @Override
     protected Map transformErrorMap(Context context, Map data) {
-        return data;
+        Map map = Maps.newHashMap();
+        map.put(Dict.RET_CODE, data.get(Dict.CODE));
+        map.put(Dict.RET_MSG, data.get(Dict.MESSAGE));
+        return map;
     }
 }
 
