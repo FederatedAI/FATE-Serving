@@ -24,6 +24,7 @@ import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -49,6 +50,9 @@ public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractSe
             if (e.getCause() != null && e.getCause() instanceof BaseException) {
                 BaseException baseException = (BaseException) e.getCause();
                 throw baseException;
+            } else if (e instanceof InvocationTargetException) {
+                InvocationTargetException ex = (InvocationTargetException) e;
+                throw new SysException(ex.getTargetException().getMessage());
             } else {
                 throw new SysException(e.getMessage());
             }
