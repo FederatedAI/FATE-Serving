@@ -49,7 +49,7 @@ public class HostModelInterceptor implements Interceptor {
         String tableName = servingServerContext.getModelTableName();
         String nameSpace = servingServerContext.getModelNamesapce();
         Model model;
-        if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < 200) {
+        if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
             model = modelManager.getPartnerModel(tableName, nameSpace);
         } else {
             model = modelManager.getModelByTableNameAndNamespace(tableName, nameSpace);
