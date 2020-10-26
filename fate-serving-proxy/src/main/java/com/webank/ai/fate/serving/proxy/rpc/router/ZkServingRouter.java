@@ -91,9 +91,9 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
             return null;
         } else {
             Proxy.Packet sourcePacket = (Proxy.Packet) inboundPackage.getBody();
-            if (MetaInfo.PROPERTY_COORDINATOR.equals(sourcePacket.getHeader().getDst().getPartyId())) {
+            if (String.valueOf(MetaInfo.PROPERTY_COORDINATOR).equals(sourcePacket.getHeader().getDst().getPartyId())) {
                 // host, proxy -> serving
-                return FederatedModelUtils.getModelRouteKey(sourcePacket);
+                return FederatedModelUtils.getModelRouteKey(context, sourcePacket);
             } else {
                 // exchange, proxy -> proxy
 //                return Dict.ONLINE_ENVIRONMENT;
