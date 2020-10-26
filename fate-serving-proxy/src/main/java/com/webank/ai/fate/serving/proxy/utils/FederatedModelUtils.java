@@ -17,13 +17,20 @@
 package com.webank.ai.fate.serving.proxy.utils;
 
 import com.webank.ai.fate.api.networking.proxy.Proxy;
+import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.EncryptMethod;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class FederatedModelUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(FederatedModelUtils.class);
 
     private static final String MODEL_KEY_SEPARATOR = "&";
 
@@ -31,15 +38,27 @@ public class FederatedModelUtils {
         return StringUtils.join(Arrays.asList(tableName, namespace), MODEL_KEY_SEPARATOR);
     }
 
-    public static String getModelRouteKey(Proxy.Packet packet) {
-        try {
+    public static String getModelRouteKey(Context context, Proxy.Packet packet) {
+        String namespace;
+        String tableName;
+        if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
+            // version 1.x
+            String data = packet.getBody().getValue().toStringUtf8();
+            Map hostFederatedParams = JsonUtil.json2Object(data, Map.class);
+            Map partnerModelInfo = (Map) hostFederatedParams.get("partnerModelInfo");
+            namespace = partnerModelInfo.get("namespace").toString();
+            tableName = partnerModelInfo.get("name").toString();
+        } else {
+            // version 2.0.0+
             Proxy.Model model = packet.getHeader().getTask().getModel();
-            String key = genModelKey(model.getTableName(), model.getNamespace());
-            String md5Key = EncryptUtils.encrypt(key, EncryptMethod.MD5);
-            return md5Key;
-        } catch (Exception e) {
-            return null;
+            namespace = model.getNamespace();
+            tableName = model.getTableName();
         }
+
+        String key = genModelKey(tableName, namespace);
+        logger.info("get model route key by version: {} namespace: {} tablename: {}, key: {}", context.getVersion(), namespace, tableName, key);
+
+        return EncryptUtils.encrypt(key, EncryptMethod.MD5);
     }
 
 }

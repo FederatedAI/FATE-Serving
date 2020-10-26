@@ -342,7 +342,7 @@ public class PipelineModelProcessor implements ModelProcessor {
                     if (logger.isDebugEnabled()) {
                         logger.debug("component {} is Returnable return data {}", component, result);
                     }
-                    if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < 200) {
+                    if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
                         result.putAll(componentResult);
                     }
                 }
