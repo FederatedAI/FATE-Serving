@@ -45,7 +45,7 @@ public class HostParamInterceptor implements Interceptor {
             inboundPackage.setBody(params);
         } else {
             InferenceRequest inferenceRequest = JsonUtil.json2Object(reqBody, InferenceRequest.class);
-            if (StringUtils.isBlank(context.getVersion()) || Long.parseLong(context.getVersion()) < 200) {
+            if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
                 Map hostParams = JsonUtil.json2Object(reqBody, Map.class);
                 Preconditions.checkArgument(hostParams != null, "parse inference params error");
                 Preconditions.checkArgument(hostParams.get("featureIdMap") != null, "parse inference params featureIdMap error");

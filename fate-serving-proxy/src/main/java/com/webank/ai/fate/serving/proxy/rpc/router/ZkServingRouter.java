@@ -84,22 +84,15 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
             // guest, proxy -> serving
             return (String) inboundPackage.getHead().get(Dict.SERVICE_ID);
         }
-        // default unaryCall
-        if (GrpcType.INTRA_GRPC == context.getGrpcType()) {
-            // guest, serving -> proxy
-//            return Dict.ONLINE_ENVIRONMENT;
-            return null;
-        } else {
+
+        if (Dict.UNARYCALL.equals(context.getServiceName()) && context.getGrpcType() == GrpcType.INTER_GRPC) {
+            // host, proxy -> serving
             Proxy.Packet sourcePacket = (Proxy.Packet) inboundPackage.getBody();
-            if (MetaInfo.PROPERTY_COORDINATOR.equals(sourcePacket.getHeader().getDst().getPartyId())) {
-                // host, proxy -> serving
-                return FederatedModelUtils.getModelRouteKey(sourcePacket);
-            } else {
-                // exchange, proxy -> proxy
-//                return Dict.ONLINE_ENVIRONMENT;
-                return null;
-            }
+            return FederatedModelUtils.getModelRouteKey(context, sourcePacket);
         }
+
+        // default unaryCall  proxy -> proxy
+        return null;
     }
 
     @Override
