@@ -24,7 +24,6 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
