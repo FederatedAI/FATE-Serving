@@ -20,20 +20,11 @@ import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
-import com.webank.ai.fate.register.router.DefaultRouterService;
-import com.webank.ai.fate.register.router.RouterService;
-import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
-import com.webank.ai.fate.serving.core.utils.NetUtils;
 import io.grpc.ManagedChannel;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class SimpleClient {

@@ -48,7 +48,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
             }
             context.setCaseId(inferenceRequest.getCaseid());
             context.setServiceId(inferenceRequest.getServiceId());
-            if (inferenceRequest.getApplyId() == null) {
+            if (inferenceRequest.getApplyId() != null) {
                 context.setApplyId(inferenceRequest.getApplyId());
             }
         } catch (Exception e) {

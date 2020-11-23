@@ -15,10 +15,18 @@
 *
 **/
 import request from '@/utils/request'
+let url = window.location.href
+let arr = url.split('/')
+let pram
+if (arr[3] === '#' || arr[3] === '') {
+    pram = ''
+} else {
+    pram = '/' + arr[3]
+}
 // 获取service 列表
 export function getserviceList(params) {
     return request({
-        url: '/api/service/list',
+        url: `${pram}/api/service/list`,
         method: 'get',
         params
     })
@@ -27,7 +35,7 @@ export function getserviceList(params) {
 //  更新服务
 export function serviceUpdate(data) {
     return request({
-        url: '/api/service/update',
+        url: `${pram}/api/service/update`,
         method: 'post',
         data
     })
@@ -35,7 +43,7 @@ export function serviceUpdate(data) {
 //  更新服务
 export function validate(data, name) {
     return request({
-        url: '/api/validate/' + name,
+        url: `${pram}/api/validate/` + name,
         method: 'post',
         data
     })

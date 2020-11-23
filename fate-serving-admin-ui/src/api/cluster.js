@@ -15,10 +15,17 @@
 *
 **/
 import request from '@/utils/request'
-
+let url = window.location.href
+let arr = url.split('/')
+let pram
+if (arr[3] === '#' || arr[3] === '') {
+    pram = ''
+} else {
+    pram = '/' + arr[3]
+}
 export function getCluster(params) {
     return request({
-        url: '/api/component/list',
+        url: `${pram}/api/component/list`,
         method: 'get',
         params
     })
@@ -27,7 +34,7 @@ export function getCluster(params) {
 // 节点配置列表
 export function getlistProps(params) {
     return request({
-        url: '/api/component/listProps',
+        url: `${pram}/api/component/listProps`,
         method: 'get',
         params
     })
@@ -36,7 +43,7 @@ export function getlistProps(params) {
 // /api/model/query
 export function getmodellist(params) {
     return request({
-        url: '/api/model/query',
+        url: `${pram}/api/model/query`,
         method: 'get',
         params
     })
@@ -44,7 +51,7 @@ export function getmodellist(params) {
 // /api/model/unload 模型卸载
 export function modelUnload(data) {
     return request({
-        url: '/api/model/unload',
+        url: `${pram}/api/model/unload`,
         method: 'post',
         data
     })
@@ -53,7 +60,7 @@ export function modelUnload(data) {
 // /api/model/unbind 模型解绑
 export function modelUnbind(data) {
     return request({
-        url: '/api/model/unbind',
+        url: `${pram}/api/model/unbind`,
         method: 'post',
         data
     })
@@ -62,7 +69,7 @@ export function modelUnbind(data) {
 // /api/monitor/queryModel
 export function queryModel(params) {
     return request({
-        url: '/api/monitor/queryModel',
+        url: `${pram}/api/monitor/queryModel`,
         method: 'get',
         params
     })
@@ -71,7 +78,7 @@ export function queryModel(params) {
 // /api/monitor/query
 export function queryMonitor(params) {
     return request({
-        url: '/api/monitor/query',
+        url: `${pram}/api/monitor/query`,
         method: 'get',
         params
     })
@@ -80,7 +87,7 @@ export function queryMonitor(params) {
 // /api/monitor/queryJvm
 export function queryJvm(params) {
     return request({
-        url: '/api/monitor/queryJvm',
+        url: `${pram}/api/monitor/queryJvm`,
         method: 'get',
         params
     })
@@ -89,7 +96,7 @@ export function queryJvm(params) {
 // /api/service/updateFlowRule
 export function updateFlowRule(data) {
     return request({
-        url: '/api/service/updateFlowRule',
+        url: `${pram}/api/service/updateFlowRule`,
         method: 'post',
         data
     })

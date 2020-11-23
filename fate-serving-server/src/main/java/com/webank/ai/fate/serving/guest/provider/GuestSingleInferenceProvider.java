@@ -53,7 +53,11 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         ModelProcessor modelProcessor = model.getModelProcessor();
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
         Map<String, Future> futureMap = Maps.newHashMap();
-        List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, inferenceRequest);
+
+        InferenceRequest remoteInferenceRequest = new InferenceRequest();
+        remoteInferenceRequest.setSendToRemoteFeatureData(inferenceRequest.getSendToRemoteFeatureData());
+
+        List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, remoteInferenceRequest);
         rpcList.forEach((rpcDataWraper -> {
             ListenableFuture<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context, rpcDataWraper, MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH);
             futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);

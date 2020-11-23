@@ -17,14 +17,14 @@
 #
 set -e
 source ./bin/common.sh
-basepath=$(cd `dirname $0`;pwd)
-#export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
+#export JAVA_HOME=/data/projects/fate/common/jdk/jdk-8u192
 #export PATH=$PATH:$JAVA_HOME/bin
-configpath=$(cd $basepath/conf;pwd)
 
+basepath=$(cd `dirname $0`;pwd)
+configpath=$(cd $basepath/conf;pwd)
 module=serving-proxy
 main_class=com.webank.ai.fate.serving.proxy.bootstrap.Bootstrap
-module_version=2.0.0
+module_version=2.0.4
 
 
 case "$1" in
@@ -32,14 +32,15 @@ case "$1" in
         start  $module
         status $module
         ;;
-
+    starting)
+        start front
+        ;;
     stop)
         stop $module
         ;;
     status)
         status $module
         ;;
-
     restart)
         stop $module
         sleep 0.5
