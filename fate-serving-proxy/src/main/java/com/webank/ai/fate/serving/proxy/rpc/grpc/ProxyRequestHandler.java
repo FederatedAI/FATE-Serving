@@ -24,7 +24,6 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
@@ -60,9 +59,8 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
 
     public InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {
         context.setCaseId(Long.toString(System.currentTimeMillis()));
-        context.setVersion(req.getAuth().getVersion());
-        if (StringUtils.isEmpty(context.getVersion())) {
-            context.setVersion(Dict.DEFAULT_VERSION);
+        if (StringUtils.isNotBlank(req.getHeader().getOperator())) {
+            context.setVersion(req.getHeader().getOperator());
         }
         context.setGuestAppId(req.getHeader().getSrc().getPartyId());
         context.setHostAppid(req.getHeader().getDst().getPartyId());

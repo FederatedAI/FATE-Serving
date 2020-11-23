@@ -44,15 +44,19 @@
             <outputDirectory>/</outputDirectory>
             <directory>bin</directory>
             <includes>
-                <include>*</include>
+                <include>*.sh</include>
             </includes>
+            <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <outputDirectory>/bin</outputDirectory>
             <directory>../bin</directory>
             <includes>
-                <include>*</include>
+                <include>*.sh</include>
             </includes>
+            <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
         </fileSet>
 
 

@@ -15,10 +15,17 @@
 *
 **/
 import request from '@/utils/request'
-
+let url = window.location.href
+let arr = url.split('/')
+let pram
+if (arr[3] === '#' || arr[3] === '') {
+    pram = ''
+} else {
+    pram = '/' + arr[3]
+}
 export function login(data) {
     return request({
-        url: '/api/admin/login',
+        url: `${pram}/api/admin/login`,
         method: 'post',
         data
     })
@@ -26,7 +33,7 @@ export function login(data) {
 
 export function logout() {
     return request({
-        url: '/api/admin/logout',
+        url: `${pram}/api/admin/logout`,
         method: 'post'
     })
 }

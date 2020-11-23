@@ -10,11 +10,12 @@ __pycache__
 *.prefs
 
 # excluded paths
-/*/target/
-/*/logs/
-/logs/
-/conf/
-/.fate/
 .idea/*
 .vscode/*
+/*/target/
+/fate-serving-admin-ui/node/
+/conf/
+/logs/
+/.fate/
 /fate-serving-admin/src/main/resources/public/
+/fate-serving-server/logs/
