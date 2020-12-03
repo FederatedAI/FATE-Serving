@@ -202,10 +202,10 @@ public class GrpcConnectionPool {
                     .retryBufferSize(16 << 20)
                     .maxRetryAttempts(20);
 
-            if (nettyServerInfo != null && nettyServerInfo.getNegotiationType() == NegotiationType.TLS) {
-                if (StringUtils.isBlank(nettyServerInfo.getCertChainFilePath()) || StringUtils.isBlank(nettyServerInfo.getPrivateKeyFilePath()) || StringUtils.isBlank(nettyServerInfo.getTrustCertCollectionFilePath())) {
-                    throw new RuntimeException("using TLS, but certificates file paths are missing!");
-                }
+            if (nettyServerInfo != null && nettyServerInfo.getNegotiationType() == NegotiationType.TLS
+                    && StringUtils.isNotBlank(nettyServerInfo.getCertChainFilePath())
+                    && StringUtils.isNotBlank(nettyServerInfo.getPrivateKeyFilePath())
+                    && StringUtils.isNotBlank(nettyServerInfo.getTrustCertCollectionFilePath())) {
                 SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient()
                         .keyManager(new File(nettyServerInfo.getCertChainFilePath()), new File(nettyServerInfo.getPrivateKeyFilePath()))
                         .trustManager(new File(nettyServerInfo.getTrustCertCollectionFilePath()))
@@ -213,11 +213,9 @@ public class GrpcConnectionPool {
                         .sessionCacheSize(65536);
                 channelBuilder.sslContext(sslContextBuilder.build()).useTransportSecurity();
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("running in secure mode for endpoint {}:{}, client crt path: {}, client key path: {}, ca crt path: {}.",
-                            ip, port, nettyServerInfo.getCertChainFilePath(), nettyServerInfo.getPrivateKeyFilePath(),
-                            nettyServerInfo.getTrustCertCollectionFilePath());
-                }
+                logger.info("running in secure mode for endpoint {}:{}, client crt path: {}, client key path: {}, ca crt path: {}.",
+                        ip, port, nettyServerInfo.getCertChainFilePath(), nettyServerInfo.getPrivateKeyFilePath(),
+                        nettyServerInfo.getTrustCertCollectionFilePath());
             } else {
                 channelBuilder.usePlaintext();
             }

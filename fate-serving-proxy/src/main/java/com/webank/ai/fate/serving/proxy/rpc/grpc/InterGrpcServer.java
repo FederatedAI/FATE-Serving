@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.register.provider.FateServerBuilder;
-import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -28,6 +27,7 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -65,10 +65,8 @@ public class InterGrpcServer implements InitializingBean {
         String trustCertCollectionFilePath = MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE;
 
         FateServerBuilder serverBuilder;
-        if(NegotiationType.TLS == NegotiationType.valueOf(negotiationType)) {
-            if(StringUtils.isBlank(certChainFilePath) || StringUtils.isBlank(privateKeyFilePath) || StringUtils.isBlank(trustCertCollectionFilePath)) {
-                throw new RuntimeException("using TLS, but certificates file paths are missing!");
-            }
+        if(NegotiationType.TLS == NegotiationType.valueOf(negotiationType) && StringUtils.isNotBlank(certChainFilePath)
+                && StringUtils.isNotBlank(privateKeyFilePath) && StringUtils.isNotBlank(trustCertCollectionFilePath)) {
             try {
                 SslContextBuilder sslContextBuilder = GrpcSslContexts.forServer(new File(certChainFilePath), new File(privateKeyFilePath))
                         .trustManager(new File(trustCertCollectionFilePath))
