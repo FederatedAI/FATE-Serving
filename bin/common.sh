@@ -57,11 +57,11 @@ start() {
       echo "usage: ${module} {serving-server|serving-proxy|serving-admin}"
     fi
 
-    JAVA_OPT="${JAVA_OPT} ${main_class} >>logs/console.log 2>>logs/error.log"
+    JAVA_OPT="${JAVA_OPT} ${main_class}"
     if [[ $1 == "front" ]]; then
-      exec java ${JAVA_OPT}
+      exec java ${JAVA_OPT} >logs/console.log 2>logs/error.log
     else
-      nohup java ${JAVA_OPT} &
+      java ${JAVA_OPT} >logs/console.log 2>logs/error.log &
     fi
 
     #sleep 5
