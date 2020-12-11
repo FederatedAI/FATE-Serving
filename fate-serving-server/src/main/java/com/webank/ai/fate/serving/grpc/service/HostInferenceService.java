@@ -52,29 +52,13 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true, role = Role.HOST)
     public void unaryCall(Proxy.Packet req, StreamObserver<Proxy.Packet> responseObserver) {
-        executor.submit(() -> {
-            String actionType = req.getHeader().getCommand().getName();
-            ServingServerContext context = (ServingServerContext) prepareContext();
-            String namespace = req.getHeader().getTask().getModel().getNamespace();
-            String tableName = req.getHeader().getTask().getModel().getTableName();
-            context.setActionType(actionType);
-            context.setVersion(req.getHeader().getOperator());
-            if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
-                // 1.x
-                Map hostFederatedParams = JsonUtil.json2Object(req.getBody().getValue().toStringUtf8(), Map.class);
-                Map partnerModelInfo = (Map) hostFederatedParams.get("partnerModelInfo");
-                namespace = partnerModelInfo.get("namespace").toString();
-                tableName = partnerModelInfo.get("name").toString();
-            }
 
-            context.setModelNamesapce(namespace);
-            context.setModelTableName(tableName);
-            context.setCaseId(req.getAuth().getNonce());
+        executor.submit(() -> {
+            ServingServerContext context = (ServingServerContext) prepareContext(req,Dict.UNARYCALL);
             Object result = null;
             byte[] data = req.getBody().getValue().toByteArray();
-
             InboundPackage inboundPackage = new InboundPackage();
-            switch (actionType) {
+            switch (context.getActionType()) {
                 case Dict.FEDERATED_INFERENCE:
                     context.setActionType(Dict.FEDERATED_INFERENCE);
                     inboundPackage.setBody(data);
@@ -107,8 +91,25 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
         });
     }
 
-    private Context prepareContext() {
+    private Context prepareContext(Proxy.Packet  req,String servieName) {
         ServingServerContext context = new ServingServerContext();
+        String actionType = req.getHeader().getCommand().getName();
+        String namespace = req.getHeader().getTask().getModel().getNamespace();
+        String tableName = req.getHeader().getTask().getModel().getTableName();
+        context.setActionType(actionType);
+        context.setVersion(req.getHeader().getOperator());
+        if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
+            // 1.x
+            Map hostFederatedParams = JsonUtil.json2Object(req.getBody().getValue().toStringUtf8(), Map.class);
+            Map partnerModelInfo = (Map) hostFederatedParams.get("partnerModelInfo");
+            namespace = partnerModelInfo.get("namespace").toString();
+            tableName = partnerModelInfo.get("name").toString();
+        }
+        context.putData(Dict.ORIGINAL_REQUEST_DATA,req);
+        context.setModelNamesapce(namespace);
+        context.setModelTableName(tableName);
+        context.setServiceName(servieName);
+        context.setCaseId(req.getAuth().getNonce());
         return context;
     }
 }

@@ -23,6 +23,7 @@ import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,24 +48,29 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
 
     Logger logger = LoggerFactory.getLogger(GuestSingleInferenceProvider.class);
 
+
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
-        Model model = ((ServingServerContext) context).getModel();
-        ModelProcessor modelProcessor = model.getModelProcessor();
+
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
-        Map<String, Future> futureMap = Maps.newHashMap();
 
-        InferenceRequest remoteInferenceRequest = new InferenceRequest();
-        remoteInferenceRequest.setSendToRemoteFeatureData(inferenceRequest.getSendToRemoteFeatureData());
+            Model model = ((ServingServerContext) context).getModel();
+            ModelProcessor modelProcessor = model.getModelProcessor();
 
-        List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, remoteInferenceRequest);
-        rpcList.forEach((rpcDataWraper -> {
-            ListenableFuture<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context, rpcDataWraper, MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH);
-            futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);
-        }));
-        ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap, MetaInfo.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT);
-        postProcess(context, returnResult);
-        return returnResult;
+            Map<String, Future> futureMap = Maps.newHashMap();
+
+            InferenceRequest remoteInferenceRequest = new InferenceRequest();
+            remoteInferenceRequest.setSendToRemoteFeatureData(inferenceRequest.getSendToRemoteFeatureData());
+
+            List<FederatedRpcInvoker.RpcDataWraper> rpcList = this.buildRpcDataWraper(context, Dict.FEDERATED_INFERENCE, remoteInferenceRequest);
+            rpcList.forEach((rpcDataWraper -> {
+                Future<ReturnResult> future = federatedRpcInvoker.singleInferenceRpcWithCache(context, rpcDataWraper, MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH);
+                futureMap.put(rpcDataWraper.getHostModel().getPartId(), future);
+            }));
+            ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap, MetaInfo.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT);
+            postProcess(context, returnResult);
+            return returnResult;
+
     }
 
     @Override

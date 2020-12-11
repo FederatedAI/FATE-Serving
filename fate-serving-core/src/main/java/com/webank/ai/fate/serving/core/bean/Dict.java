@@ -272,4 +272,8 @@ public class Dict {
     public static final String PARAMS_SERVICE_ID = "service_id";
     public static final String BATCH_INFERENCE_SPLIT_SIZE = "batch.inference.split.size";
 
+    public static final String ORIGINAL_REQUEST_DATA  = "original.request.data";
+    public static final String REDIRECT_RESULT  = "redirect.result";
+    public static final String PROTOCOL  = "protocol";
+
 }

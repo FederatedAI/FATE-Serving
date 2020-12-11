@@ -40,6 +40,16 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     long costTime;
     String resourceName;
 
+    public boolean isNeedDispatch() {
+        return needDispatch;
+    }
+
+    public void setNeedDispatch(boolean needDispatch) {
+        this.needDispatch = needDispatch;
+    }
+
+    protected  boolean  needDispatch=false;
+
     public BaseContext() {
         timestamp = System.currentTimeMillis();
     }

@@ -13,5 +13,4 @@ message InferenceMessage {
 service InferenceService {
     rpc batchInference(InferenceMessage) returns (InferenceMessage);
     rpc inference (InferenceMessage) returns (InferenceMessage);
-
 }

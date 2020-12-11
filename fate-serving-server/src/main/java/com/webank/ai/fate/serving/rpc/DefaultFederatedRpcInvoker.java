@@ -36,13 +36,16 @@ import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.common.utils.DisruptorUtil;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.rpc.sink.Sender;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
+import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.event.CacheEventData;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,17 +53,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Service
-public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Packet> {
+public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Packet>  {
 
     private static final Logger logger = LoggerFactory.getLogger(FederatedRpcInvoker.class);
     @Autowired(required = false)
     public RouterService routerService;
     @Autowired
     private Cache cache;
+    @Autowired
+    private SenderRegistor  senderRegistor;
 
     private Proxy.Packet build(Context context, RpcDataWraper rpcDataWraper) {
         Model model = ((ServingServerContext) context).getModel();
@@ -98,28 +104,13 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         return packetBuilder.build();
     }
 
-    private String route() {
-        boolean routerByzk = MetaInfo.PROPERTY_USE_ZK_ROUTER;
-        String address = null;
-        if (!routerByzk) {
-            address = MetaInfo.PROPERTY_PROXY_ADDRESS;
-        } else {
-            List<URL> urls = routerService.router(Dict.PROPERTY_PROXY_ADDRESS, Dict.ONLINE_ENVIRONMENT, Dict.UNARYCALL);
-            if (urls != null && urls.size() > 0) {
-                URL url = urls.get(0);
-                String ip = url.getHost();
-                int port = url.getPort();
-                address = ip + ":" + port;
-            }
-        }
-        return address;
-    }
+
 
     @Override
     public Proxy.Packet sync(Context context, RpcDataWraper rpcDataWraper, long timeout) {
         Proxy.Packet resultPacket = null;
         try {
-            ListenableFuture<Proxy.Packet> future = this.async(context, rpcDataWraper);
+            Future<Proxy.Packet> future = this.async(context, rpcDataWraper);
             if (future != null) {
                 resultPacket = future.get(timeout, TimeUnit.MILLISECONDS);
             }
@@ -143,7 +134,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
     }
 
     @Override
-    public ListenableFuture<ReturnResult> singleInferenceRpcWithCache(Context context, RpcDataWraper rpcDataWraper, boolean useCache) {
+    public Future<ReturnResult> singleInferenceRpcWithCache(Context context, RpcDataWraper rpcDataWraper, boolean useCache) {
         InferenceRequest inferenceRequest = (InferenceRequest) rpcDataWraper.getData();
         if (useCache) {
             Object result = cache.get(buildCacheKey(rpcDataWraper.getGuestModel(), rpcDataWraper.getHostModel(), inferenceRequest.getSendToRemoteFeatureData()));
@@ -167,7 +158,7 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                 };
             }
         }
-        ListenableFuture<Proxy.Packet> future = this.async(context, rpcDataWraper);
+        Future<Proxy.Packet> future = this.async(context, rpcDataWraper);
         return new AbstractFuture<ReturnResult>() {
             @Override
             public ReturnResult get() throws InterruptedException, ExecutionException {
@@ -253,24 +244,53 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
                 }
             }
         }
-
-        ListenableFuture<Proxy.Packet> future = null;
+        Future<Proxy.Packet> future = null;
         if (inferenceRequest.getBatchDataList().size() > 0) {
             future = this.async(context, rpcDataWraper);
         }
         return new BatchInferenceFuture(future, rpcDataWraper, inferenceRequest, useCache, cacheData);
     }
 
+
+
     @Override
-    public ListenableFuture<Proxy.Packet> async(Context context, RpcDataWraper rpcDataWraper) {
+    public Future<Proxy.Packet> async(Context context, RpcDataWraper rpcDataWraper) {
         Proxy.Packet packet = this.build(context, rpcDataWraper);
-        String address = this.route();
-        GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-        Preconditions.checkArgument(StringUtils.isNotEmpty(address));
-        ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
-        DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
-        context.setDownstreamBegin(System.currentTimeMillis());
-        ListenableFuture<Proxy.Packet> future = stub1.unaryCall(packet);
-        return future;
+        Map head = rpcDataWraper.getHead();
+        if(head == null&&head.get(Dict.PROTOCOL)!=null){
+            Sender sender = senderRegistor.getSender(head.get(Dict.PROTOCOL).toString());
+            if(sender!=null){
+              return   sender.async(context,packet);
+            }else{
+                logger.error("protocol {} can not found sender",head.get(Dict.PROTOCOL).toString());
+            }
+        }
+        return  senderRegistor.getDefaultSender().async(context,packet);
+        //return  sink.async(context,packet);
+
+        //String address = this.route();
+//        String address = context.getRouterInfo().toString();
+//        GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
+//        Preconditions.checkArgument(StringUtils.isNotEmpty(address));
+//        ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
+//        DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
+//        context.setDownstreamBegin(System.currentTimeMillis());
+//        ListenableFuture<Proxy.Packet> future = stub1.unaryCall(packet);
+//        return future;
     }
+
+
+
+
+
+//
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+//
+//      sink =  (AsyncSink) InferenceUtils.getClassByName(MetaInfo.PROPERTY_RPC_SINK_CLASS);
+//      if(sink==null){
+//          logger.error("AsyncSink {} can not init",MetaInfo.PROPERTY_RPC_SINK_CLASS);
+//          throw  new RuntimeException("AsyncSink init error");
+//      }
+//    }
 }

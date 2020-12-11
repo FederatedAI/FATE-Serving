@@ -25,22 +25,32 @@ import com.webank.ai.fate.serving.core.bean.ReturnResult;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public interface FederatedRpcInvoker<T> {
 
-    public ListenableFuture<BatchInferenceResult> batchInferenceRpcWithCache(Context context,
+    public Future<BatchInferenceResult> batchInferenceRpcWithCache(Context context,
                                                                              RpcDataWraper rpcDataWraper, boolean useCache);
     public T sync(Context context, RpcDataWraper rpcDataWraper, long timeout);
 
-    public ListenableFuture<T> async(Context context, RpcDataWraper rpcDataWraper);
+    public Future<T> async(Context context, RpcDataWraper rpcDataWraper);
 
-    public ListenableFuture<ReturnResult> singleInferenceRpcWithCache(Context context,
+    public Future<ReturnResult> singleInferenceRpcWithCache(Context context,
                                                                       FederatedRpcInvoker.RpcDataWraper rpcDataWraper, boolean useCache);
     public class RpcDataWraper {
+        Map head;
         Object data;
         Model guestModel;
         Model hostModel;
         String remoteMethodName;
+
+        public Map getHead() {
+            return head;
+        }
+
+        public void setHead(Map head) {
+            this.head = head;
+        }
 
         public Object getData() {
             return data;

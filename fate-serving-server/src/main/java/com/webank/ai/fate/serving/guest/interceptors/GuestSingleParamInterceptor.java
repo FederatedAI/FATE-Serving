@@ -29,6 +29,8 @@ import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class GuestSingleParamInterceptor implements Interceptor {
 
@@ -45,6 +47,10 @@ public class GuestSingleParamInterceptor implements Interceptor {
             Preconditions.checkArgument(StringUtils.isNotBlank(inferenceRequest.getServiceId()), "no service id");
             if (inferenceRequest.getCaseid() == null || inferenceRequest.getCaseid().length() == 0) {
                 inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
+            }
+            if(message.getHeader()!=null) {
+                Map map =JsonUtil.json2Object(message.getHeader().toByteArray(), Map.class);
+                inboundPackage.setHead(map);
             }
             context.setCaseId(inferenceRequest.getCaseid());
             context.setServiceId(inferenceRequest.getServiceId());

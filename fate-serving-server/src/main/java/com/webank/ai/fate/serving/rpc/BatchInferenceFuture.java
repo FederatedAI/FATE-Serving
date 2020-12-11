@@ -38,19 +38,20 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class BatchInferenceFuture extends AbstractFuture {
 
     Logger logger = LoggerFactory.getLogger(BatchInferenceFuture.class);
-    ListenableFuture<Proxy.Packet> future;
+    Future<Proxy.Packet> future;
     FederatedRpcInvoker.RpcDataWraper rpcDataWraper;
     BatchInferenceRequest batchInferenceRequest;
     boolean useCache;
     Map<Integer, BatchInferenceResult.SingleInferenceResult> cacheData;
 
-    public BatchInferenceFuture(ListenableFuture<Proxy.Packet> future,
+    public BatchInferenceFuture(Future<Proxy.Packet> future,
                                 FederatedRpcInvoker.RpcDataWraper rpcDataWraper,
                                 BatchInferenceRequest batchInferenceRequest,
                                 boolean useCache,

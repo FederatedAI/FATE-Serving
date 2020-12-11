@@ -26,6 +26,7 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.OverLoadException;
 import com.webank.ai.fate.serving.model.ModelManager;
@@ -49,7 +50,11 @@ public class GuestModelInterceptor implements Interceptor {
         Model model = modelManager.getModelByServiceId(serviceId);
         Preconditions.checkArgument(model != null, "model is null");
         if (model == null) {
-            throw new ModelNullException("can not find model by service id " + serviceId);
+            if(!MetaInfo.PROPERTY_USE_AUTO_DISPATCH) {
+                throw new ModelNullException("can not find model by service id " + serviceId);
+            }else{
+                context.setNeedDispatch(true);
+            }
         }
         ((ServingServerContext) context).setModel(model);
 

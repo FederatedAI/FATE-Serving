@@ -95,6 +95,9 @@ public class MetaInfo {
     public static String PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE;
     public static String PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE;
     public static String PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE;
+    public static String PROPERTY_RPC_SINK_CLASS;
+    public static Boolean  PROPERTY_USE_AUTO_DISPATCH;
+
 
     public static Map toMap() {
         Map result = Maps.newHashMap();

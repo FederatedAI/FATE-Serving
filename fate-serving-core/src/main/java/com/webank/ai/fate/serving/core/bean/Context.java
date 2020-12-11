@@ -24,6 +24,10 @@ public interface Context<Req, Resp> {
 
     static final String LOGGER_NAME = "flow";
 
+    public boolean isNeedDispatch();
+
+    public void setNeedDispatch(boolean needDispatch);
+
     public void preProcess();
 
     public Object getData(Object key);
