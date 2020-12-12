@@ -36,11 +36,7 @@ public class SenderRegistor implements ApplicationContextAware, ApplicationListe
                 Protocol  protocol = senderObject.getClass().getAnnotation(Protocol.class);
                 sinkMap.put(protocol.name(),(Sender)senderObject);
             }
-
         }
-
-
-
     }
 
     @Override
