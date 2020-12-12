@@ -33,6 +33,7 @@ import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import com.webank.ai.fate.serving.host.provider.HostBatchInferenceProvider;
 import com.webank.ai.fate.serving.host.provider.HostSingleInferenceProvider;
+import com.webank.ai.fate.serving.redirect.HostRequestRedirector;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,8 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
     HostBatchInferenceProvider hostBatchInferenceProvider;
     @Autowired
     HostSingleInferenceProvider hostSingleInferenceProvider;
+    @Autowired
+    HostRequestRedirector   requestRedirector;
 
     @Override
     @RegisterService(serviceName = Dict.UNARYCALL, useDynamicEnvironment = true, role = Role.HOST)
@@ -57,6 +60,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
             ServingServerContext context = (ServingServerContext) prepareContext(req,Dict.UNARYCALL);
             Object result = null;
             byte[] data = req.getBody().getValue().toByteArray();
+            Proxy.Packet resultPackage = null;
             InboundPackage inboundPackage = new InboundPackage();
             switch (context.getActionType()) {
                 case Dict.FEDERATED_INFERENCE:
@@ -86,7 +90,13 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
             packetBuilder.setBody(Proxy.Data.newBuilder()
                     .setValue(ByteString.copyFrom(JsonUtil.object2Json(result).getBytes()))
                     .build());
-            responseObserver.onNext(packetBuilder.build());
+            resultPackage = packetBuilder.build();
+
+            if(context.isNeedDispatch()){
+                inboundPackage.setBody(req);
+                resultPackage = (Packet)this.requestRedirector.service(context, inboundPackage).getData();
+            }
+            responseObserver.onNext(resultPackage);
             responseObserver.onCompleted();
         });
     }

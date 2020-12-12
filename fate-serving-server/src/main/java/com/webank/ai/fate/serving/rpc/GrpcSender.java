@@ -10,6 +10,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.rpc.sink.Protocol;
 import com.webank.ai.fate.serving.core.rpc.sink.Sender;
 import io.grpc.ManagedChannel;
@@ -29,10 +30,11 @@ public class GrpcSender implements Sender<Proxy.Packet  ,Proxy.Packet> {
 
     @Override
     public Future<Proxy.Packet> async(Context context, Proxy.Packet packet) {
-        String address = this.route();
+    //    String address = this.route();
+        RouterInfo routerInfo = context.getRouterInfo();
         GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-        Preconditions.checkArgument(StringUtils.isNotEmpty(address));
-        ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(address);
+        Preconditions.checkArgument(StringUtils.isNotEmpty(routerInfo.toString()));
+        ManagedChannel channel1 = grpcConnectionPool.getManagedChannel(routerInfo.toString());
         DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(channel1);
         context.setDownstreamBegin(System.currentTimeMillis());
         ListenableFuture<Proxy.Packet> future = stub1.unaryCall(packet);

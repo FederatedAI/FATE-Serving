@@ -66,7 +66,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
             result = response.build();
             boolean isNeedDispatch = context.isNeedDispatch();
             if(isNeedDispatch){
-                result=  guestRequestRedirector.redirect(context,req,INFERENCE);
+                result = (InferenceMessage) guestRequestRedirector.service(context,inboundPackage).getData();
             }
             responseObserver.onNext(result);
             responseObserver.onCompleted();
@@ -89,7 +89,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
             result = response.build();
             boolean isNeedDispatch = context.isNeedDispatch();
             if(isNeedDispatch){
-                result=  guestRequestRedirector.redirect(context,req,BATCH_INFERENCE);
+                result= (InferenceMessage) guestRequestRedirector.service(context,inboundPackage).getData();
             }
             responseObserver.onNext(result);
             responseObserver.onCompleted();
