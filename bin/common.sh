@@ -59,7 +59,7 @@ start() {
 
     JAVA_OPT="${JAVA_OPT} ${main_class}"
     if [[ $1 == "front" ]]; then
-      exec java ${JAVA_OPT} >logs/console.log 2>logs/error.log
+      exec java ${JAVA_OPT}
     else
       java ${JAVA_OPT} >logs/console.log 2>logs/error.log &
     fi
