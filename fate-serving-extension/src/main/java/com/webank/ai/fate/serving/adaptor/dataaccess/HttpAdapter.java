@@ -68,7 +68,7 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
             returnResult.setRetcode(StatusCode.SUCCESS);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("MockAdapter result, {}", JsonUtil.object2Json(returnResult));
+                logger.debug("HttpAdapter result, {}", JsonUtil.object2Json(returnResult));
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage());
