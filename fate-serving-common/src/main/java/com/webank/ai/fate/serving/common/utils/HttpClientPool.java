@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.common.utils;
 
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -168,6 +169,21 @@ public class HttpClientPool {
         StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);
         stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
         httpPost.setEntity(stringEntity);
+        return getResponse(httpPost);
+    }
+
+    public static String doPost(String url, Map<String, Object> bodyMap) {
+        HttpPost httpPost = new HttpPost(url);
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(MetaInfo.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT)
+                .setConnectTimeout(MetaInfo.PROPERTY_HTTP_CONNECT_TIMEOUT)
+                .setSocketTimeout(MetaInfo.PROPERTY_HTTP_SOCKET_TIMEOUT).build();
+        httpPost.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
+        httpPost.setConfig(requestConfig);
+        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(bodyMap), Dict.CHARSET_UTF8);
+        stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
+        httpPost.setEntity(stringEntity);
+        logger.info(" postUrl = {"+url+"}  body = {"+ObjectTransform.bean2Json(bodyMap)+"} ");
         return getResponse(httpPost);
     }
 }

@@ -144,6 +144,11 @@ public class Dict {
     public static final String PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT = "proxy.grpc.batch.inference.timeout";
     public static final String PROPERTY_MODEL_CACHE_PATH = "model.cache.path";
     public static final String PROPERTY_LR_USE_PARALLEL="lr.use.parallel";
+    public static final String PROPERTY_HTTP_CONNECT_TIMEOUT = "http.connect.timeout";
+    public static final String PROPERTY_HTTP_SOCKET_TIMEOUT = "http.socket.timeout";
+    public static final String PROPERTY_HTTP_MAX_POOL_SIZE = "http.max.pool.size";
+    public static final String PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT = "http.connect.request.timeout";
+    public static final String PROPERTY_HTTP_ADAPTER_URL = "http.adapter.url";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 

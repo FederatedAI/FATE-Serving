@@ -89,6 +89,11 @@ public class MetaInfo {
     public static Boolean PROPERTY_PRINT_OUTPUT_DATA;
     public static Boolean PROPERTY_LR_USE_PARALLEL;
     public static Boolean PROPERTY_AUTH_OPEN;
+    public static int PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT;
+    public static int PROPERTY_HTTP_CONNECT_TIMEOUT;
+    public static int PROPERTY_HTTP_SOCKET_TIMEOUT;
+    public static int PROPERTY_HTTP_MAX_POOL_SIZE;
+    public static String PROPERTY_HTTP_ADAPTER_URL;
 
     public static Map toMap() {
         Map result = Maps.newHashMap();

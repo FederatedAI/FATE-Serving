@@ -94,6 +94,11 @@ public class Bootstrap {
             MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);
             MetaInfo.PROPERTY_PRINT_INPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA)) : false;
             MetaInfo.PROPERTY_PRINT_OUTPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA)) : false;
+            MetaInfo.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT = environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT)):10000;
+            MetaInfo.PROPERTY_HTTP_CONNECT_TIMEOUT = environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_TIMEOUT) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_TIMEOUT)):10000;
+            MetaInfo.PROPERTY_HTTP_SOCKET_TIMEOUT = environment.getProperty(Dict.PROPERTY_HTTP_SOCKET_TIMEOUT) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_SOCKET_TIMEOUT)):10000;
+            MetaInfo.PROPERTY_HTTP_MAX_POOL_SIZE = environment.getProperty(Dict.PROPERTY_HTTP_MAX_POOL_SIZE) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_MAX_POOL_SIZE)):50;
+            MetaInfo.PROPERTY_HTTP_ADAPTER_URL = environment.getProperty(Dict.PROPERTY_HTTP_ADAPTER_URL);
 
         } catch (Exception e) {
             e.printStackTrace();
