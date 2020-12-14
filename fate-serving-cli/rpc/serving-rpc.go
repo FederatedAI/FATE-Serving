@@ -132,6 +132,32 @@ func BatchInference(address string, message *pb.InferenceMessage) (*pb.Inference
 	return r, nil
 }
 
+func FetchModel(address string, message *pb.FetchModelRequest) (*pb.FetchModelResponse, error) {
+	var conn *grpc.ClientConn
+	var err error
+
+	defer panicRecover()
+
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	c := pb.NewModelServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	r, err := c.FetchModel(ctx, message)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage:  [-h host] [-p port]\n\r")
 }

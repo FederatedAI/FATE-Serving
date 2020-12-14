@@ -133,6 +133,12 @@ func parseCmd(cmdString string) cmd.Run {
 		batchInferenceCmd.Param = cmdField[1:]
 		batchInferenceCmd.Address = address
 		return &batchInferenceCmd
+	case "fetchModel":
+		var fetchModelCmd cmd.FetchModelCmd
+		fetchModelCmd.Name = name
+		fetchModelCmd.Param = cmdField[1:]
+		fetchModelCmd.Address = address
+		return &fetchModelCmd
 	case "help":
 		var helpCmd cmd.HelpCmd
 		helpCmd.Name = name
@@ -147,7 +153,7 @@ func parseCmd(cmdString string) cmd.Run {
 		return &quitCmd
 
 	default:
-		fmt.Println("invalid cmd ", name, " ,now support showmodel/showconfig/help/quit")
+		fmt.Println("invalid cmd ", name, " ,now support showmodel/showconfig/inference/batchInference/fetchModel/help/quit")
 	}
 	return nil
 }
