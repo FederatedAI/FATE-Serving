@@ -47,11 +47,9 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
         try {
-            Map<String, Object> bodyMap = Maps.newHashMap();
-            bodyMap.put("context", context);
-            bodyMap.put("featureIds", featureIds);
             //get data by http
-            String responseBody = HttpClientPool.doPost(HTTP_ADAPTER_URL, bodyMap);
+            String bodyJsonString = JsonUtil.object2Json(featureIds);
+            String responseBody = HttpClientPool.doPost(HTTP_ADAPTER_URL, bodyJsonString);
             logger.info("responseBody = {" + responseBody + "}");
             if (StringUtils.isBlank(responseBody)) {
                 returnResult.setRetcode(StatusCode.HOST_FEATURE_NOT_EXIST);

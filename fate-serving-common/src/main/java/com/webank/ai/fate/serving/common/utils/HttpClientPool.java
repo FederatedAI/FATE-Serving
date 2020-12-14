@@ -173,6 +173,11 @@ public class HttpClientPool {
     }
 
     public static String doPost(String url, Map<String, Object> bodyMap) {
+        String bodyJsonString = ObjectTransform.bean2Json(bodyMap);
+        return doPost(url,bodyJsonString);
+    }
+
+    public static String doPost(String url, String bodyJsonString) {
         HttpPost httpPost = new HttpPost(url);
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectionRequestTimeout(MetaInfo.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT)
@@ -180,10 +185,10 @@ public class HttpClientPool {
                 .setSocketTimeout(MetaInfo.PROPERTY_HTTP_SOCKET_TIMEOUT).build();
         httpPost.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
         httpPost.setConfig(requestConfig);
-        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(bodyMap), Dict.CHARSET_UTF8);
+        StringEntity stringEntity = new StringEntity(bodyJsonString, Dict.CHARSET_UTF8);
         stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
         httpPost.setEntity(stringEntity);
-        logger.info(" postUrl = {"+url+"}  body = {"+ObjectTransform.bean2Json(bodyMap)+"} ");
+        logger.info(" postUrl = {"+url+"}  body = {"+bodyJsonString+"} ");
         return getResponse(httpPost);
     }
 }
