@@ -16,6 +16,8 @@
 
 package com.webank.ai.fate.serving.common.provider;
 
+import com.google.protobuf.ByteString;
+import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
@@ -23,14 +25,18 @@ import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
+import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @FateService(name = "modelService", preChain = {
         "requestOverloadBreaker"
@@ -45,11 +52,16 @@ import java.util.Map;
 })
 @Service
 public class ModelServiceProvider extends AbstractServingServiceProvider {
+
+    Logger logger = LoggerFactory.getLogger(ModelServiceProvider.class);
+
     @Autowired
     ModelManager modelManager;
 
     @Autowired
     FlowCounterManager flowCounterManager;
+
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     @FateServiceMethod(name = "MODEL_LOAD")
     public Object load(Context context, InboundPackage data) {
@@ -152,10 +164,98 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                     case "UNBIND":
                         ModelServiceProto.UnbindResponse unbindResponse = ModelServiceProto.UnbindResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
                         return unbindResponse;
+                    case "FETCH_MODEL":
+                        return ModelServiceProto.FetchModelResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
+                    case "MODEL_TRANSFER":
+                        return ModelServiceProto.ModelTransferResponse.newBuilder().setStatusCode(code).setMessage(msg).build();
                 }
 
             }
         }
         return null;
     }
+
+    @FateServiceMethod(name = "FETCH_MODEL")
+    public ModelServiceProto.FetchModelResponse fetchModel(Context context, InboundPackage data) {
+        ModelServiceProto.FetchModelRequest req = (ModelServiceProto.FetchModelRequest) data.getBody();
+        logger.info("fetch model from {}:{}, tablename {}, namespace {}", req.getSourceIp(), req.getSourcePort(), req.getTableName(), req.getNamespace());
+
+        ModelServiceProto.FetchModelResponse.Builder responseBuilder = ModelServiceProto.FetchModelResponse.newBuilder();
+        if (!MetaInfo.PROPERTY_MODEL_SYNC) {
+            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
+                    .setMessage("no synchronization allowed, to use this function, please configure model.synchronize=true").build();
+        }
+
+        String tableName = req.getTableName();
+        String namespace = req.getNamespace();
+
+        String sourceIp = req.getSourceIp();
+        int sourcePort = req.getSourcePort();
+        if (!NetUtils.isValidAddress(sourceIp + ":" + sourcePort)) {
+            throw new SysException("invalid address");
+        }
+
+        // check model exist
+        Model model = modelManager.queryModel(tableName, namespace);
+        if (model != null) {
+            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
+                    .setMessage("model already exists").build();
+        }
+
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(sourceIp, sourcePort);
+        ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel)
+                .withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+
+        ModelServiceProto.ModelTransferRequest modelTransferRequest = ModelServiceProto.ModelTransferRequest.newBuilder()
+                .setTableName(tableName).setNamespace(namespace).build();
+
+        ModelServiceProto.ModelTransferResponse modelTransferResponse = blockingStub.modelTransfer(modelTransferRequest);
+
+        if (modelTransferResponse.getStatusCode() != StatusCode.SUCCESS) {
+            return responseBuilder.setStatusCode(modelTransferResponse.getStatusCode()).setMessage(modelTransferResponse.getMessage()).build();
+        }
+
+        byte[] modelData = modelTransferResponse.getModelData().toByteArray();
+        byte[] cacheData = modelTransferResponse.getCacheData().toByteArray();
+
+        Model fetchModel = JsonUtil.json2Object(modelData, Model.class);
+
+        modelManager.restoreByLocalCache(context, fetchModel, cacheData);
+
+        return responseBuilder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS).build();
+    }
+
+    @FateServiceMethod(name = "MODEL_TRANSFER")
+    public ModelServiceProto.ModelTransferResponse modelTransfer(Context context, InboundPackage data) {
+        ModelServiceProto.ModelTransferRequest req = (ModelServiceProto.ModelTransferRequest) data.getBody();
+        logger.info("transfer model, tablename {}, namespace {}", req.getTableName(), req.getNamespace());
+
+        ModelServiceProto.ModelTransferResponse.Builder responseBuilder = ModelServiceProto.ModelTransferResponse.newBuilder();
+        if (!MetaInfo.PROPERTY_MODEL_SYNC) {
+            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
+                    .setMessage("no synchronization allowed, to use this function, please configure model.synchronize=true")
+                    .build();
+        }
+
+        String tableName = req.getTableName();
+        String namespace = req.getNamespace();
+
+        Model model = modelManager.queryModel(tableName, namespace);
+        if (model == null) {
+            logger.error("model {}_{} is not exist", tableName, namespace);
+            throw new ModelNullException("model is not exist ");
+        }
+        byte[] cacheData = modelManager.getModelCacheData(context, tableName, namespace);
+        if (cacheData == null) {
+            logger.error("model {}_{} cache data is null", tableName, namespace);
+            throw new ModelNullException("model cache data is null");
+        }
+
+        responseBuilder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS)
+                .setModelData(ByteString.copyFrom(JsonUtil.object2Json(model).getBytes()))
+                .setCacheData(ByteString.copyFrom(cacheData));
+
+        return responseBuilder.build();
+    }
+
 }

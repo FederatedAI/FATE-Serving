@@ -23,10 +23,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -189,6 +186,47 @@ public class ModelController {
 
             ListenableFuture<ModelServiceProto.UnbindResponse> future = futureStub.unbind(unbindRequest);
             ModelServiceProto.UnbindResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("response: {}", response);
+            }
+
+            result.setRetcode(response.getStatusCode());
+            result.setRetmsg(response.getMessage());
+            return result;
+        };
+    }
+
+    @PostMapping("/model/fetch")
+    public Callable<ReturnResult> fetch(@RequestBody RequestParamWrapper requestParams) throws Exception {
+        return () -> {
+            String sourceIp = requestParams.getSourceIp();
+            int sourcePort = requestParams.getSourcePort();
+            String targetIp = requestParams.getTargetIp();
+            int targetPort = requestParams.getTargetPort();
+            String tableName = requestParams.getTableName();
+            String namespace = requestParams.getNamespace();
+
+            Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
+            Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
+
+            ReturnResult result = new ReturnResult();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("fetch model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", targetIp, targetPort, tableName, namespace);
+            }
+
+            ModelServiceGrpc.ModelServiceFutureStub futureStub = getModelServiceFutureStub(targetIp, targetPort);
+            ModelServiceProto.FetchModelRequest fetchModelRequest = ModelServiceProto.FetchModelRequest.newBuilder()
+                    .setSourceIp(sourceIp)
+                    .setSourcePort(sourcePort)
+                    .setTableName(tableName)
+                    .setNamespace(namespace)
+                    .build();
+
+            // fetchModel(target) ==> modelTransfer(source)
+            ListenableFuture<ModelServiceProto.FetchModelResponse> future = futureStub.fetchModel(fetchModelRequest);
+            ModelServiceProto.FetchModelResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("response: {}", response);

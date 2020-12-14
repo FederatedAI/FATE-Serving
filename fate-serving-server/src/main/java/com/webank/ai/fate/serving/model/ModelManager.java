@@ -310,13 +310,19 @@ public class ModelManager implements InitializingBean {
         if (logger.isDebugEnabled()) {
             logger.debug("try to bind model, receive request : {}", req);
         }
-        ReturnResult returnResult = new ReturnResult();
         String serviceId = req.getServiceId();
+        Model model = this.buildModelForBind(context, req);
+        return this.doBind(context, model, serviceId);
+    }
+
+    public synchronized ReturnResult doBind(Context context, Model model, String serviceId) {
+        ReturnResult returnResult = new ReturnResult();
+
         Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
         Preconditions.checkArgument(!StringUtils.containsAny(serviceId, URL_FILTER_CHARACTER), "Service id contains special characters, " + JsonUtil.object2Json(URL_FILTER_CHARACTER));
 
         returnResult.setRetcode(StatusCode.SUCCESS);
-        Model model = this.buildModelForBind(context, req);
+
         String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
         Model loadedModel = this.namespaceMap.get(modelKey);
         if (loadedModel == null) {
@@ -391,10 +397,8 @@ public class ModelManager implements InitializingBean {
         if (logger.isDebugEnabled()) {
             logger.debug("try to load model, receive request : {}", req);
         }
-        ReturnResult returnResult = new ReturnResult();
-        returnResult.setRetcode(StatusCode.SUCCESS);
         Model model = this.buildModelForLoad(context, req);
-        String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+
         ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
         String loadType = req.getLoadType();
         if (StringUtils.isNotEmpty(loadType)) {
@@ -405,6 +409,14 @@ public class ModelManager implements InitializingBean {
         modelLoaderParam.setTableName(model.getTableName());
         modelLoaderParam.setNameSpace(model.getNamespace());
         modelLoaderParam.setFilePath(req.getFilePath());
+
+        return this.doLoad(context, model, modelLoaderParam);
+    }
+
+    public synchronized ReturnResult doLoad(Context context, Model model, ModelLoader.ModelLoaderParam modelLoaderParam) {
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(StatusCode.SUCCESS);
+        String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
         ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
         Preconditions.checkArgument(modelLoader != null, "model loader not found");
         ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
@@ -432,6 +444,24 @@ public class ModelManager implements InitializingBean {
         this.store(namespaceMap, namespaceFile);
         return returnResult;
 
+    }
+
+    public Model queryModel(String tableName, String namespace) {
+        String namespaceKey = this.getNameSpaceKey(tableName, namespace);
+        Model model = this.namespaceMap.get(namespaceKey);
+        if (model == null) {
+            return null;
+        }
+        Model clone = (Model) model.clone();
+        this.serviceIdNamespaceMap.forEach((k, v) -> {
+            if (clone.getServiceIds() == null) {
+                clone.setServiceIds(Lists.newArrayList());
+            }
+            if (namespaceKey.equals(v)) {
+                clone.getServiceIds().add(k);
+            }
+        });
+        return clone;
     }
 
     public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
@@ -665,6 +695,52 @@ public class ModelManager implements InitializingBean {
             String publishOnlineFileName = locationPre + "/.fate/publishOnlineStore.cache";
             publishLoadStoreFile = new File(publishLoadFileName);
             publishOnlineStoreFile = new File(publishOnlineFileName);
+        }
+    }
+
+    public byte[] getModelCacheData(Context context, String tableName, String namespace) {
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.CACHE);
+        String cachePath = modelLoader.getCachePath(context, tableName, namespace);
+        if (cachePath == null) {
+            return null;
+        }
+        File file = new File(cachePath);
+        if (file != null && file.exists()) {
+            try (InputStream in = new FileInputStream(file)) {
+                Long filelength = file.length();
+                byte[] filecontent = new byte[filelength.intValue()];
+                int readCount = in.read(filecontent);
+                if (readCount > 0) {
+                    return filecontent;
+                }
+            } catch (Throwable e) {
+                logger.error("load model cache fail ", e);
+            }
+        }
+        return null;
+    }
+
+    public void restoreByLocalCache(Context context, Model model, byte[] cacheData) {
+        // use local cache model loader
+        LocalCacheModelLoader modelLoader = (LocalCacheModelLoader) this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.CACHE);
+        // save to local cache
+        String cachePath = modelLoader.getCachePath(context, model.getTableName(), model.getNamespace());
+        modelLoader.saveCacheData(context, cachePath, cacheData);
+        // restore
+        ModelLoader.ModelLoaderParam param = new ModelLoader.ModelLoaderParam();
+        param.setTableName(model.getTableName());
+        param.setNameSpace(model.getNamespace());
+        // first lookup form fateflow
+        param.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+//        param.setFilePath(cachePath);
+
+        this.doLoad(context, model, param);
+
+        // bind model
+        if (model.getServiceIds() != null) {
+            for (String serviceId : model.getServiceIds()) {
+                this.doBind(context, model, serviceId);
+            }
         }
     }
 

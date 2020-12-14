@@ -108,4 +108,8 @@ public class LocalCacheModelLoader extends AbstractModelLoader<Map<String, byte[
         }
         return null;
     }
+
+    public void saveCacheData(Context context, String cachePath, byte[] bytes) {
+        this.doStore(context, bytes, new File(cachePath));
+    }
 }

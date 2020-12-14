@@ -125,6 +125,28 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void fetchModel(ModelServiceProto.FetchModelRequest request, StreamObserver<ModelServiceProto.FetchModelResponse> responseObserver) {
+        Context context = prepareContext(ModelActionType.FETCH_MODEL.name());
+        InboundPackage<ModelServiceProto.FetchModelRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.FetchModelResponse fetchModelResponse = (ModelServiceProto.FetchModelResponse) outboundPackage.getData();
+        responseObserver.onNext(fetchModelResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void modelTransfer(ModelServiceProto.ModelTransferRequest request, StreamObserver<ModelServiceProto.ModelTransferResponse> responseObserver) {
+        Context context = prepareContext(ModelActionType.MODEL_TRANSFER.name());
+        InboundPackage<ModelServiceProto.ModelTransferRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.ModelTransferResponse modelTransferResponse = (ModelServiceProto.ModelTransferResponse) outboundPackage.getData();
+        responseObserver.onNext(modelTransferResponse);
+        responseObserver.onCompleted();
+    }
+
     private Context prepareContext(String actionType) {
         ServingServerContext context = new ServingServerContext();
         context.setActionType(actionType);

@@ -46,6 +46,7 @@ public class StatusCode {
     public static final int INVALID_TOKEN = 127;
     public static final int PROXY_ROUTER_ERROR = 128;
     public static final int PROXY_AUTH_ERROR = 129;
+    public static final int MODEL_SYNC_ERROR = 130;
 
 
 

@@ -89,8 +89,31 @@ message PublishResponse{
     bytes data = 4;
 }
 
+message FetchModelRequest {
+    string tableName = 1;
+    string namespace = 2;
+    string sourceIp = 3;
+    int32 sourcePort = 4;
+    string targetIp = 5;
+    int32 targetPort = 6;
+}
 
+message FetchModelResponse {
+    int32 statusCode = 1;
+    string message = 2;
+}
 
+message ModelTransferRequest {
+    string tableName = 1;
+    string namespace = 2;
+}
+
+message ModelTransferResponse {
+    int32 statusCode = 1;
+    string message = 2;
+    bytes modelData = 3;
+    bytes cacheData = 4;
+}
 
 service ModelService{
     rpc publishLoad(PublishRequest) returns (PublishResponse);
@@ -99,4 +122,6 @@ service ModelService{
     rpc queryModel(QueryModelRequest)  returns (QueryModelResponse);
     rpc unload(UnloadRequest) returns (UnloadResponse);
     rpc unbind(UnbindRequest) returns (UnbindResponse);
+    rpc fetchModel(FetchModelRequest) returns (FetchModelResponse);
+    rpc modelTransfer(ModelTransferRequest) returns (ModelTransferResponse);
 }

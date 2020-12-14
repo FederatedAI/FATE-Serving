@@ -27,5 +27,7 @@ public enum ModelActionType {
     MODEL_PUBLISH_ONLINE,
     UNLOAD,
     UNBIND,
-    QUERY_MODEL
+    QUERY_MODEL,
+    FETCH_MODEL,
+    MODEL_TRANSFER
 }

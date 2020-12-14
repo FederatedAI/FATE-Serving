@@ -51,6 +51,17 @@ public class RequestParamWrapper {
     String filePath;
     String data;
 
+    /**
+     * fetch model from source
+     */
+    String sourceIp;
+    int sourcePort;
+    /**
+     * push model to target
+     */
+    String targetIp;
+    int targetPort;
+
     public String getSource() {
         return source;
     }
@@ -169,5 +180,37 @@ public class RequestParamWrapper {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getSourceIp() {
+        return sourceIp;
+    }
+
+    public void setSourceIp(String sourceIp) {
+        this.sourceIp = sourceIp;
+    }
+
+    public int getSourcePort() {
+        return sourcePort;
+    }
+
+    public void setSourcePort(int sourcePort) {
+        this.sourcePort = sourcePort;
+    }
+
+    public String getTargetIp() {
+        return targetIp;
+    }
+
+    public void setTargetIp(String targetIp) {
+        this.targetIp = targetIp;
+    }
+
+    public int getTargetPort() {
+        return targetPort;
+    }
+
+    public void setTargetPort(int targetPort) {
+        this.targetPort = targetPort;
     }
 }

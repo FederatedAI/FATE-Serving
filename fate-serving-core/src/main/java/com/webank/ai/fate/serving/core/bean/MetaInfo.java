@@ -97,7 +97,7 @@ public class MetaInfo {
     public static String PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE;
     public static String PROPERTY_RPC_SINK_CLASS;
     public static Boolean  PROPERTY_USE_AUTO_DISPATCH;
-
+    public static boolean PROPERTY_MODEL_SYNC;
 
     public static Map toMap() {
         Map result = Maps.newHashMap();
