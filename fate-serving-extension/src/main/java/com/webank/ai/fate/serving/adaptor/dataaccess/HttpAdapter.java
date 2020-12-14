@@ -16,8 +16,6 @@
 
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
-import com.google.common.collect.Maps;
-import com.google.gson.JsonObject;
 import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
@@ -25,7 +23,6 @@ import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
