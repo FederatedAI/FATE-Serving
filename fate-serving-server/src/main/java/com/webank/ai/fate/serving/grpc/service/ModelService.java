@@ -126,6 +126,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
     }
 
     @Override
+    @RegisterService(serviceName = "fetchModel")
     public void fetchModel(ModelServiceProto.FetchModelRequest request, StreamObserver<ModelServiceProto.FetchModelResponse> responseObserver) {
         Context context = prepareContext(ModelActionType.FETCH_MODEL.name());
         InboundPackage<ModelServiceProto.FetchModelRequest> inboundPackage = new InboundPackage();
@@ -137,6 +138,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
     }
 
     @Override
+    @RegisterService(serviceName = "modelTransfer")
     public void modelTransfer(ModelServiceProto.ModelTransferRequest request, StreamObserver<ModelServiceProto.ModelTransferResponse> responseObserver) {
         Context context = prepareContext(ModelActionType.MODEL_TRANSFER.name());
         InboundPackage<ModelServiceProto.ModelTransferRequest> inboundPackage = new InboundPackage();
