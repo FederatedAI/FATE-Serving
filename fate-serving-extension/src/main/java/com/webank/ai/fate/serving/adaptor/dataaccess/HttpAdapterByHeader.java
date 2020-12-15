@@ -17,19 +17,16 @@
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 import com.webank.ai.fate.serving.common.utils.HttpAdapterClientPool;
-import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
-    private static final Logger logger = LoggerFactory.getLogger(HttpAdapter.class);
+public class HttpAdapterByHeader extends AbstractSingleFeatureDataAdaptor {
+    private static final Logger logger = LoggerFactory.getLogger(HttpAdapterByHeader.class);
 
     private final static String HTTP_ADAPTER_URL = MetaInfo.PROPERTY_HTTP_ADAPTER_URL;
 
@@ -44,7 +41,7 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
         HttpAdapterResponse responseResult ;
         try {
             //get data by http
-            responseResult = HttpAdapterClientPool.doPost(HTTP_ADAPTER_URL, featureIds);
+            responseResult = HttpAdapterClientPool.doPostgetCodeByHeader(HTTP_ADAPTER_URL, featureIds);
             int responseCode = responseResult.getCode();
             switch (responseCode) {
                 case HttpAdapterResponseCodeEnum.SUCCESS_CODE:
@@ -56,15 +53,9 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
                         returnResult.setData(responseResult.getData());
                     }
                     break;
-
-                case HttpAdapterResponseCodeEnum.ERROR_CODE:
-                    returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
-                    returnResult.setRetmsg(" data not found ");
-                    break;
-
                 default:
                     returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
-                    returnResult.setRetmsg("responseCode unknown ");
+                    returnResult.setRetmsg("HTTP request failed ,error code :"+responseResult.getCode());
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("HttpAdapter result, {}", JsonUtil.object2Json(returnResult));
