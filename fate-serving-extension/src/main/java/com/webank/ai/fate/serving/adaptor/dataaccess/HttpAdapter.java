@@ -58,7 +58,7 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
-                returnResult.setRetmsg("responseBody not is not json string ");
+                returnResult.setRetmsg("responseBody format failed ");
                 return returnResult;
             }
             int responseCode = responseResult.getCode();
