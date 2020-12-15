@@ -446,6 +446,30 @@ public class ModelManager implements InitializingBean {
 
     }
 
+    /**
+     * query model by service id
+     * @param serviceId
+     * @return
+     */
+    public Model queryModel(String serviceId) {
+        String namespaceKey = this.serviceIdNamespaceMap.get(serviceId);
+        if (namespaceKey != null && this.namespaceMap.get(namespaceKey) != null) {
+            Model model = (Model) this.namespaceMap.get(namespaceKey).clone();
+            if (model.getServiceIds() == null) {
+                model.setServiceIds(Lists.newArrayList());
+            }
+            model.getServiceIds().add(serviceId);
+            return model;
+        }
+        return null;
+    }
+
+    /**
+     * query model by tablename and namespace
+     * @param tableName
+     * @param namespace
+     * @return
+     */
     public Model queryModel(String tableName, String namespace) {
         String namespaceKey = this.getNameSpaceKey(tableName, namespace);
         Model model = this.namespaceMap.get(namespaceKey);

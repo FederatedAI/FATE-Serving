@@ -149,7 +149,7 @@ func (cmd *HelpCmd) Run() {
 			fmt.Println("args:")
 			fmt.Println("	{0}: request the absolute path of the json file")
 			fmt.Println("file content format:")
-			fmt.Println("	{\"sourceIp\":\"127.0.0.1\",\"sourcePort\":8000,\"namespace\":\"guest#9999#arbiter-10000#guest-9999#host-10000#model\",\"tableName\":\"2020071410461638392952\"}\n")
+			fmt.Println("	{\"sourceIp\":\"127.0.0.1\",\"sourcePort\":8000,\"serviceId\":\"lr-test\", \"namespace\":\"guest#9999#arbiter-10000#guest-9999#host-10000#model\", \"tableName\":\"2020071410461638392952\"}\n")
 		default:
 
 		}
@@ -319,6 +319,7 @@ func (cmd *FetchModelCmd) Run() {
 	contentMap := common.JsonToMap(string(content))
 
 	fetchModelRequest := pb.FetchModelRequest{
+		ServiceId: contentMap["serviceId"].(string),
 		SourceIp: contentMap["sourceIp"].(string),
 		SourcePort: int32(contentMap["sourcePort"].(float64)),
 		TableName: contentMap["tableName"].(string),

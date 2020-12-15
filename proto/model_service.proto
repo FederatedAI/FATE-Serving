@@ -96,6 +96,7 @@ message FetchModelRequest {
     int32 sourcePort = 4;
     string targetIp = 5;
     int32 targetPort = 6;
+    string serviceId = 7;
 }
 
 message FetchModelResponse {
@@ -106,6 +107,7 @@ message FetchModelResponse {
 message ModelTransferRequest {
     string tableName = 1;
     string namespace = 2;
+    string serviceId = 3;
 }
 
 message ModelTransferResponse {

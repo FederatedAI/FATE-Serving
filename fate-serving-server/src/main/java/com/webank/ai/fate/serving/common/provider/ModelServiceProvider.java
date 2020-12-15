@@ -188,6 +188,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
+        String serviceId = req.getServiceId();
 
         String sourceIp = req.getSourceIp();
         int sourcePort = req.getSourcePort();
@@ -196,7 +197,12 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         }
 
         // check model exist
-        Model model = modelManager.queryModel(tableName, namespace);
+        Model model;
+        if (StringUtils.isNotBlank(serviceId)) {
+            model = modelManager.queryModel(serviceId);
+        } else {
+            model = modelManager.queryModel(tableName, namespace);
+        }
         if (model != null) {
             return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
                     .setMessage("model already exists").build();
@@ -207,7 +213,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 .withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
         ModelServiceProto.ModelTransferRequest modelTransferRequest = ModelServiceProto.ModelTransferRequest.newBuilder()
-                .setTableName(tableName).setNamespace(namespace).build();
+                .setServiceId(serviceId).setTableName(tableName).setNamespace(namespace).build();
 
         ModelServiceProto.ModelTransferResponse modelTransferResponse = blockingStub.modelTransfer(modelTransferRequest);
 
@@ -237,10 +243,16 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                     .build();
         }
 
+        String serviceId = req.getServiceId();
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
 
-        Model model = modelManager.queryModel(tableName, namespace);
+        Model model;
+        if (StringUtils.isNotBlank(serviceId)) {
+            model = modelManager.queryModel(serviceId);
+        } else {
+            model = modelManager.queryModel(tableName, namespace);
+        }
         if (model == null) {
             logger.error("model {}_{} is not exist", tableName, namespace);
             throw new ModelNullException("model is not exist ");
