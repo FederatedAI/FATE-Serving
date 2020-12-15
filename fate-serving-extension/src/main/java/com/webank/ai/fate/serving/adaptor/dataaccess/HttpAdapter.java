@@ -17,9 +17,7 @@
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
 import com.webank.ai.fate.serving.common.utils.HttpClientPool;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -43,27 +41,47 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
     public ReturnResult getData(Context context, Map<String, Object> featureIds) {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
+        HttpAdapterResponse responseResult = null;
         try {
             //get data by http
             String bodyJsonString = JsonUtil.object2Json(featureIds);
             String responseBody = HttpClientPool.doPost(HTTP_ADAPTER_URL, bodyJsonString);
             logger.info("responseBody = {" + responseBody + "}");
             if (StringUtils.isBlank(responseBody)) {
-                returnResult.setRetcode(StatusCode.HOST_FEATURE_NOT_EXIST);
+                returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
+                returnResult.setRetmsg("responseBody is null");
                 return returnResult;
             }
 
             try {
-                data = JsonUtil.json2Object(responseBody, Map.class);
+                responseResult = JsonUtil.json2Object(responseBody, HttpAdapterResponse.class);
             } catch (Exception e) {
                 logger.error(e.getMessage());
-                returnResult.setRetcode(StatusCode.HOST_PARAM_ERROR);
+                returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
                 returnResult.setRetmsg("responseBody not is not json string ");
                 return returnResult;
             }
-            returnResult.setData(data);
-            returnResult.setRetcode(StatusCode.SUCCESS);
+            int responseCode = responseResult.getCode();
+            switch (responseCode) {
+                case HttpAdapterResponseCodeEnum.SUCCESS_CODE:
+                    if (responseResult.getData() == null || responseResult.getData().size() == 0) {
+                        returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
+                        returnResult.setRetmsg("responseData is null ");
+                    }else{
+                        returnResult.setRetcode(StatusCode.SUCCESS);
+                        returnResult.setData(responseResult.getData());
+                    }
+                    break;
 
+                case HttpAdapterResponseCodeEnum.ERROR_CODE:
+                    returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
+                    returnResult.setRetmsg("responseData is null ");
+                    break;
+
+                default:
+                    returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
+                    returnResult.setRetmsg("responseCode unknown ");
+            }
             if (logger.isDebugEnabled()) {
                 logger.debug("HttpAdapter result, {}", JsonUtil.object2Json(returnResult));
             }
@@ -72,5 +90,11 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
             returnResult.setRetcode(StatusCode.SYSTEM_ERROR);
         }
         return returnResult;
+    }
+
+    public static void main(String[] args) {
+        String mockData = "{}";
+        HttpAdapterResponse response = JsonUtil.json2Object(mockData, HttpAdapterResponse.class);
+        System.out.println(response.getCode());
     }
 }
