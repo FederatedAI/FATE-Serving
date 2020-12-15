@@ -75,7 +75,7 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
 
                 case HttpAdapterResponseCodeEnum.ERROR_CODE:
                     returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
-                    returnResult.setRetmsg("responseData is null ");
+                    returnResult.setRetmsg(" data not found ");
                     break;
 
                 default:
