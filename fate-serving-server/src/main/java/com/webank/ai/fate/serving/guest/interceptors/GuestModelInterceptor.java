@@ -49,7 +49,7 @@ public class GuestModelInterceptor implements Interceptor {
         String serviceId = context.getServiceId();
         Model model = modelManager.getModelByServiceId(serviceId);
         if (model == null) {
-            if (MetaInfo.PROPERTY_USE_AUTO_DISPATCH) {
+            if (MetaInfo.PROPERTY_USE_AUTO_DISPATCH && MetaInfo.PROPERTY_USE_REGISTER) {
                 context.setNeedDispatch(true);
             }
             throw new ModelNullException("can not find model by service id " + serviceId);

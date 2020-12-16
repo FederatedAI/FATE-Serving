@@ -56,6 +56,7 @@ public class RequestParamWrapper {
      */
     String sourceIp;
     int sourcePort;
+    String serviceId;
     /**
      * push model to target
      */
@@ -212,5 +213,13 @@ public class RequestParamWrapper {
 
     public void setTargetPort(int targetPort) {
         this.targetPort = targetPort;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
     }
 }

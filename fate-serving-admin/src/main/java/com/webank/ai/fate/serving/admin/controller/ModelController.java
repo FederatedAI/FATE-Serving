@@ -206,6 +206,7 @@ public class ModelController {
             int targetPort = requestParams.getTargetPort();
             String tableName = requestParams.getTableName();
             String namespace = requestParams.getNamespace();
+            String serviceId = requestParams.getServiceId();
 
             Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
             Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
@@ -222,6 +223,7 @@ public class ModelController {
                     .setSourcePort(sourcePort)
                     .setTableName(tableName)
                     .setNamespace(namespace)
+                    .setServiceId(serviceId)
                     .build();
 
             // fetchModel(target) ==> modelTransfer(source)

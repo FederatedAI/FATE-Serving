@@ -7,8 +7,10 @@ import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.serving.common.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.common.utils.DisruptorUtil;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
@@ -16,6 +18,7 @@ import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.event.FetchModelEventData;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +46,33 @@ public class HostRequestRedirector
         return StringUtils.join(Arrays.asList(tableName, namespace), MODEL_KEY_SEPARATOR);
     }
 
-    public static String getModelRouteKey(Context context, Proxy.Packet packet) {
+    class ModelDataWrapper {
+        String tableName;
+        String namespace;
+
+        public ModelDataWrapper(String tableName, String namespace) {
+            this.tableName = tableName;
+            this.namespace = namespace;
+        }
+
+        public String getTableName() {
+            return tableName;
+        }
+
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
+        }
+
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
+        }
+    }
+
+    private ModelDataWrapper getModelData(Context context, Proxy.Packet packet) {
         String namespace;
         String tableName;
         if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
@@ -60,8 +89,15 @@ public class HostRequestRedirector
             tableName = model.getTableName();
         }
 
-        String key = genModelKey(tableName, namespace);
-        logger.info("get model route key by version: {} namespace: {} tablename: {}, key: {}", context.getVersion(), namespace, tableName, key);
+        return new ModelDataWrapper(tableName, namespace);
+    }
+
+    private String getModelRouteKey(Context context, Proxy.Packet packet) {
+        ModelDataWrapper wrapper = getModelData(context, packet);
+
+        String key = genModelKey(wrapper.getTableName(), wrapper.getNamespace());
+        logger.info("get model route key by version: {} namespace: {} tablename: {}, key: {}", context.getVersion(),
+                wrapper.getNamespace(), wrapper.getTableName(), key);
 
         return EncryptUtils.encrypt(key, EncryptMethod.MD5);
     }
@@ -89,6 +125,21 @@ public class HostRequestRedirector
             return result;
         } catch (Exception e) {
             throw new RemoteRpcException("remote rpc exception");
+        } finally {
+            ModelDataWrapper wrapper = getModelData(context, packet);
+            FetchModelEventData data = new FetchModelEventData();
+            data.setSourceIp(host);
+            data.setSourcePort(port);
+            data.setTableName(wrapper.getTableName());
+            data.setNamespace(wrapper.getNamespace());
+
+            AsyncMessageEvent messageEvent = new AsyncMessageEvent();
+            messageEvent.setName(Dict.EVENT_FETCH_MODEL);
+            messageEvent.setTimestamp(System.currentTimeMillis());
+            messageEvent.setAction(ModelActionType.FETCH_MODEL.name());
+            messageEvent.setData(data);
+            messageEvent.setContext(context);
+            DisruptorUtil.producer(messageEvent);
         }
     }
 

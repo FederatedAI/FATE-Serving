@@ -57,7 +57,7 @@ public class HostModelInterceptor implements Interceptor {
             model = modelManager.getModelByTableNameAndNamespace(tableName, nameSpace);
         }
         if (model == null) {
-            if (MetaInfo.PROPERTY_USE_AUTO_DISPATCH) {
+            if (MetaInfo.PROPERTY_USE_AUTO_DISPATCH && MetaInfo.PROPERTY_USE_REGISTER) {
                 context.setNeedDispatch(true);
             }
             logger.error("table name {} namepsace {} is not exist", tableName, nameSpace);

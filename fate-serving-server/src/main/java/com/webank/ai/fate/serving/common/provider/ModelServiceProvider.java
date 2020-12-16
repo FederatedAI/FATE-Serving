@@ -232,9 +232,9 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
     }
 
     @FateServiceMethod(name = "MODEL_TRANSFER")
-    public ModelServiceProto.ModelTransferResponse modelTransfer(Context context, InboundPackage data) {
+    public synchronized ModelServiceProto.ModelTransferResponse modelTransfer(Context context, InboundPackage data) {
         ModelServiceProto.ModelTransferRequest req = (ModelServiceProto.ModelTransferRequest) data.getBody();
-        logger.info("transfer model, tablename {}, namespace {}", req.getTableName(), req.getNamespace());
+        logger.info("transfer model by ", req.toString());
 
         ModelServiceProto.ModelTransferResponse.Builder responseBuilder = ModelServiceProto.ModelTransferResponse.newBuilder();
         if (!MetaInfo.PROPERTY_MODEL_SYNC) {
@@ -254,12 +254,12 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
             model = modelManager.queryModel(tableName, namespace);
         }
         if (model == null) {
-            logger.error("model {}_{} is not exist", tableName, namespace);
+            logger.error("model {}_{} is not exist", model.getTableName(), model.getNamespace());
             throw new ModelNullException("model is not exist ");
         }
-        byte[] cacheData = modelManager.getModelCacheData(context, tableName, namespace);
+        byte[] cacheData = modelManager.getModelCacheData(context, model.getTableName(), model.getNamespace());
         if (cacheData == null) {
-            logger.error("model {}_{} cache data is null", tableName, namespace);
+            logger.error("model {}_{} cache data is null", model.getTableName(), model.getNamespace());
             throw new ModelNullException("model cache data is null");
         }
 
