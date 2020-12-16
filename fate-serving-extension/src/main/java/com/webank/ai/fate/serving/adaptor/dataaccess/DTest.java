@@ -21,7 +21,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.utils.ObjectTransform;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class DTest extends AbstractSingleFeatureDataAdaptor {
         if (StringUtils.isEmpty(responseBody)) {
             return null;
         }
-        Map<String, Object> tmp = (Map<String, Object>) ObjectTransform.json2Bean(responseBody, HashMap.class);
+        Map<String, Object> tmp = (Map<String, Object>) JsonUtil.json2Object(responseBody, HashMap.class);
         if ((int) Optional.ofNullable(tmp.get(Dict.STATUS)).orElse(1) != 0) {
             return null;
         }

@@ -56,7 +56,8 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         Map futureMap = Maps.newHashMap();
         model.getFederationModelMap().forEach((hostPartyId, remoteModel) -> {
             BatchHostFederatedParams batchHostFederatedParams = buildBatchHostFederatedParams(context, batchInferenceRequest, model, remoteModel);
-            Future<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context, buildRpcDataWraper(model, remoteModel, batchHostFederatedParams), MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH);
+            FederatedRpcInvoker.RpcDataWraper rpcDataWraper = this.buildRpcDataWraper(model, remoteModel, batchHostFederatedParams, inboundPackage.getHead());
+            Future<BatchInferenceResult> originBatchResultFuture = federatedRpcInvoker.batchInferenceRpcWithCache(context, rpcDataWraper, MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH);
             futureMap.put(hostPartyId, originBatchResultFuture);
         });
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, MetaInfo.PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT);
@@ -82,12 +83,13 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         return outboundPackage;
     }
 
-    private FederatedRpcInvoker.RpcDataWraper buildRpcDataWraper(Model model, Model remoteModel, Object batchHostFederatedParams) {
+    private FederatedRpcInvoker.RpcDataWraper buildRpcDataWraper(Model model, Model remoteModel, Object batchHostFederatedParams, Map head) {
         FederatedRpcInvoker.RpcDataWraper rpcDataWraper = new FederatedRpcInvoker.RpcDataWraper();
         rpcDataWraper.setGuestModel(model);
         rpcDataWraper.setHostModel(remoteModel);
         rpcDataWraper.setData(batchHostFederatedParams);
         rpcDataWraper.setRemoteMethodName(Dict.REMOTE_METHOD_BATCH);
+        rpcDataWraper.setHead(head);
         return rpcDataWraper;
     }
 

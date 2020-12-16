@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -88,6 +89,7 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
         }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
+        reqBuilder.setHeader(ByteString.copyFrom(JsonUtil.object2Json(data.getProtocol()).getBytes()));
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
         if (callName.equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
             resultFuture = futureStub.batchInference(reqBuilder.build());

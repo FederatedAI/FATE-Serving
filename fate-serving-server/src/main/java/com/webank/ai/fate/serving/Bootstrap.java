@@ -111,6 +111,7 @@ public class Bootstrap {
             MetaInfo.PROPERTY_LR_USE_PARALLEL = environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL)) : false;
             MetaInfo.PROPERTY_MODEL_SYNC = environment.getProperty(Dict.PROPERTY_MODEL_SYNC) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_MODEL_SYNC)) : false;
             MetaInfo.PROPERTY_GRPC_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_GRPC_TIMEOUT, "5000"));
+            MetaInfo.PROPERTY_USE_AUTO_DISPATCH = environment.getProperty(Dict.PROPERTY_USE_AUTO_DISPATCH) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_AUTO_DISPATCH)) : true;
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("init metainfo error", e);

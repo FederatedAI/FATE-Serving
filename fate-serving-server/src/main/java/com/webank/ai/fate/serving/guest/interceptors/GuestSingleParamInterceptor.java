@@ -48,7 +48,8 @@ public class GuestSingleParamInterceptor implements Interceptor {
             if (inferenceRequest.getCaseid() == null || inferenceRequest.getCaseid().length() == 0) {
                 inferenceRequest.setCaseId(InferenceUtils.generateCaseid());
             }
-            if(message.getHeader()!=null) {
+            if (message.getHeader() != null && StringUtils.isNotBlank(message.getHeader().toStringUtf8())) {
+                // protocol map
                 Map map =JsonUtil.json2Object(message.getHeader().toByteArray(), Map.class);
                 inboundPackage.setHead(map);
             }

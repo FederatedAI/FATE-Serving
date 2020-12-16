@@ -38,7 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -80,6 +82,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         inferenceReqMap.putAll(reqBodyMap);
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
+        reqBuilder.setHeader(ByteString.copyFrom(JsonUtil.object2Json(data.getProtocol()).getBytes()));
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
         resultFuture = futureStub.inference(reqBuilder.build());
         try {

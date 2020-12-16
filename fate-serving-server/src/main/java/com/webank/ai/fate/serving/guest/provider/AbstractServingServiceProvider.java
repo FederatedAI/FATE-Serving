@@ -83,7 +83,7 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
         );
     }
 
-    protected List<FederatedRpcInvoker.RpcDataWraper> buildRpcDataWraper(Context context, String methodName, Object data) {
+    protected List<FederatedRpcInvoker.RpcDataWraper> buildRpcDataWraper(Context context, String methodName, Object data, Map head) {
         List<FederatedRpcInvoker.RpcDataWraper> result = Lists.newArrayList();
         Model model = ((ServingServerContext) context).getModel();
         Map<String, Model> hostModelMap = model.getFederationModelMap();
@@ -93,6 +93,7 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
             rpcDataWraper.setHostModel(hostModel);
             rpcDataWraper.setRemoteMethodName(methodName);
             rpcDataWraper.setData(data);
+            rpcDataWraper.setHead(head);
             result.add(rpcDataWraper);
         });
 

@@ -2,6 +2,7 @@ package com.webank.ai.fate.serving.rpc;
 
 import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.rpc.sink.Protocol;
 import com.webank.ai.fate.serving.core.rpc.sink.Sender;
 import org.springframework.beans.BeansException;
@@ -24,7 +25,7 @@ public class SenderRegistor implements ApplicationContextAware, ApplicationListe
     }
 
     public  Sender getDefaultSender(){
-        return  sinkMap.get("grpc");
+        return  sinkMap.get(Dict.PROTOCOL_GRPC);
     }
     ApplicationContext   applicationContext ;
     @Override

@@ -149,8 +149,9 @@ public class Dict {
     public static final String PROPERTY_PROXY_ASYNC_MAXSIZE = "proxy.async.maxsize";
     public static final String PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT = "proxy.grpc.batch.inference.timeout";
     public static final String PROPERTY_MODEL_CACHE_PATH = "model.cache.path";
-    public static final String PROPERTY_LR_USE_PARALLEL="lr.use.parallel";
-    public static final String PROPERTY_MODEL_SYNC="model.synchronize";
+    public static final String PROPERTY_LR_USE_PARALLEL = "lr.use.parallel";
+    public static final String PROPERTY_MODEL_SYNC = "model.synchronize";
+    public static final String PROPERTY_USE_AUTO_DISPATCH = "use.auto.dispatch";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 
@@ -204,6 +205,7 @@ public class Dict {
     public static final String COMPONENT_NAME = "componentName";
     public static final String TREE_COMPUTE_ROUND = "treeComputeRound";
     public static final String SERVICE_NAME = "serviceName";
+    public static final String ORIGIN_SERVICE = "originService";
     public static final String CALL_NAME = "callName";
     public static final String TREE_LOCATION = "treeLocation";
 
@@ -276,5 +278,6 @@ public class Dict {
     public static final String ORIGINAL_REQUEST_DATA  = "original.request.data";
     public static final String REDIRECT_RESULT  = "redirect.result";
     public static final String PROTOCOL  = "protocol";
+    public static final String PROTOCOL_GRPC = "grpc";
 
 }

@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.redirect;
 
-import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
@@ -8,19 +7,13 @@ import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
-import com.webank.ai.fate.serving.common.bean.ServingServerContext;
-import com.webank.ai.fate.serving.common.model.Model;
-import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.common.rpc.core.RequestRedirector;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
-import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
-import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
@@ -74,29 +67,25 @@ public class HostRequestRedirector
     }
 
 
-
     @Override
     public Proxy.Packet doService(Context context, InboundPackage<Proxy.Packet> inboundPackage, OutboundPackage<Proxy.Packet> outboundPackage) {
-        Proxy.Packet  packet = inboundPackage.getBody();
-        String  key = getModelRouteKey(context, packet);
-        if(routerService==null) {
-               throw new HostModelNullException("mode key  "+key+" is not exist in this cluster");
+        Proxy.Packet packet = inboundPackage.getBody();
+        String key = getModelRouteKey(context, packet);
+        if (routerService == null) {
+            throw new HostModelNullException("mode key  " + key + " is not exist in this cluster");
         }
-        List<URL> urls = routerService.router(Dict.SERVICE_SERVING, key, serviceName);
-        RouterInfo  routerInfo=null;
-        if(CollectionUtils.isNotEmpty(urls)) {
-              String ip = urls.get(0).getIp();
-              int port = urls.get(0).getPort();
-              routerInfo =  new RouterInfo();
-          }else{
-              throw new HostModelNullException("mode key  "+key+" is not exist in this cluster");
-          }
-        ManagedChannel channel = GrpcConnectionPool.getPool().getManagedChannel(routerInfo.getHost(),routerInfo.getPort());
+        List<URL> urls = routerService.router(Dict.SERVICE_SERVING, key, context.getOriginService());
+        if (CollectionUtils.isEmpty(urls)) {
+            throw new HostModelNullException("mode key  " + key + " is not exist in this cluster");
+        }
+        String host = urls.get(0).getHost();
+        int port = urls.get(0).getPort();
+
+        ManagedChannel channel = GrpcConnectionPool.getPool().getManagedChannel(host, port);
         DataTransferServiceGrpc.DataTransferServiceFutureStub futureStub = DataTransferServiceGrpc.newFutureStub(channel);
-        ListenableFuture< Proxy.Packet > resultFuture = futureStub.unaryCall(packet);
-        String resultString = null;
+        ListenableFuture<Proxy.Packet> resultFuture = futureStub.unaryCall(packet);
         try {
-            Proxy.Packet  result = resultFuture.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+            Proxy.Packet result = resultFuture.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
             return result;
         } catch (Exception e) {
             throw new RemoteRpcException("remote rpc exception");

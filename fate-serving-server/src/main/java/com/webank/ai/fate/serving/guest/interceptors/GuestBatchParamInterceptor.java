@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class GuestBatchParamInterceptor implements Interceptor {
 
@@ -52,6 +54,11 @@ public class GuestBatchParamInterceptor implements Interceptor {
             context.setServiceId(batchInferenceRequest.getServiceId());
             if (batchInferenceRequest.getApplyId() != null) {
                 context.setApplyId(batchInferenceRequest.getApplyId());
+            }
+            if (message.getHeader() != null && StringUtils.isNotBlank(message.getHeader().toStringUtf8())) {
+                // protocol map
+                Map map = JsonUtil.json2Object(message.getHeader().toByteArray(), Map.class);
+                inboundPackage.setHead(map);
             }
         } catch (Exception e) {
             throw new GuestInvalidParamException(e.getMessage());

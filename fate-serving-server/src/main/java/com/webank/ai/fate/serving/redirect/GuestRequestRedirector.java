@@ -41,21 +41,21 @@ public class GuestRequestRedirector extends AbstractServingServiceProvider<Infer
 
     Logger logger = LoggerFactory.getLogger(GuestRequestRedirector.class);
 
+    @Override
     public InferenceServiceProto.InferenceMessage doService(Context context, InboundPackage<InferenceServiceProto.InferenceMessage> inboundPackage, OutboundPackage<InferenceServiceProto.InferenceMessage> outboundPackage) {
-
-       InferenceServiceProto.InferenceMessage inferenceMessage =  inboundPackage.getBody();
+//       InferenceServiceProto.InferenceMessage inferenceMessage =  inboundPackage.getBody();
         if(routerService==null) {
-            throw new ModelNullException("serviceId {} is not exist in this node");
+            throw new ModelNullException("serviceId is not exist in this node");
         }
-        List<URL> urls = routerService.router(Dict.SERVICE_SERVING, context.getServiceId(), serviceName);
+        List<URL> urls = routerService.router(Dict.SERVICE_SERVING, context.getServiceId(), context.getOriginService());
         if(CollectionUtils.isNotEmpty(urls)) {
-            String ip = urls.get(0).getIp();
+            String ip = urls.get(0).getHost();
             int port = urls.get(0).getPort();
             ManagedChannel channel = GrpcConnectionPool.getPool().getManagedChannel(ip,port);
             InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(channel);
             Preconditions.checkArgument(context.getData(Dict.ORIGINAL_REQUEST_DATA) != null);
             ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture = futureStub.inference((InferenceServiceProto.InferenceMessage) context.getData(Dict.ORIGINAL_REQUEST_DATA));
-            String resultString = null;
+//            String resultString = null;
             try {
                 InferenceServiceProto.InferenceMessage result = resultFuture.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
                 return result;

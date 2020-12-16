@@ -86,16 +86,16 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
                     responseResult.setRetcode(StatusCode.HOST_UNSUPPORTED_COMMAND_ERROR);
                     break;
             }
-            Packet.Builder packetBuilder = Packet.newBuilder();
-            packetBuilder.setBody(Proxy.Data.newBuilder()
-                    .setValue(ByteString.copyFrom(JsonUtil.object2Json(result).getBytes()))
-                    .build());
-            resultPackage = packetBuilder.build();
 
-            if(context.isNeedDispatch()){
+            if (context.isNeedDispatch()) {
                 inboundPackage.setBody(req);
-                resultPackage = (Packet)this.requestRedirector.service(context, inboundPackage).getData();
+                resultPackage = (Packet) this.requestRedirector.service(context, inboundPackage).getData();
+            } else {
+                Packet.Builder packetBuilder = Packet.newBuilder();
+                packetBuilder.setBody(Proxy.Data.newBuilder().setValue(ByteString.copyFrom(JsonUtil.object2Json(result).getBytes())).build());
+                resultPackage = packetBuilder.build();
             }
+
             responseObserver.onNext(resultPackage);
             responseObserver.onCompleted();
         });
@@ -119,6 +119,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
         context.setModelNamesapce(namespace);
         context.setModelTableName(tableName);
         context.setServiceName(servieName);
+        context.setOriginService(servieName);
         context.setCaseId(req.getAuth().getNonce());
         return context;
     }

@@ -544,7 +544,7 @@ public class ModelManager implements InitializingBean {
     public Model getModelByServiceId(String serviceId) {
         String namespaceKey = serviceIdNamespaceMap.get(serviceId);
         if (namespaceKey == null) {
-            throw new ModelNullException("serviceId is not bind model");
+            return null;
         }
         return this.namespaceMap.get(namespaceKey);
     }

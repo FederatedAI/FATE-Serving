@@ -24,9 +24,10 @@ import java.util.concurrent.Future;
 
 @Service
 @Protocol(name = "grpc" )
-public class GrpcSender implements Sender<Proxy.Packet  ,Proxy.Packet> {
-    @Autowired
-    RouterService  routerService;
+public class GrpcSender implements Sender<Proxy.Packet, Proxy.Packet> {
+
+    @Autowired(required = false)
+    RouterService routerService;
 
     @Override
     public Future<Proxy.Packet> async(Context context, Proxy.Packet packet) {

@@ -16,6 +16,8 @@
 
 package com.webank.ai.fate.serving.proxy.controller;
 
+import com.google.common.collect.Maps;
+import com.google.protobuf.ByteString;
 import com.webank.ai.fate.serving.common.bean.BaseContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -100,10 +103,14 @@ public class ProxyController {
         if (null == context.getCaseId() || context.getCaseId().isEmpty()) {
             context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         }
+        // default protocol: grpc
+        Map protocolMap = Maps.newHashMap();
+        protocolMap.put(Dict.PROTOCOL, Optional.ofNullable(head.get(Dict.PROTOCOL)).orElse(Dict.PROTOCOL_GRPC));
 
         InboundPackage<Map> inboundPackage = new InboundPackage<Map>();
         inboundPackage.setBody(body);
         inboundPackage.setHead(head);
+        inboundPackage.setProtocol(protocolMap);
         return inboundPackage;
     }
 

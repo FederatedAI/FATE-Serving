@@ -34,6 +34,7 @@ public class InboundPackage<T> {
     RouterInfo routerInfo;
     String source;
     Map head;
+    Map protocol;
 
     /*public HttpServletRequest getHttpServletRequest() {
         return httpServletRequest;
@@ -84,5 +85,13 @@ public class InboundPackage<T> {
 
     public void setBody(T body) {
         this.body = body;
+    }
+
+    public Map getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(Map protocol) {
+        this.protocol = protocol;
     }
 }

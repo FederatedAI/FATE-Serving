@@ -25,6 +25,7 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.OverLoadException;
 import com.webank.ai.fate.serving.model.ModelManager;
@@ -56,6 +57,9 @@ public class HostModelInterceptor implements Interceptor {
             model = modelManager.getModelByTableNameAndNamespace(tableName, nameSpace);
         }
         if (model == null) {
+            if (MetaInfo.PROPERTY_USE_AUTO_DISPATCH) {
+                context.setNeedDispatch(true);
+            }
             logger.error("table name {} namepsace {} is not exist", tableName, nameSpace);
             throw new HostModelNullException("mode is null");
         }

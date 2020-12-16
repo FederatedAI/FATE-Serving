@@ -28,6 +28,10 @@ public interface Context<Req, Resp> {
 
     public void setNeedDispatch(boolean needDispatch);
 
+    public String getOriginService();
+
+    public void setOriginService(String service);
+
     public void preProcess();
 
     public Object getData(Object key);

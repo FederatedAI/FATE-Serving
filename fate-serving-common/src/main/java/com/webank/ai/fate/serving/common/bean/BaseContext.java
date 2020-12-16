@@ -40,12 +40,24 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     long costTime;
     String resourceName;
 
+    @Override
     public boolean isNeedDispatch() {
         return needDispatch;
     }
 
+    @Override
     public void setNeedDispatch(boolean needDispatch) {
         this.needDispatch = needDispatch;
+    }
+
+    @Override
+    public String getOriginService() {
+        return dataMap.get(Dict.ORIGIN_SERVICE).toString();
+    }
+
+    @Override
+    public void setOriginService(String service) {
+        dataMap.put(Dict.ORIGIN_SERVICE, service);
     }
 
     protected  boolean  needDispatch=false;

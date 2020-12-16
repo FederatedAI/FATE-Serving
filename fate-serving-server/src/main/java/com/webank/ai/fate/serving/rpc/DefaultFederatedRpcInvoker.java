@@ -23,11 +23,9 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
-import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.CollectionUtils;
-import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.common.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.cache.Cache;
@@ -38,14 +36,10 @@ import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.rpc.sink.Sender;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
-import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.event.CacheEventData;
-import io.grpc.ManagedChannel;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -257,12 +251,12 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
     public Future<Proxy.Packet> async(Context context, RpcDataWraper rpcDataWraper) {
         Proxy.Packet packet = this.build(context, rpcDataWraper);
         Map head = rpcDataWraper.getHead();
-        if(head == null&&head.get(Dict.PROTOCOL)!=null){
+        if (head != null && head.get(Dict.PROTOCOL) != null) {
             Sender sender = senderRegistor.getSender(head.get(Dict.PROTOCOL).toString());
-            if(sender!=null){
-              return   sender.async(context,packet);
-            }else{
-                logger.error("protocol {} can not found sender",head.get(Dict.PROTOCOL).toString());
+            if (sender != null) {
+                return sender.async(context, packet);
+            } else {
+                logger.error("protocol {} can not found sender", head.get(Dict.PROTOCOL).toString());
             }
         }
         return  senderRegistor.getDefaultSender().async(context,packet);

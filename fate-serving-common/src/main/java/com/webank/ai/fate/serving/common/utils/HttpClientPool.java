@@ -17,7 +17,7 @@
 package com.webank.ai.fate.serving.common.utils;
 
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.utils.ObjectTransform;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -114,7 +114,7 @@ public class HttpClientPool {
     public static String sendPost(String url, Map<String, Object> requestData, Map<String, String> headers) {
         HttpPost httpPost = new HttpPost(url);
         config(httpPost, headers);
-        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);
+        StringEntity stringEntity = new StringEntity(JsonUtil.object2Json(requestData), Dict.CHARSET_UTF8);
         stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
         httpPost.setEntity(stringEntity);
         return getResponse(httpPost);
@@ -165,7 +165,7 @@ public class HttpClientPool {
                 .setSocketTimeout(60000).build();
         httpPost.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
         httpPost.setConfig(requestConfig);
-        StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);
+        StringEntity stringEntity = new StringEntity(JsonUtil.object2Json(requestData), Dict.CHARSET_UTF8);
         stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
         httpPost.setEntity(stringEntity);
         return getResponse(httpPost);

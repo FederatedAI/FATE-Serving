@@ -28,7 +28,7 @@ import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.utils.ObjectTransform;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import com.webank.ai.fate.serving.guest.provider.GuestBatchInferenceProvider;
 import com.webank.ai.fate.serving.guest.provider.GuestSingleInferenceProvider;
@@ -61,16 +61,18 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
             InboundPackage inboundPackage = new InboundPackage();
             inboundPackage.setBody(req);
             OutboundPackage outboundPackage = this.guestSingleInferenceProvider.service(context, inboundPackage);
-            ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
-            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-            result = response.build();
+
             boolean isNeedDispatch = context.isNeedDispatch();
             if(isNeedDispatch){
                 result = (InferenceMessage) guestRequestRedirector.service(context,inboundPackage).getData();
+            } else {
+                ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
+                response.setBody(ByteString.copyFrom(JsonUtil.object2Json(returnResult).getBytes()));
+                result = response.build();
             }
+
             responseObserver.onNext(result);
             responseObserver.onCompleted();
-
         });
     }
 
@@ -80,17 +82,20 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         executor.submit(() -> {
             InferenceMessage result = null;
             InferenceMessage.Builder response = InferenceMessage.newBuilder();
-            Context context = prepareContext(req,BATCH_INFERENCE);
+            Context context = prepareContext(req, BATCH_INFERENCE);
             InboundPackage inboundPackage = new InboundPackage();
             inboundPackage.setBody(req);
             OutboundPackage outboundPackage = this.guestBatchInferenceProvider.service(context, inboundPackage);
-            BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
-            response.setBody(ByteString.copyFrom(ObjectTransform.bean2Json(returnResult).getBytes()));
-            result = response.build();
+
             boolean isNeedDispatch = context.isNeedDispatch();
-            if(isNeedDispatch){
-                result= (InferenceMessage) guestRequestRedirector.service(context,inboundPackage).getData();
+            if (isNeedDispatch) {
+                result = (InferenceMessage) guestRequestRedirector.service(context, inboundPackage).getData();
+            } else {
+                BatchInferenceResult returnResult = (BatchInferenceResult) outboundPackage.getData();
+                response.setBody(ByteString.copyFrom(JsonUtil.object2Json(returnResult).getBytes()));
+                result = response.build();
             }
+
             responseObserver.onNext(result);
             responseObserver.onCompleted();
         });
@@ -100,6 +105,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         ServingServerContext context = new ServingServerContext();
         context.putData(Dict.ORIGINAL_REQUEST_DATA,req);
         context.setServiceName(serviceName);
+        context.setOriginService(serviceName);
         return context;
     }
 
