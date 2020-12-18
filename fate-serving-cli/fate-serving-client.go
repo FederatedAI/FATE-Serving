@@ -69,6 +69,7 @@ func main() {
 	}()
 
 	fmt.Println("connect to ", host, ":", port)
+	address = host + ":" + strconv.Itoa(port)
 
 	signalChan := make(chan os.Signal, 1) //创建一个信号量的chan，缓存为1，（0,1）意义不大
 
