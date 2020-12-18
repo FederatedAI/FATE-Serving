@@ -55,7 +55,7 @@ public class AsyncMessageEventHandler implements EventHandler<AsyncMessageEvent>
         Set<Method> methods = AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP.get(eventName);
         if (methods == null || methods.size() == 0) {
             logger.error("event {} not subscribe {}", eventName, AsyncSubscribeRegister.SUBSCRIBE_METHOD_MAP);
-            throw new AsyncMessageException(eventName + " event not subscribe {}");
+            throw new AsyncMessageException(eventName + " event not subscribe");
 
         }
 

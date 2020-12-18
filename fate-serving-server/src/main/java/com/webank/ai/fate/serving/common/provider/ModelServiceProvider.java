@@ -40,10 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @FateService(name = "modelService", preChain = {
@@ -178,7 +175,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
     @FateServiceMethod(name = "FETCH_MODEL")
     public ModelServiceProto.FetchModelResponse fetchModel(Context context, InboundPackage data) {
         ModelServiceProto.FetchModelRequest req = (ModelServiceProto.FetchModelRequest) data.getBody();
-        logger.info("fetch model from {}:{}, tablename {}, namespace {}", req.getSourceIp(), req.getSourcePort(), req.getTableName(), req.getNamespace());
 
         ModelServiceProto.FetchModelResponse.Builder responseBuilder = ModelServiceProto.FetchModelResponse.newBuilder();
         if (!MetaInfo.PROPERTY_MODEL_SYNC) {
@@ -189,6 +185,8 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
         String serviceId = req.getServiceId();
+
+        logger.info("fetch model by {}", Optional.ofNullable(serviceId).orElse(tableName + "#" + namespace));
 
         String sourceIp = req.getSourceIp();
         int sourcePort = req.getSourcePort();
@@ -234,7 +232,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
     @FateServiceMethod(name = "MODEL_TRANSFER")
     public synchronized ModelServiceProto.ModelTransferResponse modelTransfer(Context context, InboundPackage data) {
         ModelServiceProto.ModelTransferRequest req = (ModelServiceProto.ModelTransferRequest) data.getBody();
-        logger.info("transfer model by ", req.toString());
 
         ModelServiceProto.ModelTransferResponse.Builder responseBuilder = ModelServiceProto.ModelTransferResponse.newBuilder();
         if (!MetaInfo.PROPERTY_MODEL_SYNC) {
@@ -246,6 +243,8 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         String serviceId = req.getServiceId();
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
+
+        logger.info("model transfer by {}", Optional.ofNullable(serviceId).orElse(tableName + "#" + namespace));
 
         Model model;
         if (StringUtils.isNotBlank(serviceId)) {

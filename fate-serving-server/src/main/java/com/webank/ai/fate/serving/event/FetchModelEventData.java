@@ -1,5 +1,7 @@
 package com.webank.ai.fate.serving.event;
 
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
+
 public class FetchModelEventData {
     String sourceIp;
     int sourcePort;
@@ -45,5 +47,10 @@ public class FetchModelEventData {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtil.object2Json(this);
     }
 }

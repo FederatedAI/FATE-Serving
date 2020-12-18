@@ -500,7 +500,7 @@ public class ModelManager implements InitializingBean {
                             clone.setServiceIds(Lists.newArrayList());
                         }
                         String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
-                        if (nameSpaceKey.equals(v)) {
+                        if (nameSpaceKey.equals(v) && !clone.getServiceIds().contains(k)) {
                             clone.getServiceIds().add(k);
                         }
                     });
@@ -529,7 +529,7 @@ public class ModelManager implements InitializingBean {
                             String nameSpaceKey = this.getNameSpaceKey(clone.getTableName(), clone.getNamespace());
 
                             this.serviceIdNamespaceMap.forEach((k, v) -> {
-                                if (v.equals(nameSpaceKey)) {
+                                if (v.equals(nameSpaceKey) && !clone.getServiceIds().contains(k)) {
                                     clone.getServiceIds().add(k);
                                 }
                             });
