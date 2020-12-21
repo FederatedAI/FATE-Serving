@@ -21,6 +21,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.serving.common.bean.InferenceProvider;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
@@ -40,7 +41,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
-public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase {
+public class GuestInferenceService extends InferenceServiceGrpc.InferenceServiceImplBase implements InferenceProvider {
     static final String BATCH_INFERENCE = "batchInference";
     static final String INFERENCE = "inference";
     private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
@@ -109,4 +110,8 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
         return context;
     }
 
+    @Override
+    public InferenceMessage inference(Context context, InferenceMessage req) {
+        return null;
+    }
 }
