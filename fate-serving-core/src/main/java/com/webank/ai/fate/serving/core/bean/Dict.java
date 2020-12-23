@@ -152,6 +152,20 @@ public class Dict {
     public static final String PROPERTY_LR_USE_PARALLEL = "lr.use.parallel";
     public static final String PROPERTY_MODEL_SYNC = "model.synchronize";
     public static final String PROPERTY_USE_AUTO_DISPATCH = "use.auto.dispatch";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_PREREQUEST = "interface.single.guest.prerequest";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_POSTREQUEST = "interface.single.guest.postrequest";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_PREDATA = "interface.single.guest.predata";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_POSTDATA = "interface.single.guest.postdata";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_PREMERGE = "interface.single.guest.premerge";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_PREREQUEST = "interface.batch.guest.prerequest";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_POSTREQUEST = "interface.batch.guest.postrequest";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_PREDATA = "interface.batch.guest.predata";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_POSTDATA = "interface.batch.guest.postdata";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_PREMERGE = "interface.batch.guest.premerge";
+    public static final String PROPERTY_INTERFACE_SINGLE_HOST_PREREQUEST = "interface.single.host.prerequest";
+    public static final String PROPERTY_INTERFACE_SINGLE_HOST_POSTREQUEST = "interface.single.host.postrequest";
+    public static final String PROPERTY_INTERFACE_BATCH_HOST_PREREQUEST = "interface.batch.host.prerequest";
+    public static final String PROPERTY_INTERFACE_BATCH_HOST_POSTREQUEST = "interface.batch.host.postrequest";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 

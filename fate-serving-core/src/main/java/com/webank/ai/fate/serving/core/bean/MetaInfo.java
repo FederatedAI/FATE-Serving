@@ -98,6 +98,20 @@ public class MetaInfo {
     public static String PROPERTY_RPC_SINK_CLASS;
     public static Boolean PROPERTY_USE_AUTO_DISPATCH;
     public static boolean PROPERTY_MODEL_SYNC;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_POSTREQUEST;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_PREDATA;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_POSTDATA;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_PREMERGE;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_POSTREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_PREDATA;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_POSTDATA;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_PREMERGE;
+    public static String PROPERTY_INTERFACE_SINGLE_HOST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_SINGLE_HOST_POSTREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_HOST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_HOST_POSTREQUEST;
 
     public static Map toMap() {
         Map result = Maps.newHashMap();

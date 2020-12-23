@@ -17,14 +17,13 @@
 package com.webank.ai.fate.serving.host.provider;
 
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.interfaces.CustomInterfaceInstanceManager;
+import com.webank.ai.fate.serving.common.interfaces.CustomPreprocessHandle;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
-import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
-import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
@@ -47,9 +46,19 @@ public class HostBatchInferenceProvider extends AbstractServingServiceProvider<B
 
     @Override
     public BatchInferenceResult doService(Context context, InboundPackage data, OutboundPackage outboundPackage) {
+        Object requestInPreInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_BATCH_HOST_PREREQUEST);
+        if(requestInPreInterface != null){
+            CustomPreprocessHandle<InboundPackage> requestInPreHandle = (CustomPreprocessHandle<InboundPackage>)requestInPreInterface;
+            requestInPreHandle.handle(context,data);
+        }
         BatchHostFederatedParams batchHostFederatedParams = (BatchHostFederatedParams) data.getBody();
         Model model = ((ServingServerContext) context).getModel();
         BatchInferenceResult batchInferenceResult = model.getModelProcessor().hostBatchInference(context, batchHostFederatedParams);
+        Object requestInPostInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_BATCH_HOST_POSTREQUEST);
+        if(requestInPostInterface != null){
+            CustomPreprocessHandle<BatchInferenceResult> requestInPostHandle = (CustomPreprocessHandle<BatchInferenceResult>)requestInPostInterface;
+            requestInPostHandle.handle(context,batchInferenceResult);
+        }
         return batchInferenceResult;
     }
 

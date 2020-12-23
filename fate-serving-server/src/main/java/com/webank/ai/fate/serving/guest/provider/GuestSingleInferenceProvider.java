@@ -17,13 +17,13 @@
 package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.interfaces.CustomInterfaceInstanceManager;
+import com.webank.ai.fate.serving.common.interfaces.CustomPreprocessHandle;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +51,11 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
 
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
+        Object requestInPreInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_GUEST_PREREQUEST);
+        if(requestInPreInterface != null){
+            CustomPreprocessHandle<InboundPackage> requestInPreHandle = (CustomPreprocessHandle<InboundPackage>)requestInPreInterface;
+            requestInPreHandle.handle(context,inboundPackage);
+        }
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
 
         Model model = ((ServingServerContext) context).getModel();
@@ -65,6 +70,12 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         }));
         ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap, MetaInfo.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT);
         postProcess(context, returnResult);
+
+        Object requestInPostInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_GUEST_POSTREQUEST);
+        if(requestInPostInterface != null){
+            CustomPreprocessHandle<ReturnResult> requestInPostHandle = (CustomPreprocessHandle<ReturnResult>)requestInPostInterface;
+            requestInPostHandle.handle(context,returnResult);
+        }
         return returnResult;
     }
 

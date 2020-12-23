@@ -17,8 +17,9 @@
 package com.webank.ai.fate.serving.guest.provider;
 
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.common.interfaces.CustomInterfaceInstanceManager;
+import com.webank.ai.fate.serving.common.interfaces.CustomPreprocessHandle;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
@@ -50,6 +51,12 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
 
     @Override
     public BatchInferenceResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
+
+        Object requestInPreInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_BATCH_GUEST_PREREQUEST);
+        if(requestInPreInterface != null){
+            CustomPreprocessHandle<InboundPackage> requestInPreHandle = (CustomPreprocessHandle<InboundPackage>)requestInPreInterface;
+            requestInPreHandle.handle(context,inboundPackage);
+        }
         Model model = ((ServingServerContext) context).getModel();
         ModelProcessor modelProcessor = model.getModelProcessor();
         BatchInferenceRequest batchInferenceRequest = (BatchInferenceRequest) inboundPackage.getBody();
@@ -63,6 +70,11 @@ public class GuestBatchInferenceProvider extends AbstractServingServiceProvider<
         BatchInferenceResult batchFederatedResult = modelProcessor.guestBatchInference(context, batchInferenceRequest, futureMap, MetaInfo.PROPERTY_BATCH_INFERENCE_RPC_TIMEOUT);
         batchFederatedResult.setCaseid(context.getCaseId());
         postProcess(context, batchFederatedResult);
+        Object requestInPostInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_BATCH_GUEST_POSTREQUEST);
+        if(requestInPostInterface != null){
+            CustomPreprocessHandle<BatchInferenceResult> requestInPostHandle = (CustomPreprocessHandle<BatchInferenceResult>)requestInPostInterface;
+            requestInPostHandle.handle(context,batchFederatedResult);
+        }
         return batchFederatedResult;
     }
 
