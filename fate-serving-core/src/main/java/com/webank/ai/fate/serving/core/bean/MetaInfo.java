@@ -94,6 +94,21 @@ public class MetaInfo {
     public static int PROPERTY_HTTP_SOCKET_TIMEOUT;
     public static int PROPERTY_HTTP_MAX_POOL_SIZE;
     public static String PROPERTY_HTTP_ADAPTER_URL;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_POSTREQUEST;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_PREDATA;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_POSTDATA;
+    public static String PROPERTY_INTERFACE_SINGLE_GUEST_PREMERGE;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_POSTREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_PREDATA;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_POSTDATA;
+    public static String PROPERTY_INTERFACE_BATCH_GUEST_PREMERGE;
+    public static String PROPERTY_INTERFACE_SINGLE_HOST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_SINGLE_HOST_POSTREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_HOST_PREREQUEST;
+    public static String PROPERTY_INTERFACE_BATCH_HOST_POSTREQUEST;
+
 
     public static Map toMap() {
         Map result = Maps.newHashMap();

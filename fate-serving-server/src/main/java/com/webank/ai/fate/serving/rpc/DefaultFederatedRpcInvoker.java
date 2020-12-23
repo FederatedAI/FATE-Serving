@@ -31,6 +31,8 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.common.async.AsyncMessageEvent;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.cache.Cache;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomInterfaceInstanceManager;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomPreprocessHandle;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.common.utils.DisruptorUtil;
@@ -144,6 +146,13 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
     @Override
     public ListenableFuture<ReturnResult> singleInferenceRpcWithCache(Context context, RpcDataWraper rpcDataWraper, boolean useCache) {
+
+        Object dataPreInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_GUEST_PREDATA);
+        if(dataPreInterface != null){
+            CustomPreprocessHandle<RpcDataWraper> dataPostHandle = (CustomPreprocessHandle<RpcDataWraper>)dataPreInterface;
+            dataPostHandle.handle(context,rpcDataWraper);
+        }
+
         InferenceRequest inferenceRequest = (InferenceRequest) rpcDataWraper.getData();
         if (useCache) {
             Object result = cache.get(buildCacheKey(rpcDataWraper.getGuestModel(), rpcDataWraper.getHostModel(), inferenceRequest.getSendToRemoteFeatureData()));
@@ -205,6 +214,13 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
 
     @Override
     public ListenableFuture<BatchInferenceResult> batchInferenceRpcWithCache(Context context, RpcDataWraper rpcDataWraper, boolean useCache) {
+
+        Object dataPreInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_BATCH_GUEST_PREDATA);
+        if(dataPreInterface != null){
+            CustomPreprocessHandle<RpcDataWraper> dataPostHandle = (CustomPreprocessHandle<RpcDataWraper>)dataPreInterface;
+            dataPostHandle.handle(context,rpcDataWraper);
+        }
+
         BatchInferenceRequest inferenceRequest = (BatchInferenceRequest) rpcDataWraper.getData();
         Map<Integer, BatchInferenceResult.SingleInferenceResult> cacheData = Maps.newHashMap();
         if (useCache) {

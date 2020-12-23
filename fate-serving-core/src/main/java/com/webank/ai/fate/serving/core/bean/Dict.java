@@ -149,6 +149,20 @@ public class Dict {
     public static final String PROPERTY_HTTP_MAX_POOL_SIZE = "http.max.pool.size";
     public static final String PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT = "http.connect.request.timeout";
     public static final String PROPERTY_HTTP_ADAPTER_URL = "http.adapter.url";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_PREREQUEST = "interface.single.guest.prerequest";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_POSTREQUEST = "interface.single.guest.postrequest";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_PREDATA = "interface.single.guest.predata";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_POSTDATA = "interface.single.guest.postdata";
+    public static final String PROPERTY_INTERFACE_SINGLE_GUEST_PREMERGE = "interface.single.guest.premerge";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_PREREQUEST = "interface.batch.guest.prerequest";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_POSTREQUEST = "interface.batch.guest.postrequest";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_PREDATA = "interface.batch.guest.predata";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_POSTDATA = "interface.batch.guest.postdata";
+    public static final String PROPERTY_INTERFACE_BATCH_GUEST_PREMERGE = "interface.batch.guest.premerge";
+    public static final String PROPERTY_INTERFACE_SINGLE_HOST_PREREQUEST = "interface.single.host.prerequest";
+    public static final String PROPERTY_INTERFACE_SINGLE_HOST_POSTREQUEST = "interface.single.host.postrequest";
+    public static final String PROPERTY_INTERFACE_BATCH_HOST_PREREQUEST = "interface.batch.host.prerequest";
+    public static final String PROPERTY_INTERFACE_BATCH_HOST_POSTREQUEST = "interface.batch.host.postrequest";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 

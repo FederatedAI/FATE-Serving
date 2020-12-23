@@ -22,7 +22,10 @@ import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.*;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomInterfaceInstanceManager;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomPreprocessHandle;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,10 +60,22 @@ public class HostSingleInferenceProvider extends AbstractServingServiceProvider<
 
     @FateServiceMethod(name = "federatedInference")
     public ReturnResult federatedInference(Context context, InboundPackage<InferenceRequest> data) {
+        //HOST插入点
+        Object requestInPreInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_HOST_PREREQUEST);
+        if(requestInPreInterface != null){
+            CustomPreprocessHandle<InboundPackage> requestInPreHandle = (CustomPreprocessHandle<InboundPackage>)requestInPreInterface;
+            requestInPreHandle.handle(context,data);
+        }
         InferenceRequest params = data.getBody();
         Model model = ((ServingServerContext) context).getModel();
         ModelProcessor modelProcessor = model.getModelProcessor();
         ReturnResult result = modelProcessor.hostInference(context, params);
+
+        Object requestInPostInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_HOST_POSTREQUEST);
+        if(requestInPostInterface != null){
+            CustomPreprocessHandle<ReturnResult> requestInPostHandle = (CustomPreprocessHandle<ReturnResult>)requestInPostInterface;
+            requestInPostHandle.handle(context,result);
+        }
         return result;
 
     }

@@ -19,9 +19,11 @@ package com.webank.ai.fate.serving.guest.provider;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomPreprocessHandle;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.*;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomInterfaceInstanceManager;
 import com.webank.ai.fate.serving.core.bean.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +43,7 @@ import java.util.concurrent.Future;
 
 })
 @Service
-public class GuestSingleInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult> {
+public class GuestSingleInferenceProvider extends AbstractServingServiceProvider<InferenceRequest, ReturnResult>{
     @Autowired
     FederatedRpcInvoker federatedRpcInvoker;
 
@@ -49,6 +51,12 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
 
     @Override
     public ReturnResult doService(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
+
+        Object requestInPreInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_GUEST_PREREQUEST);
+        if(requestInPreInterface != null){
+            CustomPreprocessHandle<InboundPackage> requestInPreHandle = (CustomPreprocessHandle<InboundPackage>)requestInPreInterface;
+            requestInPreHandle.handle(context,inboundPackage);
+        }
         Model model = ((ServingServerContext) context).getModel();
         ModelProcessor modelProcessor = model.getModelProcessor();
         InferenceRequest inferenceRequest = (InferenceRequest) inboundPackage.getBody();
@@ -64,6 +72,12 @@ public class GuestSingleInferenceProvider extends AbstractServingServiceProvider
         }));
         ReturnResult returnResult = modelProcessor.guestInference(context, inferenceRequest, futureMap, MetaInfo.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT);
         postProcess(context, returnResult);
+
+        Object requestInPostInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_GUEST_POSTREQUEST);
+        if(requestInPostInterface != null){
+            CustomPreprocessHandle<ReturnResult> requestInPostHandle = (CustomPreprocessHandle<ReturnResult>)requestInPostInterface;
+            requestInPostHandle.handle(context,returnResult);
+        }
         return returnResult;
     }
 

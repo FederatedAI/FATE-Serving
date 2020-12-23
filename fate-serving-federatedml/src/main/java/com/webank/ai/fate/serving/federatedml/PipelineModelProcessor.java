@@ -29,6 +29,9 @@ import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.*;
 import com.webank.ai.fate.serving.core.utils.EncryptUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomInterfaceInstanceManager;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomPreprocessHandle;
+import com.webank.ai.fate.serving.federatedml.interfaces.CustomPreprocessMoreTypeHandle;
 import com.webank.ai.fate.serving.federatedml.model.BaseComponent;
 import com.webank.ai.fate.serving.federatedml.model.Returnable;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +65,11 @@ public class PipelineModelProcessor implements ModelProcessor {
             Proxy.Packet packet = null;
             try {
                 BatchInferenceResult remoteInferenceResult = (BatchInferenceResult) future.get(timeout, TimeUnit.MILLISECONDS);
+                Object dataPostInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_BATCH_GUEST_POSTDATA);
+                if(dataPostInterface != null){
+                    CustomPreprocessHandle<BatchInferenceResult> dataPostHandle = (CustomPreprocessHandle<BatchInferenceResult>)dataPostInterface;
+                    dataPostHandle.handle(context,remoteInferenceResult);
+                }
                 if (StatusCode.SUCCESS != remoteInferenceResult.getRetcode()) {
                     throw new RemoteRpcException(transformRemoteErrorCode(remoteInferenceResult.getRetcode()), buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(), remoteInferenceResult.getRetmsg()));
                 }
@@ -114,6 +122,13 @@ public class PipelineModelProcessor implements ModelProcessor {
         futureMap.forEach((partId, future) -> {
             try {
                 ReturnResult remoteReturnResult = (ReturnResult) future.get(timeout, TimeUnit.MILLISECONDS);
+
+                Object dataPostInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_GUEST_POSTDATA);
+                if(dataPostInterface != null){
+                    CustomPreprocessHandle<ReturnResult> dataPostHandle = (CustomPreprocessHandle<ReturnResult>)dataPostInterface;
+                    dataPostHandle.handle(context,remoteReturnResult);
+                }
+
                 if (remoteReturnResult != null) {
                     HashMap<String, Object> remoteData = Maps.newHashMap(remoteReturnResult.getData());
                     remoteData.put(Dict.RET_CODE, remoteReturnResult.getRetcode());
@@ -219,6 +234,13 @@ public class PipelineModelProcessor implements ModelProcessor {
     }
 
     private BatchInferenceResult batchMergeHostResult(Context context, Map<Integer, Map<String, Object>> localResult, Map<String, BatchInferenceResult> remoteResult) {
+        Object dataMergeInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_BATCH_GUEST_PREMERGE);
+        if(dataMergeInterface != null){
+            CustomPreprocessMoreTypeHandle<Map<Integer, Map<String, Object>>,Map<String, BatchInferenceResult>> dataMergeHandle
+                    = (CustomPreprocessMoreTypeHandle<Map<Integer, Map<String, Object>>,Map<String, BatchInferenceResult>>)dataMergeInterface;
+            dataMergeHandle.handle(context,localResult,remoteResult);
+        }
+
         long begin = System.currentTimeMillis();
         try {
             Preconditions.checkArgument(localResult != null);
@@ -250,6 +272,12 @@ public class PipelineModelProcessor implements ModelProcessor {
     }
 
     public Map<String, Object> singleMerge(Context context, Map<String, Object> localData, Map<String, Object> remoteData) {
+
+        Object dataMergeInterface = CustomInterfaceInstanceManager.getInstanceForName(MetaInfo.PROPERTY_INTERFACE_SINGLE_GUEST_PREMERGE);
+        if(dataMergeInterface != null){
+            CustomPreprocessMoreTypeHandle<Map<String, Object>,Map<String, Object>> dataMergeHandle = (CustomPreprocessMoreTypeHandle<Map<String, Object>,Map<String, Object>>)dataMergeInterface;
+            dataMergeHandle.handle(context,localData,remoteData);
+        }
 
         if (localData == null || localData.size() == 0) {
             throw new BaseException(StatusCode.GUEST_MERGE_ERROR, "local inference result is null");
