@@ -58,6 +58,7 @@ public abstract class AbstractServingServiceProvider<req, resp> extends Abstract
             }
             result = (resp) method.invoke(this, context, data);
         } catch (Throwable e) {
+            e.printStackTrace();
             if (e.getCause() != null && e.getCause() instanceof BaseException) {
                 BaseException baseException = (BaseException) e.getCause();
                 throw baseException;
