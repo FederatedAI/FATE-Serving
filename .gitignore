@@ -17,5 +17,5 @@ __pycache__
 /conf/
 /logs/
 /.fate/
-/fate-serving-admin/src/main/resources/public/
+#/fate-serving-admin/src/main/resources/public/
 /fate-serving-server/logs/

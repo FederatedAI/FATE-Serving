@@ -45,21 +45,13 @@
             <version>2.0.6</version>
         </dependency>
 
+        <!--    If you need to customize admin-ui, the comment here needs to be cancelled
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-serving-admin-ui</artifactId>
             <version>2.0.6</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-framework</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-recipes</artifactId>
-        </dependency>-->
+        -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -95,17 +87,6 @@
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
-        <!--<dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
-
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
@@ -139,13 +120,6 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <!--<include>**/*.properties</include>-->
-                    <!--<include>**/*.json</include>-->
-                    <!--<include>**/*.js</include>-->
-                    <!--<include>**/*.css</include>-->
-                    <!--<include>**/*.xml</include>-->
-                    <!--<include>**/*.html</include>-->
-                    <!--<include>**/*.png</include>-->
                     <include>**/*</include>
                 </includes>
                 <filtering>false</filtering>
@@ -167,6 +141,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
 
+            <!--    If you need to customize admin-ui, the comment here needs to be cancelled
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>
@@ -208,6 +183,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
     </build>
 
