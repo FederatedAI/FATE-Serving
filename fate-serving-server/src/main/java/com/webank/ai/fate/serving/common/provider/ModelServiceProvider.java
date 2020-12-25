@@ -86,26 +86,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                     continue;
                 }
 
-                List<Map> rolePartyMapList = model.getRolePartyMapList();
-                if (rolePartyMapList == null) {
-                    rolePartyMapList = new ArrayList<>();
-                }
-
-                Map rolePartyMap = new HashMap();
-                rolePartyMap.put(Dict.ROLE, model.getRole());
-                rolePartyMap.put(Dict.PART_ID, model.getPartId());
-                rolePartyMapList.add(rolePartyMap);
-
-                if (model.getFederationModelMap() != null) {
-                    for (Model value : model.getFederationModelMap().values()) {
-                        rolePartyMap = new HashMap();
-                        rolePartyMap.put(Dict.ROLE, value.getRole());
-                        rolePartyMap.put(Dict.PART_ID, value.getPartId());
-                        rolePartyMapList.add(rolePartyMap);
-                    }
-                }
-
-                model.setRolePartyMapList(rolePartyMapList);
                 model.setAllowQps(flowCounterManager.getAllowedQps(model.getResourceName()));
 
                 ModelServiceProto.ModelInfoEx.Builder modelExBuilder = ModelServiceProto.ModelInfoEx.newBuilder();

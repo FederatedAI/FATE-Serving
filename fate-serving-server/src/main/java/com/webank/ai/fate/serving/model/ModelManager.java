@@ -249,6 +249,7 @@ public class ModelManager implements InitializingBean {
                             value.setRole(Dict.HOST);
                         }
                     }
+                    this.buildModelRolePartyMap(model);
                     namespaceMap.put(k, model);
                     if (Dict.HOST.equals(model.getRole())) {
                         model.getFederationModelMap().values().forEach(remoteModel -> {
@@ -424,6 +425,8 @@ public class ModelManager implements InitializingBean {
             throw new ModelProcessorInitException("model initialization error, please check if the model exists and the configuration of the FATEFLOW load model process is correct.");
         }
         model.setModelProcessor(modelProcessor);
+
+        this.buildModelRolePartyMap(model);
         this.namespaceMap.put(namespaceKey, model);
 
         if (Dict.HOST.equals(model.getRole())) {
@@ -539,6 +542,29 @@ public class ModelManager implements InitializingBean {
             default:
                 return null;
         }
+    }
+
+    private void buildModelRolePartyMap(Model model) {
+        List<Map> rolePartyMapList = model.getRolePartyMapList();
+        if (rolePartyMapList == null) {
+            rolePartyMapList = new ArrayList<>();
+        }
+
+        Map rolePartyMap = new HashMap();
+        rolePartyMap.put(Dict.ROLE, model.getRole());
+        rolePartyMap.put(Dict.PART_ID, model.getPartId());
+        rolePartyMapList.add(rolePartyMap);
+
+        if (model.getFederationModelMap() != null) {
+            for (Model value : model.getFederationModelMap().values()) {
+                rolePartyMap = new HashMap();
+                rolePartyMap.put(Dict.ROLE, value.getRole());
+                rolePartyMap.put(Dict.PART_ID, value.getPartId());
+                rolePartyMapList.add(rolePartyMap);
+            }
+        }
+
+        model.setRolePartyMapList(rolePartyMapList);
     }
 
     public Model getModelByServiceId(String serviceId) {

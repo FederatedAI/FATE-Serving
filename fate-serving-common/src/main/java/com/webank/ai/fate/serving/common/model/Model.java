@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.common.model;
 
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -170,6 +171,10 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
             resourceName = "M_" + tableName + "_" + namespace;
         }
         return resourceName;
+    }
+
+    public String getPartyId(String role) {
+        return (String) this.rolePartyMapList.stream().filter(map -> map.get(Dict.ROLE).equals(role)).findFirst().get().get(Dict.PART_ID);
     }
 
 }
