@@ -58,6 +58,7 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
     }
 
     public InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {
+        context.setTraceId(req.getAuth().getTraceId());
         context.setCaseId(Long.toString(System.currentTimeMillis()));
         if (StringUtils.isNotBlank(req.getHeader().getOperator())) {
             context.setVersion(req.getHeader().getOperator());

@@ -53,6 +53,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
                 Map map =JsonUtil.json2Object(message.getHeader().toByteArray(), Map.class);
                 inboundPackage.setHead(map);
             }
+            context.setTraceId(inferenceRequest.getTraceId());
             context.setCaseId(inferenceRequest.getCaseid());
             context.setServiceId(inferenceRequest.getServiceId());
             if (inferenceRequest.getApplyId() != null) {

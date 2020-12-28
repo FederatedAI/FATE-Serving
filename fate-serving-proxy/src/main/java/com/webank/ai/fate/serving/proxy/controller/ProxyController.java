@@ -103,6 +103,7 @@ public class ProxyController {
         if (null == context.getCaseId() || context.getCaseId().isEmpty()) {
             context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         }
+        context.setTraceId(UUID.randomUUID().toString().replaceAll("-", ""));
         // default protocol: grpc
         Map protocolMap = Maps.newHashMap();
         protocolMap.put(Dict.PROTOCOL, Optional.ofNullable(head.get(Dict.PROTOCOL)).orElse(Dict.PROTOCOL_GRPC));

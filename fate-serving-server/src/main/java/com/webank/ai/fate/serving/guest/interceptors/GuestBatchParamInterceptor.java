@@ -50,6 +50,7 @@ public class GuestBatchParamInterceptor implements Interceptor {
             if (batchInferenceRequest.getCaseid() == null || batchInferenceRequest.getCaseid().length() == 0) {
                 batchInferenceRequest.setCaseId(InferenceUtils.generateCaseid());
             }
+            context.setTraceId(batchInferenceRequest.getTraceId());
             context.setCaseId(batchInferenceRequest.getCaseid());
             context.setServiceId(batchInferenceRequest.getServiceId());
             if (batchInferenceRequest.getApplyId() != null) {

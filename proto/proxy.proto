@@ -78,6 +78,7 @@ message AuthInfo {
     string nonce = 5;
     string version = 6;
     string serviceId = 7;
+    string traceId = 8;
 }
 
 // data streaming packet

@@ -121,6 +121,7 @@ public class HostInferenceService extends DataTransferServiceGrpc.DataTransferSe
         context.setServiceName(servieName);
         context.setOriginService(servieName);
         context.setCaseId(req.getAuth().getNonce());
+        context.setTraceId(req.getAuth().getTraceId());
         return context;
     }
 }

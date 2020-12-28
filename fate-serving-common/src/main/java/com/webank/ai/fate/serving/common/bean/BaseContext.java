@@ -126,6 +126,16 @@ public class BaseContext<Req, Resp> implements Context<Req, Resp> {
     }
 
     @Override
+    public String getTraceId() {
+        return (String) dataMap.get(Dict.TRACEID);
+    }
+
+    @Override
+    public void setTraceId(String traceId) {
+        dataMap.put(Dict.TRACEID, traceId);
+    }
+
+    @Override
     public long getTimeStamp() {
         return timestamp;
     }

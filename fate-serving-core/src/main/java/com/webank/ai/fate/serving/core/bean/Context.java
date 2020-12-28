@@ -44,6 +44,10 @@ public interface Context<Req, Resp> {
 
     public void setCaseId(String caseId);
 
+    public String getTraceId();
+
+    public void setTraceId(String traceId);
+
     public long getTimeStamp();
 
     public default void postProcess(Req req, Resp resp) {

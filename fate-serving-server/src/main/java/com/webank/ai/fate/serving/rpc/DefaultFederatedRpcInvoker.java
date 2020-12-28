@@ -87,6 +87,9 @@ public class DefaultFederatedRpcInvoker implements FederatedRpcInvoker<Proxy.Pac
         if (context.getCaseId() != null) {
             authBuilder.setNonce(context.getCaseId());
         }
+        if (context.getTraceId() != null) {
+            authBuilder.setTraceId(context.getTraceId());
+        }
         if (version != null) {
             authBuilder.setVersion(version);
         }

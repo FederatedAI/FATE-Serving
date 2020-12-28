@@ -30,6 +30,7 @@ public class InferenceRequest implements Request {
     protected String modelId;
     protected String seqno;
     protected String caseId;
+    protected String traceId;
     protected String serviceId;
 
     public void setFeatureData(Map<String, Object> featureData) {
@@ -130,6 +131,14 @@ public class InferenceRequest implements Request {
 
     public boolean haveAppId() {
         return (!StringUtils.isEmpty(appid) || !StringUtils.isEmpty(partyId));
+    }
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
     }
 
     @Override

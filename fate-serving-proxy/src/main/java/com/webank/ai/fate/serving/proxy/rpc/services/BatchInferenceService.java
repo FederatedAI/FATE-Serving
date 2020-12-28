@@ -82,6 +82,7 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
         Map reqHeadMap = data.getHead();
         Map inferenceReqMap = Maps.newHashMap();
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
+        inferenceReqMap.put(Dict.TRACEID, context.getTraceId());
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
         if (logger.isDebugEnabled()) {
