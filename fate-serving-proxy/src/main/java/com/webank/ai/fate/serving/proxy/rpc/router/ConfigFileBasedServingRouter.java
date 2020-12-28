@@ -50,6 +50,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private static final Logger logger = LoggerFactory.getLogger(ConfigFileBasedServingRouter.class);
     private static final String IP = "ip";
     private static final String PORT = "port";
+    private static final String USE_SSL = "useSSL";
     private static final String HOSTNAME = "hostname";
     private static final String DEFAULT = "default";
     private final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
@@ -130,6 +131,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             } else {
                 router.setHost(epoint.getHostname());
             }
+            router.setUseSSL(epoint.getUseSSL());
             router.setPort(epoint.getPort());
             routeList.add(router);
         }
@@ -329,6 +331,11 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
                     if (endpointJson.has(PORT)) {
                         int targetPort = endpointJson.get(PORT).getAsInt();
                         endpointBuilder.setPort(targetPort);
+                    }
+
+                    if (endpointJson.has(USE_SSL)) {
+                        boolean targetUseSSL = endpointJson.get(USE_SSL).getAsBoolean();
+                        endpointBuilder.setUseSSL(targetUseSSL);
                     }
 
                     if (endpointJson.has(HOSTNAME)) {

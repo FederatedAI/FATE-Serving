@@ -22,6 +22,16 @@ public class RouterInfo {
 
     private Integer port;
 
+    private boolean useSSL;
+
+    public boolean isUseSSL() {
+        return useSSL;
+    }
+
+    public void setUseSSL(boolean useSSL) {
+        this.useSSL = useSSL;
+    }
+
     public String getHost() {
         return host;
     }
