@@ -57,7 +57,10 @@ public class DSLParser {
                 logger.info("module is {}", module);
                 componentModuleMap.put(componentName, module);
 
-                JSONObject upData = component.getJSONObject(Dict.DSL_INPUT).getJSONObject(Dict.DSL_DATA);
+                JSONObject upData = null;
+                if (component.has(Dict.DSL_INPUT) && component.getJSONObject(Dict.DSL_INPUT).has(Dict.DSL_DATA)) {
+                    upData = component.getJSONObject(Dict.DSL_INPUT).getJSONObject(Dict.DSL_DATA);
+                }
                 if (upData != null) {
                     int componentId = this.componentIds.get(componentName);
                     Iterator<String> dataKeyIterator = upData.keys();
@@ -109,7 +112,10 @@ public class DSLParser {
         for (int i = 0; i < componentList.size(); ++i) {
             String componentName = componentList.get(i);
             JSONObject component = components.getJSONObject(componentName);
-            JSONObject upData = component.getJSONObject("input").getJSONObject("data");
+            JSONObject upData = null;
+            if (component.has(Dict.DSL_INPUT) && component.getJSONObject(Dict.DSL_INPUT).has(Dict.DSL_DATA)) {
+                upData = component.getJSONObject(Dict.DSL_INPUT).getJSONObject(Dict.DSL_DATA);
+            }
             Integer componentId = componentIndexMapping.get(componentName);
             if (upData != null) {
                 Iterator<String> dataKeyIterator = upData.keys();
