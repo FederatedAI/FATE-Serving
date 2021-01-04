@@ -63,10 +63,10 @@ public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractSe
     @Override
     protected void printFlowLog(Context context) {
 
-        flowLogger.info("{}|{}|" +
+        flowLogger.info("{}|{}|{}|" +
                         "{}|{}|{}|{}|" +
                         "{}|{}",
-                context.getCaseId(), context.getReturnCode(), context.getCostTime(),
+                context.getCaseId(), context.getTraceId(), context.getReturnCode(), context.getCostTime(),
                 context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
     }
 }

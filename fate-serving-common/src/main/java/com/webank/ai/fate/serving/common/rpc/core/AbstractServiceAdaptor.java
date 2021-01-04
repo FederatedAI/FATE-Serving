@@ -216,10 +216,10 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
 
     protected void printFlowLog(Context context) {
 
-        flowLogger.info("{}|{}|{}|{}|" +
+        flowLogger.info("{}|{}|{}|{}|{}|" +
                         "{}|{}|{}|{}|" +
                         "{}|{}|{}",
-                context.getSourceIp(), context.getCaseId(), context.getGuestAppId(),
+                context.getSourceIp(), context.getCaseId(), context.getTraceId(), context.getGuestAppId(),
                 context.getHostAppid(), context.getReturnCode(), context.getCostTime(),
                 context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO",
                 MetaInfo.PROPERTY_PRINT_INPUT_DATA?context.getData(Dict.INPUT_DATA):"",
