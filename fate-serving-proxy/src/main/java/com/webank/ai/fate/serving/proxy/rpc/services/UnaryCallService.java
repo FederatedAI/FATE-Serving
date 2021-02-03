@@ -90,6 +90,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
             Proxy.Packet packet = future.get(timeout, TimeUnit.MILLISECONDS);
             return packet;
         } catch (Exception e) {
+            logger.error("unaryCall error", e);
             throw new RemoteRpcException("unaryCall error " + routerInfo.toString());
         } finally {
             long end = System.currentTimeMillis();
