@@ -15,30 +15,31 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-
-#export JAVA_HOME=/data/projects/common/jdk/jdk1.8.0_192
-#export PATH=$PATH:$JAVA_HOME/bin
 set -e 
 source ./bin/common.sh
+#export JAVA_HOME=/data/projects/fate/common/jdk/jdk-8u192
+#export PATH=$PATH:$JAVA_HOME/bin
+
 basepath=$(cd `dirname $0`;pwd)
 configpath=$(cd $basepath/conf;pwd)
 module=serving-admin
 main_class=com.webank.ai.fate.serving.admin.Bootstrap
-module_version=2.0.0
+module_version=2.0.4
 
 case "$1" in
     start)
         start  $module 
         status $module
         ;;
-
+    starting)
+        start front
+        ;;
     stop)
         stop $module
         ;;
     status)
         status $module
         ;;
-
     restart)
         stop $module
         sleep 0.5

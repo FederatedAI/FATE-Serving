@@ -54,7 +54,8 @@ export default {
         initChart() {
             this.echartInstance = this.echarts.init(this.$refs.callsLine)
             window.addEventListener('resize', this.resize)
-            this.echartInstance.setOption(this.options, true)
+            // this.echartInstance.setOption(this.options, true)
+            this.echartInstance.setOption(this.options)
         },
         resize() {
             this.echartInstance.resize()

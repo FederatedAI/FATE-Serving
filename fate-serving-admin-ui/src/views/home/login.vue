@@ -35,6 +35,7 @@
             popper-class="autopopper"
             v-model="form.username"
             :fetch-suggestions="querySearchAsync"
+            @keyup.enter.native="submit"
             @focus="nameInputStatus = true"
             @blur="nameInputStatus = false"
             @select="handleSelect"
@@ -60,6 +61,7 @@
           v-model.trim="form.password"
           :class="{ 'active': passwordInput }"
           placeholder=""
+          @keyup.enter.native="submit"
           @focus="pwdInputStatus = true"
           @blur="pwdInputStatus = false"
           ref='pwdInput'>
@@ -70,7 +72,7 @@
         <el-checkbox v-model="checked">Remember me</el-checkbox>
     </div>
     <div class="btn">
-      <el-button class="OK-btn" :type="type" :disabled="disabledbtn" @click="submit">Login</el-button>
+      <el-button class="OK-btn" :type="type" :disabled="disabledbtn" @click.native.prevent="submit" >Login</el-button>
     </div>
   </div>
   </div>
@@ -142,6 +144,7 @@ export default {
         handleSelect(item) {
             this.form.username = item.value
             this.form.password = item.address
+            this.$refs.pwdInput.focus()
         },
         loadAll() {
             return [
