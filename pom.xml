@@ -45,7 +45,7 @@
         <guava.version>27.1-jre</guava.version>
         <grpc.version>1.25.0</grpc.version>
         <protobuf.version>3.6.1</protobuf.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.1</os-maven-plugin.version>
         <spring.boot.version>2.2.0.RELEASE</spring.boot.version>
