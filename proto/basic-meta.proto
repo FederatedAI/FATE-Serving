@@ -23,6 +23,7 @@ message Endpoint {
     string ip = 1;          // ip address
     int32 port = 2;         // port
     string hostname = 3;    // host name
+    bool useSSL = 4;
 }
 
 message Endpoints {

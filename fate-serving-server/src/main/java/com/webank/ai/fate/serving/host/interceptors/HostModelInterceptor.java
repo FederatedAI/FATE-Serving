@@ -26,6 +26,7 @@ import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.HostModelNullException;
+import com.webank.ai.fate.serving.core.exceptions.OverLoadException;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -70,6 +71,7 @@ public class HostModelInterceptor implements Interceptor {
         boolean pass = flowCounterManager.pass(model.getResourceName(), times);
         if (!pass) {
             flowCounterManager.block(model.getResourceName(), times);
+            throw new OverLoadException("request was block by over load, model resource: " + model.getResourceName());
         }
     }
 

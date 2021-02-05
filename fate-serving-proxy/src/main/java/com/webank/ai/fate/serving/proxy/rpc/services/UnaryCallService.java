@@ -25,16 +25,14 @@ import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.ProxyAuthException;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
 import io.grpc.ManagedChannel;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,27 +56,41 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     @Autowired
     AuthUtils authUtils;
 
-    private int timeout= MetaInfo.PROPERTY_PROXY_GRPC_UNARYCALL_TIMEOUT;
+    private int timeout = MetaInfo.PROPERTY_PROXY_GRPC_UNARYCALL_TIMEOUT;
 
     @Override
     public Proxy.Packet doService(Context context, InboundPackage<Proxy.Packet> data, OutboundPackage<Proxy.Packet> outboundPackage) {
         Proxy.Packet sourcePackage = data.getBody();
+        RouterInfo routerInfo = data.getRouterInfo();
+
         try {
             sourcePackage = authUtils.addAuthInfo(sourcePackage);
         } catch (Exception e) {
-            logger.error("add auth info error",e);
-            throw  new ProxyAuthException("add auth info error");
+            logger.error("add auth info error", e);
+            throw new ProxyAuthException("add auth info error");
         }
-        RouterInfo routerInfo = data.getRouterInfo();
-        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
-        DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
-        stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+
         try {
+            NettyServerInfo nettyServerInfo;
+            if (routerInfo.isUseSSL()) {
+                nettyServerInfo = new NettyServerInfo(MetaInfo.PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE,
+                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE,
+                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE,
+                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE);
+            } else {
+                nettyServerInfo = new NettyServerInfo();
+            }
+
+            ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(), nettyServerInfo);
+            DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
+            stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+
             context.setDownstreamBegin(System.currentTimeMillis());
             ListenableFuture<Proxy.Packet> future = stub1.unaryCall(sourcePackage);
             Proxy.Packet packet = future.get(timeout, TimeUnit.MILLISECONDS);
             return packet;
         } catch (Exception e) {
+            logger.error("unaryCall error", e);
             throw new RemoteRpcException("unaryCall error " + routerInfo.toString());
         } finally {
             long end = System.currentTimeMillis();

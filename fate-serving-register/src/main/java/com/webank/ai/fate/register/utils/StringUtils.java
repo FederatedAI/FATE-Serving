@@ -17,7 +17,7 @@
 package com.webank.ai.fate.register.utils;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
 import java.util.regex.Matcher;

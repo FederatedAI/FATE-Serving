@@ -20,19 +20,36 @@ import java.util.List;
 
 public class RequestParamWrapper {
 
-    String username;
-    String password;
     String host;
     Integer port;
+    /**
+     * /admin/login
+     */
+    String username;
+    String password;
+    /**
+     * /model/unbind
+     */
     String tableName;
     String namespace;
     List<String> serviceIds;
+    /**
+     * /service/update
+     */
     String url;
     String routerMode;
     Integer weight;
     Long version;
+    /**
+     * /service/updateFlowRule
+     */
     String source;
     Integer allowQps;
+    /**
+     * /component/updateConfig
+     */
+    String filePath;
+    String data;
 
     public String getSource() {
         return source;
@@ -138,4 +155,19 @@ public class RequestParamWrapper {
         this.version = version;
     }
 
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 }
