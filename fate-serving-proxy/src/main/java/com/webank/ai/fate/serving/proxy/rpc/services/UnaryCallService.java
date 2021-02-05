@@ -71,14 +71,14 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         }
 
         try {
-            NettyServerInfo nettyServerInfo = null;
-            if (StringUtils.equals(String.valueOf(MetaInfo.PROPERTY_COORDINATOR), sourcePackage.getHeader().getDst().getPartyId())) {
-                nettyServerInfo = new NettyServerInfo();
-            } else {
+            NettyServerInfo nettyServerInfo;
+            if (routerInfo.isUseSSL()) {
                 nettyServerInfo = new NettyServerInfo(MetaInfo.PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE,
                         MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE,
                         MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE,
                         MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE);
+            } else {
+                nettyServerInfo = new NettyServerInfo();
             }
 
             ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(), nettyServerInfo);
@@ -90,6 +90,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
             Proxy.Packet packet = future.get(timeout, TimeUnit.MILLISECONDS);
             return packet;
         } catch (Exception e) {
+            logger.error("unaryCall error", e);
             throw new RemoteRpcException("unaryCall error " + routerInfo.toString());
         } finally {
             long end = System.currentTimeMillis();

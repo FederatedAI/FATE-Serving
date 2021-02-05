@@ -24,10 +24,17 @@ const service = axios.create({
     withCredentials: true,
     timeout: 15000
 })
-
+let url = window.location.href
+let arr = url.split('/')
+let pram
+if (arr[3] === '#' || arr[3] === '') {
+    pram = ''
+} else {
+    pram = '/' + arr[3]
+}
 service.interceptors.request.use(
     config => {
-        if (config.url !== '/api/component/list' && config.url !== '/api/monitor/query' && config.url !== '/api/monitor/queryJvm' && config.url !== '/api/monitor/queryModel') {
+        if (config.url !== `${pram}/api/component/list` && config.url !== `${pram}/api/monitor/query` && config.url !== `${pram}/api/monitor/queryJvm` && config.url !== `${pram}/api/monitor/queryModel`) {
             let loading = document.getElementById('ajaxLoading')
             loading.style.display = 'block'
         }

@@ -35,6 +35,7 @@ export default {
     },
     data() {
         return {
+            echartsflag: false,
             echarts,
             echartInstance: null,
             options: {},
@@ -42,7 +43,7 @@ export default {
         }
     },
     watch: {
-        callsData: function() {
+        callsData: function(val, old) {
             this.JVMseries = []
             var xDate = []
             var Memory = []
@@ -231,7 +232,11 @@ export default {
                 },
                 series: this.JVMseries
             }
-            this.initChart()
+            if (val.JVMInfo === old.JVMInfo) {
+                this.initChart(false)
+            } else {
+                this.initChart(true)
+            }
         }
 
     },
@@ -239,10 +244,10 @@ export default {
     // this.initChart()
     },
     methods: {
-        initChart() {
+        initChart(echartsflag) {
             this.echartInstance = this.echarts.init(this.$refs.callsLine)
             window.addEventListener('resize', this.resize)
-            this.echartInstance.setOption(this.options, true)
+            this.echartInstance.setOption(this.options, echartsflag)
         },
         resize() {
             this.echartInstance.resize()

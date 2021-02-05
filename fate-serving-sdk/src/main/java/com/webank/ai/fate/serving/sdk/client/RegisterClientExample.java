@@ -1,10 +1,12 @@
 package com.webank.ai.fate.serving.sdk.client;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.BatchInferenceResult;
 import com.webank.ai.fate.serving.core.bean.InferenceRequest;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
