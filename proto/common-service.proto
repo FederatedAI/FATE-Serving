@@ -55,6 +55,11 @@ message UpdateServiceRequest{
     int64 version = 4;
 }
 
+message UpdateConfigRequest{
+    string filePath = 1;
+    string data = 2;
+}
+
 message CommonResponse{
     int32 statusCode = 1;
     string message = 2;
@@ -67,6 +72,7 @@ service CommonService {
     rpc listProps(QueryPropsRequest)  returns (CommonResponse);
     rpc queryJvmInfo(QueryJvmInfoRequest)  returns (CommonResponse);
     rpc updateService(UpdateServiceRequest)  returns (CommonResponse);
+    rpc updateConfig(UpdateConfigRequest)  returns (CommonResponse);
 }
 
 

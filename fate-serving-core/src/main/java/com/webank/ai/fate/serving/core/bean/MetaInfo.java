@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MetaInfo {
-    public static final long CURRENT_VERSION = 200;
+    public static final long CURRENT_VERSION = 204;
     public static List<AdaptorDescriptor.ParamDescriptor> inferenceParamDescriptorList;
     public static List<AdaptorDescriptor.ParamDescriptor> batchInferenceParamDescriptorList;
     public static Boolean PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH;
@@ -89,6 +89,12 @@ public class MetaInfo {
     public static Boolean PROPERTY_PRINT_OUTPUT_DATA;
     public static Boolean PROPERTY_LR_USE_PARALLEL;
     public static Boolean PROPERTY_AUTH_OPEN;
+    public static String PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE;
+    public static String PROPERTY_PROXY_GRPC_INTER_CA_FILE;
+    public static String PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE;
+    public static String PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE;
+    public static String PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE;
+    public static String PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE;
 
     public static Map toMap() {
         Map result = Maps.newHashMap();

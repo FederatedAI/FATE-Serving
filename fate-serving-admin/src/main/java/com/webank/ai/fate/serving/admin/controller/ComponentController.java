@@ -16,14 +16,13 @@
 
 package com.webank.ai.fate.serving.admin.controller;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.serving.admin.bean.ServiceConfiguration;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
@@ -34,10 +33,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +98,37 @@ public class ComponentController {
         data.put("rows", list);
 
         return ReturnResult.build(response.getStatusCode(), response.getMessage(), data);
+    }
+
+    @PostMapping("/component/updateConfig")
+    public ReturnResult updateConfig(@RequestBody RequestParamWrapper requestParams) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(requestParams.getFilePath()), "file path is blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(requestParams.getData()), "data is blank");
+
+        String host = requestParams.getHost();
+        int port = requestParams.getPort();
+
+        if (!componentServices.isAllowAccess(host, port)) {
+            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
+        }
+
+        String filePath = requestParams.getFilePath();
+        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+
+        String project = componentServices.getProject(host, port);
+        if (project != null && !ServiceConfiguration.isAllowModify(project, fileName)) {
+            throw new SysException("the file is not allowed to be modified");
+        }
+
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel)
+                .withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+        CommonServiceProto.UpdateConfigRequest.Builder builder = CommonServiceProto.UpdateConfigRequest.newBuilder();
+        builder.setFilePath(requestParams.getFilePath());
+        builder.setData(requestParams.getData());
+
+        CommonServiceProto.CommonResponse response = blockingStub.updateConfig(builder.build());
+        return ReturnResult.build(response.getStatusCode(), response.getMessage());
     }
 
 }

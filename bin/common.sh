@@ -41,18 +41,29 @@ start() {
   getpid
   if [[ ! -n ${pid} ]]; then
     mklogsdir
-    if [[ ! -e "fate-${module}.jar" ]]; then
-      ln -s fate-${module}-${module_version}.jar fate-${module}.jar
+
+    if [[ -e "fate-${module}.jar" ]]; then
+      rm fate-${module}.jar
     fi
+    ln -s fate-${module}-${module_version}.jar fate-${module}.jar
+
     if [ ${module} = "serving-server" ]; then
-      java -Dspring.config.location=${configpath}/serving-server.properties -cp "conf/:lib/*:extension/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
-    elif [ ${module} = "serving-proxy" ]; then
-      java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
-    elif [ ${module} = "serving-admin" ]; then
-      java -Dspring.config.location=${configpath}/application.properties -cp "conf/:lib/*:fate-${module}.jar" ${main_class} >>logs/console.log 2>>logs/error.log &
+      JAVA_OPT="${JAVA_OPT} -Dspring.config.location=${configpath}/serving-server.properties"
+      JAVA_OPT="${JAVA_OPT} -cp conf/:lib/*:extension/*:fate-${module}.jar"
+    elif [ ${module} = "serving-proxy" ] || [ ${module} = "serving-admin" ]; then
+      JAVA_OPT="${JAVA_OPT} -Dspring.config.location=${configpath}/application.properties"
+      JAVA_OPT="${JAVA_OPT} -cp conf/:lib/*:fate-${module}.jar"
     else
       echo "usage: ${module} {serving-server|serving-proxy|serving-admin}"
     fi
+
+    JAVA_OPT="${JAVA_OPT} ${main_class}"
+    if [[ $1 == "front" ]]; then
+      exec java ${JAVA_OPT}
+    else
+      java ${JAVA_OPT} >logs/console.log 2>logs/error.log &
+    fi
+
     #sleep 5
     #id=$(ps -p $! | awk '{print $1}' | sed -n '2p')
     inspect_pid 5 $!

@@ -321,6 +321,12 @@ public class FlowCounterManager {
                 .collect(Collectors.toList());
 
         this.store(file, JsonUtil.object2Json(list).getBytes());
+
+        // 更新FlowCounter
+        FlowCounter flowCounter = passMap.get(sourceName);
+        if (flowCounter != null) {
+            flowCounter.setQpsAllowed(allowQps);
+        }
     }
 
     public void destroy() {

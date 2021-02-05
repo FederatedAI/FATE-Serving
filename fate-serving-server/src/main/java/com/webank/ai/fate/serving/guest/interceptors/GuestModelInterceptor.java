@@ -27,6 +27,7 @@ import com.webank.ai.fate.serving.core.bean.BatchInferenceRequest;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
+import com.webank.ai.fate.serving.core.exceptions.OverLoadException;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,7 @@ public class GuestModelInterceptor implements Interceptor {
         boolean pass = flowCounterManager.pass(model.getResourceName(), times);
         if (!pass) {
             flowCounterManager.block(model.getResourceName(), times);
+            throw new OverLoadException("request was block by over load, model resource: " + model.getResourceName());
         }
     }
 

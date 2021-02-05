@@ -28,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ComponentService {
@@ -42,18 +39,44 @@ public class ComponentService {
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
     NodeData cachedNodeData;
-    Set<String> whitelist = new HashSet<>();
+    /**
+     * project -> nodes mapping
+     */
+    Map<String, Set<String>> projectNodes = new HashMap<>();
 
     public NodeData getCachedNodeData() {
         return cachedNodeData;
     }
 
     public Set<String> getWhitelist() {
-        return whitelist;
+        if (projectNodes == null || projectNodes.size() == 0) {
+            return null;
+        }
+        Set<String> list = new HashSet<>();
+        for (Set<String> value : this.projectNodes.values()) {
+            list.addAll(value);
+        }
+        return list;
+    }
+
+    public String getProject(String host, int port) {
+        if (projectNodes == null || projectNodes.size() == 0) {
+            return null;
+        }
+
+        Optional<String> project = this.projectNodes.entrySet().stream().filter(entry -> {
+            if (entry.getValue() != null) {
+                return entry.getValue().contains(host + ":" + port);
+            }
+            return false;
+        }).map(Map.Entry::getKey).findFirst();
+
+        return project.get();
     }
 
     public boolean isAllowAccess(String host, int port) {
-        if (whitelist.contains(host + ":" + port)) {
+        Set<String> whitelist = getWhitelist();
+        if (whitelist != null && whitelist.contains(host + ":" + port)) {
             return true;
         }
         return false;
@@ -68,11 +91,12 @@ public class ComponentService {
             root.setLabel(root.getName());
             List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
             if (componentLists != null) {
-                Set<String> registeredNodes = new HashSet<>();
                 componentLists.forEach(name -> {
                     List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + name);
                     if (nodes != null) {
-                        registeredNodes.addAll(nodes);
+                        Set<String> set = projectNodes.computeIfAbsent(name, k -> new HashSet<>());
+                        set.clear();
+                        set.addAll(nodes);
                     }
                     NodeData componentData = new NodeData();
                     componentData.setName(name);
@@ -92,8 +116,6 @@ public class ComponentService {
                     }
                 });
 
-                whitelist.clear();
-                whitelist.addAll(registeredNodes);
             }
             cachedNodeData = root;
 
@@ -102,7 +124,8 @@ public class ComponentService {
             }
         }catch(Exception e){
             logger.error("get component from zk error",e);
-            cachedNodeData=null;
+            cachedNodeData = null;
+            projectNodes.clear();
         }
     }
 

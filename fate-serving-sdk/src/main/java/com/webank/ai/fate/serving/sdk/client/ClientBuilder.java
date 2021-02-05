@@ -6,10 +6,6 @@ import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-
 public class ClientBuilder {
 
     /**

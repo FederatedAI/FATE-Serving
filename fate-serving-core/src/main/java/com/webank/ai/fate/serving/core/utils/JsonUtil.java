@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
+
 public class JsonUtil {
 
     private static ObjectMapper mapper = new ObjectMapper();
@@ -40,7 +42,7 @@ public class JsonUtil {
         String s = "";
         try {
             s = mapper.writeValueAsString(o);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return s;
@@ -53,7 +55,7 @@ public class JsonUtil {
         T t = null;
         try {
             t = mapper.readValue(json, c);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return t;
@@ -64,7 +66,7 @@ public class JsonUtil {
         try {
             t = mapper.readValue(json, c);
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return t;
@@ -77,7 +79,7 @@ public class JsonUtil {
         T result = null;
         try {
             result = mapper.readValue(json, typeReference);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return result;
@@ -91,7 +93,7 @@ public class JsonUtil {
         T t = null;
         try {
             t = (T) mapper.readValue(json, tr);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return (T) t;
