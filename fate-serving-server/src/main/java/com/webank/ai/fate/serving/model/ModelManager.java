@@ -366,17 +366,31 @@ public class ModelManager implements InitializingBean {
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
         String remotePartyRole = model.getRole().equals(Dict.GUEST) ? Dict.HOST : Dict.GUEST;
         ModelServiceProto.Party remoteParty = roleMap.get(remotePartyRole);
-        String remotePartyId = remoteParty.getPartyIdList().get(0);
         ModelServiceProto.RoleModelInfo remoteRoleModelInfo = modelMap.get(remotePartyRole);
-        ModelServiceProto.ModelInfo remoteModelInfo = remoteRoleModelInfo.getRoleModelInfoMap().get(remotePartyId);
-        String remoteNamespace = remoteModelInfo.getNamespace();
-        String remoteTableName = remoteModelInfo.getTableName();
-        Model remoteModel = new Model();
-        remoteModel.setPartId(remotePartyId);
-        remoteModel.setNamespace(remoteNamespace);
-        remoteModel.setTableName(remoteTableName);
-        remoteModel.setRole(remotePartyRole);
-        model.getFederationModelMap().put(remoteModel.getPartId(), remoteModel);
+        if(remoteParty.getPartyIdList()!=null){
+            remoteParty.getPartyIdList().forEach(remotePartyId->{
+                ModelServiceProto.ModelInfo remoteModelInfo = remoteRoleModelInfo.getRoleModelInfoMap().get(remotePartyId);
+                String remoteNamespace = remoteModelInfo.getNamespace();
+                String remoteTableName = remoteModelInfo.getTableName();
+                Model remoteModel = new Model();
+                remoteModel.setPartId(remotePartyId);
+                remoteModel.setNamespace(remoteNamespace);
+                remoteModel.setTableName(remoteTableName);
+                remoteModel.setRole(remotePartyRole);
+                model.getFederationModelMap().put(remoteModel.getPartId(), remoteModel);
+            });
+        }
+//        String remotePartyId = remoteParty.getPartyIdList().get(0);
+//        ModelServiceProto.RoleModelInfo remoteRoleModelInfo = modelMap.get(remotePartyRole);
+//        ModelServiceProto.ModelInfo remoteModelInfo = remoteRoleModelInfo.getRoleModelInfoMap().get(remotePartyId);
+//        String remoteNamespace = remoteModelInfo.getNamespace();
+//        String remoteTableName = remoteModelInfo.getTableName();
+//        Model remoteModel = new Model();
+//        remoteModel.setPartId(remotePartyId);
+//        remoteModel.setNamespace(remoteNamespace);
+//        remoteModel.setTableName(remoteTableName);
+//        remoteModel.setRole(remotePartyRole);
+//        model.getFederationModelMap().put(remoteModel.getPartId(), remoteModel);
         ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
