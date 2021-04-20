@@ -119,6 +119,9 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         if (StringUtils.isNotBlank(serviceId)) {
             inferenceRequest.setServiceId(serviceId);
         }
+        if(params.get("serviceId")!=null){
+            inferenceRequest.setApplyId(params.get("serviceId").toString());
+        }
 
         for (Map.Entry<String, Object> entry : featureData.entrySet()) {
             inferenceRequest.getFeatureData().put(entry.getKey(), entry.getValue());
