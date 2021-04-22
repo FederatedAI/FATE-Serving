@@ -129,4 +129,15 @@ public class CommonServiceTest {
 
     }
 
+    @Test
+    public void test_11_check_health() {
+        CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
+        builder.setType("test");
+        builder.setMode("test");
+        builder.setVersion("0.0");
+        CommonServiceProto.CommonResponse resultMessage = inferenceClient.checkHealth(builder.build());
+        System.err.println("StatusCode ==================" + resultMessage.getStatusCode());
+        System.err.println("Message ==================" + resultMessage.getMessage());
+        System.err.println("result ==================" + resultMessage.getData().toStringUtf8());
+    }
 }

@@ -22,5 +22,6 @@ public enum CommonActionType {
     LIST_PROPS,
     QUERY_JVM,
     UPDATE_SERVICE,
-    UPDATE_CONFIG
+    UPDATE_CONFIG,
+    CHECK_HEALTH
 }
