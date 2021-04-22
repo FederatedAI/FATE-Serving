@@ -252,4 +252,16 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             throw new SysException(e.getMessage());
         }
     }
+
+    @FateServiceMethod(name = "CHECK_HEALTH")
+    public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
+        try {
+            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+            builder.setStatusCode(StatusCode.SUCCESS);
+            builder.setData(ByteString.copyFrom(JsonUtil.object2Json("Proxy TEST").getBytes()));
+            return builder.build();
+        } catch (Exception e) {
+            throw new SysException(e.getMessage());
+        }
+    }
 }

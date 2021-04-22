@@ -39,6 +39,7 @@ public class ComponentService {
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
     NodeData cachedNodeData;
+    Map<String,List<String>> addressMap;
     /**
      * project -> nodes mapping
      */
@@ -46,6 +47,10 @@ public class ComponentService {
 
     public NodeData getCachedNodeData() {
         return cachedNodeData;
+    }
+
+    public Map<String,List<String>> getAddressMap() {
+        return addressMap;
     }
 
     public Set<String> getWhitelist() {
@@ -118,7 +123,7 @@ public class ComponentService {
 
             }
             cachedNodeData = root;
-
+            addressMap = getComponentAddresses();
             if (logger.isDebugEnabled()) {
                 logger.debug("refresh  component info ");
             }
@@ -127,6 +132,24 @@ public class ComponentService {
             cachedNodeData = null;
             projectNodes.clear();
         }
+
+    }
+
+    private Map<String,List<String>> getComponentAddresses() {
+        List<NodeData> componentNodes;
+        Map<String,List<String>> addressInfo = new HashMap<>();
+        if (cachedNodeData != null) {
+            componentNodes = cachedNodeData.getChildren();
+            //遍历proxy, admin, server组件
+            for (NodeData currentComponent: componentNodes) {
+                List<String> addresses = new ArrayList<>();
+                for (NodeData currentHost: currentComponent.getChildren()) {
+                    addresses.add(currentHost.getName());
+                }
+                addressInfo.put(currentComponent.getName(),addresses);
+            }
+        }
+        return addressInfo;
     }
 
     public class NodeData {
