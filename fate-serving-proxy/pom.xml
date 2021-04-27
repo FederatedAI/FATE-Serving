@@ -79,6 +79,12 @@
             <version>2.0.4</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+
     </dependencies>
 
 
