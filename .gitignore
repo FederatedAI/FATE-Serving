@@ -1,0 +1,21 @@
+# common file patterns
+.DS_STORE
+.idea
+*.iml
+*.pyc
+__pycache__
+*.jar
+*.class
+.project
+*.prefs
+
+# excluded paths
+.idea/*
+.vscode/*
+/*/target/
+/fate-serving-admin-ui/node/
+/conf/
+/logs/
+/.fate/
+/fate-serving-admin/src/main/resources/public/
+/fate-serving-server/logs/

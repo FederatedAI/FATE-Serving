@@ -1,0 +1,60 @@
+<assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/assembly-1.0.0.xsd">
+    <id>release</id>
+
+    <formats>
+
+        <format>zip</format>
+    </formats>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+
+            <outputDirectory>/</outputDirectory>
+            <directory>target</directory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+
+
+        <fileSet>
+
+            <outputDirectory>/lib</outputDirectory>
+            <directory>target/lib</directory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>bin</directory>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/bin</outputDirectory>
+            <directory>../bin</directory>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+
+
+        <fileSet>
+            <outputDirectory>/conf</outputDirectory>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+    </fileSets>
+</assembly>
