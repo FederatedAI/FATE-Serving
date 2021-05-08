@@ -6,13 +6,13 @@ public class HealthInfo {
     private String host;
     private int port;
     private Object data;
-    private long timeStamp;
+    private String type;
 
-    public HealthInfo(String component, String host, int port, long timeStamp) {
+    public HealthInfo(String component, String host, int port, String type) {
         this.component = component;
         this.host = host;
         this.port = port;
-        this.timeStamp = timeStamp;
+        this.type = type;
     }
 
     public Object getData() {
@@ -31,8 +31,8 @@ public class HealthInfo {
         return host;
     }
 
-    public long getTimeStamp() {
-        return timeStamp;
+    public String getType() {
+        return type;
     }
 
     public void setComponent(String component) {
@@ -51,5 +51,5 @@ public class HealthInfo {
         this.port = port;
     }
 
-    public void setTimeStamp(long timeStamp) { this.timeStamp = timeStamp; }
+    public void setTimeStamp(String type) { this.type = type; }
 }

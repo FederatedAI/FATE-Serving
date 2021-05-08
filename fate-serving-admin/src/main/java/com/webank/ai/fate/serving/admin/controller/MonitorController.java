@@ -17,11 +17,15 @@
 package com.webank.ai.fate.serving.admin.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
+import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.common.flow.HealthInfo;
@@ -38,17 +42,19 @@ import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import io.grpc.ManagedChannel;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.*;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -62,7 +68,7 @@ public class MonitorController {
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     @Autowired
     ComponentService componentService;
-    Map<String,HealthInfo> healthInfoMap;
+    Map<String,Object> healthRecord;
     private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
 
     @GetMapping("/monitor/queryJvm")
@@ -173,25 +179,11 @@ public class MonitorController {
     }
 
     @GetMapping("monitor/checkHealth")
-    public ReturnResult checkHealthService(String host, int port) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-        Preconditions.checkArgument(port != 0, "parameter port was wrong");
-
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
-
-        if (healthInfoMap.get(host).getData() == null) {
+    public ReturnResult checkHealthService() {
+        if (healthRecord == null) {
             return ReturnResult.build(StatusCode.SYSTEM_ERROR, Dict.FAILED, null);
         }
-
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(host,healthInfoMap.get(host + ":" + port).getData());
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, dataMap);
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
     }
 
     private CommonServiceGrpc.CommonServiceBlockingStub getMonitorServiceBlockStub(String host, int port) {
@@ -211,12 +203,20 @@ public class MonitorController {
         return blockingStub;
     }
 
-    @Scheduled(fixedRate = 10000)
-    private void checkRemoteHealth() {
-        Map<String,List<String>> addressMap = componentService.getAddressMap();
-        if (healthInfoMap == null) {
-            healthInfoMap = new ConcurrentHashMap<>();
+    private InferenceServiceGrpc.InferenceServiceBlockingStub getInferenceServiceBlockingStub(String host, int port, int timeout) throws Exception {
+        Preconditions.checkArgument(StringUtils.isNotBlank(host), "host is blank");
+        if (!NetUtils.isValidAddress(host + ":" + port)) {
+            throw new SysException("invalid address");
         }
+
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
+        InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+    }
+
+
+    private void checkRemoteHealth(Map<String,List> componentMap) {
+        Map<String,List<String>> addressMap = componentService.getAddressMap();
         if (addressMap == null) {
             return;
         }
@@ -234,31 +234,89 @@ public class MonitorController {
                     builder.setVersion("0.1");
                     builder.setType("Test");
                     CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
-                    long currentTime = System.currentTimeMillis();
-                    if (healthInfoMap.containsKey(address)) {
-                        HealthInfo currentHostInfo = healthInfoMap.get(address);
-                        currentHostInfo.setTimeStamp(currentTime);
-                        if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
-                            currentHostInfo.setData(null);
-                        }
-                        else{
-                            currentHostInfo.setData(commonResponse.getData());
-                        }
-                        currentHostInfo.setTimeStamp(currentTime);
+
+                    HealthInfo newHealthInfo = new HealthInfo(component,host,port,"machineInfo");
+                    if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
+                        newHealthInfo.setData(null);
                     }
-                    else {
-                        HealthInfo newHealthInfo = new HealthInfo(component,host,port, currentTime);
-                        newHealthInfo.setTimeStamp(currentTime);
-                        if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
-                            newHealthInfo.setData(null);
-                        }
-                        else{
-                            newHealthInfo.setData(commonResponse.getData());
-                        }
-                        healthInfoMap.put(address,newHealthInfo);
+                    else{
+                        newHealthInfo.setData(commonResponse.getData().toStringUtf8());
                     }
+                    if (!componentMap.containsKey(component)) {
+                        componentMap.put(component,new Vector());
+                    }
+                    componentMap.get(component).add(newHealthInfo);
                 });
             }
         }
+    }
+
+    private void checkInferenceService(Map<String,List> componentMap) throws Exception{
+        componentService.pullService();
+        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
+        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
+            executor.submit(() -> {
+                InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
+                ClassPathResource inferenceTest;
+                if (serviceInfo.getName().equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
+                    inferenceTest = new ClassPathResource("batchInferenceTest.json");
+                } else {
+                    inferenceTest = new ClassPathResource("inferenceTest.json");
+                }
+                try {
+                    File jsonFile = inferenceTest.getFile();
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    Map map = objectMapper.readValue(jsonFile, Map.class);
+                    map.put("serviceId", serviceInfo.getServiceId());
+                    String host = serviceInfo.getHost();
+                    int port = serviceInfo.getPort();
+                    inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(map), "UTF-8"));
+                    InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
+                    InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub =
+                            this.getInferenceServiceBlockingStub(host, port, 3000);
+                    InferenceServiceProto.InferenceMessage result;
+                    if (serviceInfo.getName().equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
+                        result = blockingStub.batchInference(inferenceMessage);
+                    }
+                    else {
+                        result = blockingStub.inference(inferenceMessage);
+                    }
+                    HealthInfo newHealthInfo = new HealthInfo("serving",host, port,"inference");
+                    if (result.getBody() == null || result.getBody().toStringUtf8() == "null") {
+                        newHealthInfo.setData(null);
+                    }
+                    else{
+                        Map resultMap = JsonUtil.json2Object(result.getBody().toStringUtf8(),Map.class);
+                        Object returnCode = resultMap.get("retcode");
+                        Object returnMessage = resultMap.get("retmsg");
+                        resultMap.clear();
+                        resultMap.put("retcode",returnCode);
+                        resultMap.put("retmsg",returnMessage);
+                        newHealthInfo.setData(resultMap);
+                    }
+                    if (!componentMap.containsKey("serving")) {
+                        componentMap.put("serving",new Vector());
+                    }
+                    componentMap.get("serving").add(newHealthInfo);
+                } catch (IOException e) {
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+    @Scheduled(fixedRate = 10000)
+    private void selfCheck() {
+        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
+        Map<String,List> componentMap = new ConcurrentHashMap<>();
+        checkRemoteHealth(componentMap);
+        try {
+            checkInferenceService(componentMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        newHealthRecord.put("timeStamp", System.currentTimeMillis());
+        newHealthRecord.put("info", componentMap);
+        this.healthRecord = newHealthRecord;
     }
 }

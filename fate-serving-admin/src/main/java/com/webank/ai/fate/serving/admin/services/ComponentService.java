@@ -19,8 +19,10 @@ package com.webank.ai.fate.serving.admin.services;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.url.CollectionUtils;
+import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +37,14 @@ public class ComponentService {
 
     private final static String PATH_SEPARATOR = "/";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
+    private final static String PROVIDER = "providers";
     Logger logger = LoggerFactory.getLogger(ComponentService.class);
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
     NodeData cachedNodeData;
     Map<String,List<String>> addressMap;
+    List<ServiceInfo> serviceInfos;
+
     /**
      * project -> nodes mapping
      */
@@ -51,6 +56,10 @@ public class ComponentService {
 
     public Map<String,List<String>> getAddressMap() {
         return addressMap;
+    }
+
+    public List<ServiceInfo> getServiceInfos() {
+        return serviceInfos;
     }
 
     public Set<String> getWhitelist() {
@@ -152,6 +161,29 @@ public class ComponentService {
         return addressInfo;
     }
 
+    public void pullService() {
+        serviceInfos = new ArrayList<>();
+        Properties properties = zookeeperRegistry.getCacheProperties();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            String key = (String) entry.getKey();
+            String serviceName = key.substring(key.lastIndexOf('/')+1);
+            if (serviceName.equals(Dict.SERVICENAME_BATCH_INFERENCE) || serviceName.equals(Dict.SERVICENAME_INFERENCE)) {
+                String value = (String) entry.getValue();
+                String address = value.substring(value.indexOf("//")+2);
+                String host = address.substring(0, address.indexOf(':'));
+                int port = Integer.valueOf(address.substring(address.indexOf(':') + 1, address.indexOf('/')));
+                String serviceId = key.substring(key.indexOf('/')+1,key.lastIndexOf('/'));
+
+                ServiceInfo serviceInfo = new ServiceInfo();
+                serviceInfo.setHost(host);
+                serviceInfo.setName(serviceName);
+                serviceInfo.setPort(port);
+                serviceInfo.setServiceId(serviceId);
+                serviceInfos.add(serviceInfo);
+            }
+        }
+    }
+
     public class NodeData {
         String name;
         boolean leaf;
@@ -200,5 +232,42 @@ public class ComponentService {
         }
     }
 
+    public class ServiceInfo {
+        String name;
+        String host;
+        int port;
+        String serviceId;
 
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setServiceId(String serviceId) {
+            this.serviceId = serviceId;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getServiceId() {
+            return serviceId;
+        }
+    }
 }
