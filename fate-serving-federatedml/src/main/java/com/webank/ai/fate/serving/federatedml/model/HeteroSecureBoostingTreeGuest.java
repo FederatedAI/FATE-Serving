@@ -23,6 +23,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
+import org.apache.commons.collections4.map.HashedMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,6 +103,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         }
         return treeNodeId;
     }
+
     private Map<String, Object> getFinalPredict(double[] weights) {
         Map<String, Object> ret = new HashMap<String, Object>(8);
         if (this.numClasses == 2) {
@@ -160,6 +162,51 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         return result;
     }
 
+    private Map<String, Boolean> mergeTwoLookUpTable(Map<String, Boolean> lookUp1, Map<String, Boolean> lookUp2){
+
+        Map<String, Boolean> merged = new Map<String, Boolean>();
+        merged.putAll(lookUp1);
+        merged.putAll(lookUp2);
+
+        return merged;
+    }
+
+    private Map<String, Object> extractMultiPartiesData(Map<String, Object> remoteData, int tree_num){
+
+        // merge multi host lookup table (if there are multiple hosts)
+        Map<String, Object> extract_result = new HashedMap<String, Object>();
+        Map<String, Object> mergedLookUpTable = new HashedMap<String, Map<String, Boolean>>();
+
+        // extract component data
+        remoteData.forEach((k, v) -> {
+            Map<String, Object> onePartyData = (Map<String, Object>) v;
+            Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
+            if (remoteComopnentData == null) {
+                remoteComopnentData = onePartyData;
+            }
+            extract_result.put(k, remoteComopnentData);
+        });
+
+        // merge host look up tables
+        extract_result.forEach((k, v) -> {
+            Map<String, Map<String, Boolean>> lookUp = (Map<String, Map<String, Boolean>>) v;
+            for(int treeId=0; treeId<tree_num; treeId++){
+                String str_key = String.valueOf(treeId);
+                Map<String, Boolean> treeLookUp = lookUp.get(str_key);
+                if(!mergedLookUpTable.containsKey(str_key)){
+                    mergedLookUpTable.put(treeLookUp);
+                }
+                else{
+                    Map<String, Boolean> savedLookUp = mergedLookUpTable.get(str_key);
+                    Map<String, Boolean> mergedResult = this.mergeTwoLookUpTable(savedLookUp, treeLookUp);
+                    mergedLookUpTable.put(str_key, mergedResult);
+                }
+            }
+        });
+
+        return mergedLookUpTable;
+    }
+
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
         Map<String, Object> result = this.handleRemoteReturnData(remoteData);
@@ -173,37 +220,32 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
             throw new GuestMergeException("tree node id array is not return from first loop");
         }
         HashMap<String, Object> fidValueMapping = (HashMap<String, Object>) localData.get("fidValueMapping");
-        remoteData.forEach((k, v) -> {
-            HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
-            for (int i = 0; i < this.treeNum; ++i) {
-                if (this.isLocateInLeaf(i, treeNodeIds[i])) {
-                    continue;
-                }
-                treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
-                if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
-                    treeLocation.put(String.valueOf(i), treeNodeIds[i]);
-                }
+
+        HashMap<String, Object> lookUpTable = this.extractMultiPartiesData(remoteData, this.treeNum);
+        HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
+        for (int i = 0; i < this.treeNum; ++i) {
+            if (this.isLocateInLeaf(i, treeNodeIds[i])) {
+                continue;
             }
-            Map<String, Object> onePartyData = (Map<String, Object>) v;
-            Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
-            double remoteScore;
-            if (remoteComopnentData == null) {
-                remoteComopnentData = onePartyData;
+            treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
+            if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
+                treeLocation.put(String.valueOf(i), treeNodeIds[i]);
             }
-            for (String treeIdx : treeLocation.keySet()) {
-                int idx = Integer.valueOf(treeIdx);
-                int curNodeId = (Integer) treeLocation.get(treeIdx);
-                int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping, remoteComopnentData);
-                treeNodeIds[idx] = final_node_id;
-            }
-            for (int i = 0; i < this.treeNum; ++i) {
-                weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
-            }
-            if (logger.isDebugEnabled()) {
-                logger.info("tree leaf ids is {}", treeNodeIds);
-                logger.info("weights is {}", weights);
-            }
-        });
+        }
+        for (String treeIdx : treeLocation.keySet()) {
+            int idx = Integer.valueOf(treeIdx);
+            int curNodeId = (Integer) treeLocation.get(treeIdx);
+            int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping, lookUpTable);
+            treeNodeIds[idx] = final_node_id;
+        }
+        for (int i = 0; i < this.treeNum; ++i) {
+            weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.info("tree leaf ids is {}", treeNodeIds);
+            logger.info("weights is {}", weights);
+        }
+
         return getFinalPredict(weights);
     }
 

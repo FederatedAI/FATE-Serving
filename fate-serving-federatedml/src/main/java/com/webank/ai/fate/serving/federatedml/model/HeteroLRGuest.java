@@ -53,34 +53,36 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                                                     Map<String, Object> hostData) {
         Map<String, Object> result = this.handleRemoteReturnData(hostData);
         if ((int) result.get(Dict.RET_CODE) == StatusCode.SUCCESS) {
-            hostData.forEach((k, v) -> {
-                Map<String, Object> onePartyData = (Map<String, Object>) v;
+            if (CollectionUtils.isNotEmpty(guestData)) {
                 double score;
-                if (CollectionUtils.isNotEmpty(guestData)) {
-                    Map<String, Object> tempMap = guestData.get(0);
-                    Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
-                    double localScore = 0;
-                    if (componentData != null && componentData.get(Dict.SCORE) != null) {
-                        localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
-                    } else {
-                        throw new GuestMergeException("local result is invalid ");
-                    }
-                    Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
-                    double remoteScore;
-                    if (remoteComopnentData != null) {
-                        remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
-                    } else {
-                        if (onePartyData.get(Dict.PROB) != null) {
-                            remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
-                        } else {
-                            throw new GuestMergeException("host data score is null");
-                        }
-                    }
-                    score = localScore;
-                    score += remoteScore;
-                    double prob = sigmod(score);
-                    result.put(Dict.SCORE, prob);
+                Map<String, Object> tempMap = guestData.get(0);
+                Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
+                double localScore = 0;
+                if (componentData != null && componentData.get(Dict.SCORE) != null) {
+                    localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
+                } else {
+                    throw new GuestMergeException("local result is invalid ");
                 }
+                score = localScore;
+
+                hostData.forEach((k, v) -> {
+                    Map<String, Object> onePartyData = (Map<String, Object>) v;
+
+                        Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
+                        double remoteScore;
+                        if (remoteComopnentData != null) {
+                            remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
+                        } else {
+                            if (onePartyData.get(Dict.PROB) != null) {
+                                remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
+                            } else {
+                                throw new GuestMergeException("host data score is null");
+                            }
+                        }
+                        score += remoteScore;
+                    }
+                double prob = sigmod(score);
+                result.put(Dict.SCORE, prob);
 
             });
         }

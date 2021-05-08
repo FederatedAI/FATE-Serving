@@ -219,12 +219,11 @@ public class GrpcConnectionPool {
             } else {
                 channelBuilder.usePlaintext();
             }
-
             return channelBuilder.build();
-        } catch (SSLException e) {
-            throw new SecurityException(e);
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch (Exception e) {
+            logger.error("create channel error : " ,e);
+            //e.printStackTrace();
         }
         return null;
     }
