@@ -22,6 +22,7 @@ import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.common.flow.HealthInfo;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 
 @Service
 public class ComponentService {
@@ -42,7 +44,6 @@ public class ComponentService {
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
     NodeData cachedNodeData;
-    Map<String,List<String>> addressMap;
     List<ServiceInfo> serviceInfos;
 
     /**
@@ -52,10 +53,6 @@ public class ComponentService {
 
     public NodeData getCachedNodeData() {
         return cachedNodeData;
-    }
-
-    public Map<String,List<String>> getAddressMap() {
-        return addressMap;
     }
 
     public List<ServiceInfo> getServiceInfos() {
@@ -132,7 +129,6 @@ public class ComponentService {
 
             }
             cachedNodeData = root;
-            addressMap = getComponentAddresses();
             if (logger.isDebugEnabled()) {
                 logger.debug("refresh  component info ");
             }
@@ -144,21 +140,18 @@ public class ComponentService {
 
     }
 
-    private Map<String,List<String>> getComponentAddresses() {
-        List<NodeData> componentNodes;
-        Map<String,List<String>> addressInfo = new HashMap<>();
-        if (cachedNodeData != null) {
-            componentNodes = cachedNodeData.getChildren();
-            //遍历proxy, admin, server组件
-            for (NodeData currentComponent: componentNodes) {
-                List<String> addresses = new ArrayList<>();
-                for (NodeData currentHost: currentComponent.getChildren()) {
-                    addresses.add(currentHost.getName());
-                }
-                addressInfo.put(currentComponent.getName(),addresses);
+    public Map<String,List<String>> getComponentAddresses() {
+        Map<String,List<String>> addresses= new HashMap<>();
+        ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
+        List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
+        for(String component: componentLists) {
+            addresses.put(component,new ArrayList<>());
+            List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + component);
+            for (String node: nodes) {
+                addresses.get(component).add(node);
             }
         }
-        return addressInfo;
+        return addresses;
     }
 
     public void pullService() {
@@ -270,4 +263,5 @@ public class ComponentService {
             return serviceId;
         }
     }
+
 }

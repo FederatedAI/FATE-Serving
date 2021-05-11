@@ -26,7 +26,6 @@ import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
-import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.common.flow.HealthInfo;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
@@ -42,9 +41,7 @@ import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import io.grpc.ManagedChannel;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -53,12 +50,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @RequestMapping("/api")
@@ -180,9 +173,70 @@ public class MonitorController {
 
     @GetMapping("monitor/checkHealth")
     public ReturnResult checkHealthService() {
+
         if (healthRecord == null) {
-            return ReturnResult.build(StatusCode.SYSTEM_ERROR, Dict.FAILED, null);
+            return selfCheckService();
         }
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
+    }
+
+    @GetMapping("monitor/selfCheck")
+    public ReturnResult selfCheckService() {
+        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
+        Map<String,List> componentMap = new ConcurrentHashMap<>();
+        Map<String,List<String>> addressMap = componentService.getComponentAddresses();
+        componentService.pullService();
+        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
+
+        List batchList = new ArrayList<>();
+        for(String component: addressMap.keySet()) {
+            if (component.equals("admin")) {
+                continue;
+            }
+            for (String address : addressMap.get(component)) {
+                batchList.add(new java.lang.Object());
+            }
+        }
+
+        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
+            batchList.add(new java.lang.Object());
+        }
+
+        final CountDownLatch countDownLatch = new CountDownLatch(batchList.size());
+        for(String component: addressMap.keySet()) {
+            if (component.equals("admin")) {
+                continue;
+            }
+            for (String address : addressMap.get(component)) {
+                executor.submit(() -> {
+                    try {
+                        checkRemoteHealth(componentMap, address, component);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    countDownLatch.countDown();
+                });
+            }
+        }
+        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
+            executor.submit(() -> {
+                try {
+                    checkInferenceService(componentMap,serviceInfo);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                countDownLatch.countDown();
+            });
+        }
+        try {
+            countDownLatch.await(10,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        newHealthRecord.put("timeStamp", System.currentTimeMillis());
+        newHealthRecord.put("info", componentMap);
+        healthRecord = newHealthRecord;
         return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
     }
 
@@ -215,108 +269,136 @@ public class MonitorController {
     }
 
 
-    private void checkRemoteHealth(Map<String,List> componentMap) {
-        Map<String,List<String>> addressMap = componentService.getAddressMap();
-        if (addressMap == null) {
+    private void checkRemoteHealth(Map<String,List> componentMap, String address, String component) {
+            String host = address.substring(0,address.indexOf(":"));
+            int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
+            CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
+            CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
+            builder.setMode("Test");
+            builder.setVersion("0.1");
+            builder.setType("Test");
+            CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
+
+            HealthInfo newHealthInfo = new HealthInfo(component,host,port,"machineInfo");
+            if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
+                newHealthInfo.setData(null);
+            }
+            else{
+                newHealthInfo.setData(commonResponse.getData().toStringUtf8());
+            }
+            String componentKey = component + "-" + host + ":" + port;
+            if (!componentMap.containsKey(componentKey)) {
+                componentMap.put(componentKey,new Vector());
+            }
+            componentMap.get(componentKey).add(newHealthInfo);
+        return;
+    }
+
+    private void checkInferenceService(Map<String,List> componentMap, ComponentService.ServiceInfo serviceInfo) throws Exception{
+        InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
+        ClassPathResource inferenceTest;
+        if (serviceInfo.getName().equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
+            inferenceTest = new ClassPathResource("batchInferenceTest.json");
+        } else {
+            inferenceTest = new ClassPathResource("inferenceTest.json");
+        }
+        try {
+            File jsonFile = inferenceTest.getFile();
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map map = objectMapper.readValue(jsonFile, Map.class);
+            map.put("serviceId", serviceInfo.getServiceId());
+            String host = serviceInfo.getHost();
+            int port = serviceInfo.getPort();
+            inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(map), "UTF-8"));
+            InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
+            InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub =
+                    this.getInferenceServiceBlockingStub(host, port, 3000);
+            InferenceServiceProto.InferenceMessage result;
+            if (serviceInfo.getName().equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
+                result = blockingStub.batchInference(inferenceMessage);
+            }
+            else {
+                result = blockingStub.inference(inferenceMessage);
+            }
+            HealthInfo newHealthInfo = new HealthInfo("serving",host, port,"inference");
+            if (result.getBody() == null || result.getBody().toStringUtf8() == "null") {
+                newHealthInfo.setData(null);
+            }
+            else{
+                Map resultMap = JsonUtil.json2Object(result.getBody().toStringUtf8(),Map.class);
+                Object returnCode = resultMap.get("retcode");
+                Object returnMessage = resultMap.get("retmsg");
+                resultMap.clear();
+                resultMap.put("serviceId",serviceInfo.getServiceId());
+                resultMap.put("retcode",returnCode);
+                resultMap.put("retmsg",returnMessage);
+                newHealthInfo.setData(resultMap);
+            }
+            String componentKey = "serving-" + host + ":" + port;
+            if (!componentMap.containsKey(componentKey)) {
+                componentMap.put(componentKey,new Vector());
+            }
+            componentMap.get(componentKey).add(newHealthInfo);
+        } catch (IOException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return;
+    }
+    @Scheduled(fixedRate = 10000)
+    private void scheduledCheck() throws InterruptedException {
+        if (this.healthRecord != null && System.currentTimeMillis() - Long.valueOf(this.healthRecord.get("timeStamp").toString()) < 20000) {
             return;
         }
+        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
+        Map<String,List> componentMap = new ConcurrentHashMap<>();
+        Map<String,List<String>> addressMap = componentService.getComponentAddresses();
+        componentService.pullService();
+        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
+
+        List batchList = new ArrayList<>();
         for(String component: addressMap.keySet()) {
             if (component.equals("admin")) {
                 continue;
             }
-            for(String address: addressMap.get(component)) {
-                executor.submit(() -> {
-                    String host = address.substring(0,address.indexOf(":"));
-                    int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
-                    CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
-                    CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
-                    builder.setMode("Test");
-                    builder.setVersion("0.1");
-                    builder.setType("Test");
-                    CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
+            for (String address : addressMap.get(component)) {
+                batchList.add(new java.lang.Object());
+            }
+        }
 
-                    HealthInfo newHealthInfo = new HealthInfo(component,host,port,"machineInfo");
-                    if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
-                        newHealthInfo.setData(null);
+        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
+            batchList.add(new java.lang.Object());
+        }
+
+        final CountDownLatch countDownLatch = new CountDownLatch(batchList.size());
+        for(String component: addressMap.keySet()) {
+            if (component.equals("admin")) {
+                continue;
+            }
+            for (String address : addressMap.get(component)) {
+                executor.submit(() -> {
+                    try {
+                        checkRemoteHealth(componentMap, address, component);
+                        countDownLatch.countDown();
+                    } catch (Exception e) {
+                        countDownLatch.countDown();
                     }
-                    else{
-                        newHealthInfo.setData(commonResponse.getData().toStringUtf8());
-                    }
-                    if (!componentMap.containsKey(component)) {
-                        componentMap.put(component,new Vector());
-                    }
-                    componentMap.get(component).add(newHealthInfo);
                 });
             }
         }
-    }
-
-    private void checkInferenceService(Map<String,List> componentMap) throws Exception{
-        componentService.pullService();
-        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
         for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
             executor.submit(() -> {
-                InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
-                ClassPathResource inferenceTest;
-                if (serviceInfo.getName().equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
-                    inferenceTest = new ClassPathResource("batchInferenceTest.json");
-                } else {
-                    inferenceTest = new ClassPathResource("inferenceTest.json");
-                }
                 try {
-                    File jsonFile = inferenceTest.getFile();
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    Map map = objectMapper.readValue(jsonFile, Map.class);
-                    map.put("serviceId", serviceInfo.getServiceId());
-                    String host = serviceInfo.getHost();
-                    int port = serviceInfo.getPort();
-                    inferenceMessageBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(map), "UTF-8"));
-                    InferenceServiceProto.InferenceMessage inferenceMessage = inferenceMessageBuilder.build();
-                    InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub =
-                            this.getInferenceServiceBlockingStub(host, port, 3000);
-                    InferenceServiceProto.InferenceMessage result;
-                    if (serviceInfo.getName().equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
-                        result = blockingStub.batchInference(inferenceMessage);
-                    }
-                    else {
-                        result = blockingStub.inference(inferenceMessage);
-                    }
-                    HealthInfo newHealthInfo = new HealthInfo("serving",host, port,"inference");
-                    if (result.getBody() == null || result.getBody().toStringUtf8() == "null") {
-                        newHealthInfo.setData(null);
-                    }
-                    else{
-                        Map resultMap = JsonUtil.json2Object(result.getBody().toStringUtf8(),Map.class);
-                        Object returnCode = resultMap.get("retcode");
-                        Object returnMessage = resultMap.get("retmsg");
-                        resultMap.clear();
-                        resultMap.put("retcode",returnCode);
-                        resultMap.put("retmsg",returnMessage);
-                        newHealthInfo.setData(resultMap);
-                    }
-                    if (!componentMap.containsKey("serving")) {
-                        componentMap.put("serving",new Vector());
-                    }
-                    componentMap.get("serving").add(newHealthInfo);
-                } catch (IOException e) {
+                    checkInferenceService(componentMap,serviceInfo);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                countDownLatch.countDown();
             });
         }
-    }
-    @Scheduled(fixedRate = 10000)
-    private void selfCheck() {
-        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
-        Map<String,List> componentMap = new ConcurrentHashMap<>();
-        checkRemoteHealth(componentMap);
-        try {
-            checkInferenceService(componentMap);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        countDownLatch.await(10,TimeUnit.SECONDS);
         newHealthRecord.put("timeStamp", System.currentTimeMillis());
         newHealthRecord.put("info", componentMap);
-        this.healthRecord = newHealthRecord;
+        healthRecord = newHealthRecord;
     }
 }
