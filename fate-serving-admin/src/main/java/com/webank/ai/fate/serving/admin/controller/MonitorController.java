@@ -345,9 +345,9 @@ public class MonitorController {
         }
         return;
     }
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "5/10 * * * * ? ")
     private void scheduledCheck() throws InterruptedException {
-        if (this.healthRecord != null && System.currentTimeMillis() - Long.valueOf(this.healthRecord.get("timeStamp").toString()) < 20000) {
+        if (this.healthRecord != null && System.currentTimeMillis() - Long.valueOf(this.healthRecord.get("timeStamp").toString()) < 150000) {
             return;
         }
         Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
