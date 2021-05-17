@@ -50,6 +50,7 @@ import oshi.hardware.GlobalMemory;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -210,6 +211,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         Map<String,Object> resultMap = new HashMap<>();
+        List<Object> machineInfoList = new ArrayList<>();
         try {
             SystemInfo systemInfo = new SystemInfo();
             CentralProcessor processor = systemInfo.getHardware().getProcessor();
@@ -228,7 +230,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             Map<String,String> CPUInfo = new HashMap<>();
             CPUInfo.put("Total CPU Processors", String.valueOf(processor.getLogicalProcessorCount()));
             CPUInfo.put("CPU Usage", new DecimalFormat("#.##%").format(1.0-(idle * 1.0 / totalCpu)));
-            resultMap.put("CPUInfo",CPUInfo);
+            machineInfoList.add(CPUInfo);
 
             GlobalMemory memory = systemInfo.getHardware().getMemory();
             long totalByte = memory.getTotal();
@@ -236,11 +238,11 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             Map<String,String> memoryInfo= new HashMap<>();
             memoryInfo.put("Total Memory",new DecimalFormat("#.##GB").format(totalByte/1024.0/1024.0/1024.0));
             memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
-            resultMap.put("MemoryInfo", memoryInfo);
+            machineInfoList.add(memoryInfo);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        resultMap.put("MachineInfo",machineInfoList);
         //check whether fate flow is connected
         String fullUrl = MetaInfo.PROPERTY_MODEL_TRANSFER_URL;
         String host = fullUrl.substring(fullUrl.indexOf('/') + 2, fullUrl.lastIndexOf(':'));

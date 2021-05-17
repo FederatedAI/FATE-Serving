@@ -27,7 +27,6 @@ import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.common.flow.HealthInfo;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -183,7 +182,9 @@ public class MonitorController {
     @GetMapping("monitor/selfCheck")
     public ReturnResult selfCheckService() {
         Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
-        Map<String,List> componentMap = new ConcurrentHashMap<>();
+        Map<String,Map> componentMap = new ConcurrentHashMap<>();
+        componentMap.put("proxy",new ConcurrentHashMap());
+        componentMap.put("serving",new ConcurrentHashMap());
         Map<String,List<String>> addressMap = componentService.getComponentAddresses();
         componentService.pullService();
         List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
@@ -269,9 +270,14 @@ public class MonitorController {
     }
 
 
-    private void checkRemoteHealth(Map<String,List> componentMap, String address, String component) {
+    private void checkRemoteHealth(Map<String,Map> componentMap, String address, String component) {
+            Map<String,List> currentComponentMap = componentMap.get(component);
             String host = address.substring(0,address.indexOf(":"));
             int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
+            if (!currentComponentMap.containsKey(address)) {
+                currentComponentMap.put(address, new Vector<>());
+            }
+            List currentList = currentComponentMap.get(address);
             CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
             CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
             builder.setMode("Test");
@@ -279,22 +285,19 @@ public class MonitorController {
             builder.setType("Test");
             CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
 
-            HealthInfo newHealthInfo = new HealthInfo(component,host,port,"machineInfo");
+            Map<String,Object> currentInfoMap = new HashMap<>();
+            currentInfoMap.put("type","statusInfo");
             if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
-                newHealthInfo.setData(null);
+                currentInfoMap.put("data",null);
             }
             else{
-                newHealthInfo.setData(commonResponse.getData().toStringUtf8());
+                currentInfoMap.put("data",JsonUtil.json2Object(commonResponse.getData().toStringUtf8(),Map.class));
             }
-            String componentKey = component + "-" + host + ":" + port;
-            if (!componentMap.containsKey(componentKey)) {
-                componentMap.put(componentKey,new Vector());
-            }
-            componentMap.get(componentKey).add(newHealthInfo);
+            currentList.add(currentInfoMap);
         return;
     }
 
-    private void checkInferenceService(Map<String,List> componentMap, ComponentService.ServiceInfo serviceInfo) throws Exception{
+    private void checkInferenceService(Map<String,Map> componentMap, ComponentService.ServiceInfo serviceInfo) throws Exception{
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         ClassPathResource inferenceTest;
         if (serviceInfo.getName().equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
@@ -320,9 +323,15 @@ public class MonitorController {
             else {
                 result = blockingStub.inference(inferenceMessage);
             }
-            HealthInfo newHealthInfo = new HealthInfo("serving",host, port,"inference");
+            Map<String,List> currentComponentMap = componentMap.get("serving");
+            if (!currentComponentMap.containsKey(serviceInfo.getHost() + ":" + port)) {
+                currentComponentMap.put(serviceInfo.getHost() + ":" + port, new Vector<>());
+            }
+            List currentList = currentComponentMap.get(serviceInfo.getHost() + ":" + port);
+            Map<String,Object> currentInfoMap = new HashMap<>();
+            currentInfoMap.put("type","inference");
             if (result.getBody() == null || result.getBody().toStringUtf8() == "null") {
-                newHealthInfo.setData(null);
+                currentInfoMap.put("data",null);
             }
             else{
                 Map resultMap = JsonUtil.json2Object(result.getBody().toStringUtf8(),Map.class);
@@ -332,13 +341,9 @@ public class MonitorController {
                 resultMap.put("serviceId",serviceInfo.getServiceId());
                 resultMap.put("retcode",returnCode);
                 resultMap.put("retmsg",returnMessage);
-                newHealthInfo.setData(resultMap);
+                currentInfoMap.put("data",resultMap);
+                currentList.add(currentInfoMap);
             }
-            String componentKey = "serving-" + host + ":" + port;
-            if (!componentMap.containsKey(componentKey)) {
-                componentMap.put(componentKey,new Vector());
-            }
-            componentMap.get(componentKey).add(newHealthInfo);
         } catch (IOException e) {
         } catch (Exception e) {
             e.printStackTrace();
@@ -351,11 +356,12 @@ public class MonitorController {
             return;
         }
         Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
-        Map<String,List> componentMap = new ConcurrentHashMap<>();
+        Map<String,Map> componentMap = new ConcurrentHashMap<>();
         Map<String,List<String>> addressMap = componentService.getComponentAddresses();
         componentService.pullService();
         List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
-
+        componentMap.put("proxy",new ConcurrentHashMap());
+        componentMap.put("serving",new ConcurrentHashMap());
         List batchList = new ArrayList<>();
         for(String component: addressMap.keySet()) {
             if (component.equals("admin")) {

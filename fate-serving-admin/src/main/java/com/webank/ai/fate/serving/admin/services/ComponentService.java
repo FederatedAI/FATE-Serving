@@ -19,10 +19,8 @@ package com.webank.ai.fate.serving.admin.services;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.url.CollectionUtils;
-import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.common.flow.HealthInfo;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
@@ -32,7 +30,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 
 @Service
 public class ComponentService {
