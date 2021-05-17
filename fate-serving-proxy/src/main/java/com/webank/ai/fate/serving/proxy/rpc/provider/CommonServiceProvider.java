@@ -45,9 +45,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.GlobalMemory;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -247,6 +251,47 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
                 builder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS);
             }
 
+            return builder.build();
+        } catch (Exception e) {
+            throw new SysException(e.getMessage());
+        }
+    }
+
+    @FateServiceMethod(name = "CHECK_HEALTH")
+    public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
+        try {
+            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+            Map<String,Map<String,String>> resultMap = new HashMap<>();
+
+            SystemInfo systemInfo = new SystemInfo();
+            CentralProcessor processor = systemInfo.getHardware().getProcessor();
+            long[] prevTicks = processor.getSystemCpuLoadTicks();
+            long[] ticks = processor.getSystemCpuLoadTicks();
+            long nice = ticks[CentralProcessor.TickType.NICE.getIndex()] - prevTicks[CentralProcessor.TickType.NICE.getIndex()];
+            long irq = ticks[CentralProcessor.TickType.IRQ.getIndex()] - prevTicks[CentralProcessor.TickType.IRQ.getIndex()];
+            long softirq = ticks[CentralProcessor.TickType.SOFTIRQ.getIndex()] - prevTicks[CentralProcessor.TickType.SOFTIRQ.getIndex()];
+            long steal = ticks[CentralProcessor.TickType.STEAL.getIndex()] - prevTicks[CentralProcessor.TickType.STEAL.getIndex()];
+            long cSys = ticks[CentralProcessor.TickType.SYSTEM.getIndex()] - prevTicks[CentralProcessor.TickType.SYSTEM.getIndex()];
+            long user = ticks[CentralProcessor.TickType.USER.getIndex()] - prevTicks[CentralProcessor.TickType.USER.getIndex()];
+            long ioWait = ticks[CentralProcessor.TickType.IOWAIT.getIndex()] - prevTicks[CentralProcessor.TickType.IOWAIT.getIndex()];
+            long idle = ticks[CentralProcessor.TickType.IDLE.getIndex()] - prevTicks[CentralProcessor.TickType.IDLE.getIndex()];
+            long totalCpu = user + nice + cSys + idle + ioWait + irq + softirq + steal;
+
+            Map<String,String> CPUInfo = new HashMap<>();
+            CPUInfo.put("Total CPU Processors", String.valueOf(processor.getLogicalProcessorCount()));
+            CPUInfo.put("CPU Usage", new DecimalFormat("#.##%").format(1.0-(idle * 1.0 / totalCpu)));
+            resultMap.put("CPUInfo",CPUInfo);
+
+            GlobalMemory memory = systemInfo.getHardware().getMemory();
+            long totalByte = memory.getTotal();
+            long callableByte = memory.getAvailable();
+            Map<String,String> memoryInfo= new HashMap<>();
+            memoryInfo.put("Total Memory",new DecimalFormat("#.##GB").format(totalByte/1024.0/1024.0/1024.0));
+            memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
+            resultMap.put("MemoryInfo", memoryInfo);
+
+            builder.setStatusCode(StatusCode.SUCCESS);
+            builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
             return builder.build();
         } catch (Exception e) {
             throw new SysException(e.getMessage());

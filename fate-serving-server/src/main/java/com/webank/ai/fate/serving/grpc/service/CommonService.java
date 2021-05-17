@@ -38,6 +38,7 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
     private static final String LIST_PROPS = "listProps";
     private static final String QUERY_JVM = "queryJvm";
     private static final String UPDATE_SERVICE = "updateService";
+    private static final String CHECK_HEALTH = "checkHealth";
     @Autowired
     CommonServiceProvider commonServiceProvider;
 
@@ -106,5 +107,17 @@ public class CommonService extends CommonServiceGrpc.CommonServiceImplBase {
         context.setActionType(actionType);
         context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;
+    }
+
+    @Override
+    @RegisterService(serviceName = CHECK_HEALTH)
+    public void checkHealthService(CommonServiceProto.HealthCheckRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
+        Context context = prepareContext(CommonActionType.CHECK_HEALTH.name());
+        InboundPackage inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
+        CommonServiceProto.CommonResponse response = (CommonServiceProto.CommonResponse) outboundPackage.getData();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 }
