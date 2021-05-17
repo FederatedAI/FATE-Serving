@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.proxy.rpc.provider;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
@@ -40,10 +41,13 @@ import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.bean.RouteTableWrapper;
 import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.telnet.TelnetClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -259,10 +263,9 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
 
     @FateServiceMethod(name = "CHECK_HEALTH")
     public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
+        CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+        Map<String,Object> resultMap = new HashMap<>();
         try {
-            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-            Map<String,Map<String,String>> resultMap = new HashMap<>();
-
             SystemInfo systemInfo = new SystemInfo();
             CentralProcessor processor = systemInfo.getHardware().getProcessor();
             long[] prevTicks = processor.getSystemCpuLoadTicks();
@@ -290,11 +293,48 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
             resultMap.put("MemoryInfo", memoryInfo);
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            ClassPathResource routeTable = new ClassPathResource("route_table.json");
+            File jsonFile = routeTable.getFile();
+            String content = FileUtils.readFileToString(jsonFile);
+            TelnetClient telnetClient = new TelnetClient("vt200");
+            telnetClient.setDefaultTimeout(5000);
+            boolean isConnected;
+            String ip;
+            int port;
+            while(content.indexOf("ip") != -1) {
+                content = content.substring(content.indexOf("ip"));
+                ip = content.substring(6,content.indexOf(",")-1);
+                content = content.substring(content.indexOf("port"));
+                int lastIndex = 7;
+                while(Character.isDigit(content.charAt(lastIndex))) {
+                    lastIndex ++;
+                }
+                port = Integer.valueOf(content.substring(7,lastIndex));
+                try {
+                    telnetClient.connect(ip, port);
+                    isConnected = true;
+                    telnetClient.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    isConnected = false;
+                }
+                resultMap.put(ip + ":" + port, isConnected);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("routeTableInfo",null);
             builder.setStatusCode(StatusCode.SUCCESS);
             builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
             return builder.build();
-        } catch (Exception e) {
-            throw new SysException(e.getMessage());
         }
+
+        builder.setStatusCode(StatusCode.SUCCESS);
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
+        return builder.build();
     }
 }
