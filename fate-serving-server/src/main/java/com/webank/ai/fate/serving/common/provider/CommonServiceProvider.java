@@ -40,12 +40,15 @@ import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.telnet.TelnetClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -205,10 +208,9 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     }
     @FateServiceMethod(name = "CHECK_HEALTH")
     public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
+        CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+        Map<String,Object> resultMap = new HashMap<>();
         try {
-            CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-            Map<String,Map<String,String>> resultMap = new HashMap<>();
-
             SystemInfo systemInfo = new SystemInfo();
             CentralProcessor processor = systemInfo.getHardware().getProcessor();
             long[] prevTicks = processor.getSystemCpuLoadTicks();
@@ -235,12 +237,40 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             memoryInfo.put("Total Memory",new DecimalFormat("#.##GB").format(totalByte/1024.0/1024.0/1024.0));
             memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
             resultMap.put("MemoryInfo", memoryInfo);
-
-            builder.setStatusCode(StatusCode.SUCCESS);
-            builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
-            return builder.build();
         } catch (Exception e) {
-            throw new SysException(e.getMessage());
+            e.printStackTrace();
         }
+
+        //check whether fate flow is connected
+        String fullUrl = MetaInfo.PROPERTY_MODEL_TRANSFER_URL;
+        String host = fullUrl.substring(fullUrl.indexOf('/') + 2, fullUrl.lastIndexOf(':'));
+        int port = Integer.parseInt(fullUrl.substring(fullUrl.lastIndexOf(':') + 1,
+                fullUrl.indexOf('/',fullUrl.lastIndexOf(':'))));
+        TelnetClient telnetClient = new TelnetClient("vt200");
+        telnetClient.setDefaultTimeout(5000);
+        boolean isConnected = false;
+        try {
+            telnetClient.connect(host, port);
+            isConnected = true;
+            telnetClient.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        resultMap.put("FateFlow Status", isConnected);
+
+        host = MetaInfo.PROPERTY_REDIS_IP;
+        port = MetaInfo.PROPERTY_REDIS_PORT;
+        isConnected = false;
+        try {
+            telnetClient.connect(host, port);
+            isConnected = true;
+            telnetClient.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        resultMap.put("Redis Status", isConnected);
+        builder.setStatusCode(StatusCode.SUCCESS);
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
+        return builder.build();
     }
 }
