@@ -164,7 +164,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
 
     private Map<String, Boolean> mergeTwoLookUpTable(Map<String, Boolean> lookUp1, Map<String, Boolean> lookUp2){
 
-        Map<String, Boolean> merged = new Map<String, Boolean>();
+        Map<String, Boolean> merged = new HashMap<>();
         merged.putAll(lookUp1);
         merged.putAll(lookUp2);
 
@@ -175,7 +175,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
 
         // merge multi host lookup table (if there are multiple hosts)
         Map<String, Object> extract_result = new HashedMap<String, Object>();
-        Map<String, Object> mergedLookUpTable = new HashedMap<String, Map<String, Boolean>>();
+        Map<String, Object> mergedLookUpTable = new HashMap<>();
 
         // extract component data
         remoteData.forEach((k, v) -> {
@@ -194,10 +194,10 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
                 String str_key = String.valueOf(treeId);
                 Map<String, Boolean> treeLookUp = lookUp.get(str_key);
                 if(!mergedLookUpTable.containsKey(str_key)){
-                    mergedLookUpTable.put(treeLookUp);
+                    mergedLookUpTable.put(str_key,treeLookUp);
                 }
                 else{
-                    Map<String, Boolean> savedLookUp = mergedLookUpTable.get(str_key);
+                    Map<String, Boolean> savedLookUp = (Map<String, Boolean>)mergedLookUpTable.get(str_key);
                     Map<String, Boolean> mergedResult = this.mergeTwoLookUpTable(savedLookUp, treeLookUp);
                     mergedLookUpTable.put(str_key, mergedResult);
                 }
@@ -221,7 +221,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         }
         HashMap<String, Object> fidValueMapping = (HashMap<String, Object>) localData.get("fidValueMapping");
 
-        HashMap<String, Object> lookUpTable = this.extractMultiPartiesData(remoteData, this.treeNum);
+        Map<String, Object> lookUpTable = this.extractMultiPartiesData(remoteData, this.treeNum);
         HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
         for (int i = 0; i < this.treeNum; ++i) {
             if (this.isLocateInLeaf(i, treeNodeIds[i])) {
