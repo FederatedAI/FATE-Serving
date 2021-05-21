@@ -24,6 +24,10 @@ message Endpoint {
     int32 port = 2;         // port
     string hostname = 3;    // host name
     bool useSSL = 4;
+    string negotiationType = 5;
+    string certChainFile = 6;
+    string privateKeyFile = 7;
+    string caFile = 8;
 }
 
 message Endpoints {

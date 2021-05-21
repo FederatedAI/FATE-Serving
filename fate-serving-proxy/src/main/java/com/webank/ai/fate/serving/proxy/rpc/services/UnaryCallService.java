@@ -73,10 +73,9 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         try {
             NettyServerInfo nettyServerInfo;
             if (routerInfo.isUseSSL()) {
-                nettyServerInfo = new NettyServerInfo(MetaInfo.PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE,
-                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE,
-                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE,
-                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE);
+                nettyServerInfo = new NettyServerInfo(routerInfo.getNegotiationType(), routerInfo.getCertChainFile(),
+                                routerInfo.getPrivateKeyFile(), routerInfo.getCaFile());
+
             } else {
                 nettyServerInfo = new NettyServerInfo();
             }

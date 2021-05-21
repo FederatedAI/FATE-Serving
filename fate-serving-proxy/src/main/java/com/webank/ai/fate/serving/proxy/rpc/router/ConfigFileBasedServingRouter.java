@@ -52,6 +52,10 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private static final String PORT = "port";
     private static final String USE_SSL = "useSSL";
     private static final String HOSTNAME = "hostname";
+    private static final String negotiationType = "negotiationType";
+    private static final String certChainFile = "certChainFile";
+    private static final String privateKeyFile = "privateKeyFile";
+    private static final String caFile = "caFile";
     private static final String DEFAULT = "default";
     private final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
@@ -133,6 +137,10 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             }
             router.setUseSSL(epoint.getUseSSL());
             router.setPort(epoint.getPort());
+            router.setNegotiationType(epoint.getNegotiationType());
+            router.setCertChainFile(epoint.getCertChainFile());
+            router.setPrivateKeyFile(epoint.getPrivateKeyFile());
+            router.setCaFile(epoint.getCaFile());
             routeList.add(router);
         }
 
@@ -341,6 +349,26 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
                     if (endpointJson.has(HOSTNAME)) {
                         String targetHostname = endpointJson.get(HOSTNAME).getAsString();
                         endpointBuilder.setHostname(targetHostname);
+                    }
+
+                    if (endpointJson.has(negotiationType)) {
+                        String targetNegotiationType = endpointJson.get(negotiationType).getAsString();
+                        endpointBuilder.setNegotiationType(targetNegotiationType);
+                    }
+
+                    if (endpointJson.has(certChainFile)) {
+                        String targetCertChainFile = endpointJson.get(certChainFile).getAsString();
+                        endpointBuilder.setCertChainFile(targetCertChainFile);
+                    }
+
+                    if (endpointJson.has(privateKeyFile)) {
+                        String targetPrivateKeyFile = endpointJson.get(privateKeyFile).getAsString();
+                        endpointBuilder.setPrivateKeyFile(targetPrivateKeyFile);
+                    }
+
+                    if (endpointJson.has(caFile)) {
+                        String targetCaFile = endpointJson.get(caFile).getAsString();
+                        endpointBuilder.setCaFile(targetCaFile);
                     }
 
                     BasicMeta.Endpoint endpoint = endpointBuilder.build();
