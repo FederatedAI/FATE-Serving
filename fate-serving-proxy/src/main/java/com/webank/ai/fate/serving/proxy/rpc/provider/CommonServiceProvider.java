@@ -71,7 +71,9 @@ import java.util.concurrent.ConcurrentMap;
 public class CommonServiceProvider extends AbstractProxyServiceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(CommonServiceProvider.class);
-
+    private String userDir = System.getProperty(Dict.PROPERTY_USER_DIR);
+    private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
+    private final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     @Autowired
     FlowCounterManager flowCounterManager;
 
@@ -300,8 +302,13 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         }
         resultMap.put("MachineInfo",machineInfoList);
         try {
-            ClassPathResource routeTable = new ClassPathResource("route_table.json");
-            File jsonFile = routeTable.getFile();
+            String filePath = "";
+            if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
+                filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
+            } else {
+                filePath = userDir + this.fileSeparator + DEFAULT_ROUTER_FILE;
+            }
+            File jsonFile = new File(filePath);
             String content = FileUtils.readFileToString(jsonFile);
             TelnetClient telnetClient = new TelnetClient("vt200");
             telnetClient.setDefaultTimeout(5000);
