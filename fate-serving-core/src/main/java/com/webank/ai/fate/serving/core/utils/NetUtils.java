@@ -211,7 +211,7 @@ public class NetUtils {
     public static String getLocalIp() {
 
         try {
-            InetAddress inetAddress = getLocalAddress0("eth3");
+            InetAddress inetAddress = getLocalAddress0("eth0");
             if (inetAddress != null) {
                 return inetAddress.getHostAddress();
             } else {
@@ -220,7 +220,7 @@ public class NetUtils {
             if (inetAddress != null) {
                 return inetAddress.getHostAddress();
             } else {
-                return "127.0.0.1";
+                throw new RuntimeException("can not get local ip");
             }
 
         } catch (Throwable e) {
@@ -295,7 +295,7 @@ public class NetUtils {
                             Optional<InetAddress> addressOp = toValidAddress(addresses.nextElement());
                             if (addressOp.isPresent()) {
                                 try {
-                                    if (addressOp.get().isReachable(100)) {
+                                    if (addressOp.get().isReachable(10000)) {
                                         return addressOp.get();
                                     }
                                 } catch (IOException e) {
