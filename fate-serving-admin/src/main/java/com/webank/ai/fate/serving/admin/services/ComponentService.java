@@ -159,6 +159,9 @@ public class ComponentService {
             String serviceName = key.substring(key.lastIndexOf('/')+1);
             if (serviceName.equals(Dict.SERVICENAME_BATCH_INFERENCE) || serviceName.equals(Dict.SERVICENAME_INFERENCE)) {
                 String value = (String) entry.getValue();
+                if (value.startsWith("empty")) {
+                    continue;
+                }
                 String address = value.substring(value.indexOf("//")+2);
                 String host = address.substring(0, address.indexOf(':'));
                 int port = Integer.valueOf(address.substring(address.indexOf(':') + 1, address.indexOf('/')));
