@@ -25,10 +25,7 @@ import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -66,7 +63,16 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         String resultString = null;
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
         try {
-            managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
+            NettyServerInfo nettyServerInfo = null;
+            if (routerInfo.isUseSSL()) {
+                     nettyServerInfo = new NettyServerInfo(MetaInfo.PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE,
+                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE,
+                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE,
+                        MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE);
+            } else {
+                nettyServerInfo = new NettyServerInfo();
+            }
+            managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(),nettyServerInfo);
         } catch (Exception e) {
             logger.error("get grpc channel error", e);
             throw new RemoteRpcException("remote rpc exception");
