@@ -93,7 +93,7 @@ public class ModelController {
         }
 
         ModelServiceProto.QueryModelResponse response = blockingStub.queryModel(queryModelRequestBuilder.build());
-
+        parseComponentInfo(response);
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
@@ -233,6 +233,10 @@ public class ModelController {
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
         return futureStub;
+    }
+
+    public void parseComponentInfo(ModelServiceProto.QueryModelResponse response){
+
     }
 
 }

@@ -53,16 +53,23 @@ message ModelBindInfo{
 
 }
 
+message ModelProcessorExt{
+    string componentMap = 1;
+    string pipeLineNode = 2;
+    string dslParser = 3;
+    string modelPackage = 4;
+    int32 splitSize = 5;
+}
+
 message ModelInfoEx{
     string tableName = 1;
     string namespace = 2;
     repeated string serviceIds = 3;
     string content = 4;
     int32    index = 5;
-
+    //lx-todo
+    ModelProcessorExt modelProcessorExt = 6;
 }
-
-
 
 message QueryModelResponse{
     int32 retcode = 1;

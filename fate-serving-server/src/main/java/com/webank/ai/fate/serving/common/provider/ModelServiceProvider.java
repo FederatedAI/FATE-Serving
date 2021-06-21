@@ -28,6 +28,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.apache.commons.lang3.StringUtils;
@@ -107,6 +108,16 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                     modelExBuilder.addAllServiceIds(model.getServiceIds());
                 }
                 modelExBuilder.setContent(JsonUtil.object2Json(model));
+                if (model.getModelProcessor() instanceof PipelineModelProcessor) {
+                    ModelServiceProto.ModelProcessorExt.Builder modelProcessorExtBuilder = ModelServiceProto.ModelProcessorExt.newBuilder();
+                    PipelineModelProcessor pipelineModelProcessor = (PipelineModelProcessor) model.getModelProcessor();
+                    modelProcessorExtBuilder.setComponentMap(JsonUtil.object2Json(pipelineModelProcessor.getComponentMap()));
+                    modelProcessorExtBuilder.setPipeLineNode(JsonUtil.object2Json(pipelineModelProcessor.getPipeLineNode()));
+                    modelProcessorExtBuilder.setDslParser(JsonUtil.object2Json(pipelineModelProcessor.getDslParser()));
+                    modelProcessorExtBuilder.setModelPackage(JsonUtil.object2Json(pipelineModelProcessor.getModelPackage()));
+                    modelProcessorExtBuilder.setSplitSize(pipelineModelProcessor.getSplitSize());
+                    modelExBuilder.setModelProcessorExt(modelProcessorExtBuilder.build());
+                }
                 builder.addModelInfos(modelExBuilder.build());
             }
         }

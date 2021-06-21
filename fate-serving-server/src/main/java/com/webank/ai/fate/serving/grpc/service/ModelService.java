@@ -120,7 +120,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
-        ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse) outboundPackage.getData();
+         ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse) outboundPackage.getData();
         responseObserver.onNext(queryModelResponse);
         responseObserver.onCompleted();
     }
@@ -131,5 +131,4 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;
     }
-
 }
