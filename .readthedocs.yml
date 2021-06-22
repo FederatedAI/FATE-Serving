@@ -9,4 +9,4 @@ formats: all
 python:
   version: 3.7
   install:
-    - requirements: doccument/docs/requirements.txt
+    - requirements: document/docs/requirements.txt
