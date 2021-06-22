@@ -395,6 +395,12 @@ public class PipelineModelProcessor implements ModelProcessor {
         return newModelProtoMap;
     }
 
+    public Map<String,Object> getParmasMap(){
+        Map<String,Object> parmas = Maps.newHashMap();
+        componentMap.forEach((k,v)->{parmas.put(k,v.getParams());});
+        return parmas;
+    }
+
     class LocalInferenceTask extends RecursiveTask<Map<Integer, Map<String, Object>>> {
         Context context;
         Map<String, Map<String, Object>> tempCache;
