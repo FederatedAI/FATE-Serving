@@ -61,18 +61,15 @@ public class ModelController {
     private ComponentService componentService;
 
     @GetMapping("/model/query")
-    public ReturnResult queryModel(String host, int port, String serviceId, Integer page, Integer pageSize) throws Exception {
+    public ReturnResult queryModel(String host, Integer port, String serviceId, Integer page, Integer pageSize) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port is blank");
-
         if (page == null || page < 0) {
             page = 1;
         }
-
         if (pageSize == null) {
             pageSize = 10;
         }
-
         if (logger.isDebugEnabled()) {
             logger.debug("query model, host: {}, port: {}, serviceId: {}", host, port, serviceId);
         }

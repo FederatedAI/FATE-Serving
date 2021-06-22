@@ -141,11 +141,13 @@ public class ComponentService {
         Map<String,List<String>> addresses= new HashMap<>();
         ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
         List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
-        for(String component: componentLists) {
-            addresses.put(component,new ArrayList<>());
-            List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + component);
-            for (String node: nodes) {
-                addresses.get(component).add(node);
+        if(componentLists!=null) {
+            for (String component : componentLists) {
+                addresses.put(component, new ArrayList<>());
+                List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + component);
+                for (String node : nodes) {
+                    addresses.get(component).add(node);
+                }
             }
         }
         return addresses;
