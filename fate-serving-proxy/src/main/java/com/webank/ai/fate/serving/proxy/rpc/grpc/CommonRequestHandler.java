@@ -25,6 +25,7 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.CommonActionType;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.proxy.rpc.provider.CommonServiceProvider;
+import com.webank.ai.fate.serving.proxy.rpc.provider.RouterTableServiceProvider;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -21,6 +21,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -97,6 +99,16 @@ public class JsonUtil {
             e.printStackTrace();
         }
         return (T) t;
+    }
+
+    public static JsonObject object2JsonObject(Object source){
+        String json = object2Json(source);
+        return JsonParser.parseString(json).getAsJsonObject();
+    }
+
+    public static <T> T JsonObject2Objcet(JsonObject source,Class<T> clazz){
+        String json = source.toString();
+        return json2Object(json,clazz);
     }
 
 }

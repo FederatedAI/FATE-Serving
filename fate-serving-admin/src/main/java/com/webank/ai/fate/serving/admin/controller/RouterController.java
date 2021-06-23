@@ -19,8 +19,6 @@ package com.webank.ai.fate.serving.admin.controller;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.api.proxy.common.RouterServiceGrpc;
-import com.webank.ai.fate.api.proxy.common.RouterServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
@@ -28,15 +26,19 @@ import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
+import com.webank.ai.fate.serving.proxy.rpc.grpc.RouterTableServiceGrpc;
+import com.webank.ai.fate.serving.proxy.rpc.grpc.RouterTableServiceProto;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -58,10 +60,12 @@ public class RouterController {
     @Autowired
     private ComponentService componentService;
 
-    @GetMapping("/router/query")
-    public ReturnResult queryModel(String host, int port, RouterServiceProto.RouterTableInfo routerTable, Integer page, Integer pageSize) throws Exception {
-        Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-        Preconditions.checkArgument(port != 0, "parameter port is blank");
+    @PostMapping("/router/query")
+    @ResponseBody
+    public ReturnResult queryModel(RouterTableServiceProto.RouterTableInfo routerTable, Integer page, Integer pageSize) throws Exception {
+        String serverHost = "127.0.0.1";int serverPort=8879;
+        Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
+        Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         if (page == null || page < 0) {
             page = 1;
         }
@@ -71,28 +75,29 @@ public class RouterController {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("query router, host: {}, port: {}", host, port);
+            logger.debug("query router, host: {}, port: {}", serverHost, serverPort);
         }
 
-        RouterServiceGrpc.RouterServiceBlockingStub blockingStub = getRouterServiceBlockingStub(host, port);
+        RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = getRouterTableServiceBlockingStub(serverHost, serverPort);
 
-        RouterServiceProto.QueryRouterRequest.Builder queryRouterRequestBuilder = RouterServiceProto.QueryRouterRequest.newBuilder();
-        if (StringUtils.isBlank(routerTable.getPartyId())) {
-            Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
-            queryRouterRequestBuilder.setPartyId(routerTable.getPartyId());
-        }
-        RouterServiceProto.QueryRouterResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
+        RouterTableServiceProto.RouterOperatetRequest.Builder queryRouterRequestBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
+//        if (StringUtils.isNotBlank(routerTable.getPartyId())) {
+//            Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
+//            queryRouterRequestBuilder.setPartyId(routerTable.getPartyId());
+//        }
+        RouterTableServiceProto.RouterOperatetResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
 
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();
-        List<RouterServiceProto.RouterTableInfo> routerTableList = response.getRouterTableList();
+//        List<RouterTableServiceProto.RouterTableInfo> routerTableList = (List<RouterTableServiceProto.RouterTableInfo>)response.getData().toStringUtf8();
+        List<RouterTableServiceProto.RouterTableInfo> routerTableList = new ArrayList<>();
         int totalSize = 0;
         if (routerTableList != null) {
             totalSize = routerTableList.size();
-            routerTableList = routerTableList.stream().sorted(Comparator.comparing(RouterServiceProto.RouterTableInfo::getPartyId)).collect(Collectors.toList());
+            routerTableList = routerTableList.stream().sorted(Comparator.comparing(RouterTableServiceProto.RouterTableInfo::getPartyId)).collect(Collectors.toList());
 
             // Pagination
             int totalPage = (routerTableList.size() + pageSize - 1) / pageSize;
@@ -100,7 +105,7 @@ public class RouterController {
                 routerTableList = routerTableList.subList((page - 1) * pageSize, Math.min(page * pageSize, routerTableList.size()));
             }
 
-            for (RouterServiceProto.RouterTableInfo routerTableInfo : routerTableList) {
+            for (RouterTableServiceProto.RouterTableInfo routerTableInfo : routerTableList) {
                 rows.add(routerTableInfo);
             }
         }
@@ -110,88 +115,88 @@ public class RouterController {
         return ReturnResult.build(response.getStatusCode(), response.getMessage(), data);
     }
 
-    @GetMapping("/router/add")
-    public ReturnResult addRouter(String host, int port, RouterServiceProto.RouterTableInfo routerTable) throws Exception {
-        Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-        Preconditions.checkArgument(port != 0, "parameter port is blank");
+    @PostMapping("/router/add")
+    public ReturnResult addRouter(String serverHost, int serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
+        Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
+        Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
         Preconditions.checkArgument(!NetUtils.isValidAddress(routerTable.getHost() + ":" + routerTable.getPort()), "parameter Network Access format error");
-        if (routerTable.getCertficate()) {
-            Preconditions.checkArgument(StringUtils.isBlank(routerTable.getCertficatePath()), "parameter CertficatePath is blank");
+        if (routerTable.getUseSSL()) {
+            Preconditions.checkArgument(StringUtils.isBlank(routerTable.getCertChainFile()), "parameter CertficatePath is blank");
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("add router, host: {}, port: {}", host, port);
+            logger.debug("add router, host: {}, port: {}", serverHost, serverPort);
         }
 
-        RouterServiceGrpc.RouterServiceBlockingStub blockingStub = getRouterServiceBlockingStub(host, port);
+        RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = getRouterTableServiceBlockingStub(serverHost, serverPort);
 
-        RouterServiceProto.RouterOperatetRequest.Builder addRouterBuilder = RouterServiceProto.RouterOperatetRequest.newBuilder();
+        RouterTableServiceProto.RouterOperatetRequest.Builder addRouterBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
         addRouterBuilder.setRouterTableInfo(routerTable);
-        RouterServiceProto.QueryRouterResponse response = blockingStub.addRouter(addRouterBuilder.build());
+        RouterTableServiceProto.RouterOperatetResponse response = blockingStub.addRouter(addRouterBuilder.build());
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
 
         if (response == null) {
-            throw new RemoteRpcException("Remote rpc error ,target: " + host + ":" + port);
+            throw new RemoteRpcException("Remote rpc error ,target: " + serverHost + ":" + serverPort);
         }
         return ReturnResult.build(response.getStatusCode(), response.getMessage());
     }
 
-    @GetMapping("/router/update")
-    public ReturnResult updateRouter(String host, int port, RouterServiceProto.RouterTableInfo routerTable) throws Exception {
-        Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-        Preconditions.checkArgument(port != 0, "parameter port is blank");
+    @PostMapping("/router/update")
+    public ReturnResult updateRouter(String serverHost, int serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
+        Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
+        Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
         Preconditions.checkArgument(!NetUtils.isValidAddress(routerTable.getHost() + ":" + routerTable.getPort()), "parameter Network Access format error");
-        if (routerTable.getCertficate()) {
-            Preconditions.checkArgument(StringUtils.isBlank(routerTable.getCertficatePath()), "parameter CertficatePath is blank");
+        if (routerTable.getUseSSL()) {
+            Preconditions.checkArgument(StringUtils.isBlank(routerTable.getCertChainFile()), "parameter CertficatePath is blank");
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("add router, host: {}, port: {}", host, port);
+            logger.debug("add router, host: {}, port: {}", serverHost, serverPort);
         }
 
-        RouterServiceGrpc.RouterServiceBlockingStub blockingStub = getRouterServiceBlockingStub(host, port);
+        RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = getRouterTableServiceBlockingStub(serverHost, serverPort);
 
-        RouterServiceProto.RouterOperatetRequest.Builder updateRouterBuilder = RouterServiceProto.RouterOperatetRequest.newBuilder();
+        RouterTableServiceProto.RouterOperatetRequest.Builder updateRouterBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
         updateRouterBuilder.setRouterTableInfo(routerTable);
-        RouterServiceProto.QueryRouterResponse response = blockingStub.updateRouter(updateRouterBuilder.build());
+        RouterTableServiceProto.RouterOperatetResponse response = blockingStub.updateRouter(updateRouterBuilder.build());
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
 
         if (response == null) {
-            throw new RemoteRpcException("Remote rpc error ,target: " + host + ":" + port);
+            throw new RemoteRpcException("Remote rpc error ,target: " + serverHost + ":" + serverPort);
         }
         return ReturnResult.build(response.getStatusCode(), response.getMessage());
     }
 
-    @GetMapping("/router/delete")
-    public ReturnResult deleteRouter(String host, int port, RouterServiceProto.RouterTableInfo routerTable) throws Exception {
-        Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
-        Preconditions.checkArgument(port != 0, "parameter port is blank");
+    @PostMapping("/router/delete")
+    public ReturnResult deleteRouter(String serverHost, int serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
+        Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
+        Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
         if (logger.isDebugEnabled()) {
-            logger.debug("add router, host: {}, port: {}", host, port);
+            logger.debug("add router, host: {}, port: {}", serverHost, serverPort);
         }
 
-        RouterServiceGrpc.RouterServiceBlockingStub blockingStub = getRouterServiceBlockingStub(host, port);
+        RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = getRouterTableServiceBlockingStub(serverHost, serverPort);
 
-        RouterServiceProto.QueryRouterRequest.Builder deleteBuilder = RouterServiceProto.QueryRouterRequest.newBuilder();
-        deleteBuilder.setPartyId(routerTable.getPartyId());
-        RouterServiceProto.QueryRouterResponse response = blockingStub.deleteRouter(deleteBuilder.build());
+        RouterTableServiceProto.RouterOperatetRequest.Builder deleteBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
+        deleteBuilder.setRouterTableInfo(routerTable);
+        RouterTableServiceProto.RouterOperatetResponse response = blockingStub.deleteRouter(deleteBuilder.build());
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
 
         if (response == null) {
-            throw new RemoteRpcException("Remote rpc error ,target: " + host + ":" + port);
+            throw new RemoteRpcException("Remote rpc error ,target: " + serverHost + ":" + serverPort);
         }
         return ReturnResult.build(response.getStatusCode(), response.getMessage());
     }
 
 
-    private RouterServiceGrpc.RouterServiceBlockingStub getRouterServiceBlockingStub(String host, Integer port) throws Exception {
+    private RouterTableServiceGrpc.RouterTableServiceBlockingStub getRouterTableServiceBlockingStub(String host, Integer port) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
@@ -204,7 +209,7 @@ public class RouterController {
         }
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        RouterServiceGrpc.RouterServiceBlockingStub blockingStub = RouterServiceGrpc.newBlockingStub(managedChannel);
+        RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = RouterTableServiceGrpc.newBlockingStub(managedChannel);
         blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
         return blockingStub;
     }

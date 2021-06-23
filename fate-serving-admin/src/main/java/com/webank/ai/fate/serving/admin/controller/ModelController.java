@@ -60,7 +60,7 @@ public class ModelController {
     @Autowired
     private ComponentService componentService;
 
-    @GetMapping("/model/query")
+    @PostMapping("/model/query")
     public ReturnResult queryModel(String host, int port, String serviceId, Integer page, Integer pageSize) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port is blank");

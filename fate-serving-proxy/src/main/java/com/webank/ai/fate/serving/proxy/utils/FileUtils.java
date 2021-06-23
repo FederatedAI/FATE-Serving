@@ -20,9 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
@@ -44,6 +42,28 @@ public class FileUtils {
             }
         }
         return null;
+    }
+
+    public static boolean writeFile(String context, File target) {
+        BufferedWriter out = null;
+        try {
+            if (!target.exists()) {
+                target.createNewFile();
+            }
+            out = new BufferedWriter(new FileWriter(target));
+            out.write(context);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return false;
+        } finally {
+            try {
+                out.flush();
+                out.close();
+            } catch (IOException ex) {
+
+            }
+        }
+        return true;
     }
 
 }
