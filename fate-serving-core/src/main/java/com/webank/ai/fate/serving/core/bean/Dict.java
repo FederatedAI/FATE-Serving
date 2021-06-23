@@ -60,6 +60,7 @@ public class Dict {
     public static final String PROPERTY_FEATURE_SINGLE_ADAPTOR = "feature.single.adaptor";
     public static final String PROPERTY_BATCH_SPLIT_SIZE = "batch.split.size";
     public static final String PROPERTY_LR_SPLIT_SIZE = "lr.split.size";
+    public static final String CACHE_TYPE_REDIS = "redis";
 
 
     /**

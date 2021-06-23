@@ -263,14 +263,16 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         host = MetaInfo.PROPERTY_REDIS_IP;
         port = MetaInfo.PROPERTY_REDIS_PORT;
         isConnected = false;
-        try {
-            telnetClient.connect(host, port);
-            isConnected = true;
-            telnetClient.disconnect();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(MetaInfo.PROPERTY_CACHE_TYPE.equals(Dict.CACHE_TYPE_REDIS)) {
+            try {
+                telnetClient.connect(host, port);
+                isConnected = true;
+                telnetClient.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            resultMap.put("Redis Status", isConnected);
         }
-        resultMap.put("Redis Status", isConnected);
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
         return builder.build();

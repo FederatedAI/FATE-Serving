@@ -84,6 +84,7 @@ public class GrpcConnectionPool {
                                 } catch (Exception e) {
                                     logger.error("channel {} check status error", k);
                                 }
+
                             });
                         }
                     },
