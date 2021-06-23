@@ -28,9 +28,7 @@ import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 public abstract class BaseComponent implements LocalInferenceAware {
@@ -141,6 +139,10 @@ public abstract class BaseComponent implements LocalInferenceAware {
 
     public void setCache(Cache cache) {
         this.cache = cache;
+    }
+
+    public Map<String,Object> getParams(){
+        return new HashMap<>();
     }
 
 }

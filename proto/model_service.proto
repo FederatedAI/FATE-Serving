@@ -54,11 +54,9 @@ message ModelBindInfo{
 }
 
 message ModelProcessorExt{
-    string componentMap = 1;
-    string pipeLineNode = 2;
-    string dslParser = 3;
-    string modelPackage = 4;
-    int32 splitSize = 5;
+    string dslParser = 1;
+    string paramsMap = 2;
+    string pipelineNodes = 3;
 }
 
 message ModelInfoEx{

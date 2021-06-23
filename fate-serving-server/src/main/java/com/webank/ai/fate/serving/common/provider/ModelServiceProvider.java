@@ -111,11 +111,10 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 if (model.getModelProcessor() instanceof PipelineModelProcessor) {
                     ModelServiceProto.ModelProcessorExt.Builder modelProcessorExtBuilder = ModelServiceProto.ModelProcessorExt.newBuilder();
                     PipelineModelProcessor pipelineModelProcessor = (PipelineModelProcessor) model.getModelProcessor();
-                    modelProcessorExtBuilder.setComponentMap(JsonUtil.object2Json(pipelineModelProcessor.getComponentMap()));
-                    modelProcessorExtBuilder.setPipeLineNode(JsonUtil.object2Json(pipelineModelProcessor.getPipeLineNode()));
+//                    System.out.println(JsonUtil.object2Json(pipelineModelProcessor.getParmasMap()));
                     modelProcessorExtBuilder.setDslParser(JsonUtil.object2Json(pipelineModelProcessor.getDslParser()));
-                    modelProcessorExtBuilder.setModelPackage(JsonUtil.object2Json(pipelineModelProcessor.getModelPackage()));
-                    modelProcessorExtBuilder.setSplitSize(pipelineModelProcessor.getSplitSize());
+                    modelProcessorExtBuilder.setParamsMap(JsonUtil.object2Json(pipelineModelProcessor.getParmasMap()));
+//                    modelProcessorExtBuilder.setPipelineNodes()
                     modelExBuilder.setModelProcessorExt(modelProcessorExtBuilder.build());
                 }
                 builder.addModelInfos(modelExBuilder.build());

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package com.webank.ai.fate.api.proxy.common;
+option java_outer_classname = "RouterServiceProto";
+
+message QueryRouterRequest{
+    string serviceId = 1;
+    string partyId = 2;
+}
+
+message QueryRouterResponse{
+    int32 statusCode = 1;
+    string message = 2;
+    string error = 3;
+    repeated RouterTableInfo routerTable = 4;
+}
+
+message RouterOperatetRequest{
+    RouterTableInfo routerTableInfo = 1;
+}
+
+message RouterTableInfo{
+    string partyId = 1;
+    string host = 2;
+    int32 port = 3;
+    bool certficate = 4;
+    string certficatePath = 5;
+}
+
+message RouterOperatetResponse{
+    int32 statusCode = 1;
+    string message = 2;
+    string error = 3;
+    bytes data = 4;
+}
+
+service RouterService{
+    rpc queryRouter(QueryRouterRequest) returns (QueryRouterResponse);
+    rpc addRouter(RouterOperatetRequest) returns (QueryRouterResponse);
+    rpc updateRouter(RouterOperatetRequest) returns (QueryRouterResponse);
+    rpc deleteRouter(QueryRouterRequest) returns (QueryRouterResponse);
+}
