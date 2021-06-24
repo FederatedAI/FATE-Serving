@@ -62,7 +62,7 @@ public class RouterController {
 
     @PostMapping("/router/query")
     @ResponseBody
-    public ReturnResult queryModel(String serverHost, int serverPort,RouterTableServiceProto.RouterTableInfo routerTable, Integer page, Integer pageSize) throws Exception {
+    public ReturnResult queryModel(String serverHost, Integer serverPort,RouterTableServiceProto.RouterTableInfo routerTable, Integer page, Integer pageSize) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
         Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         if (page == null || page < 0) {
@@ -115,7 +115,7 @@ public class RouterController {
     }
 
     @PostMapping("/router/add")
-    public ReturnResult addRouter(String serverHost, int serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
+    public ReturnResult addRouter(String serverHost, Integer serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
         Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
@@ -143,7 +143,7 @@ public class RouterController {
     }
 
     @PostMapping("/router/update")
-    public ReturnResult updateRouter(String serverHost, int serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
+    public ReturnResult updateRouter(String serverHost, Integer serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
         Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
@@ -171,7 +171,7 @@ public class RouterController {
     }
 
     @PostMapping("/router/delete")
-    public ReturnResult deleteRouter(String serverHost, int serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
+    public ReturnResult deleteRouter(String serverHost, Integer serverPort, RouterTableServiceProto.RouterTableInfo routerTable) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
         Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
