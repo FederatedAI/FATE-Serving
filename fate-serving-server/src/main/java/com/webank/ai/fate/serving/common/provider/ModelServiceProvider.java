@@ -66,7 +66,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         return returnResult;
     }
 
-    @FateServiceMethod(name = "QUERY_MODEL")
+//    @FateServiceMethod(name = "QUERY_MODEL")
     public ModelServiceProto.QueryModelResponse queryModel(Context context, InboundPackage data) {
         ModelServiceProto.QueryModelRequest req = (ModelServiceProto.QueryModelRequest) data.getBody();
         List<Model> models = modelManager.queryModel(context, req);

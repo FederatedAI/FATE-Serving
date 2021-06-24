@@ -42,7 +42,7 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RouterTableServiceProvider.class);
 
-    @FateServiceMethod(name = "QUERY_ROUTER")
+    @FateServiceMethod(name = "queryRouter")
     public RouterTableServiceProto.RouterOperatetResponse queryRouterTableService(Context context, InboundPackage inboundPackage) {
         RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
         JsonObject routTableJson = RouterTableUtils.loadRoutTable();

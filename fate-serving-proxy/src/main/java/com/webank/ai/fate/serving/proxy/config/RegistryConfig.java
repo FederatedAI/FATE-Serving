@@ -48,7 +48,7 @@ public class RegistryConfig {
         }
         ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_PROXY,
                 Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PROXY_GRPC_INTRA_PORT);
-        zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
+//        zookeeperRegistry.subProject(Dict.SERVICE_SERVING);
 
         return zookeeperRegistry;
     }

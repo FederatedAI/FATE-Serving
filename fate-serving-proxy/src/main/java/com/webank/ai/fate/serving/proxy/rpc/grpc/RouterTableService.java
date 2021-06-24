@@ -16,7 +16,9 @@
 
 package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
+import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.common.bean.BaseContext;
+import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.CommonActionType;
@@ -34,6 +36,7 @@ public class RouterTableService extends RouterTableServiceGrpc.RouterTableServic
     RouterTableServiceProvider RouterTableServiceProvider;
 
     @Override
+    @RegisterService(serviceName = "queryRouter")
     public void queryRouter(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver) {
         service(request, responseObserver, CommonActionType.QUERY_ROUTER.name());
     }
