@@ -18,7 +18,6 @@ package com.webank.ai.fate.serving.proxy.rpc.grpc;
 
 import com.webank.ai.fate.register.annotions.RegisterService;
 import com.webank.ai.fate.serving.common.bean.BaseContext;
-import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.CommonActionType;
@@ -37,21 +36,24 @@ public class RouterTableService extends RouterTableServiceGrpc.RouterTableServic
 
     @Override
     @RegisterService(serviceName = "queryRouter")
-    public void queryRouter(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver) {
+    public synchronized void queryRouter(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver) {
         service(request, responseObserver, CommonActionType.QUERY_ROUTER.name());
     }
 
     @Override
+    @RegisterService(serviceName = "addRouter")
     public void addRouter(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver) {
         service(request, responseObserver, CommonActionType.ADD_ROUTER.name());
     }
 
     @Override
+    @RegisterService(serviceName = "updateRouter")
     public void updateRouter(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver) {
         service(request, responseObserver, CommonActionType.UPDATE_ROUTER.name());
     }
 
     @Override
+    @RegisterService(serviceName = "deleteRouter")
     public void deleteRouter(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver) {
         service(request, responseObserver, CommonActionType.DELETE_ROUTER.name());
     }

@@ -21,6 +21,7 @@ import com.google.protobuf.ByteString;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
+import com.webank.ai.fate.serving.core.bean.CommonActionType;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -32,7 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@FateService(name = "RouterTableService", preChain = {
+import java.util.ArrayList;
+import java.util.List;
+
+@FateService(name = "routerTableService", preChain = {
         "requestOverloadBreaker"
 }, postChain = {
 
@@ -42,7 +46,7 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RouterTableServiceProvider.class);
 
-    @FateServiceMethod(name = "queryRouter")
+    @FateServiceMethod(name = "QUERY_ROUTER")
     public RouterTableServiceProto.RouterOperatetResponse queryRouterTableService(Context context, InboundPackage inboundPackage) {
         RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
         JsonObject routTableJson = RouterTableUtils.loadRoutTable();
@@ -51,13 +55,14 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
             builder.setMessage("proxy load router table error");
             return builder.build();
         }
-        JsonObject route_table = routTableJson.getAsJsonObject("route_table");
-        if(route_table == null){
-            route_table = new JsonObject();
+        List<RouterTableServiceProto.RouterTableInfo> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
+        if(routerTableInfoList == null){
+            routerTableInfoList = new ArrayList<>();
         }
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);
-        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(route_table).getBytes()));
+        ByteString bytes = ByteString.copyFrom(JsonUtil.object2Json(routerTableInfoList).getBytes());
+        builder.setData(bytes);
         return builder.build();
     }
 

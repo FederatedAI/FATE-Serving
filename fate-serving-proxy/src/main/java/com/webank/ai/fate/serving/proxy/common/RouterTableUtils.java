@@ -1,5 +1,6 @@
 package com.webank.ai.fate.serving.proxy.common;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
@@ -17,6 +18,9 @@ import org.springframework.beans.BeanUtils;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @auther Xiongli
@@ -172,6 +176,20 @@ public class RouterTableUtils {
     public static boolean writeRouterFile(String context) {
         String filePath = USERDIR + FILESEPARATOR + DEFAULT_ROUTER_FILE;
         return FileUtils.writeFile(context, new File(filePath));
+    }
+
+    public static List<RouterTableServiceProto.RouterTableInfo> parseJson2RouterInfoList(JsonObject routerTable) {
+        List<RouterTableServiceProto.RouterTableInfo> routerTableInfoList = new ArrayList<>();
+        if(routerTable == null){
+            return routerTableInfoList;
+        }
+        JsonObject tableJson = null;
+        for (Map.Entry<String, JsonElement> tableEntry : routerTable.entrySet()) {
+            tableJson = tableEntry.getValue().getAsJsonObject();
+            tableJson.addProperty("partyId",tableEntry.getKey());
+            routerTableInfoList.add(JsonUtil.JsonObject2Objcet(tableJson,RouterTableServiceProto.RouterTableInfo.class));
+        }
+        return routerTableInfoList;
     }
 
 }
