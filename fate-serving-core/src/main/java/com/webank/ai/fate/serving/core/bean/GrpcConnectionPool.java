@@ -134,7 +134,7 @@ public class GrpcConnectionPool {
     public  ManagedChannel getManagedChannel(RouterInfo  routerInfo){
         NettyServerInfo nettyServerInfo = null;
         if (routerInfo.isUseSSL()) {
-            nettyServerInfo = new NettyServerInfo(MetaInfo.PROPERTY_PROXY_GRPC_INTER_NEGOTIATIONTYPE,
+            nettyServerInfo = new NettyServerInfo(NegotiationType.TLS.toString(),
                     MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE,
                     MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE,
                     MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE);
@@ -200,9 +200,7 @@ public class GrpcConnectionPool {
 
     public synchronized ManagedChannel createManagedChannel(String ip, int port, NettyServerInfo nettyServerInfo) {
         try {
-            if (logger.isDebugEnabled()) {
-                logger.debug("create ManagedChannel");
-            }
+            logger.info("create channel ip {} port {} server info {}",ip,port,nettyServerInfo);
 
             NettyChannelBuilder channelBuilder = NettyChannelBuilder
                     .forAddress(ip, port)

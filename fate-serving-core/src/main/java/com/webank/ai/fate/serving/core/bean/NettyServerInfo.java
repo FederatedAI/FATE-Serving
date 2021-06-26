@@ -1,8 +1,10 @@
 package com.webank.ai.fate.serving.core.bean;
 
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 
 public class NettyServerInfo {
+
 
     public NettyServerInfo() {
         this.negotiationType = NegotiationType.PLAINTEXT;
@@ -53,5 +55,8 @@ public class NettyServerInfo {
 
     public void setTrustCertCollectionFilePath(String trustCertCollectionFilePath) {
         this.trustCertCollectionFilePath = trustCertCollectionFilePath;
+    }
+    public String  toString(){
+        return JsonUtil.object2Json(this);
     }
 }
