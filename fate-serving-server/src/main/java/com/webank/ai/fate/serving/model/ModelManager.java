@@ -434,6 +434,72 @@ public class ModelManager implements InitializingBean {
 
     }
 
+    /**
+     * query model by service id
+     * @param serviceId
+     * @return
+     */
+    public Model queryModel(String serviceId) {
+        String namespaceKey = this.serviceIdNamespaceMap.get(serviceId);
+        if (namespaceKey != null && this.namespaceMap.get(namespaceKey) != null) {
+            Model model = (Model) this.namespaceMap.get(namespaceKey).clone();
+            if (model.getServiceIds() == null) {
+                model.setServiceIds(Lists.newArrayList());
+            }
+            model.getServiceIds().add(serviceId);
+            return model;
+        }
+        return null;
+    }
+
+    /**
+     * query model by tablename and namespace
+     * @param tableName
+     * @param namespace
+     * @return
+     */
+    public Model queryModel(String tableName, String namespace) {
+        String namespaceKey = this.getNameSpaceKey(tableName, namespace);
+        Model model = this.namespaceMap.get(namespaceKey);
+        if (model == null) {
+            return null;
+        }
+        Model clone = (Model) model.clone();
+        this.serviceIdNamespaceMap.forEach((k, v) -> {
+            if (clone.getServiceIds() == null) {
+                clone.setServiceIds(Lists.newArrayList());
+            }
+            if (namespaceKey.equals(v)) {
+                clone.getServiceIds().add(k);
+            }
+        });
+        return clone;
+    }
+
+    public void restoreByLocalCache(Context context, Model model, byte[] cacheData) {
+        // use local cache model loader
+        LocalCacheModelLoader modelLoader = (LocalCacheModelLoader) this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.CACHE);
+        // save to local cache
+        String cachePath = modelLoader.getCachePath(context, model.getTableName(), model.getNamespace());
+        modelLoader.saveCacheData(context, cachePath, cacheData);
+        // restore
+        ModelLoader.ModelLoaderParam param = new ModelLoader.ModelLoaderParam();
+        param.setTableName(model.getTableName());
+        param.setNameSpace(model.getNamespace());
+        // first lookup form fateflow
+        param.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+//        param.setFilePath(cachePath);
+
+        this.doLoad(context, model, param);
+
+        // bind model
+        if (model.getServiceIds() != null) {
+            for (String serviceId : model.getServiceIds()) {
+                this.doBind(context, model, serviceId);
+            }
+        }
+    }
+
     public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
         int queryType = queryModelRequest.getQueryType();
         switch (queryType) {

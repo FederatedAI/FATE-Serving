@@ -59,6 +59,7 @@ public class MetaInfo {
     public static Integer PROPERTY_LR_SPLIT_SIZE;
     public static String PROPERTY_SERVICE_ROLE_NAME;
     public static String PROPERTY_MODEL_TRANSFER_URL;
+    public static boolean PROPERTY_MODEL_SYNC;
     public static Integer PROPERTY_COORDINATOR;
     public static Integer PROPERTY_SERVER_PORT;
     public static String PROPERTY_INFERENCE_SERVICE_NAME;

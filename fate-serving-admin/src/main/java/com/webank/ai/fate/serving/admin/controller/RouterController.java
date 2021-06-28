@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.admin.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -25,6 +26,7 @@ import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.RouterTableServiceGrpc;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.RouterTableServiceProto;
@@ -38,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ public class RouterController {
     @PostMapping("/router/query")
     @ResponseBody
     public ReturnResult queryModel(String serverHost, Integer serverPort,RouterTableServiceProto.RouterTableInfo routerTable, Integer page, Integer pageSize) throws Exception {
+        serverHost = "127.0.0.1"; serverPort = 8879;
         Preconditions.checkArgument(StringUtils.isNotBlank(serverHost), "parameter host is blank");
         Preconditions.checkArgument(serverPort != 0, "parameter port is blank");
         if (page == null || page < 0) {
@@ -91,8 +93,10 @@ public class RouterController {
 
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();
-//        List<RouterTableServiceProto.RouterTableInfo> routerTableList = (List<RouterTableServiceProto.RouterTableInfo>)response.getData().toStringUtf8();
-        List<RouterTableServiceProto.RouterTableInfo> routerTableList = new ArrayList<>();
+        String dataJson = response.getData().toStringUtf8();
+        JsonUtil.json2Object(dataJson,List.class);
+        List<RouterTableServiceProto.RouterTableInfo> routerTableList =
+                JsonUtil.json2List(response.getData().toStringUtf8(), new TypeReference<List<RouterTableServiceProto.RouterTableInfo>>() {}) ;
         int totalSize = 0;
         if (routerTableList != null) {
             totalSize = routerTableList.size();

@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.common.provider;
 
+import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
@@ -23,22 +24,21 @@ import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.NetUtils;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
+import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @FateService(name = "modelService", preChain = {
         "requestOverloadBreaker"
@@ -51,6 +51,8 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
     @Autowired
     FlowCounterManager flowCounterManager;
+
+    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     @FateServiceMethod(name = "MODEL_LOAD")
     public Object load(Context context, InboundPackage data) {
@@ -136,6 +138,61 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         ModelServiceProto.UnbindRequest req = (ModelServiceProto.UnbindRequest) data.getBody();
         ModelServiceProto.UnbindResponse res = modelManager.unbind(context, req);
         return res;
+    }
+
+    @FateServiceMethod(name = "FETCH_MODEL")
+    public ModelServiceProto.FetchModelResponse fetchModel(Context context, InboundPackage data) {
+        ModelServiceProto.FetchModelRequest req = (ModelServiceProto.FetchModelRequest) data.getBody();
+
+        ModelServiceProto.FetchModelResponse.Builder responseBuilder = ModelServiceProto.FetchModelResponse.newBuilder();
+        if (!MetaInfo.PROPERTY_MODEL_SYNC) {
+            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
+                    .setMessage("no synchronization allowed, to use this function, please configure model.synchronize=true").build();
+        }
+
+        String tableName = req.getTableName();
+        String namespace = req.getNamespace();
+        String serviceId = req.getServiceId();
+
+        String sourceIp = req.getSourceIp();
+        int sourcePort = req.getSourcePort();
+        if (!NetUtils.isValidAddress(sourceIp + ":" + sourcePort)) {
+            throw new SysException("invalid address");
+        }
+
+        // check model exist
+        Model model;
+        if (StringUtils.isNotBlank(serviceId)) {
+            model = modelManager.queryModel(serviceId);
+        } else {
+            model = modelManager.queryModel(tableName, namespace);
+        }
+        if (model != null) {
+            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
+                    .setMessage("model already exists").build();
+        }
+
+        ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(sourceIp, sourcePort);
+        ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel)
+                .withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+
+        ModelServiceProto.ModelTransferRequest modelTransferRequest = ModelServiceProto.ModelTransferRequest.newBuilder()
+                .setServiceId(serviceId).setTableName(tableName).setNamespace(namespace).build();
+
+        ModelServiceProto.ModelTransferResponse modelTransferResponse = blockingStub.modelTransfer(modelTransferRequest);
+
+        if (modelTransferResponse.getStatusCode() != StatusCode.SUCCESS) {
+            return responseBuilder.setStatusCode(modelTransferResponse.getStatusCode()).setMessage(modelTransferResponse.getMessage()).build();
+        }
+
+        byte[] modelData = modelTransferResponse.getModelData().toByteArray();
+        byte[] cacheData = modelTransferResponse.getCacheData().toByteArray();
+
+        Model fetchModel = JsonUtil.json2Object(modelData, Model.class);
+
+        modelManager.restoreByLocalCache(context, fetchModel, cacheData);
+
+        return responseBuilder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS).build();
     }
 
     @Override
