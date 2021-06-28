@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.core.bean;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
@@ -130,6 +131,20 @@ public class GrpcConnectionPool {
         }
     }
 
+    public  ManagedChannel getManagedChannel(RouterInfo  routerInfo){
+        NettyServerInfo nettyServerInfo = null;
+        if (routerInfo.isUseSSL()) {
+            nettyServerInfo = new NettyServerInfo(NegotiationType.TLS.toString(),
+                    MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_CERTCHAIN_FILE,
+                    MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE,
+                    MetaInfo.PROPERTY_PROXY_GRPC_INTER_CA_FILE);
+        } else {
+            nettyServerInfo = new NettyServerInfo();
+        }
+        String key = new StringBuilder().append(routerInfo.getHost()).append(":").append(routerInfo.getPort()).toString();
+        return getAManagedChannel(key,nettyServerInfo);
+    }
+
     public ManagedChannel getManagedChannel(String key) {
         return getAManagedChannel(key, new NettyServerInfo());
     }
@@ -185,9 +200,7 @@ public class GrpcConnectionPool {
 
     public synchronized ManagedChannel createManagedChannel(String ip, int port, NettyServerInfo nettyServerInfo) {
         try {
-            if (logger.isDebugEnabled()) {
-                logger.debug("create ManagedChannel");
-            }
+            logger.info("create channel ip {} port {} server info {}",ip,port,nettyServerInfo);
 
             NettyChannelBuilder channelBuilder = NettyChannelBuilder
                     .forAddress(ip, port)
@@ -223,7 +236,6 @@ public class GrpcConnectionPool {
         }
         catch (Exception e) {
             logger.error("create channel error : " ,e);
-            //e.printStackTrace();
         }
         return null;
     }

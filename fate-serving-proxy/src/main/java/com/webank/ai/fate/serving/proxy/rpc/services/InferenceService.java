@@ -66,7 +66,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         String resultString = null;
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
         try {
-            managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
+            managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo);
         } catch (Exception e) {
             logger.error("get grpc channel error", e);
             throw new RemoteRpcException("remote rpc exception");
