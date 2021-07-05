@@ -111,4 +111,91 @@ public class JsonUtil {
         return json2Object(json,clazz);
     }
 
+    public static <T> T object2Objcet(Object source,Class<T> clazz){
+        String json = object2Json(source);
+        return json2Object(json,clazz);
+    }
+
+
+
+
+
+
+
+
+
+    /***
+     * format json string
+     */
+    public static String formatJson(String jsonStr) {
+        if (null == jsonStr || "".equals(jsonStr)) return "";
+        jsonStr = jsonStr.replace("\\n", "");
+        StringBuilder sb = new StringBuilder();
+        char last;
+        char current = '\0';
+        int indent = 0;
+        boolean isInQuotationMarks = false;
+        for (int i = 0; i < jsonStr.length(); i++) {
+            last = current;
+            current = jsonStr.charAt(i);
+            switch (current) {
+                case '"':
+                    if (last != '\\') {
+                        isInQuotationMarks = !isInQuotationMarks;
+                    }
+                    sb.append(current);
+                    break;
+                case '{':
+                case '[':
+                    sb.append(current);
+                    if (!isInQuotationMarks) {
+                        sb.append('\n');
+                        indent++;
+                        addIndentTab(sb, indent);
+                    }
+                    break;
+                case '}':
+                case ']':
+                    if (!isInQuotationMarks) {
+                        sb.append('\n');
+                        indent--;
+                        addIndentTab(sb, indent);
+                    }
+                    sb.append(current);
+                    break;
+                case ',':
+                    sb.append(current);
+                    if (last != '\\' && !isInQuotationMarks) {
+                        sb.append('\n');
+                        addIndentTab(sb, indent);
+                    }
+                    break;
+                case ' ':
+                    if (',' != jsonStr.charAt(i - 1)) {
+                        sb.append(current);
+                    }
+                    break;
+                case '\\':
+                    sb.append("\\");
+                    break;
+                default:
+                    sb.append(current);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private static void addIndentTab(StringBuilder sb, int indent) {
+        for (int i = 0; i < indent; i++) {
+            sb.append("\t");
+        }
+    }
+
+    public static void main(String[] args) {
+        String s = JsonUtil.formatJson("{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]},\"123\":[{\"host\":\"127.0.0.1\",\"port\":8888,\"useSSL\":false,\"negotiationType\":\"\",\"certChainFile\":\"\",\"privateKeyFile\":\"\",\"caFile\":\"\"}]},\"permission\":{\"default_allow\":true}}");
+        System.out.println(s);
+
+    }
+
 }

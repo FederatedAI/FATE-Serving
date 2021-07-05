@@ -776,4 +776,87 @@ public class ModelManager implements InitializingBean {
         }
     }
 
+    public synchronized ReturnResult doLoad(Context context, Model model, ModelLoader.ModelLoaderParam modelLoaderParam) {
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(StatusCode.SUCCESS);
+        String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
+        Preconditions.checkArgument(modelLoader != null, "model loader not found");
+        ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
+        if (modelProcessor == null) {
+            throw new ModelProcessorInitException("model initialization error, please check if the model exists and the configuration of the FATEFLOW load model process is correct.");
+        }
+        model.setModelProcessor(modelProcessor);
+
+        this.buildModelRolePartyMap(model);
+        this.namespaceMap.put(namespaceKey, model);
+
+        if (Dict.HOST.equals(model.getRole())) {
+            model.getFederationModelMap().values().forEach(remoteModel -> {
+                String remoteNamespaceKey = this.getNameSpaceKey(remoteModel.getTableName(), remoteModel.getNamespace());
+                this.partnerModelMap.put(remoteNamespaceKey, model);
+            });
+        }
+        /**
+         *  host model
+         */
+        if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
+            String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
+            zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+            zookeeperRegistry.register(FateServer.hostServiceSets);
+        }
+        // update cache
+        this.store(namespaceMap, namespaceFile);
+        return returnResult;
+
+    }
+
+    public synchronized ReturnResult doBind(Context context, Model model, String serviceId) {
+        ReturnResult returnResult = new ReturnResult();
+
+        Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
+        Preconditions.checkArgument(!StringUtils.containsAny(serviceId, URL_FILTER_CHARACTER), "Service id contains special characters, " + JsonUtil.object2Json(URL_FILTER_CHARACTER));
+
+        returnResult.setRetcode(StatusCode.SUCCESS);
+
+        String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        Model loadedModel = this.namespaceMap.get(modelKey);
+        if (loadedModel == null) {
+            throw new ModelNullException("model " + modelKey + " is not exist ");
+        }
+        this.serviceIdNamespaceMap.put(serviceId, modelKey);
+        if (zookeeperRegistry != null) {
+            if (StringUtils.isNotEmpty(serviceId)) {
+                zookeeperRegistry.addDynamicEnvironment(serviceId);
+            }
+            zookeeperRegistry.register(FateServer.serviceSets);
+        }
+        //update cache
+        this.store(serviceIdNamespaceMap, serviceIdFile);
+        return returnResult;
+    }
+
+    private void buildModelRolePartyMap(Model model) {
+        List<Map> rolePartyMapList = model.getRolePartyMapList();
+        if (rolePartyMapList == null) {
+            rolePartyMapList = new ArrayList<>();
+        }
+
+        Map rolePartyMap = new HashMap();
+        rolePartyMap.put(Dict.ROLE, model.getRole());
+        rolePartyMap.put(Dict.PART_ID, model.getPartId());
+        rolePartyMapList.add(rolePartyMap);
+
+        if (model.getFederationModelMap() != null) {
+            for (Model value : model.getFederationModelMap().values()) {
+                rolePartyMap = new HashMap();
+                rolePartyMap.put(Dict.ROLE, value.getRole());
+                rolePartyMap.put(Dict.PART_ID, value.getPartId());
+                rolePartyMapList.add(rolePartyMap);
+            }
+        }
+
+        model.setRolePartyMapList(rolePartyMapList);
+    }
+
 }

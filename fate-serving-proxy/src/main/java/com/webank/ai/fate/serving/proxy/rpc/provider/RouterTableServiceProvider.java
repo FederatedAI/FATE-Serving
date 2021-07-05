@@ -21,7 +21,6 @@ import com.google.protobuf.ByteString;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.core.bean.CommonActionType;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -70,7 +69,7 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
     public RouterTableServiceProto.RouterOperatetResponse addRouterTableService(Context context, InboundPackage inboundPackage) {
         RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
         RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
-        String errorMsg = RouterTableUtils.addRouter(request.getRouterTableInfo());
+        String errorMsg = RouterTableUtils.addRouter(request.getRouterTableInfoList());
         if(StringUtils.isBlank(errorMsg)){
             builder.setStatusCode(StatusCode.SUCCESS);
             builder.setMessage(Dict.SUCCESS);
@@ -85,7 +84,7 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
     public RouterTableServiceProto.RouterOperatetResponse updateRouterTableService(Context context, InboundPackage inboundPackage) {
         RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
         RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
-        String errorMsg = RouterTableUtils.updateRouter(request.getRouterTableInfo());
+        String errorMsg = RouterTableUtils.updateRouter(request.getRouterTableInfoList());
         if (StringUtils.isBlank(errorMsg)) {
             builder.setStatusCode(StatusCode.SUCCESS);
             builder.setMessage(Dict.SUCCESS);
@@ -100,7 +99,7 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
     public RouterTableServiceProto.RouterOperatetResponse deleteRouterTableService(Context context, InboundPackage inboundPackage) {
         RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
         RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
-        String errorMsg = RouterTableUtils.deleteRouter(request.getRouterTableInfo());
+        String errorMsg = RouterTableUtils.deleteRouter(request.getRouterTableInfoList());
         if (StringUtils.isBlank(errorMsg)) {
             builder.setStatusCode(StatusCode.SUCCESS);
             builder.setMessage(Dict.SUCCESS);

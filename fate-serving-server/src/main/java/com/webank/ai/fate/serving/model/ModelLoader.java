@@ -25,6 +25,8 @@ public interface ModelLoader {
 
     public ModelProcessor restoreModel(Context context, ModelLoaderParam modelLoaderParam);
 
+    String getCachePath(Context context, String tableName, String namespace);
+
     public enum LoadModelType {
         FATEFLOW,
         FILE,
