@@ -16,9 +16,9 @@
 
 package com.webank.ai.fate.serving.core.exceptions;
 
-public class RouteInfoOperateException extends BaseException {
+public class NoRouterInfoException extends BaseException {
 
-    public RouteInfoOperateException(int retCode, String message) {
+    public NoRouterInfoException(int retCode, String message) {
         super(retCode, message);
     }
 

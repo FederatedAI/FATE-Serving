@@ -127,6 +127,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
     }
 
     @Override
+    @RegisterService(serviceName = "queryModel")
     public void queryModel(ModelServiceProto.QueryModelRequest request, StreamObserver<ModelServiceProto.QueryModelResponse> responseObserver) {
         Context context = prepareContext(ModelActionType.QUERY_MODEL.name());
         InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();

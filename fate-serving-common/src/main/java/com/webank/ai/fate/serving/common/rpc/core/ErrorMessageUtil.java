@@ -93,7 +93,7 @@ public class ErrorMessageUtil {
         if (e instanceof IllegalArgumentException) {
             result.put(Dict.CODE, StatusCode.PARAM_ERROR);
             result.put(Dict.MESSAGE, "PARAM_ERROR");
-        } else if (e instanceof NoRouteInfoException) {
+        } else if (e instanceof NoRouterInfoException) {
             result.put(Dict.CODE, StatusCode.GUEST_ROUTER_ERROR);
             result.put(Dict.MESSAGE, "ROUTER_ERROR");
         } else if (e instanceof SysException) {
