@@ -38,7 +38,7 @@ public class RouterTableRequest {
 
     public static class RouterTable {
         String partyId;
-        String host;
+        String ip;
         Integer port;
         boolean useSSL;
         String negotiationType;
@@ -55,12 +55,12 @@ public class RouterTableRequest {
             this.partyId = partyId;
         }
 
-        public String getHost() {
-            return host;
+        public String getIp() {
+            return ip;
         }
 
-        public void setHost(String host) {
-            this.host = host;
+        public void setIp(String ip) {
+            this.ip = ip;
         }
 
         public Integer getPort() {

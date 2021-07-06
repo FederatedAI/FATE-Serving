@@ -20,11 +20,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
-import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
-import com.webank.ai.fate.serving.core.bean.RouterTableRequest;
+import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -93,14 +92,13 @@ public class RouterController {
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();
         String dataJson = response.getData().toStringUtf8();
-        JsonUtil.json2Object(dataJson, List.class);
-        List<RouterTableServiceProto.RouterTableInfo> routerTableList =
-                JsonUtil.json2List(response.getData().toStringUtf8(), new TypeReference<List<RouterTableServiceProto.RouterTableInfo>>() {
+        List<JsonObject> routerTableList =
+                JsonUtil.json2List(response.getData().toStringUtf8(), new TypeReference<List<JsonObject>>() {
                 });
         int totalSize = 0;
         if (routerTableList != null) {
             totalSize = routerTableList.size();
-            routerTableList = routerTableList.stream().sorted(Comparator.comparing(RouterTableServiceProto.RouterTableInfo::getPartyId)).collect(Collectors.toList());
+            routerTableList = routerTableList.stream().collect(Collectors.toList());
 
             // Pagination
             int totalPage = (routerTableList.size() + pageSize - 1) / pageSize;
@@ -108,7 +106,7 @@ public class RouterController {
                 routerTableList = routerTableList.subList((page - 1) * pageSize, Math.min(page * pageSize, routerTableList.size()));
             }
 
-            for (RouterTableServiceProto.RouterTableInfo routerTableInfo : routerTableList) {
+            for (JsonObject routerTableInfo : routerTableList) {
                 rows.add(routerTableInfo);
             }
         }
@@ -230,7 +228,7 @@ public class RouterController {
             if (routerTable == null) continue;
             RouterTableServiceProto.RouterTableInfo.Builder builder = RouterTableServiceProto.RouterTableInfo.newBuilder();
             builder.setPartyId(routerTable.getPartyId())
-                    .setHost(routerTable.getHost())
+                    .setHost(routerTable.getIp())
                     .setPort(routerTable.getPort())
                     .setUseSSL(routerTable.isUseSSL())
                     .setNegotiationType(routerTable.getNegotiationType())

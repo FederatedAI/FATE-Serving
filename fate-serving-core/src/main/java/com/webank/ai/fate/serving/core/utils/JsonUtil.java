@@ -106,7 +106,7 @@ public class JsonUtil {
         return JsonParser.parseString(json).getAsJsonObject();
     }
 
-    public static <T> T JsonObject2Objcet(JsonObject source,Class<T> clazz){
+    public static <T> T json2Object(JsonObject source,Class<T> clazz){
         String json = source.toString();
         return json2Object(json,clazz);
     }
@@ -116,18 +116,14 @@ public class JsonUtil {
         return json2Object(json,clazz);
     }
 
-
-
-
-
-
-
-
+    public static String formatJson(String jsonStr) {
+        return formatJson(jsonStr,"   ");
+    }
 
     /***
      * format json string
      */
-    public static String formatJson(String jsonStr) {
+    public static String formatJson(String jsonStr,String formatChar) {
         if (null == jsonStr || "".equals(jsonStr)) return "";
         jsonStr = jsonStr.replace("\\n", "");
         StringBuilder sb = new StringBuilder();
@@ -151,7 +147,7 @@ public class JsonUtil {
                     if (!isInQuotationMarks) {
                         sb.append('\n');
                         indent++;
-                        addIndentTab(sb, indent);
+                        addIndentTab(sb, indent,formatChar);
                     }
                     break;
                 case '}':
@@ -159,7 +155,7 @@ public class JsonUtil {
                     if (!isInQuotationMarks) {
                         sb.append('\n');
                         indent--;
-                        addIndentTab(sb, indent);
+                        addIndentTab(sb, indent,formatChar);
                     }
                     sb.append(current);
                     break;
@@ -167,7 +163,7 @@ public class JsonUtil {
                     sb.append(current);
                     if (last != '\\' && !isInQuotationMarks) {
                         sb.append('\n');
-                        addIndentTab(sb, indent);
+                        addIndentTab(sb, indent,formatChar);
                     }
                     break;
                 case ' ':
@@ -186,9 +182,9 @@ public class JsonUtil {
         return sb.toString();
     }
 
-    private static void addIndentTab(StringBuilder sb, int indent) {
+    private static void addIndentTab(StringBuilder sb, int indent,String formatChar) {
         for (int i = 0; i < indent; i++) {
-            sb.append("\t");
+            sb.append(formatChar);
         }
     }
 

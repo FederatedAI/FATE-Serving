@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.proxy.rpc.provider;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
@@ -23,6 +24,8 @@ import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.RouterTableRequest;
+import com.webank.ai.fate.serving.core.bean.RouterTableResponseRecord;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.RouterInfoOperateException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -55,9 +58,9 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
             builder.setMessage("proxy load router table error");
             return builder.build();
         }
-        List<RouterTableServiceProto.RouterTableInfo> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
+        JsonArray routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
         if (routerTableInfoList == null) {
-            routerTableInfoList = new ArrayList<>();
+            routerTableInfoList = new JsonArray();
         }
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);
