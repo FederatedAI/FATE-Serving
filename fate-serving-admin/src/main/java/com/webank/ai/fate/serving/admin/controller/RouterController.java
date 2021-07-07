@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -91,8 +90,9 @@ public class RouterController {
         if (routerTableList != null) {
             String filterPartyId = (routerTable.getRouterTableList() == null || routerTable.getRouterTableList().size() == 0)
                     ? null : routerTable.getRouterTableList().get(0).getPartyId();
-            routerTableList = routerTableList.stream().sorted(Comparator.comparing(RouterTableResponseRecord::getPartyId))
-                    .filter(record -> record.getPartyId().equals(filterPartyId))
+            routerTableList = routerTableList.stream()
+                    .filter(record -> record.getPartyId().equals(filterPartyId) || StringUtils.isBlank(filterPartyId))
+                    .sorted((prev, next) -> comparePartyId(prev.getPartyId(),next.getPartyId()))
                     .collect(Collectors.toList());
             totalSize = routerTableList.size();
 
@@ -232,5 +232,15 @@ public class RouterController {
             routerTableInfoList.add(builder.build());
         }
         return routerTableInfoList;
+    }
+
+    public static int comparePartyId(String prev , String next){
+//        prev = "default".equals(prev)?"0": prev;
+//        next = "default".equals(next)?"0": next;
+//        return prev.compareTo(next);
+        String numberReg = "^\\d{1,9}$";
+        Integer prevInt = prev.matches(numberReg)?Integer.parseInt(prev): 0;
+        Integer nextInt = next.matches(numberReg)?Integer.parseInt(next): 0;
+        return prevInt - nextInt;
     }
 }
