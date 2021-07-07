@@ -20,8 +20,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
@@ -35,7 +33,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,11 +45,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-/**
- * @Description Model management
- * @Date: 2020/3/25 11:13
- * @Author: v_dylanxu
- */
 @RequestMapping("/api")
 @RestController
 public class RouterController {
@@ -57,13 +53,14 @@ public class RouterController {
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     @Autowired
-    private ComponentService componentService;
+    ComponentService componentService;
 
     @PostMapping("/router/query")
-    @ResponseBody
-    public ReturnResult queryModel(String serverHost, Integer serverPort, RouterTableServiceProto.RouterTableInfo routerTable, Integer page, Integer pageSize) throws Exception {
-        serverHost = "127.0.0.1";
-        serverPort = 8879;
+    public ReturnResult queryModel(@RequestBody RouterTableRequest routerTable) {
+        String serverHost = routerTable.getServerHost();
+        Integer serverPort = routerTable.getServerPort();
+        Integer page = routerTable.getPage();
+        Integer pageSize = routerTable.getPageSize();
         checkAddress(serverHost, serverPort);
         if (page == null || page < 0) {
             page = 1;
@@ -80,35 +77,31 @@ public class RouterController {
         RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = getRouterTableServiceBlockingStub(serverHost, serverPort);
 
         RouterTableServiceProto.RouterOperatetRequest.Builder queryRouterRequestBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
-//        if (StringUtils.isNotBlank(routerTable.getPartyId())) {
-//            Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId must be default or number");
-//            queryRouterRequestBuilder.setPartyId(routerTable.getPartyId());
-//        }
         RouterTableServiceProto.RouterOperatetResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
 
-        Map data = Maps.newHashMap();
-        List rows = Lists.newArrayList();
-        String dataJson = response.getData().toStringUtf8();
-        List<JsonObject> routerTableList =
-                JsonUtil.json2List(response.getData().toStringUtf8(), new TypeReference<List<JsonObject>>() {
+        Map<String, Object> data = Maps.newHashMap();
+        List<RouterTableResponseRecord> rows = Lists.newArrayList();
+        List<RouterTableResponseRecord> routerTableList =
+                JsonUtil.json2List(response.getData().toStringUtf8(), new TypeReference<List<RouterTableResponseRecord>>() {
                 });
         int totalSize = 0;
         if (routerTableList != null) {
+            String filterPartyId = (routerTable.getRouterTableList() == null || routerTable.getRouterTableList().size() == 0)
+                    ? null : routerTable.getRouterTableList().get(0).getPartyId();
+            routerTableList = routerTableList.stream().sorted(Comparator.comparing(RouterTableResponseRecord::getPartyId))
+                    .filter(record -> record.getPartyId().equals(filterPartyId))
+                    .collect(Collectors.toList());
             totalSize = routerTableList.size();
-            routerTableList = routerTableList.stream().collect(Collectors.toList());
 
             // Pagination
             int totalPage = (routerTableList.size() + pageSize - 1) / pageSize;
             if (page <= totalPage) {
                 routerTableList = routerTableList.subList((page - 1) * pageSize, Math.min(page * pageSize, routerTableList.size()));
             }
-
-            for (JsonObject routerTableInfo : routerTableList) {
-                rows.add(routerTableInfo);
-            }
+            rows.addAll(routerTableList);
         }
 
         data.put("total", totalSize);
@@ -116,7 +109,7 @@ public class RouterController {
         return ReturnResult.build(response.getStatusCode(), response.getMessage(), data);
     }
 
-    private RouterTableServiceGrpc.RouterTableServiceBlockingStub getRouterTableServiceBlockingStub(String host, Integer port) throws Exception {
+    private RouterTableServiceGrpc.RouterTableServiceBlockingStub getRouterTableServiceBlockingStub(String host, Integer port) {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port != 0, "parameter port was wrong");
         if (!NetUtils.isValidAddress(host + ":" + port)) {
@@ -133,7 +126,7 @@ public class RouterController {
     }
 
     @PostMapping("/router/add")
-    public ReturnResult addRouter(@RequestBody RouterTableRequest routerTables) throws Exception {
+    public ReturnResult addRouter(@RequestBody RouterTableRequest routerTables) {
         checkAddress(routerTables.getServerHost(), routerTables.getServerPort());
         for (RouterTableServiceProto.RouterTableInfo routerTable : parseRouterInfo(routerTables.getRouterTableList())) {
             checkParameter(routerTable);
@@ -153,7 +146,7 @@ public class RouterController {
     }
 
     @PostMapping("/router/update")
-    public ReturnResult updateRouter(@RequestBody RouterTableRequest routerTables) throws Exception {
+    public ReturnResult updateRouter(@RequestBody RouterTableRequest routerTables) {
         checkAddress(routerTables.getServerHost(), routerTables.getServerPort());
         for (RouterTableRequest.RouterTable routerTable : routerTables.getRouterTableList()) {
             Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId : {" + routerTable.getPartyId() + "} must be default or number");
@@ -176,7 +169,7 @@ public class RouterController {
     }
 
     @PostMapping("/router/delete")
-    public ReturnResult deleteRouter(@RequestBody RouterTableRequest routerTables) throws Exception {
+    public ReturnResult deleteRouter(@RequestBody RouterTableRequest routerTables) {
         checkAddress(routerTables.getServerHost(), routerTables.getServerPort());
         for (RouterTableRequest.RouterTable routerTable : routerTables.getRouterTableList()) {
             Preconditions.checkArgument(checkPartyId(routerTable.getPartyId()), "parameter partyId : {" + routerTable.getPartyId() + "} must be default or number");
@@ -203,7 +196,7 @@ public class RouterController {
         Preconditions.checkArgument(NetUtils.isValidAddress(routerTable.getHost() + ":" + routerTable.getPort()), "parameter Network Access : {" + routerTable.getHost() + ":" + routerTable.getPort() + "} format error");
         Preconditions.checkArgument(StringUtils.isNotBlank(routerTable.getServerType()), "parameter serverType must is blank");
         if (routerTable.getUseSSL()) {
-            Preconditions.checkArgument(StringUtils.isBlank(routerTable.getCertChainFile()), "parameter CertficatePath is blank");
+            Preconditions.checkArgument(StringUtils.isBlank(routerTable.getCertChainFile()), "parameter certificatePath is blank");
         }
     }
 

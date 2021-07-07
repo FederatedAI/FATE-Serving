@@ -253,8 +253,8 @@ public class RouterTableUtils {
         return FileUtils.writeFile(context, new File(filePath));
     }
 
-    public static JsonArray parseJson2RouterInfoList(JsonObject routerTableJson) {
-        JsonArray routerTableInfoList = new JsonArray();
+    public static List<RouterTableResponseRecord> parseJson2RouterInfoList(JsonObject routerTableJson) {
+        List<RouterTableResponseRecord> routerTableInfoList = new ArrayList<>();
         if (routerTableJson == null) {
             return routerTableInfoList;
         }
@@ -264,24 +264,33 @@ public class RouterTableUtils {
             if (routerInfos == null) {
                 continue;
             }
-            JsonObject responseRecord = new JsonObject();
-            responseRecord.addProperty("partyId",tableEntry.getKey());
-            responseRecord.add("createTime",routerInfos.get("createTime"));
-            responseRecord.add("updateTime",routerInfos.get("updateTime"));
-            JsonArray routerList = new JsonArray();
+            RouterTableResponseRecord responseRecord = new RouterTableResponseRecord();
+            responseRecord.setPartyId(tableEntry.getKey());
+            List<RouterTableResponseRecord.RouterTable> routerList = new ArrayList<>();
             for (Map.Entry<String, JsonElement> routerInfosEntry : routerInfos.entrySet()) {
                 String serverType = routerInfosEntry.getKey();
-                JsonArray routerInfosArr = routerInfosEntry.getValue().getAsJsonArray();
-                if (routerInfosArr == null) {
-                    continue;
-                }
-                for (JsonElement jsonElement : routerInfosArr) {
-                    JsonObject routerTableSignleJson = jsonElement.getAsJsonObject();
-                    routerTableSignleJson.addProperty("serverType",serverType);
-                    routerList.add(routerTableSignleJson);
+                switch (serverType) {
+                    case "createTime":
+                        responseRecord.setCreateTime(routerInfosEntry.getValue().getAsLong());
+                        break;
+                    case "updateTime":
+                        responseRecord.setUpdateTime(routerInfosEntry.getValue().getAsLong());
+                        break;
+                    default:
+                        JsonArray routerInfosArr = routerInfosEntry.getValue().getAsJsonArray();
+                        if (routerInfosArr == null) {
+                            continue;
+                        }
+                        for (JsonElement jsonElement : routerInfosArr) {
+                            JsonObject routerTableSignleJson = jsonElement.getAsJsonObject();
+                            routerTableSignleJson.addProperty("serverType", serverType);
+                            routerList.add(JsonUtil.json2Object(routerTableSignleJson, RouterTableResponseRecord.RouterTable.class));
+                        }
+                        break;
                 }
             }
-            responseRecord.add("routerList",routerList);
+            responseRecord.setRouterList(routerList);
+            responseRecord.setCount(routerList.size());
             routerTableInfoList.add(responseRecord);
         }
         return routerTableInfoList;

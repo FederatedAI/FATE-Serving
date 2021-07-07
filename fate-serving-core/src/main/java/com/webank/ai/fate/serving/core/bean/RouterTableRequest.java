@@ -3,7 +3,7 @@ package com.webank.ai.fate.serving.core.bean;
 import java.util.List;
 
 /**
- * @auther Xiongli
+ * @auther Xiong li
  * @date 2021/6/29
  * @remark
  */
@@ -11,6 +11,8 @@ public class RouterTableRequest {
     String serverHost;
     Integer serverPort;
     List<RouterTable> routerTableList;
+    Integer page;
+    Integer pageSize;
 
     public String getServerHost() {
         return serverHost;
@@ -34,6 +36,22 @@ public class RouterTableRequest {
 
     public void setRouterTableList(List<RouterTable> routerTableList) {
         this.routerTableList = routerTableList;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     public static class RouterTable {

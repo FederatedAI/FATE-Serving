@@ -318,6 +318,9 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             // loop through role in coordinator
             for (Map.Entry<String, JsonElement> roleEntry : coordinatorValue.entrySet()) {
                 String roleKey = roleEntry.getKey();
+                if(roleKey.equals("createTime")||roleKey.equals("updateTime")){
+                    continue;
+                }
                 JsonArray roleValue = roleEntry.getValue().getAsJsonArray();
 
                 List<BasicMeta.Endpoint> endpoints = serviceTable.get(roleKey);
