@@ -48,7 +48,7 @@ package com.webank.ai.fate.serving.core.exceptions;
  * guest 模型不存在 1104   异常  GuestModelNullException
  * host  模型不存在 2104   异常  HostModelNullException
  * guest 通信异常   1105   异常  GuestNetErrorExcetpion
- * guest 通讯路由不存在  4115 异常  NoRouteInfoException
+ * guest 通讯路由不存在  4115 异常  NoRouterInfoException
  * guest  host返回数据异常  1115  HostReturnErrorException
  */
 

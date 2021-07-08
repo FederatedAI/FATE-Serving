@@ -251,12 +251,11 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
         if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
             return;
         }
-        JsonParser jsonParser = new JsonParser();
         JsonReader jsonReader = null;
         JsonObject confJson = null;
         try {
             jsonReader = new JsonReader(new FileReader(filePath));
-            confJson = jsonParser.parse(jsonReader).getAsJsonObject();
+            confJson = JsonParser.parseReader(jsonReader).getAsJsonObject();
             MetaInfo.PROXY_ROUTER_TABLE = confJson.toString();
             logger.info("load router table {}", confJson);
 
@@ -318,6 +317,9 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             // loop through role in coordinator
             for (Map.Entry<String, JsonElement> roleEntry : coordinatorValue.entrySet()) {
                 String roleKey = roleEntry.getKey();
+                if(roleKey.equals("createTime")||roleKey.equals("updateTime")){
+                    continue;
+                }
                 JsonArray roleValue = roleEntry.getValue().getAsJsonArray();
 
                 List<BasicMeta.Endpoint> endpoints = serviceTable.get(roleKey);

@@ -21,7 +21,7 @@ import com.webank.ai.fate.serving.common.rpc.core.Interceptor;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
+import com.webank.ai.fate.serving.core.exceptions.NoRouterInfoException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public class DefaultServingRouter implements Interceptor {
             routerInfo = configFileBasedServingRouter.route(context, inboundPackage);
         }
         if (null == routerInfo) {
-            throw new NoRouteInfoException(StatusCode.PROXY_ROUTER_ERROR,"serving-proxy can not find router info ");
+            throw new NoRouterInfoException(StatusCode.PROXY_ROUTER_ERROR,"serving-proxy can not find router info ");
         }
         inboundPackage.setRouterInfo(routerInfo);
     }

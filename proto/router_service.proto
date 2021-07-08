@@ -4,7 +4,7 @@ package com.webank.ai.fate.serving.proxy.rpc.grpc;
 option java_outer_classname = "RouterTableServiceProto";
 
 message RouterOperatetRequest{
-    RouterTableInfo routerTableInfo = 1;
+    repeated RouterTableInfo routerTableInfo = 1;
 }
 
 message RouterTableInfo{
@@ -16,12 +16,13 @@ message RouterTableInfo{
     string certChainFile = 6;
     string privateKeyFile = 7;
     string caFile = 8;
+    string serverType = 9;
 }
 
 message RouterOperatetResponse{
     int32 statusCode = 1;
     string message = 2;
-    bytes data = 4;
+    bytes data = 3;
 }
 
 service RouterTableService{

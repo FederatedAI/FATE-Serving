@@ -1,24 +1,26 @@
 package com.webank.ai.fate.serving.proxy.common;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
+import com.webank.ai.fate.serving.core.bean.RouterTableResponseRecord;
+import com.webank.ai.fate.serving.core.exceptions.RouterInfoOperateException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.RouterTableServiceProto;
 import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +36,7 @@ public class RouterTableUtils {
     private static final String FILESEPARATOR = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
     private static final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     private final static String DEFAULT_ROUTER_TABLE = "{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]}},\"permission\":{\"default_allow\":true}}";
-    private static String router_table = "";
+    static String router_table ;
 
     public static JsonObject loadRoutTable() {
         String filePath;
@@ -53,12 +55,11 @@ public class RouterTableUtils {
             logger.error("router table {} is not exist", filePath);
             return null;
         }
-        JsonParser jsonParser = new JsonParser();
         JsonReader routerReader = null;
         JsonObject confJson;
         try {
             routerReader = new JsonReader(new FileReader(filePath));
-            confJson = jsonParser.parse(routerReader).getAsJsonObject();
+            confJson = JsonParser.parseReader(routerReader).getAsJsonObject();
             if (confJson == null || confJson.size() == 0) {
                 confJson = initRouter();
             } else {
@@ -85,111 +86,214 @@ public class RouterTableUtils {
         return JsonParser.parseString(DEFAULT_ROUTER_TABLE).getAsJsonObject();
     }
 
-    public static String updateRouter(RouterTableServiceProto.RouterTableInfo routerInfo) {
+    public static void addRouter(List<RouterTableServiceProto.RouterTableInfo> routerInfoList) {
         try {
-            JsonObject routerJson = StringUtils.isBlank(router_table) ?
-                    loadRoutTable() : JsonParser.parseString(router_table).getAsJsonObject();
+            long now = new Date().getTime();
+            JsonObject routerJson = loadRoutTable();
             if (routerJson == null) {
-                return "router_table.json not exists";
+                throw new RouterInfoOperateException("router_table.json not exists");
             }
             JsonObject route_table = routerJson.getAsJsonObject("route_table");
             if (route_table == null) {
-                return "missing routing configuration";
+                throw new RouterInfoOperateException("missing routing configuration");
             }
-            if (!route_table.has(routerInfo.getPartyId())) {
-                return "partyId (" + routerInfo.getPartyId() + ") is not exists";
+            for (RouterTableServiceProto.RouterTableInfo routerInfo : routerInfoList) {
+                JsonObject partyIdRouter = route_table.getAsJsonObject(routerInfo.getPartyId());
+                if (partyIdRouter == null) {
+                    partyIdRouter = new JsonObject();
+                    partyIdRouter.addProperty("createTime", now);
+                    partyIdRouter.addProperty("updateTime", now);
+                    route_table.add(routerInfo.getPartyId(), partyIdRouter);
+                }
+                JsonArray serverTypeArray = partyIdRouter.getAsJsonArray(routerInfo.getServerType());
+                if (serverTypeArray == null) {
+                    serverTypeArray = new JsonArray();
+                    partyIdRouter.add(routerInfo.getServerType(), serverTypeArray);
+                }
+                if (getIndex(serverTypeArray, routerInfo.getHost(), routerInfo.getPort()) != -1) {
+                    throw new RouterInfoOperateException("partyId : " + routerInfo.getPartyId() + ", serverType : " + routerInfo.getServerType()
+                            + ", Network Access : " + routerInfo.getHost() + ":" + routerInfo.getPort() + " is already exists");
+                }
+                serverTypeArray.add(parseRouterInfo(routerInfo));
+                partyIdRouter.add(routerInfo.getServerType(), serverTypeArray);
             }
-            route_table.add(routerInfo.getPartyId(), parseRouterInfo(routerInfo));
-            if (writeRouterFile(routerJson.toString())) {
+            routerJson.add("route_table", route_table);
+            if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
                 logger.error("write router_table.json error");
-                return "write router_table.json error";
+                throw new RouterInfoOperateException("write router_table.json error");
             }
+        } catch (RouterInfoOperateException routerEx) {
+            throw new RouterInfoOperateException(routerEx.getMessage());
         } catch (Exception e) {
-            logger.error("parse router table error");
-            return "parse router table error";
+            logger.error("parse router table error", e);
+            throw new RouterInfoOperateException("parse router table error");
         }
-        return "";
     }
 
-    public static String addRouter(RouterTableServiceProto.RouterTableInfo routerInfo) {
+    public static void updateRouter(List<RouterTableServiceProto.RouterTableInfo> routerInfoList) {
         try {
-            JsonObject routerJson = StringUtils.isBlank(router_table) ?
-                    loadRoutTable() : JsonParser.parseString(router_table).getAsJsonObject();
+            JsonObject routerJson = loadRoutTable();
             if (routerJson == null) {
-                return "router_table.json not exists";
+                throw new RouterInfoOperateException("router_table.json not exists");
             }
             JsonObject route_table = routerJson.getAsJsonObject("route_table");
             if (route_table == null) {
-                return "missing routing configuration";
+                throw new RouterInfoOperateException("missing routing configuration");
             }
-            if (route_table.has(routerInfo.getPartyId())) {
-                return "partyId (" + routerInfo.getPartyId() + ") is already exists";
+            for (RouterTableServiceProto.RouterTableInfo routerInfo : routerInfoList) {
+                JsonObject partyIdRouter = route_table.getAsJsonObject(routerInfo.getPartyId());
+                if (partyIdRouter == null) {
+                    throw new RouterInfoOperateException("there is no configuration with partyId = " + routerInfo.getPartyId());
+                }
+                partyIdRouter.addProperty("updateTime", new Date().getTime());
+                JsonArray serverTypeArray = partyIdRouter.getAsJsonArray(routerInfo.getServerType());
+                if (serverTypeArray == null)
+                    throw new RouterInfoOperateException("there is no configuration with partyId = " + routerInfo.getPartyId() + " and serverType = " + routerInfo.getServerType());
+                int index = getIndex(serverTypeArray, routerInfo.getHost(), routerInfo.getPort());
+                if (index == -1) {
+                    throw new RouterInfoOperateException("partyId : " + routerInfo.getPartyId() + ", serverType : " + routerInfo.getServerType()
+                            + ", Network Access : " + routerInfo.getHost() + ":" + routerInfo.getPort() + " is not exists");
+                }
+                JsonObject singleRoute;
+                singleRoute = parseRouterInfo(routerInfo);
+                serverTypeArray.set(index, singleRoute);
+                partyIdRouter.add(routerInfo.getServerType(), serverTypeArray);
             }
-            route_table.add(routerInfo.getPartyId(), parseRouterInfo(routerInfo));
-            if (writeRouterFile(routerJson.toString())) {
+            if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
                 logger.error("write router_table.json error");
-                return "write router_table.json error";
+                throw new RouterInfoOperateException("write router_table.json error");
             }
+        } catch (RouterInfoOperateException routerEx) {
+            throw new RouterInfoOperateException(routerEx.getMessage());
         } catch (Exception e) {
             logger.error("parse router table error");
-            return "parse router table error";
+            throw new RouterInfoOperateException("parse router table error");
         }
-        return "";
     }
 
-    public static String deleteRouter(RouterTableServiceProto.RouterTableInfo routerInfo) {
+    public static void deleteRouter(List<RouterTableServiceProto.RouterTableInfo> routerInfoList) {
         try {
-            JsonObject routerJson = StringUtils.isBlank(router_table) ?
-                    loadRoutTable() : JsonParser.parseString(router_table).getAsJsonObject();
+            JsonObject routerJson = loadRoutTable();
             if (routerJson == null) {
-                return "router_table.json not exists";
+                throw new RouterInfoOperateException("router_table.json not exists");
             }
             JsonObject route_table = routerJson.getAsJsonObject("route_table");
             if (route_table == null) {
-                return "missing routing configuration";
+                throw new RouterInfoOperateException("missing routing configuration");
             }
-            if (!route_table.has(routerInfo.getPartyId())) {
-                return "partyId (" + routerInfo.getPartyId() + ") is not exists";
+            for (RouterTableServiceProto.RouterTableInfo routerInfo : routerInfoList) {
+                JsonObject partyIdRouter = route_table.getAsJsonObject(routerInfo.getPartyId());
+                if (StringUtils.isBlank(routerInfo.getServerType())) {
+                    route_table.remove(routerInfo.getPartyId());
+                    if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
+                        logger.error("write router_table.json error");
+                        throw new RouterInfoOperateException("write router_table.json error");
+                    }
+                    return;
+                }
+                if (partyIdRouter == null) {
+                    throw new RouterInfoOperateException("there is no configuration with partyId = " + routerInfo.getPartyId());
+                }
+                partyIdRouter.addProperty("updateTime", new Date().getTime());
+                JsonArray serverTypeArray = partyIdRouter.getAsJsonArray(routerInfo.getServerType());
+                if (serverTypeArray == null) {
+                    throw new RouterInfoOperateException("there is no configuration with partyId = " + routerInfo.getPartyId() + " and serverType = " + routerInfo.getServerType());
+                }
+                int index = getIndex(serverTypeArray, routerInfo.getHost(), routerInfo.getPort());
+                if (index == -1) {
+                    throw new RouterInfoOperateException("partyId : " + routerInfo.getPartyId() + ", serverType : " + routerInfo.getServerType()
+                            + ", Network Access : " + routerInfo.getHost() + ":" + routerInfo.getPort() + " is not exists");
+                }
+                serverTypeArray.remove(index);
+                partyIdRouter.add(routerInfo.getServerType(), serverTypeArray);
             }
-            route_table.remove(routerInfo.getPartyId());
-            if (writeRouterFile(routerJson.toString())) {
+            routerJson.add("route_table", route_table);
+            if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
                 logger.error("write router_table.json error");
-                return "write router_table.json error";
+                throw new RouterInfoOperateException("write router_table.json error");
             }
+        } catch (RouterInfoOperateException routerEx) {
+            throw new RouterInfoOperateException(routerEx.getMessage());
         } catch (Exception e) {
             logger.error("parse router table error");
-            return "parse router table error";
+            throw new RouterInfoOperateException("parse router table error");
         }
-        return "";
     }
 
     private static JsonObject parseRouterInfo(RouterTableServiceProto.RouterTableInfo routerInfo) {
         if (routerInfo == null) {
             return null;
         }
-        RouterInfo target = new RouterInfo();
-        BeanUtils.copyProperties(routerInfo, target);
-        return JsonUtil.object2JsonObject(target);
+        JsonObject result = new JsonObject();
+        result.addProperty("ip", routerInfo.getHost());
+        result.addProperty("port", routerInfo.getPort());
+        result.addProperty("useSSL", routerInfo.getUseSSL());
+        result.addProperty("negotiationType", StringUtils.isBlank(routerInfo.getNegotiationType()) ? null : routerInfo.getNegotiationType());
+        result.addProperty("certChainFile", StringUtils.isBlank(routerInfo.getCertChainFile()) ? null : routerInfo.getCertChainFile());
+        result.addProperty("privateKeyFile", StringUtils.isBlank(routerInfo.getPrivateKeyFile()) ? null : routerInfo.getPrivateKeyFile());
+        result.addProperty("caFile", StringUtils.isBlank(routerInfo.getCaFile()) ? null : routerInfo.getCaFile());
+        return result;
     }
-
-
     public static boolean writeRouterFile(String context) {
         String filePath = USERDIR + FILESEPARATOR + DEFAULT_ROUTER_FILE;
-        return FileUtils.writeFile(context, new File(filePath));
+        return !FileUtils.writeFile(context, new File(filePath));
     }
 
-    public static List<RouterTableServiceProto.RouterTableInfo> parseJson2RouterInfoList(JsonObject routerTable) {
-        List<RouterTableServiceProto.RouterTableInfo> routerTableInfoList = new ArrayList<>();
-        if(routerTable == null){
+    public static List<RouterTableResponseRecord> parseJson2RouterInfoList(JsonObject routerTableJson) {
+        List<RouterTableResponseRecord> routerTableInfoList = new ArrayList<>();
+        if (routerTableJson == null) {
             return routerTableInfoList;
         }
-        JsonObject tableJson = null;
-        for (Map.Entry<String, JsonElement> tableEntry : routerTable.entrySet()) {
-            tableJson = tableEntry.getValue().getAsJsonObject();
-            tableJson.addProperty("partyId",tableEntry.getKey());
-            routerTableInfoList.add(JsonUtil.JsonObject2Objcet(tableJson,RouterTableServiceProto.RouterTableInfo.class));
+        for (Map.Entry<String, JsonElement> tableEntry : routerTableJson.entrySet()) {
+            JsonObject routerInfos;
+            routerInfos = tableEntry.getValue().getAsJsonObject();
+            if (routerInfos == null) {
+                continue;
+            }
+            RouterTableResponseRecord responseRecord = new RouterTableResponseRecord();
+            responseRecord.setPartyId(tableEntry.getKey());
+            List<RouterTableResponseRecord.RouterTable> routerList = new ArrayList<>();
+            for (Map.Entry<String, JsonElement> routerInfosEntry : routerInfos.entrySet()) {
+                String serverType = routerInfosEntry.getKey();
+                switch (serverType) {
+                    case "createTime":
+                        responseRecord.setCreateTime(routerInfosEntry.getValue().getAsLong());
+                        break;
+                    case "updateTime":
+                        responseRecord.setUpdateTime(routerInfosEntry.getValue().getAsLong());
+                        break;
+                    default:
+                        JsonArray routerInfosArr = routerInfosEntry.getValue().getAsJsonArray();
+                        if (routerInfosArr == null) {
+                            continue;
+                        }
+                        for (JsonElement jsonElement : routerInfosArr) {
+                            JsonObject routerTableSignleJson = jsonElement.getAsJsonObject();
+                            routerTableSignleJson.addProperty("serverType", serverType);
+                            routerList.add(JsonUtil.json2Object(routerTableSignleJson, RouterTableResponseRecord.RouterTable.class));
+                        }
+                        break;
+                }
+            }
+            responseRecord.setRouterList(routerList);
+            responseRecord.setCount(routerList.size());
+            routerTableInfoList.add(responseRecord);
         }
         return routerTableInfoList;
     }
+
+    public static int getIndex(JsonArray sourceArr, String host, int port) {
+        int result = -1;
+        String new_address = host + ":" + port;
+        for (int i = 0; i < sourceArr.size(); i++) {
+            JsonElement jsonElement = sourceArr.get(i);
+            String old_address = jsonElement.getAsJsonObject().get("ip").getAsString() + ":" + jsonElement.getAsJsonObject().get("port").toString();
+            if (new_address.equals(old_address)) {
+                result = i;
+            }
+        }
+        return result;
+    }
+
 
 }

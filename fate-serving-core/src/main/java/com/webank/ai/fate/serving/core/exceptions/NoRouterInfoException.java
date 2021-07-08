@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.webank.ai.fate.serving.core.bean;
+package com.webank.ai.fate.serving.core.exceptions;
 
-public enum ModelActionType {
-    /**
-     * MODEL_LOAD
-     */
-    MODEL_LOAD,
-    /**
-     * MODEL_PUBLISH_ONLINE
-     */
-    MODEL_PUBLISH_ONLINE,
-    UNLOAD,
-    UNBIND,
-    QUERY_MODEL,
-    FETCH_MODEL
+public class NoRouterInfoException extends BaseException {
+
+    public NoRouterInfoException(int retCode, String message) {
+        super(retCode, message);
+    }
+
+
 }

@@ -46,8 +46,10 @@ public class StatusCode {
     public static final int INVALID_TOKEN = 127;
     public static final int PROXY_ROUTER_ERROR = 128;
     public static final int PROXY_AUTH_ERROR = 129;
-    public static final int PROXY_LOAD_ROUTER_TABLE_ERROR = 130;
-    public static final int PROXY_UPDATE_ROUTER_TABLE_ERROR = 131;
+    public static final int MODEL_SYNC_ERROR = 130;
+    public static final int Fill_RATE_ERROR = 131; // 填充率异常
+    public static final int PROXY_LOAD_ROUTER_TABLE_ERROR = 132;
+    public static final int PROXY_UPDATE_ROUTER_TABLE_ERROR = 133;
 
 
 

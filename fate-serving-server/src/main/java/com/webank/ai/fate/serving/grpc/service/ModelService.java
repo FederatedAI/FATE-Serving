@@ -115,6 +115,19 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
     }
 
     @Override
+    @RegisterService(serviceName = "fetchModel")
+    public void fetchModel(ModelServiceProto.FetchModelRequest request, StreamObserver<ModelServiceProto.FetchModelResponse> responseObserver) {
+        Context context = prepareContext(ModelActionType.FETCH_MODEL.name());
+        InboundPackage<ModelServiceProto.FetchModelRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.FetchModelResponse fetchModelResponse = (ModelServiceProto.FetchModelResponse) outboundPackage.getData();
+        responseObserver.onNext(fetchModelResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    @RegisterService(serviceName = "queryModel")
     public void queryModel(ModelServiceProto.QueryModelRequest request, StreamObserver<ModelServiceProto.QueryModelResponse> responseObserver) {
         Context context = prepareContext(ModelActionType.QUERY_MODEL.name());
         InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();
