@@ -294,6 +294,32 @@ func ReadParams(path string) ([]byte, error) {
 	return []byte(request), err
 }
 
+func ReadFile(path string) (string, error) {
+	// read file content
+	file, err := os.Open(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	stat, _ := file.Stat()
+	if size := stat.Size(); size == 0 {
+		return "", errors.New("file content empty")
+	}
+
+	buffer := make([]byte, stat.Size())
+	_, err = file.Read(buffer)
+	if err != nil {
+		return "", err
+	}
+
+	request := string(buffer)
+	request = strings.ReplaceAll(request, "\n", "")
+	request = strings.ReplaceAll(request, "\r", "")
+	request = strings.ReplaceAll(request, "\t", "")
+	return request, err
+}
+
 func (cmd *FetchModelCmd) Run() {
 	/*
 		{

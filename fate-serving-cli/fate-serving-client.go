@@ -279,6 +279,49 @@ func init() {
 		},
 	}
 
+	uncaryCall := &grumble.Command{
+		Name:     "unarycall",
+		Help:     "unarycall",
+		LongHelp: "unarycall",
+		Flags: func(f *grumble.Flags) {
+			f.String("a", "address", "localhost:8000", "the address of serving-server")
+			f.String("f", "filepath", "", "the file path of json file")
+			f.String("s", "serviceId", "", "the serviceId of model")
+			//f.String("h", "host", "localhost", "the ip of serving-server")
+
+			// flag.StringVar(&host, "h", "localhost", "host ip")
+			// flag.IntVar(&port, "p", 8000, "port")
+		},
+		Run: func(c *grumble.Context) error {
+			c.App.Config().PromptColor.Add()
+			var err error
+			address := c.Flags.String("address")
+			filePath := c.Flags.String("filepath")
+
+			stringContext, _ := cmd.ReadFile(filePath)
+			if err != nil {
+				fmt.Println(err)
+				return nil
+			}
+
+			request := pb.Packet{}
+			common.JsonToStuct(stringContext, &request)
+			fmt.Println(request)
+			response, err := rpc.UnaryCall(address, &request)
+
+			if err != nil {
+				fmt.Println("Connection error")
+				return nil
+			}
+			if response != nil {
+
+				fmt.Println(response)
+			}
+			//c.App.Println(c.Flags.String("directory"))
+			return nil
+		},
+	}
+
 	showJvmCommand := &grumble.Command{
 		Name:     "jvm",
 		Help:     "jvm",
@@ -590,6 +633,7 @@ func init() {
 	App.AddCommand(showflowCommand)
 	App.AddCommand(cluster)
 	App.AddCommand(showJvmCommand)
+	App.AddCommand(uncaryCall)
 
 	// adminCommand.AddCommand(&grumble.Command{
 	// 	Name: "root",

@@ -42,3 +42,11 @@ func JsonToList(jsonStr string) []map[string]interface{} {
 	return list
 	//fmt.Println(mapResult)
 }
+
+func JsonToStuct(jsonStr string, result interface{}) {
+	err := json.Unmarshal([]byte(jsonStr), result)
+	if err != nil {
+		fmt.Println("JsonToStruct err: ", err)
+	}
+
+}
