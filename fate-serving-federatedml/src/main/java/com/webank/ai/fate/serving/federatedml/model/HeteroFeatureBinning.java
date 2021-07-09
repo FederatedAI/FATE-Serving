@@ -22,6 +22,7 @@ import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBi
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningResult;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.IVParam;
 import com.webank.ai.fate.serving.core.bean.Context;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,8 @@ public class HeteroFeatureBinning extends BaseComponent {
     private List<Long> transformCols;
     private List<String> header;
     private boolean needRun;
+    private String transformType;
+    private Map<String,List<Double>> woeMap;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -47,6 +50,7 @@ public class HeteroFeatureBinning extends BaseComponent {
             this.needRun = featureBinningMeta.getNeedRun();
             TransformMeta transformMeta = featureBinningMeta.getTransformParam();
             this.transformCols = transformMeta.getTransformColsList();
+            this.transformType = transformMeta.getTransformType();
             FeatureBinningParam featureBinningParam = this.parseModel(FeatureBinningParam.parser(), protoParam);
             this.header = featureBinningParam.getHeaderList();
             FeatureBinningResult featureBinningResult = featureBinningParam.getBinningResult();
@@ -55,6 +59,7 @@ public class HeteroFeatureBinning extends BaseComponent {
                 IVParam oneColResult = binningResult.get(key);
                 List<Double> splitPoints = oneColResult.getSplitPointsList();
                 this.splitPoints.put(key, splitPoints);
+                this.woeMap.put(key,oneColResult.getWoeArrayList());
             }
         } catch (Exception ex) {
             logger.error("init model error:", ex);
@@ -70,6 +75,9 @@ public class HeteroFeatureBinning extends BaseComponent {
         HashMap<String, Long> headerMap = new HashMap<>(8);
         Map<String, Object> firstData = inputData.get(0);
         if (!this.needRun) {
+            return firstData;
+        }
+        if (StringUtils.isEmpty(this.transformType)) {
             return firstData;
         }
         for (int i = 0; i < this.header.size(); i++) {
@@ -92,7 +100,12 @@ public class HeteroFeatureBinning extends BaseComponent {
                 if (colIndex < 0) {
                     colIndex = Math.min((- colIndex - 1), splitPoint.size() - 1);
                 }
-                outputData.put(colName, colIndex);
+                if ("woe".equals(this.transformType)) {
+                    outputData.put(colName,this.woeMap.get(colName).get(colIndex));
+                }
+                if ("bin_num".equals(this.transformType)) {
+                    outputData.put(colName, colIndex);
+                }
             } catch (Throwable e) {
                 logger.error("HeteroFeatureBinning error", e);
             }

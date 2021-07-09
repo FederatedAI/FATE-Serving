@@ -75,20 +75,20 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
                 ColsMap colsMap = this.colsMapMap.get(colName);
                 List<String> values = colsMap.getValuesList();
                 List<String> encodedVariables = colsMap.getTransformedHeadersList();
-                Integer inputValue = 0;
+                String inputValue = "0";
                 try {
                     String thisInputValue = firstData.get(colName).toString();
                     if (this.isDouble(thisInputValue)) {
                         double d = Double.valueOf(thisInputValue);
-                        inputValue = (int) Math.ceil(d);
+                        inputValue = String.valueOf(Math.ceil(d));
                     } else {
-                        inputValue = Integer.valueOf(thisInputValue);
+                        inputValue = String.valueOf(thisInputValue);
                     }
                 } catch (Throwable e) {
                     logger.error("Onehot component accept number input value only");
                 }
                 for (int i = 0; i < values.size(); i++) {
-                    Integer possibleValue = Integer.parseInt(values.get(i));
+                    String possibleValue = String.valueOf(values.get(i));
                     String newColName = encodedVariables.get(i);
                     if (inputValue.equals(possibleValue)) {
                         outputData.put(newColName, 1.0);
