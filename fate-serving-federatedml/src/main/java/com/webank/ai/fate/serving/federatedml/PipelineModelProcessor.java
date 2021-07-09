@@ -49,6 +49,7 @@ public class PipelineModelProcessor implements ModelProcessor {
     private static ForkJoinPool forkJoinPool = new ForkJoinPool();
     private List<BaseComponent> pipeLineNode = new ArrayList<>();
     private Map<String, BaseComponent> componentMap = new HashMap<String, BaseComponent>();
+    private Map<String, Map<String,Object>> componentParmasMap = new HashMap<String, Map<String,Object>>();
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
     private int splitSize = MetaInfo.PROPERTY_BATCH_SPLIT_SIZE;
@@ -172,6 +173,14 @@ public class PipelineModelProcessor implements ModelProcessor {
     @Override
     public Object getComponent(String name) {
         return this.componentMap.get(name);
+    }
+
+    @Override
+    public ModelProcessor initComponentParmasMap() {
+        componentMap.forEach((cptName,instance)->{
+            componentParmasMap.put(cptName,instance.getParams());
+        });
+        return this;
     }
 
     public int initModel(Map<String, byte[]> modelProtoMap) {
