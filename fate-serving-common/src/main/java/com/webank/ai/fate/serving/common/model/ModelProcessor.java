@@ -33,4 +33,6 @@ public interface ModelProcessor {
 
     public Object getComponent(String name);
 
+    public ModelProcessor initComponentParmasMap();
+
 }

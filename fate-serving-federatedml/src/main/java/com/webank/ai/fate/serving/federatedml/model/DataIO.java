@@ -16,13 +16,17 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.gson.JsonObject;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOMetaProto.DataIOMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +69,14 @@ public class DataIO extends BaseComponent {
         }
         logger.info("Finish init DataIO class");
         return OK;
+    }
+
+    @Override
+    public Map<String, Object> getParams() {
+        for (Field declaredField : dataIOParam.getClass().getDeclaredFields()) {
+            logger.info(declaredField.getName());
+        }
+        return JsonUtil.object2Objcet(dataIOParam, new TypeReference<Map<String, Object>>() {});
     }
 
     @Override

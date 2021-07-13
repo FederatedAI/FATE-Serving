@@ -16,9 +16,12 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.core.mlmodel.buffer.fm.FMModelParamProto.Embedding;
 import com.webank.ai.fate.core.mlmodel.buffer.fm.FMModelParamProto.FMModelParam;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +114,13 @@ public abstract class HeteroFM extends BaseComponent {
         ret.put(Dict.INPUT_DATA_HIT_RATE, inputDataHitRate);
         ret.put(Dict.FM_CROSS, multiplies);
         return ret;
+    }
+
+    @Override
+    public Map<String, Object> getParams() {
+        Map<String,Object> paramsMap = Maps.newHashMap();
+        paramsMap.putAll(weight);
+        return paramsMap;
     }
 
 }

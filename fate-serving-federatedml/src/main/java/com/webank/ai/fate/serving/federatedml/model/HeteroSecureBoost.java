@@ -64,6 +64,11 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         return OK;
     }
 
+    @Override
+    public Map<String, Object> getParams() {
+        return null;
+    }
+
     protected String getSite(int treeId, int treeNodeId) {
         return this.trees.get(treeId).getTree(treeNodeId).getSitename().split(":", -1)[0];
     }
