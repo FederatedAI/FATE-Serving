@@ -297,26 +297,30 @@ func init() {
 			var err error
 			address := c.Flags.String("address")
 			filePath := c.Flags.String("filepath")
+			if len(filePath) != 0 {
+				stringContext, _ := cmd.ReadFile(filePath)
+				if err != nil {
+					fmt.Println(err)
+					return nil
+				}
 
-			stringContext, _ := cmd.ReadFile(filePath)
-			if err != nil {
-				fmt.Println(err)
-				return nil
+				request := pb.Packet{}
+				common.JsonToStuct(stringContext, &request)
+				fmt.Println(request)
+				response, err := rpc.UnaryCall(address, &request)
+
+				if err != nil {
+					fmt.Println("Connection error")
+					return nil
+				}
+				if response != nil {
+
+					fmt.Println(response)
+				}
+			} else {
+				fmt.Println("please use -f ")
 			}
 
-			request := pb.Packet{}
-			common.JsonToStuct(stringContext, &request)
-			fmt.Println(request)
-			response, err := rpc.UnaryCall(address, &request)
-
-			if err != nil {
-				fmt.Println("Connection error")
-				return nil
-			}
-			if response != nil {
-
-				fmt.Println(response)
-			}
 			//c.App.Println(c.Flags.String("directory"))
 			return nil
 		},
