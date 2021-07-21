@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.proxy.rpc.provider;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -266,6 +267,9 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         Map<String,Object> resultMap = new HashMap<>();
         List<Object> machineInfoList = new ArrayList<>();
+        List<String>  warnList = Lists.newArrayList();
+        List<String>  errorList = Lists.newArrayList();
+
         try {
             SystemInfo systemInfo = new SystemInfo();
             CentralProcessor processor = systemInfo.getHardware().getProcessor();
@@ -292,12 +296,14 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             Map<String,String> memoryInfo= new HashMap<>();
             memoryInfo.put("Total Memory",new DecimalFormat("#.##GB").format(totalByte/1024.0/1024.0/1024.0));
             memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
+
             machineInfoList.add(memoryInfo);
 
         } catch (Exception e) {
-            e.printStackTrace();
+           // e.printStackTrace();
+
         }
-        resultMap.put("MachineInfo",machineInfoList);
+        resultMap.put("machineInfo",machineInfoList);
         try {
             String filePath = "";
             if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
@@ -326,9 +332,10 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
                     isConnected = true;
                     telnetClient.disconnect();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                  //  e.printStackTrace();
                     isConnected = false;
                 }
+                errorList.add("router " +ip + ":" + port+" can not connected");
                 resultMap.put(ip + ":" + port, isConnected);
             }
         } catch (Exception e) {
@@ -339,6 +346,8 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             return builder.build();
         }
 
+        resultMap.put(Dict.WARN_LIST,warnList);
+        resultMap.put(Dict.ERROR_LIST,errorList);
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
         return builder.build();

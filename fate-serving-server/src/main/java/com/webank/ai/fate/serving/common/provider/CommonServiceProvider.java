@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.common.provider;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -212,6 +213,8 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
         Map<String,Object> resultMap = new HashMap<>();
         List<Object> machineInfoList = new ArrayList<>();
+        List<String>  warnList = Lists.newArrayList();
+        List<String>  errorList =  Lists.newArrayList();
         try {
             SystemInfo systemInfo = new SystemInfo();
             CentralProcessor processor = systemInfo.getHardware().getProcessor();
@@ -240,41 +243,53 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
             machineInfoList.add(memoryInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         }
         resultMap.put("MachineInfo",machineInfoList);
+
+        resultMap.put(Dict.ERROR_LIST,errorList);
+        resultMap.put(Dict.WARN_LIST,warnList);
         //check whether fate flow is connected
         String fullUrl = MetaInfo.PROPERTY_MODEL_TRANSFER_URL;
-        String host = fullUrl.substring(fullUrl.indexOf('/') + 2, fullUrl.lastIndexOf(':'));
-        int port = Integer.parseInt(fullUrl.substring(fullUrl.lastIndexOf(':') + 1,
-                fullUrl.indexOf('/',fullUrl.lastIndexOf(':'))));
-        TelnetClient telnetClient = new TelnetClient("vt200");
-        telnetClient.setDefaultTimeout(5000);
-        boolean isConnected = false;
-        try {
-            telnetClient.connect(host, port);
-            isConnected = true;
-            telnetClient.disconnect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        resultMap.put("FateFlow Status", isConnected);
-
-        host = MetaInfo.PROPERTY_REDIS_IP;
-        port = MetaInfo.PROPERTY_REDIS_PORT;
-        isConnected = false;
-        if(MetaInfo.PROPERTY_CACHE_TYPE.equals(Dict.CACHE_TYPE_REDIS)) {
+        if(StringUtils.isNotBlank(fullUrl)) {
+            String host = fullUrl.substring(fullUrl.indexOf('/') + 2, fullUrl.lastIndexOf(':'));
+            int port = Integer.parseInt(fullUrl.substring(fullUrl.lastIndexOf(':') + 1,
+                    fullUrl.indexOf('/', fullUrl.lastIndexOf(':'))));
+            TelnetClient telnetClient = new TelnetClient("vt200");
+            telnetClient.setDefaultTimeout(5000);
+            boolean isConnected = false;
             try {
                 telnetClient.connect(host, port);
                 isConnected = true;
                 telnetClient.disconnect();
             } catch (Exception e) {
-                e.printStackTrace();
+               // e.printStackTrace();
             }
-            resultMap.put("Redis Status", isConnected);
+            if(!isConnected){
+                String result1 = String.format("default fateflow config %s can not connected", fullUrl);
+                warnList.add(result1);
+            }
+
+            resultMap.put("FateFlow Status", isConnected);
         }
+
+//        host = MetaInfo.PROPERTY_REDIS_IP;
+//        port = MetaInfo.PROPERTY_REDIS_PORT;
+//        isConnected = false;
+//        if(MetaInfo.PROPERTY_CACHE_TYPE.equals(Dict.CACHE_TYPE_REDIS)) {
+//            try {
+//                telnetClient.connect(host, port);
+//                isConnected = true;
+//                telnetClient.disconnect();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            resultMap.put("Redis Status", isConnected);
+//        }
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
+
+
         return builder.build();
     }
 }
