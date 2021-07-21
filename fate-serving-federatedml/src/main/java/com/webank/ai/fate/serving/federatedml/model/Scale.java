@@ -16,10 +16,12 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleMetaProto.ScaleMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.ScaleParamProto.ScaleParam;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,4 +65,8 @@ public class Scale extends BaseComponent {
         return outputData;
     }
 
+    @Override
+    public Map<String, Object> getParams() {
+        return JsonUtil.object2Objcet(scaleParam, new TypeReference<Map<String, Object>>() {});
+    }
 }

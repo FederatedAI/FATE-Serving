@@ -16,11 +16,13 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotMetaProto.OneHotMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.ColsMap;
 import com.webank.ai.fate.core.mlmodel.buffer.OneHotParamProto.OneHotParam;
 import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +37,13 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
     private List<String> cols;
     private Map<String, ColsMap> colsMapMap;
     private boolean needRun;
+    private OneHotParam oneHotParam;
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         logger.info("start init OneHot Encoder class");
         try {
             OneHotMeta oneHotMeta = this.parseModel(OneHotMeta.parser(), protoMeta);
-            OneHotParam oneHotParam = this.parseModel(OneHotParam.parser(), protoParam);
+            oneHotParam = this.parseModel(OneHotParam.parser(), protoParam);
             this.needRun = oneHotMeta.getNeedRun();
             this.cols = oneHotMeta.getTransformColNamesList();
             this.colsMapMap = oneHotParam.getColMapMap();
@@ -103,4 +106,8 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
         return outputData;
     }
 
+    @Override
+    public Map<String, Object> getParams() {
+        return JsonUtil.object2Objcet(oneHotParam, new TypeReference<Map<String, Object>>() {});
+    }
 }

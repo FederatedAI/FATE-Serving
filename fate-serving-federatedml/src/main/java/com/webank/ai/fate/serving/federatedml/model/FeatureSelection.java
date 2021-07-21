@@ -16,10 +16,13 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionMetaProto.FeatureSelectionMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.FeatureSelectionParam;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureSelectionParamProto.LeftCols;
+import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +52,11 @@ public class FeatureSelection extends BaseComponent {
         }
         logger.info("Finish init Feature Selection class");
         return OK;
+    }
+
+    @Override
+    public Map<String, Object> getParams() {
+        return JsonUtil.object2Objcet(featureSelectionParam, new TypeReference<Map<String, Object>>() {});
     }
 
     @Override
