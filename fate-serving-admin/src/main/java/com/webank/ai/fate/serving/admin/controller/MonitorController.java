@@ -170,7 +170,7 @@ public class MonitorController {
         return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, dataMap);
     }
 
-    @GetMapping("monitor/checkHealth")
+    @GetMapping("/monitor/checkHealth")
     public ReturnResult checkHealthService() {
 
         if (healthRecord == null) {
@@ -179,7 +179,7 @@ public class MonitorController {
         return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
     }
 
-    @GetMapping("monitor/selfCheck")
+    @GetMapping("/monitor/selfCheck")
     public ReturnResult selfCheckService() {
         Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
         Map<String,Map> componentMap = new ConcurrentHashMap<>();
