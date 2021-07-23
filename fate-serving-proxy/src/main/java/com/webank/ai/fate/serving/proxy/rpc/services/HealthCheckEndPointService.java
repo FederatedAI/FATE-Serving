@@ -8,12 +8,14 @@ import com.webank.ai.fate.serving.common.utils.TelnetUtil;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +32,12 @@ public class HealthCheckEndPointService {
         this.machineCheck(healthCheckResult);
         this.routerInfoCheck(healthCheckResult);
         return  healthCheckResult;
+    }
+
+    private  void  checkSshCertConfig(HealthCheckResult  healthCheckResult){
 
     }
+
 
     private  void  configCheck(HealthCheckResult  healthCheckResult){
 
@@ -67,11 +73,51 @@ public class HealthCheckEndPointService {
             routerInfoMap.forEach((k,v)->{
                 if(v!=null){
                     v.forEach(routerInfo -> {
-                        boolean  connectAble  = TelnetUtil.tryTelnet(routerInfo.getHost(),routerInfo.getPort());
-                        if(!connectAble){
-                            healthCheckResult.getErrorList().add("check router " +routerInfo.getHost() + " " + routerInfo.getPort()+": can not be telneted");
-                        }else{
-                            healthCheckResult.getOkList().add("check router " +routerInfo.getHost() + " " + routerInfo.getPort()+": telnet ok");
+                        try {
+                            boolean connectAble = TelnetUtil.tryTelnet(routerInfo.getHost(), routerInfo.getPort());
+                            if (!connectAble) {
+                                healthCheckResult.getErrorList().add("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
+                            } else {
+                                healthCheckResult.getOkList().add("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": telnet ok");
+                            }
+                            if (routerInfo.isUseSSL()) {
+
+                                String caFilePath = routerInfo.getCaFile();
+                                if (StringUtils.isNotEmpty(caFilePath)) {
+                                    File caFile = new File(caFilePath);
+                                    if (caFile.exists()) {
+                                        healthCheckResult.getOkList().add("check cert file :" + caFilePath + " is found");
+                                    } else {
+                                        healthCheckResult.getErrorList().add("check cert file :" + caFilePath + " is not found");
+                                    }
+                                } else {
+                                    healthCheckResult.getErrorList();
+                                }
+
+                                String certChainFilePath = routerInfo.getCertChainFile();
+                                if (StringUtils.isNotEmpty(certChainFilePath)) {
+                                    File certChainFile = new File(certChainFilePath);
+                                    if (certChainFile.exists()) {
+                                        healthCheckResult.getOkList().add("check cert file :" + certChainFilePath + " is found");
+                                    } else {
+                                        healthCheckResult.getErrorList().add("check cert file :" + certChainFilePath + " is not found");
+                                    }
+                                }
+
+                                String privateKeyFilePath = routerInfo.getPrivateKeyFile();
+                                if (StringUtils.isNotEmpty(privateKeyFilePath)) {
+                                    File privateKeyFile = new File(privateKeyFilePath);
+                                    if (privateKeyFile.exists()) {
+                                        healthCheckResult.getOkList().add("check cert file :" + privateKeyFilePath + " is found");
+                                    } else {
+                                        healthCheckResult.getErrorList().add("check cert file :" + privateKeyFilePath + " is not found");
+                                    }
+                                }
+
+
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
                         }
                     });
                 }

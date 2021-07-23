@@ -3,11 +3,14 @@ package com.webank.ai.fate.serving.grpc.service;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 
+import com.webank.ai.fate.register.router.RouterService;
+import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.serving.common.bean.HealthCheckResult;
 import com.webank.ai.fate.serving.common.utils.TelnetUtil;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ import java.util.Map;
 @Service
 public class HealthCheckEndPointService {
 
+    @Autowired(required = false)
+    private RouterService routerService;
 
     public HealthCheckResult check(){
         HealthCheckResult  healthCheckResult = new HealthCheckResult();
@@ -31,8 +36,23 @@ public class HealthCheckEndPointService {
         return  healthCheckResult;
     }
 
-    private  void  configCheck(HealthCheckResult  healthCheckResult){
+    private  void  checkFateFlow(HealthCheckResult  healthCheckResult){
+        if (routerService != null) {
+            String transferUri = "flow/online/transfer";
+            URL url = URL.valueOf(transferUri);
+            List urls = routerService.router(url);
+            if(urls== null||urls.size()==0){
+                healthCheckResult.getWarnList().add("check fateflow in zookeeper:"+"not found");
+            }else{
+                healthCheckResult.getOkList().add("check fateflow  in zookeeper:founded");
+            }
+        }
+    }
 
+
+
+
+    private  void  configCheck(HealthCheckResult  healthCheckResult){
         String fullUrl = MetaInfo.PROPERTY_MODEL_TRANSFER_URL;
         if(StringUtils.isNotBlank(fullUrl)) {
             String host = fullUrl.substring(fullUrl.indexOf('/') + 2, fullUrl.lastIndexOf(':'));
@@ -52,6 +72,7 @@ public class HealthCheckEndPointService {
             }else {
                 healthCheckResult.getErrorList().add("check zookeeper url"+":"+MetaInfo.PROPERTY_ZK_URL);
             }
+            checkFateFlow(healthCheckResult);
         }
         }
     }
