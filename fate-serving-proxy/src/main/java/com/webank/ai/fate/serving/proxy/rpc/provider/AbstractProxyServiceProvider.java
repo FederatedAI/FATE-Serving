@@ -23,6 +23,8 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.exceptions.BaseException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,6 +32,7 @@ import java.util.Map;
 
 public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
 
+    Logger logger  = LoggerFactory.getLogger(AbstractProxyServiceProvider.class);
     @Override
     protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         return null;
@@ -47,6 +50,7 @@ public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractSe
             }
             result = (resp) method.invoke(this, context, data);
         } catch (Throwable e) {
+            logger.error("xxxxxxx",e);
             if (e.getCause() != null && e.getCause() instanceof BaseException) {
                 BaseException baseException = (BaseException) e.getCause();
                 throw baseException;

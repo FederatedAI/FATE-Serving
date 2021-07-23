@@ -275,6 +275,8 @@ public class Dict {
     public static final String BATCH_INFERENCE_SPLIT_SIZE = "batch.inference.split.size";
     public static final String WARN_LIST = "warnList";
     public static final String ERROR_LIST =  "errorList";
+    public static final String HEALTH_INFO =  "healthInfo";
+    public static final String PROPERTY_ADMIN_HEALTH_CHECK_TIME = "health.check.time";
 
 
 }

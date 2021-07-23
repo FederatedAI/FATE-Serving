@@ -147,7 +147,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
 
         } catch (Throwable e) {
             exceptions.add(e);
-            logger.error(e.getMessage());
+            logger.error("service error",e);
         } finally {
             requestInHandle.decrementAndGet();
             if (exceptions.size() != 0) {

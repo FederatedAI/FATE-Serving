@@ -69,9 +69,14 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private Map<Proxy.Topic, List<RouterInfo>> topicEndpointMapping;
     private BasicMeta.Endpoint.Builder endpointBuilder;
 
+
     @Override
     public RouteType getRouteType() {
         return routeType;
+    }
+
+    public Map<Proxy.Topic, List<RouterInfo>> getAllRouterInfoMap(){
+        return   topicEndpointMapping;
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.services.HealthCheckService;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -42,6 +43,8 @@ import com.webank.ai.fate.serving.core.utils.NetUtils;
 import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -58,11 +61,14 @@ import java.util.stream.Collectors;
 @RestController
 public class MonitorController {
 
+    Logger logger = LoggerFactory.getLogger(MonitorController.class);
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     @Autowired
     ComponentService componentService;
-    Map<String,Object> healthRecord;
-    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
+    @Autowired
+    HealthCheckService  healthCheckService;
+
+
 
     @GetMapping("/monitor/queryJvm")
     public ReturnResult queryJvmData(String host, int port) {
@@ -173,74 +179,71 @@ public class MonitorController {
 
     @GetMapping("monitor/checkHealth")
     public ReturnResult checkHealthService() {
-
-        if (healthRecord == null) {
-            return selfCheckService();
-        }
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
+        Map data  = healthCheckService.getHealthCheckInfo();
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, data);
     }
 
-    @GetMapping("monitor/selfCheck")
-    public ReturnResult selfCheckService() {
-        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
-        Map<String,Map> componentMap = new ConcurrentHashMap<>();
-        componentMap.put("proxy",new ConcurrentHashMap());
-        componentMap.put("serving",new ConcurrentHashMap());
-        Map<String,List<String>> addressMap = componentService.getComponentAddresses();
-        componentService.pullService();
-        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
-
-        List batchList = new ArrayList<>();
-        for(String component: addressMap.keySet()) {
-            if (component.equals("admin")) {
-                continue;
-            }
-            for (String address : addressMap.get(component)) {
-                batchList.add(new java.lang.Object());
-            }
-        }
-
-        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
-            batchList.add(new java.lang.Object());
-        }
-
-        final CountDownLatch countDownLatch = new CountDownLatch(batchList.size());
-        for(String component: addressMap.keySet()) {
-            if (component.equals("admin")) {
-                continue;
-            }
-            for (String address : addressMap.get(component)) {
-                executor.submit(() -> {
-                    try {
-                        checkRemoteHealth(componentMap, address, component);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    countDownLatch.countDown();
-                });
-            }
-        }
-        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
-            executor.submit(() -> {
-                try {
-                    checkInferenceService(componentMap,serviceInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                countDownLatch.countDown();
-            });
-        }
-        try {
-            countDownLatch.await(10,TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        newHealthRecord.put("timeStamp", System.currentTimeMillis());
-        newHealthRecord.put("info", componentMap);
-        healthRecord = newHealthRecord;
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
-    }
+//    @GetMapping("monitor/selfCheck")
+//    public ReturnResult selfCheckService() {
+//        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
+//        Map<String,Map> componentMap = new ConcurrentHashMap<>();
+//        componentMap.put("proxy",new ConcurrentHashMap());
+//        componentMap.put("serving",new ConcurrentHashMap());
+//        Map<String,List<String>> addressMap = componentService.getComponentAddresses();
+//        componentService.pullService();
+//        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
+//
+//        List batchList = new ArrayList<>();
+//        for(String component: addressMap.keySet()) {
+//            if (component.equals("admin")) {
+//                continue;
+//            }
+//            for (String address : addressMap.get(component)) {
+//                batchList.add(new java.lang.Object());
+//            }
+//        }
+//
+////        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
+////            batchList.add(new java.lang.Object());
+////        }
+//
+//        final CountDownLatch countDownLatch = new CountDownLatch(addressMap.size());
+//        for(String component: addressMap.keySet()) {
+//            if (component.equals("admin")) {
+//                countDownLatch.countDown();
+//                continue;
+//            }
+//            for (String address : addressMap.get(component)) {
+//                try{
+//                executor.submit(() -> {
+//                            try {
+//                                checkRemoteHealth(componentMap, address, component);
+//                            } catch (Exception e) {
+//                                logger.error("check {} {} health error ",component,address);
+//                            }
+//                        });
+//                }finally {
+//                    countDownLatch.countDown();
+//                }
+//
+//            }
+//        }
+////        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
+////            executor.submit(() -> {
+////                try {
+////                    checkInferenceService(componentMap,serviceInfo);
+////                } catch (Exception e) {
+////                    e.printStackTrace();
+////                }
+////                countDownLatch.countDown();
+////            });
+////        }
+//
+//        newHealthRecord.put("timeStamp", System.currentTimeMillis());
+//        newHealthRecord.put("info", componentMap);
+//        healthRecord = newHealthRecord;
+//        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
+//    }
 
     private CommonServiceGrpc.CommonServiceBlockingStub getMonitorServiceBlockStub(String host, int port) {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
@@ -271,32 +274,9 @@ public class MonitorController {
     }
 
 
-    private void checkRemoteHealth(Map<String,Map> componentMap, String address, String component) {
-            Map<String,List> currentComponentMap = componentMap.get(component);
-            String host = address.substring(0,address.indexOf(":"));
-            int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
-            if (!currentComponentMap.containsKey(address)) {
-                currentComponentMap.put(address, new Vector<>());
-            }
-            List currentList = currentComponentMap.get(address);
-            CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
-            CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
-            builder.setMode("Test");
-            builder.setVersion("0.1");
-            builder.setType("Test");
-            CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
 
-            Map<String,Object> currentInfoMap = new HashMap<>();
-            currentInfoMap.put("type","statusInfo");
-            if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
-                currentInfoMap.put("data",null);
-            }
-            else{
-                currentInfoMap.put("data",JsonUtil.json2Object(commonResponse.getData().toStringUtf8(),Map.class));
-            }
-            currentList.add(currentInfoMap);
-        return;
-    }
+
+
 
     private void checkInferenceService(Map<String,Map> componentMap, ComponentService.ServiceInfo serviceInfo) throws Exception{
         InferenceServiceProto.InferenceMessage.Builder inferenceMessageBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
@@ -351,61 +331,9 @@ public class MonitorController {
         }
         return;
     }
-    @Scheduled(cron = "5/10 * * * * ? ")
-    private void scheduledCheck() throws InterruptedException {
-        if (this.healthRecord != null && System.currentTimeMillis() - Long.valueOf(this.healthRecord.get("timeStamp").toString()) < 150000) {
-            return;
-        }
-        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
-        Map<String,Map> componentMap = new ConcurrentHashMap<>();
-        Map<String,List<String>> addressMap = componentService.getComponentAddresses();
-        componentService.pullService();
-        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
-        componentMap.put("proxy",new ConcurrentHashMap());
-        componentMap.put("serving",new ConcurrentHashMap());
-        List batchList = new ArrayList<>();
-        for(String component: addressMap.keySet()) {
-            if (component.equals("admin")) {
-                continue;
-            }
-            for (String address : addressMap.get(component)) {
-                batchList.add(new java.lang.Object());
-            }
-        }
+    //@Scheduled(cron = "5/10 * * * * ? ")
 
-        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
-            batchList.add(new java.lang.Object());
-        }
 
-        final CountDownLatch countDownLatch = new CountDownLatch(batchList.size());
-        for(String component: addressMap.keySet()) {
-            if (component.equals("admin")) {
-                continue;
-            }
-            for (String address : addressMap.get(component)) {
-                executor.submit(() -> {
-                    try {
-                        checkRemoteHealth(componentMap, address, component);
-                        countDownLatch.countDown();
-                    } catch (Exception e) {
-                        countDownLatch.countDown();
-                    }
-                });
-            }
-        }
-        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
-            executor.submit(() -> {
-                try {
-                    checkInferenceService(componentMap,serviceInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                countDownLatch.countDown();
-            });
-        }
-        countDownLatch.await(10,TimeUnit.SECONDS);
-        newHealthRecord.put("timeStamp", System.currentTimeMillis());
-        newHealthRecord.put("info", componentMap);
-        healthRecord = newHealthRecord;
-    }
+
+
 }
