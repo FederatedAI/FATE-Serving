@@ -27,6 +27,7 @@ import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,6 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
 
     @Override
     protected Map<String, byte[]> doLoadModel(Context context, ModelLoaderParam modelLoaderParam) {
-
         logger.info("read model, name: {} namespace: {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
         try {
             String requestUrl = "";
@@ -97,8 +97,17 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             if (StringUtils.isNotBlank(filePath)) {
                 requestUrl = URLDecoder.decode(filePath);
             } else if (routerService != null) {
-                URL url = URL.valueOf("flow/online/transfer");
+                //serving 2.1.0兼容
+                String transferUri = "flow/online/transfer";
+                String modelVersion = modelLoaderParam.tableName;
+                String modelId = modelLoaderParam.nameSpace.replace("#", "_");
+                URL url = URL.valueOf(transferUri + "/" + modelId + "/" + modelVersion);
                 List<URL> urls = routerService.router(url);
+                if (ObjectUtils.allNotNull(urls)) {
+                    url = URL.valueOf(transferUri);
+                    urls = routerService.router(url);
+                }
+
                 if (urls == null || urls.isEmpty()) {
                     logger.info("register url not found, {}", url);
                 } else {
