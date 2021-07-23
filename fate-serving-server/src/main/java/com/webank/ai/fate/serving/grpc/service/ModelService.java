@@ -31,6 +31,8 @@ import com.webank.ai.fate.serving.core.bean.ModelActionType;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
 
     @Autowired
     ModelServiceProvider modelServiceProvider;
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     @RegisterService(serviceName = "publishLoad")
@@ -50,6 +53,8 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
+        logger.info("returnResult = " + returnResult);
+        logger.info("req.getLocal().getPartyId() = " + req.getLocal().getPartyId());
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");

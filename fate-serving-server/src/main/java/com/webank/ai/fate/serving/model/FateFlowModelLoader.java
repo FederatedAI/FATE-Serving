@@ -100,7 +100,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                 //serving 2.1.0兼容
                 String transferUri = "flow/online/transfer";
                 String modelVersion = modelLoaderParam.tableName;
-                String modelId = modelLoaderParam.nameSpace.replace("#", "_");
+                String modelId = modelLoaderParam.nameSpace.replace("#", "~");
                 URL url = URL.valueOf(transferUri + "/" + modelId + "/" + modelVersion);
                 List<URL> urls = routerService.router(url);
                 if (ObjectUtils.allNotNull(urls)) {
