@@ -17,7 +17,6 @@
 package com.webank.ai.fate.serving.common.provider;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -26,7 +25,7 @@ import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.common.ServiceWrapper;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.common.bean.HealthCheckResult;
+import com.webank.ai.fate.serving.common.health.HealthCheckResult;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.JvmInfoCounter;
@@ -43,17 +42,9 @@ import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.grpc.service.HealthCheckEndPointService;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.telnet.TelnetClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-import oshi.hardware.GlobalMemory;
 
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -215,7 +206,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
     @FateServiceMethod(name = "CHECK_HEALTH")
     public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-        HealthCheckResult healthCheckResult = healthCheckEndPointService.check();
+        HealthCheckResult healthCheckResult = healthCheckEndPointService.check(context);
 //        Map<String,Object> resultMap = new HashMap<>();
 //        List<Object> machineInfoList = new ArrayList<>();
 //        List<String>  warnList = Lists.newArrayList();

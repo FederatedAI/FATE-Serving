@@ -180,6 +180,8 @@ public class MonitorController {
     @GetMapping("monitor/checkHealth")
     public ReturnResult checkHealthService() {
         Map data  = healthCheckService.getHealthCheckInfo();
+
+
         return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, data);
     }
 

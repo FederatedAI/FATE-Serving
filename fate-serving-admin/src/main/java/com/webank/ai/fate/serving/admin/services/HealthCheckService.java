@@ -1,8 +1,12 @@
 package com.webank.ai.fate.serving.admin.services;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.serving.common.health.HealthCheckRecord;
+import com.webank.ai.fate.serving.common.health.HealthCheckResult;
+import com.webank.ai.fate.serving.common.health.HealthCheckStatus;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
@@ -45,31 +49,37 @@ public class HealthCheckService implements InitializingBean {
 
     private void  checkRemoteHealth(Map<String,Map> componentMap, String address, String component) {
 
-        Map<String,List> currentComponentMap = componentMap.get(component);
+        Map<String,Map> currentComponentMap = componentMap.get(component);
         String host = address.substring(0,address.indexOf(":"));
         int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
-        if (!currentComponentMap.containsKey(address)) {
-            currentComponentMap.put(address, new Vector<>());
-        }
-        List currentList = currentComponentMap.get(address);
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
         CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
-//        builder.setMode("Test");
-//        builder.setVersion("0.1");
-//        builder.setType("Test");
         CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
-
-        Map<String,Object> healthInfo = new HashMap<>();
-        healthInfo.put("type","statusInfo");
-        if (commonResponse.getData() == null || commonResponse.getData().toStringUtf8() == "null") {
-            healthInfo.put("data",null);
-        }
-        else{
-            healthInfo.put("data", JsonUtil.json2Object(commonResponse.getData().toStringUtf8(),Map.class));
-        }
-        currentList.add(healthInfo);
+        HealthCheckResult  healthCheckResult = JsonUtil.json2Object(commonResponse.getData().toStringUtf8(), HealthCheckResult.class);
+        //currentList.add(healthInfo);
         logger.info("componentMap {}",componentMap);
+        Map result = new HashMap();
+        List<HealthCheckRecord> okList = Lists.newArrayList();
+        List<HealthCheckRecord> warnList = Lists.newArrayList();
+        List<HealthCheckRecord> errorList = Lists.newArrayList();
+        if(healthCheckResult!=null){
+            List<HealthCheckRecord> records = healthCheckResult.getRecords();
+            for (HealthCheckRecord record : records) {
+                if(record.getHealthCheckStatus().equals(HealthCheckStatus.ok)){
+                    okList.add(record);
+                }else if(record.getHealthCheckStatus().equals(HealthCheckStatus.warn)){
+                    warnList.add(record);
+                }else{
+                    errorList.add(record);
+                }
 
+            }
+
+        }
+        result.put("okList",okList);
+        result.put("warnList",warnList);
+        result.put("errorList",errorList);
+        currentComponentMap.put(address,result);
     }
 
     private  void scheduledCheck()   {
@@ -81,8 +91,6 @@ public class HealthCheckService implements InitializingBean {
             Map<String, Object> newHealthRecord = new ConcurrentHashMap<>();
             Map<String, Map> componentHearthMap = new ConcurrentHashMap<>();
             Map<String, List<String>> addressMap = componentService.getComponentAddresses();
-
-            logger.info("==========={}", addressMap);
             //componentService.pullService();
             List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
             componentHearthMap.put("proxy", new ConcurrentHashMap());
@@ -104,7 +112,7 @@ public class HealthCheckService implements InitializingBean {
                 }
             }
             newHealthRecord.put(Dict.TIMESTAMP, System.currentTimeMillis());
-            newHealthRecord.put(Dict.HEALTH_INFO, componentHearthMap);
+            newHealthRecord.putAll(componentHearthMap);
             healthRecord = newHealthRecord;
         }catch(Exception  e){
             logger.error("schedule health check error ",e );
@@ -131,7 +139,7 @@ public class HealthCheckService implements InitializingBean {
     }
     @Override
     public void afterPropertiesSet() throws Exception {
-        logger.info("oooooooooooooooooo");
+
         ScheduledExecutorService  scheduledExecutorService= Executors.newSingleThreadScheduledExecutor();
         scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override

@@ -101,6 +101,8 @@ public class Bootstrap {
             MetaInfo.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE);
             MetaInfo.PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE);
             MetaInfo.PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE = environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE);
+            MetaInfo.PROPERTY_ALLOW_HEALTH_CHECK = environment.getProperty(Dict.PROPERTY_ALLOW_HEALTH_CHECK) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ALLOW_HEALTH_CHECK)) : true;
+
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("init metainfo error", e);

@@ -152,6 +152,7 @@ public class Dict {
     public static final String PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT = "proxy.grpc.batch.inference.timeout";
     public static final String PROPERTY_MODEL_CACHE_PATH = "model.cache.path";
     public static final String PROPERTY_LR_USE_PARALLEL="lr.use.parallel";
+    public static final String PROPERTY_ALLOW_HEALTH_CHECK = "health.check.allow";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 

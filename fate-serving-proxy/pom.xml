@@ -36,7 +36,7 @@
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-serving-core</artifactId>
             <version>${fate.version}</version>
-            <scope>compile</scope>
+
         </dependency>
 
         <dependency>
