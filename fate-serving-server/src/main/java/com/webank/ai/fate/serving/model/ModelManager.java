@@ -378,8 +378,8 @@ public class ModelManager implements InitializingBean {
         remoteModel.setRole(remotePartyRole);
         model.getFederationModelMap().put(remoteModel.getPartId(), remoteModel);
         ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
-        String selfPartyId = selfParty.getPartyIdList().get(0);
-        ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
+        //String selfPartyId = selfParty.getPartyIdList().get(0);
+        ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(model.getPartId());
         String selfNamespace = selfModelInfo.getNamespace();
         String selfTableName = selfModelInfo.getTableName();
         model.setNamespace(selfNamespace);
