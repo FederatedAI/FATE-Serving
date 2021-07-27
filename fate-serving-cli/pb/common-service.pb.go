@@ -19,9 +19,13 @@
 // 	protoc        v3.17.3
 // source: common-service.proto
 
-package __
+package pb
 
 import (
+	context "context"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -907,4 +911,300 @@ func file_common_service_proto_init() {
 	file_common_service_proto_rawDesc = nil
 	file_common_service_proto_goTypes = nil
 	file_common_service_proto_depIdxs = nil
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// CommonServiceClient is the client API for CommonService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type CommonServiceClient interface {
+	QueryMetrics(ctx context.Context, in *QueryMetricRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	UpdateFlowRule(ctx context.Context, in *UpdateFlowRuleRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	ListProps(ctx context.Context, in *QueryPropsRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	QueryJvmInfo(ctx context.Context, in *QueryJvmInfoRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	UpdateService(ctx context.Context, in *UpdateServiceRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	UpdateConfig(ctx context.Context, in *UpdateConfigRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	CheckHealthService(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+}
+
+type commonServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewCommonServiceClient(cc grpc.ClientConnInterface) CommonServiceClient {
+	return &commonServiceClient{cc}
+}
+
+func (c *commonServiceClient) QueryMetrics(ctx context.Context, in *QueryMetricRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, "/com.webank.ai.fate.api.networking.common.CommonService/queryMetrics", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonServiceClient) UpdateFlowRule(ctx context.Context, in *UpdateFlowRuleRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, "/com.webank.ai.fate.api.networking.common.CommonService/updateFlowRule", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonServiceClient) ListProps(ctx context.Context, in *QueryPropsRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, "/com.webank.ai.fate.api.networking.common.CommonService/listProps", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonServiceClient) QueryJvmInfo(ctx context.Context, in *QueryJvmInfoRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, "/com.webank.ai.fate.api.networking.common.CommonService/queryJvmInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonServiceClient) UpdateService(ctx context.Context, in *UpdateServiceRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, "/com.webank.ai.fate.api.networking.common.CommonService/updateService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonServiceClient) UpdateConfig(ctx context.Context, in *UpdateConfigRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, "/com.webank.ai.fate.api.networking.common.CommonService/updateConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commonServiceClient) CheckHealthService(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, "/com.webank.ai.fate.api.networking.common.CommonService/checkHealthService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CommonServiceServer is the server API for CommonService service.
+type CommonServiceServer interface {
+	QueryMetrics(context.Context, *QueryMetricRequest) (*CommonResponse, error)
+	UpdateFlowRule(context.Context, *UpdateFlowRuleRequest) (*CommonResponse, error)
+	ListProps(context.Context, *QueryPropsRequest) (*CommonResponse, error)
+	QueryJvmInfo(context.Context, *QueryJvmInfoRequest) (*CommonResponse, error)
+	UpdateService(context.Context, *UpdateServiceRequest) (*CommonResponse, error)
+	UpdateConfig(context.Context, *UpdateConfigRequest) (*CommonResponse, error)
+	CheckHealthService(context.Context, *HealthCheckRequest) (*CommonResponse, error)
+}
+
+// UnimplementedCommonServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedCommonServiceServer struct {
+}
+
+func (*UnimplementedCommonServiceServer) QueryMetrics(context.Context, *QueryMetricRequest) (*CommonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryMetrics not implemented")
+}
+func (*UnimplementedCommonServiceServer) UpdateFlowRule(context.Context, *UpdateFlowRuleRequest) (*CommonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateFlowRule not implemented")
+}
+func (*UnimplementedCommonServiceServer) ListProps(context.Context, *QueryPropsRequest) (*CommonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProps not implemented")
+}
+func (*UnimplementedCommonServiceServer) QueryJvmInfo(context.Context, *QueryJvmInfoRequest) (*CommonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryJvmInfo not implemented")
+}
+func (*UnimplementedCommonServiceServer) UpdateService(context.Context, *UpdateServiceRequest) (*CommonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateService not implemented")
+}
+func (*UnimplementedCommonServiceServer) UpdateConfig(context.Context, *UpdateConfigRequest) (*CommonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateConfig not implemented")
+}
+func (*UnimplementedCommonServiceServer) CheckHealthService(context.Context, *HealthCheckRequest) (*CommonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckHealthService not implemented")
+}
+
+func RegisterCommonServiceServer(s *grpc.Server, srv CommonServiceServer) {
+	s.RegisterService(&_CommonService_serviceDesc, srv)
+}
+
+func _CommonService_QueryMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryMetricRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServiceServer).QueryMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/com.webank.ai.fate.api.networking.common.CommonService/QueryMetrics",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServiceServer).QueryMetrics(ctx, req.(*QueryMetricRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommonService_UpdateFlowRule_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateFlowRuleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServiceServer).UpdateFlowRule(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/com.webank.ai.fate.api.networking.common.CommonService/UpdateFlowRule",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServiceServer).UpdateFlowRule(ctx, req.(*UpdateFlowRuleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommonService_ListProps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryPropsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServiceServer).ListProps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/com.webank.ai.fate.api.networking.common.CommonService/ListProps",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServiceServer).ListProps(ctx, req.(*QueryPropsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommonService_QueryJvmInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryJvmInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServiceServer).QueryJvmInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/com.webank.ai.fate.api.networking.common.CommonService/QueryJvmInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServiceServer).QueryJvmInfo(ctx, req.(*QueryJvmInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommonService_UpdateService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServiceServer).UpdateService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/com.webank.ai.fate.api.networking.common.CommonService/UpdateService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServiceServer).UpdateService(ctx, req.(*UpdateServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommonService_UpdateConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServiceServer).UpdateConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/com.webank.ai.fate.api.networking.common.CommonService/UpdateConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServiceServer).UpdateConfig(ctx, req.(*UpdateConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommonService_CheckHealthService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommonServiceServer).CheckHealthService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/com.webank.ai.fate.api.networking.common.CommonService/CheckHealthService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommonServiceServer).CheckHealthService(ctx, req.(*HealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _CommonService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "com.webank.ai.fate.api.networking.common.CommonService",
+	HandlerType: (*CommonServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "queryMetrics",
+			Handler:    _CommonService_QueryMetrics_Handler,
+		},
+		{
+			MethodName: "updateFlowRule",
+			Handler:    _CommonService_UpdateFlowRule_Handler,
+		},
+		{
+			MethodName: "listProps",
+			Handler:    _CommonService_ListProps_Handler,
+		},
+		{
+			MethodName: "queryJvmInfo",
+			Handler:    _CommonService_QueryJvmInfo_Handler,
+		},
+		{
+			MethodName: "updateService",
+			Handler:    _CommonService_UpdateService_Handler,
+		},
+		{
+			MethodName: "updateConfig",
+			Handler:    _CommonService_UpdateConfig_Handler,
+		},
+		{
+			MethodName: "checkHealthService",
+			Handler:    _CommonService_CheckHealthService_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "common-service.proto",
 }
