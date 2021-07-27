@@ -17,17 +17,15 @@
 package com.webank.ai.fate.serving.proxy.rpc.provider;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
-import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.common.ServiceWrapper;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
-import com.webank.ai.fate.serving.common.bean.HealthCheckResult;
+import com.webank.ai.fate.serving.common.health.HealthCheckResult;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.JvmInfoCounter;
@@ -35,32 +33,23 @@ import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
-import com.webank.ai.fate.serving.common.utils.TelnetUtil;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
-import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.bean.RouteTableWrapper;
 import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
 import com.webank.ai.fate.serving.proxy.rpc.services.HealthCheckEndPointService;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.telnet.TelnetClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-import oshi.hardware.GlobalMemory;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -278,71 +267,8 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
     @FateServiceMethod(name = "CHECK_HEALTH")
     public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
 
-        logger.info("ooooooooooooooooooooo");
-        HealthCheckResult healthCheckResult = healthCheckEndPointService.check();
+        HealthCheckResult healthCheckResult = healthCheckEndPointService.check(context);
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-//        Map<String,Object> resultMap = new HashMap<>();
-//        List<Object> machineInfoList = new ArrayList<>();
-//        List<String>  warnList = Lists.newArrayList();
-//        List<String>  errorList = Lists.newArrayList();
-//
-//        /**
-//         *
-//         */
-//
-//        try {
-//            SystemInfo systemInfo = new SystemInfo();
-//            CentralProcessor processor = systemInfo.getHardware().getProcessor();
-//            long[] prevTicks = processor.getSystemCpuLoadTicks();
-//            long[] ticks = processor.getSystemCpuLoadTicks();
-//            long nice = ticks[CentralProcessor.TickType.NICE.getIndex()] - prevTicks[CentralProcessor.TickType.NICE.getIndex()];
-//            long irq = ticks[CentralProcessor.TickType.IRQ.getIndex()] - prevTicks[CentralProcessor.TickType.IRQ.getIndex()];
-//            long softirq = ticks[CentralProcessor.TickType.SOFTIRQ.getIndex()] - prevTicks[CentralProcessor.TickType.SOFTIRQ.getIndex()];
-//            long steal = ticks[CentralProcessor.TickType.STEAL.getIndex()] - prevTicks[CentralProcessor.TickType.STEAL.getIndex()];
-//            long cSys = ticks[CentralProcessor.TickType.SYSTEM.getIndex()] - prevTicks[CentralProcessor.TickType.SYSTEM.getIndex()];
-//            long user = ticks[CentralProcessor.TickType.USER.getIndex()] - prevTicks[CentralProcessor.TickType.USER.getIndex()];
-//            long ioWait = ticks[CentralProcessor.TickType.IOWAIT.getIndex()] - prevTicks[CentralProcessor.TickType.IOWAIT.getIndex()];
-//            long idle = ticks[CentralProcessor.TickType.IDLE.getIndex()] - prevTicks[CentralProcessor.TickType.IDLE.getIndex()];
-//            long totalCpu = user + nice + cSys + idle + ioWait + irq + softirq + steal;
-//
-//            Map<String,String> CPUInfo = new HashMap<>();
-//            CPUInfo.put("Total CPU Processors", String.valueOf(processor.getLogicalProcessorCount()));
-//            CPUInfo.put("CPU Usage", new DecimalFormat("#.##%").format(1.0-(idle * 1.0 / totalCpu)));
-//            machineInfoList.add(CPUInfo);
-//
-//            GlobalMemory memory = systemInfo.getHardware().getMemory();
-//            long totalByte = memory.getTotal();
-//            long callableByte = memory.getAvailable();
-//            Map<String,String> memoryInfo= new HashMap<>();
-//            memoryInfo.put("Total Memory",new DecimalFormat("#.##GB").format(totalByte/1024.0/1024.0/1024.0));
-//            memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
-//
-//            machineInfoList.add(memoryInfo);
-//
-//        } catch (Exception e) {
-//           // e.printStackTrace();
-//
-//        }
-//        resultMap.put("machineInfo",machineInfoList);
-//        try {
-////            String filePath = "";
-////            if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
-////                filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
-////            } else {
-////                filePath = userDir + this.fileSeparator + DEFAULT_ROUTER_FILE;
-////            }
-//
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            resultMap.put("routeTableInfo",null);
-//            builder.setStatusCode(StatusCode.SUCCESS);
-//            builder.setData(ByteString.copyFrom(JsonUtil.object2Json(resultMap).getBytes()));
-//            return builder.build();
-//        }
-//
-//        resultMap.put(Dict.WARN_LIST,warnList);
-//        resultMap.put(Dict.ERROR_LIST,errorList);
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setData(ByteString.copyFrom(JsonUtil.object2Json(healthCheckResult).getBytes()));
         return builder.build();
