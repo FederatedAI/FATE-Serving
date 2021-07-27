@@ -180,72 +180,21 @@ public class MonitorController {
     @GetMapping("monitor/checkHealth")
     public ReturnResult checkHealthService() {
         Map data  = healthCheckService.getHealthCheckInfo();
-
-
         return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, data);
     }
 
-//    @GetMapping("monitor/selfCheck")
-//    public ReturnResult selfCheckService() {
-//        Map<String,Object> newHealthRecord = new ConcurrentHashMap<>();
-//        Map<String,Map> componentMap = new ConcurrentHashMap<>();
-//        componentMap.put("proxy",new ConcurrentHashMap());
-//        componentMap.put("serving",new ConcurrentHashMap());
-//        Map<String,List<String>> addressMap = componentService.getComponentAddresses();
-//        componentService.pullService();
-//        List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
-//
-//        List batchList = new ArrayList<>();
-//        for(String component: addressMap.keySet()) {
-//            if (component.equals("admin")) {
-//                continue;
-//            }
-//            for (String address : addressMap.get(component)) {
-//                batchList.add(new java.lang.Object());
-//            }
-//        }
-//
-////        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
-////            batchList.add(new java.lang.Object());
-////        }
-//
-//        final CountDownLatch countDownLatch = new CountDownLatch(addressMap.size());
-//        for(String component: addressMap.keySet()) {
-//            if (component.equals("admin")) {
-//                countDownLatch.countDown();
-//                continue;
-//            }
-//            for (String address : addressMap.get(component)) {
-//                try{
-//                executor.submit(() -> {
-//                            try {
-//                                checkRemoteHealth(componentMap, address, component);
-//                            } catch (Exception e) {
-//                                logger.error("check {} {} health error ",component,address);
-//                            }
-//                        });
-//                }finally {
-//                    countDownLatch.countDown();
-//                }
-//
-//            }
-//        }
-////        for (ComponentService.ServiceInfo serviceInfo: serviceInfos) {
-////            executor.submit(() -> {
-////                try {
-////                    checkInferenceService(componentMap,serviceInfo);
-////                } catch (Exception e) {
-////                    e.printStackTrace();
-////                }
-////                countDownLatch.countDown();
-////            });
-////        }
-//
-//        newHealthRecord.put("timeStamp", System.currentTimeMillis());
-//        newHealthRecord.put("info", componentMap);
-//        healthRecord = newHealthRecord;
-//        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, healthRecord);
-//    }
+    @GetMapping("monitor/selfCheck")
+    public ReturnResult selfCheckService() {
+        long currentTimestamp = System.currentTimeMillis();
+        Map data  = healthCheckService.getHealthCheckInfo();
+        if(data!=null&&data.get(Dict.TIMESTAMP)!=null){
+          long timestamp =  ((Number)data.get(Dict.TIMESTAMP)).longValue();
+          if(currentTimestamp-timestamp>10000){
+              data  = healthCheckService.check();
+          }
+        }
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, data);
+    }
 
     private CommonServiceGrpc.CommonServiceBlockingStub getMonitorServiceBlockStub(String host, int port) {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");

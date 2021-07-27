@@ -82,12 +82,9 @@ public class HealthCheckService implements InitializingBean {
         currentComponentMap.put(address,result);
     }
 
-    private  void scheduledCheck()   {
+    public   Map check()   {
         try {
-            logger.info("schedule check begin");
-//        if (this.healthRecord != null && System.currentTimeMillis() - Long.valueOf(this.healthRecord.get("timeStamp").toString()) < 150000) {
-//            return;
-//        }
+
             Map<String, Object> newHealthRecord = new ConcurrentHashMap<>();
             Map<String, Map> componentHearthMap = new ConcurrentHashMap<>();
             Map<String, List<String>> addressMap = componentService.getComponentAddresses();
@@ -114,9 +111,11 @@ public class HealthCheckService implements InitializingBean {
             newHealthRecord.put(Dict.TIMESTAMP, System.currentTimeMillis());
             newHealthRecord.putAll(componentHearthMap);
             healthRecord = newHealthRecord;
+
         }catch(Exception  e){
             logger.error("schedule health check error ",e );
         }
+        return  healthRecord;
     }
 
 
@@ -139,14 +138,15 @@ public class HealthCheckService implements InitializingBean {
     }
     @Override
     public void afterPropertiesSet() throws Exception {
+        if(MetaInfo.PROPERTY_ALLOW_HEALTH_CHECK) {
+            ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+            scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
 
-        ScheduledExecutorService  scheduledExecutorService= Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-
-                    scheduledCheck();
-            }
-        },0, MetaInfo.PROPERTY_ADMIN_HEALTH_CHECK_TIME,TimeUnit.SECONDS);
+                    check();
+                }
+            }, 0, MetaInfo.PROPERTY_ADMIN_HEALTH_CHECK_TIME, TimeUnit.SECONDS);
+        }
     }
 }
