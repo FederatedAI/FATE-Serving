@@ -27,6 +27,7 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 import org.slf4j.Logger;
@@ -43,7 +44,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(ZookeeperRegistry.class);
     private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
-    private final static String DEFAULT_ROOT = "FATE-SERVICES";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
     private final static String ROOT_KEY = "root";
     public static ConcurrentMap<URL, ZookeeperRegistry> registeryMap = new ConcurrentHashMap();
@@ -61,7 +61,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
-        String group = url.getParameter(ROOT_KEY, DEFAULT_ROOT);
+        String group = url.getParameter(ROOT_KEY, Dict.DEFAULT_FATE_ROOT);
         if (!group.startsWith(PATH_SEPARATOR)) {
             group = PATH_SEPARATOR + group;
         }

@@ -61,6 +61,7 @@ public class Dict {
     public static final String PROPERTY_BATCH_SPLIT_SIZE = "batch.split.size";
     public static final String PROPERTY_LR_SPLIT_SIZE = "lr.split.size";
     public static final String CACHE_TYPE_REDIS = "redis";
+    public static final String DEFAULT_FATE_ROOT = "FATE-SERVICES";
 
 
     /**
