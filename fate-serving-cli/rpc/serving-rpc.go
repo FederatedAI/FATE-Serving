@@ -87,7 +87,7 @@ func QueryHealthInfo(address string, queryHealthInfoRequest *pb.HealthCheckReque
 	var conn *grpc.ClientConn
 	var err error
 	defer panicRecover()
-	conn, err = grpc.Dial(address, grpc.WithDisableHealthCheck())
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
