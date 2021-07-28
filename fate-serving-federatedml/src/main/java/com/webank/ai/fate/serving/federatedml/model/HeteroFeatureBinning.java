@@ -68,8 +68,9 @@ public class HeteroFeatureBinning extends BaseComponent {
     }
 
     @Override
-    public Map<String, Object> getParams() {
-        return JsonUtil.object2Objcet(featureBinningParam, new TypeReference<Map<String, Object>>() {});
+    public Object getParam() {
+        return featureBinningParam;
+        //return JsonUtil.object2Objcet(featureBinningParam, new TypeReference<Map<String, Object>>() {});
     }
 
     @Override

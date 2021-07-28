@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -98,6 +99,8 @@ public class ModelController {
             logger.debug("response: {}", response);
         }
 
+        logger.info("response: {}", response);
+
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();
         List<ModelServiceProto.ModelInfoEx> modelInfosList = response.getModelInfosList();
@@ -113,7 +116,25 @@ public class ModelController {
             }
 
             for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
-                rows.add(JsonUtil.json2Object(modelInfoEx.getContent(), Map.class));
+                ModelServiceProto.ModelProcessorExt modelProcessorExt = modelInfoEx.getModelProcessorExt();
+                Map modelData = JsonUtil.json2Object(modelInfoEx.getContent(), Map.class);
+                List<Map>  componentList = Lists.newArrayList();
+                if(modelProcessorExt!=null) {
+                    List<ModelServiceProto.PipelineNode> nodes =  modelProcessorExt.getNodesList();
+                    if(nodes!=null){
+                        nodes.forEach(node ->{
+
+                          Map paramMap = JsonUtil.json2Object(node.getParams(),Map.class)  ;
+                          Map compnentMap =new HashMap();
+                          compnentMap.put("name",node.getName());
+                          compnentMap.put("params",paramMap);
+                            componentList.add(compnentMap);
+                        });
+                    }
+
+                    modelData.put("components",componentList);
+                }
+                rows.add(modelData);
             }
         }
 

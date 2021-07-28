@@ -101,3 +101,54 @@ export function updateFlowRule(data) {
         data
     })
 }
+// /api/monitor/checkHealth
+export function checkHealth(data) {
+    return request({
+        url: `${pram}/api/monitor/checkHealth`,
+        method: 'get'
+    })
+}
+
+// proxy路由配置
+// 列表查询
+export function queryRouterList(data) {
+    return request({
+        url: `${pram}/api/router/query`,
+        method: 'post',
+        data
+    })
+}
+
+// 新增路由
+export function addRouter(data) {
+    return request({
+        url: `${pram}/api/router/add`,
+        method: 'post',
+        data
+    })
+}
+
+// 更新路由
+export function updateRouter(data) {
+    return request({
+        url: `${pram}/api/router/update`,
+        method: 'post',
+        data
+    })
+}
+
+// /api/monitor/selfCheck
+export function selfCheck(data) {
+    return request({
+        url: `${pram}/api/monitor/selfCheck`,
+        method: 'get'
+    })
+}
+// 删除列表项
+export function deleteRouter(data) {
+    return request({
+        url: `${pram}/api/router/delete`,
+        method: 'post',
+        data
+    })
+}

@@ -37,12 +37,17 @@ public abstract class HeteroSecureBoost extends BaseComponent {
     protected List<String> classes;
     protected int treeDim;
     protected double learningRate;
+    BoostingTreeModelParam param;
+
+    public  Object getParam(){
+        return  param;
+    }
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         logger.info("start init HeteroLR class");
         try {
-            BoostingTreeModelParam param = this.parseModel(BoostingTreeModelParam.parser(), protoParam);
+            param= this.parseModel(BoostingTreeModelParam.parser(), protoParam);
             BoostingTreeModelMeta meta = this.parseModel(BoostingTreeModelMeta.parser(), protoMeta);
             Map<Integer, String> featureNameMapping = param.getFeatureNameFidMapping();
             featureNameMapping.forEach((k, v) -> {
@@ -64,10 +69,7 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         return OK;
     }
 
-    @Override
-    public Map<String, Object> getParams() {
-        return null;
-    }
+
 
     protected String getSite(int treeId, int treeNodeId) {
         return this.trees.get(treeId).getTree(treeNodeId).getSitename().split(":", -1)[0];

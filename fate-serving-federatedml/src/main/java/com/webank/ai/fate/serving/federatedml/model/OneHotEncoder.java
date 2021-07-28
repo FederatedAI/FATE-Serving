@@ -107,7 +107,7 @@ public class OneHotEncoder extends BaseComponent implements LocalInferenceAware 
     }
 
     @Override
-    public Map<String, Object> getParams() {
-        return JsonUtil.object2Objcet(oneHotParam, new TypeReference<Map<String, Object>>() {});
+    public Object getParam() {
+        return oneHotParam;
     }
 }

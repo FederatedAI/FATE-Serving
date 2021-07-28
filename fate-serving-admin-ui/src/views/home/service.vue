@@ -29,7 +29,9 @@
                 <el-table-column prop="name" label="Name" show-overflow-tooltip />
                 <el-table-column prop="host" label="Host" show-overflow-tooltip />
                 <el-table-column prop="port" label="Port" show-overflow-tooltip />
-                <el-table-column sortable  prop="weight" label="Weight" show-overflow-tooltip>
+                <!-- <el-table-column sortable prop="CheckupStatus" label="Checkup Status" show-overflow-tooltip />
+                <el-table-column sortable prop="LastCheckup" label="Last Checkup" show-overflow-tooltip /> -->
+                <el-table-column sortable prop="weight" label="Weight" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span v-if="!(showEdit === scope.$index)">
                             {{ scope.row.weight }}

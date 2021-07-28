@@ -33,12 +33,13 @@ public abstract class HeteroLR extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(HeteroLR.class);
     private Map<String, Double> weight;
     private Double intercept;
+    LRModelParam lrModelParam;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         logger.info("start init HeteroLR class");
         try {
-            LRModelParam lrModelParam = this.parseModel(LRModelParam.parser(), protoParam);
+             lrModelParam = this.parseModel(LRModelParam.parser(), protoParam);
             this.weight = lrModelParam.getWeightMap();
             this.intercept = lrModelParam.getIntercept();
         } catch (Exception ex) {
@@ -204,10 +205,12 @@ public abstract class HeteroLR extends BaseComponent {
     }
 
     @Override
-    public Map<String,Object> getParams() {
-        Map<String,Object> paramsMap = Maps.newHashMap();
-        paramsMap.putAll(weight);
-        return paramsMap;
+    public Object getParam() {
+//        Map<String,Object> paramsMap = Maps.newHashMap();
+//        paramsMap.putAll(weight);
+//        return paramsMap;
+
+        return lrModelParam;
     }
 
     public static void main(String[] args) {

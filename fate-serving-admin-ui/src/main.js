@@ -21,6 +21,7 @@ import '@/styles/theme/index.css'
 import '@/styles/index.scss'
 import '@/styles/loading.scss'
 import locale from 'element-ui/lib/locale/lang/en'
+import singleMessageCell from './message'
 
 import App from './App'
 import store from './store'
@@ -36,6 +37,7 @@ if (process.env.NODE_ENV === 'mock') {
 }
 Object.keys(filters).forEach(key => Vue.filter(key, filters[key]))
 Vue.use(ElementUI, { locale })
+Vue.prototype.$message = singleMessageCell
 Vue.config.productionTip = false
 /* eslint-disable no-new */
 new Vue({

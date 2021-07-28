@@ -55,8 +55,9 @@ public class FeatureSelection extends BaseComponent {
     }
 
     @Override
-    public Map<String, Object> getParams() {
-        return JsonUtil.object2Objcet(featureSelectionParam, new TypeReference<Map<String, Object>>() {});
+    public Object getParam() {
+//        return JsonUtil.object2Objcet(featureSelectionParam, new TypeReference<Map<String, Object>>() {});
+        return featureSelectionParam;
     }
 
     @Override

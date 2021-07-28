@@ -71,6 +71,6 @@ public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractSe
                         "{}|{}|{}|{}|" +
                         "{}|{}",
                 context.getCaseId(), context.getReturnCode(), context.getCostTime(),
-                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "NO_ROUTER_INFO");
+                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "");
     }
 }

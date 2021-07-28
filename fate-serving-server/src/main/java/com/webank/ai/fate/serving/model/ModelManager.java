@@ -508,7 +508,7 @@ public class ModelManager implements InitializingBean {
                 List<Model> allModels = listAllModel();
                 return allModels.stream().map(e -> {
                     Model clone = (Model) e.clone();
-                    clone.setModelProcessor(e.getModelProcessor().initComponentParmasMap());
+                    clone.setModelProcessor(e.getModelProcessor());
                     this.serviceIdNamespaceMap.forEach((k, v) -> {
                         if (clone.getServiceIds() == null) {
                             clone.setServiceIds(Lists.newArrayList());

@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -192,6 +194,16 @@ public class JsonUtil {
             sb.append(formatChar);
         }
     }
+
+    public static String pbToJson(MessageOrBuilder  message){
+        try {
+         return    com.google.protobuf.util.JsonFormat.printer().print(message);
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        }
+        return  "";
+    }
+
 
     public static void main(String[] args) {
         String s = JsonUtil.formatJson("{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]},\"123\":[{\"host\":\"127.0.0.1\",\"port\":8888,\"useSSL\":false,\"negotiationType\":\"\",\"certChainFile\":\"\",\"privateKeyFile\":\"\",\"caFile\":\"\"}]},\"permission\":{\"default_allow\":true}}");
