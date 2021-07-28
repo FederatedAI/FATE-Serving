@@ -444,6 +444,7 @@ public class PipelineModelProcessor implements ModelProcessor {
                                 }
                             }
                         } catch (Throwable e) {
+                            logger.error(" compute error = {}",e);
                             if (result.get(input.getIndex()) == null) {
                                 result.put(input.getIndex(), ErrorMessageUtil.handleExceptionToMap(e));
                             } else {
