@@ -144,7 +144,6 @@ func autoFillString(content string, fillData string, lenght int) string {
 
 	}
 	return content
-
 }
 
 func autuFillKey(content string) string {
