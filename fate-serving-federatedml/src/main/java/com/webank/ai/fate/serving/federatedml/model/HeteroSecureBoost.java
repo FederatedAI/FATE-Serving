@@ -72,7 +72,7 @@ public abstract class HeteroSecureBoost extends BaseComponent {
 
 
     protected String getSite(int treeId, int treeNodeId) {
-        return this.trees.get(treeId).getTree(treeNodeId).getSitename().split(":", -1)[0];
+        return this.trees.get(treeId).getTree(treeNodeId).getSitename();
     }
 
     protected String generateTag(String caseId, String modelId, int communicationRound) {
