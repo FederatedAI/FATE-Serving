@@ -241,6 +241,7 @@ public class ModelManager implements InitializingBean {
                 modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
                 modelLoaderParam.setTableName(model.getTableName());
                 modelLoaderParam.setNameSpace(model.getNamespace());
+                context.putData("model",model);
                 ModelProcessor modelProcessor = modelLoader.restoreModel(context, modelLoaderParam);
                 if (modelProcessor != null) {
                     model.setModelProcessor(modelProcessor);

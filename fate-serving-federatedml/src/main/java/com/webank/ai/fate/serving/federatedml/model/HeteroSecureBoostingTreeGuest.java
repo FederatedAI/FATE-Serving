@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements MergeInferenceAware, LocalInferenceAware, Returnable {
-    private final String site = "guest";
+    private final String role = "guest";
     private boolean fastMode = true;
     private double sigmoid(double x) {
         return 1. / (1. + Math.exp(-x));
@@ -247,6 +247,11 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         }
 
         return getFinalPredict(weights);
+    }
+
+    @Override
+    public void initSite(String partId) {
+        super.initSite(role+":"+partId);
     }
 
 }

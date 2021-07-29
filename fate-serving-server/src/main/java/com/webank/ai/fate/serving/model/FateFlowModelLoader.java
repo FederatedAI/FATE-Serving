@@ -85,7 +85,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
     protected ModelProcessor initPipeLine(Context context, Map<String, byte[]> stringMap) {
         if (stringMap != null) {
             PipelineModelProcessor modelProcessor = new PipelineModelProcessor();
-            modelProcessor.initModel(stringMap);
+            modelProcessor.initModel(context,stringMap);
             return modelProcessor;
         } else {
             return null;
