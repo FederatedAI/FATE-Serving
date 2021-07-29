@@ -502,6 +502,29 @@ public class ModelManager implements InitializingBean {
         }
     }
 
+
+    public byte[] getModelCacheData(Context context, String tableName, String namespace) {
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.CACHE);
+        String cachePath = modelLoader.getCachePath(context, tableName, namespace);
+        if (cachePath == null) {
+            return null;
+        }
+        File file = new File(cachePath);
+        if (file != null && file.exists()) {
+            try (InputStream in = new FileInputStream(file)) {
+                Long filelength = file.length();
+                byte[] filecontent = new byte[filelength.intValue()];
+                int readCount = in.read(filecontent);
+                if (readCount > 0) {
+                    return filecontent;
+                }
+            } catch (Throwable e) {
+                logger.error("load model cache fail ", e);
+            }
+        }
+        return null;
+    }
+
     public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
         int queryType = queryModelRequest.getQueryType();
         switch (queryType) {
