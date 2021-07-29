@@ -143,6 +143,57 @@ public class ModelController {
         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
 
+    @PostMapping("/model/transfer")
+    public Callable<ReturnResult> transfer(@RequestBody RequestParamWrapper requestParams) throws Exception {
+        return () -> {
+            String host = requestParams.getHost();
+            Integer port = requestParams.getPort();
+            List<String> serviceIds = requestParams.getServiceIds();
+            String tableName = requestParams.getTableName();
+            String namespace = requestParams.getNamespace();
+
+            String targetHost = requestParams.getTargetHost();
+            Integer targetPort = requestParams.getTargetPort();
+
+
+
+            Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
+            Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
+
+            ReturnResult result = new ReturnResult();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("unload model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", host, port, tableName, namespace);
+            }
+
+            ModelServiceGrpc.ModelServiceFutureStub futureStub = getModelServiceFutureStub(targetHost, targetPort);
+            ModelServiceProto.FetchModelRequest   fetchModelRequest =  ModelServiceProto.FetchModelRequest.newBuilder()
+                    //.setServiceId()
+                    .setNamespace(namespace).setTableName(tableName).setSourceIp(host).setSourcePort(port).build();
+
+
+
+            ModelServiceProto.UnloadRequest unloadRequest = ModelServiceProto.UnloadRequest.newBuilder()
+                    .setTableName(tableName)
+                    .setNamespace(namespace)
+                    .build();
+
+            ListenableFuture<ModelServiceProto.FetchModelResponse> future = futureStub.fetchModel(fetchModelRequest);
+            ModelServiceProto.FetchModelResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("response: {}", response);
+            }
+
+            result.setRetcode(response.getStatusCode());
+//            result.setData(JSONObject.parseObject(response.getData().toStringUtf8()));
+            result.setRetmsg(response.getMessage());
+            return result;
+        };
+    }
+
+
+
     @PostMapping("/model/unload")
     public Callable<ReturnResult> unload(@RequestBody RequestParamWrapper requestParams) throws Exception {
         return () -> {

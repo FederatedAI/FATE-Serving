@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.common.provider;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import com.google.protobuf.ProtocolStringList;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.url.CollectionUtils;
@@ -37,6 +38,7 @@ import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.ManagedChannel;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,7 +177,14 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
-        String serviceId = req.getServiceId();
+        List<String>  serviceIds = Lists.newArrayList();
+        ProtocolStringList serviceIdsList = req.getServiceIdsList();
+        ModelServiceProto.ModelTransferRequest.Builder modelTransferRequestBuilder = ModelServiceProto.ModelTransferRequest.newBuilder();
+//        if(serviceIdsList!=null){
+//            serviceIdsList.asByteStringList().forEach(serviceIdByte ->{
+//                serviceIds.add(serviceIdByte.toString());
+//            });
+//        }
 
         String sourceIp = req.getSourceIp();
         int sourcePort = req.getSourcePort();
@@ -185,22 +194,22 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
         // check model exist
         Model model;
-        if (StringUtils.isNotBlank(serviceId)) {
-            model = modelManager.queryModel(serviceId);
-        } else {
-            model = modelManager.queryModel(tableName, namespace);
-        }
-        if (model != null) {
-            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
-                    .setMessage("model already exists").build();
-        }
+//        if (StringUtils.isNotBlank(serviceId)) {
+//            model = modelManager.queryModel(serviceId);
+//        } else {
+//            model = modelManager.queryModel(tableName, namespace);
+//        }
+//        if (model != null) {
+//            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
+//                    .setMessage("model already exists").build();
+//        }
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(sourceIp, sourcePort);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel)
                 .withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
-        ModelServiceProto.ModelTransferRequest modelTransferRequest = ModelServiceProto.ModelTransferRequest.newBuilder()
-                .setServiceId(serviceId).setTableName(tableName).setNamespace(namespace).build();
+        ModelServiceProto.ModelTransferRequest modelTransferRequest = modelTransferRequestBuilder
+                .setTableName(tableName).setNamespace(namespace).build();
 
         ModelServiceProto.ModelTransferResponse modelTransferResponse = blockingStub.modelTransfer(modelTransferRequest);
 
@@ -229,18 +238,18 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                     .build();
         }
 
-        String serviceId = req.getServiceId();
+        //String serviceId = req.getServiceId();
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
 
-        logger.info("model transfer by {}", Optional.ofNullable(serviceId).orElse(tableName + "#" + namespace));
+        //logger.info("model transfer by {}", Optional.ofNullable(serviceId).orElse(tableName + "#" + namespace));
 
         Model model;
-        if (StringUtils.isNotBlank(serviceId)) {
-            model = modelManager.queryModel(serviceId);
-        } else {
+//        if (StringUtils.isNotBlank(serviceId)) {
+//            model = modelManager.queryModel(serviceId);
+//        } else {
             model = modelManager.queryModel(tableName, namespace);
-        }
+        //}
         if (model == null) {
             logger.error("model {}_{} is not exist", model.getTableName(), model.getNamespace());
             throw new ModelNullException("model is not exist ");
