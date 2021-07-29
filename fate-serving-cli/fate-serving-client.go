@@ -520,8 +520,6 @@ func init() {
 			f.Int64("c", "count", 1, "count")
 		},
 		Run: func(c *grumble.Context) error {
-			cache := make(map[float64]interface{})
-			sortList := make([]float64, 0, 0)
 			request := pb.HealthCheckRequest{}
 			address := getAddress(c)
 			seconds := c.Flags.Int64("seconds")
@@ -534,18 +532,8 @@ func init() {
 				}
 				if queryHealthInfoResponse != nil {
 					dataString := string(queryHealthInfoResponse.GetData())
-					data := common.JsonToList(dataString)
-					for _, contentMap := range data {
-						timestamp := contentMap["timestamp"].(float64)
-						if cache[timestamp] == nil {
-							cache[timestamp] = contentMap
-							sortList = append(sortList, timestamp)
-						}
-					}
-					sort.Float64s(sortList)
-					for _, timestamp := range sortList {
-						printHealthInfo(cache[timestamp].(map[string]interface{}))
-					}
+					data := common.JsonToMap(dataString)
+					printHealthInfo(data)
 					for i < countNum-1 {
 						time.Sleep(time.Duration(seconds) * time.Second)
 					}
@@ -729,40 +717,12 @@ func printJvmInfo(contentMap map[string]interface{}) {
 }
 
 func printHealthInfo(contentMap map[string]interface{}) {
-	timestamp := contentMap["timestamp"].(float64)
-	timestampString := strconv.FormatFloat(timestamp, 'f', 0, 64)
-	proxy := contentMap["proxy"].(map[string]interface{})
-	pOkList := proxy["okList"].([]map[string]string)
-	pWarnList := proxy["warnList"].([]map[string]string)
-	pErrorList := proxy["errorList"].([]map[string]string)
-	serving := contentMap["serving"].(map[string]interface{})
-	sOkList := serving["okList"].([]map[string]string)
-	sWarnList := serving["warnList"].([]map[string]string)
-	sErrorList := serving["errorList"].([]map[string]string)
-	pOkList = append(pOkList, sOkList...)
-	pWarnList = append(pWarnList, sWarnList...)
-	pErrorList = append(pErrorList, sErrorList...)
-	fmt.Printf("%s\n", timestampString)
-	if len(pOkList) != 0 {
-		fmt.Println("----------------------------------------------------------")
-		for _, ok := range pOkList {
-			fmt.Printf("checkItemName:%s, msg:%s;", ok["checkItemName"], ok["msg"])
+	records := contentMap["records"].([]interface{})
+	if len(records) != 0 {
+		for _, record := range records {
+			re := record.(map[string]interface{})
+			fmt.Printf("checkItemName:%s, msg:%s, healthCheckStatus:%s\n", re["checkItemName"].(string), re["msg"].(string), re["healthCheckStatus"].(string))
 		}
-		fmt.Println("----------------------------------------------------------")
-	}
-	if len(pWarnList) != 0 {
-		fmt.Println("----------------------------------------------------------")
-		for _, ok := range pWarnList {
-			fmt.Printf("checkItemName:%s, msg:%s;", ok["checkItemName"], ok["msg"])
-		}
-		fmt.Println("----------------------------------------------------------")
-	}
-	if len(pErrorList) != 0 {
-		fmt.Println("----------------------------------------------------------")
-		for _, ok := range pErrorList {
-			fmt.Printf("checkItemName:%s, msg:%s;", ok["checkItemName"], ok["msg"])
-		}
-		fmt.Println("----------------------------------------------------------")
 	}
 }
 
