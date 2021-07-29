@@ -17,40 +17,56 @@
 <template>
     <div>
         <el-dialog
-            title="Pipeline"
             :width="pipelineWidth"
+            title="Pipeline"
             custom-class="pipeline-dialog"
             :visible.sync="pipelineVisible"
             @close="closePipeline"
+            :fullscreen="fullscreen"
+            :top="top"
         >
-            <div class="chart-content">
+            <div class="chart-content" :style="{'height':pipelineheight}">
+                <div class="fullscreen">
+                    <div class="enlarge" @click="setSize('1')" v-if="!fullscreen"><img src="@/assets/zoom-in.png" alt=""></div>
+                    <div class="shrink" @click="setSize('2')" v-else><img src="@/assets/zoom-out.png" alt=""></div>
+                </div>
                 <div class="dag-chart ">
-                    <dag ref="dagForJobFlow" :dag-info="dagData" @choose="getDagInstance" @retry="jobRetry"/>
+                    <div v-if="dagData.length > 0" :style="{'transform':`scale(${scale})`}">
+                        <div class="pipeline-cube" @click="getDagInstance(item,index)" :class="{'active':index === activeIndex}" v-for="(item,index) in dagData" :key="index">{{item.name}}<span class="line" v-if="index < (dagData.length - 1)"></span></div>
+                    </div>
+                    <div v-else class="no-data">No Data</div>
+                    <div v-if="dagData" class="buttonList">
+                        <div class="opera_btn" @click="suitableWhole">
+                            <i class="el-icon-full-screen" />
+                        </div>
+                        <div class="opera_btn" @click="bigger">
+                            <i class="el-icon-plus" />
+                        </div>
+                        <div class="opera_btn" @click="small">
+                            <i class="el-icon-minus" />
+                        </div>
+                    </div>
                 </div>
                 <div class="dag-detail">
                     <div class="detail-title">Parameters({{ parameterCount }})</div>
                     <div v-loading="msgLoading" class="msg bg-dark">
                         <el-tree v-if="treeRefresh" ref="foldParameterTree" :data="paramList" :empty-text="''" :default-expand-all="treeUnfoldAll" :props="defaultPropsForTree" class="bg-dark"/>
-                        <div v-if="paramList && paramList.length > 0" class="unfold-tree" @click.stop="unfoldAll">{{ treeUnfoldAll ? 'fold all' : 'unfold all' }}</div>
+                        <div v-if="paramList && paramList.length > 0" class="unfold-tree" @click.stop="unfoldAll">{{ treeUnfoldAll ? 'Fold All' : 'Unfold All' }}</div>
                     </div>
                 </div>
             </div>
         </el-dialog>
         <canvas v-show="false" id="historyForDetail" width="1" height="1" style="width:1px;height:1px"/>
-        <!-- <confirm ref="confirm" class="confirm-dialog"/> -->
     </div>
 </template>
 
 <script>
-
-import Dag from '@/components/CanvasComponent/flowDiagram'
-import { parseTime, formatSeconds } from '@/filters'
-// import Confirm from '@/views/job-dashboard/board/Confirm'
+// import { parseTime, formatSeconds } from '@/filters'
 
 export default {
     name: 'pipelinedialog',
     components: {
-        Dag
+        // Dag
         // Confirm
     },
     props: {
@@ -61,65 +77,40 @@ export default {
             }
         },
         dagData: {
-            type: Object,
+            type: Array,
             default() {
-                return {}
+                return []
             }
         }
     },
     data() {
         return {
             pipelineWidth: '60%',
+            pipelineheight: '700px',
             parameterCount: 0,
+            activeIndex: 0,
             msgLoading: false,
             treeRefresh: true,
             treeUnfoldAll: false,
-            dataOutputShow: true,
             defaultPropsForTree: { label: 'label', children: 'children' },
-            paramList: [],
-            jobId: this.$route.query.job_id,
-            role: this.$route.query.role,
-            partyId: this.$route.query.party_id,
-            jobFrom: this.$route.query.from,
-            summaryLoading: true,
-            roleList: [],
-            jobInfo: {},
+            paramList: [{
+                label: 'NO DATA',
+                bold: true
+            }],
             componentName: '',
             lastStatus: '',
-            logLoading: false,
-            dagInstance: null,
-            // graphOptions,
-            // outputGraphOptions: graphOptions,
             paraLoading: false,
-            DAGData: null,
-            outputVisible: false,
-            modelOutputType: '',
-            outputTitle: '',
-            currentTab: 'model',
-            logWebsocket: null,
-            timer: null,
-            modelOutputShowing: true,
-            noteHint: false,
-            notePopover: false,
-            foldButtonForNote: true,
-            foldPForNote: 'notes-content-p',
-            scrollTopPos: 0,
-            refreshCheck: false,
-            scrollHoldChange: false,
-            breads: [],
-            popover: [],
-            downloadList: [],
-            useLogic: false,
-            variableMap: []
-
+            scale: 1,
+            top: '12vh',
+            fullscreen: false
         }
     },
     watch: {
         dagData: {
             handler(newVal, oldVal) {
                 console.log(arguments, 'dagData')
-                if (newVal && newVal.component_list) {
-                    this.$emit('showPipeline')
+                if (newVal && newVal[0] && newVal[0].name) {
+                    this.getParams(newVal[0].name, 0)
                 }
             },
             immediate: true
@@ -129,40 +120,16 @@ export default {
         closePipeline() {
             this.$emit('closePipeline')
         },
-        getDagInstance(data) {
+        getDagInstance(data, index) {
             console.log(data, 'data')
-            // if (data.model === this.modelNameMap.correlation || data.model === this.modelNameMap.evaluation) {
-            //     this.dataOutputShow = false
-            // } else {
-            //     this.dataOutputShow = true
-            // }
-            this.clickComponent(data.name, data.dataIndex, data.model, data.disable, data.status)
+            this.activeIndex = index
+            this.clickComponent(data.name, index)
         },
-        clickComponent(componentName, dataIndex, componentType, disable, status) {
-            let couldBeNeedRefresh = false
-            if (componentName === this.componentName) {
-                couldBeNeedRefresh = this.lastStatus !== status
-            }
-            this.lastStatus = status
+        clickComponent(componentName, dataIndex) {
+            // this.lastStatus = status
             this.componentName = componentName
-            this.lastComponentName = componentName
-            // this.modelOutputType = componentType || ''
-            // this.outputTitle = this.modelOutputType ? `${componentType}: ${componentName}` : ''
-            // // this.clickComponentChangeStyle(this.graphOptions.series[0].data, dataIndex)
-            // // this.dagInstance.setOption(this.graphOptions)
-            if (!disable) {
-                this.getParams(componentName, dataIndex)
-            } else {
-                this.paramList = [{
-                    label: 'NO DATA',
-                    bold: true
-                }]
-                this.parameterCount = 0
-                this.componentName = ''
-            }
-            if (couldBeNeedRefresh) {
-                this.$refs['outputDialog'].refresh()
-            }
+            // this.lastComponentName = componentName
+            this.getParams(componentName, dataIndex)
         },
         getParams(componentName, index) {
             const vm = this
@@ -171,7 +138,8 @@ export default {
             this.parameterCount = 0
             try {
                 this.paraLoading = false
-                const d = JSON.parse(this.dagData[index].parameterData)
+                const d = this.dagData[index].params
+                // const d = JSON.parse(this.dagData[index].parameterData)
                 const checkLevels = function(obj) {
                     const finalParameter = []
                     for (const key in obj) {
@@ -227,120 +195,6 @@ export default {
                 this.parameterCount = 0
             }
         },
-        jobRetry(name) {
-            // const vm = this
-            // const confirmText = [`The job will continue from where it ${this.jobInfo.status}`, 'it may take few seconds to  update job status.']
-            // this.$refs.confirm
-            //     .confirm(...confirmText)
-            //     .then(() => {
-            //         vm.restartJobWebsocket(name)
-            //     })
-        },
-        restartJobWebsocket(name) {
-            // retryJob({
-            //     job_id: this.jobId,
-            //     componentName: name
-            // }).then(res => {
-            //     this.initJobSocket()
-            // })
-        },
-        // initJobSocket() {
-        //     if (!this.ws) {
-        //         const { jobId, role, partyId } = this
-        //         if (!jobId || !role || !partyId) {
-        //             console.warn(`Missing required parameters`)
-        //         }
-        //         this.ws = new ReconnectingWebSocket(
-        //             `/websocket/progress/${jobId}/${role}/${partyId}`
-        //         )
-        //         this.summaryLoading = true
-        //         this.ws.addEventListener('message', event => {
-        //             this.summaryLoading = false
-        //             let data
-        //             try {
-        //                 data = JSON.parse(event.data)
-        //             } catch (error) {
-        //                 this.ws.close()
-        //                 data = null
-        //                 return
-        //             }
-        //             this.handleMessage(data)
-        //         })
-        //     }
-        //     return this.ws
-        // },
-        handleMessage(data) {
-            if (!data) {
-                return
-            }
-            this.updateJob(data)
-            this.summaryLoading = false
-            this.setData(data)
-            if (this.isDone(data.status)) {
-                if (this.ws) {
-                    this.ws.close()
-                    this.ws = ''
-                }
-            }
-        },
-        setData(data) {
-            const { summary_date: { job, dataset: _dataset }, dependencyData } = data
-            if (_dataset) {
-                this.roleList = this.transformDataset(_dataset)
-            }
-            if (job) {
-                this.jobInfo = this.transformJobInfo(job)
-                this.$nextTick(() => {
-                    this.notesHint()
-                })
-            }
-            if (dependencyData) {
-                this.DAGData = this.transformDAGData(dependencyData)
-            }
-        },
-        transformDataset({ roles, dataset }) {
-            return Object.keys(roles).map(role => {
-                const datasetList = roles[role].map(name => {
-                    let set = ''
-                    if (dataset[role]) {
-                        set = Object.values(dataset[role][name]).join(', ')
-                    }
-                    return {
-                        name,
-                        dataset: set
-                    }
-                })
-                return {
-                    role: role.toUpperCase(),
-                    datasetList
-                }
-            })
-        },
-        transformJobInfo(job) {
-            return {
-                submmissionTime: job.fCreateTime ? parseTime(new Date(job.fCreateTime)) : '',
-                startTime: job.fStartTime ? parseTime(new Date(job.fStartTime)) : '',
-                endTime: job.fEndTime ? parseTime(new Date(job.fEndTime)) : '',
-                duration: job.fElapsed ? formatSeconds(job.fElapsed) : '',
-                status: job.fStatus ? job.fStatus : '',
-                notes: job.fDescription ? job.fDescription : ''
-            }
-        },
-        transformDAGData(data) {
-            return data
-        },
-        notesHint() {
-            const cvs = document.getElementById('historyForDetail').getContext('2d')
-            const width = this.measureText(cvs, this.jobInfo.notes || '', { size: 14, weight: 'bold' }).width
-            const acWidth = parseInt(getComputedStyle(document.getElementById('notesP')).width.replace('px', ''))
-            this.noteHint = width > (acWidth * 3) - 45
-        },
-        measureText(ctx, text, style) {
-            for (const key in style) {
-                ctx[key] = style[key]
-            }
-            return ctx.measureText(text)
-        },
         unfoldAll() {
             const vm = this
             this.treeUnfoldAll = !this.treeUnfoldAll
@@ -348,19 +202,84 @@ export default {
             this.$nextTick(() => {
                 vm.treeRefresh = true
             })
+        },
+        suitableWhole() {
+            this.scale = 1
+        },
+        bigger() {
+            this.scale += 0.1
+        },
+        small() {
+            this.scale -= 0.1
+        },
+        setSize(type) {
+            if (type === '1') {
+                this.top = '0'
+                this.fullscreen = true
+                this.pipelineheight = '90vh'
+            } else if (type === '2') {
+                this.top = '12vh'
+                this.fullscreen = false
+                this.pipelineheight = '700px'
+            }
         }
     }
 }
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
+    .dag-chart{
+        width: 100%;
+        display: flex;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        .pipeline-cube{
+            position: relative;
+            width: 224px;
+            height: 28px;
+            line-height: 28px;
+            background: #EBEDF0;
+            border-radius: 4px;
+            margin-bottom: 60px;
+            font-family: Roboto;
+            font-weight: bold;
+            color: #6A6C75;
+            text-align: center;
+            cursor: pointer;
+            span{
+                position: absolute;
+                top: 28px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 1px;
+                height: 60px;
+                background: #DCDDE0;
+            }
+        }
+        .pipeline-cube.active{
+            color: #fff;
+            background: #217AD9;
+        }
+        .pipeline-cube:not(:nth-of-type(1))::before{
+            position: absolute;
+            content: '▼';
+            color: #DCDDE0;
+            font-size: 16px;
+            top:-18px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+
     .confirm-dialog {
         .el-dialog {
         height: auto !important;
-        .el-dialog__body {
-            height: auto !important;
-            padding: 30px 20px;
-        }
+            .el-dialog__body {
+                height: auto !important;
+                padding: 30px 20px;
+            }
         }
     }
     .disable-color {

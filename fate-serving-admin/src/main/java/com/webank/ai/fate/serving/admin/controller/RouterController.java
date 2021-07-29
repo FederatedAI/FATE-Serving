@@ -56,6 +56,7 @@ public class RouterController {
 
     @PostMapping("/router/query")
     public ReturnResult queryModel(@RequestBody RouterTableRequest routerTable) {
+        logger.info("pppppppppppppppppp");
         String serverHost = routerTable.getServerHost();
         Integer serverPort = routerTable.getServerPort();
         Integer page = routerTable.getPage();
@@ -77,10 +78,10 @@ public class RouterController {
 
         RouterTableServiceProto.RouterOperatetRequest.Builder queryRouterRequestBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
         RouterTableServiceProto.RouterOperatetResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
-        if (logger.isDebugEnabled()) {
-            logger.debug("response: {}", response);
-        }
-
+//        if (logger.isDebugEnabled()) {
+//            logger.debug("response: {}", response);
+//        }
+        logger.info("response: {}", response);
         Map<String, Object> data = Maps.newHashMap();
         List<RouterTableResponseRecord> rows = Lists.newArrayList();
         List<RouterTableResponseRecord> routerTableList =

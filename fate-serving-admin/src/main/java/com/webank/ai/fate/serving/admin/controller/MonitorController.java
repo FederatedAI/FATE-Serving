@@ -187,6 +187,8 @@ public class MonitorController {
     public ReturnResult selfCheckService() {
         long currentTimestamp = System.currentTimeMillis();
         Map data  = healthCheckService.getHealthCheckInfo();
+        logger.info("================={}",data);
+
         if(data!=null&&data.get(Dict.TIMESTAMP)!=null){
           long timestamp =  ((Number)data.get(Dict.TIMESTAMP)).longValue();
           if(currentTimestamp-timestamp>10000){

@@ -120,7 +120,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
 //        }
         HealthCheckRecord  routerConfigCheck = new  HealthCheckRecord();
         if(configFileBasedServingRouter.getAllRouterInfoMap()==null||configFileBasedServingRouter.getAllRouterInfoMap().size()==0){
-            routerConfigCheck.setCheckItemName("");
+
             healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : no router info found",HealthCheckStatus.error));
 
            // healthCheckResult.getErrorList().add("check router_table.json  "+": no router info found");

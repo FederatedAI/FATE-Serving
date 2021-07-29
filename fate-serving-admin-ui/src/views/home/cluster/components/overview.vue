@@ -53,6 +53,8 @@
 
 <script>
 import echarts from 'echarts'
+import _ from 'lodash'
+
 // 图片路径先在外部拼接完成
 let adminUrl = `image://${require('@/assets/admin_default.svg')}`
 let proxyUrl = `image://${require('@/assets/proxy_default.svg')}`
@@ -60,7 +62,6 @@ let servingUrl = `image://${require('@/assets/server_default.svg')}`
 let selectedProxyUrl = `image://${require('@/assets/proxy_select.svg')}`
 let selectedServingUrl = `image://${require('@/assets/server_select.svg')}`
 let symbolSize = 30
-
 export default {
     name: 'overview',
     props: {
@@ -268,9 +269,9 @@ export default {
         },
         setOption() {
             // let proxy = [this.chartArr.proxy[0].children[0]] || []
-            let proxy = (this.chartArr && this.chartArr.proxy[0] && this.chartArr.proxy[0].children) || []
+            let proxy = _.get(this, 'chartArr.proxy[0].children', [])
             // let serving = [this.chartArr.serving[0].children[0]] || []
-            let serving = (this.chartArr && this.chartArr.serving[0] && this.chartArr.serving[0].children) || []
+            let serving = _.get(this, 'chartArr.serving[0].children', [])
 
             let proxyArr = proxy.map(item => item.name)
             let servingArr = serving.map(item => item.name)
@@ -343,8 +344,10 @@ export default {
             this.initChart()
         },
         setOptionLarge() {
-            let proxy = this.chartArr.proxy[0].children || []
-            let serving = this.chartArr.serving[0].children || []
+            // let proxy = this.chartArr.proxy[0].children || []
+            let proxy = _.get(this, 'chartArr.proxy[0].children', [])
+            // let serving = this.chartArr.serving[0].children || []
+            let serving = _.get(this, 'chartArr.serving[0].children', [])
             let proxyArr = proxy.map(item => item.name)
             let servingArr = serving.map(item => item.name)
             if (proxyArr.length < 1 && servingArr.length < 1) return

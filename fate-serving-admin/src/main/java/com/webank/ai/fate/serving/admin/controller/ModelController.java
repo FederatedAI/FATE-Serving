@@ -99,7 +99,7 @@ public class ModelController {
             logger.debug("response: {}", response);
         }
 
-//        logger.info("response: {}", response);
+        //logger.info("response: {}", response);
 
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();
@@ -140,6 +140,8 @@ public class ModelController {
 
         data.put("total", totalSize);
         data.put("rows", rows);
+
+        logger.info("=============={}",data);
         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
 
