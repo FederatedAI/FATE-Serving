@@ -99,7 +99,7 @@ public class ModelController {
             logger.debug("response: {}", response);
         }
 
-        logger.info("response: {}", response);
+//        logger.info("response: {}", response);
 
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();

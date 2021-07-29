@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.common.provider;
 
 import com.google.gson.Gson;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
@@ -28,6 +29,7 @@ import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
@@ -36,6 +38,8 @@ import com.webank.ai.fate.serving.guest.provider.AbstractServingServiceProvider;
 import com.webank.ai.fate.serving.model.ModelManager;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +57,8 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
     @Autowired
     FlowCounterManager flowCounterManager;
+
+    Logger logger = LoggerFactory.getLogger(ModelServiceProvider.class);
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
@@ -211,6 +217,49 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
         return responseBuilder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS).build();
     }
+
+    @FateServiceMethod(name = "MODEL_TRANSFER")
+    public synchronized ModelServiceProto.ModelTransferResponse modelTransfer(Context context, InboundPackage data) {
+        ModelServiceProto.ModelTransferRequest req = (ModelServiceProto.ModelTransferRequest) data.getBody();
+
+        ModelServiceProto.ModelTransferResponse.Builder responseBuilder = ModelServiceProto.ModelTransferResponse.newBuilder();
+        if (!MetaInfo.PROPERTY_MODEL_SYNC) {
+            return responseBuilder.setStatusCode(StatusCode.MODEL_SYNC_ERROR)
+                    .setMessage("no synchronization allowed, to use this function, please configure model.synchronize=true")
+                    .build();
+        }
+
+        String serviceId = req.getServiceId();
+        String tableName = req.getTableName();
+        String namespace = req.getNamespace();
+
+        logger.info("model transfer by {}", Optional.ofNullable(serviceId).orElse(tableName + "#" + namespace));
+
+        Model model;
+        if (StringUtils.isNotBlank(serviceId)) {
+            model = modelManager.queryModel(serviceId);
+        } else {
+            model = modelManager.queryModel(tableName, namespace);
+        }
+        if (model == null) {
+            logger.error("model {}_{} is not exist", model.getTableName(), model.getNamespace());
+            throw new ModelNullException("model is not exist ");
+        }
+        byte[] cacheData = modelManager.getModelCacheData(context, model.getTableName(), model.getNamespace());
+        if (cacheData == null) {
+            logger.error("model {}_{} cache data is null", model.getTableName(), model.getNamespace());
+            throw new ModelNullException("model cache data is null");
+        }
+
+        responseBuilder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS)
+                .setModelData(ByteString.copyFrom(JsonUtil.object2Json(model).getBytes()))
+                .setCacheData(ByteString.copyFrom(cacheData));
+
+        return responseBuilder.build();
+    }
+
+
+
 
     @Override
     protected Object transformExceptionInfo(Context context, ExceptionInfo data) {

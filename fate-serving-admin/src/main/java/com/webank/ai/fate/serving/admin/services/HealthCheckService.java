@@ -57,7 +57,7 @@ public class HealthCheckService implements InitializingBean {
         CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
         HealthCheckResult  healthCheckResult = JsonUtil.json2Object(commonResponse.getData().toStringUtf8(), HealthCheckResult.class);
         //currentList.add(healthInfo);
-        logger.info("componentMap {}",componentMap);
+        logger.info("healthCheckResult {}",healthCheckResult);
         Map result = new HashMap();
         List<HealthCheckRecord> okList = Lists.newArrayList();
         List<HealthCheckRecord> warnList = Lists.newArrayList();

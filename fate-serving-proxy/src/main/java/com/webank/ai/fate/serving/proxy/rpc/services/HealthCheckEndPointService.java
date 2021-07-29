@@ -10,6 +10,8 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.SystemInfo;
@@ -30,9 +32,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
     @Autowired(required = false)
     ZookeeperRegistry   zookeeperRegistry;
 
-    //ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
-
-
+    Logger logger = LoggerFactory.getLogger(HealthCheckEndPointService.class);
 
     private  void  checkSshCertConfig(HealthCheckResult  healthCheckResult){
         Map<Proxy.Topic, List<RouterInfo>>    routerInfoMap = configFileBasedServingRouter.getAllRouterInfoMap();
@@ -41,7 +41,6 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                 if(v!=null){
                     v.forEach(routerInfo -> {
                         if (routerInfo.isUseSSL()) {
-
                             String caFilePath = routerInfo.getCaFile();
                             if (StringUtils.isNotEmpty(caFilePath)) {
                                 File caFile = new File(caFilePath);
@@ -109,7 +108,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
     }
 
     private  void  checkRouterInfo(HealthCheckResult  healthCheckResult){
-
+        logger.info("check router info ================ ");
 //        if(!MetaInfo.PROPERTY_USE_REGISTER.booleanValue()){
 //                healthCheckResult.getWarnList().add(MetaInfo.PROPERTY_USE_REGISTER+":"+MetaInfo.PROPERTY_USE_REGISTER+"="+MetaInfo.PROPERTY_USE_REGISTER);
 //        }else{
@@ -119,7 +118,6 @@ public class HealthCheckEndPointService implements HealthCheckAware {
 //                healthCheckResult.getErrorList().add(MetaInfo.PROPERTY_ZK_URL+":"+MetaInfo.PROPERTY_ZK_URL);
 //            }
 //        }
-        healthCheckResult.getRecords();
         HealthCheckRecord  routerConfigCheck = new  HealthCheckRecord();
         if(configFileBasedServingRouter.getAllRouterInfoMap()==null||configFileBasedServingRouter.getAllRouterInfoMap().size()==0){
             routerConfigCheck.setCheckItemName("");
