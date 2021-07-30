@@ -27,5 +27,6 @@ public enum CommonActionType {
     QUERY_ROUTER,
     ADD_ROUTER,
     UPDATE_ROUTER,
-    DELETE_ROUTER
+    DELETE_ROUTER,
+    SAVE_ROUTER
 }

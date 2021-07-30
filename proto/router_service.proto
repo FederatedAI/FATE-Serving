@@ -30,4 +30,5 @@ service RouterTableService{
     rpc addRouter(RouterOperatetRequest) returns (RouterOperatetResponse);
     rpc updateRouter(RouterOperatetRequest) returns (RouterOperatetResponse);
     rpc deleteRouter(RouterOperatetRequest) returns (RouterOperatetResponse);
+    rpc saveRouter(RouterOperatetRequest) returns (RouterOperatetResponse);
 }

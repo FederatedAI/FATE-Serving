@@ -106,4 +106,19 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
         }
         return builder.build();
     }
+
+    @FateServiceMethod(name = "SAVE_ROUTER")
+    public RouterTableServiceProto.RouterOperatetResponse saveRouterTableService(Context context, InboundPackage inboundPackage) {
+        RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
+        RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
+        try {
+            RouterTableUtils.saveRouter(request.getRouterTableInfoList());
+            builder.setStatusCode(StatusCode.SUCCESS);
+            builder.setMessage(Dict.SUCCESS);
+        } catch (RouterInfoOperateException e) {
+            builder.setStatusCode(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR);
+            builder.setMessage(e.getMessage());
+        }
+        return builder.build();
+    }
 }

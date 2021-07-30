@@ -58,6 +58,12 @@ public class RouterTableService extends RouterTableServiceGrpc.RouterTableServic
         service(request, responseObserver, CommonActionType.DELETE_ROUTER.name());
     }
 
+    @Override
+    @RegisterService(serviceName = "saveRouter")
+    public void saveRouter(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver) {
+        service(request, responseObserver, CommonActionType.SAVE_ROUTER.name());
+    }
+
     private void service(RouterTableServiceProto.RouterOperatetRequest request, StreamObserver<RouterTableServiceProto.RouterOperatetResponse> responseObserver, String actionType) {
         BaseContext context = new BaseContext();
         context.setActionType(actionType);
