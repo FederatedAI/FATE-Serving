@@ -37,7 +37,7 @@ public class RouterTableUtils {
     private static final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     private final static String DEFAULT_ROUTER_TABLE = "{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]}},\"permission\":{\"default_allow\":true}}";
     private final static String BASE_ROUTER_TABLE = "{\"route_table\":{},\"permission\":{\"default_allow\":true}}";
-    static String router_table ;
+    static String router_table;
 
     public static JsonObject loadRoutTable() {
         String filePath;
@@ -270,12 +270,21 @@ public class RouterTableUtils {
         result.addProperty("ip", routerInfo.getHost());
         result.addProperty("port", routerInfo.getPort());
         result.addProperty("useSSL", routerInfo.getUseSSL());
-        result.addProperty("negotiationType", StringUtils.isBlank(routerInfo.getNegotiationType()) ? null : routerInfo.getNegotiationType());
-        result.addProperty("certChainFile", StringUtils.isBlank(routerInfo.getCertChainFile()) ? null : routerInfo.getCertChainFile());
-        result.addProperty("privateKeyFile", StringUtils.isBlank(routerInfo.getPrivateKeyFile()) ? null : routerInfo.getPrivateKeyFile());
-        result.addProperty("caFile", StringUtils.isBlank(routerInfo.getCaFile()) ? null : routerInfo.getCaFile());
+        if (StringUtils.isNotBlank(routerInfo.getNegotiationType())) {
+            result.addProperty("negotiationType", routerInfo.getNegotiationType());
+        }
+        if (StringUtils.isNotBlank(routerInfo.getCertChainFile())) {
+            result.addProperty("certChainFile", routerInfo.getCertChainFile());
+        }
+        if (StringUtils.isNotBlank(routerInfo.getPrivateKeyFile())) {
+            result.addProperty("privateKeyFile", routerInfo.getPrivateKeyFile());
+        }
+        if (StringUtils.isNotBlank(routerInfo.getCaFile())) {
+            result.addProperty("caFile", routerInfo.getCaFile());
+        }
         return result;
     }
+
     public static boolean writeRouterFile(String context) {
         String filePath = USER_DIR + FILE_SEPARATOR + DEFAULT_ROUTER_FILE;
         return !FileUtils.writeFile(context, new File(filePath));

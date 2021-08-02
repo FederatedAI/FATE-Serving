@@ -191,7 +191,7 @@ public class RouterController {
 
     @PostMapping("/router/save")
     public ReturnResult saveRouter(@RequestBody RouterTableRequest routerTables) {
-        checkAddress(routerTables.getServerHost(), routerTables.getServerPort());
+        checkAddress(routerTables);
         for (RouterTableServiceProto.RouterTableInfo routerTable : parseRouterInfo(routerTables.getRouterTableList())) {
             checkParameter(routerTable);
         }
@@ -221,8 +221,21 @@ public class RouterController {
     private void checkAddress(String serverHost, Integer serverPort) {
         ParameterUtils.checkArgument(StringUtils.isNotBlank(serverHost), "parameter serverHost is blank");
         ParameterUtils.checkArgument(serverPort != 0, "parameter serverPort is blank");
+
         if (logger.isDebugEnabled()) {
             logger.debug("add router, host: {}, port: {}", serverHost, serverPort);
+        }
+    }
+
+    private void checkAddress(RouterTableRequest routerTables) {
+        ParameterUtils.checkArgument(StringUtils.isNotBlank(routerTables.getServerHost()), "parameter serverHost is blank");
+        ParameterUtils.checkArgument(routerTables.getServerPort() != 0, "parameter serverPort is blank");
+
+        List<RouterTableRequest.RouterTable> routerTableList = routerTables.getRouterTableList();
+        if(routerTableList != null){
+            for (RouterTableRequest.RouterTable routerTable : routerTableList) {
+                ParameterUtils.checkArgument(NetUtils.isValidAddress(routerTable.getIp() + ":" + routerTable.getPort()), "parameter Network Access : {" + routerTable.getIp() + ":" + routerTable.getPort() + "} format error");
+            }
         }
     }
 
