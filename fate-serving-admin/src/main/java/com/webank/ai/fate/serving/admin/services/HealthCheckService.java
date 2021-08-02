@@ -57,7 +57,7 @@ public class HealthCheckService implements InitializingBean {
         CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
         HealthCheckResult  healthCheckResult = JsonUtil.json2Object(commonResponse.getData().toStringUtf8(), HealthCheckResult.class);
         //currentList.add(healthInfo);
-        logger.info("healthCheckResult {}",healthCheckResult);
+        //logger.info("healthCheckResult {}",healthCheckResult);
         Map result = new HashMap();
         List<HealthCheckRecord> okList = Lists.newArrayList();
         List<HealthCheckRecord> warnList = Lists.newArrayList();
@@ -102,14 +102,18 @@ public class HealthCheckService implements InitializingBean {
                     executor.submit(() -> {
                         try {
                             checkRemoteHealth(componentHearthMap, address, component);
-                        } finally {
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }finally {
                             countDownLatch.countDown();
                         }
                     });
                 }
             }
+            countDownLatch.await();
             newHealthRecord.put(Dict.TIMESTAMP, System.currentTimeMillis());
             newHealthRecord.putAll(componentHearthMap);
+
             healthRecord = newHealthRecord;
 
         }catch(Exception  e){
