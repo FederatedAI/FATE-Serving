@@ -275,14 +275,14 @@ public class ModelManager implements InitializingBean {
 
         // register service after restore
         if (namespaceMap != null && namespaceMap.size() > 0) {
-            List<String> environments = Lists.newArrayList();
+            List<String> hostEnvironments = Lists.newArrayList();
             for (Model model : namespaceMap.values()) {
                 if (Dict.HOST.equals(model.getRole())) {
                     String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
-                    environments.add(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+                    hostEnvironments.add(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
                 }
             }
-            this.registerService(environments);
+            this.registerHostService(hostEnvironments);
         }
 
         if (serviceIdNamespaceMap != null && serviceIdNamespaceMap.size() > 0) {
@@ -294,7 +294,7 @@ public class ModelManager implements InitializingBean {
                     //environments.add(model.getPartId());
                 }
             }
-            this.registerService(environments);
+            this.registerGuestService(environments);
         }
 
         logger.info("restore model success ");
@@ -306,6 +306,21 @@ public class ModelManager implements InitializingBean {
             zookeeperRegistry.register(FateServer.serviceSets);
         }
     }
+
+    private void registerGuestService(Collection environments) {
+        if (zookeeperRegistry != null) {
+            zookeeperRegistry.addDynamicEnvironment(environments);
+            zookeeperRegistry.register(FateServer.guestServiceSets,environments);
+        }
+    }
+
+
+    private void registerHostService(Collection<String> environments) {
+        if (zookeeperRegistry != null) {
+            zookeeperRegistry.register(FateServer.hostServiceSets,environments);
+        }
+    }
+
 
     public synchronized ReturnResult bind(Context context, ModelServiceProto.PublishRequest req) {
         if (logger.isDebugEnabled()) {
@@ -428,6 +443,7 @@ public class ModelManager implements InitializingBean {
         if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
             String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
             zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+            logger.info("iiiiiiiiiiiiiiiiiiiiiiiiii{}",FateServer.hostServiceSets);
             zookeeperRegistry.register(FateServer.hostServiceSets);
         }
         // update cache
