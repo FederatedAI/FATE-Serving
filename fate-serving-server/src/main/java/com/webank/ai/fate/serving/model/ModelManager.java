@@ -343,7 +343,7 @@ public class ModelManager implements InitializingBean {
             if (StringUtils.isNotEmpty(serviceId)) {
                 zookeeperRegistry.addDynamicEnvironment(serviceId);
             }
-            zookeeperRegistry.register(FateServer.serviceSets);
+            zookeeperRegistry.register(FateServer.guestServiceSets,Lists.newArrayList(serviceId));
         }
         //update cache
         this.store(serviceIdNamespaceMap, serviceIdFile);
@@ -443,7 +443,6 @@ public class ModelManager implements InitializingBean {
         if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
             String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
             zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
-            logger.info("iiiiiiiiiiiiiiiiiiiiiiiiii{}",FateServer.hostServiceSets);
             zookeeperRegistry.register(FateServer.hostServiceSets);
         }
         // update cache
