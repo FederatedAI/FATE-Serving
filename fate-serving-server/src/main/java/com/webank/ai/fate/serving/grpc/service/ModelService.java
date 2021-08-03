@@ -131,6 +131,18 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
     }
 
     @Override
+    @RegisterService(serviceName = "modelTransfer")
+    public void modelTransfer(ModelServiceProto.ModelTransferRequest request, StreamObserver<ModelServiceProto.ModelTransferResponse> responseObserver) {
+        Context context = prepareContext(ModelActionType.MODEL_TRANSFER.name());
+        InboundPackage<ModelServiceProto.ModelTransferRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.ModelTransferResponse modelTransferResponse = (ModelServiceProto.ModelTransferResponse) outboundPackage.getData();
+        responseObserver.onNext(modelTransferResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
     @RegisterService(serviceName = "queryModel")
     public void queryModel(ModelServiceProto.QueryModelRequest request, StreamObserver<ModelServiceProto.QueryModelResponse> responseObserver) {
         Context context = prepareContext(ModelActionType.QUERY_MODEL.name());
