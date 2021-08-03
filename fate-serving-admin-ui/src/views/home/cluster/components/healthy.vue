@@ -34,7 +34,7 @@
                     <el-button class="healthy-but" :disabled="checkup" :style="checkup ? 'background-color:#B8BFCC' : 'background-color:#217AD9'" @click="startCheckup">Start Checkup</el-button>
                 </div>
                   <div class="healthy-bottom">
-                    <div class="healthy-item" v-if="HealthData.healthInfo && HealthData.healthInfo.proxy">
+                    <div class="healthy-item" v-if="HealthData && HealthData.proxy">
                             <i v-if="proxypercentage !== 100" class="el-icon-loading"/>
                             <i v-else-if="errorFlag" class="el-icon-error"/>
                             <i v-else-if="warnFlag" class="el-icon-warning"/>
@@ -45,17 +45,17 @@
                         <i class="el-icon-arrow-down" :class="proxyCK ? 'active-down' : ''" @click="proxyCK = !proxyCK"></i>
                        <div v-show="proxyCK">
                             <div class="healthy-run" v-for="(item,i) in proxyStatus" :key="i">
-                                <i v-if="proxypercentage !== 100 && ((100 / proxyStatus.length) * (i + 1)) >= proxypercentage" class="el-icon-loading"/>
-                                <i v-else-if="item.type === 'okList'" class="el-icon-success"/>
-                                <i v-else-if="item.type === 'warnList'" class="el-icon-warning"/>
-                                <i v-else-if="item.type === 'errorList'" class="el-icon-error"/>
-                                <span>{{Object.keys(item)[0]}}</span>
-                                <span v-if="item.type === 'okList'">Check up passed!</span>
-                                <span v-else>{{ Object.values(item)[0] }}</span>
+                                <i v-if="proxypercentage !== 100 && (((100 / proxyStatus.length) * (i + 1)) >= proxypercentage)" class="el-icon-loading"/>
+                                <i v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
+                                <i v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
+                                <i v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
+                                <span>{{item.checkItemName}}</span>
+                                <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span>
+                                <span v-else>{{ item.msg }}</span>
                             </div>
                        </div>
                     </div>
-                     <div class="healthy-item" v-if="HealthData.healthInfo && HealthData.healthInfo.serving">
+                     <div class="healthy-item" v-if="HealthData && HealthData.serving">
                             <i v-if="checkupStatus === 2 " class="el-icon-loading"/>
                             <i v-else-if="SerrorFlag" class="el-icon-error"/>
                             <i v-else-if="SwarnFlag" class="el-icon-warning"/>
@@ -68,13 +68,13 @@
                         <i class="el-icon-arrow-down" :class="serverCK ? 'active-down' : ''" @click="serverCK = !serverCK"></i>
                         <div v-show="serverCK">
                             <div class="healthy-run" v-for="(item,i) in servingStatus" :key="i">
-                                <i v-if="servingpercentage !== 100 && ((100 / servingStatus.length) * (i + 1)) >= servingpercentage" class="el-icon-loading"/>
-                                <i v-else-if="item.type === 'okList'" class="el-icon-success"/>
-                                <i v-else-if="item.type === 'warnList'" class="el-icon-warning"/>
-                                <i v-else-if="item.type === 'errorList'" class="el-icon-error"/>
-                                <span>{{Object.keys(item)[0]}}</span>
-                                <span v-if="item.type === 'okList'">Check up passed!</span>
-                                <span v-else>{{ Object.values(item)[0] }}</span>
+                                <i v-if="servingpercentage !== 100 && (((100 / servingStatus.length) * (i + 1)) >= servingpercentage)" class="el-icon-loading"/>
+                                <i v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
+                                <i v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
+                                <i v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
+                                <span>{{item.checkItemName}}</span>
+                                <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span>
+                                <span v-else>{{ item.msg }}</span>
                             </div>
                         </div>
                     </div>
@@ -85,9 +85,7 @@
 </template>
 
 <script>
-import {
-    selfCheck
-} from '@/api/cluster'
+import { selfCheck } from '@/api/cluster'
 import moment from 'moment'
 export default {
     name: 'Healthy',
@@ -121,7 +119,9 @@ export default {
             okFlag: null,
             SerrorFlag: null,
             SwarnFlag: null,
-            SokFlag: null
+            SokFlag: null,
+            pData: '',
+            sData: ''
         }
     },
     watch: {
@@ -151,59 +151,41 @@ export default {
             this.SerrorFlag = 0
             this.SokFlag = 0
             this.SwarnFlag = 0
-            for (let key in this.HealthData.healthInfo) {
+            this.pData = ''
+            this.sData = ''
+            for (let key in this.HealthData) {
                 if (key === 'proxy') {
-                    for (let key2 in this.HealthData.healthInfo[key]) {
-                        this.HealthData.healthInfo[key][key2].length !== 0 && this.HealthData.healthInfo[key][key2].forEach(item => {
-                            for (let key3 in item) {
-                                if (key3 === 'data') {
-                                    for (let key4 in item[key3]) {
-                                        if (key4 === 'errorList' || key4 === 'okList' || key4 === 'warnList') {
-                                            this.errorFlag += item[key3].errorList && item[key3].errorList.length
-                                            this.okFlag += item[key3].okList && item[key3].okList.length
-                                            this.warnFlag += item[key3].warnList && item[key3].warnList.length
-                                            // item[key3][key4] = [{ '127.0.0.1:8000': 'router 127.0.0.1:8000 can not connected' }, { '127.0.0.1:8040': 'router 127.0.0.1:8000 can not connected' }]
-                                            item[key3][key4].forEach((item1, i) => {
-                                                item1.type = key4
-                                            })
-                                            this.proxyStatus = this.proxyStatus.concat(item[key3][key4])
-                                        }
-                                    }
-                                }
-                            }
-                        })
+                    for (let key2 in this.HealthData[key]) {
+                        this.pData = key2
+                        for (let key3 in this.HealthData[key][key2]) {
+                            this.errorFlag += this.HealthData[key][key2].errorList && this.HealthData[key][key2].errorList.length
+                            this.okFlag += this.HealthData[key][key2].okList && this.HealthData[key][key2].okList.length
+                            this.warnFlag += this.HealthData[key][key2].warnList && this.HealthData[key][key2].warnList.length
+                            this.proxyStatus = this.proxyStatus.concat(this.HealthData[key][key2][key3])
+                        }
                     }
                 } else if (key === 'serving') {
-                    for (let key2 in this.HealthData.healthInfo[key]) {
-                        this.HealthData.healthInfo[key][key2].length !== 0 && this.HealthData.healthInfo[key][key2].forEach(item => {
-                            for (let key3 in item) {
-                                if (key3 === 'data') {
-                                    for (let key4 in item[key3]) {
-                                        if (key4 === 'errorList' || key4 === 'okList' || key4 === 'warnList') {
-                                            this.SerrorFlag += item[key3].errorList && item[key3].errorList.length
-                                            this.SokFlag += item[key3].okList && item[key3].okList.length
-                                            this.SwarnFlag += item[key3].warnList && item[key3].warnList.length
-                                            // item[key3][key4] = [{ '127.0.0.1:8000': 'router 127.0.0.1:8000 can not connected' }, { '127.0.0.1:8040': 'router 127.0.0.1:8000 can not connected' }]
-                                            item[key3][key4].forEach(item1 => {
-                                                item1.type = key4
-                                            })
-                                            this.servingStatus = this.servingStatus.concat(item[key3][key4])
-                                        }
-                                    }
-                                }
-                            }
-                        })
+                    for (let key2 in this.HealthData[key]) {
+                        this.sData = key2
+                        for (let key3 in this.HealthData[key][key2]) {
+                            this.SerrorFlag += this.HealthData[key][key2].errorList && this.HealthData[key][key2].errorList.length
+                            this.SokFlag += this.HealthData[key][key2].okList && this.HealthData[key][key2].okList.length
+                            this.SwarnFlag += this.HealthData[key][key2].warnList && this.HealthData[key][key2].warnList.length
+                            this.servingStatus = this.servingStatus.concat(this.HealthData[key][key2][key3])
+                        }
                     }
                 }
             }
-            if (this.okFlag || this.SokFlag) {
-                this.checkupStatus = 1
-            } else if (this.warnFlag || this.SwarnFlag) {
-                this.checkupStatus = 4
-            } if (this.errorFlag || this.SerrorFlag) {
-                this.checkupStatus = 3
+            if (this.servingpercentage === 100) {
+                if (this.okFlag || this.SokFlag || !this.sData || !this.pData) {
+                    this.checkupStatus = 1
+                } else if (this.warnFlag || this.SwarnFlag) {
+                    this.checkupStatus = 4
+                } if (this.errorFlag || this.SerrorFlag) {
+                    this.checkupStatus = 3
+                }
+                this.$emit('checkup', this.checkupStatus)
             }
-            this.$emit('checkup', this.checkupStatus)
         },
 
         startCheckup() {
@@ -224,6 +206,10 @@ export default {
             selfCheck().then(res => {
                 // clearInterval(this.clusterTimer)
                 this.clusterTimer = setInterval(() => {
+                    // this.HealthData = res.data
+
+                    this.$emit('checkup', this.checkupStatus, res.data)
+                    this.initHealthData()
                     if (this.proxypercentage < 100) {
                         this.proxypercentage += 1
                     } else if (this.servingpercentage < 100) {
@@ -243,8 +229,12 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss">
 .checkup {
+    .el-dialog__wrapper {
+        z-index: 9999999 !important;
+    }
   .checkup-dialog {
     margin-top: 22vh !important;
+
 }
 }
 

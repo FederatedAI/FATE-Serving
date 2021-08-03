@@ -1,5 +1,6 @@
 package com.webank.ai.fate.serving.proxy.rpc.services;
 
+import com.webank.ai.fate.api.core.BasicMeta;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
@@ -10,6 +11,8 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.SystemInfo;
@@ -30,9 +33,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
     @Autowired(required = false)
     ZookeeperRegistry   zookeeperRegistry;
 
-    //ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
-
-
+    Logger logger = LoggerFactory.getLogger(HealthCheckEndPointService.class);
 
     private  void  checkSshCertConfig(HealthCheckResult  healthCheckResult){
         Map<Proxy.Topic, List<RouterInfo>>    routerInfoMap = configFileBasedServingRouter.getAllRouterInfoMap();
@@ -41,7 +42,6 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                 if(v!=null){
                     v.forEach(routerInfo -> {
                         if (routerInfo.isUseSSL()) {
-
                             String caFilePath = routerInfo.getCaFile();
                             if (StringUtils.isNotEmpty(caFilePath)) {
                                 File caFile = new File(caFilePath);
@@ -109,7 +109,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
     }
 
     private  void  checkRouterInfo(HealthCheckResult  healthCheckResult){
-
+        logger.info("check router info ================ {}",configFileBasedServingRouter.getAllRouterInfoMap());
 //        if(!MetaInfo.PROPERTY_USE_REGISTER.booleanValue()){
 //                healthCheckResult.getWarnList().add(MetaInfo.PROPERTY_USE_REGISTER+":"+MetaInfo.PROPERTY_USE_REGISTER+"="+MetaInfo.PROPERTY_USE_REGISTER);
 //        }else{
@@ -119,10 +119,9 @@ public class HealthCheckEndPointService implements HealthCheckAware {
 //                healthCheckResult.getErrorList().add(MetaInfo.PROPERTY_ZK_URL+":"+MetaInfo.PROPERTY_ZK_URL);
 //            }
 //        }
-        healthCheckResult.getRecords();
         HealthCheckRecord  routerConfigCheck = new  HealthCheckRecord();
-        if(configFileBasedServingRouter.getAllRouterInfoMap()==null||configFileBasedServingRouter.getAllRouterInfoMap().size()==0){
-            routerConfigCheck.setCheckItemName("");
+        if(configFileBasedServingRouter.getRouteTable()==null||configFileBasedServingRouter.getRouteTable().size()==0){
+
             healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : no router info found",HealthCheckStatus.error));
 
            // healthCheckResult.getErrorList().add("check router_table.json  "+": no router info found");
@@ -132,33 +131,41 @@ public class HealthCheckEndPointService implements HealthCheckAware {
           //  healthCheckResult.getOkList().add("check router_table.json  "+": router_table.json is found");
         }
 
+        routerInfoCheck(healthCheckResult);
+
 
     }
     private  void  routerInfoCheck(HealthCheckResult  healthCheckResult){
-        Map<Proxy.Topic, List<RouterInfo>>    routerInfoMap = configFileBasedServingRouter.getAllRouterInfoMap();
+        Map<String, Map<String, List<BasicMeta.Endpoint>>>    routerInfoMap = configFileBasedServingRouter.getRouteTable();
         if(routerInfoMap!=null&&routerInfoMap.size()>0){
-            routerInfoMap.forEach((k,v)->{
-                if(v!=null){
-                    v.forEach(routerInfo -> {
-                        try {
-                            boolean connectAble = TelnetUtil.tryTelnet(routerInfo.getHost(), routerInfo.getPort());
+            routerInfoMap.values().forEach(value->{
+                value.forEach((k,v)->{
+                    if(v!=null){
+                        v.forEach(endpoint -> {
+                            try {
+                                boolean connectAble = TelnetUtil.tryTelnet(endpoint.getIp(), endpoint.getPort());
 
 
-                            if (!connectAble) {
+                                if (!connectAble) {
 
-                                healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted",HealthCheckStatus.warn));
-                            //("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
-                            } else {
-                                healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  routerInfo.getHost() + " " + routerInfo.getPort() + ": telneted",HealthCheckStatus.ok
-                                ));
+                                    healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": can not be telneted",HealthCheckStatus.warn));
+                                    //("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
+                                } else {
+                                    healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": telneted",HealthCheckStatus.ok
+                                    ));
+                                }
+
+                            }catch (Exception e){
+                                e.printStackTrace();
                             }
+                        });
+                    }
+                });
 
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                    });
-                }
+
+
             });
+
         }
 
     }
@@ -200,6 +207,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                         }
                     }
             );
+            logger.info("pppppppppppppppppppppppp {}",healthCheckResult);
             return healthCheckResult;
         }else{
             return  null;

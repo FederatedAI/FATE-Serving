@@ -148,8 +148,7 @@ export default {
         },
         loadAll() {
             return [
-                { 'value': 'admin', 'address': 'admin' },
-                { 'value': 'admssin', 'address': 'admssin' }
+                { 'value': 'admin', 'address': 'admin' }
             ]
         }
     }

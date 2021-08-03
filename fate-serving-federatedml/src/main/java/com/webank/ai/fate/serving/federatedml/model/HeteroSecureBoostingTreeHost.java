@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements LocalInferenceAware, Returnable {
-    private final String site = "host";
+    private final String role = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
     private boolean fastMode = true;
     private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
@@ -92,5 +92,10 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         }
         ret = this.extractHostNodeRoute(fidValueMapping);
         return ret;
+    }
+
+    @Override
+    public void initSite(String partId) {
+        super.initSite(role+":"+partId);
     }
 }

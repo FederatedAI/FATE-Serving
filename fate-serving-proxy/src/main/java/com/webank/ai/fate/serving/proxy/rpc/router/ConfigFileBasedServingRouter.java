@@ -65,6 +65,15 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private Map<Proxy.Topic, Set<Proxy.Topic>> allow;
     private Map<Proxy.Topic, Set<Proxy.Topic>> deny;
     private boolean defaultAllow;
+
+    public Map<String, Map<String, List<BasicMeta.Endpoint>>> getRouteTable() {
+        return routeTable;
+    }
+
+    public void setRouteTable(Map<String, Map<String, List<BasicMeta.Endpoint>>> routeTable) {
+        this.routeTable = routeTable;
+    }
+
     private Map<String, Map<String, List<BasicMeta.Endpoint>>> routeTable;
     private Map<Proxy.Topic, List<RouterInfo>> topicEndpointMapping;
     private BasicMeta.Endpoint.Builder endpointBuilder;
@@ -236,6 +245,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
 
     @Scheduled(fixedRate = 10000)
     public void loadRouteTable() {
+        logger.info("load route table");
         String filePath = "";
         if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
             filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
@@ -253,7 +263,8 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             return;
         }
         String fileMd5 = FileUtils.fileMd5(filePath);
-        if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
+        if (StringUtils.isNotBlank(lastFileMd5)&&null != fileMd5 && fileMd5.equals(lastFileMd5)) {
+//            logger.info("oooooooooooooooooooo {}",lastFileMd5);
             return;
         }
         JsonReader jsonReader = null;
@@ -306,6 +317,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     }
 
     private void initRouteTable(JsonObject confJson) {
+        logger.info("ppppppppppppppppppp  {}",confJson);
         Map<String, Map<String, List<BasicMeta.Endpoint>>> newRouteTable = new ConcurrentHashMap<>();
 
         // loop through coordinator

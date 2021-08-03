@@ -1,5 +1,7 @@
 package com.webank.ai.fate.serving.common.health;
 
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
+
 public class HealthCheckRecord{
     String  checkItemName;
     String  msg;
@@ -36,5 +38,9 @@ public class HealthCheckRecord{
         this.checkItemName = checkItemName;
         this.msg = msg;
         this.healthCheckStatus = healthCheckStatus;
+    }
+
+    public String  toString(){
+        return JsonUtil.object2Json(this);
     }
 }

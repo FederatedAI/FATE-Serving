@@ -247,9 +247,7 @@
                                         type="text"
                                         style="font-size: 18px"
                                         class="pipeline"
-                                        :class="{'disabled':!scope.row.modelProcessor}"
                                         size="mini"
-                                        :disabled="!scope.row.modelProcessor"
                                         @click="showPipeLineDialog(scope.row)"
                                     ></el-button>
                                     <el-dropdown class="function-dropdown" placement="bottom" :hide-on-click="false" @command="moreFunction" trigger="click">
@@ -374,7 +372,7 @@
                             </span>
                         </el-dialog>
                         <el-dialog :visible.sync="secSureSynchronizeVisible" :showClose='cancel' title="" class="model-synchronize" width="40%" top="15%" center>
-                            <span>The model already exsits in 192.169.1.1:8080,</span>
+                            <span>The model already exsits in {{ servingServer }},</span>
                             <br>
                             <span>continue synchronizing and cover it?</span>
                             <span slot="footer" class="dialog-footer  dialog-but">
@@ -425,13 +423,14 @@
                         <routertable ref="routertable" v-loading="loadingRouterTable" :showRouterTable="showRouterTable" :ipPort="ipPort" :routerPartyID="routerPartyID" @tabipInfo="tabipInfo" />
                     </div>
                     <div>
-                        <pipelinedialog @closePipeline="closePipeline" v-loading="loadingPipeline" @showPipeline="showPipeline" :pipelineVisible="pipelineVisible" :dagData="dagData"  />
+                        <pipelinedialog @closePipeline="closePipeline" v-loading="loadingPipeline" @showPipeline="showPipeline" :pipelineVisible="pipelineVisible" :dagDataBak="dagDataBak" :dagData="dagData"  />
                     </div>
 
                 </div>
             </div>
-            <healthy ref="healthy" :HealthData='HealthData' @checkup="checkup"> </healthy>
+
         </div>
+         <healthy ref="healthy" :HealthData='HealthData' @checkup="checkup"> </healthy>
     </div>
 </template>
 
@@ -541,7 +540,8 @@ export default {
             loadingRouterTable: false,
             showRouterTable: false,
             loadingPipeline: false,
-            dagData: {}
+            dagData: [],
+            dagDataBak: {}
         }
     },
     watch: {
@@ -1000,7 +1000,7 @@ export default {
                     // 初始化flow address 下拉列表箭头状态
                     this.$set(this.ModelsData[i], 'up', '1')
                     // mock
-                    this.ModelsData[i]['flowAddress'] = ['1.2.2.5:8080', '1.2.2.5:8080', '1.2.2.5:8080']
+                    this.ModelsData[i]['flowAddress'] = ['127.0.0.1:8080', '127.0.0.1:8080', '127.0.0.1:8080']
                 }
                 console.log(this.ModelsData, 'ModelsData')
             })
@@ -1258,57 +1258,22 @@ export default {
                 this.flowControlVisible = true
             } else if (command === 'ModelSynchronize') {
                 this.modelSynchronizeVisible = true
+                if (this.ipData && this.ipData.children) {
+                    // 过滤出除当前serving的下拉菜单
+                    this.servingServerList = this.ipData.children.filter(item => item.name !== this.ipchildrenData.name)
+                    this.servingServerList = this.servingServerList.map(item => {
+                        return {
+                            label: item.name,
+                            value: item.name
+                        }
+                    })
+                    console.log(this.servingServerList, 'servingServerList')
+                }
             }
         },
         showPipeLineDialog(row) {
-            // 显示model 弹框
-            this.dagData = {
-                component_list: [{
-                    component_name: 'dataio_0',
-                    time: 1626147382965,
-                    stauts: 'success'
-                },
-                {
-                    component_name: 'intersection_0',
-                    time: 1626147394218,
-                    stauts: 'success'
-                },
-                {
-                    component_name: 'fast_secureboost_0',
-                    time: 1626147306352,
-                    stauts: 'success'
-                }],
-                component_module: {
-                    dataio_0: 'DataIO',
-                    fast_secureboost_0: 'HeteroFastSecureBoost',
-                    intersection_0: 'Intersection'
-                },
-                component_need_run: {
-                    intersection_0: true,
-                    fast_secureboost_0: true,
-                    dataio_0: true
-                },
-                dependencies: {
-                    fast_secureboost_0: [{
-                        component_name: 'intersection_0',
-                        up_output_info: ['data', 0],
-                        type: 'validate_data'
-                    }],
-                    intersection_0: [{
-                        component_name: 'dataio_0',
-                        up_output_info: ['data', 0],
-                        type: 'data'
-                    }]
-                }
-            }
-
-            // this.dagData = row ? row.modelProcessor : {}
-            // const params = {
-            //     host: this.ipPort[0],
-            //     port: this.ipPort[1],
-            //     source: row.resourceName
-            // }
-            // this.handleModelData(params)
+            this.dagData = row ? row.components : []
+            this.pipelineVisible = true
         },
         handleArrow(index, type) {
             this.$set(this.ModelsData[index], 'up', type)

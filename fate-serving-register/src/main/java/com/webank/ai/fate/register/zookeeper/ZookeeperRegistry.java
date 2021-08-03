@@ -282,6 +282,39 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
     }
 
+
+    public synchronized void register(Set<RegisterService> sets,Collection<String>  dynamicEnvironments){
+        String hostAddress = NetUtils.getLocalIp();
+
+        for (RegisterService service : sets) {
+            URL url = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+            URL serviceUrl = url.setProject(project);
+            if (service.useDynamicEnvironment()) {
+
+                if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
+                    dynamicEnvironments.forEach(environment -> {
+                        URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                        // use cache service params
+                        loadCacheParams(newServiceUrl);
+
+                        String serviceName = service.serviceName() + environment;
+                        if (!registedString.contains(serviceName)) {
+                            this.register(newServiceUrl);
+                            this.registedString.add(serviceName);
+                        } else {
+                            logger.info("url {} is already registed, will not do anything ", newServiceUrl);
+                        }
+                    });
+                }
+
+
+            }
+
+        }
+
+
+    }
+
     public synchronized void register(Set<RegisterService> sets) {
         if (logger.isDebugEnabled()) {
             logger.debug("prepare to register {}", sets);

@@ -516,14 +516,16 @@ func init() {
 		LongHelp: "showHealthInfo",
 		Flags: func(f *grumble.Flags) {
 			f.String("a", "address", "localhost:8000", "ip:port")
-			f.Int64("s", "seconds", 5, "seconds")
+			f.Int64("e", "seconds", 5, "seconds")
 			f.Int64("c", "count", 1, "count")
+			f.String("s", "status", "", "Health check information status value filtering (error、ok、warn)")
 		},
 		Run: func(c *grumble.Context) error {
 			request := pb.HealthCheckRequest{}
 			address := getAddress(c)
 			seconds := c.Flags.Int64("seconds")
 			countNum := c.Flags.Int64("count")
+			status := c.Flags.String("status")
 			i := int64(0)
 			for ; i < countNum; i++ {
 				queryHealthInfoResponse, error := rpc.QueryHealthInfo(address, &request)
@@ -533,7 +535,7 @@ func init() {
 				if queryHealthInfoResponse != nil {
 					dataString := string(queryHealthInfoResponse.GetData())
 					data := common.JsonToMap(dataString)
-					printHealthInfo(data)
+					printHealthInfo(data, status)
 					for i < countNum-1 {
 						time.Sleep(time.Duration(seconds) * time.Second)
 					}
@@ -716,12 +718,17 @@ func printJvmInfo(contentMap map[string]interface{}) {
 
 }
 
-func printHealthInfo(contentMap map[string]interface{}) {
+func printHealthInfo(contentMap map[string]interface{}, status string) {
 	records := contentMap["records"].([]interface{})
 	if len(records) != 0 {
 		for _, record := range records {
 			re := record.(map[string]interface{})
-			fmt.Printf("checkItemName:%s, msg:%s, healthCheckStatus:%s\n", re["checkItemName"].(string), re["msg"].(string), re["healthCheckStatus"].(string))
+			if len(status) == 0 {
+				fmt.Printf("checkItemName:%s, msg:%s, healthCheckStatus:%s\n", re["checkItemName"].(string), re["msg"].(string), re["healthCheckStatus"].(string))
+			}
+			if len(status) > 0 && strings.Compare(status, re["healthCheckStatus"].(string)) == 0 {
+				fmt.Printf("checkItemName:%s, msg:%s, healthCheckStatus:%s\n", re["checkItemName"].(string), re["msg"].(string), re["healthCheckStatus"].(string))
+			}
 		}
 	}
 }

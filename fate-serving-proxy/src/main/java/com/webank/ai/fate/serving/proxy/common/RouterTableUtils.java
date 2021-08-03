@@ -32,18 +32,19 @@ import java.util.Map;
 public class RouterTableUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RouterTableUtils.class);
-    private static final String USERDIR = System.getProperty(Dict.PROPERTY_USER_DIR);
-    private static final String FILESEPARATOR = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
+    private static final String USER_DIR = System.getProperty(Dict.PROPERTY_USER_DIR);
+    private static final String FILE_SEPARATOR = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
     private static final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     private final static String DEFAULT_ROUTER_TABLE = "{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]}},\"permission\":{\"default_allow\":true}}";
-    static String router_table ;
+    private final static String BASE_ROUTER_TABLE = "{\"route_table\":{},\"permission\":{\"default_allow\":true}}";
+    static String router_table;
 
     public static JsonObject loadRoutTable() {
         String filePath;
         if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
             filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
         } else {
-            filePath = USERDIR + FILESEPARATOR + DEFAULT_ROUTER_FILE;
+            filePath = USER_DIR + FILE_SEPARATOR + DEFAULT_ROUTER_FILE;
         }
 
         if (logger.isDebugEnabled()) {
@@ -220,6 +221,47 @@ public class RouterTableUtils {
         }
     }
 
+    public static void saveRouter(List<RouterTableServiceProto.RouterTableInfo> routerInfoList) {
+        try {
+            long now = new Date().getTime();
+            JsonObject routerJson = JsonParser.parseString(BASE_ROUTER_TABLE).getAsJsonObject();
+            JsonObject route_table = routerJson.getAsJsonObject("route_table");
+            if (route_table == null) {
+                throw new RouterInfoOperateException("missing routing configuration");
+            }
+            for (RouterTableServiceProto.RouterTableInfo routerInfo : routerInfoList) {
+                JsonObject partyIdRouter = route_table.getAsJsonObject(routerInfo.getPartyId());
+                if (partyIdRouter == null) {
+                    partyIdRouter = new JsonObject();
+                    partyIdRouter.addProperty("createTime", now);
+                    partyIdRouter.addProperty("updateTime", now);
+                    route_table.add(routerInfo.getPartyId(), partyIdRouter);
+                }
+                JsonArray serverTypeArray = partyIdRouter.getAsJsonArray(routerInfo.getServerType());
+                if (serverTypeArray == null) {
+                    serverTypeArray = new JsonArray();
+                    partyIdRouter.add(routerInfo.getServerType(), serverTypeArray);
+                }
+                if (getIndex(serverTypeArray, routerInfo.getHost(), routerInfo.getPort()) != -1) {
+                    throw new RouterInfoOperateException("partyId : " + routerInfo.getPartyId() + ", serverType : " + routerInfo.getServerType()
+                            + ", Network Access : " + routerInfo.getHost() + ":" + routerInfo.getPort() + " is duplicate");
+                }
+                serverTypeArray.add(parseRouterInfo(routerInfo));
+                partyIdRouter.add(routerInfo.getServerType(), serverTypeArray);
+            }
+            routerJson.add("route_table", route_table);
+            if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
+                logger.error("write router_table.json error");
+                throw new RouterInfoOperateException("write router_table.json error");
+            }
+        } catch (RouterInfoOperateException routerEx) {
+            throw new RouterInfoOperateException(routerEx.getMessage());
+        } catch (Exception e) {
+            logger.error("parse router table error", e);
+            throw new RouterInfoOperateException("parse router table error");
+        }
+    }
+
     private static JsonObject parseRouterInfo(RouterTableServiceProto.RouterTableInfo routerInfo) {
         if (routerInfo == null) {
             return null;
@@ -228,14 +270,23 @@ public class RouterTableUtils {
         result.addProperty("ip", routerInfo.getHost());
         result.addProperty("port", routerInfo.getPort());
         result.addProperty("useSSL", routerInfo.getUseSSL());
-        result.addProperty("negotiationType", StringUtils.isBlank(routerInfo.getNegotiationType()) ? null : routerInfo.getNegotiationType());
-        result.addProperty("certChainFile", StringUtils.isBlank(routerInfo.getCertChainFile()) ? null : routerInfo.getCertChainFile());
-        result.addProperty("privateKeyFile", StringUtils.isBlank(routerInfo.getPrivateKeyFile()) ? null : routerInfo.getPrivateKeyFile());
-        result.addProperty("caFile", StringUtils.isBlank(routerInfo.getCaFile()) ? null : routerInfo.getCaFile());
+        if (StringUtils.isNotBlank(routerInfo.getNegotiationType())) {
+            result.addProperty("negotiationType", routerInfo.getNegotiationType());
+        }
+        if (StringUtils.isNotBlank(routerInfo.getCertChainFile())) {
+            result.addProperty("certChainFile", routerInfo.getCertChainFile());
+        }
+        if (StringUtils.isNotBlank(routerInfo.getPrivateKeyFile())) {
+            result.addProperty("privateKeyFile", routerInfo.getPrivateKeyFile());
+        }
+        if (StringUtils.isNotBlank(routerInfo.getCaFile())) {
+            result.addProperty("caFile", routerInfo.getCaFile());
+        }
         return result;
     }
+
     public static boolean writeRouterFile(String context) {
-        String filePath = USERDIR + FILESEPARATOR + DEFAULT_ROUTER_FILE;
+        String filePath = USER_DIR + FILE_SEPARATOR + DEFAULT_ROUTER_FILE;
         return !FileUtils.writeFile(context, new File(filePath));
     }
 

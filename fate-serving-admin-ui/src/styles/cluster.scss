@@ -751,7 +751,7 @@
 }
 
 .pipeline-dialog {
-    margin-top: 12vh !important;
+    margin-top: unset;
     .el-dialog__header {
         padding: 30px 36px 0;
     }
@@ -766,24 +766,62 @@
     }
 
     .chart-content {
+        position: relative;
         display: flex;
-        height: 700px;
-
+        .fullscreen{
+            position: absolute;
+            top: -51px;
+            right: 20px;
+            cursor: pointer;
+        }
         .dag-chart {
-            width: 57%;
+            position: relative;
+            flex: 1;
             height: 100%;
             border: 1px solid #e6ebf0;
             flex-shrink: 0;
+            .no-data{
+                font-size: 24px;
+                font-weight: bold;
+                color: #B8BFCC;
+            }
+            .buttonList {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                .opera_btn {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 4px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: #f8f8fa;
+                    margin-bottom: 12px;
+                    color: #bbbbc8;
+                    cursor: pointer;
+                    &:hover {
+                        background-color: #494ece;
+                        color: #fff;
+                    }
+                    &:last-child {
+                        margin-bottom: 0px;
+                    }
+                }
+            }
         }
 
         .dag-detail {
-            flex: 1;
+            position: relative;
+            width: 420px;
             background: #f5f8fa;
             height: 100%;
             margin-left: 24px;
             padding: 14px 24px;
             box-sizing: border-box;
-
+            overflow: auto;
             .detail-title {
                 height: 22px;
                 font-size: 18px;
@@ -793,6 +831,15 @@
                 color: #217ad9;
                 padding-bottom: 12px;
                 border-bottom: 2px solid #e6ebf0;
+            }
+            .unfold-tree{
+                position: absolute;
+                top: 16px;
+                right: 25px;
+                font-size: 16px;
+                font-weight: bold;
+                color: #217ad9;
+                cursor: pointer;
             }
         }
     }
