@@ -53,8 +53,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
-        logger.info("returnResult = " + returnResult);
-        logger.info("req.getLocal().getPartyId() = " + req.getLocal().getPartyId());
+        logger.info("PublishRequest = {}",req);
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");

@@ -66,7 +66,7 @@ public class Scale extends BaseComponent {
     }
 
     @Override
-    public Map<String, Object> getParams() {
-        return JsonUtil.object2Objcet(scaleParam, new TypeReference<Map<String, Object>>() {});
+    public Object getParam() {
+        return scaleParam;
     }
 }

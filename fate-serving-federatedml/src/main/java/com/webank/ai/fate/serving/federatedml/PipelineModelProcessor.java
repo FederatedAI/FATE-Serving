@@ -175,13 +175,13 @@ public class PipelineModelProcessor implements ModelProcessor {
         return this.componentMap.get(name);
     }
 
-    @Override
-    public ModelProcessor initComponentParmasMap() {
-        componentMap.forEach((cptName,instance)->{
-            componentParmasMap.put(cptName,instance.getParams());
-        });
-        return this;
-    }
+//    @Override
+//    public ModelProcessor initComponentParmasMap() {
+////        componentMap.forEach((cptName,instance)->{
+////            componentParmasMap.put(cptName,instance.getParam());
+////        });
+//        return this;
+//    }
 
     public int initModel(Map<String, byte[]> modelProtoMap) {
         if (modelProtoMap != null) {
@@ -404,11 +404,11 @@ public class PipelineModelProcessor implements ModelProcessor {
         return newModelProtoMap;
     }
 
-    public Map<String,Object> getParmasMap(){
-        Map<String,Object> parmas = Maps.newHashMap();
-        componentMap.forEach((k,v)->{parmas.put(k,v.getParams());});
-        return parmas;
-    }
+//    public Map<String,Object> getParmasMap(){
+//        Map<String,Object> parmas = Maps.newHashMap();
+//        componentMap.forEach((k,v)->{parmas.put(k,v.getParams());});
+//        return parmas;
+//    }
 
     class LocalInferenceTask extends RecursiveTask<Map<Integer, Map<String, Object>>> {
         Context context;
@@ -444,6 +444,7 @@ public class PipelineModelProcessor implements ModelProcessor {
                                 }
                             }
                         } catch (Throwable e) {
+                            logger.error(" compute error = {}",e);
                             if (result.get(input.getIndex()) == null) {
                                 result.put(input.getIndex(), ErrorMessageUtil.handleExceptionToMap(e));
                             } else {

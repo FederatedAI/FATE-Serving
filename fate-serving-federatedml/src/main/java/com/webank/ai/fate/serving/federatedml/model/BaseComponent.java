@@ -141,6 +141,6 @@ public abstract class BaseComponent implements LocalInferenceAware {
         this.cache = cache;
     }
 
-    public abstract Map<String,Object> getParams();
+    public abstract Object getParam();
 
 }

@@ -144,7 +144,6 @@ func autoFillString(content string, fillData string, lenght int) string {
 
 	}
 	return content
-
 }
 
 func autuFillKey(content string) string {
@@ -287,10 +286,7 @@ func init() {
 			f.String("a", "address", "localhost:8000", "the address of serving-server")
 			f.String("f", "filepath", "", "the file path of json file")
 			f.String("s", "serviceId", "", "the serviceId of model")
-			//f.String("h", "host", "localhost", "the ip of serving-server")
 
-			// flag.StringVar(&host, "h", "localhost", "host ip")
-			// flag.IntVar(&port, "p", 8000, "port")
 		},
 		Run: func(c *grumble.Context) error {
 			c.App.Config().PromptColor.Add()
@@ -321,7 +317,6 @@ func init() {
 				fmt.Println("please use -f ")
 			}
 
-			//c.App.Println(c.Flags.String("directory"))
 			return nil
 		},
 	}
@@ -337,7 +332,6 @@ func init() {
 
 		},
 		Run: func(c *grumble.Context) error {
-			//	cache := make(map[string]interface{})
 
 			cache := make(map[float64]interface{})
 			sortList := make([]float64, 0, 0)
@@ -349,8 +343,6 @@ func init() {
 			i := int64(0)
 			for ; i < countNum; i++ {
 
-				//now := time.Now().UnixNano() / 1e6
-				//request. = now - 1000*seconds
 				queryJvmResponse, error := rpc.QueryJvmInfo(address, &request)
 
 				if error != nil {
@@ -360,7 +352,6 @@ func init() {
 					dataString := string(queryJvmResponse.GetData())
 					data := common.JsonToList(dataString)
 					for _, contentMap := range data {
-						//	fmt.Println(data)
 						timestamp := contentMap["timestamp"].(float64)
 
 						if cache[timestamp] == nil {
@@ -519,6 +510,39 @@ func init() {
 		},
 	}
 
+	showHealthInfoCommand := &grumble.Command{
+		Name:     "showHealthInfo",
+		Help:     "showHealthInfo",
+		LongHelp: "showHealthInfo",
+		Flags: func(f *grumble.Flags) {
+			f.String("a", "address", "localhost:8000", "ip:port")
+			f.Int64("s", "seconds", 5, "seconds")
+			f.Int64("c", "count", 1, "count")
+		},
+		Run: func(c *grumble.Context) error {
+			request := pb.HealthCheckRequest{}
+			address := getAddress(c)
+			seconds := c.Flags.Int64("seconds")
+			countNum := c.Flags.Int64("count")
+			i := int64(0)
+			for ; i < countNum; i++ {
+				queryHealthInfoResponse, error := rpc.QueryHealthInfo(address, &request)
+				if error != nil {
+					return error
+				}
+				if queryHealthInfoResponse != nil {
+					dataString := string(queryHealthInfoResponse.GetData())
+					data := common.JsonToMap(dataString)
+					printHealthInfo(data)
+					for i < countNum-1 {
+						time.Sleep(time.Duration(seconds) * time.Second)
+					}
+				}
+			}
+			return nil
+		},
+	}
+
 	inferenceCommand := &grumble.Command{
 		Name:     "inference",
 		Help:     "inference",
@@ -638,6 +662,7 @@ func init() {
 	App.AddCommand(cluster)
 	App.AddCommand(showJvmCommand)
 	App.AddCommand(uncaryCall)
+	App.AddCommand(showHealthInfoCommand)
 
 	// adminCommand.AddCommand(&grumble.Command{
 	// 	Name: "root",
@@ -654,8 +679,8 @@ func main() {
 	// flag.IntVar(&port, "p", 8000, "port")
 	address = host + ":" + strconv.Itoa(port)
 	grumble.Main(App)
-
 }
+
 func printConfig() {
 	fmt.Println("use default address : " + address)
 
@@ -689,6 +714,16 @@ func printJvmInfo(contentMap map[string]interface{}) {
 	fmt.Println(timestampString, yongGcContent, fullGcContent, heapMaxContent,
 		heapUsedContent, usedPercentContent, threadCountContent)
 
+}
+
+func printHealthInfo(contentMap map[string]interface{}) {
+	records := contentMap["records"].([]interface{})
+	if len(records) != 0 {
+		for _, record := range records {
+			re := record.(map[string]interface{})
+			fmt.Printf("checkItemName:%s, msg:%s, healthCheckStatus:%s\n", re["checkItemName"].(string), re["msg"].(string), re["healthCheckStatus"].(string))
+		}
+	}
 }
 
 func printZkService(conn *zk.Conn) error {

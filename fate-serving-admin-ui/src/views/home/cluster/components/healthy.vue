@@ -1,0 +1,346 @@
+<!--
+  Copyright 2019 The FATE Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the 'License');
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an 'AS IS' BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+ -->
+<template>
+<div class="checkup">
+    <el-dialog
+            title="Cluster Checkup Wizard"
+            custom-class="pipeline-dialog checkup-dialog"
+            :visible.sync="healthyVisible"
+            width="700px"
+        >
+            <div class="healthy-content">
+                <div class="healthy-top">
+                    <div>
+                        <span v-if="checkupStatus === 1" class="healthy-status"><i class="el-icon-success"></i>Cluster is healthy.</span>
+                        <span v-if="checkupStatus === 2" class="healthy-status"><i class="el-icon-loading" ></i><span class="span">Checkuping</span></span>
+                        <span v-if="checkupStatus === 3" class="healthy-status" style="color:#FE6363"><i class="el-icon-error"></i><span class="span">Error occurs !</span></span>
+                        <span v-if="checkupStatus === 4" class="healthy-status" style="color:#FE6363"><i class="el-icon-warning"></i><span class="span">Warn</span></span>
+                        <span class="healthy-time">Last checkup：{{ HealthData.timestamp | datefrom}}</span>
+                    </div>
+                    <el-button class="healthy-but" :disabled="checkup" :style="checkup ? 'background-color:#B8BFCC' : 'background-color:#217AD9'" @click="startCheckup">Start Checkup</el-button>
+                </div>
+                  <div class="healthy-bottom">
+                    <div class="healthy-item" v-if="HealthData.healthInfo && HealthData.healthInfo.proxy">
+                            <i v-if="proxypercentage !== 100" class="el-icon-loading"/>
+                            <i v-else-if="errorFlag" class="el-icon-error"/>
+                            <i v-else-if="warnFlag" class="el-icon-warning"/>
+                            <i v-else-if="okFlag" class="el-icon-success"/>
+                            <i v-else class="no-deta"/>
+                        <span>Serving Proxy</span>
+                        <el-progress :percentage="proxypercentage" :show-text="false" color="#217AD9"></el-progress>
+                        <i class="el-icon-arrow-down" :class="proxyCK ? 'active-down' : ''" @click="proxyCK = !proxyCK"></i>
+                       <div v-show="proxyCK">
+                            <div class="healthy-run" v-for="(item,i) in proxyStatus" :key="i">
+                                <i v-if="proxypercentage !== 100 && ((100 / proxyStatus.length) * (i + 1)) >= proxypercentage" class="el-icon-loading"/>
+                                <i v-else-if="item.type === 'okList'" class="el-icon-success"/>
+                                <i v-else-if="item.type === 'warnList'" class="el-icon-warning"/>
+                                <i v-else-if="item.type === 'errorList'" class="el-icon-error"/>
+                                <span>{{Object.keys(item)[0]}}</span>
+                                <span v-if="item.type === 'okList'">Check up passed!</span>
+                                <span v-else>{{ Object.values(item)[0] }}</span>
+                            </div>
+                       </div>
+                    </div>
+                     <div class="healthy-item" v-if="HealthData.healthInfo && HealthData.healthInfo.serving">
+                            <i v-if="checkupStatus === 2 " class="el-icon-loading"/>
+                            <i v-else-if="SerrorFlag" class="el-icon-error"/>
+                            <i v-else-if="SwarnFlag" class="el-icon-warning"/>
+                            <i v-else-if="SokFlag" class="el-icon-success"/>
+                            <i v-else class="no-deta"/>
+                             <!-- v-if="servingpercentage === 100 || servingpercentage ===0" -->
+                            <!-- <i v-if="checkupStatus === 3" class="el-icon-warning"/> -->
+                        <span style="margin-right:23px">Serving Server</span>
+                        <el-progress :percentage="servingpercentage" :show-text="false" color="#217AD9"></el-progress>
+                        <i class="el-icon-arrow-down" :class="serverCK ? 'active-down' : ''" @click="serverCK = !serverCK"></i>
+                        <div v-show="serverCK">
+                            <div class="healthy-run" v-for="(item,i) in servingStatus" :key="i">
+                                <i v-if="servingpercentage !== 100 && ((100 / servingStatus.length) * (i + 1)) >= servingpercentage" class="el-icon-loading"/>
+                                <i v-else-if="item.type === 'okList'" class="el-icon-success"/>
+                                <i v-else-if="item.type === 'warnList'" class="el-icon-warning"/>
+                                <i v-else-if="item.type === 'errorList'" class="el-icon-error"/>
+                                <span>{{Object.keys(item)[0]}}</span>
+                                <span v-if="item.type === 'okList'">Check up passed!</span>
+                                <span v-else>{{ Object.values(item)[0] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </el-dialog>
+    </div>
+</template>
+
+<script>
+import {
+    selfCheck
+} from '@/api/cluster'
+import moment from 'moment'
+export default {
+    name: 'Healthy',
+    filters: {
+        datefrom(value) {
+            return value ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '--'
+        }
+    },
+    props: {
+        HealthData: {
+            type: Object,
+            default() {
+                return {}
+            }
+        }
+    },
+    data() {
+        return {
+            checkupStatus: 1,
+            checkup: false,
+            proxypercentage: 100,
+            servingpercentage: 100,
+            healthyVisible: false,
+            proxyCK: false,
+            serverCK: false,
+            clusterTimer: null,
+            proxyStatus: [],
+            servingStatus: [],
+            errorFlag: null,
+            warnFlag: null,
+            okFlag: null,
+            SerrorFlag: null,
+            SwarnFlag: null,
+            SokFlag: null
+        }
+    },
+    watch: {
+        healthyVisible: {
+            handler: function(val) {
+                if (val) {
+                    this.initHealthData()
+                }
+            },
+            immediate: true,
+            deep: true
+        }
+    },
+    created() {
+        setTimeout(() => {
+            this.initHealthData()
+            this.$emit('checkup', this.checkupStatus)
+        }, 100)
+    },
+    methods: {
+        initHealthData() {
+            this.proxyStatus = []
+            this.servingStatus = []
+            this.errorFlag = 0
+            this.okFlag = 0
+            this.warnFlag = 0
+            this.SerrorFlag = 0
+            this.SokFlag = 0
+            this.SwarnFlag = 0
+            for (let key in this.HealthData.healthInfo) {
+                if (key === 'proxy') {
+                    for (let key2 in this.HealthData.healthInfo[key]) {
+                        this.HealthData.healthInfo[key][key2].length !== 0 && this.HealthData.healthInfo[key][key2].forEach(item => {
+                            for (let key3 in item) {
+                                if (key3 === 'data') {
+                                    for (let key4 in item[key3]) {
+                                        if (key4 === 'errorList' || key4 === 'okList' || key4 === 'warnList') {
+                                            this.errorFlag += item[key3].errorList && item[key3].errorList.length
+                                            this.okFlag += item[key3].okList && item[key3].okList.length
+                                            this.warnFlag += item[key3].warnList && item[key3].warnList.length
+                                            // item[key3][key4] = [{ '127.0.0.1:8000': 'router 127.0.0.1:8000 can not connected' }, { '127.0.0.1:8040': 'router 127.0.0.1:8000 can not connected' }]
+                                            item[key3][key4].forEach((item1, i) => {
+                                                item1.type = key4
+                                            })
+                                            this.proxyStatus = this.proxyStatus.concat(item[key3][key4])
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                    }
+                } else if (key === 'serving') {
+                    for (let key2 in this.HealthData.healthInfo[key]) {
+                        this.HealthData.healthInfo[key][key2].length !== 0 && this.HealthData.healthInfo[key][key2].forEach(item => {
+                            for (let key3 in item) {
+                                if (key3 === 'data') {
+                                    for (let key4 in item[key3]) {
+                                        if (key4 === 'errorList' || key4 === 'okList' || key4 === 'warnList') {
+                                            this.SerrorFlag += item[key3].errorList && item[key3].errorList.length
+                                            this.SokFlag += item[key3].okList && item[key3].okList.length
+                                            this.SwarnFlag += item[key3].warnList && item[key3].warnList.length
+                                            // item[key3][key4] = [{ '127.0.0.1:8000': 'router 127.0.0.1:8000 can not connected' }, { '127.0.0.1:8040': 'router 127.0.0.1:8000 can not connected' }]
+                                            item[key3][key4].forEach(item1 => {
+                                                item1.type = key4
+                                            })
+                                            this.servingStatus = this.servingStatus.concat(item[key3][key4])
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                    }
+                }
+            }
+            if (this.okFlag || this.SokFlag) {
+                this.checkupStatus = 1
+            } else if (this.warnFlag || this.SwarnFlag) {
+                this.checkupStatus = 4
+            } if (this.errorFlag || this.SerrorFlag) {
+                this.checkupStatus = 3
+            }
+            this.$emit('checkup', this.checkupStatus)
+        },
+
+        startCheckup() {
+            this.checkup = true
+            this.checkupStatus = 2
+            this.servingpercentage = 0
+            this.proxypercentage = 0
+            this.$emit('checkup', this.checkupStatus)
+            // setTimeout(() => {
+            //     this.clusterTimer = setInterval(() => {
+            //         if (this.proxypercentage < 40) {
+            //             this.proxypercentage += 1
+            //         } else {
+            //             clearInterval(this.clusterTimer)
+            //         }
+            //     }, 150)
+            // }, 300)
+            selfCheck().then(res => {
+                // clearInterval(this.clusterTimer)
+                this.clusterTimer = setInterval(() => {
+                    if (this.proxypercentage < 100) {
+                        this.proxypercentage += 1
+                    } else if (this.servingpercentage < 100) {
+                        this.servingpercentage += 1
+                    } else {
+                        clearInterval(this.clusterTimer)
+                        this.checkup = false
+                        this.initHealthData()
+                        this.$emit('checkup', this.checkupStatus, res.data)
+                    }
+                }, 50)
+            })
+        }
+    }
+}
+</script>
+
+<style rel="stylesheet/scss" lang="scss">
+.checkup {
+  .checkup-dialog {
+    margin-top: 22vh !important;
+}
+}
+
+.healthy-content {
+    .no-deta {
+        display: inline-block;
+        width: 18px;
+    }
+    .healthy-top {
+        width: 628px;
+        height: 96px;
+        background: #FAFBFC;
+        display: flex;
+        padding: 12px 24px 12px 12px;
+        box-sizing: border-box;
+        justify-content: space-between;
+        .healthy-status {
+             color: #4E5766;
+             display: block;
+            font-size: 24px;
+            margin-bottom: 15px;
+            i {
+                font-size: 36px;
+                vertical-align: -4px;
+                margin-right: 5px;
+            }
+        }
+        .healthy-time {
+            font-size: 14px;
+            font-weight: 400;
+            color: #848C99;
+        }
+        .healthy-but {
+            background: #217AD9;
+            width: 160px;
+            height: 36px;
+            color: #fff;
+            border: none;
+            border-radius: 0px;
+            margin-top: 18px;
+        }
+    }
+     .healthy-bottom {
+         font-size: 18px;
+         margin-top: 24px;
+         .healthy-item {
+             margin-bottom: 20px;
+         }
+         span {
+            margin: 0px 30px 0 15px;
+         }
+         .el-progress-bar__inner,.el-progress-bar__outer {
+             border-radius: 0;
+         }
+         .el-progress-bar {
+             padding-right: 20px;
+         }
+        .el-progress {
+            position: relative;
+            width: 437px;
+            line-height: 1;
+            display: inline-block;
+        }
+       .el-progress__text {
+            display: none;
+        }
+        .el-icon-arrow-down {
+            cursor: pointer;
+            color: #B8BFCC;
+            transition: transform .3s;
+        }
+        .active-down {
+            transform: rotate(180deg);
+        }
+        .healthy-run {
+            margin:15px 0 0 33px;
+            transition: all .3s;
+
+            span {
+                color: #848C99;
+                font-size: 14px;
+                vertical-align: 2px;
+                margin-right: 10px;
+
+            }
+        }
+        .el-icon-error {
+            color: #FE6363;
+        }
+        .el-icon-warning {
+            color: #FF9D00;
+        }
+        .el-icon-success,.el-icon-loading {
+            color: #217AD9;
+        }
+     }
+
+}
+</style>

@@ -16,6 +16,8 @@
 
 package com.webank.ai.fate.serving.common.provider;
 
+import com.google.gson.Gson;
+import com.google.protobuf.Message;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.register.url.CollectionUtils;
@@ -109,20 +111,35 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 if (model.getServiceIds() != null) {
                     modelExBuilder.addAllServiceIds(model.getServiceIds());
                 }
-                modelExBuilder.setContent(JsonUtil.object2Json(model));
+                //JsonUtil.object2Json(model)
+                        Gson  gson =  new Gson();
+                modelExBuilder.setContent(gson.toJson(model));
                 if (model.getModelProcessor() instanceof PipelineModelProcessor) {
                     ModelServiceProto.ModelProcessorExt.Builder modelProcessorExtBuilder = ModelServiceProto.ModelProcessorExt.newBuilder();
                     PipelineModelProcessor pipelineModelProcessor = (PipelineModelProcessor) model.getModelProcessor();
 //                    System.out.println(JsonUtil.object2Json(pipelineModelProcessor.getParmasMap()));
-                    modelProcessorExtBuilder.setDslParser(JsonUtil.object2Json(pipelineModelProcessor .getDslParser()));
-                    modelProcessorExtBuilder.setParamsMap(JsonUtil.object2Json(pipelineModelProcessor.getParmasMap()));
+                    //pipelineModelProcessor.getPipeLineNode()
+//                    modelProcessorExtBuilder.setDslParser(JsonUtil.object2Json(pipelineModelProcessor .getDslParser()));
+//                    modelProcessorExtBuilder.setParamsMap(JsonUtil.object2Json(pipelineModelProcessor.getParmasMap()));
 //                    modelProcessorExtBuilder.setPipelineNodes()
+
+                    if(pipelineModelProcessor!=null){
+                        pipelineModelProcessor.getPipeLineNode().forEach(node->{
+                            if(node!=null) {
+                                ModelServiceProto.PipelineNode.Builder pipelineNodeBuilder = ModelServiceProto.PipelineNode.newBuilder();
+                                pipelineNodeBuilder.setName(node.getComponentName());
+                                pipelineNodeBuilder.setParams(node.getParam() instanceof Message ?JsonUtil.pbToJson((Message)node.getParam()):JsonUtil.object2Json(node.getParam()));
+                                modelProcessorExtBuilder.addNodes(pipelineNodeBuilder.build());
+                            }
+                        });
+                    }
                     modelExBuilder.setModelProcessorExt(modelProcessorExtBuilder.build());
                 }
                 builder.addModelInfos(modelExBuilder.build());
             }
         }
         builder.setRetcode(StatusCode.SUCCESS);
+
         return builder.build();
     }
 

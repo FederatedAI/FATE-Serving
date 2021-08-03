@@ -17,6 +17,8 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOMetaProto.DataIOMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.DataIOParamProto.DataIOParam;
@@ -72,11 +74,19 @@ public class DataIO extends BaseComponent {
     }
 
     @Override
-    public Map<String, Object> getParams() {
-        for (Field declaredField : dataIOParam.getClass().getDeclaredFields()) {
-            logger.info(declaredField.getName());
-        }
-        return JsonUtil.object2Objcet(dataIOParam, new TypeReference<Map<String, Object>>() {});
+    public Object getParam() {
+//        for (Field declaredField : dataIOParam.getClass().getDeclaredFields()) {
+//            logger.info(declaredField.getName());
+//        }
+////        Gson  gson = new Gson();
+//        Map  result = Maps.newHashMap();
+//        result.put("dataIOParam",dataIOParam );
+
+        return  dataIOParam;
+//
+//        dataIOParam.
+//        gson.toJson()
+ //       return JsonUtil.object2Objcet(dataIOParam, new TypeReference<Map<String, Object>>() {});
     }
 
     @Override

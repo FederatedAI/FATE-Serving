@@ -117,7 +117,7 @@ public abstract class HeteroFM extends BaseComponent {
     }
 
     @Override
-    public Map<String, Object> getParams() {
+    public Object getParam() {
         Map<String,Object> paramsMap = Maps.newHashMap();
         paramsMap.putAll(weight);
         return paramsMap;

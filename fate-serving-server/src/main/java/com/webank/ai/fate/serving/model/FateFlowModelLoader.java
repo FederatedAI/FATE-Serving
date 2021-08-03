@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.model;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -27,25 +28,29 @@ import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URLEncoder;
+import java.util.*;
 
 @Component
-public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>> {
+public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>> implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(FateFlowModelLoader.class);
+    private static final String TRANSFER_URI = "flow/online/transfer";
 
     @Autowired(required = false)
     private RouterService routerService;
+
+
+    @Autowired
+    ZookeeperRegistry zookeeperRegistry;
 
     @Override
     protected byte[] serialize(Context context, Map<String, byte[]> data) {
@@ -95,16 +100,27 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
 
             String filePath = modelLoaderParam.getFilePath();
             if (StringUtils.isNotBlank(filePath)) {
-                requestUrl = URLDecoder.decode(filePath);
+                requestUrl = URLDecoder.decode(filePath,"UTF-8");
             } else if (routerService != null) {
                 //serving 2.1.0兼容
-                String transferUri = "flow/online/transfer";
-                String modelVersion = modelLoaderParam.tableName;
-                String modelId = modelLoaderParam.nameSpace.replace("#", "~");
-                URL url = URL.valueOf(transferUri + "/" + modelId + "/" + modelVersion);
-                List<URL> urls = routerService.router(url);
-                if (ObjectUtils.allNotNull(urls)) {
-                    url = URL.valueOf(transferUri);
+                String modelParentPathx = "/" + Dict.DEFAULT_FATE_ROOT + "/" + TRANSFER_URI + "/providers";
+                List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
+                URL url = null;
+                List<URL> urls = new ArrayList<>();
+                if (children != null && children.size() > 0) {
+                    String modelVersion = modelLoaderParam.tableName;
+                    String modelId = modelLoaderParam.nameSpace.replace("#", "~");
+                    String uri = "/" + modelId + "/" + modelVersion;
+                    String encodeUri = URLEncoder.encode(uri,"UTF-8");
+                    for (String child : children) {
+                        if(child.endsWith(encodeUri)){
+                            urls.add(URL.valueOf(URLDecoder.decode(child,"UTF-8")));
+                            break;
+                        }
+                    }
+                }
+                if (urls == null || urls.isEmpty()) {
+                    url = URL.valueOf(TRANSFER_URI);
                     urls = routerService.router(url);
                 }
 
@@ -162,4 +178,18 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         return null;
     }
 
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        String modelParentPathx = "/" + Dict.DEFAULT_FATE_ROOT + "/" + TRANSFER_URI + "/providers";
+        String modelParentPath = "/";
+        List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
+        logger.info("children = {}", children);
+    }
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String str = "http%3A%2F%2F172.16.153.213%3A9380%2Fv1%2Fmodel%2Ftransfer%2Fhost%7E7005%7Eguest-7005%7Ehost-7005%7Emodel%2F202102011904312633151";
+        String x = URLDecoder.decode(str, "UTF-8");
+        System.out.println("x = " + x);
+    }
 }

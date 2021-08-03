@@ -1,6 +1,6 @@
 {
   "name": "FATE-Serving",
-  "version": "2.0.4",
+  "version": "2.0.0",
   "private": true,
   "author": "FATE Serving",
   "scripts": {

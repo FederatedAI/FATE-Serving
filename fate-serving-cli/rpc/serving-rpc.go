@@ -82,6 +82,30 @@ func QueryJvmInfo(address string, queryJvmRequest *pb.QueryJvmInfoRequest) (*pb.
 	return r, nil
 }
 
+func QueryHealthInfo(address string, queryHealthInfoRequest *pb.HealthCheckRequest) (*pb.CommonResponse, error) {
+	//glogger.Info("try to UnaryCall,address",address)
+	var conn *grpc.ClientConn
+	var err error
+	defer panicRecover()
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	c := pb.NewCommonServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	r, err := c.CheckHealthService(ctx, queryHealthInfoRequest)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 func QueryServingServerConfig(address string, queryPropsRequest *pb.QueryPropsRequest) (*pb.CommonResponse, error) {
 	//glogger.Info("try to UnaryCall,address",address)
 	var conn *grpc.ClientConn
