@@ -41,7 +41,7 @@ public class HealthCheckService implements InitializingBean {
 
     private static final String SERVING_CHECK_HEALTH = "serving/online/checkHealth";
 
-    proxy/online/checkHealthService
+
 
     private static final String PROXY_CHECK_HEALTH = "proxy/online/checkHealth";
 
