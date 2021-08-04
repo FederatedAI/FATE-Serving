@@ -41,7 +41,7 @@ public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBas
     private static final String LIST_PROPS = "listProps";
     private static final String QUERY_JVM = "queryJvm";
     private static final String UPDATE_SERVICE = "updateService";
-    private static final String CHECK_HEALTH = "checkHealthService";
+    private static final String CHECK_HEALTH = "checkHealth";
     private static final String UPDATE_ROUTE_TABLE = "updateRouteTable";
 
     @Autowired

@@ -50,6 +50,8 @@ public class StatusCode {
     public static final int Fill_RATE_ERROR = 131; // 填充率异常
     public static final int PROXY_LOAD_ROUTER_TABLE_ERROR = 132;
     public static final int PROXY_UPDATE_ROUTER_TABLE_ERROR = 133;
+    public static final int PROXY_PARAM_ERROR = 134;
+
 
 
 

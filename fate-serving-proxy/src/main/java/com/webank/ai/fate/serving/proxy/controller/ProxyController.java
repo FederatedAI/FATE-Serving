@@ -69,7 +69,11 @@ public class ProxyController {
                 logger.info("receive : {} headers {}", data, headers.toSingleValueMap());
                 final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor("unaryCall");
                 Proxy.Packet.Builder  packetBuilder =  Proxy.Packet.newBuilder();
-                JsonFormat.parser().merge(data,packetBuilder);
+                try {
+                    JsonFormat.parser().merge(data, packetBuilder);
+                }catch(Exception e){
+
+                }
                 packetBuilder.build();
                 Context context = new BaseContext();
                 context.setCallName("unaryCall");

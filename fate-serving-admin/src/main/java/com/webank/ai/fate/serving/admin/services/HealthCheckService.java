@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.health.HealthCheckRecord;
 import com.webank.ai.fate.serving.common.health.HealthCheckResult;
 import com.webank.ai.fate.serving.common.health.HealthCheckStatus;
@@ -36,6 +38,15 @@ public class HealthCheckService implements InitializingBean {
     Logger logger = LoggerFactory.getLogger(HealthCheckService.class);
     @Autowired
     ComponentService  componentService;
+
+    private static final String SERVING_CHECK_HEALTH = "serving/online/checkHealth";
+
+    proxy/online/checkHealthService
+
+    private static final String PROXY_CHECK_HEALTH = "proxy/online/checkHealth";
+
+    @Autowired
+    private ZookeeperRegistry zookeeperRegistry;
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     Map<String,Object> healthRecord = new ConcurrentHashMap<>();
@@ -79,37 +90,74 @@ public class HealthCheckService implements InitializingBean {
         result.put("okList",okList);
         result.put("warnList",warnList);
         result.put("errorList",errorList);
+        logger.info("health check {} component {} result {}",address,component,result);
         currentComponentMap.put(address,result);
     }
 
     public   Map check()   {
         try {
-
-            Map<String, Object> newHealthRecord = new ConcurrentHashMap<>();
+            List<URL>  servingList  = zookeeperRegistry.getCacheUrls(URL.valueOf(SERVING_CHECK_HEALTH));
+            List<URL>  proxyList  = zookeeperRegistry.getCacheUrls(URL.valueOf(PROXY_CHECK_HEALTH));
+            logger.info("serving urls {}",servingList);
+            logger.info("proxy urls {}",proxyList);
             Map<String, Map> componentHearthMap = new ConcurrentHashMap<>();
-            Map<String, List<String>> addressMap = componentService.getComponentAddresses();
-            //componentService.pullService();
-            List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
+
+            int size  =(servingList!=null?servingList.size():0)+(proxyList!=null?proxyList.size():0);
+
+            final CountDownLatch countDownLatch = new CountDownLatch(size);
             componentHearthMap.put("proxy", new ConcurrentHashMap());
             componentHearthMap.put("serving", new ConcurrentHashMap());
-            final CountDownLatch countDownLatch = new CountDownLatch(addressMap.size());
-            for (String component : addressMap.keySet()) {
-                if (component.equals("admin")) {
-                    countDownLatch.countDown();
-                    continue;
-                }
-                for (String address : addressMap.get(component)) {
-                    executor.submit(() -> {
-                        try {
-                            checkRemoteHealth(componentHearthMap, address, component);
-                        } catch (Exception e){
-                            e.printStackTrace();
-                        }finally {
-                            countDownLatch.countDown();
-                        }
-                    });
-                }
+            if(servingList!=null){
+                servingList.forEach(url ->{
+                    try {
+
+                        checkRemoteHealth(componentHearthMap, url.getAddress(), "serving");
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }finally {
+                        countDownLatch.countDown();
+                    }
+                });
             }
+            if(proxyList!=null){
+                proxyList.forEach(url->{
+                    try {
+
+                        checkRemoteHealth(componentHearthMap, url.getAddress(), "proxy");
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }finally {
+                        countDownLatch.countDown();
+                    }
+
+                });
+            }
+
+           Map<String, Object> newHealthRecord = new ConcurrentHashMap<>();
+//
+//            Map<String, List<String>> addressMap = componentService.getComponentAddresses();
+//
+//            //componentService.pullService();
+//            List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
+//
+//            final CountDownLatch countDownLatch = new CountDownLatch(addressMap.size());
+//            for (String component : addressMap.keySet()) {
+//                if (component.equals("admin")) {
+//                    countDownLatch.countDown();
+//                    continue;
+//                }
+//                for (String address : addressMap.get(component)) {
+//                    executor.submit(() -> {
+//                        try {
+//                            checkRemoteHealth(componentHearthMap, address, component);
+//                        } catch (Exception e){
+//                            e.printStackTrace();
+//                        }finally {
+//                            countDownLatch.countDown();
+//                        }
+//                    });
+//                }
+//            }
             countDownLatch.await();
             newHealthRecord.put(Dict.TIMESTAMP, System.currentTimeMillis());
             newHealthRecord.putAll(componentHearthMap);

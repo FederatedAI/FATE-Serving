@@ -28,6 +28,7 @@ import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 import org.slf4j.Logger;
@@ -128,6 +129,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             Map content = new HashMap();
             content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
             content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
+            content.put(Dict.VERSION, MetaInfo.CURRENT_VERSION);
             this.zkClient.create(path, JsonUtil.object2Json(content), true);
             this.componentUrl = url;
 
@@ -270,14 +272,14 @@ public class ZookeeperRegistry extends FailbackRegistry {
             if (serviceWrapper.getWeight() != null) {
                 parameters.put(Constants.WEIGHT_KEY, String.valueOf(serviceWrapper.getWeight()));
             }
-            if (serviceWrapper.getVersion() != null) {
-                parameters.put(Constants.VERSION_KEY, String.valueOf(serviceWrapper.getVersion()));
-            }
+//            if (serviceWrapper.getVersion() != null) {
+//                parameters.put(Constants.VERSION_KEY, String.valueOf(serviceWrapper.getVersion()));
+//            }
         } else {
             serviceWrapper = new ServiceWrapper();
             serviceWrapper.setRouterMode(parameters.get(Constants.ROUTER_MODE));
             serviceWrapper.setWeight(parameters.get(Constants.WEIGHT_KEY) != null ? Integer.valueOf(parameters.get(Constants.WEIGHT_KEY)) : null);
-            serviceWrapper.setVersion(parameters.get(Constants.VERSION_KEY) != null ? Long.valueOf(parameters.get(Constants.VERSION_KEY)) : null);
+            //serviceWrapper.setVersion(parameters.get(Constants.VERSION_KEY) != null ? Long.valueOf(parameters.get(Constants.VERSION_KEY)) : null);
             this.getServiceCacheMap().put(url.getEnvironment() + "/" + url.getPath(), serviceWrapper);
         }
     }
@@ -311,6 +313,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             }
 
         }
+        syncServiceCacheFile();
 
 
     }

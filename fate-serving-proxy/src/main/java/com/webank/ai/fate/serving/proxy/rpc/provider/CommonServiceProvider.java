@@ -185,11 +185,11 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             }
 
             String originVersion = originUrl.getParameter(Constants.VERSION_KEY);
-            if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
-                parameters.put(Constants.VERSION_KEY, String.valueOf(version));
-                serviceWrapper.setVersion(version);
-                hasChange = true;
-            }
+//            if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
+//                parameters.put(Constants.VERSION_KEY, String.valueOf(version));
+//                serviceWrapper.setVersion(version);
+//                hasChange = true;
+//            }
 
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
 

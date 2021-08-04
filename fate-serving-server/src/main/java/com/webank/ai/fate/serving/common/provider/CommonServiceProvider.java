@@ -151,7 +151,7 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
             String url = request.getUrl();
             String routerMode = request.getRouterMode();
             int weight = request.getWeight();
-            long version = request.getVersion();
+            //long version = request.getVersion();
             URL originUrl = URL.valueOf(url);
             boolean hasChange = false;
             ServiceWrapper serviceWrapper = new ServiceWrapper();
@@ -168,11 +168,11 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
                 hasChange = true;
             }
             String originVersion = originUrl.getParameter(Constants.VERSION_KEY);
-            if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
-                parameters.put(Constants.VERSION_KEY, String.valueOf(version));
-                serviceWrapper.setVersion(version);
-                hasChange = true;
-            }
+//            if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
+//                parameters.put(Constants.VERSION_KEY, String.valueOf(version));
+//                serviceWrapper.setVersion(version);
+//                hasChange = true;
+//            }
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
             builder.setStatusCode(StatusCode.SUCCESS);
             if (hasChange) {
