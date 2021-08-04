@@ -16,6 +16,8 @@
 
 package com.webank.ai.fate.serving.proxy.controller;
 
+import com.google.protobuf.util.JsonFormat;
+import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.common.bean.BaseContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
@@ -24,8 +26,10 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import com.webank.ai.fate.serving.proxy.utils.WebUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +54,36 @@ public class ProxyController {
 
     @Autowired
     ProxyServiceRegister proxyServiceRegister;
+
+
+    @RequestMapping(value = "/uncary", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public Callable<String> uncaryCall(
+                                       @RequestBody String data,
+                                       HttpServletRequest httpServletRequest,
+                                       @RequestHeader HttpHeaders headers
+    ) throws Exception {
+        return new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                logger.info("receive : {} headers {}", data, headers.toSingleValueMap());
+                final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor("unaryCall");
+                Proxy.Packet.Builder  packetBuilder =  Proxy.Packet.newBuilder();
+                JsonFormat.parser().merge(data,packetBuilder);
+                packetBuilder.build();
+                Context context = new BaseContext();
+                context.setCallName("unaryCall");
+                //context.setVersion(version);
+                InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, packetBuilder.build());
+                OutboundPackage<Proxy.Packet> result = serviceAdaptor.service(context, inboundPackage);
+                return JsonFormat.printer().print(result.getData());
+            }
+        };
+    }
+
+
+
+
 
     @RequestMapping(value = "/federation/{version}/{callName}", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
@@ -104,6 +138,20 @@ public class ProxyController {
         InboundPackage<Map> inboundPackage = new InboundPackage<Map>();
         inboundPackage.setBody(body);
         inboundPackage.setHead(head);
+        return inboundPackage;
+    }
+
+
+    public InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {
+        context.setCaseId(Long.toString(System.currentTimeMillis()));
+        if (StringUtils.isNotBlank(req.getHeader().getOperator())) {
+            context.setVersion(req.getHeader().getOperator());
+        }
+        context.setGuestAppId(req.getHeader().getSrc().getPartyId());
+        context.setHostAppid(req.getHeader().getDst().getPartyId());
+        InboundPackage<Proxy.Packet> inboundPackage = new InboundPackage<Proxy.Packet>();
+        inboundPackage.setBody(req);
+
         return inboundPackage;
     }
 

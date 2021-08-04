@@ -18,6 +18,26 @@ package com.webank.ai.fate.serving.core.rpc.router;
 
 public class RouterInfo {
 
+    public Protocol getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    private Protocol  protocol;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    private String url;
+
     private String host;
 
     private Integer port;

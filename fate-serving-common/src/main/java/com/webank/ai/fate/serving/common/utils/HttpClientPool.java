@@ -119,6 +119,14 @@ public class HttpClientPool {
         httpPost.setEntity(stringEntity);
         return getResponse(httpPost);
     }
+    public static String sendPost(String url, String requestData, Map<String, String> headers) {
+        HttpPost httpPost = new HttpPost(url);
+        config(httpPost, headers);
+        StringEntity stringEntity = new StringEntity(requestData, Dict.CHARSET_UTF8);
+        stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
+        httpPost.setEntity(stringEntity);
+        return getResponse(httpPost);
+    }
 
     public static String get(String url, Map<String, String> headers) {
         return sendGet(url, headers);

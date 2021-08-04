@@ -28,6 +28,7 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.rpc.router.Protocol;
 import com.webank.ai.fate.serving.core.rpc.router.RouteType;
 import com.webank.ai.fate.serving.core.rpc.router.RouteTypeConvertor;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
@@ -50,6 +51,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private static final Logger logger = LoggerFactory.getLogger(ConfigFileBasedServingRouter.class);
     private static final String IP = "ip";
     private static final String PORT = "port";
+    private static final String URL = "url";
     private static final String USE_SSL = "useSSL";
     private static final String HOSTNAME = "hostname";
     private static final String negotiationType = "negotiationType";
@@ -149,6 +151,10 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             } else {
                 router.setHost(epoint.getHostname());
             }
+            if(epoint.getUrl()!=null&&StringUtils.isNotBlank(epoint.getUrl())){
+                router.setProtocol(Protocol.HTTP);
+            }
+            router.setUrl(epoint.getUrl());
             router.setUseSSL(epoint.getUseSSL());
             router.setPort(epoint.getPort());
             router.setNegotiationType(epoint.getNegotiationType());
@@ -245,7 +251,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
 
     @Scheduled(fixedRate = 10000)
     public void loadRouteTable() {
-        logger.info("load route table");
+        //logger.info("load route table");
         String filePath = "";
         if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
             filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
@@ -264,7 +270,6 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
         }
         String fileMd5 = FileUtils.fileMd5(filePath);
         if (StringUtils.isNotBlank(lastFileMd5)&&null != fileMd5 && fileMd5.equals(lastFileMd5)) {
-//            logger.info("oooooooooooooooooooo {}",lastFileMd5);
             return;
         }
         JsonReader jsonReader = null;
@@ -358,6 +363,10 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
                     if (endpointJson.has(PORT)) {
                         int targetPort = endpointJson.get(PORT).getAsInt();
                         endpointBuilder.setPort(targetPort);
+                    }
+                    if(endpointJson.has(URL)){
+                        String url = endpointJson.get(URL).getAsString();
+                        endpointBuilder.setUrl(url);
                     }
 
                     if (endpointJson.has(USE_SSL)) {

@@ -28,6 +28,7 @@ message Endpoint {
     string certChainFile = 6;
     string privateKeyFile = 7;
     string caFile = 8;
+    string url = 9;
 }
 
 message Endpoints {
