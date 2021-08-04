@@ -28,5 +28,6 @@ public enum ModelActionType {
     UNLOAD,
     UNBIND,
     QUERY_MODEL,
-    FETCH_MODEL
+    FETCH_MODEL,
+    MODEL_TRANSFER
 }

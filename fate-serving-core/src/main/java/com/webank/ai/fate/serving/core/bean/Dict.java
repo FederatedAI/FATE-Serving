@@ -114,7 +114,7 @@ public class Dict {
     public static final String PROPERTY_USE_ZK_ROUTER = "useZkRouter";
     public static final String PROPERTY_USE_REGISTER = "useRegister";
     public static final String PROPERTY_MODEL_TRANSFER_URL = "model.transfer.url";
-    public static final boolean PROPERTY_MODEL_SYNC = true;
+    public static final String PROPERTY_MODEL_SYNC = "model.synchronize";
     public static final String PROPERTY_SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
     public static final String PROPERTY_FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
     public static final String PROPERTY_ACL_ENABLE = "acl.enable";
