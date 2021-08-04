@@ -62,7 +62,7 @@ public class ModelController {
     private ComponentService componentService;
 
     @GetMapping("/model/query")
-    public ReturnResult queryModel(String host, Integer port, String serviceId, Integer page, Integer pageSize) throws Exception {
+    public ReturnResult queryModel(String host, Integer port, String serviceId,String tableName, String namespace, Integer page, Integer pageSize) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port is blank");
 
@@ -85,9 +85,12 @@ public class ModelController {
         if (StringUtils.isNotBlank(serviceId)) {
             // by service id
             queryModelRequestBuilder.setQueryType(1);
-//            queryModelRequestBuilder.setTableName(tableName);
-//            queryModelRequestBuilder.setNamespace(namespace);
             queryModelRequestBuilder.setServiceId(serviceId);
+        } else if (StringUtils.isNotBlank(namespace) && StringUtils.isNotBlank(tableName)) {
+            // query model by tableName and namespace
+            queryModelRequestBuilder.setTableName(tableName);
+            queryModelRequestBuilder.setNamespace(namespace);
+            queryModelRequestBuilder.setQueryType(2);
         } else {
             // list all
             queryModelRequestBuilder.setQueryType(0);

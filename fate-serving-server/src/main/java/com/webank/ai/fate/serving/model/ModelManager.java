@@ -589,6 +589,14 @@ public class ModelManager implements InitializingBean {
                             return clone;
                         })
                         .collect(Collectors.toList());
+            case 2:
+                // query model by tableName and namespace
+                List<Model> modelList = new ArrayList<>();
+                Model model = queryModel(queryModelRequest.getTableName(), queryModelRequest.getNamespace());
+                if (model != null)
+                    modelList.add(model);
+
+                return modelList;
             default:
                 return null;
         }
