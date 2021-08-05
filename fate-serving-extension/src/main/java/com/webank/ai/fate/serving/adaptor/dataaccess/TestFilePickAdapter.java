@@ -46,6 +46,7 @@ public class TestFilePickAdapter extends AbstractSingleFeatureDataAdaptor {
 
         try {
             if (featureMaps.isEmpty()) {
+                logger.info("testHost data path = {}", Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
                 List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
                 for (int i = 0; i < lines.size(); i++) {
                     String[] idFeats = StringUtils.split(lines.get(i), ",");
