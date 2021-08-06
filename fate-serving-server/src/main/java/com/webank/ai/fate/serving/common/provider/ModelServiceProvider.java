@@ -242,16 +242,17 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
 
-        //logger.info("model transfer by {}", Optional.ofNullable(serviceId).orElse(tableName + "#" + namespace));
+        logger.info("model transfer by tableName：{}, namespace：{}", tableName , namespace);
 
         Model model;
 //        if (StringUtils.isNotBlank(serviceId)) {
 //            model = modelManager.queryModel(serviceId);
 //        } else {
             model = modelManager.queryModel(tableName, namespace);
+
         //}
         if (model == null) {
-            logger.error("model {}_{} is not exist", model.getTableName(), model.getNamespace());
+            logger.error("model {}_{} is not exist", tableName, namespace);
             throw new ModelNullException("model is not exist ");
         }
         byte[] cacheData = modelManager.getModelCacheData(context, model.getTableName(), model.getNamespace());
