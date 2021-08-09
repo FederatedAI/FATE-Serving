@@ -534,13 +534,18 @@ public class ModelManager implements InitializingBean {
         param.setNameSpace(model.getNamespace());
         // first lookup form fateflow
         param.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
-//        param.setFilePath(cachePath);
+//       param.setFilePath(cachePath);
 
+        List<String> serviceIds= model.getServiceIds();
+        //remove serviceId in the fetched model
+        model.setServiceIds(null);
+
+        //save fetched model
         this.doLoad(context, model, param);
 
-        // bind model
-        if (model.getServiceIds() != null) {
-            for (String serviceId : model.getServiceIds()) {
+        //bind the relation <serviceId,model>
+        if (serviceIds != null) {
+            for (String serviceId : serviceIds) {
                 this.doBind(context, model, serviceId);
             }
         }
