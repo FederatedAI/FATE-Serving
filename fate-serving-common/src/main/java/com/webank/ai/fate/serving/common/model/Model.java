@@ -58,7 +58,7 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
     }
 
     public void setResourceAdress(String resourceAdress) {
-        resourceAdress = resourceAdress;
+        this.resourceAdress = resourceAdress;
     }
 
     public Double getAllowQps() {
