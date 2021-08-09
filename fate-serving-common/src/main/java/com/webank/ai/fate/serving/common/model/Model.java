@@ -51,14 +51,14 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
 
     private Double allowQps;
 
-    private String ResourceAdress;
+    private String resourceAdress;
 
     public String getResourceAdress() {
-        return ResourceAdress;
+        return resourceAdress;
     }
 
     public void setResourceAdress(String resourceAdress) {
-        ResourceAdress = resourceAdress;
+        resourceAdress = resourceAdress;
     }
 
     public Double getAllowQps() {
