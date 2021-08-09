@@ -96,7 +96,47 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
     protected Map<String, byte[]> doLoadModel(Context context, ModelLoaderParam modelLoaderParam) {
         logger.info("read model, name: {} namespace: {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
         try {
-            String requestUrl = "";
+            String requestUrl =getResource(context,modelLoaderParam);
+
+            Map<String, Object> requestData = new HashMap<>(8);
+            requestData.put("name", modelLoaderParam.tableName);
+            requestData.put("namespace", modelLoaderParam.nameSpace);
+
+            long start = System.currentTimeMillis();
+            String responseBody = HttpClientPool.transferPost(requestUrl, requestData);
+            long end = System.currentTimeMillis();
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}|{}|{}|{}", requestUrl, start, end, (end - start) + " ms");
+            }
+            if (StringUtils.isEmpty(responseBody)) {
+                logger.info("read model fail, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
+                return null;
+            }
+            Map responseData = JsonUtil.json2Object(responseBody, Map.class);
+            if (responseData.get(Dict.RET_CODE) != null && (int) responseData.get(Dict.RET_CODE) != StatusCode.SUCCESS) {
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get(Dict.RET_MSG));
+                return null;
+            }
+            Map<String, byte[]> resultMap = new HashMap<>(8);
+            Map<String, Object> dataMap = responseData.get(Dict.DATA) != null ? (Map<String, Object>) responseData.get(Dict.DATA) : null;
+            if (dataMap == null || dataMap.isEmpty()) {
+                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);
+                return null;
+            }
+            for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                resultMap.put(entry.getKey(), Base64.getDecoder().decode(String.valueOf(entry.getValue())));
+            }
+            return resultMap;
+        } catch (Exception e) {
+            logger.error("get model info from fateflow error", e);
+        }
+        return null;
+    }
+
+    @Override
+    public String getResource(Context context,ModelLoaderParam modelLoaderParam) {
+        String requestUrl = "";
+        try {
 
             String filePath = modelLoaderParam.getFilePath();
             if (StringUtils.isNotBlank(filePath)) {
@@ -140,44 +180,12 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                 logger.info("fateflow address not found");
                 return null;
             }
-
             logger.info("use request url: {}", requestUrl);
-
-            Map<String, Object> requestData = new HashMap<>(8);
-            requestData.put("name", modelLoaderParam.tableName);
-            requestData.put("namespace", modelLoaderParam.nameSpace);
-
-            long start = System.currentTimeMillis();
-            String responseBody = HttpClientPool.transferPost(requestUrl, requestData);
-            long end = System.currentTimeMillis();
-            if (logger.isDebugEnabled()) {
-                logger.debug("{}|{}|{}|{}", requestUrl, start, end, (end - start) + " ms");
-            }
-            if (StringUtils.isEmpty(responseBody)) {
-                logger.info("read model fail, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
-                return null;
-            }
-            Map responseData = JsonUtil.json2Object(responseBody, Map.class);
-            if (responseData.get(Dict.RET_CODE) != null && (int) responseData.get(Dict.RET_CODE) != StatusCode.SUCCESS) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, responseData.get(Dict.RET_MSG));
-                return null;
-            }
-            Map<String, byte[]> resultMap = new HashMap<>(8);
-            Map<String, Object> dataMap = responseData.get(Dict.DATA) != null ? (Map<String, Object>) responseData.get(Dict.DATA) : null;
-            if (dataMap == null || dataMap.isEmpty()) {
-                logger.info("read model fail, {}, {}, {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace, dataMap);
-                return null;
-            }
-            for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-                resultMap.put(entry.getKey(), Base64.getDecoder().decode(String.valueOf(entry.getValue())));
-            }
-            return resultMap;
-        } catch (Exception e) {
-            logger.error("get model info from fateflow error", e);
+        }catch (Exception e){
+            logger.error("get flow address error = {}",e);
         }
-        return null;
+        return requestUrl;
     }
-
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -185,11 +193,5 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         String modelParentPath = "/";
         List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
         logger.info("children = {}", children);
-    }
-
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        String str = "http%3A%2F%2F172.16.153.213%3A9380%2Fv1%2Fmodel%2Ftransfer%2Fhost%7E7005%7Eguest-7005%7Ehost-7005%7Emodel%2F202102011904312633151";
-        String x = URLDecoder.decode(str, "UTF-8");
-        System.out.println("x = " + x);
     }
 }
