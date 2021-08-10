@@ -116,11 +116,12 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                 modelExBuilder.setIndex(i);
                 modelExBuilder.setTableName(model.getTableName());
                 modelExBuilder.setNamespace(model.getNamespace());
+                modelExBuilder.setResourceAdress(model.getResourceAdress() == null ? "" : model.getResourceAdress());
                 if (model.getServiceIds() != null) {
                     modelExBuilder.addAllServiceIds(model.getServiceIds());
                 }
                 //JsonUtil.object2Json(model)
-                        Gson  gson =  new Gson();
+                Gson gson = new Gson();
                 modelExBuilder.setContent(gson.toJson(model));
                 if (model.getModelProcessor() instanceof PipelineModelProcessor) {
                     ModelServiceProto.ModelProcessorExt.Builder modelProcessorExtBuilder = ModelServiceProto.ModelProcessorExt.newBuilder();
@@ -131,12 +132,12 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 //                    modelProcessorExtBuilder.setParamsMap(JsonUtil.object2Json(pipelineModelProcessor.getParmasMap()));
 //                    modelProcessorExtBuilder.setPipelineNodes()
 
-                    if(pipelineModelProcessor!=null){
-                        pipelineModelProcessor.getPipeLineNode().forEach(node->{
-                            if(node!=null) {
+                    if (pipelineModelProcessor != null) {
+                        pipelineModelProcessor.getPipeLineNode().forEach(node -> {
+                            if (node != null) {
                                 ModelServiceProto.PipelineNode.Builder pipelineNodeBuilder = ModelServiceProto.PipelineNode.newBuilder();
                                 pipelineNodeBuilder.setName(node.getComponentName());
-                                pipelineNodeBuilder.setParams(node.getParam() instanceof Message ?JsonUtil.pbToJson((Message)node.getParam()):JsonUtil.object2Json(node.getParam()));
+                                pipelineNodeBuilder.setParams(node.getParam() instanceof Message ? JsonUtil.pbToJson((Message) node.getParam()) : JsonUtil.object2Json(node.getParam()));
                                 modelProcessorExtBuilder.addNodes(pipelineNodeBuilder.build());
                             }
                         });
@@ -177,7 +178,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
-        List<String>  serviceIds = Lists.newArrayList();
+        List<String> serviceIds = Lists.newArrayList();
         ProtocolStringList serviceIdsList = req.getServiceIdsList();
         ModelServiceProto.ModelTransferRequest.Builder modelTransferRequestBuilder = ModelServiceProto.ModelTransferRequest.newBuilder();
 //        if(serviceIdsList!=null){
@@ -242,13 +243,13 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         String tableName = req.getTableName();
         String namespace = req.getNamespace();
 
-        logger.info("model transfer by tableName：{}, namespace：{}", tableName , namespace);
+        logger.info("model transfer by tableName：{}, namespace：{}", tableName, namespace);
 
         Model model;
 //        if (StringUtils.isNotBlank(serviceId)) {
 //            model = modelManager.queryModel(serviceId);
 //        } else {
-            model = modelManager.queryModel(tableName, namespace);
+        model = modelManager.queryModel(tableName, namespace);
 
         //}
         if (model == null) {
@@ -267,8 +268,6 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
         return responseBuilder.build();
     }
-
-
 
 
     @Override

@@ -418,10 +418,10 @@ public class ModelManager implements InitializingBean {
     }
 
     public String getAdressForUrl(String url) {
+        String address = "";
         if (StringUtils.isBlank(url)) {
-            return null;
+            return address;
         }
-        String address = null;
         if (url.contains("//")) {
             String tempUrl = url.substring(url.indexOf("//") + 2);
             if (tempUrl.contains("/")) {
