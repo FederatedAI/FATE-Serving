@@ -98,7 +98,17 @@ public class MetaInfo {
     public static String PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE;
     public static Integer PROPERTY_ADMIN_HEALTH_CHECK_TIME;
     public static Boolean PROPERTY_ALLOW_HEALTH_CHECK;
-
+    public static Integer HTTP_CLIENT_CONFIG_CONN_REQ_TIME_OUT;
+    public static Integer HTTP_CLIENT_CONFIG_CONN_TIME_OUT;
+    public static Integer HTTP_CLIENT_CONFIG_SOCK_TIME_OUT;
+    public static Integer HTTP_CLIENT_INIT_POOL_MAX_TOTAL;
+    public static Integer HTTP_CLIENT_INIT_POOL_DEF_MAX_PER_ROUTE;
+    public static Integer HTTP_CLIENT_INIT_POOL_SOCK_TIME_OUT;
+    public static Integer HTTP_CLIENT_INIT_POOL_CONN_TIME_OUT;
+    public static Integer HTTP_CLIENT_INIT_POOL_CONN_REQ_TIME_OUT;
+    public static Integer HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT;
+    public static Integer HTTP_CLIENT_TRAN_CONN_TIME_OUT;
+    public static Integer HTTP_CLIENT_TRAN_SOCK_TIME_OUT;
 
     public static Map toMap() {
         Map result = Maps.newHashMap();
