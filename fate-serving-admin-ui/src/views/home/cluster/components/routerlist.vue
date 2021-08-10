@@ -16,214 +16,24 @@
  -->
 <template>
     <div style="padding:1px 0">
-        <div class="button-contral">
-            <el-button class="add" type="primary" @click="openModify">Add</el-button>
-        </div>
-        <el-table
-            :data="routerTableData"
-            :header-cell-style="{background:'#fff'}"
-            style="width: 100%;margin-bottom: 20px;"
-            max-height="668px"
-            class="table"
-            @expand-change="setArrow"
-            ref="refTable"
-        >
-            <el-table-column type="expand">
-                <template slot-scope="scope">
-                    <el-table :data="scope.row.routerList" style="width: calc(100% - 70px)" id="two-list">
-                        <el-table-column width="200" prop="index" label="Index">
-                            <template slot-scope="scope">
-                                <span>{{scope.$index + 1}}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column width="200" prop="serverType" label="Type"></el-table-column>
-                        <el-table-column prop="Network Access" label="Network Access">
-                            <template slot-scope="scope">
-                                <span>{{ scope.row.ipPort }}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                            prop="useSSL"
-                            label="Certificate"
-                            width="200"
-                            sortable
-                            :sort-method="(a, b) => { return sortMix(a, b, 'useSSL') }">
-                            <template slot-scope="scope">
-                                <span>{{ scope.row.useSSL ? 'Configured' : 'Unconfigured' }}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column width="200" prop="certChainFile" label="Certificate Path"></el-table-column>
-                    </el-table>
-                </template>
-            </el-table-column>
-            <el-table-column width="120" prop="$index" label="Index" show-overflow-tooltip>
-                <template slot-scope="scope">
-                    <span>{{ scope.$index + 1 }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column
-                width="200"
-                prop="partyId"
-                label="PartyID"
-                sortable
-                :sort-method="(a, b) => { return sortMix(a, b, 'partyId') }"
-                show-overflow-tooltip
-            >
-                <template slot-scope="scope">
-                    <span>{{ scope.row.partyId }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column width="280" prop="networkAccess" label="Network Access">
-                <template slot-scope="scope">
-                    <span class="access-count" :class="{'up':scope.row.up === '2'}" @click="openList(scope.row)">
-                        <span>{{scope.row.count}}</span>
-                        <i v-if="scope.row.count > 0" class="el-icon-caret-bottom"></i>
-                    </span>
-
-                </template>
-            </el-table-column>
-            <el-table-column
-                width="280"
-                prop="createTime"
-                sortable
-                :sort-method="(a, b) => { return sortMix(a, b, 'createTime') }"
-                label="Create Time"
-            >
-                <template slot-scope="scope">
-                    <span>{{ scope.row.createTime | dateform }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column
-                width="280"
-                prop="updateTime"
-                sortable
-                :sort-method="(a, b) => { return sortMix(a, b, 'updateTime') }"
-                label="updateTime">
-                <template slot-scope="scope">
-                    <span>{{ scope.row.updateTime | dateform }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column width="100" label="Operation">
-                <template slot-scope="scope">
-                    <el-button
-                        type="text"
-                        style="font-size: 18px"
-                        class="edit"
-                        size="mini"
-                        @click="openModify(scope.row,scope.$index)"
-                    ></el-button>
-                    <el-button
-                        type="text"
-                        style="font-size: 18px"
-                        class="delete"
-                        :class="{'disable':scope.row.partyId === 'default'}"
-                        :disabled="scope.row.partyId === 'default'"
-                        size="mini"
-                        @click="delete(scope.row)"
-                    ></el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-        <div class="pagination" v-if="page.total > 0">
-            <el-pagination
-                background
-                @current-change="handleCurrentChange"
-                :current-page.sync="page.currentPage"
-                :page-size="page.size"
-                layout="total, prev, pager, next, jumper"
-                :total="page.total"
-            ></el-pagination>
-        </div>
+        <vue-json-editor
+            v-model="routerTableData"
+            :showBtns="false"
+            :mode="'code'"
+            lang="en"
+            @json-change="onJsonChange"
+            @json-save="onJsonSave"
+            />
 
         <div class="page-contral">
             <el-button
                 type="primary"
-                @click="modifyRouter = false"
+                @click="getTableData"
                 style="background:#B8BFCC;border-radius:0"
             >Cancel</el-button>
             <el-button type="primary" class="save-page" :class="{'disable':!hasChange}" :disabled="!hasChange" @click="saveSureDialog = true">Save</el-button>
         </div>
 
-        <el-dialog
-            :visible.sync="modifyRouter"
-            :showClose="cancel"
-            :title="modelType === 'add' ? 'Add' : 'Edit'"
-            class="modifyModel"
-            width="45%"
-            top="10%"
-            center>
-            <div class="party-input">
-                <span class="party-input-title" style="color:#217AD9;font-size:18px;">PartyID</span>
-                <el-input v-model.number="modifyData.partyId" :class="{'disable':modelType === 'edit'}" :disabled="modelType === 'edit'"></el-input>
-            </div>
-            <div class="table-title-line">
-                <span>Network Access Info</span>
-                <span class="add-router-button" @click="addNewRouter"><i class="el-icon-circle-plus"></i>add router</span>
-            </div>
-
-           <el-table :data="modifyData.routerList" style="width: 100%" id="modify-table">
-                <el-table-column width="60" prop="index" label="Index">
-                    <template slot-scope="scope">
-                        <span>{{scope.$index + 1}}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column width="120" prop="serverType" label="Type">
-                    <template slot-scope="scope">
-                        <el-select class="sel-role input-placeholder" v-model="scope.row.serverType" placeholder="">
-                            <el-option key="default" label="Default" value="default"></el-option>
-                            <el-option key="serving" label="Serving" value="serving"></el-option>
-                        </el-select>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="Network Access" label="Network Access">
-                    <template slot-scope="scope">
-                        <el-input clearable v-model="scope.row.ipPort"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column
-                    prop="useSSL"
-                    label="Certificate"
-                    width="150">
-                    <template slot-scope="scope">
-                        <el-switch
-                            v-model="scope.row.useSSL"
-                            active-color="#217AD9"
-                            inactive-color="#E6EBF0"
-                            active-text=""
-                            inactive-text=""
-                            @change="setCertificate(scope.row)">
-                        </el-switch>
-                    </template>
-                </el-table-column>
-                <el-table-column width="150" prop="certChainFile" label="Certificate Path">
-                    <template slot-scope="scope">
-                        <el-input clearable v-model="scope.row.certChainFile" :value="scope.row.certChainFile" :disabled="!scope.row.useSSL"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column width="90" label="Operation" align="center">
-                <template slot-scope="scope">
-                    <el-button
-                        type="text"
-                        style="font-size: 18px"
-                        class="delete"
-                        :class="{'disable':scope.row.partyId === 'default'}"
-                        :disabled="scope.row.partyId === 'default'"
-                        size="mini"
-                        @click="deleteRouter(scope.$index)"
-                    ></el-button>
-                </template>
-            </el-table-column>
-            </el-table>
-
-            <span slot="footer" class="dialog-footer dialog-but">
-                <el-button type="primary" :disabled="!modifyData.partyId" @click="saveLocalRouter">OK</el-button>
-                <el-button
-                    type="primary"
-                    @click="modifyRouter = false"
-                    style="background:#B8BFCC;border: 1px solid #B8BFCC"
-                >Cancel</el-button>
-            </span>
-        </el-dialog>
         <el-dialog
             :visible.sync="saveSureDialog"
             :showClose="cancel"
@@ -244,6 +54,7 @@
                 >Cancel</el-button>
             </span>
         </el-dialog>
+
         <el-dialog
             :visible.sync="sureLeaveDialog"
             :showClose="cancelLeave"
@@ -268,7 +79,8 @@
 </template>
 
 <script>
-import { queryRouterList, addRouter, updateRouter, deleteRouter } from '@/api/cluster'
+import { queryRouterList, saveRouter } from '@/api/cluster'
+import vueJsonEditor from 'vue-json-editor'
 export default {
     name: 'routerTable',
     props: {
@@ -291,6 +103,7 @@ export default {
             }
         }
     },
+    components: { vueJsonEditor },
     data() {
         return {
             modifyRouter: false,
@@ -301,7 +114,30 @@ export default {
             next: '',
             modifyData: {
                 partyId: '',
-                routerList: []
+                routerList: [{
+                    caFile: '',
+                    certChainFile: '',
+                    ip: '',
+                    negotiationType: '',
+                    port: '',
+                    privateKeyFile: '',
+                    serverType: 'default',
+                    useSSL: false,
+                    ipPort: ''
+                }]
+            },
+            resultInfo: {
+                'userId': '1111111129ac7325-30da-4e6a-8a00-9699820fc04a',
+                'realName': '小雪18',
+                'gradeCode': '166',
+                'provinceCode': '110000',
+                'cityCode': {
+                    'test1': 'test1',
+                    'test2': 'test2'
+                },
+                'schoolId': 21,
+                'schoolLevel': 1,
+                'schoolName': '北京第二实验小学朝阳学校'
             },
             nowModelDataIndex: 0,
             hasChange: false,
@@ -326,6 +162,13 @@ export default {
         }
     },
     methods: {
+        onJsonChange() {
+            console.log(arguments, 'onJsonChange')
+            this.hasChange = true
+        },
+        onJsonSave() {
+            console.log(arguments, 'onJsonSave')
+        },
         sureLeave() {
             this.routerTableData = this.deepClone(this.cacheRouterTableData)
             this.hasChange = false
@@ -356,12 +199,12 @@ export default {
                 this.page.total = res.data.total
                 this.routerTableData = res.data.rows
                 this.routerTableData.map(item => {
-                    item.up = '1'
                     item.routerList.map(val => {
                         val.ipPort = val.ip ? `${val.ip}:${val.port}` : ''
                     })
                 })
                 this.cacheRouterTableData = this.deepClone(this.routerTableData)
+                this.hasChange = false
                 console.log(this.routerTableData, 'routerTableData')
                 console.log(this.cacheRouterTableData, 'routerTableData')
             })
@@ -382,29 +225,15 @@ export default {
 
             return a - b < 0 ? -1 : 1
         },
-        setArrow() {
-            console.log(arguments, 'open')
-            let row = arguments[0]
-            this.$nextTick(() => {
-                this.routerTableData.map(item => {
-                    if (item.partyId === row.partyId) {
-                        row.up = row.up === '2' ? '1' : '2'
-                    } else {
-                        item.up = '1'
-                    }
-                })
-            })
-            console.log(this.routerTableData, 'this.routerTableData')
-        },
         initModify() {
             this.modifyData.partyId = ''
             this.modifyData.routerList = [{
-                caFile: null,
-                certChainFile: null,
+                caFile: '',
+                certChainFile: '',
                 ip: '',
-                negotiationType: null,
+                negotiationType: '',
                 port: '',
-                privateKeyFile: null,
+                privateKeyFile: '',
                 serverType: 'default',
                 useSSL: false,
                 ipPort: ''
@@ -415,20 +244,17 @@ export default {
             this.modifyRouter = true
             if (this.modelType === 'edit') {
                 this.modifyData.partyId = row.partyId
-                this.modifyData.routerList = row.routerList
+                this.$set(this.modifyData, 'routerList', row.routerList)
                 this.nowModelDataIndex = index
             } else {
                 this.initModify()
             }
-            console.log(this.modifyData, 'modifyData')
         },
-        delete() {
-            deleteRouter().then(res => {
-                console.log(res, 'res-delete')
-            })
+        deleteList(index) {
+            this.routerTableData.splice(index, 1)
+            this.hasChange = JSON.stringify(this.cacheRouterTableData) !== JSON.stringify(this.routerTableData)
         },
         deleteRouter(index) {
-            console.log(index, 'deleteRouter-index')
             this.modifyData.routerList.splice(index, 1)
         },
         saveLocalRouter() {
@@ -444,8 +270,7 @@ export default {
                 this.routerTableData.push({
                     partyId: this.modifyData.partyId,
                     count: this.modifyData.routerList.length,
-                    routerList: this.modifyData.routerList,
-                    up: '1'
+                    routerList: this.modifyData.routerList
                 })
                 this.page.total++
                 // this.$set(this.routerTableData[this.routerTableData.length], 'routerList', this.modifyData.routerList)
@@ -456,7 +281,6 @@ export default {
             if (JSON.stringify(this.cacheRouterTableData) !== JSON.stringify(this.routerTableData)) {
                 this.hasChange = true
             }
-            console.log(this.hasChange, 'haschange')
         },
         setCertificate(row) {
             if (!row.useSSL) {
@@ -468,29 +292,53 @@ export default {
         },
         addNewRouter() {
             this.modifyData.routerList.push({
-                caFile: null,
-                certChainFile: null,
+                caFile: '',
+                certChainFile: '',
                 ip: '',
-                negotiationType: null,
+                negotiationType: '',
                 port: '',
-                privateKeyFile: null,
+                privateKeyFile: '',
                 serverType: 'default',
                 useSSL: false,
                 ipPort: ''
             })
         },
         sureSave() {
-            console.log(this.routerTableData, 'routerTableData')
+            console.log(this.routerTableData, 'routerTableData-save')
             this.saveSureDialog = false
-            if (this.modelType === 'add') {
-                addRouter().then(res => {
-                    console.log(res, 'res-addRouter')
+            let routerTableList = this.routerTableData.map(item => {
+                return item.routerList.map(k => {
+                    k = this.nullToStr(k)
+                    return {
+                        partyId: item.partyId,
+                        ...k
+                    }
                 })
-            } else {
-                updateRouter().then(res => {
-                    console.log(res, 'res-updateRouter')
-                })
+            }).flat()
+            let param = {
+                'serverHost': this.ipPort[0],
+                'serverPort': this.ipPort[1],
+                'routerTableList': [...routerTableList]
             }
+            console.log(param, JSON.stringify(param), 'param-save')
+            saveRouter(param).then(res => {
+                console.log(res, 'res-addRouter')
+                if (res.retcode === 0 && res.retmsg === 'success') {
+                    this.$message.success('Save success!')
+                    this.getTableData()
+                }
+            })
+        },
+        cancelSave() {
+            this.routerTableData = this.deepClone(this.cacheRouterTableData)
+        },
+        nullToStr(data) {
+            for (var x in data) {
+                if (data[x] === null) { // 如果是null 把直接内容转为 ''
+                    data[x] = ''
+                }
+            }
+            return data
         },
         deepClone(target) {
             // 定义一个变量
@@ -523,6 +371,12 @@ export default {
             }
             // 返回最终结果
             return result
+        },
+        updateView(row, index) {
+            let ipArr = row.ipPort.split(':')
+            row.ip = ipArr[0]
+            row.port = ipArr[1]
+            // this.$set(this.modifyData.routerList[index], 'ipPort', row.ipPort)
         }
         // selectIP(item, index) {
         //     this.$emit('selectIP', item, index)
@@ -532,42 +386,16 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scope>
-    .button-contral{
-        display: flex;
-        justify-content: flex-start;
-        width: 100%;
-        margin: 20px 0 10px;
-        .add{
-            width: 100px;
-            height: 36px;
-            background: #217AD9;
-            color:'#fff';
-            border-radius: 0;
+    .jsoneditor-vue{
+        margin: 12px 0;
+        height: 600px;
+        .jsoneditor-menu{
+            button{
+                outline: none;
+            }
         }
     }
     .ip-info-Router{
-        tbody{
-            color: #848C99;
-        }
-        .el-table__expanded-cell{
-            .el-table{
-                margin: 10px 30px;
-                background: #FAFBFC;
-                tr,th {
-                    background-color: transparent;
-                }
-            }
-        }
-        .el-table__expand-icon{
-            display: none;
-        }
-        .el-table__expand-column{
-            // display: none;
-            width: 10px;
-        }
-        .pagination {
-            bottom: 100px !important;
-        }
         .page-contral{
             clear: both;
             background: #fff;
@@ -583,36 +411,6 @@ export default {
                 background: #217AD9;
             }
         }
-        #center-gray{
-            display: inline-block;
-            margin: 5px 0 20px;
-            font-size: 18px;
-            font-family: Product Sans;
-            font-weight: 400;
-            line-height: 20px;
-            color: #848C99;
-        }
     }
-    #two-list{
-        .el-table__body-wrapper {
-            height: unset !important;
-        }
 
-    }
-    .access-count{
-        span{
-            color: #217AD9;
-            margin-right: 16px;
-        }
-        i{
-            cursor: pointer;
-            font-size: 16px;
-            transition: all .4s;
-        }
-    }
-    .access-count.up{
-        i{
-            transform: rotate(-180deg);
-        }
-    }
 </style>

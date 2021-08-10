@@ -100,8 +100,8 @@ export default {
             largerGrig: {
                 top: 0,
                 bottom: 0,
-                left: '8%',
-                right: '8%'
+                left: '12%',
+                right: '12%'
             },
             options: {
                 tooltip: {
@@ -171,7 +171,7 @@ export default {
             }
         },
         selectItem: function(newVal, oldVal) {
-            console.log(newVal, 'selectItem')
+            // console.log(newVal, 'selectItem')
             if (!newVal) return
             let name = newVal[0]
             let type = newVal[1]
@@ -235,9 +235,11 @@ export default {
                 this.$set(this.options.series[0].label, 'fontSize', 16)
                 this.$set(this.options.series[0], 'symbolSize', 35)
                 this.$set(this.proxySpace, 1, -45)
-                let { left, right } = this.largerGrig
-                this.$set(this.options.series[0], 'left', left)
-                this.$set(this.options.series[0], 'right', right)
+                if (this.options.series[0].data.length > 8) {
+                    let { left, right } = this.largerGrig
+                    this.$set(this.options.series[0], 'left', left)
+                    this.$set(this.options.series[0], 'right', right)
+                }
             } else {
                 // this.$set(this.options.tooltip, 'show', true)
                 this.$set(this.options.series[0].label, 'fontSize', 10)
@@ -249,16 +251,16 @@ export default {
         },
         initChart() {
             this.echartInstance = this.echarts.init(this.$refs.callsLine)
-            window.addEventListener('resize', this.resize)
             this.echartInstance.setOption(this.options)
+            window.addEventListener('resize', this.resize)
             this.echartInstance.on('click', this.tabNav)
         },
         initLarge() {
             // 放大改用svg渲染 避免模糊
             this.echartInstanceLarge = this.echarts.init(this.$refs.largeCallsLine, null, { renderer: 'svg' })
-            window.addEventListener('resize', this.resizeLarge)
             this.optionsLarge = this.deepClone(this.options)
             this.echartInstanceLarge.setOption(this.optionsLarge)
+            window.addEventListener('resize', this.resizeLarge)
             this.echartInstanceLarge.on('click', this.tabNav)
         },
         resize() {
@@ -268,11 +270,10 @@ export default {
             this.echartInstanceLarge.resize()
         },
         setOption() {
-            // let proxy = [this.chartArr.proxy[0].children[0]] || []
             let proxy = _.get(this, 'chartArr.proxy[0].children', [])
-            // let serving = [this.chartArr.serving[0].children[0]] || []
             let serving = _.get(this, 'chartArr.serving[0].children', [])
-
+            // let proxy = [this.chartArr.proxy[0].children[0]] || []
+            // let serving = [this.chartArr.serving[0].children[0]] || []
             let proxyArr = proxy.map(item => item.name)
             let servingArr = serving.map(item => item.name)
             if (proxyArr.length < 1 && servingArr.length < 1) return
@@ -290,22 +291,34 @@ export default {
             // 添加admin坐标
             let adminX = 150
             let center = ''
-            console.log(longArrPostionArr, 'longArrPostionArr')
-            console.log(shortArrPostionArr, 'shortArrPostionArr')
-            if (longLen % 2 !== 0) {
-                console.log('set-admin-by-long')
-                center = (longLen - 1) / 2 + 1
-                adminX = longArrPostionArr[center - 1].x
-            } else if (shortLen % 2 !== 0) {
-                console.log('set-admin-by-short')
-                center = (shortLen - 1) / 2 + 1
-                adminX = shortArrPostionArr[center - 1].x
+            // console.log(longArrPostionArr, 'longArrPostionArr')
+            // console.log(shortArrPostionArr, 'shortArrPostionArr')
+            if (longLen === 1) {
+                adminX = longArrPostionArr[0].x
+                if (shortArrPostionArr.length > 0) {
+                    shortArrPostionArr[0].x = longArrPostionArr[0].x
+                }
+            } else if (longLen === shortLen) {
+                longArrPostionArr.map((item, index) => {
+                    shortArrPostionArr[index].x = item.x
+                })
+                adminX = this.setAdminPosition(longArrPostionArr)
             } else {
-                console.log('set-admin-by-width')
-                if (longLen > 2) {
-                    adminX = this.setAdminPosition(longArrPostionArr)
-                } else if (shortLen > 2) {
-                    adminX = this.setAdminPosition(shortArrPostionArr)
+                if (longLen % 2 !== 0) {
+                    console.log('set-admin-by-long')
+                    center = ((longLen - 1) / 2) + 1
+                    adminX = longArrPostionArr[center - 1].x
+                } else if (shortLen % 2 !== 0) {
+                    console.log('set-admin-by-short')
+                    center = ((shortLen - 1) / 2) + 1
+                    adminX = shortArrPostionArr[center - 1].x
+                } else {
+                    console.log('set-admin-by-width')
+                    if (longLen > 2) {
+                        adminX = this.setAdminPosition(longArrPostionArr)
+                    } else if (shortLen > 2) {
+                        adminX = this.setAdminPosition(shortArrPostionArr)
+                    }
                 }
             }
 
@@ -326,16 +339,16 @@ export default {
                 newSeriesLink = this.setOptionsLink(shortArrPostionArr, longArrPostionArr)
             }
             console.log(newSeriesData, 'newSeriesData')
-            let xmap = newSeriesData.map(item => item.x)
-            console.log(xmap, 'xmap')
+            // let xmap = newSeriesData.map(item => item.x)
+            // console.log(xmap, 'xmap')
             if (this.selected) {
                 console.log(this.selected, 'small-selected')
                 newSeriesData[this.selected].symbol = newSeriesData[this.selected].dataName === 'proxy' ? selectedProxyUrl : selectedServingUrl
             } else {
                 // 未手动选择过则设置默认选中第一个serving
-                if (longArrName === 'proxy') {
+                if (longArrName === 'proxy' && shortArrPostionArr[0]) {
                     this.selectItem = [shortArrPostionArr[0].name, shortArrPostionArr[0].dataName]
-                } else {
+                } else if (longArrName === 'serving' && longArrPostionArr[0]) {
                     this.selectItem = [longArrPostionArr[0].name, longArrPostionArr[0].dataName]
                 }
             }
@@ -344,9 +357,9 @@ export default {
             this.initChart()
         },
         setOptionLarge() {
-            // let proxy = this.chartArr.proxy[0].children || []
+            // let proxy = [this.chartArr.proxy[0].children[0]] || []
+            // let serving = [this.chartArr.serving[0].children[0]] || []
             let proxy = _.get(this, 'chartArr.proxy[0].children', [])
-            // let serving = this.chartArr.serving[0].children || []
             let serving = _.get(this, 'chartArr.serving[0].children', [])
             let proxyArr = proxy.map(item => item.name)
             let servingArr = serving.map(item => item.name)
@@ -368,19 +381,30 @@ export default {
             // 添加admin坐标
             let adminX = 500
             let center = ''
-            if (longLen % 2 !== 0) {
-                center = (longLen - 1) / 2 + 1
-                adminX = longArrPostionArr[center - 1].x
-            } else if (shortLen % 2 !== 0) {
-                center = (shortLen - 1) / 2 + 1
-                adminX = shortArrPostionArr[center - 1].x
+            if (longLen === 1) {
+                adminX = longArrPostionArr[0].x
+                if (shortArrPostionArr[0])shortArrPostionArr[0].x = longArrPostionArr[0].x
+            } else if (longLen === shortLen) {
+                longArrPostionArr.map((item, index) => {
+                    shortArrPostionArr[index].x = item.x
+                })
+                adminX = this.setAdminPosition(longArrPostionArr)
             } else {
-                if (longLen > 2) {
-                    adminX = this.setAdminPosition(longArrPostionArr)
-                } else if (shortLen > 2) {
-                    adminX = this.setAdminPosition(shortArrPostionArr)
+                if (longLen % 2 !== 0) {
+                    center = ((longLen - 1) / 2) + 1
+                    adminX = longArrPostionArr[center - 1].x
+                } else if (shortLen % 2 !== 0) {
+                    center = ((shortLen - 1) / 2) + 1
+                    adminX = shortArrPostionArr[center - 1].x
+                } else {
+                    if (longLen > 2) {
+                        adminX = this.setAdminPosition(longArrPostionArr)
+                    } else if (shortLen > 2) {
+                        adminX = this.setAdminPosition(shortArrPostionArr)
+                    }
                 }
             }
+
             let adminPosition = {
                 name: 'admin',
                 symbol: adminUrl,
@@ -410,7 +434,7 @@ export default {
             let len = arr.length
             let arrLx = arr[(len / 2) - 1].x
             let arrRx = arr[(len / 2)].x
-            console.log((arrLx + arrRx) / 2)
+            // console.log((arrLx + arrRx) / 2)
             return (arrLx + arrRx) / 2
         },
         setLongArrPosition(arr, arrName) {
@@ -442,7 +466,7 @@ export default {
             positionArr.map(item => {
                 item.y = y
             })
-            console.log(positionArr, 'positionArr')
+            // console.log(positionArr, 'positionArr')
             return positionArr
         },
         setShortArrPosition(arr, arrName) {
@@ -470,8 +494,8 @@ export default {
                     listIndex: index
                 })
             })
-            console.log(positionArr, 'positionArr')
-            return positionArr
+            // console.log(positionArr, 'positionArr')
+            return positionArr || []
         },
         setOptionsLink(arr1, arr2) {
             if (arr1.length < 1 || arr2.length < 1) return []

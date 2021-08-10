@@ -20,7 +20,7 @@
             :width="pipelineWidth"
             title="Pipeline"
             custom-class="pipeline-dialog"
-            :visible.sync="pipelineVisible"
+            :visible="pipelineVisible"
             @close="closePipeline"
             :fullscreen="fullscreen"
             :top="top"
@@ -30,9 +30,9 @@
                     <div class="enlarge" @click="setSize('1')" v-if="!fullscreen"><img src="@/assets/zoom-in.png" alt=""></div>
                     <div class="shrink" @click="setSize('2')" v-else><img src="@/assets/zoom-out.png" alt=""></div>
                 </div>
-                <div class="dag-chart ">
-                    <div v-if="dagData.length > 0" :style="{'transform':`scale(${scale})`}">
-                        <div class="pipeline-cube" @click="getDagInstance(item,index)" :class="{'active':index === activeIndex}" v-for="(item,index) in dagData" :key="index">{{item.name}}<span class="line" v-if="index < (dagData.length - 1)"></span></div>
+                <div class="dag-chart">
+                    <div class="cube-section" v-if="dagData.length > 0" :style="{'transform':`scale(${scale})`}">
+                        <div class="pipeline-cube" @click.stop="getDagInstance(item,index)" :class="{'active':index === activeIndex}" v-for="(item,index) in dagData" :key="index">{{item.name}}<span class="line" v-if="index < (dagData.length - 1)"></span></div>
                     </div>
                     <div v-else class="no-data">No Data</div>
                     <div v-if="dagData" class="buttonList">
@@ -62,7 +62,6 @@
 
 <script>
 // import { parseTime, formatSeconds } from '@/filters'
-
 export default {
     name: 'pipelinedialog',
     components: {
@@ -108,7 +107,7 @@ export default {
     watch: {
         dagData: {
             handler(newVal, oldVal) {
-                console.log(arguments, 'dagData')
+                // console.log(arguments, 'dagData')
                 if (newVal && newVal[0] && newVal[0].name) {
                     this.getParams(newVal[0].name, 0)
                 }
@@ -117,11 +116,37 @@ export default {
         }
     },
     methods: {
+        move(e) {
+            console.log(e, 'e')
+            let odiv = e.target // 获取目标元素
+            let parent = e.target.offsetParent
+            // 算出鼠标相对元素的位置
+            let disX = e.clientX - odiv.offsetLeft
+            let disY = e.clientY - odiv.offsetTop
+            document.onmousemove = (e) => { // 鼠标按下并移动的事件
+                // 用鼠标的位置减去鼠标相对元素的位置，得到元素的位置
+                let left = e.clientX - disX
+                let top = e.clientY - disY
+
+                // 绑定元素位置到positionX和positionY上面
+                console.log(this, 'this')
+                this.positionX = top
+                this.positionY = left
+
+                // 移动当前元素
+                parent.style.left = left + 'px'
+                parent.style.top = top + 'px'
+            }
+            document.onmouseup = (e) => {
+                document.onmousemove = null
+                document.onmouseup = null
+            }
+        },
         closePipeline() {
             this.$emit('closePipeline')
         },
         getDagInstance(data, index) {
-            console.log(data, 'data')
+            // console.log(data, 'data')
             this.activeIndex = index
             this.clickComponent(data.name, index)
         },
