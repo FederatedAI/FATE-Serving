@@ -22,6 +22,7 @@
     "moment": "^2.24.0",
     "nprogress": "^0.2.0",
     "vue": "^2.6.10",
+    "vue-json-editor": "^1.4.3",
     "vue-router": "^3.0.3",
     "vuex": "^3.0.1"
   },

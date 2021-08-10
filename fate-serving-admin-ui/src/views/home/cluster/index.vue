@@ -146,8 +146,8 @@
                                 <template slot-scope="scope">
                                     <el-popover
                                         v-if="scope.row.serviceIds && scope.row.serviceIds[0] !== '--'"
+                                        popper-class="dark-popover"
                                         placement="top"
-                                        effect="dark"
                                         trigger="hover">
                                         <div>
                                             <div style="wadth:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
@@ -202,10 +202,10 @@
                                         v-if="scope.row.flowAddress.length > 0"
                                         :visible-arrow="false"
                                         placement="bottom"
-                                        effect="dark"
+                                        popper-class="dark-popover"
                                         @show="handleArrow(scope.$index,'2')"
                                         @hide="handleArrow(scope.$index,'1')"
-                                        trigger="click">
+                                        trigger="hover">
                                         <div>
                                             <div><p v-for="(item,index) in scope.row.flowAddress" :key="index">{{item}}</p></div>
                                         </div>
@@ -363,7 +363,7 @@
                                 ></el-option>
                             </el-select>
                             <span slot="footer" class="dialog-footer  dialog-but">
-                                <el-button type="primary"  @click="selectSynchron">OK</el-button>
+                                <el-button type="primary"  @click="checkModel">OK</el-button>
                                 <el-button
                                     type="primary"
                                     @click="modelSynchronizeVisible = false"
@@ -376,7 +376,7 @@
                             <br>
                             <span>continue synchronizing and cover it?</span>
                             <span slot="footer" class="dialog-footer  dialog-but">
-                                <el-button type="primary"  @click="sureModelSynchronize">OK</el-button>
+                                <el-button type="primary"  @click="selectSynchron">OK</el-button>
                                 <el-button
                                     type="primary"
                                     @click="secSureSynchronizeVisible = false"
@@ -423,7 +423,13 @@
                         <routertable ref="routertable" v-loading="loadingRouterTable" :showRouterTable="showRouterTable" :ipPort="ipPort" :routerPartyID="routerPartyID" @tabipInfo="tabipInfo" />
                     </div>
                     <div>
-                        <pipelinedialog @closePipeline="closePipeline" v-loading="loadingPipeline" @showPipeline="showPipeline" :pipelineVisible="pipelineVisible" :dagDataBak="dagDataBak" :dagData="dagData"  />
+                        <pipelinedialog
+                        ref="pipelinedialog"
+                        @closePipeline="closePipeline"
+                        v-loading="loadingPipeline"
+                        :pipelineVisible="pipelineVisible"
+                        :dagDataBak="dagDataBak"
+                        :dagData="dagData"  />
                     </div>
 
                 </div>
@@ -444,6 +450,7 @@ import modelchart from './components/modelchart'
 import healthy from './components/healthy'
 import routertable from './components/routerlist'
 import pipelinedialog from './components/pipelinedialog'
+import _ from 'lodash'
 
 import {
     getCluster,
@@ -455,7 +462,8 @@ import {
     queryMonitor,
     queryJvm,
     updateFlowRule,
-    checkHealth
+    checkHealth,
+    transfer
 } from '@/api/cluster'
 export default {
     name: 'cluster',
@@ -569,7 +577,8 @@ export default {
                     if (val[0] !== old[0] || val[1] !== old[1]) {
                         this.clearChartTimer()
                         this.listProps()
-                        this.ipInfo = 0
+                        // 2.1.0 模型同步后需要跳转到迁移目标的model tab 故此处不能设定ipInfo
+                        // this.ipInfo = 0
                     }
                 }
             },
@@ -760,36 +769,81 @@ export default {
                 this.tabipInfo(this.ipInfo)
             })
         },
+        checkModel() {
+            const params = {
+                host: this.ipPort[0],
+                port: this.ipPort[1],
+                tableName: this.rowData.tableName,
+                namespace: this.rowData.namespace
+            }
+            console.log(params, 'params')
+            getmodellist(params).then(res => {
+                console.log(res)
+                if (_.get(res, 'data.total', '') > 0) {
+                    this.secSureSynchronizeVisible = true
+                } else {
+                    this.selectSynchron()
+                }
+            })
+        },
         selectSynchron() {
-            if (this.servingServer === '111') {
-                // var type = Math.random() > 0.5 ? '1' : '2'
-                var type = '2'
-                if (type === '1') {
-                    this.$message.success({
-                        'message': 'Model synchronize success',
-                        'duration': 5000
+            console.log(this.rowData, 'rowData-selectSynchron')
+            const params = {
+                host: this.ipPort[0],
+                port: this.ipPort[1],
+                targetHost: this.servingServer.split(':')[0],
+                targetPort: this.servingServer.split(':')[1],
+                tableName: this.rowData.tableName,
+                namespace: this.rowData.namespace
+            }
+            transfer(params).then(res => {
+                console.log(res)
+                if (_.get(res, 'retcode', '') === 0) {
+                    this.$message.success('Model synchronize success')
+                    // 成功后跳转到目标迁移机器的model tab
+                    let listIndex = ''
+                    let ipArr = _.get(this, 'ipDataArr[0].children', [])
+                    ipArr.map((item, index) => {
+                        if (item.name === this.servingServer) {
+                            listIndex = index
+                        }
                     })
+                    this.selectIP(this.ipDataArr[0].children[listIndex], listIndex)
                 } else {
                     const h = this.$createElement
                     this.$message.warning({
                         message: h('div', null, [
                             h('div', null, 'Model synchronize failed'),
-                            h('div', { style: 'font-size:12px;color:#999;margin-top:6px' }, 'XXXXXXXXX')
+                            h('div', { style: 'font-size:12px;color:#999;margin-top:6px' }, res.retmsg)
                         ]),
                         'duration': 50000
                     }, true)
                 }
                 this.closeSynchronizeModel()
-            } else {
-                this.secSureSynchronizeVisible = true
-            }
-        },
-        sureModelSynchronize() {
-            this.$message.success({
-                'message': 'Model synchronize success',
-                'duration': 5000
+                console.log(this.ipDataArr, 'this.ipDataArr')
             })
-            this.closeSynchronizeModel()
+            // if (this.servingServer === '111') {
+            //     // var type = Math.random() > 0.5 ? '1' : '2'
+            //     var type = '2'
+            //     if (type === '1') {
+            //         this.$message.success({
+            //             'message': 'Model synchronize success',
+            //             'duration': 5000
+            //         })
+            //     } else {
+            //         const h = this.$createElement
+            //         this.$message.warning({
+            //             message: h('div', null, [
+            //                 h('div', null, 'Model synchronize failed'),
+            //                 h('div', { style: 'font-size:12px;color:#999;margin-top:6px' }, 'XXXXXXXXX')
+            //             ]),
+            //             'duration': 50000
+            //         }, true)
+            //     }
+            //     this.closeSynchronizeModel()
+            // } else {
+            //     this.secSureSynchronizeVisible = true
+            // }
         },
         closeSynchronizeModel() {
             this.modelSynchronizeVisible = false
@@ -947,7 +1001,9 @@ export default {
             if (this.ipInfo === 0) {
                 this.listProps()
             } else {
-                this.tabipInfo(this.ipInfo)
+                this.$nextTick(() => {
+                    this.tabipInfo(this.ipInfo)
+                })
             }
         },
         tabJVMInfo(index) {
@@ -955,7 +1011,6 @@ export default {
             this.JVMInfo = +index
         },
         tabipInfo(index) {
-            console.log(index, 'index')
             //  Basic、Models  tab
             this.clearChartTimer()
             if (this.$refs.routertable && this.$refs.routertable.hasChange === true) {
@@ -1144,7 +1199,9 @@ export default {
                 { name: 'I_QUERY_MODEL', textStyle: { color: '#ef6363' } },
                 { name: 'I_UNLOAD', textStyle: { color: '#c65f5f' } },
                 { name: 'I_UNBIND', textStyle: { color: '#848c99' } },
-                { name: 'I_CHECK_HEALTH', textStyle: { color: '#c23431' } }]
+                { name: 'I_CHECK_HEALTH', textStyle: { color: '#c23431' } },
+                { name: 'I_QUERY_ROUTER', textStyle: { color: '#d049c9' } },
+                { name: 'I_SAVE_ROUTER', textStyle: { color: '#7949d0' } }]
             for (var y = 0; y < legendArr.length; y++) {
                 for (var p = 0; p < MonArr.length; p++) {
                     if (legendArr[y] === MonArr[p].name) {
@@ -1258,6 +1315,7 @@ export default {
                 this.flowControlVisible = true
             } else if (command === 'ModelSynchronize') {
                 this.modelSynchronizeVisible = true
+                this.servingServer = ''
                 if (this.ipData && this.ipData.children) {
                     // 过滤出除当前serving的下拉菜单
                     this.servingServerList = this.ipData.children.filter(item => item.name !== this.ipchildrenData.name)
@@ -1273,6 +1331,8 @@ export default {
         },
         showPipeLineDialog(row) {
             this.dagData = row ? row.components : []
+            // 在小窗状态打开
+            this.$refs['pipelinedialog'].setSize('2')
             this.pipelineVisible = true
         },
         handleArrow(index, type) {
@@ -1284,9 +1344,6 @@ export default {
         searchRouter() {
             this.$refs['routertable'].getTableData()
         },
-        showPipeline() {
-            this.pipelineVisible = true
-        },
         closePipeline() {
             this.pipelineVisible = false
         }
@@ -1297,7 +1354,7 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 @import 'src/styles/cluster.scss';
 .el-tooltip__popper {
-     transform:translateY(100px);
+    transform:translateY(100px);
      font-size:14px;
     font-family:Product Sans;
     font-weight:400;
@@ -1319,21 +1376,6 @@ export default {
 }
 .party-popover-content{
     // overflow: hidden;
-    .party-popover{
-        display: flex;
-        flex-wrap: wrap;
-        width: 350px;
-        max-height: 200px;
-        overflow: auto;
-        span{
-            flex-shrink: 0;
-            margin-right: 3px;
-            margin-bottom: 5px;
-        }
-    }
-}
-
-.el-popover{
     padding: 10px;
     background: rgba(0,0,0,.8);
     color: #fff !important;
@@ -1348,7 +1390,20 @@ export default {
     .titpopover-label {
         color: #fff;
     }
+    .party-popover{
+        display: flex;
+        flex-wrap: wrap;
+        width: 350px;
+        max-height: 200px;
+        overflow: auto;
+        span{
+            flex-shrink: 0;
+            margin-right: 3px;
+            margin-bottom: 5px;
+        }
+    }
 }
+
 .el-table .cell{
     padding-top: 5px;
     line-height: 14px;

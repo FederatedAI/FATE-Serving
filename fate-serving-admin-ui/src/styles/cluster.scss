@@ -355,6 +355,12 @@
         .ip-info-Monitor,
         .ip-info-JVM,
         .ip-info-Router {
+            .el-popover__reference{
+                max-width: 150px;
+                overflow: hidden;
+                display: inline-block;
+                text-overflow: ellipsis;
+            }
             // position: relative;
             // height: 71vh;
             .service_id {
@@ -626,7 +632,7 @@
         cursor: pointer;
     }
     .titpopover-label:hover {
-        background: #666;
+        background: #f5f7fa;
     }
 }
 .popper__arrow {
@@ -780,6 +786,16 @@
             height: 100%;
             border: 1px solid #e6ebf0;
             flex-shrink: 0;
+            .cube-section{
+                display: flex;
+                justify-content: flex-start;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                min-height: 400px;
+                overflow-y: auto;
+                padding-top: 200px;
+            }
             .no-data{
                 font-size: 24px;
                 font-weight: bold;
@@ -858,8 +874,8 @@
             // justify-content: center;
             .echarts{
                 margin: auto;
-                width: 80% !important;
-                height:65vh !important;
+                width: 85% !important;
+                height:80vh !important;
                 &>div{
                     canvas{
                         top: 50% !important;
@@ -987,6 +1003,14 @@
                     border: 2px solid #E6EBF0;
                     padding: 0 5px;
                 }
+                .ip-port{
+                    height: 21px;
+                    line-height: 24px;
+                    border: 2px solid #E6EBF0;
+                    padding: 0 5px;
+                    outline: none;
+                }
+                
                 .el-select{
                     .el-input__inner{
                         border: 0;
@@ -1016,4 +1040,19 @@
         
     }
     
+}
+.el-popover.dark-popover{
+    padding: 10px;
+    background: rgba(0,0,0,.8);
+    color: #fff !important;
+    .popper__arrow{
+        top: unset !important;
+    }
+    .popper__arrow::after{
+        border-top-color: rgba(0,0,0,.8) !important;
+    }
+
+    .titpopover-label {
+        color: #fff;
+    }
 }
