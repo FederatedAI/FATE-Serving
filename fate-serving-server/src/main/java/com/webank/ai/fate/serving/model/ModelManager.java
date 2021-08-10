@@ -241,7 +241,7 @@ public class ModelManager implements InitializingBean {
                 modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
                 modelLoaderParam.setTableName(model.getTableName());
                 modelLoaderParam.setNameSpace(model.getNamespace());
-                context.putData("model",model);
+                context.putData("model", model);
                 ModelProcessor modelProcessor = modelLoader.restoreModel(context, modelLoaderParam);
                 if (modelProcessor != null) {
                     model.setModelProcessor(modelProcessor);
@@ -310,14 +310,14 @@ public class ModelManager implements InitializingBean {
     private void registerGuestService(Collection environments) {
         if (zookeeperRegistry != null) {
             zookeeperRegistry.addDynamicEnvironment(environments);
-            zookeeperRegistry.register(FateServer.guestServiceSets,environments);
+            zookeeperRegistry.register(FateServer.guestServiceSets, environments);
         }
     }
 
 
     private void registerHostService(Collection<String> environments) {
         if (zookeeperRegistry != null) {
-            zookeeperRegistry.register(FateServer.hostServiceSets,environments);
+            zookeeperRegistry.register(FateServer.hostServiceSets, environments);
         }
     }
 
@@ -343,7 +343,7 @@ public class ModelManager implements InitializingBean {
             if (StringUtils.isNotEmpty(serviceId)) {
                 zookeeperRegistry.addDynamicEnvironment(serviceId);
             }
-            zookeeperRegistry.register(FateServer.guestServiceSets,Lists.newArrayList(serviceId));
+            zookeeperRegistry.register(FateServer.guestServiceSets, Lists.newArrayList(serviceId));
         }
         //update cache
         this.store(serviceIdNamespaceMap, serviceIdFile);
@@ -396,12 +396,39 @@ public class ModelManager implements InitializingBean {
         ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
         ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(model.getPartId());
-        Preconditions.checkArgument(selfModelInfo!=null,"model info is invalid");
+        Preconditions.checkArgument(selfModelInfo != null, "model info is invalid");
         String selfNamespace = selfModelInfo.getNamespace();
         String selfTableName = selfModelInfo.getTableName();
         model.setNamespace(selfNamespace);
         model.setTableName(selfTableName);
+        if (ModelLoader.LoadModelType.FATEFLOW.name().equals(req.getLoadType())) {
+            try {
+                ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
+                modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+                modelLoaderParam.setTableName(model.getTableName());
+                modelLoaderParam.setNameSpace(model.getNamespace());
+                modelLoaderParam.setFilePath(req.getFilePath());
+                ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.FATEFLOW);
+                model.setResourceAdress(getAdressForUrl(modelLoader.getResource(context, modelLoaderParam)));
+            } catch (Exception e) {
+                logger.error("getloadModelUrl error = {}", e);
+            }
+        }
         return model;
+    }
+
+    public String getAdressForUrl(String url) {
+        if (StringUtils.isBlank(url)) {
+            return "";
+        }
+        String address = "";
+        if (url.contains("//")) {
+            String tempUrl = url.substring(url.indexOf("//") + 2);
+            if (tempUrl.contains("/")) {
+                address = tempUrl.substring(0, tempUrl.indexOf("/"));
+            }
+        }
+        return address;
     }
 
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
@@ -453,6 +480,7 @@ public class ModelManager implements InitializingBean {
 
     /**
      * query model by service id
+     *
      * @param serviceId
      * @return
      */
@@ -471,6 +499,7 @@ public class ModelManager implements InitializingBean {
 
     /**
      * query model by tablename and namespace
+     *
      * @param tableName
      * @param namespace
      * @return

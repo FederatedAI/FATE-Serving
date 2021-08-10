@@ -69,8 +69,8 @@ message ModelInfoEx{
     repeated string serviceIds = 3;
     string content = 4;
     int32    index = 5;
-    //lx-todo
     ModelProcessorExt modelProcessorExt = 6;
+    string resourceAdress = 7;
 }
 
 message QueryModelResponse{
