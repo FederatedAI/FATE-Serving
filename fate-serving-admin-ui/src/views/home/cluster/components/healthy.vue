@@ -49,9 +49,9 @@
                                 <i v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
                                 <i v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
                                 <i v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
-                                <span>{{item.checkItemName}}</span>
-                                <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span>
-                                <span v-else>{{ item.msg }}</span>
+                                <span :title="item.ip + ' : ' + item.checkItemName" class="check-item">{{item.ip + ' : ' + item.checkItemName}}</span>
+                                <!-- <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span> -->
+                                <span :title="item.msg" class="check-msg">{{ item.msg }}</span>
                             </div>
                        </div>
                     </div>
@@ -61,8 +61,6 @@
                             <i v-else-if="SwarnFlag" class="el-icon-warning"/>
                             <i v-else-if="SokFlag" class="el-icon-success"/>
                             <i v-else class="no-deta"/>
-                             <!-- v-if="servingpercentage === 100 || servingpercentage ===0" -->
-                            <!-- <i v-if="checkupStatus === 3" class="el-icon-warning"/> -->
                         <span style="margin-right:23px">Serving Server</span>
                         <el-progress :percentage="servingpercentage" :show-text="false" color="#217AD9"></el-progress>
                         <i class="el-icon-arrow-down" :class="serverCK ? 'active-down' : ''" @click="serverCK = !serverCK"></i>
@@ -72,9 +70,9 @@
                                 <i v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
                                 <i v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
                                 <i v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
-                                <span>{{item.checkItemName}}</span>
-                                <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span>
-                                <span v-else>{{ item.msg }}</span>
+                                <span :title="item.ip + ' : ' + item.checkItemName"  class="check-item">{{item.ip + ' : ' + item.checkItemName}}</span>
+                                <!-- <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span> -->
+                                <span :title="item.msg"  class="check-msg">{{ item.msg }}</span>
                             </div>
                         </div>
                     </div>
@@ -158,6 +156,9 @@ export default {
                     for (let key2 in this.HealthData[key]) {
                         this.pData = key2
                         for (let key3 in this.HealthData[key][key2]) {
+                            this.HealthData[key][key2][key3].forEach(element => {
+                                element.ip = key2
+                            })
                             this.errorFlag += this.HealthData[key][key2].errorList && this.HealthData[key][key2].errorList.length
                             this.okFlag += this.HealthData[key][key2].okList && this.HealthData[key][key2].okList.length
                             this.warnFlag += this.HealthData[key][key2].warnList && this.HealthData[key][key2].warnList.length
@@ -168,6 +169,9 @@ export default {
                     for (let key2 in this.HealthData[key]) {
                         this.sData = key2
                         for (let key3 in this.HealthData[key][key2]) {
+                            this.HealthData[key][key2][key3].forEach(element => {
+                                element.ip = key2
+                            })
                             this.SerrorFlag += this.HealthData[key][key2].errorList && this.HealthData[key][key2].errorList.length
                             this.SokFlag += this.HealthData[key][key2].okList && this.HealthData[key][key2].okList.length
                             this.SwarnFlag += this.HealthData[key][key2].warnList && this.HealthData[key][key2].warnList.length
@@ -194,20 +198,8 @@ export default {
             this.servingpercentage = 0
             this.proxypercentage = 0
             this.$emit('checkup', this.checkupStatus)
-            // setTimeout(() => {
-            //     this.clusterTimer = setInterval(() => {
-            //         if (this.proxypercentage < 40) {
-            //             this.proxypercentage += 1
-            //         } else {
-            //             clearInterval(this.clusterTimer)
-            //         }
-            //     }, 150)
-            // }, 300)
             selfCheck().then(res => {
-                // clearInterval(this.clusterTimer)
                 this.clusterTimer = setInterval(() => {
-                    // this.HealthData = res.data
-
                     this.$emit('checkup', this.checkupStatus, res.data)
                     this.initHealthData()
                     if (this.proxypercentage < 100) {
@@ -283,6 +275,16 @@ export default {
          .healthy-item {
              margin-bottom: 20px;
          }
+         .check-item,.check-msg {
+             display: inline-block;
+             width: 240px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+         }
+         .check-msg {
+             width: 280px;
+         }
          span {
             margin: 0px 30px 0 15px;
          }
@@ -305,6 +307,7 @@ export default {
             cursor: pointer;
             color: #B8BFCC;
             transition: transform .3s;
+            vertical-align: middle;
         }
         .active-down {
             transform: rotate(180deg);
@@ -316,7 +319,7 @@ export default {
             span {
                 color: #848C99;
                 font-size: 14px;
-                vertical-align: 2px;
+                vertical-align:-2px;
                 margin-right: 10px;
 
             }

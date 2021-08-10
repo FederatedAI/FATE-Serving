@@ -119,19 +119,10 @@ export function queryRouterList(data) {
     })
 }
 
-// 新增路由
-export function addRouter(data) {
+// 全量更新路由
+export function saveRouter(data) {
     return request({
-        url: `${pram}/api/router/add`,
-        method: 'post',
-        data
-    })
-}
-
-// 更新路由
-export function updateRouter(data) {
-    return request({
-        url: `${pram}/api/router/update`,
+        url: `${pram}/api/router/save`,
         method: 'post',
         data
     })
@@ -144,10 +135,19 @@ export function selfCheck(data) {
         method: 'get'
     })
 }
-// 删除列表项
-export function deleteRouter(data) {
+
+// 模型同步前查询若目标机器上是否已存在该模型
+export function checkModel(data) {
     return request({
-        url: `${pram}/api/router/delete`,
+        url: `${pram}/api/model/query`,
+        method: 'get'
+    })
+}
+
+// 模型同步
+export function transfer(data) {
+    return request({
+        url: `${pram}/api/model/transfer`,
         method: 'post',
         data
     })
