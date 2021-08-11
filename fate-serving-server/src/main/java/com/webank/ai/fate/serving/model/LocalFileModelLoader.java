@@ -149,4 +149,9 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
         }
         return null;
     }
+
+    @Override
+    public String getResource(Context context, ModelLoaderParam modelLoaderParam){
+        return null;
+    }
 }
