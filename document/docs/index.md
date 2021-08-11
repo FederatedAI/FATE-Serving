@@ -1,15 +1,16 @@
+## 简介
 ### 什么是Fate-Serving
 fate-serving是FATE的在线部分，在使用FATE进行联邦建模完成之后，可以使用fate-serving进行包括单笔预测、多笔预测以及多host预测在内的在线联合预测。
 
 ### 组件简介
 •	serving-server  
-serving-server用于实时处理在线预测请求, 理论上serving-server需要从fate-flow加载模型成功之后才能对外提供服务。 在FATE中建好模型之后，通过fate-flow的推送模型脚本可以将模型推送至serving-server。 推送成功之后，serving-server会将该模型相关的预测接口注册进zookeeper， 外部系统可以通过服务发现获取接口地址并调用。 同时本地文件持久化该模型,以便在serving-server实例在集群中某些组件不可用的情况下， 仍然能够从本地文件中恢复模型。
+serving-server用于实时处理在线预测请求, 理论上serving-server需要从fate-flow加载模型成功之后才能对外提供服务。 在FATE中建好模型之后，通过fate-flow的推送模型脚本可以将模型推送至serving-server。 推送成功之后，serving-server会将该模型相关的预测接口注册进zookeeper， 外部系统可以通过服务发现获取接口地址并调用。 同时本地文件持久化该模型,以便在serving-server实例在集群中某些组件不可用的情况下， 仍然能够从本地文件中恢复模型。支持多host的算法模型：纵向LR+纵向SBT
 
 •	serving-proxy  
 serving-proxy 是serving-server的代理，对外提供了grpc接口以及http的接口， 主要用于联邦预测请求的路由转发鉴权。在离线的联邦建模时， 每一个参与方都会分配一个唯一的partId。serving-proxy维护了一个各参与方partId的路由表， 并通过路由表中的信息来转发请求。
 
 •	serving-admin  
-serving-admin 提供在线集群的可视化操作界面， 可以查看管理集群中各节点的配置以及状态、查看模型列表、流量的调控、并能提供一定的监控的功能。
+serving-admin 提供在线集群的可视化操作界面， 可以查看管理集群中各节点的配置以及状态、查看模型列表、流量的调控、并能提供一定的监控的功能。[点击查看详情](./example/admin.md)    
 
 •	zookeeper  
 zookeeper 用户各组件的信息同步协调以及服务注册于发现
@@ -31,4 +32,32 @@ zookeeper 用户各组件的信息同步协调以及服务注册于发现
 •	fate-serving-sdk：提供sdk代码，用于代码接入serving-server服务  
 •	fate-serving-server：serving-server模块，主要处理在线联邦预测业务和模型算法逻辑  
 •	fate-serving-cli：golang实现，命令行工具的代码，提供serving-server的查询和预测  
+
+## 服务介绍
+[点击查看详情](./service/service.md)
+
+## 部署示例
+[点击查看详情](./example/deploy.md)
  
+## quickstart
+[点击查看详情](./quickstart/quickstart.md)
+
+## 加载模型及发布模型
+[点击查看详情](./model/load.md)
+
+## 推理接口
+[usage](./inference/usage.md)   
+[单笔推理](./inference/single.md)   
+[批量推理](./inference/batch.md)    
+
+## 日志简介
+[点击查看详情](./log/log.md)
+
+## TLS安全证书
+[点击查看详情](./service/security.md)
+
+## 算法相关
+[基础类](./algo/base.md)   
+[特征工程组件介绍](./algo/feature.md)   
+[其他组件](./algo/components.md)    
+

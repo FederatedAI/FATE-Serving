@@ -1,10 +1,10 @@
 ### http请求
 #### http请求地址
-请求路径：http://{ip}:{port}[^ip]/federation/v1/inference
-[^ip]: {ip}:{port} 为Guest方serving-proxy的地址，依据实际部署架构而定
+请求路径：http://{ip}:{port}/federation/v1/inference     
+{ip}:{port} 为Guest方serving-proxy的地址，依据实际部署架构而定
 
 #### http请求类型
-POST
+POST    
 content-application/json
 
 #### 请求内容
@@ -52,7 +52,8 @@ xxxxxxxxxx
   }
 }
 ```
-**Note**: head中填入系统参数，featureData中为模型所需特征数据，不会传递给Host方，只有sendToRemoteFeatureData中的才会传递给Host方，一般sendToRemoteFeatureData需要包含host方用于匹配样本的id，例如设备号或者手机号
+**Note**: 
+>head中填入系统参数，featureData中为模型所需特征数据，不会传递给Host方，只有sendToRemoteFeatureData中的才会传递给Host方，一般sendToRemoteFeatureData需要包含host方用于匹配样本的id，例如设备号或者手机号
 
 #### 响应内容
 <table>
@@ -115,7 +116,7 @@ xxxxxxxxxx
 
 ### java版SDK
 目前提供了java版sdk，可以通过使用java版SDK来对接serving-server，sdk提供服务发现以及路由功能。
-需要使用在目标工程pom文件中加入相关依赖
+需要使用，则在目标工程pom文件中加入相关依赖
 
 #### 操作步骤
 ```yml

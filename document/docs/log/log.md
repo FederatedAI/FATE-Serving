@@ -59,6 +59,11 @@ xxxxxxxxxx
             <AppenderRef ref="flow"/>
         </AsyncLogger>
 ​
+<!--
+    <AsyncLogger name="debug" level="debug" includeLocation="true" additivity="false">
+        <AppenderRef ref="debug"/>
+    </AsyncLogger>
+-->
         <AsyncRoot level="info" includeLocation="true">
             <AppenderRef ref="console" level="info"/>
             <AppenderRef ref="info" level="info"/>
@@ -77,7 +82,7 @@ xxxxxxxxxx
 该日志为错误日志，用于记录error级别日志
 
 •	fate-${module}-debug.log  
-该日志为调试日志，用于记录debug级别日志，该日志需要手动开启
+该日志为调试日志，用于记录debug级别日志，该日志需要放开注释手动开启
 
 •	flow.log   
 该日志为访问日志，用于记录每一笔请求的到达时间、耗时、返回码、请求参数等
