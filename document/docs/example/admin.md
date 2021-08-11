@@ -50,6 +50,12 @@ serving-admin提供了FATE-Serving集群的可视化操作界面，依赖zookeep
 模型卸载：卸载实例已载入的模型，模型卸载会同时解绑服务ID，并注销注册的服务接口
 ![admin-unload](..\img\unload.jpg)
 
+模型同步：可将当前机器上的模型同步到本机群中其他的serving-server机器上
+![model-sync](../img/model_sync.jpg)
+
+支持查看模型pipeline：点击可在弹窗中查看当前模型的pipeline
+![model-pipeline](../img/model-pipeline.jpg)
+
 #### 服务管理
 服务接口：展示注册中心中各实例注册的服务接口  
 列表字段  
@@ -100,3 +106,14 @@ JVM监控：提供JVM信息图表展示，包含Memory（内存情况）、GC Fr
 #### 流量控制
 模型调用流量控制：可通过限制模型调用QPS，可进行流量控制，超过限制的请求会被拦截
 ![flow](../img/flowControl.jpg)
+
+#### 自检功能
+Cluster一键自检工具：由后台定时对Cluster进行自检，用户也可以主动进行一键自检   
+页面上增加自检精灵工具，可查看Cluster的服务自检状态   
+![health-check](../img/health-check.jpg)
+
+#### 支持配置生成路由表
+![route](../img/gen-route.jpg)
+
+#### 服务拓扑图展示
+![graph](../img/graph.jpg)

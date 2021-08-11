@@ -2,11 +2,11 @@ FATE-Serving的在线批量推理功能，在单次推理基础上提升吞吐�
 
 ### http请求
 #### http请求地址
-请求路径：http://{ip}:{port}[^ip]/federation/v1/batchInference
-[^ip]: {ip}:{port} 为Guest方serving-proxy的地址，依据实际部署架构而定
+请求路径：http://{ip}:{port}/federation/v1/batchInference    
+{ip}:{port} 为Guest方serving-proxy的地址，依据实际部署架构而定
 
 #### http请求类型
-POST
+POST    
 content-application/json
 
 #### 请求内容
@@ -75,7 +75,8 @@ xxxxxxxxxx
     }
 }
 ```
-**Note**: head中填入系统参数，body中batchDataList为参数集合，featureData中为模型所需特征数据，不会传递给Host方，只有sendToRemoteFeatureData中的才会传递给Host方，一般sendToRemoteFeatureData需要包含host方用于匹配样本的id，例如设备号或者手机号
+**Note**: 
+>head中填入系统参数，body中batchDataList为参数集合，featureData中为模型所需特征数据，不会传递给Host方，只有sendToRemoteFeatureData中的才会传递给Host方，一般sendToRemoteFeatureData需要包含host方用于匹配样本的id，例如设备号或者手机号
 
 #### 响应内容
 <table>
