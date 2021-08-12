@@ -280,5 +280,16 @@ public class Dict {
     public static final String HEALTH_INFO =  "healthInfo";
     public static final String PROPERTY_ADMIN_HEALTH_CHECK_TIME = "health.check.time";
 
+    public static final String HTTP_CLIENT_CONFIG_CONN_REQ_TIME_OUT = "httpclinet.config.connection.req.timeout";
+    public static final String HTTP_CLIENT_CONFIG_CONN_TIME_OUT = "httpclient.config.connection.timeout";
+    public static final String HTTP_CLIENT_CONFIG_SOCK_TIME_OUT = "httpclient.config.sockect.timeout";
+    public static final String HTTP_CLIENT_INIT_POOL_MAX_TOTAL = "httpclient.init.pool.maxtotal";
+    public static final String HTTP_CLIENT_INIT_POOL_DEF_MAX_PER_ROUTE = "httpclient.init.pool.def.max.pre.route";
+    public static final String HTTP_CLIENT_INIT_POOL_SOCK_TIME_OUT = "httpclient.init.pool.sockect.timeout";
+    public static final String HTTP_CLIENT_INIT_POOL_CONN_TIME_OUT = "httpclient.init.pool.connection.timeout";
+    public static final String HTTP_CLIENT_INIT_POOL_CONN_REQ_TIME_OUT = "httpclient.init.pool.connection.req.timeout";
+    public static final String HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT = "httpclient.tran.connection.req.timeout";
+    public static final String HTTP_CLIENT_TRAN_CONN_TIME_OUT = "httpclient.tran.connection.timeout";
+    public static final String HTTP_CLIENT_TRAN_SOCK_TIME_OUT = "httpclient.tran.sockect.timeout";
 
 }
