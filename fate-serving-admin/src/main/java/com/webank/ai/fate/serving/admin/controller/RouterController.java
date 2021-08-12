@@ -100,10 +100,8 @@ public class RouterController {
             RouterTableServiceProto.RouterOperatetResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
             routerTableInfo = response.getData().toStringUtf8();
         }
-        System.err.println("PPPPPPPPPPPPPPPPPPPPPPPPPP"+routerTableInfo);
-
-        JsonUtil.json2Object(routerTableInfo, Map.class);
-        data.put("routerTable", );
+        //System.err.println("PPPPPPPPPPPPPPPPPPPPPPPPPP"+routerTableInfo);
+        data.put("routerTable", routerTableInfo);
         data.put("changeAble",matched);
         return ReturnResult.build( 0,Dict.SUCCESS, data);
     }
