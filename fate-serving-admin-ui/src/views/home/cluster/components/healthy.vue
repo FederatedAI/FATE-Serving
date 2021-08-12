@@ -28,7 +28,7 @@
                         <span v-if="checkupStatus === 1" class="healthy-status"><i class="el-icon-success"></i>Cluster is healthy.</span>
                         <span v-if="checkupStatus === 2" class="healthy-status"><i class="el-icon-loading" ></i><span class="span">Checkuping</span></span>
                         <span v-if="checkupStatus === 3" class="healthy-status" style="color:#FE6363"><i class="el-icon-error"></i><span class="span">Error occurs !</span></span>
-                        <span v-if="checkupStatus === 4" class="healthy-status" style="color:#FE6363"><i class="el-icon-warning"></i><span class="span">Warn</span></span>
+                        <span v-if="checkupStatus === 4" class="healthy-status" style="color:#FF9D00"><i class="el-icon-warning"></i><span class="span">Warn</span></span>
                         <span class="healthy-time">Last checkup：{{ HealthData.timestamp | datefrom}}</span>
                     </div>
                     <el-button class="healthy-but" :disabled="checkup" :style="checkup ? 'background-color:#B8BFCC' : 'background-color:#217AD9'" @click="startCheckup">Start Checkup</el-button>
@@ -181,12 +181,12 @@ export default {
                 }
             }
             if (this.servingpercentage === 100) {
-                if (this.okFlag || this.SokFlag || !this.sData || !this.pData) {
-                    this.checkupStatus = 1
+                if (this.errorFlag || this.SerrorFlag) {
+                    this.checkupStatus = 3
                 } else if (this.warnFlag || this.SwarnFlag) {
                     this.checkupStatus = 4
-                } if (this.errorFlag || this.SerrorFlag) {
-                    this.checkupStatus = 3
+                } else if (this.okFlag || this.SokFlag || !this.sData || !this.pData) {
+                    this.checkupStatus = 1
                 }
                 this.$emit('checkup', this.checkupStatus)
             }

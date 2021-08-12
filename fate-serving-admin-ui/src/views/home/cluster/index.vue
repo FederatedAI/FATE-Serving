@@ -22,8 +22,8 @@
                         <span class="healthy"  @click="heal">
                         <span v-if="checkupStatus === 1"><i class="el-icon-success"></i><span class="span">Cluster is healthy.</span></span>
                         <span v-if="checkupStatus === 2"><i class="el-icon-loading"></i><span class="span">Checkuping</span></span>
-                        <span v-if="checkupStatus === 3"><i class="el-icon-warning"></i><span class="span"  style="color: #FE6363;">Error occurs !</span></span>
-                        <span v-if="checkupStatus === 4" style="color:#FE6363"><i class="el-icon-warning"></i><span class="span">Warn</span></span>
+                        <span v-if="checkupStatus === 3"><i class="el-icon-error"></i><span class="span"  style="color: #FE6363;">Error occurs !</span></span>
+                        <span v-if="checkupStatus === 4" style="color:#FE6363"><i class="el-icon-warning"></i><span class="span" style="color: #FF9D00;">Warn</span></span>
                     </span>
                 </div>
                 <div class="enlarge" @click="setSize('1')" v-if="!isLarger"><img src="@/assets/zoom-in.png" alt=""></div>
@@ -194,12 +194,12 @@
                             </el-table-column>
                             <el-table-column
                                 width="200"
-                                prop="fateFlowAddress"
+                                prop="resourceAdress"
                                 label="FATE Flow Address"
                             >
                                 <template slot-scope="scope" >
                                     <el-popover
-                                        v-if="scope.row.flowAddress.length > 0"
+                                        v-if="scope.row.resourceAdress.length > 0"
                                         :visible-arrow="false"
                                         placement="bottom"
                                         popper-class="dark-popover"
@@ -207,20 +207,20 @@
                                         @hide="handleArrow(scope.$index,'1')"
                                         trigger="hover">
                                         <div>
-                                            <div><p v-for="(item,index) in scope.row.flowAddress" :key="index">{{item}}</p></div>
+                                            <div><p v-for="(item,index) in scope.row.resourceAdress" :key="index">{{item}}</p></div>
                                         </div>
                                        <span slot="reference" style="white-space: nowrap;">
-                                            <span v-for="(item,index) in scope.row.flowAddress" :key="index">{{item}}
-                                                <span v-if="index+1 !== scope.row.flowAddress.length">,</span>
+                                            <span v-for="(item,index) in scope.row.resourceAdress" :key="index">{{item}}
+                                                <span v-if="index+1 !== scope.row.resourceAdress.length">,</span>
                                             </span>
                                         </span>
                                     </el-popover>
                                     <span v-else
-                                        v-for="(item,index) in scope.row.flowAddress"
+                                        v-for="(item,index) in scope.row.resourceAdress"
                                         :key="index" >
                                         {{item}}
                                     </span>
-                                    <span :class="{'flow_address':scope.row.flowAddress.length > 0,'flow_address_up':scope.row.up === '2'}"> </span>
+                                    <span :class="{'flow_address':scope.row.resourceAdress.length > 0,'flow_address_up':scope.row.up === '2'}"> </span>
                                 </template>
                             </el-table-column>
                             <el-table-column
@@ -1055,7 +1055,7 @@ export default {
                     // 初始化flow address 下拉列表箭头状态
                     this.$set(this.ModelsData[i], 'up', '1')
                     // mock
-                    this.ModelsData[i]['flowAddress'] = ['127.0.0.1:8080', '127.0.0.1:8080', '127.0.0.1:8080']
+                    this.ModelsData[i]['resourceAdress'] = [this.ModelsData[i]['resourceAdress']]
                 }
                 console.log(this.ModelsData, 'ModelsData')
             })
