@@ -25,12 +25,12 @@
             @json-save="onJsonSave"
             />
 
-        <div class="page-contral">
-            <el-button
+        <div class="page-contral" v-if="changeAble">
+            <!-- <el-button
                 type="primary"
                 @click="getTableData"
                 style="background:#B8BFCC;border-radius:0"
-            >Cancel</el-button>
+            >Cancel</el-button> -->
             <el-button type="primary" class="save-page" :class="{'disable':!hasChange}" :disabled="!hasChange" @click="saveSureDialog = true">Save</el-button>
         </div>
 
@@ -106,48 +106,14 @@ export default {
     components: { vueJsonEditor },
     data() {
         return {
-            modifyRouter: false,
             cancel: false,
             cancelLeave: false,
-            routerTableData: [],
-            modelType: 'add',
+            routerTableData: {},
             next: '',
-            modifyData: {
-                partyId: '',
-                routerList: [{
-                    caFile: '',
-                    certChainFile: '',
-                    ip: '',
-                    negotiationType: '',
-                    port: '',
-                    privateKeyFile: '',
-                    serverType: 'default',
-                    useSSL: false,
-                    ipPort: ''
-                }]
-            },
-            resultInfo: {
-                'userId': '1111111129ac7325-30da-4e6a-8a00-9699820fc04a',
-                'realName': '小雪18',
-                'gradeCode': '166',
-                'provinceCode': '110000',
-                'cityCode': {
-                    'test1': 'test1',
-                    'test2': 'test2'
-                },
-                'schoolId': 21,
-                'schoolLevel': 1,
-                'schoolName': '北京第二实验小学朝阳学校'
-            },
-            nowModelDataIndex: 0,
             hasChange: false,
+            changeAble: false,
             saveSureDialog: false,
-            sureLeaveDialog: false,
-            page: {
-                currentPage: 1,
-                size: 10,
-                total: 0
-            }
+            sureLeaveDialog: false
         }
     },
     watch: {
@@ -160,6 +126,10 @@ export default {
             },
             immediate: true
         }
+    },
+    created() {
+        var app = document.getElementById('app')
+        app.removeChild(document.getElementByClassName('jsoneditor-poweredBy')[0])
     },
     methods: {
         onJsonChange() {
@@ -175,20 +145,10 @@ export default {
             this.sureLeaveDialog = false
             this.$emit('tabipInfo', this.next)
         },
-        handleCurrentChange(val) {
-            this.page.currentPage = val
-            this.tabipInfo(this.ipInfo)
-        },
         getTableData() {
-            // 特异查询重置页码
-            if (this.routerPartyID) {
-                this.page.currentPage = 1
-            }
             const param = {
                 'serverHost': this.ipPort[0],
                 'serverPort': this.ipPort[1],
-                'page': this.page.currentPage,
-                'pageSize': this.page.size,
                 'routerTableList': [
                     {
                         'partyId': this.routerPartyID
@@ -196,131 +156,41 @@ export default {
                 ]
             }
             queryRouterList(param).then(res => {
-                this.page.total = res.data.total
-                this.routerTableData = res.data.rows
-                this.routerTableData.map(item => {
-                    item.routerList.map(val => {
-                        val.ipPort = val.ip ? `${val.ip}:${val.port}` : ''
-                    })
-                })
+                this.routerTableData = JSON.parse(res.data.routerTable)
+                this.changeAble = res.data.changeAble
+                // this.routerTableData.map(item => {
+                //     item.routerList.map(val => {
+                //         val.ipPort = val.ip ? `${val.ip}:${val.port}` : ''
+                //     })
+                // })
                 this.cacheRouterTableData = this.deepClone(this.routerTableData)
                 this.hasChange = false
-                console.log(this.routerTableData, 'routerTableData')
-                console.log(this.cacheRouterTableData, 'routerTableData')
-            })
-        },
-        openList(row) {
-            this.$refs.refTable.toggleRowExpansion(row)
-        },
-        sortMix(a, b, key) {
-            if (Object.prototype.toString.call(a) === '[object Array]') {
-                a = a[key][0] + ''
-                b = b[key][0] + ''
-            } else {
-                a = a[key] + ''
-                b = b[key] + ''
-            }
-            a = (a.split('')[0] || '').charCodeAt()
-            b = (b.split('')[0] || '').charCodeAt()
-
-            return a - b < 0 ? -1 : 1
-        },
-        initModify() {
-            this.modifyData.partyId = ''
-            this.modifyData.routerList = [{
-                caFile: '',
-                certChainFile: '',
-                ip: '',
-                negotiationType: '',
-                port: '',
-                privateKeyFile: '',
-                serverType: 'default',
-                useSSL: false,
-                ipPort: ''
-            }]
-        },
-        openModify(row, index) {
-            this.modelType = row.partyId ? 'edit' : 'add'
-            this.modifyRouter = true
-            if (this.modelType === 'edit') {
-                this.modifyData.partyId = row.partyId
-                this.$set(this.modifyData, 'routerList', row.routerList)
-                this.nowModelDataIndex = index
-            } else {
-                this.initModify()
-            }
-        },
-        deleteList(index) {
-            this.routerTableData.splice(index, 1)
-            this.hasChange = JSON.stringify(this.cacheRouterTableData) !== JSON.stringify(this.routerTableData)
-        },
-        deleteRouter(index) {
-            this.modifyData.routerList.splice(index, 1)
-        },
-        saveLocalRouter() {
-            this.modifyData.routerList.map(item => {
-                if (item.ipPort.length <= 0) {
-                    this.$message.warning('The params Network Access is required')
-                }
-            })
-            if (this.modelType === 'edit') {
-                this.$set(this.routerTableData[this.nowModelDataIndex], 'routerList', this.modifyData.routerList)
-                this.$set(this.routerTableData[this.nowModelDataIndex], 'count', this.modifyData.routerList.length)
-            } else {
-                this.routerTableData.push({
-                    partyId: this.modifyData.partyId,
-                    count: this.modifyData.routerList.length,
-                    routerList: this.modifyData.routerList
-                })
-                this.page.total++
-                // this.$set(this.routerTableData[this.routerTableData.length], 'routerList', this.modifyData.routerList)
-                // this.$set(this.routerTableData[this.routerTableData.length], 'partyId', this.modifyData.partyId)
-            }
-            console.log(this.routerTableData, 'this.routerTableData')
-            this.modifyRouter = false
-            if (JSON.stringify(this.cacheRouterTableData) !== JSON.stringify(this.routerTableData)) {
-                this.hasChange = true
-            }
-        },
-        setCertificate(row) {
-            if (!row.useSSL) {
-                row.certChainFile = ''
-            }
-        },
-        setIpPort(row) {
-            console.log(row, 'setIpPort-row')
-        },
-        addNewRouter() {
-            this.modifyData.routerList.push({
-                caFile: '',
-                certChainFile: '',
-                ip: '',
-                negotiationType: '',
-                port: '',
-                privateKeyFile: '',
-                serverType: 'default',
-                useSSL: false,
-                ipPort: ''
             })
         },
         sureSave() {
             console.log(this.routerTableData, 'routerTableData-save')
+            // let routerTableList = this.routerTableData.map(item => {
+            //     return item.routerList.map(k => {
+            //         k = this.nullToStr(k)
+            //         return {
+            //             partyId: item.partyId,
+            //             ...k
+            //         }
+            //     })
+            // }).flat()
+            if (!this.isJson(JSON.stringify(this.routerTableData))) {
+                this.$message.warning({
+                    message: 'Illegal parameter format',
+                    'duration': 3000
+                }, true)
+            }
+            console.log('验证通过！')
             this.saveSureDialog = false
-            let routerTableList = this.routerTableData.map(item => {
-                return item.routerList.map(k => {
-                    k = this.nullToStr(k)
-                    return {
-                        partyId: item.partyId,
-                        ...k
-                    }
-                })
-            }).flat()
             let param = {
                 'serverHost': this.ipPort[0],
                 'serverPort': this.ipPort[1],
-                'routerTableList': [...routerTableList]
+                'routerTableList': this.routerTableData
             }
-            console.log(param, JSON.stringify(param), 'param-save')
             saveRouter(param).then(res => {
                 console.log(res, 'res-addRouter')
                 if (res.retcode === 0 && res.retmsg === 'success') {
@@ -331,6 +201,21 @@ export default {
         },
         cancelSave() {
             this.routerTableData = this.deepClone(this.cacheRouterTableData)
+        },
+        isJson(data) {
+            console.log(data, 'isjosn-data')
+            if (typeof data === 'string') {
+                try {
+                    var obj = JSON.parse(data)
+                    if (typeof obj === 'object' && obj) {
+                        return true
+                    } else {
+                        return false
+                    }
+                } catch (e) {
+                    return false
+                }
+            }
         },
         nullToStr(data) {
             for (var x in data) {
@@ -389,6 +274,9 @@ export default {
     .jsoneditor-vue{
         margin: 12px 0;
         height: 600px;
+        .jsoneditor-poweredBy{
+            display: none;
+        }
         .jsoneditor-menu{
             button{
                 outline: none;

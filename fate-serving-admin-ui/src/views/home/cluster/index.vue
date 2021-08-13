@@ -816,34 +816,12 @@ export default {
                             h('div', null, 'Model synchronize failed'),
                             h('div', { style: 'font-size:12px;color:#999;margin-top:6px' }, res.retmsg)
                         ]),
-                        'duration': 50000
+                        'duration': 3000
                     }, true)
                 }
                 this.closeSynchronizeModel()
                 console.log(this.ipDataArr, 'this.ipDataArr')
             })
-            // if (this.servingServer === '111') {
-            //     // var type = Math.random() > 0.5 ? '1' : '2'
-            //     var type = '2'
-            //     if (type === '1') {
-            //         this.$message.success({
-            //             'message': 'Model synchronize success',
-            //             'duration': 5000
-            //         })
-            //     } else {
-            //         const h = this.$createElement
-            //         this.$message.warning({
-            //             message: h('div', null, [
-            //                 h('div', null, 'Model synchronize failed'),
-            //                 h('div', { style: 'font-size:12px;color:#999;margin-top:6px' }, 'XXXXXXXXX')
-            //             ]),
-            //             'duration': 50000
-            //         }, true)
-            //     }
-            //     this.closeSynchronizeModel()
-            // } else {
-            //     this.secSureSynchronizeVisible = true
-            // }
         },
         closeSynchronizeModel() {
             this.modelSynchronizeVisible = false
