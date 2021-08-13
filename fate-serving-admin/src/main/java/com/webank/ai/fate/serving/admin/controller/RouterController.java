@@ -17,8 +17,14 @@
 package com.webank.ai.fate.serving.admin.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.webank.ai.fate.api.core.BasicMeta;
+import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
+import com.webank.ai.fate.api.networking.common.CommonServiceProto;
+import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
@@ -50,61 +56,54 @@ public class RouterController {
 
     private static final Logger logger = LoggerFactory.getLogger(RouterController.class);
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
-
+    @Autowired
+    ZookeeperRegistry zookeeperRegistry;
     @Autowired
     ComponentService componentService;
+    String   ROUTER_URL = "proxy/online/queryRouter";
+
+
+
 
     @PostMapping("/router/query")
-    public ReturnResult queryModel(@RequestBody RouterTableRequest routerTable) {
-        logger.info("pppppppppppppppppp");
+    public ReturnResult queryRouter(@RequestBody RouterTableRequest routerTable) {
+
+        List<URL>   urls = zookeeperRegistry.getCacheUrls(URL.valueOf(ROUTER_URL));
+        if(urls==null||urls.size()==0){
+            return  new  ReturnResult();
+        }
+        Map<String, Object> data = Maps.newHashMap();
         String serverHost = routerTable.getServerHost();
         Integer serverPort = routerTable.getServerPort();
-        Integer page = routerTable.getPage();
-        Integer pageSize = routerTable.getPageSize();
         checkAddress(serverHost, serverPort);
-        if (page == null || page < 0) {
-            page = 1;
-        }
-
-        if (pageSize == null) {
-            pageSize = 10;
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("query router, host: {}, port: {}", serverHost, serverPort);
-        }
-
-        RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = getRouterTableServiceBlockingStub(serverHost, serverPort);
-
-        RouterTableServiceProto.RouterOperatetRequest.Builder queryRouterRequestBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
-        RouterTableServiceProto.RouterOperatetResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
-        logger.info("response: {}", response);
-        Map<String, Object> data = Maps.newHashMap();
-        List<RouterTableResponseRecord> rows = Lists.newArrayList();
-        List<RouterTableResponseRecord> routerTableList =
-                JsonUtil.json2List(response.getData().toStringUtf8(), new TypeReference<List<RouterTableResponseRecord>>() {
-                });
-        int totalSize = 0;
-        if (routerTableList != null) {
-            String filterPartyId = (routerTable.getRouterTableList() == null || routerTable.getRouterTableList().size() == 0)
-                    ? null : routerTable.getRouterTableList().get(0).getPartyId();
-            routerTableList = routerTableList.stream()
-                    .filter(record -> record.getPartyId().equals(filterPartyId) || StringUtils.isBlank(filterPartyId))
-                    .sorted((prev, next) -> comparePartyId(prev.getPartyId(), next.getPartyId()))
-                    .collect(Collectors.toList());
-            totalSize = routerTableList.size();
-
-            // Pagination
-            int totalPage = (routerTableList.size() + pageSize - 1) / pageSize;
-            if (page <= totalPage) {
-                routerTableList = routerTableList.subList((page - 1) * pageSize, Math.min(page * pageSize, routerTableList.size()));
+        String routerTableInfo = "";
+        boolean matched= false;
+        for (URL url : urls) {
+            if(serverHost.equals(url.getIp())&&serverPort.intValue()==serverPort){
+                matched =true;
             }
-            rows.addAll(routerTableList);
         }
-
-        data.put("total", totalSize);
-        data.put("rows", rows);
-        return ReturnResult.build(response.getStatusCode(), response.getMessage(), data);
+        if(!matched){
+            ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(serverHost, serverPort);
+            CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+            blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+            CommonServiceProto.QueryPropsRequest.Builder builder = CommonServiceProto.QueryPropsRequest.newBuilder();
+            CommonServiceProto.CommonResponse response = blockingStub.listProps(builder.build());
+            Map<String, Object> propMap = JsonUtil.json2Object(response.getData().toStringUtf8(), Map.class);
+            routerTableInfo =propMap.get(Dict.PROXY_ROUTER_TABLE)!=null? propMap.get(Dict.PROXY_ROUTER_TABLE).toString():"";
+        }else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("query router, host: {}, port: {}", serverHost, serverPort);
+            }
+            RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = getRouterTableServiceBlockingStub(serverHost, serverPort);
+            RouterTableServiceProto.RouterOperatetRequest.Builder queryRouterRequestBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
+            RouterTableServiceProto.RouterOperatetResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
+            routerTableInfo = response.getData().toStringUtf8();
+        }
+        //System.err.println("PPPPPPPPPPPPPPPPPPPPPPPPPP"+routerTableInfo);
+        data.put("routerTable", routerTableInfo);
+        data.put("changeAble",matched);
+        return ReturnResult.build( 0,Dict.SUCCESS, data);
     }
 
     private RouterTableServiceGrpc.RouterTableServiceBlockingStub getRouterTableServiceBlockingStub(String host, Integer port) {

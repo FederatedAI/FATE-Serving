@@ -23,6 +23,7 @@ import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.RouterTableResponseRecord;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.RouterInfoOperateException;
@@ -54,58 +55,58 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
             builder.setMessage("proxy load router table error");
             return builder.build();
         }
-        List<RouterTableResponseRecord> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
+        //List<RouterTableResponseRecord> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);
-        ByteString bytes = ByteString.copyFrom(JsonUtil.object2Json(routerTableInfoList).getBytes());
+        ByteString bytes = ByteString.copyFrom(MetaInfo.PROXY_ROUTER_TABLE.getBytes());
         builder.setData(bytes);
         return builder.build();
     }
 
-    @FateServiceMethod(name = "ADD_ROUTER")
-    public RouterTableServiceProto.RouterOperatetResponse addRouterTableService(Context context, InboundPackage inboundPackage) {
-        RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
-        RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
-        try {
-            RouterTableUtils.addRouter(request.getRouterTableInfoList());
-            builder.setStatusCode(StatusCode.SUCCESS);
-            builder.setMessage(Dict.SUCCESS);
-        } catch (RouterInfoOperateException e) {
-            builder.setStatusCode(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR);
-            builder.setMessage(e.getMessage());
-        }
-        return builder.build();
-    }
+//    @FateServiceMethod(name = "ADD_ROUTER")
+//    public RouterTableServiceProto.RouterOperatetResponse addRouterTableService(Context context, InboundPackage inboundPackage) {
+//        RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
+//        RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
+//        try {
+//            RouterTableUtils.addRouter(request.getRouterTableInfoList());
+//            builder.setStatusCode(StatusCode.SUCCESS);
+//            builder.setMessage(Dict.SUCCESS);
+//        } catch (RouterInfoOperateException e) {
+//            builder.setStatusCode(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR);
+//            builder.setMessage(e.getMessage());
+//        }
+//        return builder.build();
+//    }
 
-    @FateServiceMethod(name = "UPDATE_ROUTER")
-    public RouterTableServiceProto.RouterOperatetResponse updateRouterTableService(Context context, InboundPackage inboundPackage) {
-        RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
-        RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
-        try {
-            RouterTableUtils.updateRouter(request.getRouterTableInfoList());
-            builder.setStatusCode(StatusCode.SUCCESS);
-            builder.setMessage(Dict.SUCCESS);
-        } catch (RouterInfoOperateException e) {
-            builder.setStatusCode(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR);
-            builder.setMessage(e.getMessage());
-        }
-        return builder.build();
-    }
-
-    @FateServiceMethod(name = "DELETE_ROUTER")
-    public RouterTableServiceProto.RouterOperatetResponse deleteRouterTableService(Context context, InboundPackage inboundPackage) {
-        RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
-        RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
-        try {
-            RouterTableUtils.deleteRouter(request.getRouterTableInfoList());
-            builder.setStatusCode(StatusCode.SUCCESS);
-            builder.setMessage(Dict.SUCCESS);
-        } catch (RouterInfoOperateException e) {
-            builder.setStatusCode(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR);
-            builder.setMessage(e.getMessage());
-        }
-        return builder.build();
-    }
+//    @FateServiceMethod(name = "UPDATE_ROUTER")
+//    public RouterTableServiceProto.RouterOperatetResponse updateRouterTableService(Context context, InboundPackage inboundPackage) {
+//        RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
+//        RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
+//        try {
+//            RouterTableUtils.updateRouter(request.getRouterTableInfoList());
+//            builder.setStatusCode(StatusCode.SUCCESS);
+//            builder.setMessage(Dict.SUCCESS);
+//        } catch (RouterInfoOperateException e) {
+//            builder.setStatusCode(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR);
+//            builder.setMessage(e.getMessage());
+//        }
+//        return builder.build();
+//    }
+//
+//    @FateServiceMethod(name = "DELETE_ROUTER")
+//    public RouterTableServiceProto.RouterOperatetResponse deleteRouterTableService(Context context, InboundPackage inboundPackage) {
+//        RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
+//        RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
+//        try {
+//            RouterTableUtils.deleteRouter(request.getRouterTableInfoList());
+//            builder.setStatusCode(StatusCode.SUCCESS);
+//            builder.setMessage(Dict.SUCCESS);
+//        } catch (RouterInfoOperateException e) {
+//            builder.setStatusCode(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR);
+//            builder.setMessage(e.getMessage());
+//        }
+//        return builder.build();
+//    }
 
     @FateServiceMethod(name = "SAVE_ROUTER")
     public RouterTableServiceProto.RouterOperatetResponse saveRouterTableService(Context context, InboundPackage inboundPackage) {

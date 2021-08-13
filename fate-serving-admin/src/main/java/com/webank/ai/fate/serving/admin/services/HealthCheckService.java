@@ -41,8 +41,6 @@ public class HealthCheckService implements InitializingBean {
 
     private static final String SERVING_CHECK_HEALTH = "serving/online/checkHealth";
 
-
-
     private static final String PROXY_CHECK_HEALTH = "proxy/online/checkHealth";
 
     @Autowired
@@ -55,11 +53,11 @@ public class HealthCheckService implements InitializingBean {
 
     public    Map  getHealthCheckInfo(){
         return   healthRecord;
-
     }
 
     private void  checkRemoteHealth(Map<String,Map> componentMap, String address, String component) {
-
+        if(StringUtils.isBlank(address))
+            return ;
         Map<String,Map> currentComponentMap = componentMap.get(component);
         String host = address.substring(0,address.indexOf(":"));
         int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
@@ -83,9 +81,7 @@ public class HealthCheckService implements InitializingBean {
                 }else{
                     errorList.add(record);
                 }
-
             }
-
         }
         result.put("okList",okList);
         result.put("warnList",warnList);
@@ -98,22 +94,21 @@ public class HealthCheckService implements InitializingBean {
         try {
             List<URL>  servingList  = zookeeperRegistry.getCacheUrls(URL.valueOf(SERVING_CHECK_HEALTH));
             List<URL>  proxyList  = zookeeperRegistry.getCacheUrls(URL.valueOf(PROXY_CHECK_HEALTH));
-            logger.info("serving urls {}",servingList);
-            logger.info("proxy urls {}",proxyList);
+//            logger.info("serving urls {}",servingList);
+//            logger.info("proxy urls {}",proxyList);
             Map<String, Map> componentHearthMap = new ConcurrentHashMap<>();
-
             int size  =(servingList!=null?servingList.size():0)+(proxyList!=null?proxyList.size():0);
-
             final CountDownLatch countDownLatch = new CountDownLatch(size);
             componentHearthMap.put("proxy", new ConcurrentHashMap());
             componentHearthMap.put("serving", new ConcurrentHashMap());
             if(servingList!=null){
                 servingList.forEach(url ->{
                     try {
-
-                        checkRemoteHealth(componentHearthMap, url.getAddress(), "serving");
+                        if(StringUtils.isNotBlank(url.getAddress())) {
+                            checkRemoteHealth(componentHearthMap, url.getAddress(), "serving");
+                        }
                     } catch (Exception e){
-                        e.printStackTrace();
+                        logger.error("serving-server health check error",e);
                     }finally {
                         countDownLatch.countDown();
                     }
@@ -122,48 +117,20 @@ public class HealthCheckService implements InitializingBean {
             if(proxyList!=null){
                 proxyList.forEach(url->{
                     try {
-
                         checkRemoteHealth(componentHearthMap, url.getAddress(), "proxy");
                     } catch (Exception e){
-                        e.printStackTrace();
+                        logger.error("serving-proxy health check error",e);
                     }finally {
                         countDownLatch.countDown();
                     }
 
                 });
             }
-
            Map<String, Object> newHealthRecord = new ConcurrentHashMap<>();
-//
-//            Map<String, List<String>> addressMap = componentService.getComponentAddresses();
-//
-//            //componentService.pullService();
-//            List<ComponentService.ServiceInfo> serviceInfos = componentService.getServiceInfos();
-//
-//            final CountDownLatch countDownLatch = new CountDownLatch(addressMap.size());
-//            for (String component : addressMap.keySet()) {
-//                if (component.equals("admin")) {
-//                    countDownLatch.countDown();
-//                    continue;
-//                }
-//                for (String address : addressMap.get(component)) {
-//                    executor.submit(() -> {
-//                        try {
-//                            checkRemoteHealth(componentHearthMap, address, component);
-//                        } catch (Exception e){
-//                            e.printStackTrace();
-//                        }finally {
-//                            countDownLatch.countDown();
-//                        }
-//                    });
-//                }
-//            }
             countDownLatch.await();
             newHealthRecord.put(Dict.TIMESTAMP, System.currentTimeMillis());
             newHealthRecord.putAll(componentHearthMap);
-
             healthRecord = newHealthRecord;
-
         }catch(Exception  e){
             logger.error("schedule health check error ",e );
         }
