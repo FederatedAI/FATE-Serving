@@ -113,7 +113,8 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
         RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
         RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
         try {
-            RouterTableUtils.saveRouter(request.getRouterTableInfoList());
+            MetaInfo.PROXY_ROUTER_TABLE = request.getRouterInfo();
+            RouterTableUtils.saveRouter( MetaInfo.PROXY_ROUTER_TABLE);
             builder.setStatusCode(StatusCode.SUCCESS);
             builder.setMessage(Dict.SUCCESS);
         } catch (RouterInfoOperateException e) {

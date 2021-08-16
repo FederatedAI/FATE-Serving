@@ -109,7 +109,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
     }
 
     private  void  checkRouterInfo(HealthCheckResult  healthCheckResult){
-        logger.info("check router info ================ {}",configFileBasedServingRouter.getAllRouterInfoMap());
+
 //        if(!MetaInfo.PROPERTY_USE_REGISTER.booleanValue()){
 //                healthCheckResult.getWarnList().add(MetaInfo.PROPERTY_USE_REGISTER+":"+MetaInfo.PROPERTY_USE_REGISTER+"="+MetaInfo.PROPERTY_USE_REGISTER);
 //        }else{
@@ -207,7 +207,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                         }
                     }
             );
-            logger.info("pppppppppppppppppppppppp {}",healthCheckResult);
+
             return healthCheckResult;
         }else{
             return  null;

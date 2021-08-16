@@ -10,7 +10,16 @@ import java.util.List;
 public class RouterTableRequest {
     String serverHost;
     Integer serverPort;
-    List<RouterTable> routerTableList;
+
+    public Object getRouterTableList() {
+        return routerTableList;
+    }
+
+    public void setRouterTableList(Object routerTableList) {
+        this.routerTableList = routerTableList;
+    }
+
+    Object routerTableList;
     Integer page;
     Integer pageSize;
 
@@ -30,13 +39,9 @@ public class RouterTableRequest {
         this.serverPort = serverPort;
     }
 
-    public List<RouterTable> getRouterTableList() {
-        return routerTableList;
-    }
 
-    public void setRouterTableList(List<RouterTable> routerTableList) {
-        this.routerTableList = routerTableList;
-    }
+
+
 
     public Integer getPage() {
         return page;
