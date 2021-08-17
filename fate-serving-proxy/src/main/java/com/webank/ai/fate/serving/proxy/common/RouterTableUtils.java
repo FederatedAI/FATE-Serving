@@ -565,9 +565,9 @@ public class RouterTableUtils {
                 throw syntaxError("Missing comma after string: \"" + sb);
             } else if (value.charAt(index)==':' ) {
                 String str = sb.substring(0, sb.length() - 1);
-                if (!validateRouteTableKey(sb.charAt(0), str)) {
-                    throw syntaxError("Invalid RouteTable KEY:\"" + sb);
-                }
+//                if (!validateRouteTableKey(sb.charAt(0), str)) {
+//                    throw syntaxError("Invalid RouteTable KEY:\"" + sb);
+//                }
                 validateRouteTableValue(str);
             }
         }
@@ -615,18 +615,35 @@ public class RouterTableUtils {
 
         public static void validateRouteTableValue(String key) throws JSONException {
             int a = index;
-            char c;
+            char c,d ;
             List<String> num_list = Arrays.asList("port");
             List<String> boolean_list = Arrays.asList("useSSL", "default_allow");
             do {
                 ++a;
                 c = value.charAt(a);
-            } while (c == ' ');
+            } while (c == ' ' || c == '"');
+
+            StringBuilder sb = new StringBuilder();
+            do {
+                d = value.charAt(a);
+                sb.append(d);
+                a++;
+            } while (d !=' ' && ",]}\"".indexOf(d) <0);
+            String str = sb.substring(0,sb.length()-1);
+
             if (num_list.contains(key) && !(c == '-' || (c >= 48 && c <= 57))) {
                 throw syntaxError("RouteTable KEY:" + key + " match NumberType");
             }
             if (boolean_list.contains(key) && !(c == 't' || c == 'f' || c == 'n')) {
                 throw syntaxError("RouteTable KEY:" + key + " match BooleanType");
+            }
+            String port_reg = "^([0-5]?\\d{0,4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$";
+            if("port".equals(key) && !str.matches(port_reg)){
+                throw syntaxError("Invalid Port : " + str);
+            }
+            String ip_reg = "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$";
+            if("ip".equals(key) && !str.matches(ip_reg)){
+                throw syntaxError("Invalid ip : " + str);
             }
         }
 
@@ -698,7 +715,7 @@ public class RouterTableUtils {
 
     public static void main(String[] args) {
 //        String str = "{\"route_table\": {\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]},\"123\":[{\"host\":\"127.0.0.1\",\"port\":8888,\"useSSL\":false,\"negotiationType\":\"\",\"certChainFile\":\"\",\"privateKeyFile\":\"\",\"caFile\":\"\"}]},\"permission\":{\"default_allow\":true}}";
-        String str = "{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":12345}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]}},\"permission\":{\"default_allow\":true,\"allow\":[{\"from\":{\"coordinator\":\"9999\",\"role\":\"guest\"},\"to\":{\"coordinator\":\"10000\",\"role\":\"host\"}}],\"deny\":[{\"from\":{\"coordinator\":\"9999\",\"role\":\"guest\"},\"to\":{\"coordinator\":\"10000\",\"role\":\"host\"}}]}}";
+        String str = "{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":2345}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]}},\"permission\":{\"default_allow\":true,\"allow\":[{\"from\":{\"coordinator\":\"9999\",\"role\":\"guest\"},\"to\":{\"coordinator\":\"10000\",\"role\":\"host\"}}],\"deny\":[{\"from\":{\"coordinator\":\"9999\",\"role\":\"guest\"},\"to\":{\"coordinator\":\"10000\",\"role\":\"host\"}}]}}";
         try {
             if (RouteTableJsonValidator.isJSON(str)) {
                 String s = JsonUtil.formatJson(str);
