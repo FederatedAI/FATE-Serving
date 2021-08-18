@@ -220,7 +220,7 @@
                                         :key="index" >
                                         {{item}}
                                     </span>
-                                    <span :class="{'flow_address':scope.row.resourceAdress.length > 0,'flow_address_up':scope.row.up === '2'}"> </span>
+                                    <span v-if="scope.row.resourceAdress" :class="{'flow_address':scope.row.resourceAdress.length > 0,'flow_address_up':scope.row.up === '2'}"> </span>
                                 </template>
                             </el-table-column>
                             <el-table-column
@@ -578,7 +578,7 @@ export default {
                         this.clearChartTimer()
                         this.listProps()
                         // 2.1.0 模型同步后需要跳转到迁移目标的model tab 故此处不能设定ipInfo
-                        // this.ipInfo = 0
+                        this.ipInfo = 0
                     }
                 }
             },
@@ -1033,7 +1033,11 @@ export default {
                     // 初始化flow address 下拉列表箭头状态
                     this.$set(this.ModelsData[i], 'up', '1')
                     // mock
-                    this.ModelsData[i]['resourceAdress'] = [this.ModelsData[i]['resourceAdress']]
+                    if (this.ModelsData[i]['resourceAdress']) {
+                        this.ModelsData[i]['resourceAdress'] = [this.ModelsData[i]['resourceAdress']]
+                    } else {
+                        this.ModelsData[i]['resourceAdress'] = []
+                    }
                 }
                 console.log(this.ModelsData, 'ModelsData')
             })

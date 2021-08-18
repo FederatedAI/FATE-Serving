@@ -324,7 +324,9 @@ export default {
 
             }
         }
-        .el-icon-error {
+
+     }
+       .el-icon-error {
             color: #FE6363;
         }
         .el-icon-warning {
@@ -333,7 +335,6 @@ export default {
         .el-icon-success,.el-icon-loading {
             color: #217AD9;
         }
-     }
 
 }
 </style>

@@ -17,6 +17,7 @@
 <template>
     <div style="padding:1px 0">
         <vue-json-editor
+            ref="vue-json-editor"
             v-model="routerTableData"
             :showBtns="false"
             :mode="'code'"
@@ -127,9 +128,14 @@ export default {
             immediate: true
         }
     },
-    created() {
-        var app = document.getElementById('app')
-        app.removeChild(document.getElementByClassName('jsoneditor-poweredBy')[0])
+    mounted() {
+        // var app = this.$refs['vue-json-editor']
+        var app = this.$el
+        var menu = app.querySelectorAll('.jsoneditor-menu')[0]
+        var poweredBy = menu.querySelectorAll('.jsoneditor-poweredBy')[0]
+        if (poweredBy) {
+            app.removeChild(poweredBy)
+        }
     },
     methods: {
         onJsonChange() {
