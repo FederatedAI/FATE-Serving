@@ -55,10 +55,10 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
             builder.setMessage("proxy load router table error");
             return builder.build();
         }
-        //List<RouterTableResponseRecord> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
+        List<RouterTableResponseRecord> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);
-        ByteString bytes = ByteString.copyFrom(MetaInfo.PROXY_ROUTER_TABLE.getBytes());
+        ByteString bytes = ByteString.copyFrom(JsonUtil.object2Json(routerTableInfoList).getBytes());
         builder.setData(bytes);
         return builder.build();
     }
@@ -113,8 +113,7 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
         RouterTableServiceProto.RouterOperatetResponse.Builder builder = RouterTableServiceProto.RouterOperatetResponse.newBuilder();
         RouterTableServiceProto.RouterOperatetRequest request = (RouterTableServiceProto.RouterOperatetRequest) inboundPackage.getBody();
         try {
-            MetaInfo.PROXY_ROUTER_TABLE = request.getRouterInfo();
-            RouterTableUtils.saveRouter( MetaInfo.PROXY_ROUTER_TABLE);
+            RouterTableUtils.saveRouter(request.getRouterInfo());
             builder.setStatusCode(StatusCode.SUCCESS);
             builder.setMessage(Dict.SUCCESS);
         } catch (RouterInfoOperateException e) {

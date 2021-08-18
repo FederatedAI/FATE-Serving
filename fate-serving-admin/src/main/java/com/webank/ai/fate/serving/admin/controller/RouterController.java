@@ -16,11 +16,7 @@
 
 package com.webank.ai.fate.serving.admin.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.webank.ai.fate.api.core.BasicMeta;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.url.URL;
@@ -44,11 +40,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @RequestMapping("/api")
 @RestController
@@ -60,39 +54,42 @@ public class RouterController {
     ZookeeperRegistry zookeeperRegistry;
     @Autowired
     ComponentService componentService;
-    String   ROUTER_URL = "proxy/online/queryRouter";
-
-
+    String ROUTER_URL = "proxy/online/queryRouter";
 
 
     @PostMapping("/router/query")
     public ReturnResult queryRouter(@RequestBody RouterTableRequest routerTable) {
 
-        List<URL>   urls = zookeeperRegistry.getCacheUrls(URL.valueOf(ROUTER_URL));
-        if(urls==null||urls.size()==0){
-            return  new  ReturnResult();
+        List<URL> urls = zookeeperRegistry.getCacheUrls(URL.valueOf(ROUTER_URL));
+        if (urls == null || urls.size() == 0) {
+            return new ReturnResult();
         }
         Map<String, Object> data = Maps.newHashMap();
         String serverHost = routerTable.getServerHost();
         Integer serverPort = routerTable.getServerPort();
         checkAddress(serverHost, serverPort);
         String routerTableInfo = "";
-        boolean matched= false;
+        boolean matched = false;
         for (URL url : urls) {
-            logger.info("url {} {} {} {}",url.getHost(),url.getPort(),serverHost,serverPort);
-            if(serverHost.equals(url.getHost())&&serverPort.intValue()==serverPort){
-                matched =true;
+            logger.info("url {} {} {} {}", url.getHost(), url.getPort(), serverHost, serverPort);
+            if (serverHost.equals(url.getHost()) && serverPort.intValue() == serverPort) { // todo-wcy
+                matched = true;
             }
         }
-        if(!matched){
+        int statusCode;
+        String retMsg;
+
+        if (!matched) {
             ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(serverHost, serverPort);
             CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
             blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
             CommonServiceProto.QueryPropsRequest.Builder builder = CommonServiceProto.QueryPropsRequest.newBuilder();
             CommonServiceProto.CommonResponse response = blockingStub.listProps(builder.build());
             Map<String, Object> propMap = JsonUtil.json2Object(response.getData().toStringUtf8(), Map.class);
-            routerTableInfo =propMap.get(Dict.PROXY_ROUTER_TABLE)!=null? propMap.get(Dict.PROXY_ROUTER_TABLE).toString():"";
-        }else {
+            routerTableInfo = propMap.get(Dict.PROXY_ROUTER_TABLE) != null ? propMap.get(Dict.PROXY_ROUTER_TABLE).toString() : "";
+            statusCode = response.getStatusCode();
+            retMsg = response.getMessage();
+        } else {
             if (logger.isDebugEnabled()) {
                 logger.debug("query router, host: {}, port: {}", serverHost, serverPort);
             }
@@ -100,11 +97,12 @@ public class RouterController {
             RouterTableServiceProto.RouterOperatetRequest.Builder queryRouterRequestBuilder = RouterTableServiceProto.RouterOperatetRequest.newBuilder();
             RouterTableServiceProto.RouterOperatetResponse response = blockingStub.queryRouter(queryRouterRequestBuilder.build());
             routerTableInfo = response.getData().toStringUtf8();
+            statusCode = response.getStatusCode();
+            retMsg = response.getMessage();
         }
-        //System.err.println("PPPPPPPPPPPPPPPPPPPPPPPPPP"+routerTableInfo);
         data.put("routerTable", routerTableInfo);
-        data.put("changeAble",matched);
-        return ReturnResult.build( 0,Dict.SUCCESS, data);
+        data.put("changeAble", matched);
+        return ReturnResult.build(statusCode, retMsg, data);
     }
 
     private RouterTableServiceGrpc.RouterTableServiceBlockingStub getRouterTableServiceBlockingStub(String host, Integer port) {
@@ -124,21 +122,15 @@ public class RouterController {
     }
 
 
-
-
-
-
-
     @PostMapping("/router/save")
     public ReturnResult saveRouter(@RequestBody RouterTableRequest routerTables) {
 
-        logger.info("save router table {}",routerTables.getRouterTableList());
+        logger.info("save router table {}", routerTables.getRouterTableList());
 
 
+        checkAddress(routerTables.getServerHost(), routerTables.getServerPort());
 
-        checkAddress(routerTables.getServerHost(),routerTables.getServerPort());
-
-        String  content = JsonUtil.object2Json(routerTables.getRouterTableList());
+        String content = JsonUtil.object2Json(routerTables.getRouterTableList());
 //        for (Map routerTable : parseRouterInfo(routerTables.getRouterTableList())) {
 //            checkParameter(routerTable);
 //        }
@@ -154,7 +146,7 @@ public class RouterController {
             throw new RemoteRpcException("Remote rpc error ,target: " + routerTables.getServerHost() + ":" + routerTables.getServerPort());
         }
 
-        return ReturnResult.build(0, "success");
+        return ReturnResult.build(response.getStatusCode(), response.getMessage());
     }
 
 //    private void checkParameter(RouterTableServiceProto.RouterTableInfo routerTable) {

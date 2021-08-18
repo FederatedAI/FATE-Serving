@@ -125,7 +125,6 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         CommonServiceProto.QueryPropsRequest queryPropsRequest = (CommonServiceProto.QueryPropsRequest) inboundPackage.getBody();
         String keyword = queryPropsRequest.getKeyword();
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-        builder.setStatusCode(StatusCode.SUCCESS);
         Map metaInfoMap = MetaInfo.toMap();
         Map map;
         if (StringUtils.isNotBlank(keyword)) {
@@ -139,7 +138,7 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         } else {
             map = metaInfoMap;
         }
-        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(map).getBytes()));
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(map).getBytes())).setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS);
         return builder.build();
     }
 
