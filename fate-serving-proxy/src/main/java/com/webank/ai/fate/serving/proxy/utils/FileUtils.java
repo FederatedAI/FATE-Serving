@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
@@ -64,6 +67,70 @@ public class FileUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * 将str写入文件,同步操作,独占锁
+     */
+    public static boolean writeStr2ReplaceFileSync(String str, String pathFile) throws Exception {
+        File file = new File(pathFile);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (IOException e) {
+            logger.error("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
+            throw new IOException("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
+        }
+        FileOutputStream fileOutputStream = null;
+        FileChannel fileChannel = null;
+        FileLock fileLock;//文件锁
+        try {
+
+            /**
+             * 写文件
+             */
+            fileOutputStream = new FileOutputStream(file);
+            fileChannel = fileOutputStream.getChannel();
+
+            try {
+                fileLock = fileChannel.tryLock();//独占锁
+            } catch (Exception e) {
+                logger.info("another thread is writing ,refresh and try again");
+                throw new IOException("another thread is writing ,refresh and try again");
+            }
+
+            if (fileLock != null) {
+                fileChannel.write(ByteBuffer.wrap(str.getBytes()));
+
+                if (fileLock.isValid()) {
+                    logger.info("release-write-lock");
+                    fileLock.release();
+                }
+
+                if (file.length() != str.getBytes().length) {
+                    logger.error("write successfully but the content was lost, reedit and try again");
+                    throw new IOException("write successfully but the content was lost, reedit and try again");
+                }
+            }
+
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        } finally {
+            close(fileChannel);
+            close(fileOutputStream);
+        }
+        return true;
+    }
+
+    public static void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
