@@ -43,10 +43,20 @@ public class ComponentService {
     NodeData cachedNodeData;
     List<ServiceInfo> serviceInfos;
 
+    public Map<String, Set<String>> getProjectNodes() {
+        return projectNodes;
+    }
+
+    public void setProjectNodes(Map<String, Set<String>> projectNodes) {
+        this.projectNodes = projectNodes;
+    }
+
     /**
      * project -> nodes mapping
      */
     Map<String, Set<String>> projectNodes = new HashMap<>();
+
+
 
     public NodeData getCachedNodeData() {
         return cachedNodeData;

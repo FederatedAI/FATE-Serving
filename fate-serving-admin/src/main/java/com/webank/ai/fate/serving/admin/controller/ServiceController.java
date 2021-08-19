@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.admin.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
@@ -60,6 +61,9 @@ public class ServiceController {
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
+
+    Set<String>  filterSet = Sets.newHashSet("batchInference","inference","unaryCall");
+
     /**
      * 列出集群中所注册的所有接口
      * @param page
@@ -81,7 +85,12 @@ public class ServiceController {
         }
         Properties properties = zookeeperRegistry.getCacheProperties();
 
+
         List<ServiceDataWrapper> resultList = new ArrayList<>();
+
+
+
+
         int totalSize = 0;
         int index = 0;
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -94,6 +103,8 @@ public class ServiceController {
                     URL url = URL.valueOf(u);
                     if (!Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
                         String[] split = key.split("/");
+                        if(!filterSet.contains(split[2]))
+                            continue;
                         ServiceDataWrapper wrapper = new ServiceDataWrapper();
                         wrapper.setUrl(url.toFullString());
                         wrapper.setProject(split[0]);

@@ -31,6 +31,8 @@ import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.admin.services.HealthCheckService;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.MetricNode;
+import com.webank.ai.fate.serving.common.health.HealthCheckRecord;
+import com.webank.ai.fate.serving.common.health.HealthCheckStatus;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
@@ -180,7 +182,44 @@ public class MonitorController {
     @GetMapping("monitor/checkHealth")
     public ReturnResult checkHealthService() {
         Map data  = healthCheckService.getHealthCheckInfo();
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, data);
+
+        Map resultData = Maps.newHashMap();
+        resultData.putAll(data);
+        Map<String, Set<String>>  componentData = componentService.getProjectNodes();
+
+        if(componentData.get("proxy")==null){
+            Map proxyInfo = new  HashMap();
+            Map emptyProxyResult = new HashMap();
+            proxyInfo.put("No instance founded",emptyProxyResult);
+            List<HealthCheckRecord> okList = Lists.newArrayList();
+            List<HealthCheckRecord> warnList = Lists.newArrayList();
+            List<HealthCheckRecord> errorList = Lists.newArrayList();
+            HealthCheckRecord  healthCheckRecord= new  HealthCheckRecord();
+            healthCheckRecord.setCheckItemName(" ");
+            healthCheckRecord.setMsg(" " );
+            emptyProxyResult.put("okList",okList);
+            emptyProxyResult.put("warnList",warnList);
+            warnList.add(healthCheckRecord);
+            emptyProxyResult.put("errorList",errorList);
+            resultData.put("proxy",proxyInfo);
+        }
+        if(componentData.get("serving")==null){
+            Map servingInfo = new  HashMap();
+            Map emptyResult = new HashMap();
+            servingInfo.put("No instance founded",emptyResult);
+            List<HealthCheckRecord> okList = Lists.newArrayList();
+            List<HealthCheckRecord> warnList = Lists.newArrayList();
+            List<HealthCheckRecord> errorList = Lists.newArrayList();
+            HealthCheckRecord  healthCheckRecord= new  HealthCheckRecord();
+            healthCheckRecord.setCheckItemName(" ");
+            healthCheckRecord.setMsg(" " );
+            emptyResult.put("okList",okList);
+            emptyResult.put("warnList",warnList);
+            warnList.add(healthCheckRecord);
+            emptyResult.put("errorList",errorList);
+            resultData.put("serving",servingInfo);
+        }
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, resultData);
     }
 
     @GetMapping("monitor/selfCheck")
@@ -195,9 +234,45 @@ public class MonitorController {
               data  = healthCheckService.check();
           }
         }
-        logger.info("================={}",data);
+        Map resultData = Maps.newHashMap();
+        resultData.putAll(data);
 
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, data);
+        Map<String, Set<String>>  componentData = componentService.getProjectNodes();
+
+        if(componentData.get("proxy")==null){
+            Map proxyInfo = new  HashMap();
+            Map emptyProxyResult = new HashMap();
+            proxyInfo.put("No instance founded",emptyProxyResult);
+            List<HealthCheckRecord> okList = Lists.newArrayList();
+            List<HealthCheckRecord> warnList = Lists.newArrayList();
+            List<HealthCheckRecord> errorList = Lists.newArrayList();
+            HealthCheckRecord  healthCheckRecord= new  HealthCheckRecord();
+            healthCheckRecord.setCheckItemName(" ");
+            healthCheckRecord.setMsg(" " );
+            emptyProxyResult.put("okList",okList);
+            emptyProxyResult.put("warnList",warnList);
+            warnList.add(healthCheckRecord);
+            emptyProxyResult.put("errorList",errorList);
+            resultData.put("proxy",proxyInfo);
+        }
+        if(componentData.get("serving")==null){
+            Map servingInfo = new  HashMap();
+            Map emptyResult = new HashMap();
+            servingInfo.put("No instance founded",emptyResult);
+            List<HealthCheckRecord> okList = Lists.newArrayList();
+            List<HealthCheckRecord> warnList = Lists.newArrayList();
+            List<HealthCheckRecord> errorList = Lists.newArrayList();
+            HealthCheckRecord  healthCheckRecord= new  HealthCheckRecord();
+            healthCheckRecord.setCheckItemName(" ");
+            healthCheckRecord.setMsg(" " );
+            emptyResult.put("okList",okList);
+            emptyResult.put("warnList",warnList);
+            warnList.add(healthCheckRecord);
+            emptyResult.put("errorList",errorList);
+            resultData.put("serving",servingInfo);
+        }
+
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, resultData);
     }
 
     private CommonServiceGrpc.CommonServiceBlockingStub getMonitorServiceBlockStub(String host, int port) {
