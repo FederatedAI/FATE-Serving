@@ -122,6 +122,8 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
             throw  new RemoteRpcException("");
         }
         String  resultJson = HttpClientPool.sendPost(url,content,null);
+
+        logger.info("result json {}",resultJson);
         Proxy.Packet.Builder  resultBuilder =  Proxy.Packet.newBuilder();
         try {
             JsonFormat.parser().merge(resultJson,resultBuilder);

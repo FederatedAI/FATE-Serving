@@ -25,6 +25,7 @@ import com.webank.ai.fate.serving.common.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
@@ -56,7 +57,7 @@ public class ProxyController {
     ProxyServiceRegister proxyServiceRegister;
 
 
-    @RequestMapping(value = "/uncary", method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = "/unary", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public Callable<String> uncaryCall(
                                        @RequestBody String data,
@@ -77,16 +78,13 @@ public class ProxyController {
                 packetBuilder.build();
                 Context context = new BaseContext();
                 context.setCallName("unaryCall");
-                //context.setVersion(version);
+                context.setGrpcType(GrpcType.INTER_GRPC);
                 InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, packetBuilder.build());
                 OutboundPackage<Proxy.Packet> result = serviceAdaptor.service(context, inboundPackage);
                 return JsonFormat.printer().print(result.getData());
             }
         };
     }
-
-
-
 
 
     @RequestMapping(value = "/federation/{version}/{callName}", method = {RequestMethod.POST, RequestMethod.GET})

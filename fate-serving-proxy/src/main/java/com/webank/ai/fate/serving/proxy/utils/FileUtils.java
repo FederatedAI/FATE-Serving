@@ -99,15 +99,12 @@ public class FileUtils {
                 logger.info("another thread is writing ,refresh and try again");
                 throw new IOException("another thread is writing ,refresh and try again");
             }
-
             if (fileLock != null) {
                 fileChannel.write(ByteBuffer.wrap(str.getBytes()));
-
                 if (fileLock.isValid()) {
                     logger.info("release-write-lock");
                     fileLock.release();
                 }
-
                 if (file.length() != str.getBytes().length) {
                     logger.error("write successfully but the content was lost, reedit and try again");
                     throw new IOException("write successfully but the content was lost, reedit and try again");
