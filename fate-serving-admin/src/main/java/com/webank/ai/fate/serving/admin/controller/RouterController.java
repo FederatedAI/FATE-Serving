@@ -142,6 +142,9 @@ public class RouterController {
             logger.debug("response: {}", response);
         }
 
+
+
+
         if (response == null) {
             throw new RemoteRpcException("Remote rpc error ,target: " + routerTables.getServerHost() + ":" + routerTables.getServerPort());
         }

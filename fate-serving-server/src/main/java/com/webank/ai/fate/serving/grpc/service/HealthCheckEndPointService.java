@@ -32,8 +32,6 @@ public class HealthCheckEndPointService implements HealthCheckAware{
     @Autowired
     private ModelManager  modelManager;
 
-
-
     private  void  checkFateFlow(HealthCheckResult  healthCheckResult){
         if (routerService != null) {
             String transferUri = "flow/online/transfer";
@@ -79,12 +77,6 @@ public class HealthCheckEndPointService implements HealthCheckAware{
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
 
-    //ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
-
-
-
-
-
     private  void  checkZkConfig(HealthCheckResult  healthCheckResult){
         if(zookeeperRegistry==null){
             healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ZOOKEEPER_CONFIG.getItemName(),"zookeeper is not used or config is invalid",HealthCheckStatus.warn));
@@ -114,7 +106,7 @@ public class HealthCheckEndPointService implements HealthCheckAware{
             HealthCheckResult  healthCheckResult = new  HealthCheckResult();
             Arrays.stream(items).filter((item) -> {
                 HealthCheckComponent healthCheckComponent = item.getComponent();
-                return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGPROXY;
+                return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGSERVER;
             }).forEach((item) -> {
                         switch (item) {
 
