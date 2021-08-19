@@ -23,18 +23,13 @@ import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
-import com.webank.ai.fate.serving.core.bean.RouterTableResponseRecord;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.RouterInfoOperateException;
-import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.common.RouterTableUtils;
 import com.webank.ai.fate.serving.proxy.rpc.grpc.RouterTableServiceProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @FateService(name = "routerTableService", preChain = {
         "requestOverloadBreaker"
@@ -55,10 +50,10 @@ public class RouterTableServiceProvider extends AbstractProxyServiceProvider {
             builder.setMessage("proxy load router table error");
             return builder.build();
         }
-        List<RouterTableResponseRecord> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
+//        List<RouterTableResponseRecord> routerTableInfoList = RouterTableUtils.parseJson2RouterInfoList(routTableJson.getAsJsonObject("route_table"));
         builder.setStatusCode(StatusCode.SUCCESS);
         builder.setMessage(Dict.SUCCESS);
-        ByteString bytes = ByteString.copyFrom(JsonUtil.object2Json(routerTableInfoList).getBytes());
+        ByteString bytes = ByteString.copyFrom(routTableJson.toString().getBytes());
         builder.setData(bytes);
         return builder.build();
     }

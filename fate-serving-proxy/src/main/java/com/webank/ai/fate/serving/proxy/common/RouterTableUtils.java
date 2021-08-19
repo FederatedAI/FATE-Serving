@@ -10,7 +10,6 @@ import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.RouterTableResponseRecord;
 import com.webank.ai.fate.serving.core.exceptions.RouterInfoOperateException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
-import com.webank.ai.fate.serving.proxy.rpc.grpc.RouterTableServiceProto;
 import com.webank.ai.fate.serving.proxy.utils.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -20,7 +19,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @auther Xiongli
@@ -225,7 +227,7 @@ public class RouterTableUtils {
 //        }
 //    }
 
-    public static synchronized void saveRouter(String routerInfo) {
+    public static void saveRouter(String routerInfo){
         try {
             if (!RouteTableJsonValidator.isJSON(routerInfo)) {
                 logger.error("validate router_table.json format error");
@@ -233,10 +235,13 @@ public class RouterTableUtils {
         } catch (Exception e) {
             throw new RouterInfoOperateException("validate router_table.json format error:" + e.getMessage());
         }
-        if (writeRouterFile(JsonUtil.formatJson(routerInfo))) {
-                logger.error("write router_table.json error");
-                throw new RouterInfoOperateException("write router_table.json error");
-            }
+        try {
+            if (writeRouterFile(JsonUtil.formatJson(routerInfo))) {
+                    logger.error("write router_table.json fail");
+                }
+        } catch (Exception e) {
+            throw new RouterInfoOperateException("router_table.json : " + e.getMessage());
+        }
     }
 
 //    private static JsonObject parseRouterInfo(RouterTableServiceProto.RouterTableInfo routerInfo) {
@@ -262,10 +267,11 @@ public class RouterTableUtils {
 //        return result;
 //    }
 
-    public static boolean writeRouterFile(String context) {
+    public static boolean writeRouterFile(String context) throws Exception {
         String filePath = getRouterFile();
         logger.info("write router table file {} {}",filePath,context);
-        return !FileUtils.writeFile(context, new File(filePath));
+//        return !FileUtils.writeFile(context, new File(filePath));
+        return !FileUtils.writeStr2ReplaceFileSync(context, filePath);
     }
 
     public static List<RouterTableResponseRecord> parseJson2RouterInfoList(JsonObject routerTableJson) {
