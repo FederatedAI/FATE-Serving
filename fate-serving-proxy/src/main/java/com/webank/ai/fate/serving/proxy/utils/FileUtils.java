@@ -70,7 +70,8 @@ public class FileUtils {
     }
 
     /**
-     * 将str写入文件,同步操作,独占锁
+     * Write string to file,
+     * synchronize operation, exclusive lock
      */
     public static boolean writeStr2ReplaceFileSync(String str, String pathFile) throws Exception {
         File file = new File(pathFile);
@@ -84,34 +85,32 @@ public class FileUtils {
         }
         FileOutputStream fileOutputStream = null;
         FileChannel fileChannel = null;
-        FileLock fileLock;//文件锁
+        FileLock fileLock;
         try {
 
             /**
-             * 写文件
+             * write file
              */
             fileOutputStream = new FileOutputStream(file);
             fileChannel = fileOutputStream.getChannel();
 
             try {
-                fileLock = fileChannel.tryLock();//独占锁
+                fileLock = fileChannel.tryLock();// exclusive lock
             } catch (Exception e) {
-                logger.info("another thread is writing ,refresh and try again");
                 throw new IOException("another thread is writing ,refresh and try again");
             }
             if (fileLock != null) {
                 fileChannel.write(ByteBuffer.wrap(str.getBytes()));
                 if (fileLock.isValid()) {
-                    logger.info("release-write-lock");
-                    fileLock.release();
+                    fileLock.release(); // release-write-lock
                 }
                 if (file.length() != str.getBytes().length) {
-                    logger.error("write successfully but the content was lost, reedit and try again");
                     throw new IOException("write successfully but the content was lost, reedit and try again");
                 }
             }
 
         } catch (IOException e) {
+            logger.error(e.getMessage());
             throw new IOException(e.getMessage());
         } finally {
             close(fileChannel);
