@@ -16,6 +16,8 @@
 
 package com.webank.ai.fate.serving.proxy.controller;
 
+import com.google.common.collect.Maps;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.util.JsonFormat;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.common.bean.BaseContext;
@@ -25,6 +27,7 @@ import com.webank.ai.fate.serving.common.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.rpc.grpc.GrpcType;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
@@ -67,21 +70,22 @@ public class ProxyController {
         return new Callable<String>() {
             @Override
             public String call() throws Exception {
-                logger.info("receive : {} headers {}", data, headers.toSingleValueMap());
-                final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor("unaryCall");
-                Proxy.Packet.Builder  packetBuilder =  Proxy.Packet.newBuilder();
-                try {
-                    JsonFormat.parser().merge(data, packetBuilder);
-                }catch(Exception e){
+                    final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor("unaryCall");
+                    Proxy.Packet.Builder packetBuilder = Proxy.Packet.newBuilder();
+                    try {
+                        JsonFormat.parser().merge(data, packetBuilder);
+                    }catch(Exception e){
+                        logger.error("invalid http param {}",data);
+                        return JsonFormat.printer().print(returnInvalidParam());
+                    }
+                    packetBuilder.build();
+                    Context context = new BaseContext();
+                    context.setCallName("unaryCall");
+                    context.setGrpcType(GrpcType.INTER_GRPC);
+                    InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, packetBuilder.build());
+                    OutboundPackage<Proxy.Packet> result = serviceAdaptor.service(context, inboundPackage);
+                    return JsonFormat.printer().print(result.getData());
 
-                }
-                packetBuilder.build();
-                Context context = new BaseContext();
-                context.setCallName("unaryCall");
-                context.setGrpcType(GrpcType.INTER_GRPC);
-                InboundPackage<Proxy.Packet> inboundPackage = buildInboundPackage(context, packetBuilder.build());
-                OutboundPackage<Proxy.Packet> result = serviceAdaptor.service(context, inboundPackage);
-                return JsonFormat.printer().print(result.getData());
             }
         };
     }
@@ -144,7 +148,7 @@ public class ProxyController {
     }
 
 
-    public InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {
+    private  InboundPackage<Proxy.Packet> buildInboundPackage(Context context, Proxy.Packet req) {
         context.setCaseId(Long.toString(System.currentTimeMillis()));
         if (StringUtils.isNotBlank(req.getHeader().getOperator())) {
             context.setVersion(req.getHeader().getOperator());
@@ -156,5 +160,17 @@ public class ProxyController {
 
         return inboundPackage;
     }
+
+
+    private  Proxy.Packet   returnInvalidParam(){
+        Proxy.Packet.Builder builder = Proxy.Packet.newBuilder();
+        Proxy.Data.Builder dataBuilder = Proxy.Data.newBuilder();
+        Map fateMap = Maps.newHashMap();
+        fateMap.put(Dict.RET_CODE, StatusCode.PROXY_PARAM_ERROR);
+        fateMap.put(Dict.RET_MSG, "invalid http param");
+        builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JsonUtil.object2Json(fateMap))));
+        return builder.build();
+    }
+
 
 }
