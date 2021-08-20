@@ -186,8 +186,7 @@ public class MonitorController {
         Map resultData = Maps.newHashMap();
         resultData.putAll(data);
         Map<String, Set<String>>  componentData = componentService.getProjectNodes();
-
-        if(componentData.get("proxy")==null){
+        if(componentData.get("proxy")==null||((Set)componentData.get("proxy")).size()==0){
             Map proxyInfo = new  HashMap();
             Map emptyProxyResult = new HashMap();
             proxyInfo.put("No instance founded",emptyProxyResult);
@@ -203,7 +202,7 @@ public class MonitorController {
             emptyProxyResult.put("errorList",errorList);
             resultData.put("proxy",proxyInfo);
         }
-        if(componentData.get("serving")==null){
+        if(componentData.get("serving")==null||((Set)componentData.get("serving")).size()==0){
             Map servingInfo = new  HashMap();
             Map emptyResult = new HashMap();
             servingInfo.put("No instance founded",emptyResult);
@@ -239,7 +238,7 @@ public class MonitorController {
 
         Map<String, Set<String>>  componentData = componentService.getProjectNodes();
 
-        if(componentData.get("proxy")==null){
+        if(componentData.get("proxy")==null||((Set)componentData.get("proxy")).size()==0){
             Map proxyInfo = new  HashMap();
             Map emptyProxyResult = new HashMap();
             proxyInfo.put("No instance founded",emptyProxyResult);
@@ -255,7 +254,7 @@ public class MonitorController {
             emptyProxyResult.put("errorList",errorList);
             resultData.put("proxy",proxyInfo);
         }
-        if(componentData.get("serving")==null){
+        if(componentData.get("serving")==null||((Set)componentData.get("serving")).size()==0){
             Map servingInfo = new  HashMap();
             Map emptyResult = new HashMap();
             servingInfo.put("No instance founded",emptyResult);

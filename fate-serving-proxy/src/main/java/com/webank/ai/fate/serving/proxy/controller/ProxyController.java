@@ -105,15 +105,11 @@ public class ProxyController {
                 if (logger.isDebugEnabled()) {
                     logger.debug("receive : {} headers {}", data, headers.toSingleValueMap());
                 }
-
                 final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor(callName);
-
                 Context context = new BaseContext();
                 context.setCallName(callName);
                 context.setVersion(version);
-
                 InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, data, httpServletRequest);
-
                 OutboundPackage<Map> result = serviceAdaptor.service(context, inboundPackage);
                 if (result != null && result.getData() != null) {
                     result.getData().remove("log");
@@ -157,7 +153,6 @@ public class ProxyController {
         context.setHostAppid(req.getHeader().getDst().getPartyId());
         InboundPackage<Proxy.Packet> inboundPackage = new InboundPackage<Proxy.Packet>();
         inboundPackage.setBody(req);
-
         return inboundPackage;
     }
 
