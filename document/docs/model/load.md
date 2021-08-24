@@ -1,5 +1,5 @@
 
-源码中提供了简单的LR模型用于进行简单测试，可以在没有安装FATE的情况下使用该模式。将 [example/model_cache_example.zip](..\src\model_cache_example.zip) 解压至guest与host双方serving-server实例部署目录下的.fate目录下（若是不存在可手动新建该目录），重启即可自动加载模型并绑定到lr-test
+源码中提供了简单的LR模型用于进行简单测试，可以在没有安装FATE的情况下使用该模式。将 [example/model_cache_example.zip](../src/model_cache_example.zip) 解压至guest与host双方serving-server实例部署目录下的.fate目录下（若是不存在可手动新建该目录），重启即可自动加载模型并绑定到lr-test
 
 ### 模型推送流程
 前面介绍了如何安装各个组件，在各组件都成功安装后，接下来需要将模型推送至serving-server。
@@ -15,7 +15,7 @@
 8. 可以在serving-admin页面上测试调用（此步操作非必需）
 
 具体的工作流程如下图所示 蓝色为guest集群，灰色代表host集群  
-![flow](..\img\flow.jpg)
+![flow](../img/flow.jpg)
 
 ### FATE-Flow的配置（以1.4.x 版本为例）
 在执行模型的推送和绑定操作之前，需要先配置FATE-Flow,并重启FATE-Flow：  
@@ -107,7 +107,7 @@ xxxxxxxxxx
 }
 ```
 #### 模型在内存中的结构
-![model_structure](..\img\model_structure.jpg)
+![model_structure](../img/model_structure.jpg)
 
 #### 常见问题
 <table>

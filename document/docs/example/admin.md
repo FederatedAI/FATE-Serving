@@ -7,7 +7,7 @@ serving-admin提供了FATE-Serving集群的可视化操作界面，依赖zookeep
 节点展示：提供集群组件展示，可切换实例进行操作  
 ![admin1](../img/admin1.jpg)
 
-参数配置：展示实例的参数配置及元数据，参数解释请参考[配置详解](..\config\admin.md)
+参数配置：展示实例的参数配置及元数据，参数解释请参考[配置详解](../config/admin.md)
 ![admin2](../img/admin2.jpg)
 
 #### 模型管理

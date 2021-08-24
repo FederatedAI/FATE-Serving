@@ -57,7 +57,7 @@ HeteroSecureBoostingTreeGuest和HeteroSecureBoostingTreeHost是party guest和hos
 另外，HeteroSecureBoost在2.0.x版本开始支持批量预测。
 
 HeteroSecureBoost在线推理流程图如下：
-![inference_flow](..\img\inference_flow.jpg)
+![inference_flow](../img/inference_flow.jpg)
 
 ### HeteroLR 在线推理
 HeteroLR为纵向联邦逻辑回归在线推理的实现过程。

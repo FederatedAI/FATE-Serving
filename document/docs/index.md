@@ -17,8 +17,8 @@ zookeeper 用户各组件的信息同步协调以及服务注册于发现
 
 ### 架构简介  
 各组件的具体功能以及整个项目的功能如下图所示：  
-![架构1](img\Structure1.jpg)  
-![架构2](img\Structure2.jpg) 
+![架构1](img/Structure1.jpg)  
+![架构2](img/Structure2.jpg) 
 
 ### 源码结构
 •	fate-serving-register：主要为服务治理相关的逻辑  
