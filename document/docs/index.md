@@ -54,7 +54,7 @@ zookeeper 用户各组件的信息同步协调以及服务注册于发现
 [点击查看详情](./log/log.md)
 
 ## TLS安全证书
-[点击查看详情](./service/security.md)
+[点击查看详情](config/security.md)
 
 ## 算法相关
 [基础类](./algo/base.md)   
