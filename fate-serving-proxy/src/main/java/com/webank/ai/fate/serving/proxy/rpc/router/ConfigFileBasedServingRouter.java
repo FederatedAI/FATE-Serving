@@ -322,9 +322,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     }
 
     private void initRouteTable(JsonObject confJson) {
-        logger.info("ppppppppppppppppppp  {}",confJson);
         Map<String, Map<String, List<BasicMeta.Endpoint>>> newRouteTable = new ConcurrentHashMap<>();
-
         // loop through coordinator
         for (Map.Entry<String, JsonElement> coordinatorEntry : confJson.entrySet()) {
             String coordinatorKey = coordinatorEntry.getKey();
@@ -335,7 +333,6 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
                 serviceTable = new ConcurrentHashMap<>(4);
                 newRouteTable.put(coordinatorKey, serviceTable);
             }
-
             // loop through role in coordinator
             for (Map.Entry<String, JsonElement> roleEntry : coordinatorValue.entrySet()) {
                 String roleKey = roleEntry.getKey();

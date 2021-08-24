@@ -21,15 +21,6 @@
         list-style: none;
     }
 }
-.el-icon-success {
-    color: #217AD9;
-}
-.el-icon-loading {
-    color: #217AD9;
-}
-.el-icon-warning {
-    color: #FE6363;
-}
 .el-popover {
     min-width: 100px;
 }
@@ -84,7 +75,15 @@
                 margin-left: 5px;
                 cursor: pointer;
             }
-
+            .el-icon-error {
+                color: #FE6363 !important;
+            }
+            .el-icon-warning {
+                color: #FF9D00 !important;
+            }
+            .el-icon-success,.el-icon-loading {
+                color: #217AD9 !important;
+            }
         }
         ul {
             position: relative;

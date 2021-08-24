@@ -29,8 +29,7 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.exceptions.ProxyAuthException;
-import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.*;
 import com.webank.ai.fate.serving.core.rpc.router.Protocol;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
@@ -113,22 +112,28 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         }
     }
 
-    private  Proxy.Packet  httpTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo){
-        String url = routerInfo.getUrl();
-        String content = null;
+    private  Proxy.Packet  httpTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo) throws BaseException{
         try {
-             content = JsonFormat.printer().print(sourcePackage);
-        } catch (InvalidProtocolBufferException e) {
-            throw  new RemoteRpcException("");
+            String url = routerInfo.getUrl();
+            String content = null;
+            content = JsonFormat.printer().print(sourcePackage);
+            String resultJson = HttpClientPool.sendPost(url, content, null);
+            logger.info("result json {}", resultJson);
+            Proxy.Packet.Builder resultBuilder = Proxy.Packet.newBuilder();
+            try {
+                JsonFormat.parser().merge(resultJson, resultBuilder);
+            }catch(Exception  e){
+                logger.error("receive invalid http response {}",resultJson);
+                throw  new InvalidResponseException("receive invalid http response");
+            }
+            return resultBuilder.build();
+        }catch(Exception e){
+            if(e instanceof BaseException){
+                throw (BaseException) e;
+            }else{
+                throw  new SysException(e.getMessage());
+            }
         }
-        String  resultJson = HttpClientPool.sendPost(url,content,null);
-        Proxy.Packet.Builder  resultBuilder =  Proxy.Packet.newBuilder();
-        try {
-            JsonFormat.parser().merge(resultJson,resultBuilder);
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-        }
-        return  resultBuilder.build();
     }
 
     @Override
@@ -136,7 +141,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         Proxy.Packet.Builder builder = Proxy.Packet.newBuilder();
         Proxy.Data.Builder dataBuilder = Proxy.Data.newBuilder();
         Map fateMap = Maps.newHashMap();
-        fateMap.put(Dict.RET_CODE, exceptionInfo.getCode());
+        fateMap.put(Dict.RET_CODE, exceptionInfo.getCode()+500);
         fateMap.put(Dict.RET_MSG, exceptionInfo.getMessage());
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JsonUtil.object2Json(fateMap))));
         return builder.build();

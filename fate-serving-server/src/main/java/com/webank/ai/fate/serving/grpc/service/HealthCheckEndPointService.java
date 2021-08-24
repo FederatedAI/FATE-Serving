@@ -32,8 +32,6 @@ public class HealthCheckEndPointService implements HealthCheckAware{
     @Autowired
     private ModelManager  modelManager;
 
-
-
     private  void  checkFateFlow(HealthCheckResult  healthCheckResult){
         if (routerService != null) {
             String transferUri = "flow/online/transfer";
@@ -66,11 +64,10 @@ public class HealthCheckEndPointService implements HealthCheckAware{
                     fullUrl.indexOf('/', fullUrl.lastIndexOf(':'))));
             boolean isConnected = TelnetUtil.tryTelnet(host, port);
             if (!isConnected) {
-                String result1 = String.format("check default fateflow url: %s can not connected", fullUrl);
+                String result1 = String.format(" %s can not connected", fullUrl);
                 healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_DEFAULT_FATEFLOW.getItemName(),result1,HealthCheckStatus.warn));
             }else{
                 healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_DEFAULT_FATEFLOW.getItemName(),"default fateflow url is ok",HealthCheckStatus.warn));
-
             }
 
         }
@@ -78,12 +75,6 @@ public class HealthCheckEndPointService implements HealthCheckAware{
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
-
-    //ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
-
-
-
-
 
     private  void  checkZkConfig(HealthCheckResult  healthCheckResult){
         if(zookeeperRegistry==null){
@@ -114,7 +105,7 @@ public class HealthCheckEndPointService implements HealthCheckAware{
             HealthCheckResult  healthCheckResult = new  HealthCheckResult();
             Arrays.stream(items).filter((item) -> {
                 HealthCheckComponent healthCheckComponent = item.getComponent();
-                return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGPROXY;
+                return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGSERVER;
             }).forEach((item) -> {
                         switch (item) {
 

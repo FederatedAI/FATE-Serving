@@ -5,6 +5,7 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,16 +40,30 @@ public class HealthCheckUtil {
             memoryInfo.put("Total Memory",new DecimalFormat("#.##GB").format(totalByte/1024.0/1024.0/1024.0));
             memoryInfo.put("Memory Usage", new DecimalFormat("#.##%").format((totalByte-callableByte)*1.0/totalByte));
             double  useRate = (totalByte-callableByte)*1.0/totalByte;
-
+            String  useRateString= getPercentFormat(useRate,1,2);
             if(useRate>0.8) {
-                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_MEMORY_USAGE.getItemName(),"check memory usage:"+useRate ,HealthCheckStatus.error));
+                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_MEMORY_USAGE.getItemName()," usage:"+useRateString ,HealthCheckStatus.error));
             }else{
-                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_MEMORY_USAGE.getItemName(),"check memory usage:"+useRate ,HealthCheckStatus.ok));
+                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_MEMORY_USAGE.getItemName(),"usage:"+useRateString ,HealthCheckStatus.ok));
 
             }
         } catch (Exception e) {
 
         }
     }
+
+    public static String getPercentFormat(double d,int IntegerDigits,int FractionDigits){
+        NumberFormat nf = java.text.NumberFormat.getPercentInstance();
+
+        nf.setMaximumIntegerDigits(IntegerDigits);//小数点前保留几位
+
+        nf.setMinimumFractionDigits(FractionDigits);// 小数点后保留几位
+
+        String str = nf.format(d);
+
+        return str;
+
+    }
+
 
 }

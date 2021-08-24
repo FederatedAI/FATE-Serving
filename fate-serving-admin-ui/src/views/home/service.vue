@@ -24,8 +24,8 @@
                 :data="serviceData"
                 height="100%"
                 :header-cell-style="{background:'#fff'}">
-                <el-table-column prop="project" label="Project" show-overflow-tooltip />
-                <el-table-column sortable  prop="environment" label="Environment" show-overflow-tooltip />
+                <!-- <el-table-column prop="project" label="Project" show-overflow-tooltip />
+                <el-table-column sortable  prop="environment" label="Environment" show-overflow-tooltip /> -->
                 <el-table-column prop="name" label="Name" show-overflow-tooltip />
                 <el-table-column prop="host" label="Host" show-overflow-tooltip />
                 <el-table-column prop="port" label="Port" show-overflow-tooltip />
@@ -39,7 +39,7 @@
                         <el-input class="input" v-else v-model.number="weight" @input='inputweight' placeholder=""></el-input>
                     </template>
                 </el-table-column>
-                <el-table-column label="Operation">
+                <el-table-column label="Operation" width="200">
                     <template slot-scope="scope">
                         <el-button v-if="!(showEdit === scope.$index)" type="text" style="font-size: 16px;margin-left:15px" class="el-icon-edit" @click="edit(scope.row,scope.$index)"></el-button>
                         <span v-else>
