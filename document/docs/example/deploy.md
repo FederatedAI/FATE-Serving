@@ -1,6 +1,6 @@
 ### 部署示例图
 下图橙色代表guest ，蓝色代表host。  
-![deploy](..\img\Deploy.jpg)
+![deploy](../img/Deploy.jpg)
 
 ### guest部署
 •	guest 的serving-proxy application.properties 配置：  

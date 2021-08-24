@@ -5,14 +5,14 @@ serving-admin提供了FATE-Serving集群的可视化操作界面，依赖zookeep
 ### 功能介绍
 #### 节点管理
 节点展示：提供集群组件展示，可切换实例进行操作  
-![admin1](..\img\admin1.jpg)
+![admin1](../img/admin1.jpg)
 
 参数配置：展示实例的参数配置及元数据，参数解释请参考[配置详解](..\config\admin.md)
-![admin2](..\img\admin2.jpg)
+![admin2](../img/admin2.jpg)
 
 #### 模型管理
 模型查询：展示实例从fateflow载入成功的模型，仅显示单方模型，数据使用方会显示绑定的服务ID
-![admin3](..\img\admin-model.jpg)
+![admin3](../img/admin-model.jpg)
 列表字段
 <table>
   <tr>
@@ -42,13 +42,13 @@ serving-admin提供了FATE-Serving集群的可视化操作界面，依赖zookeep
 </table>
 
 模型调用监控：模型列表右侧可展示模型调用监控，绿色线条为调用量，红色线条为异常次数。一次调用批量预测模型调用量为请求参数中 batchDataList 数量
-![admin-modelMonitor](..\img\model_monitor.jpg)
+![admin-modelMonitor](../img/model_monitor.jpg)
 
 模型解绑：可以对模型绑定的服务ID进行解绑，并注销对应服务注册的服务接口
-![admin-unbind](..\img\unbind.jpg)
+![admin-unbind](../img/unbind.jpg)
 
 模型卸载：卸载实例已载入的模型，模型卸载会同时解绑服务ID，并注销注册的服务接口
-![admin-unload](..\img\unload.jpg)
+![admin-unload](../img/unload.jpg)
 
 模型同步：可将当前机器上的模型同步到本机群中其他的serving-server机器上
 ![model-sync](../img/model_sync.jpg)
