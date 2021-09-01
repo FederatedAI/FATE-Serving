@@ -110,7 +110,7 @@ public class ModelController {
         int totalSize = 0;
         if (modelInfosList != null) {
             totalSize = modelInfosList.size();
-            modelInfosList = modelInfosList.stream().sorted(Comparator.comparingInt(ModelServiceProto.ModelInfoEx::getIndex)).collect(Collectors.toList());
+            modelInfosList = modelInfosList.stream().sorted(Comparator.comparing(ModelServiceProto.ModelInfoEx::getTableName).reversed()).collect(Collectors.toList());
 
             // Pagination
             int totalPage = (modelInfosList.size() + pageSize - 1) / pageSize;
@@ -144,7 +144,7 @@ public class ModelController {
         data.put("total", totalSize);
         data.put("rows", rows);
 
-        logger.info("=============={}",data);
+//        logger.info("=============={}",data);
         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
 

@@ -17,7 +17,6 @@ import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 import com.webank.ai.fate.serving.core.utils.ThreadPoolUtil;
-import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +28,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.*;
 
 @Service
@@ -86,7 +84,7 @@ public class HealthCheckService implements InitializingBean {
         result.put("okList",okList);
         result.put("warnList",warnList);
         result.put("errorList",errorList);
-        logger.info("health check {} component {} result {}",address,component,result);
+//        logger.info("health check {} component {} result {}",address,component,result);
         currentComponentMap.put(address,result);
     }
 

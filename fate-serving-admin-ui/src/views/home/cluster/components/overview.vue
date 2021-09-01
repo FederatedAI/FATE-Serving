@@ -106,7 +106,7 @@ export default {
             options: {
                 tooltip: {
                     formatter: (params) => {
-                        return `${params.name}(${params.data.x},${params.data.y})`
+                        return `${params.name}`
                     }
                 },
                 animation: false,

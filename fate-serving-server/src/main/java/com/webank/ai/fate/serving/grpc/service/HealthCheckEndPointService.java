@@ -1,6 +1,5 @@
 package com.webank.ai.fate.serving.grpc.service;
 
-import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
@@ -9,20 +8,13 @@ import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.utils.TelnetUtil;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
-
-import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.model.ModelManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import oshi.SystemInfo;
-import oshi.hardware.GlobalMemory;
 
-import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class HealthCheckEndPointService implements HealthCheckAware{
@@ -38,9 +30,9 @@ public class HealthCheckEndPointService implements HealthCheckAware{
             URL url = URL.valueOf(transferUri);
             List urls = routerService.router(url);
             if(urls== null||urls.size()==0){
-                healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_FATEFLOW_IN_ZK.getItemName(), "fateflow is not found in zk ",HealthCheckStatus.warn));
+                healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_FATEFLOW_IN_ZK.getItemName(), "fateflow is not found in zookeeper ",HealthCheckStatus.warn));
             }else{
-                healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_FATEFLOW_IN_ZK.getItemName(), "fateflow is found in zk",HealthCheckStatus.ok));
+                healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_FATEFLOW_IN_ZK.getItemName(), "fateflow is found in zookeeper",HealthCheckStatus.ok));
             }
         }
     }
@@ -67,7 +59,7 @@ public class HealthCheckEndPointService implements HealthCheckAware{
                 String result1 = String.format(" %s can not connected", fullUrl);
                 healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_DEFAULT_FATEFLOW.getItemName(),result1,HealthCheckStatus.warn));
             }else{
-                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_DEFAULT_FATEFLOW.getItemName(),"default fateflow url is ok",HealthCheckStatus.warn));
+                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_DEFAULT_FATEFLOW.getItemName(),"default fateflow url is ok",HealthCheckStatus.ok));
             }
 
         }

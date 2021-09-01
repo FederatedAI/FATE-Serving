@@ -255,7 +255,7 @@
                                         </span>
                                         <el-dropdown-menu slot="dropdown">
                                             <el-dropdown-item command="Unload" >Unload</el-dropdown-item>
-                                            <el-dropdown-item command="unbind" v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'" >unbind</el-dropdown-item>
+                                            <el-dropdown-item command="Unbind" v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'" >Unbind</el-dropdown-item>
                                             <el-dropdown-item command="FlowControl" >Flow control</el-dropdown-item>
                                             <el-dropdown-item command="ModelSynchronize">Model synchronize</el-dropdown-item>
                                         </el-dropdown-menu>
@@ -771,8 +771,8 @@ export default {
         },
         checkModel() {
             const params = {
-                host: this.ipPort[0],
-                port: this.ipPort[1],
+                host: this.servingServer.split(':')[0],
+                port: this.servingServer.split(':')[1],
                 tableName: this.rowData.tableName,
                 namespace: this.rowData.namespace
             }

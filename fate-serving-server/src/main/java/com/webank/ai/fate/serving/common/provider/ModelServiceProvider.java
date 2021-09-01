@@ -30,7 +30,6 @@ import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.ModelNullException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
@@ -45,7 +44,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @FateService(name = "modelService", preChain = {
@@ -254,12 +256,18 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         //}
         if (model == null) {
             logger.error("model {}_{} is not exist", tableName, namespace);
-            throw new ModelNullException("model is not exist ");
+//            throw new ModelNullException("model is not exist ");
+            return responseBuilder.setStatusCode(StatusCode.MODEL_NULL)
+                    .setMessage("model is not exist")
+                    .build();
         }
         byte[] cacheData = modelManager.getModelCacheData(context, model.getTableName(), model.getNamespace());
         if (cacheData == null) {
             logger.error("model {}_{} cache data is null", model.getTableName(), model.getNamespace());
-            throw new ModelNullException("model cache data is null");
+//            throw new ModelNullException("model cache data is null");
+            return responseBuilder.setStatusCode(StatusCode.MODEL_NULL)
+                    .setMessage("model cache data is null")
+                    .build();
         }
 
         responseBuilder.setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS)
@@ -299,5 +307,17 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
             }
         }
         return null;
+    }
+
+    @Override
+    protected void printFlowLog(Context context) {
+
+        flowLogger.info("{}|{}|{}|{}|{}|{}|{}|{}",
+
+                context.getCaseId(), context.getReturnCode(), context.getCostTime(),
+                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "",
+                MetaInfo.PROPERTY_PRINT_INPUT_DATA ? context.getData(Dict.INPUT_DATA) : "",
+                MetaInfo.PROPERTY_PRINT_OUTPUT_DATA ? context.getData(Dict.OUTPUT_DATA) : ""
+        );
     }
 }
