@@ -129,9 +129,10 @@
         }
       ]
     }
-    //  guest方使用上面的default配置就能满足大部分需求。
-    ,
-    //serving-proxy 在收到grpc unaryCall接口的请求后，会根据请求中的目的partyId尝试匹配。
+    //  向对方发送请求使用上面的default配置就能满足大部分需求。
+    // 以下是路由中己方部分说明：
+    
+    //己方的serving-proxy 在收到grpc unaryCall接口的请求后，会根据请求中的目的partyId尝试匹配。
     比如请求中目的partId为10000，则会在路由表中查找是否存在10000的配置
     //此处的10000表示目的partId 为10000时的路由，匹配到10000之后，再根据请求中的角色信息role。
     比如请求中role 为serving则会继续匹配下面是否有serving的配置
@@ -146,8 +147,8 @@
       "serving": [
         // 当已经匹配到role为serving，则代表请求为发给serving-server的请求，这时检查是否启用了ZK为注册中心，
         如果已启用ZK则优先从ZK中获取目标地址，未找到时使用以下地址
-        // 此处配置己端对应serving服务地址列表，ip和port对应serving-server所启动的grpc服务地址
-        {
+        
+        {  // 此处配置己端对应serving服务地址列表，ip和port对应serving-server所启动的grpc服务地址
           "ip": "127.0.0.1",
           "port": 8080
         }

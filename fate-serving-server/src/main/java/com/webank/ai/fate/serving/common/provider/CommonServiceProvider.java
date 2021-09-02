@@ -45,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -288,4 +289,18 @@ public class CommonServiceProvider extends AbstractServingServiceProvider {
 
         return builder.build();
     }
+
+    @Override
+    protected void printFlowLog(Context context) {
+        Method method = (Method) this.getMethodMap().get(context.getActionType());
+
+        flowLogger.info("{}|{}|{}|{}|{}|{}|{}|{}",
+
+                context.getCaseId(), context.getReturnCode(), context.getCostTime(),
+                context.getDownstreamCost(), serviceName + "." + method.getName(), context.getRouterInfo() != null ? context.getRouterInfo() : "",
+                MetaInfo.PROPERTY_PRINT_INPUT_DATA ? context.getData(Dict.INPUT_DATA) : "",
+                MetaInfo.PROPERTY_PRINT_OUTPUT_DATA ? context.getData(Dict.OUTPUT_DATA) : ""
+        );
+    }
+
 }

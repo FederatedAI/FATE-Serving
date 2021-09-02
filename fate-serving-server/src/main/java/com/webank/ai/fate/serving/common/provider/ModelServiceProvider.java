@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -311,11 +312,12 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
     @Override
     protected void printFlowLog(Context context) {
+        Method method = (Method) this.getMethodMap().get(context.getActionType());
 
         flowLogger.info("{}|{}|{}|{}|{}|{}|{}|{}",
 
                 context.getCaseId(), context.getReturnCode(), context.getCostTime(),
-                context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "",
+                context.getDownstreamCost(), serviceName + "." + method.getName(), context.getRouterInfo() != null ? context.getRouterInfo() : "",
                 MetaInfo.PROPERTY_PRINT_INPUT_DATA ? context.getData(Dict.INPUT_DATA) : "",
                 MetaInfo.PROPERTY_PRINT_OUTPUT_DATA ? context.getData(Dict.OUTPUT_DATA) : ""
         );
