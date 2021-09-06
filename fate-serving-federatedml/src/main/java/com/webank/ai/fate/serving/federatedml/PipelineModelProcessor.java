@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
+import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
 import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
@@ -54,7 +55,7 @@ public class PipelineModelProcessor implements ModelProcessor {
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
     private int splitSize = MetaInfo.PROPERTY_BATCH_SPLIT_SIZE;
-
+    private Model model;
     public List<BaseComponent> getPipeLineNode() {
         return pipeLineNode;
     }
@@ -176,6 +177,18 @@ public class PipelineModelProcessor implements ModelProcessor {
         return this.componentMap.get(name);
     }
 
+    @Override
+    public void setModel(Model model) {
+        this.model = model;
+        this.getPipeLineNode().forEach(baseComponent -> {
+            if(baseComponent!=null) {
+                baseComponent.setModel(model);
+                baseComponent.setSite(model.getPartId());
+            }
+
+        });
+    }
+
 //    @Override
 //    public ModelProcessor initComponentParmasMap() {
 ////        componentMap.forEach((cptName,instance)->{
@@ -204,8 +217,6 @@ public class PipelineModelProcessor implements ModelProcessor {
                         Class modelClass = Class.forName(this.modelPackage + "." + className);
                         BaseComponent mlNode = (BaseComponent) modelClass.getConstructor().newInstance();
                         mlNode.setComponentName(componentName);
-                        mlNode.setModel(context.getData("model") == null ? new Model() : (Model) context.getData("model"));
-                        mlNode.initSite(mlNode.getModel().getPartId());
                         byte[] protoMeta = newModelProtoMap.get(componentName + ".Meta");
                         byte[] protoParam = newModelProtoMap.get(componentName + ".Param");
                         int returnCode = mlNode.initModel(protoMeta, protoParam);

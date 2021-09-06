@@ -241,8 +241,8 @@ public class ModelManager implements InitializingBean {
                 modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
                 modelLoaderParam.setTableName(model.getTableName());
                 modelLoaderParam.setNameSpace(model.getNamespace());
-                context.putData("model", model);
                 ModelProcessor modelProcessor = modelLoader.restoreModel(context, modelLoaderParam);
+                modelProcessor.setModel(model);
                 if (modelProcessor != null) {
                     model.setModelProcessor(modelProcessor);
                     if (model.getRole().equals(Dict.GUEST)) {
@@ -456,6 +456,8 @@ public class ModelManager implements InitializingBean {
             throw new ModelProcessorInitException("model initialization error, please check if the model exists and the configuration of the FATEFLOW load model process is correct.");
         }
         model.setModelProcessor(modelProcessor);
+        modelProcessor.setModel(model);
+
         this.namespaceMap.put(namespaceKey, model);
 
         if (Dict.HOST.equals(model.getRole())) {
@@ -869,7 +871,7 @@ public class ModelManager implements InitializingBean {
             throw new ModelProcessorInitException("model initialization error, please check if the model exists and the configuration of the FATEFLOW load model process is correct.");
         }
         model.setModelProcessor(modelProcessor);
-
+        modelProcessor.setModel(model);
         this.buildModelRolePartyMap(model);
         this.namespaceMap.put(namespaceKey, model);
 

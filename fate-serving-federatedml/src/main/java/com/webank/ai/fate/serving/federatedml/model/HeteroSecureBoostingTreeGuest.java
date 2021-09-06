@@ -260,9 +260,6 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         return getFinalPredict(weights);
     }
 
-    @Override
-    public void initSite(String partId) {
-        super.initSite(role+":"+partId);
-    }
+
 
 }

@@ -53,12 +53,20 @@ public abstract class BaseComponent implements LocalInferenceAware {
     protected int index;
     protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;
     protected Cache cache;
+
+    public String getSite() {
+        return site;
+    }
+
+    public void setSite(String site) {
+        this.site = site;
+    }
+
     protected String site;
     protected Model model;
 
     public abstract int initModel(byte[] protoMeta, byte[] protoParam);
 
-    public void initSite(String partId){ site = partId;}
 
     protected <T> T parseModel(com.google.protobuf.Parser<T> protoParser, byte[] protoString) throws com.google.protobuf.InvalidProtocolBufferException {
         return ProtobufUtils.parseProtoObject(protoParser, protoString);

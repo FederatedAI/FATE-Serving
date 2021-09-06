@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
@@ -47,6 +48,9 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
             for (int j = 0; j < nodes.size(); j++) {
                 NodeParam node = nodes.get(j);
                 if (!this.getSite(i, j).equals(this.site)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.info("{} not equals {}",this.getSite(i, j),this.site);
+                    }
                     continue;
                 }
                 int fid = this.trees.get(i).getTree(j).getFid();
@@ -94,8 +98,5 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         return ret;
     }
 
-    @Override
-    public void initSite(String partId) {
-        super.initSite(role+":"+partId);
-    }
+
 }
