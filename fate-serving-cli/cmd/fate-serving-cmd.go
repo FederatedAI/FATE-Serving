@@ -345,7 +345,7 @@ func (cmd *FetchModelCmd) Run() {
 	contentMap := common.JsonToMap(string(content))
 
 	fetchModelRequest := pb.FetchModelRequest{
-		ServiceId:  contentMap["serviceId"].(string),
+		ServiceIds: contentMap["serviceIds"].([]string),
 		SourceIp:   contentMap["sourceIp"].(string),
 		SourcePort: int32(contentMap["sourcePort"].(float64)),
 		TableName:  contentMap["tableName"].(string),

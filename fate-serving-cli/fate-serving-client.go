@@ -423,14 +423,11 @@ func init() {
 		},
 		Run: func(c *grumble.Context) error {
 			c.App.Config().PromptColor.Add()
-			request := pb.QueryModelRequest{
-				QueryType: 0,
-			}
+			request := pb.QueryModelRequest{}
 			address := getAddress(c)
 			//	detail := c.Flags.String("detail")
 
 			queryModelResponse, error := rpc.QueryModelInfo(address, &request)
-
 			if error != nil {
 				c.App.PrintError(error)
 				return error
