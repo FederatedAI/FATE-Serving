@@ -65,14 +65,15 @@ public class TestFilePickAdapter extends AbstractSingleFeatureDataAdaptor {
                 }
             }
 
-            Map<String, Object> featureData = featureMaps.get(featureIds.get(Dict.DEVICE_ID));
+            Map<String, Object> featureData = featureMaps.get(featureIds.get(Dict.ID).toString());
             if (featureData != null) {
                 Map clone = (Map) ((HashMap) featureData).clone();
                 returnResult.setData(clone);
                 returnResult.setRetcode(StatusCode.SUCCESS);
             } else {
-                logger.error("cant not find features for {}.", featureIds.get(Dict.DEVICE_ID));
+                logger.error("cant not find features for {}.", featureIds.get(Dict.ID).toString());
                 returnResult.setRetcode(StatusCode.HOST_FEATURE_NOT_EXIST);
+                returnResult.setRetmsg("cant not find features for " +  featureIds.get(Dict.ID).toString());
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage());
@@ -80,4 +81,5 @@ public class TestFilePickAdapter extends AbstractSingleFeatureDataAdaptor {
         }
         return returnResult;
     }
+
 }

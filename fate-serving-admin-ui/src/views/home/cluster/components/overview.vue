@@ -15,36 +15,6 @@
 
  -->
 <template>
-    <!-- <ul>
-        <li
-            v-if="ArrProxy[0] && ArrProxy[0].children.length"
-            class="proxy"
-            :class="selected === 1 ? 'active' : ''"
-            @click="tabNav(1,1)"
-        >serving-proxy</li>
-        <li v-else class="proxy disabled">serving-proxy</li>
-        <li class="admin">admin</li>
-        <li
-            v-if="ArrServing[0] && ArrServing[0].children.length"
-            class="serving"
-            :class="selected === 2 ? 'active' : ''"
-            @click="tabNav(2,1)"
-        >serving-server</li>
-        <li v-else class="serving disabled">serving-server</li>
-        <li class="caret-l caret">
-            <p></p>
-            <i class="el-icon-caret-bottom"></i>
-        </li>
-        <li class="caret-r caret">
-            <p></p>
-            <i class="el-icon-caret-bottom"></i>
-        </li>
-        <li class="caret-c caret">
-            <i class="el-icon-caret-left" />
-            <p></p>
-            <i class="el-icon-caret-right" />
-        </li>
-    </ul> -->
     <div class="echart-overview">
         <div ref="callsLine" v-show="!isLarger" class="echarts"  />
         <div ref="largeCallsLine" v-show="isLarger" class="echarts"></div>
@@ -110,9 +80,6 @@ export default {
                     }
                 },
                 animation: false,
-                // selectedMode: 'single',
-                // animationDurationUpdate: 1500,
-                // animationEasingUpdate: 'quinticInOut',
                 series: [
                     {
                         type: 'graph',

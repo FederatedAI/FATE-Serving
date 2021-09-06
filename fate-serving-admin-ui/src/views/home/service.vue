@@ -241,7 +241,7 @@ export default {
                         'x4': 1.307686
                     },
                     'sendToRemoteFeatureData': {
-                        'phone_num': '122222222'
+                        'id': 123
                     }
                 }
                 this.json.verifydata = JSON.stringify(JSON.parse(JSON.stringify(this.json.verifydata)), null, 4)

@@ -185,6 +185,7 @@ public class Dict {
     public static final String MY_PARTY_NAME = "myPartyName";
     public static final String FEDERATED_INFERENCE = "federatedInference";
     public static final String FEDERATED_INFERENCE_FOR_TREE = "federatedInference4Tree";
+    public static final String ID = "id";
     public static final String DEVICE_ID = "device_id";
     public static final String PHONE_NUM = "phone_num";
     public static final String FEDERATED_PARAMS = "federatedParams";
