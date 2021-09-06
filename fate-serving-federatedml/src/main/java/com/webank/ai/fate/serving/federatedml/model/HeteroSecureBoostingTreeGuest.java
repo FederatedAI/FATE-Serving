@@ -23,6 +23,8 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
+import com.webank.ai.fate.serving.core.exceptions.ModelLoadException;
+import com.webank.ai.fate.serving.core.exceptions.SbtDataException;
 import org.apache.commons.collections4.map.HashedMap;
 
 import java.util.ArrayList;
@@ -91,10 +93,19 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
                 treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
             } else {
                 Map<String, Boolean> lookUp = (Map<String, Boolean>) lookUpTable.get(String.valueOf(treeId));
-                if (lookUp.get(String.valueOf(treeNodeId))) {
-                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
-                } else {
-                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
+                if(lookUp==null){
+                    logger.error("treeId {} is not exist in {}",treeId,lookUpTable.keySet());
+                    throw  new SbtDataException();
+                }
+                if(lookUp.get(String.valueOf(treeNodeId))!=null) {
+                    if (lookUp.get(String.valueOf(treeNodeId))) {
+                        treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
+                    } else {
+                        treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
+                    }
+                }else{
+                    logger.error("tree node id {} not exist in {} ,lookup table  {}",treeNodeId,lookUp,lookUpTable);
+                    throw  new SbtDataException();
                 }
             }
             if (logger.isDebugEnabled()) {

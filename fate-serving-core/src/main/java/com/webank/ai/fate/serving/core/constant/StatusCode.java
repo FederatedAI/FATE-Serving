@@ -52,6 +52,7 @@ public class StatusCode {
     public static final int PROXY_UPDATE_ROUTER_TABLE_ERROR = 133;
     public static final int PROXY_PARAM_ERROR = 134;
     public static final int INVALID_RESPONSE =  135;
+    public static final int SBT_DATA_ERROR = 136;
 
 
 
