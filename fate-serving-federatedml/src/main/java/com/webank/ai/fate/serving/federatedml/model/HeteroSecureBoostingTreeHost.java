@@ -47,7 +47,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
             Map<String, Boolean> treeRoute = new HashMap<String, Boolean>(8);
             for (int j = 0; j < nodes.size(); j++) {
                 NodeParam node = nodes.get(j);
-                if (!this.getSite(i, j).equals(this.site)) {
+                if (!this.getSite(i, j).trim().equals(this.site.trim())) {
                     if (logger.isDebugEnabled()) {
                         logger.info("{} not equals {}",this.getSite(i, j),this.site);
                     }
