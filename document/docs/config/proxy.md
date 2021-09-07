@@ -117,6 +117,7 @@
 
 ### route_table配置
 ```yaml
+1.GRPC
 {
   "route_table": {
     "default": {
@@ -160,5 +161,40 @@
     "default_allow": true
   }
 }
+2.HTTP
+{
+  "route_table": {
+    "default": {
+      "default": [
+        {
+          // 此处配置是否开启ssl证书认证
+          "useSSL":false,
+          "url":"http://127.0.0.1:8879/unary"
+        }
+      ]
+    }
+    "10000": {
+      "default": [
+        {
+          "useSSL":false,
+          "url":"http://127.0.0.1:8879/unary"
+        }
+      ],
+      "serving": [
+        
+        {  // 此处配置己端对应serving服务地址列表，ip和port对应serving-server所启动的grpc服务地址
+          "ip": "127.0.0.1",
+          "port": 8080
+        }
+      ]
+    }
+  },
+  // 此处配置当前路由表规则开启/关闭
+  "permission": {
+    "default_allow": true
+  }
+}
+
+
 
 ```
