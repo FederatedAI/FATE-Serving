@@ -64,7 +64,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
 
                 if (input.containsKey(Integer.toString(fid))) {
                     Object featVal = input.get(Integer.toString(fid));
-                    direction = Double.parseDouble(featVal.toString()) <= splitValue + 1e-20;
+                    direction = Double.parseDouble(featVal.toString()) <= splitValue + 1e-8;
                 } else {
                     if (this.trees.get(i).getMissingDirMaskdict().containsKey(j)) {
                         int missingDir = this.trees.get(i).getMissingDirMaskdict().get(j);
