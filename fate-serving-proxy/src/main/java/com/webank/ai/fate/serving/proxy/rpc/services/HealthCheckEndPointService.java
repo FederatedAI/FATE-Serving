@@ -1,9 +1,9 @@
 package com.webank.ai.fate.serving.proxy.rpc.services;
 
+import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.core.BasicMeta;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.register.utils.StringUtils;
-import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.health.*;
 import com.webank.ai.fate.serving.common.utils.TelnetUtil;
@@ -15,16 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-import oshi.hardware.GlobalMemory;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class HealthCheckEndPointService implements HealthCheckAware {
@@ -143,9 +140,13 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                     if(v!=null){
                         v.forEach(endpoint -> {
                             try {
-                                boolean connectAble = TelnetUtil.tryTelnet(endpoint.getIp(), endpoint.getPort());
-
-
+                                boolean connectAble;
+                                if(StringUtils.isNotEmpty(endpoint.getUrl())){
+                                    Map<String,String> resultMap = getIpPortFromUrl(endpoint.getUrl());
+                                    connectAble = TelnetUtil.tryTelnet(resultMap.get("IP"), Integer.valueOf(resultMap.get("PORT")));
+                                }else{
+                                    connectAble = TelnetUtil.tryTelnet(endpoint.getIp(), endpoint.getPort());
+                                }
                                 if (!connectAble) {
 
                                     healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": can not be telneted",HealthCheckStatus.warn));
@@ -168,6 +169,31 @@ public class HealthCheckEndPointService implements HealthCheckAware {
 
         }
 
+    }
+
+    private static Map<String,String> getIpPortFromUrl(String url){
+        Map<String,String> resutlMap = Maps.newHashMap();
+        if(url.startsWith("http://localhost")){
+            url = url.replace("http://localhost","http://127.0.0.1");
+        }
+        if(url.startsWith("https://localhost")){
+            url = url.replace("https://localhost","https://127.0.0.1");
+        }
+        String host = "";
+        Pattern p = Pattern.compile("(?<=//|)((\\w)+\\.)+\\w+(:\\d{0,5})?");
+        Matcher matcher = p.matcher(url);
+        if(matcher.find()){
+            host = matcher.group();
+        }
+        if(host.contains(":") == false){
+            resutlMap.put("IP",host);
+            resutlMap.put("PORT","80");
+            return resutlMap;
+        }
+        String[] ipPortArr = host.split(":");
+        resutlMap.put("IP",ipPortArr[0]);
+        resutlMap.put("PORT",ipPortArr[1]);
+        return resutlMap;
     }
 
 
