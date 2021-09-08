@@ -116,20 +116,22 @@
 </table>
 
 ### route_table配置
-```yaml
+**在2.1.0版本之后开始支持HTTP接口配置，2.1.0之前的版本只支持GRPC配置。**     
+
 1.GRPC
+```yaml
 {
   "route_table": {
     "default": {
       "default": [
         // 此处用于配置serving-proxy默认对外转发地址，
-        切记不能配置成serving-proxy自己的ip端口，会形成回环
+       // 切记不能配置成serving-proxy自己的ip端口，会形成回环
         {
           "ip": "127.0.0.1",
           "port": 9999
         }
       ]
-    }
+    },
     //  向对方发送请求使用上面的default配置就能满足大部分需求。
     // 以下是路由中己方部分说明：
     
@@ -161,7 +163,9 @@
     "default_allow": true
   }
 }
+```
 2.HTTP
+```yaml
 {
   "route_table": {
     "default": {
@@ -172,7 +176,7 @@
           "url":"http://127.0.0.1:8879/unary"
         }
       ]
-    }
+    },
     "10000": {
       "default": [
         {
