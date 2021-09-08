@@ -144,16 +144,24 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                                 if(StringUtils.isNotEmpty(endpoint.getUrl())){
                                     Map<String,String> resultMap = getIpPortFromUrl(endpoint.getUrl());
                                     connectAble = TelnetUtil.tryTelnet(resultMap.get("IP"), Integer.valueOf(resultMap.get("PORT")));
+                                    if (!connectAble) {
+
+                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  resultMap.get("IP") + " " + Integer.valueOf(resultMap.get("PORT")) + ": can not be telneted",HealthCheckStatus.warn));
+                                        //("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
+                                    } else {
+                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  resultMap.get("IP") + " " + Integer.valueOf(resultMap.get("PORT")) + ": telneted",HealthCheckStatus.ok
+                                        ));
+                                    }
                                 }else{
                                     connectAble = TelnetUtil.tryTelnet(endpoint.getIp(), endpoint.getPort());
-                                }
-                                if (!connectAble) {
+                                    if (!connectAble) {
 
-                                    healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": can not be telneted",HealthCheckStatus.warn));
-                                    //("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
-                                } else {
-                                    healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": telneted",HealthCheckStatus.ok
-                                    ));
+                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": can not be telneted",HealthCheckStatus.warn));
+                                        //("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
+                                    } else {
+                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": telneted",HealthCheckStatus.ok
+                                        ));
+                                    }
                                 }
 
                             }catch (Exception e){
