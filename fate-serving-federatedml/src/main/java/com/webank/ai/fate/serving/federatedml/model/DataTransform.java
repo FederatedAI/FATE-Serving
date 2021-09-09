@@ -40,7 +40,7 @@ public class DataTransform extends BaseComponent {
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        logger.info("start init DataIO class");
+        logger.info("start init DataTransform class");
         try {
             this.dataTransformMeta = this.parseModel(DataTransformMeta.parser(), protoMeta);
             this.dataTransformParam = this.parseModel(DataTransformParam.parser(), protoParam);
@@ -60,10 +60,10 @@ public class DataTransform extends BaseComponent {
             this.inputformat = this.dataTransformMeta.getInputFormat();
         } catch (Exception ex) {
             //ex.printStackTrace();
-            logger.error("init DataIo error", ex);
+            logger.error("init DataTransform error", ex);
             return ILLEGALDATA;
         }
-        logger.info("Finish init DataIO class");
+        logger.info("Finish init DataTransform class");
         return OK;
     }
 
