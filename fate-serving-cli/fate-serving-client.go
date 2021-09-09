@@ -655,12 +655,12 @@ func init() {
 
 	App.AddCommand(showModelCommand)
 	App.AddCommand(showConfigCommand)
-	App.AddCommand(inferenceCommand)
-	App.AddCommand(batchInferenceCommand)
+	//App.AddCommand(inferenceCommand)
+	//App.AddCommand(batchInferenceCommand)
 	App.AddCommand(showflowCommand)
 	App.AddCommand(cluster)
 	App.AddCommand(showJvmCommand)
-	App.AddCommand(uncaryCall)
+	//App.AddCommand(uncaryCall)
 	App.AddCommand(showHealthInfoCommand)
 
 	// adminCommand.AddCommand(&grumble.Command{
