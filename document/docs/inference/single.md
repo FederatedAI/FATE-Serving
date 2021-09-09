@@ -46,14 +46,13 @@ xxxxxxxxxx
       "x4": 1.307686
     },
     "sendToRemoteFeatureData": {
-      "device_id": "8",
-      "phone_num": "122222222"
+      "id": "123"
     }
   }
 }
 ```
 **Note**: 
->head中填入系统参数，featureData中为模型所需特征数据，不会传递给Host方，只有sendToRemoteFeatureData中的才会传递给Host方，一般sendToRemoteFeatureData需要包含host方用于匹配样本的id，例如设备号或者手机号
+>head中填入系统参数，featureData中为模型所需特征数据，不会传递给Host方，只有sendToRemoteFeatureData中的才会传递给Host方，一般sendToRemoteFeatureData需要包含host方用于匹配样本的id，例如设备号或者手机号等。
 
 #### 响应内容
 <table>

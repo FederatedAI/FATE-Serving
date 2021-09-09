@@ -13,12 +13,12 @@ serving-proxy 是serving-server的代理，对外提供了grpc接口以及http�
 serving-admin 提供在线集群的可视化操作界面， 可以查看管理集群中各节点的配置以及状态、查看模型列表、流量的调控、并能提供一定的监控的功能。[点击查看详情](./example/admin.md)    
 
 •	zookeeper  
-zookeeper 用户各组件的信息同步协调以及服务注册于发现
+zookeeper 用户各组件的信息同步协调以及服务注册与发现
 
 ### 架构简介  
 各组件的具体功能以及整个项目的功能如下图所示：  
 ![架构1](img/Structure1.jpg)  
-![架构2](img/Structure2.jpg) 
+![架构2](img/Structure2.jpg)
 
 ### 源码结构
 •	fate-serving-register：主要为服务治理相关的逻辑  

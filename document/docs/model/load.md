@@ -18,8 +18,8 @@
 ![flow](../img/flow.jpg)
 
 ### FATE-Flow的配置（以1.4.x 版本为例）
-在执行模型的推送和绑定操作之前，需要先配置FATE-Flow,并重启FATE-Flow：  
-**Note** 注意多方都需要修改成各自FATE-Serving的实际部署地址
+在执行模型的推送和绑定操作之前，需要先配置FATE-Flow,并重启FATE-Flow。 
+>**Note:** 多方都需要修改成各自FATE-Serving的实际部署地址
 
 #### 未启用注册中心(zookeeper)
 修改arch/conf/server_conf.json，填入FATE-Serving集群实际部署serving-server服务的ip:port，如：
@@ -41,7 +41,7 @@ zookeeper:
      - 192.168.1.1:2181
      - 192.168.1.1:2182
 ```
-其中ZOOKEEPER_HOSTS填入FATE-Serving集群实际部署Zookeeper的ip:port
+其中zookeeper.hosts填入FATE-Serving集群实际部署Zookeeper的ip:port
 
 •	若zookeeper开启了ACL，则需要添加以下配置，否则略过此步骤。修改部署目录下arch/conf/base_conf.yaml
 ```yml
@@ -53,7 +53,7 @@ zookeeper:
 ```
 其中use与password填入FATE-Serving集群实际部署ZooKeeper的用户名与密码
 
-**Note**: 配置完上述文件后重启Fate-Flow服务以生效
+>**Note**: 配置完上述文件后重启Fate-Flow服务以生效
 
 #### 模型发布
 配置路径：$pythonpath/fate_flow/examples/publish_load_model.json  
@@ -82,7 +82,7 @@ xxxxxxxxxx
 
 #### 模型绑定
 配置路径：$pythonpath/fate_flow/examples/bind_model_service.json  
-修改内容：自定义service_id，后续将利用该service_id将模型绑定到模型服务中。将实际任务配置（initiator, role, job_parameters）进行修改，请确保model_id及model_version与离线训练的模型的相同。  
+修改内容：自定义service_id，后续将利用该service_id将模型绑定到模型服务中。将实际任务配置（initiator, role, job_parameters）进行修改，请确保model_id及model_version与离线训练的模型相同。  
 配置格式：
 ```yml
 xxxxxxxxxx
