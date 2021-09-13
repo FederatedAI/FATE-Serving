@@ -110,6 +110,12 @@ public class MetaInfo {
     public static Integer HTTP_CLIENT_TRAN_CONN_TIME_OUT;
     public static Integer HTTP_CLIENT_TRAN_SOCK_TIME_OUT;
 
+    public static int PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT;
+    public static int PROPERTY_HTTP_CONNECT_TIMEOUT;
+    public static int PROPERTY_HTTP_SOCKET_TIMEOUT;
+    public static int PROPERTY_HTTP_MAX_POOL_SIZE;
+    public static String PROPERTY_HTTP_ADAPTER_URL;
+
     public static Map toMap() {
         Map result = Maps.newHashMap();
         Field[] fields = MetaInfo.class.getFields();
