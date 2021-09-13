@@ -333,7 +333,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 if (service.useDynamicEnvironment()) {
                     if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
                         dynamicEnvironments.forEach(environment -> {
-                            URL newServiceUrl = service.serviceName().contains("http") ? url : serviceUrl.setEnvironment(environment);
+                            URL newServiceUrl = service.protocol().equals(Dict.HTTP) ? url : serviceUrl.setEnvironment(environment);
                             // use cache service params
                             loadCacheParams(newServiceUrl);
 
@@ -348,7 +348,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     }
                 } else {
                     if (!registedString.contains(service.serviceName() + environment)) {
-                        URL newServiceUrl = service.serviceName().contains("http") ? url : serviceUrl.setEnvironment(environment);
+                        URL newServiceUrl = service.protocol().equals(Dict.HTTP) ? url : serviceUrl.setEnvironment(environment);
                         if (logger.isDebugEnabled()) {
                             logger.debug("try to register url {}", newServiceUrl);
                         }
@@ -378,13 +378,19 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String protocol , serviceName ;
         int hostPort;
         protocol =  service.protocol();
-        hostPort = service.protocol().equals("http")?MetaInfo.PROPERTY_PORT:port;
-        serviceName = service.serviceName();
 
+        if (MetaInfo.PROPERTY_SERVER_PORT == null) {
+            logger.error("Failed to register service:{} ,acquire server.port is null", service);
+            throw new RuntimeException("Failed to register service:"+ service +" ,acquire server.port is null");
+        }
+        hostPort = service.protocol().equals(Dict.HTTP)?MetaInfo.PROPERTY_SERVER_PORT:port;
+
+        serviceName = service.serviceName();
         if (StringUtils.isBlank(serviceName)) {
             logger.error("Failed to register service:{} ,acquire serviceName is blank", service);
             throw new RuntimeException("Failed to register service:"+ service +" ,acquire serviceName is blank");
         }
+
         URL url = URL.valueOf(protocol + "://" + hostAddress + ":" + hostPort + Constants.PATH_SEPARATOR + parseRegisterService(serviceName, service));
         return url;
     }
