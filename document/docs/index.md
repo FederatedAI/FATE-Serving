@@ -45,6 +45,9 @@ zookeeper 用户各组件的信息同步协调以及服务注册与发现
 ## 加载模型及发布模型
 [点击查看详情](./model/load.md)
 
+## HOST如何获取特征
+[点击查看详情](./service/adapter.md)
+
 ## 推理接口
 [usage](./inference/usage.md)   
 [单笔推理](./inference/single.md)   
