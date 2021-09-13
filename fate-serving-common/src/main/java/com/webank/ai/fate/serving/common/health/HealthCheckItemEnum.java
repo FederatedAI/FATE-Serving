@@ -8,7 +8,8 @@ public enum HealthCheckItemEnum {
     CHECK_CERT_FILE("check cert file",HealthCheckComponent.SERVINGPROXY),
     CHECK_DEFAULT_FATEFLOW("check default fateflow config",HealthCheckComponent.SERVINGSERVER),
     CHECK_FATEFLOW_IN_ZK("check fateflow in zookeeper",HealthCheckComponent.SERVINGSERVER),
-    CHECK_MODEL_LOADED("check model loaded",HealthCheckComponent.SERVINGSERVER);
+    CHECK_MODEL_LOADED("check model loaded",HealthCheckComponent.SERVINGSERVER),
+    CHECK_RETURNABLE_NUM("check returnable num",HealthCheckComponent.SERVINGSERVER);
 
 //    CHECK_MODEL_LOADED("check model loaded"),
 //    CHECK_MODEL_VALIDATE()
