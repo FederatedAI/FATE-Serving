@@ -69,4 +69,15 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
 
         return inboundPackage;
     }
+
+    @RegisterService(serviceName = "http:federation/v1/inference:8059")
+    public void inference() {
+        //The method implementation is not here ,just register zk
+    }
+
+    @RegisterService(serviceName = "http:federation/v1/batchInference:8059")
+    public void batchInference() {
+        //The method implementation is not here ,just register zk
+    }
+
 }

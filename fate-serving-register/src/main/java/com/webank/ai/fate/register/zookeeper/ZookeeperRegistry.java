@@ -244,9 +244,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     }
 
-    private String parseRegisterService(RegisterService registerService) {
+    private String parseRegisterService(String serviceName, RegisterService registerService) {
 
-        String serviceName = registerService.serviceName();
         long version = registerService.version();
         String param = "?";
         RouterMode routerMode = registerService.routerMode();
@@ -289,7 +288,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         String hostAddress = NetUtils.getLocalIp();
 
         for (RegisterService service : sets) {
-            URL url = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+            URL url = generateUrl(hostAddress, service);
             URL serviceUrl = url.setProject(project);
             if (service.useDynamicEnvironment()) {
 
@@ -329,12 +328,12 @@ public class ZookeeperRegistry extends FailbackRegistry {
         Set<URL> registered = this.getRegistered();
         for (RegisterService service : sets) {
             try {
-                URL url = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+                URL url = generateUrl(hostAddress, service);
                 URL serviceUrl = url.setProject(project);
                 if (service.useDynamicEnvironment()) {
                     if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
                         dynamicEnvironments.forEach(environment -> {
-                            URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                            URL newServiceUrl = service.serviceName().contains("http") ? url : serviceUrl.setEnvironment(environment);
                             // use cache service params
                             loadCacheParams(newServiceUrl);
 
@@ -349,7 +348,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     }
                 } else {
                     if (!registedString.contains(service.serviceName() + environment)) {
-                        URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                        URL newServiceUrl = service.serviceName().contains("http") ? url : serviceUrl.setEnvironment(environment);
                         if (logger.isDebugEnabled()) {
                             logger.debug("try to register url {}", newServiceUrl);
                         }
@@ -373,6 +372,26 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (logger.isDebugEnabled()) {
             logger.debug("registed urls {}", registered);
         }
+    }
+
+    private URL generateUrl(String hostAddress, RegisterService service) {
+        String protocol , serviceName ;
+        int hostPort;
+        if (service.serviceName().contains("http")) {
+            protocol = "http";
+            hostPort = Integer.valueOf(service.serviceName().split(":")[2]);
+            serviceName = service.serviceName().split(":")[1];
+        } else {
+             protocol = "grpc";
+             hostPort = port;
+             serviceName = service.serviceName();
+        }
+        if (StringUtils.isBlank(serviceName)) {
+            logger.error("Failed to register service:{} ,acquire serviceName is blank", service);
+            throw new RuntimeException("Failed to register service:"+ service +" ,acquire serviceName is blank");
+        }
+        URL url = URL.valueOf(protocol + "://" + hostAddress + ":" + hostPort + Constants.PATH_SEPARATOR + parseRegisterService(serviceName, service));
+        return url;
     }
 
     public void addDynamicEnvironment(String environment) {
