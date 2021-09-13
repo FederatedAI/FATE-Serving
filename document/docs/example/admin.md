@@ -4,7 +4,7 @@ serving-admin提供了FATE-Serving集群的可视化操作界面，依赖zookeep
 
 ### 功能介绍
 #### 节点管理
-节点展示：提供集群组件展示，可切换实例进行操作  
+节点展示：提供集群组件展示，点击组件可切换实例进行操作  
 ![admin1](../img/admin1.jpg)
 
 参数配置：展示实例的参数配置及元数据，参数解释请参考[配置详解](../config/admin.md)
@@ -115,5 +115,4 @@ Cluster一键自检工具：由后台定时对Cluster进行自检，用户也可
 #### 支持配置生成路由表
 ![route](../img/gen-route.jpg)
 
-#### 服务拓扑图展示
-![graph](../img/graph.jpg)
+
