@@ -71,6 +71,7 @@ nav:
       - 安全证书配置: config/security.md
   - 部署实例: example/deploy.md
   - 加载模型: model/load.md
+  - HOST如何获取特征: service/adapter.md
   - 推理接口:
       - 接口调用: inference/usage.md
       - 单笔接口: inference/single.md 
