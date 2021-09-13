@@ -377,15 +377,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
     private URL generateUrl(String hostAddress, RegisterService service) {
         String protocol , serviceName ;
         int hostPort;
-        if (service.serviceName().contains("http")) {
-            protocol = "http";
-            hostPort = Integer.valueOf(service.serviceName().split(":")[2]);
-            serviceName = service.serviceName().split(":")[1];
-        } else {
-             protocol = "grpc";
-             hostPort = port;
-             serviceName = service.serviceName();
-        }
+        protocol =  service.protocol();
+        hostPort = service.protocol().equals("http")?MetaInfo.PROPERTY_PORT:port;
+        serviceName = service.serviceName();
+
         if (StringUtils.isBlank(serviceName)) {
             logger.error("Failed to register service:{} ,acquire serviceName is blank", service);
             throw new RuntimeException("Failed to register service:"+ service +" ,acquire serviceName is blank");
