@@ -39,6 +39,9 @@ public class IntraGrpcServer implements InitializingBean {
     IntraRequestHandler intraRequestHandler;
     @Autowired
     CommonRequestHandler commonRequestHandler;
+    @Autowired
+    RouterTableService routerTableService;
+
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
     @Resource(name = "grpcExecutorPool")
@@ -51,6 +54,7 @@ public class IntraGrpcServer implements InitializingBean {
         serverBuilder.executor(executor);
         serverBuilder.addService(ServerInterceptors.intercept(intraRequestHandler, new ServiceExceptionHandler()), IntraRequestHandler.class);
         serverBuilder.addService(ServerInterceptors.intercept(commonRequestHandler, new ServiceExceptionHandler()), CommonRequestHandler.class);
+        serverBuilder.addService(ServerInterceptors.intercept(routerTableService, new ServiceExceptionHandler()), RouterTableService.class);
         server = serverBuilder.build();
         server.start();
 

@@ -47,6 +47,9 @@ export default {
             }
         }
     },
+    created() {
+        // console.log(this.activeip, 'activeip')
+    },
     methods: {
         selectIP(item, index) {
             this.$emit('selectIP', item, index)

@@ -97,7 +97,8 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
 
     protected abstract ModelProcessor initPipeLine(Context context, MODELDATA modeldata);
 
-    private String getCachePath(Context context, String name, String namespace) {
+    @Override
+    public String getCachePath(Context context, String name, String namespace) {
         StringBuilder sb = new StringBuilder();
         String locationPre = MetaInfo.PROPERTY_MODEL_CACHE_PATH;
         if (StringUtils.isNotEmpty(locationPre) && StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(namespace)) {
@@ -159,4 +160,7 @@ public abstract class AbstractModelLoader<MODELDATA> implements ModelLoader {
 
     protected abstract MODELDATA doLoadModel(Context context, ModelLoaderParam modelLoaderParam);
 
+    public void saveCacheData(Context context, String cachePath, byte[] bytes) {
+        this.doStore(context, bytes, new File(cachePath));
+    }
 }

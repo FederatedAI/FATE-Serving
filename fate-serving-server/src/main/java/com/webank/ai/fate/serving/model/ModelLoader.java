@@ -21,9 +21,13 @@ import com.webank.ai.fate.serving.core.bean.Context;
 
 public interface ModelLoader {
 
-    public ModelProcessor loadModel(Context context, ModelLoaderParam modelLoaderParam);
+    ModelProcessor loadModel(Context context, ModelLoaderParam modelLoaderParam);
 
-    public ModelProcessor restoreModel(Context context, ModelLoaderParam modelLoaderParam);
+    ModelProcessor restoreModel(Context context, ModelLoaderParam modelLoaderParam);
+
+    String getCachePath(Context context, String tableName, String namespace);
+
+    String getResource(Context context,ModelLoaderParam modelLoaderParam);
 
     public enum LoadModelType {
         FATEFLOW,

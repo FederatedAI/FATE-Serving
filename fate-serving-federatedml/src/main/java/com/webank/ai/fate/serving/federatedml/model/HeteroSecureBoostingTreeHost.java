@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.webank.ai.fate.core.mlmodel.buffer.BoostTreeModelParamProto.DecisionTreeModelParam;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements LocalInferenceAware, Returnable {
-    private final String site = "host";
+    private final String role = "host";
     private final String modelId = "HeteroSecureBoostingTreeHost"; // need to change
     private boolean fastMode = true;
     private int traverseTree(int treeId, int treeNodeId, Map<String, Object> input) {
@@ -46,7 +47,10 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
             Map<String, Boolean> treeRoute = new HashMap<String, Boolean>(8);
             for (int j = 0; j < nodes.size(); j++) {
                 NodeParam node = nodes.get(j);
-                if (!this.getSite(i, j).equals(this.site)) {
+                if (!this.getSite(i, j).trim().equals(this.site.trim())) {
+                    if (logger.isDebugEnabled()) {
+                        logger.info("{} not equals {}",this.getSite(i, j),this.site);
+                    }
                     continue;
                 }
                 int fid = this.trees.get(i).getTree(j).getFid();
@@ -60,7 +64,7 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
 
                 if (input.containsKey(Integer.toString(fid))) {
                     Object featVal = input.get(Integer.toString(fid));
-                    direction = Double.parseDouble(featVal.toString()) <= splitValue + 1e-20;
+                    direction = Double.parseDouble(featVal.toString()) <= splitValue + 1e-8;
                 } else {
                     if (this.trees.get(i).getMissingDirMaskdict().containsKey(j)) {
                         int missingDir = this.trees.get(i).getMissingDirMaskdict().get(j);
@@ -93,4 +97,6 @@ public class HeteroSecureBoostingTreeHost extends HeteroSecureBoost implements L
         ret = this.extractHostNodeRoute(fidValueMapping);
         return ret;
     }
+
+
 }

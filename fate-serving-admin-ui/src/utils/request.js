@@ -15,7 +15,9 @@
 *
 **/
 import axios from 'axios'
-import { Message } from 'element-ui'
+import Vue from 'vue'
+
+// import { Message } from 'element-ui'
 
 import store from '@/store'
 import { getToken, removeToken } from '@/utils/auth'
@@ -34,7 +36,9 @@ if (arr[3] === '#' || arr[3] === '') {
 }
 service.interceptors.request.use(
     config => {
-        if (config.url !== `${pram}/api/component/list` && config.url !== `${pram}/api/monitor/query` && config.url !== `${pram}/api/monitor/queryJvm` && config.url !== `${pram}/api/monitor/queryModel`) {
+        if (config.url !== `${pram}/api/component/list` && config.url !== `${pram}/api/monitor/query` &&
+         config.url !== `${pram}/api/monitor/queryJvm` && config.url !== `${pram}/api/monitor/queryModel` &&
+         config.url !== `${pram}/api/monitor/selfCheck` && config.url !== `${pram}/api/monitor/checkHealth`) {
             let loading = document.getElementById('ajaxLoading')
             loading.style.display = 'block'
         }
@@ -67,9 +71,8 @@ service.interceptors.response.use(
         } else if (response.config.url === '/api/admin/login' && +res.retcode === 120) {
             return Promise.reject(res)
         } else {
-            Message({
+            Vue.prototype.$message.error({
                 message: `${res.retmsg ? res.retmsg : 'http reqest failed!'}`,
-                type: 'error',
                 duration: 5 * 1000
             })
             return Promise.reject(res)
@@ -78,10 +81,8 @@ service.interceptors.response.use(
     error => {
         let loading = document.getElementById('ajaxLoading')
         loading.style.display = 'none'
-        Message({
-            // message: error.message,
+        Vue.prototype.$message.error({
             message: 'http reqest failed!',
-            type: 'error',
             duration: 5 * 1000
         })
         return Promise.reject(error)

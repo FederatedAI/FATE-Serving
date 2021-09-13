@@ -43,6 +43,7 @@ public class TestFileAdapter extends AbstractSingleFeatureDataAdaptor {
         ReturnResult returnResult = new ReturnResult();
         Map<String, Object> data = new HashMap<>();
         try {
+            logger.info("testHost data path = {}", Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
             List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
             lines.forEach(line -> {
                 for (String kv : StringUtils.split(line, ",")) {

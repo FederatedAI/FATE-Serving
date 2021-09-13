@@ -104,11 +104,26 @@ public class Bootstrap {
             MetaInfo.PROPERTY_MODEL_TRANSFER_URL = environment.getProperty(Dict.PROPERTY_MODEL_TRANSFER_URL);
             MetaInfo.PROPERTY_MODEL_CACHE_PATH = StringUtils.isNotBlank(environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH)) ? environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH) : MetaInfo.PROPERTY_ROOT_PATH;
             MetaInfo.PROPERTY_ACL_ENABLE = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ACL_ENABLE, "false"));
+            MetaInfo.PROPERTY_MODEL_SYNC = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_MODEL_SYNC, "false"));
+            MetaInfo.PROPERTY_MODEL_SYNC = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_MODEL_SYNC, "false"));
+            MetaInfo.PROPERTY_GRPC_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_GRPC_TIMEOUT, "5000"));
             MetaInfo.PROPERTY_ACL_USERNAME = environment.getProperty(Dict.PROPERTY_ACL_USERNAME);
             MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);
             MetaInfo.PROPERTY_PRINT_INPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA)) : false;
             MetaInfo.PROPERTY_PRINT_OUTPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA)) : false;
             MetaInfo.PROPERTY_LR_USE_PARALLEL = environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_LR_USE_PARALLEL)) : false;
+            MetaInfo.PROPERTY_ALLOW_HEALTH_CHECK = environment.getProperty(Dict.PROPERTY_ALLOW_HEALTH_CHECK) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ALLOW_HEALTH_CHECK)) : true;
+            MetaInfo.HTTP_CLIENT_CONFIG_CONN_REQ_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_CONFIG_CONN_REQ_TIME_OUT,"500"));
+            MetaInfo.HTTP_CLIENT_CONFIG_CONN_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_CONFIG_CONN_TIME_OUT,"500"));
+            MetaInfo.HTTP_CLIENT_CONFIG_SOCK_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_CONFIG_SOCK_TIME_OUT,"2000"));
+            MetaInfo.HTTP_CLIENT_INIT_POOL_MAX_TOTAL = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_INIT_POOL_MAX_TOTAL,"500"));
+            MetaInfo.HTTP_CLIENT_INIT_POOL_DEF_MAX_PER_ROUTE = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_INIT_POOL_DEF_MAX_PER_ROUTE,"200"));
+            MetaInfo.HTTP_CLIENT_INIT_POOL_SOCK_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_INIT_POOL_SOCK_TIME_OUT,"10000"));
+            MetaInfo.HTTP_CLIENT_INIT_POOL_CONN_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_INIT_POOL_CONN_TIME_OUT,"10000"));
+            MetaInfo.HTTP_CLIENT_INIT_POOL_CONN_REQ_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_INIT_POOL_CONN_REQ_TIME_OUT,"10000"));
+            MetaInfo.HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT,"60000"));
+            MetaInfo.HTTP_CLIENT_TRAN_CONN_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_TRAN_CONN_TIME_OUT,"60000"));
+            MetaInfo.HTTP_CLIENT_TRAN_SOCK_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_TRAN_SOCK_TIME_OUT,"60000"));
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("init metainfo error", e);

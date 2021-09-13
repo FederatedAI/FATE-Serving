@@ -101,3 +101,54 @@ export function updateFlowRule(data) {
         data
     })
 }
+// /api/monitor/checkHealth
+export function checkHealth(data) {
+    return request({
+        url: `${pram}/api/monitor/checkHealth`,
+        method: 'get'
+    })
+}
+
+// proxy路由配置
+// 列表查询
+export function queryRouterList(data) {
+    return request({
+        url: `${pram}/api/router/query`,
+        method: 'post',
+        data
+    })
+}
+
+// 全量更新路由
+export function saveRouter(data) {
+    return request({
+        url: `${pram}/api/router/save`,
+        method: 'post',
+        data
+    })
+}
+
+// /api/monitor/selfCheck
+export function selfCheck(data) {
+    return request({
+        url: `${pram}/api/monitor/selfCheck`,
+        method: 'get'
+    })
+}
+
+// 模型同步前查询若目标机器上是否已存在该模型
+export function checkModel(data) {
+    return request({
+        url: `${pram}/api/model/query`,
+        method: 'get'
+    })
+}
+
+// 模型同步
+export function transfer(data) {
+    return request({
+        url: `${pram}/api/model/transfer`,
+        method: 'post',
+        data
+    })
+}

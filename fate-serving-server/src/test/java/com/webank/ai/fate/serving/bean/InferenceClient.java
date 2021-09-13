@@ -192,4 +192,16 @@ public class InferenceClient {
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
         return blockingStub.queryJvmInfo(data);
     }
+
+    public CommonServiceProto.CommonResponse checkHealth(CommonServiceProto.HealthCheckRequest data) {
+        ManagedChannel managedChannel = null;
+        try {
+            managedChannel = createManagedChannel(ip, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
+        return blockingStub.checkHealthService(data);
+    }
 }

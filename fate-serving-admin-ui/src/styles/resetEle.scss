@@ -14,29 +14,52 @@
 *  limitations under the License.
 *  
 **/
-button, input {
-    font-family: productsans;
-}
+// button, input {
+//     font-family: productsans;
+// }
 
-.el-button {
-    border-radius: 0;
+// .el-button {
+//     border-radius: 0;
+// }
+
+// .el-input__icon {
+//     color: #848C99;
+//     line-height: 34px;
+// }
+// .el-input__inner {
+//     // background-color: #E6EBF0;
+//     color: #848C99;
+//     border: 0px;
+//     outline: none;
+//     height: 34px;
+//     line-height: 34px;
+//     border-radius: 0;
+// }
+
+// .el-icon-arrow-up:before {
+//     content: "\E78F";
+// }
+
+button, input {
+    font-family: 'OPPOSans';
 }
 
 .el-input__icon {
     color: #848C99;
-    line-height: 34px;
+    line-height: 36px;
 }
 .el-input__inner {
-    background-color: #E6EBF0;
-    color: #848C99;
+    // background-color: #E6EBF0;
+    // color: #848C99;
     border: 0px;
     outline: none;
-    height: 34px;
-    line-height: 34px;
+    height: 36px;
+    line-height: 36px;
     border-radius: 0;
 }
 
 .el-icon-arrow-up:before {
+    color: #848C99;
     content: "\E78F";
 }
 

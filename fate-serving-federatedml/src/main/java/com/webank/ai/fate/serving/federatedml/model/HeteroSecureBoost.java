@@ -37,12 +37,17 @@ public abstract class HeteroSecureBoost extends BaseComponent {
     protected List<String> classes;
     protected int treeDim;
     protected double learningRate;
+    BoostingTreeModelParam param;
+
+    public  Object getParam(){
+        return  param;
+    }
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         logger.info("start init HeteroLR class");
         try {
-            BoostingTreeModelParam param = this.parseModel(BoostingTreeModelParam.parser(), protoParam);
+            param= this.parseModel(BoostingTreeModelParam.parser(), protoParam);
             BoostingTreeModelMeta meta = this.parseModel(BoostingTreeModelMeta.parser(), protoMeta);
             Map<Integer, String> featureNameMapping = param.getFeatureNameFidMapping();
             featureNameMapping.forEach((k, v) -> {
@@ -64,8 +69,15 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         return OK;
     }
 
+
+
     protected String getSite(int treeId, int treeNodeId) {
-        return this.trees.get(treeId).getTree(treeNodeId).getSitename().split(":", -1)[0];
+          String siteName =   this.trees.get(treeId).getTree(treeNodeId).getSitename();
+          if(siteName!=null&&":".indexOf(siteName)!=0){
+              return  siteName.split(":")[1];
+          }else{
+              return  siteName;
+          }
     }
 
     protected String generateTag(String caseId, String modelId, int communicationRound) {
@@ -82,7 +94,10 @@ public abstract class HeteroSecureBoost extends BaseComponent {
         double splitValue = this.trees.get(treeId).getSplitMaskdict().get(treeNodeId);
         String fidStr = String.valueOf(fid);
         if (input.containsKey(fidStr)) {
-            if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-20) {
+            if (logger.isDebugEnabled()) {
+                logger.info("treeId {}, treeNodeId {}, splitValue {}, fid {}", treeId, treeNodeId, splitValue,Double.parseDouble(input.get(fidStr).toString()) );
+            }
+            if (Double.parseDouble(input.get(fidStr).toString()) <= splitValue + 1e-8) {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
             } else {
                 nextTreeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
