@@ -293,4 +293,9 @@ public class Dict {
     public static final String HTTP_CLIENT_TRAN_CONN_TIME_OUT = "httpclient.tran.connection.timeout";
     public static final String HTTP_CLIENT_TRAN_SOCK_TIME_OUT = "httpclient.tran.sockect.timeout";
 
+    public static final String PROPERTY_HTTP_CONNECT_TIMEOUT = "http.connect.timeout";
+    public static final String PROPERTY_HTTP_SOCKET_TIMEOUT = "http.socket.timeout";
+    public static final String PROPERTY_HTTP_MAX_POOL_SIZE = "http.max.pool.size";
+    public static final String PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT = "http.connect.request.timeout";
+    public static final String PROPERTY_HTTP_ADAPTER_URL = "http.adapter.url";
 }
