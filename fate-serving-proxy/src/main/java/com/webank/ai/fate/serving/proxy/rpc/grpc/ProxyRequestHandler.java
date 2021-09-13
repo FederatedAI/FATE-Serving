@@ -24,7 +24,7 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.ServiceAdaptor;
 import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.proxy.rpc.core.ProxyServiceRegister;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.StringUtils;
@@ -71,12 +71,12 @@ public abstract class ProxyRequestHandler extends DataTransferServiceGrpc.DataTr
         return inboundPackage;
     }
 
-    @RegisterService(serviceName = "federation/v1/inference",protocol = "http")
+    @RegisterService(serviceName = "federation/v1/inference",protocol = Dict.HTTP)
     public void inference() {
         //The method implementation is not here ,just register zk
     }
 
-    @RegisterService(serviceName = "federation/v1/batchInference",protocol = "http")
+    @RegisterService(serviceName = "federation/v1/batchInference",protocol = Dict.HTTP)
     public void batchInference() {
         //The method implementation is not here ,just register zk
     }
