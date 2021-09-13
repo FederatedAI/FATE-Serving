@@ -14,7 +14,108 @@
 4.自行开发并直接调用serving-server提供的grpc接口。     
 优点：目前sdk部分只提供了java版，若是其他未支持的语言，可以自行开发并调用相关接口 。部署时可以采用 nginx前置部署，用于反向代理grpc请求。
 
-### 错误码表
+### serving-proxy错误码表
+<table>
+  <tr>
+    <td>错误码低三位</td>
+    <td>描述</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>成功</td>
+  </tr>
+  <tr>
+    <td>600</td>
+    <td>参数解析错误</td>
+  </tr>
+  <tr>
+    <td>602</td>
+    <td>Adaptor 特征错误</td>
+  </tr>
+  <tr>
+    <td>604</td>
+    <td>模型不存在</td>
+  </tr>
+  <tr>
+    <td>605</td>
+    <td>网络错误</td>
+  </tr>
+  <tr>
+    <td>606</td>
+    <td>路由错误</td>
+  </tr>
+  <tr>
+    <td>607</td>
+    <td>加载模型失败</td>
+  </tr>
+  <tr>
+    <td>608</td>
+    <td>合并预测结果失败</td>
+  </tr>
+  <tr>
+    <td>609</td>
+    <td>绑定模型失败</td>
+  </tr>
+  <tr>
+    <td>610</td>
+    <td>系统错误</td>
+  </tr>
+  <tr>
+    <td>611</td>
+    <td>服务已关闭</td>
+  </tr>
+  <tr>
+    <td>613</td>
+    <td>特征不存在</td>
+  </tr>
+  <tr>
+    <td>616</td>
+    <td>Adaptor 返回失败</td>
+  </tr>
+  <tr>
+    <td>620</td>
+    <td>请求参数错误</td>
+  </tr>
+  <tr>
+    <td>621</td>
+    <td>鉴权失败</td>
+  </tr>
+  <tr>
+    <td>622</td>
+    <td>未找到服务</td>
+  </tr>
+  <tr>
+    <td>623</td>
+    <td>模型初始化失败</td>
+  </tr>
+  <tr>
+    <td>624</td>
+    <td>请求负载错误</td>
+  </tr>
+  <tr>
+    <td>625</td>
+    <td>不支持的指令</td>
+  </tr>
+  <tr>
+    <td>626</td>
+    <td>取消注册错误</td>
+  </tr>
+  <tr>
+    <td>627</td>
+    <td>无效的口令</td>
+  </tr>
+  <tr>
+    <td>628</td>
+    <td>serving-proxy路由错误</td>
+  </tr>
+  <tr>
+    <td>629</td>
+    <td>serving-proxy鉴权失败</td>
+  </tr>
+</table>
+
+
+### serving-server错误码表
 <table>
   <tr>
     <td>错误码低三位</td>

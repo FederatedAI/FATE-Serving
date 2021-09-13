@@ -6,7 +6,6 @@
 •	guest 的serving-proxy application.properties 配置：  
 ```yml
 xxxxxxxxxx
-coordinator=9999 
 server.port=8059
 zk.url=172.168.0.1:2181,172.168.0.2:2181,172.168.0.3:2181
 proxy.grpc.intra.port=8879
@@ -22,17 +21,6 @@ xxxxxxxxxx
         {
           "ip": "172.134.0.1",
           "port": 9370
-        }
-      ]
-    },
-    "9999": {
-      "serving": [
-        {
-          "ip": "172.168.0.2",
-          "port": 8000
-        }, {
-          "ip": "172.168.0.3",
-          "port": 8000
         }
       ]
     }
@@ -65,7 +53,6 @@ admin.password=admin
 •	host 的serving-proxy application.properties 配置：
 ```yml
 xxxxxxxxxx
-coordinator=10000 
 server.port=8059
 zk.url=172.134.0.1:2181,172.134.0.2:2181,172.134.0.3:2181
 proxy.grpc.intra.port=8879
@@ -81,17 +68,6 @@ xxxxxxxxxx
                 "ip": "172.134.0.2",
                 "port": 8000
             }]
-        },
-        "10000": { //上面 application properties里的coordinator
-            "serving": [{
-                    "ip": "172.134.0.2",
-                    "port": 8000
-                },
-                {
-                    "ip": "172.134.0.3",
-                    "port": 8000
-                }
-            ]
         }
     },
     "permission": {
