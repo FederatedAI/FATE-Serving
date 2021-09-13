@@ -15,11 +15,20 @@
 
  -->
 <template>
-    <div class="main">
+    <div class="main" :class="{'larger':isLarger}">
         <div class="ip-selector">
             <div class="overview">
-                <div class="cluster">Cluster</div>
-                <overview :selected="selected" :ArrProxy="ArrProxy" :ArrServing="ArrServing" @tabNav="tabNav"/>
+                <div class="cluster">Cluster
+                        <span class="healthy"  @click="heal">
+                        <span v-if="checkupStatus === 1"><i class="el-icon-success"></i><span class="span">Cluster is healthy.</span></span>
+                        <span v-if="checkupStatus === 2"><i class="el-icon-loading"></i><span class="span">Checkuping</span></span>
+                        <span v-if="checkupStatus === 3"><i class="el-icon-error"></i><span class="span"  style="color: #FE6363;">Error occurs !</span></span>
+                        <span v-if="checkupStatus === 4" style="color:#FE6363"><i class="el-icon-warning"></i><span class="span" style="color: #FF9D00;">Warn</span></span>
+                    </span>
+                </div>
+                <div class="enlarge" @click="setSize('1')" v-if="!isLarger"><img src="@/assets/zoom-in.png" alt=""></div>
+                <div class="shrink" @click="setSize('2')" v-else><img src="@/assets/zoom-out.png" alt=""></div>
+                <overview ref="overview" :chartArr="chartArr" :isLarger="isLarger" @tabNav="tabNav"/>
             </div>
             <div class="ip-list">
                 <div class="ip-list-top">
@@ -51,13 +60,18 @@
                         <i class="el-icon-caret-bottom"></i>
                     </div>
                 </el-popover>
-                <ul class="ul" :class="ipInfo === 1 || ipInfo === 0   ? 'ulBasic' : ''">
+                <ul class="ul" :class="[0,1,4].includes(ipInfo) ? 'ulBasic' : ''">
                     <li :class="ipInfo === 0 ? 'activeInfo' : ''" @click="tabipInfo(0)">Basic</li>
                     <li
                         v-if="selected === 2"
                         :class="ipInfo === 1 ? 'activeInfo' : ''"
                         @click="tabipInfo(1)"
                     >Models</li>
+                    <li
+                        v-if="selected === 1"
+                        :class="ipInfo === 4 ? 'activeInfo' : ''"
+                        @click="tabipInfo(4)"
+                    >Router</li>
                     <li :class="ipInfo === 2 ? 'activeInfo' : ''" @click="tabipInfo(2)">Traffic Monitor</li>
                     <li :class="ipInfo === 3 ? 'activeInfo' : ''" @click="tabipInfo(3)">JVM</li>
                 </ul>
@@ -105,9 +119,11 @@
                             class="table"
                         >
                             <el-table-column
-                                width="320"
+                                width="280"
                                 prop="namespace"
                                 label="Model ID"
+                                sortable
+                                :sort-method="(a, b) => { return sortMix(a, b, 'namespace') }"
                                 show-overflow-tooltip
                             >
                                 <template slot-scope="scope">
@@ -118,17 +134,20 @@
                                 width="200"
                                 prop="tableName"
                                 label="Model Version"
+                                sortable
+                                :sort-method="(a, b) => { return sortMix(a, b, 'tableName') }"
                                 show-overflow-tooltip
                             >
                                 <template slot-scope="scope">
                                     <span>{{ scope.row.tableName }}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column sortable width="160" :sort-method="(a, b) => { return sortMix(a, b, 'serviceIds') }" prop="serviceId" label="Service ID">
+                            <el-table-column sortable width="120" :sort-method="(a, b) => { return sortMix(a, b, 'serviceIds') }" prop="serviceId" label="Service ID">
                                 <template slot-scope="scope">
                                     <el-popover
                                         v-if="scope.row.serviceIds && scope.row.serviceIds[0] !== '--'"
-                                        placement="bottom"
+                                        popper-class="dark-popover"
+                                        placement="top"
                                         trigger="hover">
                                         <div>
                                             <div style="wadth:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
@@ -146,10 +165,23 @@
                                 width="180"
                                 prop="RolePartyID"
                                 label="Role & Party ID"
-                                show-overflow-tooltip
                             >
                                 <template slot-scope="scope">
-                                    <span
+                                    <el-popover
+                                        v-if="scope.row.rolePartyMapList.length > 0"
+                                        placement="top"
+                                        effect="dark"
+                                        width="340"
+                                        popper-class="party-popover-content"
+                                        trigger="hover">
+                                        <div class="party-popover"><span v-for="(item,index) in scope.row.rolePartyMapList" :key="index">{{item.role}}-{{item.partId}}<span v-if="index+1 !== scope.row.rolePartyMapList.length">,</span></span></div>
+                                       <span slot="reference" class="service_id" style="white-space: nowrap;max-width:170px">
+                                            <span v-for="(item,index) in scope.row.rolePartyMapList" :key="index">{{item.role}}-{{item.partId}}
+                                                <span v-if="index+1 !== scope.row.rolePartyMapList.length">,</span>
+                                            </span>
+                                        </span>
+                                    </el-popover>
+                                    <span v-else
                                         v-for="(item,index) in scope.row.rolePartyMapList"
                                         :key="index"
                                     >
@@ -158,6 +190,37 @@
                                             v-if="index+1 !== scope.row.rolePartyMapList.length"
                                         >,</span>
                                     </span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                width="200"
+                                prop="resourceAdress"
+                                label="FATE Flow Address"
+                            >
+                                <template slot-scope="scope" >
+                                    <el-popover
+                                        v-if="scope.row.resourceAdress.length > 0"
+                                        :visible-arrow="false"
+                                        placement="bottom"
+                                        popper-class="dark-popover"
+                                        @show="handleArrow(scope.$index,'2')"
+                                        @hide="handleArrow(scope.$index,'1')"
+                                        trigger="hover">
+                                        <div>
+                                            <div><p v-for="(item,index) in scope.row.resourceAdress" :key="index">{{item}}</p></div>
+                                        </div>
+                                       <span slot="reference" style="white-space: nowrap;">
+                                            <span v-for="(item,index) in scope.row.resourceAdress" :key="index">{{item}}
+                                                <span v-if="index+1 !== scope.row.resourceAdress.length">,</span>
+                                            </span>
+                                        </span>
+                                    </el-popover>
+                                    <span v-else
+                                        v-for="(item,index) in scope.row.resourceAdress"
+                                        :key="index" >
+                                        {{item}}
+                                    </span>
+                                    <span v-if="scope.row.resourceAdress" :class="{'flow_address':scope.row.resourceAdress.length > 0,'flow_address_up':scope.row.up === '2'}"> </span>
                                 </template>
                             </el-table-column>
                             <el-table-column
@@ -171,7 +234,7 @@
                                     <span>{{ scope.row.timestamp | dateform }}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column width="250" label="Operation">
+                            <el-table-column width="150" label="Operation">
                                 <template slot-scope="scope">
                                     <el-button
                                         type="text"
@@ -182,23 +245,40 @@
                                     ></el-button>
                                     <el-button
                                         type="text"
+                                        style="font-size: 18px"
+                                        class="pipeline"
+                                        size="mini"
+                                        @click="showPipeLineDialog(scope.row)"
+                                    ></el-button>
+                                    <el-dropdown class="function-dropdown" placement="bottom" :hide-on-click="false" @command="moreFunction" trigger="click">
+                                        <span class="el-dropdown-link function-list" @click="getRow(scope.row)">
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item command="Unload" >Unload</el-dropdown-item>
+                                            <el-dropdown-item command="Unbind" v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'" >Unbind</el-dropdown-item>
+                                            <el-dropdown-item command="FlowControl" >Flow control</el-dropdown-item>
+                                            <el-dropdown-item command="ModelSynchronize">Model synchronize</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
+                                    <!-- <el-button
+                                        type="text"
                                         style="font-size: 14px"
                                         size="mini"
                                         @click="flowControl(scope.row)"
-                                    >FlowControl</el-button>
-                                    <el-button
+                                    >FlowControl</el-button> -->
+                                    <!-- <el-button
                                         type="text"
                                         style="font-size: 14px"
                                         size="mini"
                                         @click="unload(scope.row)"
-                                    >Unload</el-button>
-                                    <el-button
+                                    >Unload</el-button> -->
+                                    <!-- <el-button
                                         v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'"
                                         type="text"
                                         style="font-size: 14px"
                                         size="mini"
                                         @click="unbind(scope.row)"
-                                    >Unbind</el-button>
+                                    >Unbind</el-button> -->
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -214,17 +294,17 @@
                         </div>
                         <div v-if="dialogVisible">
                             <el-dialog
-                            title="Model monitor"
-                            width="50%"
-                            custom-class="dialogtit"
-                            :visible.sync="dialogVisible"
-                        >
-                            <div class="chart">
-                                <div class="modelchart">
-                                    <modelchart :callsData="polar" />
+                                title="Model monitor"
+                                width="50%"
+                                custom-class="dialogtit"
+                                :visible.sync="dialogVisible"
+                            >
+                                <div class="chart">
+                                    <div class="modelchart">
+                                        <modelchart :callsData="polar" />
+                                    </div>
                                 </div>
-                            </div>
-                        </el-dialog>
+                            </el-dialog>
                         </div>
                         <el-dialog :visible.sync="unbindVisible" :showClose='cancel' width="35%" top="15%" center>
                             <span>Please select the Service IDs</span><br>
@@ -272,6 +352,38 @@
                                 >Cancel</el-button>
                             </span>
                         </el-dialog>
+                        <el-dialog :visible.sync="modelSynchronizeVisible" :showClose='cancel' title="Model synchronize" class="model-synchronize" width="37%" top="15%" center>
+                            <span>The model will synchronize to the serving-server you select.</span>
+                            <el-select class="serving-server-select input-placeholder" placeholder=" " v-model="servingServer" filterable clearable >
+                                <el-option
+                                    v-for="item in servingServerList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value"
+                                ></el-option>
+                            </el-select>
+                            <span slot="footer" class="dialog-footer  dialog-but">
+                                <el-button type="primary"  @click="checkModel">OK</el-button>
+                                <el-button
+                                    type="primary"
+                                    @click="modelSynchronizeVisible = false"
+                                    style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                                >Cancel</el-button>
+                            </span>
+                        </el-dialog>
+                        <el-dialog :visible.sync="secSureSynchronizeVisible" :showClose='cancel' title="" class="model-synchronize" width="40%" top="15%" center>
+                            <span>The model already exsits in {{ servingServer }},</span>
+                            <br>
+                            <span>continue synchronizing and cover it?</span>
+                            <span slot="footer" class="dialog-footer  dialog-but">
+                                <el-button type="primary"  @click="selectSynchron">OK</el-button>
+                                <el-button
+                                    type="primary"
+                                    @click="secSureSynchronizeVisible = false"
+                                    style="background:#B8BFCC;border: 1px solid #B8BFCC"
+                                >Cancel</el-button>
+                            </span>
+                        </el-dialog>
                     </div>
                     <div v-if="ipInfo === 2" class="ip-info-Monitor">
                         <div class="Monitor-chart">
@@ -302,9 +414,29 @@
                             </div>
                         </div>
                     </div>
+                    <div v-if="ipInfo === 4" class="ip-info-Router" >
+                        <div class="search">
+                            <el-input placeholder="Party ID" v-model="routerPartyID">
+                                <el-button slot="prepend" icon="el-icon-search" @click="searchRouter"></el-button>
+                            </el-input>
+                        </div>
+                        <routertable ref="routertable" v-loading="loadingRouterTable" :showRouterTable="showRouterTable" :ipPort="ipPort" :routerPartyID="routerPartyID" @tabipInfo="tabipInfo" />
+                    </div>
+                    <div>
+                        <pipelinedialog
+                        ref="pipelinedialog"
+                        @closePipeline="closePipeline"
+                        v-loading="loadingPipeline"
+                        :pipelineVisible="pipelineVisible"
+                        :dagDataBak="dagDataBak"
+                        :dagData="dagData"  />
+                    </div>
+
                 </div>
             </div>
+
         </div>
+         <healthy ref="healthy" :HealthData='HealthData' @checkup="checkup"> </healthy>
     </div>
 </template>
 
@@ -315,6 +447,11 @@ import iplist from './components/iplist'
 import jvmchart from './components/jvmchart'
 import monitorchart from './components/monitorchart'
 import modelchart from './components/modelchart'
+import healthy from './components/healthy'
+import routertable from './components/routerlist'
+import pipelinedialog from './components/pipelinedialog'
+import _ from 'lodash'
+
 import {
     getCluster,
     getlistProps,
@@ -324,7 +461,9 @@ import {
     queryModel,
     queryMonitor,
     queryJvm,
-    updateFlowRule
+    updateFlowRule,
+    checkHealth,
+    transfer
 } from '@/api/cluster'
 export default {
     name: 'cluster',
@@ -333,7 +472,10 @@ export default {
         iplist,
         jvmchart,
         monitorchart,
-        modelchart
+        modelchart,
+        healthy,
+        routertable,
+        pipelinedialog
     },
     data() {
         return {
@@ -366,6 +508,8 @@ export default {
             unbindVisible: false, // unbind
             unloadVisible: false, // unload
             flowControlVisible: false,
+            modelSynchronizeVisible: false,
+            secSureSynchronizeVisible: false,
             flag: true,
             ModelsData: [], // Models数据
             JVMInfo: 0, //  JVM tab
@@ -377,8 +521,35 @@ export default {
             JVMseries: [],
             ArrServing: [],
             ArrProxy: [],
+            chartArr: {},
             clusterTimer: null, // ip列表定时器
-            chartTimer: null // 视图定时器
+            chartTimer: null, // 视图定时器
+            servingServer: '',
+            servingServerList: [
+                {
+                    label: '111',
+                    value: '111'
+                },
+                {
+                    label: '222',
+                    value: '222'
+                }
+            ],
+            pipelineVisible: false,
+            pipelineWidth: '60%',
+            checkupStatus: 0,
+            HealthData: {},
+            isLarger: false,
+            routerPageData: {
+                page: 1,
+                pageSize: 10
+            },
+            routerPartyID: '',
+            loadingRouterTable: false,
+            showRouterTable: false,
+            loadingPipeline: false,
+            dagData: [],
+            dagDataBak: {}
         }
     },
     watch: {
@@ -406,6 +577,7 @@ export default {
                     if (val[0] !== old[0] || val[1] !== old[1]) {
                         this.clearChartTimer()
                         this.listProps()
+                        // 2.1.0 模型同步后需要跳转到迁移目标的model tab 故此处不能设定ipInfo
                         this.ipInfo = 0
                     }
                 }
@@ -427,6 +599,8 @@ export default {
     computed: {},
     created() {
         this.getClusterlist()
+        this.getHealthData()
+
         this.clusterTimer = setInterval(() => {
             this.getClusterlist()
         }, 5000)
@@ -436,14 +610,33 @@ export default {
         clearInterval(this.clusterTimer)
     },
     methods: {
+        checkup (index, HealthData) {
+            if (index) {
+                this.checkupStatus = index
+            }
+            if (HealthData) {
+                this.HealthData = HealthData
+            }
+        },
+        heal() {
+            this.$refs.healthy.healthyVisible = true
+        },
+        getHealthData() {
+            checkHealth().then(res => {
+                this.HealthData = res.data
+                setTimeout(() => {
+                    this.$refs.healthy.initHealthData()
+                })
+            })
+        },
         getClusterlist() {
             // 初始化数据
             getCluster().then(res => {
                 this.clusterData = res.data.children
-                this.tabNav(this.selected)
+                this.tabNav({ index: this.selected })
             })
         },
-        tabNav(index, info) {
+        tabNav({ index, info, listIndex }) {
             if (info) {
                 this.searchkey = ''
                 this.serviceid = ''
@@ -459,6 +652,10 @@ export default {
             this.ArrProxy = this.clusterData.filter(item => {
                 return item.name === 'proxy'
             })
+            this.chartArr = {
+                'serving': this.ArrServing,
+                'proxy': this.ArrProxy
+            }
             if (
                 this.ArrServing[0] &&
                 !this.ArrServing[0].children.length
@@ -489,6 +686,9 @@ export default {
                 setTimeout(() => {
                     this.ipPort = this.ipData.children[this.activeip].name.split(':')
                 })
+                if (listIndex >= 0) {
+                    this.selectIP(this.ipDataArr[0].children[listIndex], listIndex)
+                }
             } else {
                 this.ipchildrenData = []
                 this.basicData = []
@@ -509,11 +709,6 @@ export default {
                 }
             })
         },
-        unload(row) {
-            // unload
-            this.rowData = row
-            this.unloadVisible = true
-        },
         sureUnload() {
             // 确定unload
             this.unloadVisible = false
@@ -532,12 +727,6 @@ export default {
         date(value) {
             // 时间格式函数
             return value ? moment(value).format('HH:mm:ss') : '--'
-        },
-        unbind(row) {
-            // unbind
-            this.rowData = row
-            this.unbindVisible = true
-            this.serviceIDCheckList = []
         },
         sureUnbind() {
             // 确定unbind
@@ -567,11 +756,6 @@ export default {
                 this.qps = 0
             }
         },
-        flowControl(row) {
-            this.rowData = row
-            this.qps = row.allowQps
-            this.flowControlVisible = true
-        },
         sureflowControl() {
             const params = {
                 host: this.ipPort[0],
@@ -584,6 +768,64 @@ export default {
                 this.flowControlVisible = false
                 this.tabipInfo(this.ipInfo)
             })
+        },
+        checkModel() {
+            const params = {
+                host: this.servingServer.split(':')[0],
+                port: this.servingServer.split(':')[1],
+                tableName: this.rowData.tableName,
+                namespace: this.rowData.namespace
+            }
+            console.log(params, 'params')
+            getmodellist(params).then(res => {
+                console.log(res)
+                if (_.get(res, 'data.total', '') > 0) {
+                    this.secSureSynchronizeVisible = true
+                } else {
+                    this.selectSynchron()
+                }
+            })
+        },
+        selectSynchron() {
+            console.log(this.rowData, 'rowData-selectSynchron')
+            const params = {
+                host: this.ipPort[0],
+                port: this.ipPort[1],
+                targetHost: this.servingServer.split(':')[0],
+                targetPort: this.servingServer.split(':')[1],
+                tableName: this.rowData.tableName,
+                namespace: this.rowData.namespace
+            }
+            transfer(params).then(res => {
+                console.log(res)
+                if (_.get(res, 'retcode', '') === 0) {
+                    this.$message.success('Model synchronize success')
+                    // 成功后跳转到目标迁移机器的model tab
+                    let listIndex = ''
+                    let ipArr = _.get(this, 'ipDataArr[0].children', [])
+                    ipArr.map((item, index) => {
+                        if (item.name === this.servingServer) {
+                            listIndex = index
+                        }
+                    })
+                    this.selectIP(this.ipDataArr[0].children[listIndex], listIndex)
+                } else {
+                    const h = this.$createElement
+                    this.$message.warning({
+                        message: h('div', null, [
+                            h('div', null, 'Model synchronize failed'),
+                            h('div', { style: 'font-size:12px;color:#999;margin-top:6px' }, res.retmsg)
+                        ]),
+                        'duration': 3000
+                    }, true)
+                }
+                this.closeSynchronizeModel()
+                console.log(this.ipDataArr, 'this.ipDataArr')
+            })
+        },
+        closeSynchronizeModel() {
+            this.modelSynchronizeVisible = false
+            this.secSureSynchronizeVisible = false
         },
         modelpolar() {
             // 获取model 弹框数据
@@ -723,6 +965,8 @@ export default {
             this.listProps(this.searchkey)
         },
         selectIP(item, index) {
+            let type = item.label.split('-')[1]
+            let name = item.name
             // 选中ip
             this.searchkey = ''
             this.serviceid = ''
@@ -730,10 +974,14 @@ export default {
             this.ipchildrenData = item
             this.titvisible = false
             this.ipPort = this.ipchildrenData.name.split(':')
+            this.$refs.overview.selectItem = [name, type]
+            console.log([name, type], '[name, type]')
             if (this.ipInfo === 0) {
                 this.listProps()
             } else {
-                this.tabipInfo(this.ipInfo)
+                this.$nextTick(() => {
+                    this.tabipInfo(this.ipInfo)
+                })
             }
         },
         tabJVMInfo(index) {
@@ -743,60 +991,86 @@ export default {
         tabipInfo(index) {
             //  Basic、Models  tab
             this.clearChartTimer()
-            this.ipInfo = +index
-            if (this.ipInfo === 1) {
-                this.MonitorPolar = {}
-                const params = {
-                    page: this.page,
-                    pageSize: this.pageSize,
-                    host: this.ipPort[0],
-                    port: this.ipPort[1],
-                    serviceId: this.serviceid
+            if (this.$refs.routertable && this.$refs.routertable.hasChange === true) {
+                this.$refs.routertable.sureLeaveDialog = true
+                this.$set(this.$refs.routertable, 'next', index)
+            } else {
+                this.showRouterTable = false
+                this.ipInfo = +index
+                if (this.ipInfo === 0) {
+                    this.tabToBasic()
+                } else if (this.ipInfo === 1) {
+                    this.tabToModels()
+                } else if (this.ipInfo === 2) {
+                    this.tabToMonitor()
+                } else if (this.ipInfo === 3) {
+                    this.tabToJvm()
+                } else if (this.ipInfo === 4) {
+                    this.tabToRouter()
                 }
-                getmodellist(params).then(res => {
-                    this.ModelsData = res.data.rows
-                    this.total = res.data.total
-                    for (var i = 0; i < this.ModelsData.length; i++) {
-                        if (this.ModelsData[i].serviceIds && this.ModelsData[i].serviceIds.length === 0) {
-                            this.ModelsData[i].serviceIds.push('--')
-                        }
-                    }
-                })
-            } else if (this.ipInfo === 0) {
-                if (this.ipPort.length === 0) {
-                    return false
-                }
-                this.listProps()
-            } else if (this.ipInfo === 2) {
-                if (this.ipPort.length === 0) {
-                    return false
-                }
-                const params = {
-                    host: this.ipPort[0],
-                    port: this.ipPort[1]
-                }
-                this.Monitordata = {}
-                this.MonitorXdate = []
-                this.handleMonitorData(params)
-                // 5计时器，重复1-4
-                this.setChartTimer(() => {
-                    this.handleMonitorData(params)
-                })
-            } else if (this.ipInfo === 3) {
-                if (this.ipPort.length === 0) {
-                    return false
-                }
-                const params = {
-                    host: this.ipPort[0],
-                    port: this.ipPort[1]
-                }
-                this.JvmData = []
-                this.handleJvmData(params)
-                // 5设定计时器
-                this.setChartTimer(() => {
-                    this.handleJvmData(params)
-                })
             }
+        },
+        tabToBasic() {
+            if (this.ipPort.length === 0) return false
+            this.listProps()
+        },
+        tabToModels() {
+            this.MonitorPolar = {}
+            const params = {
+                page: this.page,
+                pageSize: this.pageSize,
+                host: this.ipPort[0],
+                port: this.ipPort[1],
+                serviceId: this.serviceid
+            }
+            getmodellist(params).then(res => {
+                this.ModelsData = res.data.rows
+                this.total = res.data.total
+                for (var i = 0; i < this.ModelsData.length; i++) {
+                    if (this.ModelsData[i].serviceIds && this.ModelsData[i].serviceIds.length === 0) {
+                        this.ModelsData[i].serviceIds.push('--')
+                    }
+                    // 初始化flow address 下拉列表箭头状态
+                    this.$set(this.ModelsData[i], 'up', '1')
+                    // mock
+                    if (this.ModelsData[i]['resourceAdress']) {
+                        this.ModelsData[i]['resourceAdress'] = [this.ModelsData[i]['resourceAdress']]
+                    } else {
+                        this.ModelsData[i]['resourceAdress'] = []
+                    }
+                }
+                console.log(this.ModelsData, 'ModelsData')
+            })
+        },
+        tabToMonitor() {
+            if (this.ipPort.length === 0) return false
+            const params = {
+                host: this.ipPort[0],
+                port: this.ipPort[1]
+            }
+            this.Monitordata = {}
+            this.MonitorXdate = []
+            this.handleMonitorData(params)
+            // 5计时器，重复1-4
+            this.setChartTimer(() => {
+                this.handleMonitorData(params)
+            })
+        },
+        tabToJvm() {
+            if (this.ipPort.length === 0) return false
+            const params = {
+                host: this.ipPort[0],
+                port: this.ipPort[1]
+            }
+            this.JvmData = []
+            this.handleJvmData(params)
+            // 5设定计时器
+            this.setChartTimer(() => {
+                this.handleJvmData(params)
+            })
+        },
+        tabToRouter() {
+            this.showRouterTable = true
         },
         handleMonitorData(params) {
             queryMonitor(params).then(res => {
@@ -906,7 +1180,10 @@ export default {
                 { name: 'I_MODEL_PUBLISH_ONLINE', textStyle: { color: '#ff9d00' } },
                 { name: 'I_QUERY_MODEL', textStyle: { color: '#ef6363' } },
                 { name: 'I_UNLOAD', textStyle: { color: '#c65f5f' } },
-                { name: 'I_UNBIND', textStyle: { color: '#848c99' } }]
+                { name: 'I_UNBIND', textStyle: { color: '#848c99' } },
+                { name: 'I_CHECK_HEALTH', textStyle: { color: '#c23431' } },
+                { name: 'I_QUERY_ROUTER', textStyle: { color: '#d049c9' } },
+                { name: 'I_SAVE_ROUTER', textStyle: { color: '#7949d0' } }]
             for (var y = 0; y < legendArr.length; y++) {
                 for (var p = 0; p < MonArr.length; p++) {
                     if (legendArr[y] === MonArr[p].name) {
@@ -1005,6 +1282,52 @@ export default {
             b = (b.split('')[0] || '').charCodeAt()
 
             return a - b < 0 ? -1 : 1
+        },
+        getRow(row) {
+            this.rowData = row
+        },
+        moreFunction(command) {
+            if (command === 'Unload') {
+                this.unloadVisible = true
+            } else if (command === 'Unbind') {
+                this.unbindVisible = true
+                this.serviceIDCheckList = []
+            } else if (command === 'FlowControl') {
+                this.qps = this.rowData.allowQps
+                this.flowControlVisible = true
+            } else if (command === 'ModelSynchronize') {
+                this.modelSynchronizeVisible = true
+                this.servingServer = ''
+                if (this.ipData && this.ipData.children) {
+                    // 过滤出除当前serving的下拉菜单
+                    this.servingServerList = this.ipData.children.filter(item => item.name !== this.ipchildrenData.name)
+                    this.servingServerList = this.servingServerList.map(item => {
+                        return {
+                            label: item.name,
+                            value: item.name
+                        }
+                    })
+                    console.log(this.servingServerList, 'servingServerList')
+                }
+            }
+        },
+        showPipeLineDialog(row) {
+            this.dagData = row ? row.components : []
+            // 在小窗状态打开
+            this.$refs['pipelinedialog'].setSize('2')
+            this.pipelineVisible = true
+        },
+        handleArrow(index, type) {
+            this.$set(this.ModelsData[index], 'up', type)
+        },
+        setSize(type) {
+            this.isLarger = type === '1'
+        },
+        searchRouter() {
+            this.$refs['routertable'].getTableData()
+        },
+        closePipeline() {
+            this.pipelineVisible = false
         }
     }
 }
@@ -1013,7 +1336,7 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 @import 'src/styles/cluster.scss';
 .el-tooltip__popper {
-     transform:translateY(100px);
+    transform:translateY(100px);
      font-size:14px;
     font-family:Product Sans;
     font-weight:400;
@@ -1030,4 +1353,79 @@ export default {
         display: none !important;
     }
 }
+.el-dropdown-menu__item{
+    color: #4d95e1 !important;
+}
+.party-popover-content{
+    // overflow: hidden;
+    padding: 10px;
+    background: rgba(0,0,0,.8);
+    color: #fff !important;
+
+    .popper__arrow{
+        top: unset !important;
+    }
+    .popper__arrow::after{
+        border-top-color: rgba(0,0,0,.8) !important;
+    }
+
+    .titpopover-label {
+        color: #fff;
+    }
+    .party-popover{
+        display: flex;
+        flex-wrap: wrap;
+        width: 350px;
+        max-height: 200px;
+        overflow: auto;
+        span{
+            flex-shrink: 0;
+            margin-right: 3px;
+            margin-bottom: 5px;
+        }
+    }
+}
+
+.el-table .cell{
+    padding-top: 5px;
+    line-height: 14px;
+
+}
+.ip-info-Models{
+    tbody {
+        td:nth-of-type(5){
+            padding-right: 30px !important;
+            .cell{
+                display: flex;
+                overflow: unset;
+                &>span[effect="dark"]{
+                    overflow: hidden;
+                    max-width: 160px;
+                    display: inline-block;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
+    }
+}
+.flow_address{
+    position: relative;
+    &::after{
+        position: absolute;
+        top:50%;
+        right: -20px;
+        transform: translateY(-50%) rotate(0);
+        content: '▼';
+        color: #4E5766;
+        font-size: 12px;
+        line-height: 1;
+        transition: all .5s;
+    }
+}
+.flow_address_up{
+    &::after{
+        transform: translateY(-50%) rotate(-180deg);
+    }
+}
+
 </style>

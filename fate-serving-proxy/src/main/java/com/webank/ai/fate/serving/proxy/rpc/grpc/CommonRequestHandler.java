@@ -25,11 +25,13 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.core.bean.CommonActionType;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.proxy.rpc.provider.CommonServiceProvider;
+import com.webank.ai.fate.serving.proxy.rpc.provider.RouterTableServiceProvider;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBase {
@@ -39,6 +41,7 @@ public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBas
     private static final String LIST_PROPS = "listProps";
     private static final String QUERY_JVM = "queryJvm";
     private static final String UPDATE_SERVICE = "updateService";
+    private static final String CHECK_HEALTH = "checkHealth";
     private static final String UPDATE_ROUTE_TABLE = "updateRouteTable";
 
     @Autowired
@@ -122,4 +125,15 @@ public class CommonRequestHandler extends CommonServiceGrpc.CommonServiceImplBas
         return context;
     }
 
+    @Override
+    @RegisterService(serviceName = CHECK_HEALTH)
+    public void checkHealthService(CommonServiceProto.HealthCheckRequest request, StreamObserver<CommonServiceProto.CommonResponse> responseObserver) {
+        Context context = prepareContext(CommonActionType.CHECK_HEALTH.name());
+        InboundPackage inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = commonServiceProvider.service(context, inboundPackage);
+        CommonServiceProto.CommonResponse response = (CommonServiceProto.CommonResponse) outboundPackage.getData();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 }

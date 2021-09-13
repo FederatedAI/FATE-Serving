@@ -27,6 +27,8 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.url.UrlUtils;
 import com.webank.ai.fate.register.utils.StringUtils;
 import com.webank.ai.fate.register.utils.URLBuilder;
+import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.core.utils.NetUtils;
 import org.slf4j.Logger;
@@ -43,7 +45,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     private static final Logger logger = LoggerFactory.getLogger(ZookeeperRegistry.class);
     private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
-    private final static String DEFAULT_ROOT = "FATE-SERVICES";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
     private final static String ROOT_KEY = "root";
     public static ConcurrentMap<URL, ZookeeperRegistry> registeryMap = new ConcurrentHashMap();
@@ -61,7 +62,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
         super(url);
-        String group = url.getParameter(ROOT_KEY, DEFAULT_ROOT);
+        String group = url.getParameter(ROOT_KEY, Dict.DEFAULT_FATE_ROOT);
         if (!group.startsWith(PATH_SEPARATOR)) {
             group = PATH_SEPARATOR + group;
         }
@@ -128,6 +129,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             Map content = new HashMap();
             content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
             content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
+            content.put(Dict.VERSION, MetaInfo.CURRENT_VERSION);
             this.zkClient.create(path, JsonUtil.object2Json(content), true);
             this.componentUrl = url;
 
@@ -270,16 +272,50 @@ public class ZookeeperRegistry extends FailbackRegistry {
             if (serviceWrapper.getWeight() != null) {
                 parameters.put(Constants.WEIGHT_KEY, String.valueOf(serviceWrapper.getWeight()));
             }
-            if (serviceWrapper.getVersion() != null) {
-                parameters.put(Constants.VERSION_KEY, String.valueOf(serviceWrapper.getVersion()));
-            }
+//            if (serviceWrapper.getVersion() != null) {
+//                parameters.put(Constants.VERSION_KEY, String.valueOf(serviceWrapper.getVersion()));
+//            }
         } else {
             serviceWrapper = new ServiceWrapper();
             serviceWrapper.setRouterMode(parameters.get(Constants.ROUTER_MODE));
             serviceWrapper.setWeight(parameters.get(Constants.WEIGHT_KEY) != null ? Integer.valueOf(parameters.get(Constants.WEIGHT_KEY)) : null);
-            serviceWrapper.setVersion(parameters.get(Constants.VERSION_KEY) != null ? Long.valueOf(parameters.get(Constants.VERSION_KEY)) : null);
+            //serviceWrapper.setVersion(parameters.get(Constants.VERSION_KEY) != null ? Long.valueOf(parameters.get(Constants.VERSION_KEY)) : null);
             this.getServiceCacheMap().put(url.getEnvironment() + "/" + url.getPath(), serviceWrapper);
         }
+    }
+
+
+    public synchronized void register(Set<RegisterService> sets,Collection<String>  dynamicEnvironments){
+        String hostAddress = NetUtils.getLocalIp();
+
+        for (RegisterService service : sets) {
+            URL url = URL.valueOf("grpc://" + hostAddress + ":" + port + Constants.PATH_SEPARATOR + parseRegisterService(service));
+            URL serviceUrl = url.setProject(project);
+            if (service.useDynamicEnvironment()) {
+
+                if (CollectionUtils.isNotEmpty(dynamicEnvironments)) {
+                    dynamicEnvironments.forEach(environment -> {
+                        URL newServiceUrl = serviceUrl.setEnvironment(environment);
+                        // use cache service params
+                        loadCacheParams(newServiceUrl);
+
+                        String serviceName = service.serviceName() + environment;
+                        if (!registedString.contains(serviceName)) {
+                            this.register(newServiceUrl);
+                            this.registedString.add(serviceName);
+                        } else {
+                            logger.info("url {} is already registed, will not do anything ", newServiceUrl);
+                        }
+                    });
+                }
+
+
+            }
+
+        }
+        syncServiceCacheFile();
+
+
     }
 
     public synchronized void register(Set<RegisterService> sets) {

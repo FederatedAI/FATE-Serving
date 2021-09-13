@@ -23,6 +23,9 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.GuestMergeException;
+import com.webank.ai.fate.serving.core.exceptions.ModelLoadException;
+import com.webank.ai.fate.serving.core.exceptions.SbtDataException;
+import org.apache.commons.collections4.map.HashedMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements MergeInferenceAware, LocalInferenceAware, Returnable {
-    private final String site = "guest";
+    private final String role = "guest";
     private boolean fastMode = true;
     private double sigmoid(double x) {
         return 1. / (1. + Math.exp(-x));
@@ -90,10 +93,19 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
                 treeNodeId = this.gotoNextLevel(treeId, treeNodeId, input);
             } else {
                 Map<String, Boolean> lookUp = (Map<String, Boolean>) lookUpTable.get(String.valueOf(treeId));
-                if (lookUp.get(String.valueOf(treeNodeId))) {
-                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
-                } else {
-                    treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
+                if(lookUp==null){
+                    logger.error("treeId {} is not exist in {}",treeId,lookUpTable.keySet());
+                    throw  new SbtDataException();
+                }
+                if(lookUp.get(String.valueOf(treeNodeId))!=null) {
+                    if (lookUp.get(String.valueOf(treeNodeId))) {
+                        treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getLeftNodeid();
+                    } else {
+                        treeNodeId = this.trees.get(treeId).getTree(treeNodeId).getRightNodeid();
+                    }
+                }else{
+                    logger.error("tree node id {} not exist in {} ,lookup table  {}",treeNodeId,lookUp,lookUpTable);
+                    throw  new SbtDataException();
                 }
             }
             if (logger.isDebugEnabled()) {
@@ -102,6 +114,7 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         }
         return treeNodeId;
     }
+
     private Map<String, Object> getFinalPredict(double[] weights) {
         Map<String, Object> ret = new HashMap<String, Object>(8);
         if (this.numClasses == 2) {
@@ -160,6 +173,51 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
         return result;
     }
 
+    private Map<String, Boolean> mergeTwoLookUpTable(Map<String, Boolean> lookUp1, Map<String, Boolean> lookUp2){
+
+        Map<String, Boolean> merged = new HashMap<>();
+        merged.putAll(lookUp1);
+        merged.putAll(lookUp2);
+
+        return merged;
+    }
+
+    private Map<String, Object> extractMultiPartiesData(Map<String, Object> remoteData, int tree_num){
+
+        // merge multi host lookup table (if there are multiple hosts)
+        Map<String, Object> extract_result = new HashedMap<String, Object>();
+        Map<String, Object> mergedLookUpTable = new HashMap<>();
+
+        // extract component data
+        remoteData.forEach((k, v) -> {
+            Map<String, Object> onePartyData = (Map<String, Object>) v;
+            Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
+            if (remoteComopnentData == null) {
+                remoteComopnentData = onePartyData;
+            }
+            extract_result.put(k, remoteComopnentData);
+        });
+
+        // merge host look up tables
+        extract_result.forEach((k, v) -> {
+            Map<String, Map<String, Boolean>> lookUp = (Map<String, Map<String, Boolean>>) v;
+            for(int treeId=0; treeId<tree_num; treeId++){
+                String str_key = String.valueOf(treeId);
+                Map<String, Boolean> treeLookUp = lookUp.get(str_key);
+                if(!mergedLookUpTable.containsKey(str_key)){
+                    mergedLookUpTable.put(str_key,treeLookUp);
+                }
+                else{
+                    Map<String, Boolean> savedLookUp = (Map<String, Boolean>)mergedLookUpTable.get(str_key);
+                    Map<String, Boolean> mergedResult = this.mergeTwoLookUpTable(savedLookUp, treeLookUp);
+                    mergedLookUpTable.put(str_key, mergedResult);
+                }
+            }
+        });
+
+        return mergedLookUpTable;
+    }
+
     @Override
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localDataList, Map<String, Object> remoteData) {
         Map<String, Object> result = this.handleRemoteReturnData(remoteData);
@@ -173,38 +231,35 @@ public class HeteroSecureBoostingTreeGuest extends HeteroSecureBoost implements 
             throw new GuestMergeException("tree node id array is not return from first loop");
         }
         HashMap<String, Object> fidValueMapping = (HashMap<String, Object>) localData.get("fidValueMapping");
-        remoteData.forEach((k, v) -> {
-            HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
-            for (int i = 0; i < this.treeNum; ++i) {
-                if (this.isLocateInLeaf(i, treeNodeIds[i])) {
-                    continue;
-                }
-                treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
-                if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
-                    treeLocation.put(String.valueOf(i), treeNodeIds[i]);
-                }
+
+        Map<String, Object> lookUpTable = this.extractMultiPartiesData(remoteData, this.treeNum);
+        HashMap<String, Object> treeLocation = new HashMap<String, Object>(8);
+        for (int i = 0; i < this.treeNum; ++i) {
+            if (this.isLocateInLeaf(i, treeNodeIds[i])) {
+                continue;
             }
-            Map<String, Object> onePartyData = (Map<String, Object>) v;
-            Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
-            double remoteScore;
-            if (remoteComopnentData == null) {
-                remoteComopnentData = onePartyData;
+            treeNodeIds[i] = this.traverseTree(i, treeNodeIds[i], fidValueMapping);
+            if (!this.isLocateInLeaf(i, treeNodeIds[i])) {
+                treeLocation.put(String.valueOf(i), treeNodeIds[i]);
             }
-            for (String treeIdx : treeLocation.keySet()) {
-                int idx = Integer.valueOf(treeIdx);
-                int curNodeId = (Integer) treeLocation.get(treeIdx);
-                int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping, remoteComopnentData);
-                treeNodeIds[idx] = final_node_id;
-            }
-            for (int i = 0; i < this.treeNum; ++i) {
-                weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
-            }
-            if (logger.isDebugEnabled()) {
-                logger.info("tree leaf ids is {}", treeNodeIds);
-                logger.info("weights is {}", weights);
-            }
-        });
+        }
+        for (String treeIdx : treeLocation.keySet()) {
+            int idx = Integer.valueOf(treeIdx);
+            int curNodeId = (Integer) treeLocation.get(treeIdx);
+            int final_node_id = this.fastTraverseTree(idx, curNodeId, fidValueMapping, lookUpTable);
+            treeNodeIds[idx] = final_node_id;
+        }
+        for (int i = 0; i < this.treeNum; ++i) {
+            weights[i] = getTreeLeafWeight(i, treeNodeIds[i]);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.info("tree leaf ids is {}", treeNodeIds);
+            logger.info("weights is {}", weights);
+        }
+
         return getFinalPredict(weights);
     }
+
+
 
 }

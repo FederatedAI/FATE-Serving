@@ -21,6 +21,7 @@ import com.webank.ai.fate.register.common.Constants;
 import com.webank.ai.fate.register.url.CollectionUtils;
 import com.webank.ai.fate.register.zookeeper.ZookeeperClient;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,17 +36,34 @@ public class ComponentService {
 
     private final static String PATH_SEPARATOR = "/";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
+    private final static String PROVIDER = "providers";
     Logger logger = LoggerFactory.getLogger(ComponentService.class);
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
     NodeData cachedNodeData;
+    List<ServiceInfo> serviceInfos;
+
+    public Map<String, Set<String>> getProjectNodes() {
+        return projectNodes;
+    }
+
+    public void setProjectNodes(Map<String, Set<String>> projectNodes) {
+        this.projectNodes = projectNodes;
+    }
+
     /**
      * project -> nodes mapping
      */
     Map<String, Set<String>> projectNodes = new HashMap<>();
 
+
+
     public NodeData getCachedNodeData() {
         return cachedNodeData;
+    }
+
+    public List<ServiceInfo> getServiceInfos() {
+        return serviceInfos;
     }
 
     public Set<String> getWhitelist() {
@@ -118,7 +136,6 @@ public class ComponentService {
 
             }
             cachedNodeData = root;
-
             if (logger.isDebugEnabled()) {
                 logger.debug("refresh  component info ");
             }
@@ -126,6 +143,49 @@ public class ComponentService {
             logger.error("get component from zk error",e);
             cachedNodeData = null;
             projectNodes.clear();
+        }
+
+    }
+
+    public Map<String,List<String>> getComponentAddresses() {
+        Map<String,List<String>> addresses= new HashMap<>();
+        ZookeeperClient zkClient = zookeeperRegistry.getZkClient();
+        List<String> componentLists = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT);
+        if(componentLists!=null) {
+            for (String component : componentLists) {
+                addresses.put(component, new ArrayList<>());
+                List<String> nodes = zkClient.getChildren(PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + component);
+                for (String node : nodes) {
+                    addresses.get(component).add(node);
+                }
+            }
+        }
+        return addresses;
+    }
+
+    public void pullService() {
+        serviceInfos = new ArrayList<>();
+        Properties properties = zookeeperRegistry.getCacheProperties();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            String key = (String) entry.getKey();
+            String serviceName = key.substring(key.lastIndexOf('/')+1);
+            if (serviceName.equals(Dict.SERVICENAME_BATCH_INFERENCE) || serviceName.equals(Dict.SERVICENAME_INFERENCE)) {
+                String value = (String) entry.getValue();
+                if (value.startsWith("empty")) {
+                    continue;
+                }
+                String address = value.substring(value.indexOf("//")+2);
+                String host = address.substring(0, address.indexOf(':'));
+                int port = Integer.valueOf(address.substring(address.indexOf(':') + 1, address.indexOf('/')));
+                String serviceId = key.substring(key.indexOf('/')+1,key.lastIndexOf('/'));
+
+                ServiceInfo serviceInfo = new ServiceInfo();
+                serviceInfo.setHost(host);
+                serviceInfo.setName(serviceName);
+                serviceInfo.setPort(port);
+                serviceInfo.setServiceId(serviceId);
+                serviceInfos.add(serviceInfo);
+            }
         }
     }
 
@@ -177,5 +237,43 @@ public class ComponentService {
         }
     }
 
+    public class ServiceInfo {
+        String name;
+        String host;
+        int port;
+        String serviceId;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setServiceId(String serviceId) {
+            this.serviceId = serviceId;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getServiceId() {
+            return serviceId;
+        }
+    }
 
 }

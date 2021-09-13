@@ -22,6 +22,25 @@ public class RequestParamWrapper {
 
     String host;
     Integer port;
+
+    public String getTargetHost() {
+        return targetHost;
+    }
+
+    public void setTargetHost(String targetHost) {
+        this.targetHost = targetHost;
+    }
+
+    public Integer getTargetPort() {
+        return targetPort;
+    }
+
+    public void setTargetPort(Integer targetPort) {
+        this.targetPort = targetPort;
+    }
+
+    String targetHost;
+    Integer targetPort;
     /**
      * /admin/login
      */

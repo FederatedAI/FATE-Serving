@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- package common
+package common
 
 import (
 	"encoding/json"
@@ -26,8 +26,27 @@ func JsonToMap(jsonStr string) map[string]interface{} {
 	var mapResult map[string]interface{}
 	err := json.Unmarshal([]byte(jsonStr), &mapResult)
 	if err != nil {
-		fmt.Println("JsonToMapDemo err: ", err)
+		fmt.Println("JsonToMap err: ", err)
 	}
 	return mapResult
 	//fmt.Println(mapResult)
+}
+
+func JsonToList(jsonStr string) []map[string]interface{} {
+	//	jsonStr := `{"name": "jqw","age": 18}`
+	var list []map[string]interface{}
+	err := json.Unmarshal([]byte(jsonStr), &list)
+	if err != nil {
+		fmt.Println("JsonToList err: ", err)
+	}
+	return list
+	//fmt.Println(mapResult)
+}
+
+func JsonToStuct(jsonStr string, result interface{}) {
+	err := json.Unmarshal([]byte(jsonStr), result)
+	if err != nil {
+		fmt.Println("JsonToStruct err: ", err)
+	}
+
 }

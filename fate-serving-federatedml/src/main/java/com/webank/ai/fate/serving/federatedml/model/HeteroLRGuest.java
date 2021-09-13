@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Math.exp;
 
@@ -53,36 +54,38 @@ public class HeteroLRGuest extends HeteroLR implements MergeInferenceAware, Retu
                                                     Map<String, Object> hostData) {
         Map<String, Object> result = this.handleRemoteReturnData(hostData);
         if ((int) result.get(Dict.RET_CODE) == StatusCode.SUCCESS) {
-            hostData.forEach((k, v) -> {
-                Map<String, Object> onePartyData = (Map<String, Object>) v;
-                double score;
-                if (CollectionUtils.isNotEmpty(guestData)) {
-                    Map<String, Object> tempMap = guestData.get(0);
-                    Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
-                    double localScore = 0;
-                    if (componentData != null && componentData.get(Dict.SCORE) != null) {
-                        localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
-                    } else {
-                        throw new GuestMergeException("local result is invalid ");
-                    }
-                    Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
-                    double remoteScore;
-                    if (remoteComopnentData != null) {
-                        remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
-                    } else {
-                        if (onePartyData.get(Dict.PROB) != null) {
-                            remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
-                        } else {
-                            throw new GuestMergeException("host data score is null");
-                        }
-                    }
-                    score = localScore;
-                    score += remoteScore;
-                    double prob = sigmod(score);
-                    result.put(Dict.SCORE, prob);
+            if (CollectionUtils.isNotEmpty(guestData)) {
+                AtomicReference<Double> score = new AtomicReference<>((double) 0);
+                Map<String, Object> tempMap = guestData.get(0);
+                Map<String, Object> componentData = (Map<String, Object>) tempMap.get(this.getComponentName());
+                double localScore = 0;
+                if (componentData != null && componentData.get(Dict.SCORE) != null) {
+                    localScore = ((Number) componentData.get(Dict.SCORE)).doubleValue();
+                } else {
+                    throw new GuestMergeException("local result is invalid ");
                 }
+                score.set(localScore);
 
-            });
+                hostData.forEach((k, v) -> {
+                    Map<String, Object> onePartyData = (Map<String, Object>) v;
+
+                        Map<String, Object> remoteComopnentData = (Map<String, Object>) onePartyData.get(this.getComponentName());
+                        double remoteScore;
+                        if (remoteComopnentData != null) {
+                            remoteScore = ((Number) remoteComopnentData.get(Dict.SCORE)).doubleValue();
+                        } else {
+                            if (onePartyData.get(Dict.PROB) != null) {
+                                remoteScore = ((Number) onePartyData.get(Dict.PROB)).doubleValue();
+                            } else {
+                                throw new GuestMergeException("host data score is null");
+                            }
+                        }
+                        score.updateAndGet(v1 -> new Double((double) (v1 + remoteScore)));
+                    });
+                double prob = sigmod(score.get());
+                result.put(Dict.SCORE, prob);
+
+            }
         }
         return result;
     }

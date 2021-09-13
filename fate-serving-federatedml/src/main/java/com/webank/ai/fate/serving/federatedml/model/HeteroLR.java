@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.federatedml.model;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.webank.ai.fate.core.mlmodel.buffer.LRModelParamProto.LRModelParam;
 import com.webank.ai.fate.serving.core.bean.Dict;
@@ -32,12 +33,13 @@ public abstract class HeteroLR extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(HeteroLR.class);
     private Map<String, Double> weight;
     private Double intercept;
+    LRModelParam lrModelParam;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
         logger.info("start init HeteroLR class");
         try {
-            LRModelParam lrModelParam = this.parseModel(LRModelParam.parser(), protoParam);
+             lrModelParam = this.parseModel(LRModelParam.parser(), protoParam);
             this.weight = lrModelParam.getWeightMap();
             this.intercept = lrModelParam.getIntercept();
         } catch (Exception ex) {
@@ -96,7 +98,7 @@ public abstract class HeteroLR extends BaseComponent {
         Map<String, Double> ret = new HashMap<>(8);
         double modelWeightHitRate = -1.0;
         double inputDataHitRate = -1.0;
-        Set<String> inputKeys =inputData.keySet();
+        Set<String> inputKeys = inputData.keySet();
         Set<String> weightKeys = weight.keySet();
         Set<String> joinKeys = Sets.newHashSet();
         joinKeys.addAll(inputKeys);
@@ -138,6 +140,7 @@ public abstract class HeteroLR extends BaseComponent {
         List<String> keys;
         Map<String, Object> inputData;
         Map<String, Double> weight;
+
         public LRTask(Map<String, Double> weight, Map<String, Object> inputData, List<String> keys) {
             this.keys = keys;
             this.inputData = inputData;
@@ -193,19 +196,30 @@ public abstract class HeteroLR extends BaseComponent {
         double score = 0;
         int modelWeightHitCount = 0;
         int inputDataHitCount = 0;
+
         public LRTaskResult(double score, int modelWeightHitCount, int inputDataHitCount) {
             this.score = score;
             this.modelWeightHitCount = modelWeightHitCount;
             this.inputDataHitCount = inputDataHitCount;
         }
     }
-    public static  void main(String[] args){
 
-        Set set1 =  new HashSet();
+    @Override
+    public Object getParam() {
+//        Map<String,Object> paramsMap = Maps.newHashMap();
+//        paramsMap.putAll(weight);
+//        return paramsMap;
+
+        return lrModelParam;
+    }
+
+    public static void main(String[] args) {
+
+        Set set1 = new HashSet();
         set1.add("1");
         set1.add("2");
         set1.add("3");
-        Set set2 =  new HashSet();
+        Set set2 = new HashSet();
         set2.add("2");
         set2.add("3");
 
@@ -215,7 +229,6 @@ public abstract class HeteroLR extends BaseComponent {
         System.err.println(set3);
 
     }
-
 
 
 }

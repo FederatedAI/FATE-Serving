@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.admin.handler;
 
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
+import com.webank.ai.fate.serving.core.exceptions.ParameterException;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
@@ -50,6 +51,13 @@ public class GlobalExceptionHandler {
     public ReturnResult statusRuntimeExceptionHandle(Exception e) {
         logger.error("[RemoteRpcException]Exception:", e);
         return ReturnResult.build(StatusCode.NET_ERROR, "remote rpc request exception");
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ExceptionHandler(value = {ParameterException.class})
+    public ReturnResult statusRuntimeExceptionHandle(ParameterException e) {
+        logger.error("[RemoteRpcException]Exception:", e);
+        return ReturnResult.build(e.getRetcode(), e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.OK)

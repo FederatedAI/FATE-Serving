@@ -56,6 +56,10 @@ type BatchInferenceCmd struct {
 	Cmd
 }
 
+type FetchModelCmd struct {
+	Cmd
+}
+
 func (cmd *QuitCmd) Run() {
 	os.Exit(0)
 }
@@ -121,6 +125,7 @@ func (cmd *HelpCmd) Run() {
 		fmt.Println("	showconfig		-- list the configs in use")
 		fmt.Println("	inference		-- single inference request, e.g. inference request.json")
 		fmt.Println("	batchInference		-- batch inference request, e.g. batchInference request.json")
+		fmt.Println("	fetchModel		-- fetch the model from the specified node, e.g. fetchModel request.json")
 		fmt.Println("	help       		-- show all cmd")
 		fmt.Println("	quit       		-- quit")
 		fmt.Println("Use \"help <command>\" for more information about inference command.\n")
@@ -139,6 +144,12 @@ func (cmd *HelpCmd) Run() {
 			fmt.Println("	{0}: request the absolute path of the json file")
 			fmt.Println("file content format:")
 			fmt.Println("	{\"serviceId\":\"lr-test\",\"batchDataList\":[{\"index\":0,\"featureData\":{\"x0\":0.4853,\"x1\":1.1996,\"x2\":-1.574,\"x3\":-0.8811,\"x4\":-0.6176,\"x5\":0.5997,\"x6\":-0.5361,\"x7\":-0.1189,\"x8\":-1.5728},\"sendToRemoteFeatureData\":{\"device_id\":\"299\",\"phone_num\":585}}]}\n")
+		case command == "fetchModel":
+			fmt.Println("Usage: fetchModel [args...]")
+			fmt.Println("args:")
+			fmt.Println("	{0}: request the absolute path of the json file")
+			fmt.Println("file content format:")
+			fmt.Println("	{\"sourceIp\":\"127.0.0.1\",\"sourcePort\":8000,\"serviceId\":\"lr-test\", \"namespace\":\"guest#9999#arbiter-10000#guest-9999#host-10000#model\", \"tableName\":\"2020071410461638392952\"}\n")
 		default:
 
 		}
@@ -184,7 +195,7 @@ func (cmd *InferenceCmd) Run() {
 		return
 	}
 
-	content, err := readParams(cmd.Param[0])
+	content, err := ReadParams(cmd.Param[0])
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -236,7 +247,7 @@ func (cmd *BatchInferenceCmd) Run() {
 	}
 
 	// params file path
-	content, err := readParams(cmd.Param[0])
+	content, err := ReadParams(cmd.Param[0])
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -257,7 +268,7 @@ func (cmd *BatchInferenceCmd) Run() {
 	}
 }
 
-func readParams(path string) ([]byte, error) {
+func ReadParams(path string) ([]byte, error) {
 	// read file content
 	file, err := os.Open(path)
 
@@ -281,4 +292,75 @@ func readParams(path string) ([]byte, error) {
 	request = strings.ReplaceAll(request, "\r", "")
 	request = strings.ReplaceAll(request, "\t", "")
 	return []byte(request), err
+}
+
+func ReadFile(path string) (string, error) {
+	// read file content
+	file, err := os.Open(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	stat, _ := file.Stat()
+	if size := stat.Size(); size == 0 {
+		return "", errors.New("file content empty")
+	}
+
+	buffer := make([]byte, stat.Size())
+	_, err = file.Read(buffer)
+	if err != nil {
+		return "", err
+	}
+
+	request := string(buffer)
+	request = strings.ReplaceAll(request, "\n", "")
+	request = strings.ReplaceAll(request, "\r", "")
+	request = strings.ReplaceAll(request, "\t", "")
+	return request, err
+}
+
+func (cmd *FetchModelCmd) Run() {
+	/*
+		{
+			"namespace": "guest#9999#arbiter-10000#guest-9999#host-10000#model",
+			"sourceIp": "127.0.0.1",
+			"sourcePort": 8001,
+			"tableName": "2020071410461638392952"
+		}
+	*/
+	var err error
+	if len(cmd.Param) == 0 {
+		fmt.Println("params empty")
+		return
+	}
+
+	// params file path
+	content, err := ReadParams(cmd.Param[0])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	contentMap := common.JsonToMap(string(content))
+
+	fetchModelRequest := pb.FetchModelRequest{
+		ServiceIds: contentMap["serviceIds"].([]string),
+		SourceIp:   contentMap["sourceIp"].(string),
+		SourcePort: int32(contentMap["sourcePort"].(float64)),
+		TableName:  contentMap["tableName"].(string),
+		Namespace:  contentMap["namespace"].(string),
+	}
+
+	fetchModelResponse, err := rpc.FetchModel(cmd.Address, &fetchModelRequest)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if fetchModelResponse != nil {
+		resp, err := json.Marshal(fetchModelResponse)
+		if err == nil {
+			fmt.Println(string(resp))
+		}
+	}
 }

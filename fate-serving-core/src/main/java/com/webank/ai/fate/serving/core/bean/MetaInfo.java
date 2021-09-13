@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MetaInfo {
-    public static final long CURRENT_VERSION = 204;
+    public static final long CURRENT_VERSION = 210;
     public static List<AdaptorDescriptor.ParamDescriptor> inferenceParamDescriptorList;
     public static List<AdaptorDescriptor.ParamDescriptor> batchInferenceParamDescriptorList;
     public static Boolean PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH;
@@ -59,6 +59,7 @@ public class MetaInfo {
     public static Integer PROPERTY_LR_SPLIT_SIZE;
     public static String PROPERTY_SERVICE_ROLE_NAME;
     public static String PROPERTY_MODEL_TRANSFER_URL;
+    public static boolean PROPERTY_MODEL_SYNC;
     public static Integer PROPERTY_COORDINATOR;
     public static Integer PROPERTY_SERVER_PORT;
     public static String PROPERTY_INFERENCE_SERVICE_NAME;
@@ -95,6 +96,19 @@ public class MetaInfo {
     public static String PROPERTY_PROXY_GRPC_INTER_CLIENT_PRIVATEKEY_FILE;
     public static String PROPERTY_PROXY_GRPC_INTER_SERVER_CERTCHAIN_FILE;
     public static String PROPERTY_PROXY_GRPC_INTER_SERVER_PRIVATEKEY_FILE;
+    public static Integer PROPERTY_ADMIN_HEALTH_CHECK_TIME;
+    public static Boolean PROPERTY_ALLOW_HEALTH_CHECK;
+    public static Integer HTTP_CLIENT_CONFIG_CONN_REQ_TIME_OUT;
+    public static Integer HTTP_CLIENT_CONFIG_CONN_TIME_OUT;
+    public static Integer HTTP_CLIENT_CONFIG_SOCK_TIME_OUT;
+    public static Integer HTTP_CLIENT_INIT_POOL_MAX_TOTAL;
+    public static Integer HTTP_CLIENT_INIT_POOL_DEF_MAX_PER_ROUTE;
+    public static Integer HTTP_CLIENT_INIT_POOL_SOCK_TIME_OUT;
+    public static Integer HTTP_CLIENT_INIT_POOL_CONN_TIME_OUT;
+    public static Integer HTTP_CLIENT_INIT_POOL_CONN_REQ_TIME_OUT;
+    public static Integer HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT;
+    public static Integer HTTP_CLIENT_TRAN_CONN_TIME_OUT;
+    public static Integer HTTP_CLIENT_TRAN_SOCK_TIME_OUT;
 
     public static Map toMap() {
         Map result = Maps.newHashMap();

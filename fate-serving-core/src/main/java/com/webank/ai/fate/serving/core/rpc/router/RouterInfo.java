@@ -18,11 +18,39 @@ package com.webank.ai.fate.serving.core.rpc.router;
 
 public class RouterInfo {
 
+    public Protocol getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    private Protocol  protocol;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    private String url;
+
     private String host;
 
     private Integer port;
 
     private boolean useSSL;
+
+    private String negotiationType;
+
+    private String certChainFile;
+
+    private String privateKeyFile;
+
+    private String caFile;
 
     public boolean isUseSSL() {
         return useSSL;
@@ -46,6 +74,38 @@ public class RouterInfo {
 
     public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public String getCaFile() {
+        return caFile;
+    }
+
+    public String getCertChainFile() {
+        return certChainFile;
+    }
+
+    public String getNegotiationType() {
+        return negotiationType;
+    }
+
+    public String getPrivateKeyFile() {
+        return privateKeyFile;
+    }
+
+    public void setCaFile(String caFile) {
+        this.caFile = caFile;
+    }
+
+    public void setCertChainFile(String certChainFile) {
+        this.certChainFile = certChainFile;
+    }
+
+    public void setNegotiationType(String negotiationType) {
+        this.negotiationType = negotiationType;
+    }
+
+    public void setPrivateKeyFile(String privateKeyFile) {
+        this.privateKeyFile = privateKeyFile;
     }
 
     @Override
