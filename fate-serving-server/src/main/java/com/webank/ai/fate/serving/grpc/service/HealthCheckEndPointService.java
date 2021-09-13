@@ -5,6 +5,7 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.health.*;
 import com.webank.ai.fate.serving.common.model.Model;
+import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.utils.TelnetUtil;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
@@ -23,6 +24,8 @@ public class HealthCheckEndPointService implements HealthCheckAware{
     private RouterService routerService;
     @Autowired
     private ModelManager  modelManager;
+
+    private static HealthCheckEndPointService checkEndPointServiceInstance;
 
     private  void  checkFateFlow(HealthCheckResult  healthCheckResult){
         if (routerService != null) {
@@ -62,6 +65,20 @@ public class HealthCheckEndPointService implements HealthCheckAware{
                 healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_DEFAULT_FATEFLOW.getItemName(),"default fateflow url is ok",HealthCheckStatus.ok));
             }
 
+        }
+    }
+
+    private void checkReturnAbleNum(HealthCheckResult  healthCheckResult){
+        List<Model> models =  modelManager.listAllModel();
+        if(models != null||models.size() > 0){
+            for(Model model : models){
+                ModelProcessor modelProcessor = model.getModelProcessor();
+                if(modelProcessor.getReturnNums() > 1){
+                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_RETURNABLE_NUM.getItemName(),"There are more than one returnable components in the " + model.getResourceName(),HealthCheckStatus.warn));
+                }else{
+                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_RETURNABLE_NUM.getItemName(), "The number of returnable components in the " + model.getResourceName() + " is norma",HealthCheckStatus.ok));
+                }
+            }
         }
     }
 
@@ -113,6 +130,9 @@ public class HealthCheckEndPointService implements HealthCheckAware{
                             case CHECK_DEFAULT_FATEFLOW:
                                 checkDefaultFateflow(healthCheckResult);
                                 break;
+                            case CHECK_RETURNABLE_NUM:
+                                checkReturnAbleNum(healthCheckResult);
+                                break;
                         }
                     }
             );
@@ -124,4 +144,12 @@ public class HealthCheckEndPointService implements HealthCheckAware{
 
     }
 
+    @Autowired
+    public void setCheckEndPointServiceInstance(HealthCheckEndPointService checkEndPointServiceInstance){
+        HealthCheckEndPointService.checkEndPointServiceInstance = checkEndPointServiceInstance;
+    }
+
+    public static HealthCheckEndPointService getCheckEndPointServiceInstance() {
+        return HealthCheckEndPointService.checkEndPointServiceInstance;
+    }
 }

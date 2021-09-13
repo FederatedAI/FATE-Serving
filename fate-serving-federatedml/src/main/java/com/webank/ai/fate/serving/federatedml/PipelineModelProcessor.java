@@ -188,6 +188,20 @@ public class PipelineModelProcessor implements ModelProcessor {
         });
     }
 
+    @Override
+    public int getReturnNums() {
+        if(pipeLineNode.size() > 0){
+            int num = 0;
+            for(BaseComponent component : pipeLineNode){
+                if(component instanceof Returnable){
+                    num++;
+                }
+            }
+            return num;
+        }
+        return 0;
+    }
+
 //    @Override
 //    public ModelProcessor initComponentParmasMap() {
 ////        componentMap.forEach((cptName,instance)->{

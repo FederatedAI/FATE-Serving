@@ -36,6 +36,8 @@ public interface ModelProcessor {
 
     public  void  setModel(Model model);
 
+    public int getReturnNums();
+
   //  public ModelProcessor initComponentParmasMap();
 
 }
