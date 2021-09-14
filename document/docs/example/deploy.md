@@ -11,7 +11,9 @@ zk.url=172.168.0.1:2181,172.168.0.2:2181,172.168.0.3:2181
 proxy.grpc.intra.port=8879
 proxy.grpc.inter.port=9370
 ```
-•	guest 的serving-proxy router_table.json配置：  
+•	guest 的serving-proxy router_table.json配置： 
+ 
+由于guest的请求只会向外发送，所以只需要配置出口ip端口就好， 如下代码所示只需要配置default转发规则，则会将所有请求转发至出口ip，而出口ip需要与host端proxy.grpc.inter.port对齐。
 ```yml
 xxxxxxxxxx
 {
@@ -30,7 +32,6 @@ xxxxxxxxxx
   }
 }
 ```
-由于guest的请求只会向外发送，所以只需要配置出口ip端口就好， 如以上代码所示只需要配置default转发规则，则会将所有请求转发至出口ip。而出口ip需要与host端proxy.grpc.inter.port对齐
 
 •	guest 的 serving-server application.properties 配置： 
 ```yml

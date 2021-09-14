@@ -1,7 +1,6 @@
 ### 配置
 目前fate-serving 使用log4j2作为日志组件，使用log4j2.xml来作为配置文件。
-```yml
-xxxxxxxxxx
+```xml
 <Configuration status="ERROR" monitorInterval="60">
     <Properties>
         <Property name="logdir">logs</Property>
@@ -101,7 +100,7 @@ xxxxxxxxxx
 
 ### 可选打印内容
 工程的配置文件中现提供两个可选参数，启动即可在flow日志中打印请求的参数和返回值，可以根据自己需要修改参数并重启系统
-```yml
+```properties
 print.input.data=true   // flow日志打印参数
 print.output.data=true  // flow日志打印返回值
 ```
