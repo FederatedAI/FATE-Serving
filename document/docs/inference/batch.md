@@ -33,8 +33,7 @@ content-application/json
 </table>
 
 #### 请求示例
-```yml
-xxxxxxxxxx
+```json
 {
     "head": {
         "serviceId": "test-lr"
@@ -127,8 +126,7 @@ xxxxxxxxxx
   </tr>
 </table>
 
-```yml
-xxxxxxxxxx
+```json
 {
     "retcode": 0,
     "retmsg": "",
@@ -194,8 +192,7 @@ xxxxxxxxxx
 ```
 
 #### 示例
-```yml
-xxxxxxxxxx
+```java
 package com.webank.ai.fate.serving.sdk.client;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -237,7 +234,7 @@ public class RegisterClientExample {
 		featureData.put("x7", 0.102345);
 		inferenceRequest.setFeatureData(featureData);
 		Map<String,Object>  sendToRemote = Maps.newHashMap();
-		sendToRemote.put("device_id","helloworld");
+		sendToRemote.put("id","123");
 	/**
 		* sendToRemote 数据会发送到host ，需要谨慎检查是否是敏感数据
 		*/

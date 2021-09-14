@@ -4,8 +4,7 @@ PipelineModelProcessor类是模型处理逻辑的实现类，serving-server在�
 2) 合并远端数据 （这一步只在Guest方存在）  
 
 BaseComponent 类是所有算法组件的基类，它实现了LocalInferenceAware接口  
-```yml
-xxxxxxxxxx
+```java
 public interface LocalInferenceAware {
 ​
     public Map<String, Object> localInference(Context context, List<Map<String, Object>> input);
@@ -14,15 +13,14 @@ public interface LocalInferenceAware {
 ```
 PipelineModelProcessor中的pipeline在检测到组件为LocalInferenceAware时，会调用localInference方法来进行本地预测。
 另外一个重要的接口MergeInferenceAware，实现该接口的组件可以执行合并远端返回数据的逻辑。  
-```yml
-xxxxxxxxxx
+```java
 public interface MergeInferenceAware {
 ​
     public Map<String, Object> mergeRemoteInference(Context context, List<Map<String, Object>> localData, Map<String, Object> remoteData);
 }
 ```
 
-### HeteroSecureBoost 组件
+### HeteroSecureBoost 在线推理
 HeteroSecureBoost 为纵向联邦SecureBoost在线推理的实现过程，与离线不同的是，目前serving只支持单个host的预测。  
 它主要包含3个文件"HeteroSecureBoost", "HeteroSecureBoostingTreeGuest", "HeteroSecureBoostingTreeHost"，下面对这三个文件展开说明
 
@@ -67,14 +65,16 @@ HeteroLR是HeteroLRGuest和HeteroLRHost的模型基类，该基类提供了模�
 
 1. HeteroLR继承自BaseComponent类，BaseComponent类为所有模型的基类，所有算法模型必须继承该类和实现相关接口，用于统一的调度。
 2. 模型初始化: initModel函数，功能是对输入的Meta和Param两个序列化的模型文件进行反序列话，同时，初始化相关的类属性，初始化的内容包括:  
-    a. weight: LR模型的权值  
-    b. intercept: LR模型的偏置
+    >weight: LR模型的权值  
+    >intercept: LR模型的偏置
+
 3. 功能函数说明:  
-    a. forward: 计算score = weight * value + intercept, 若是host方，则intercept为0
+    forward: 计算score = weight * value + intercept, 若是host方，则intercept为0
 
 #### HeteroLRGuest and HeteroLRHost
-HeteroLRGuest和HeteroLRHost是party guest和host对应的实现代码，其中party guest收到请求后，会执行推理过程，与此同时，需要与host也一起进行推理，下面给出具体说明。
-
+HeteroLRGuest和HeteroLRHost是party guest和host对应的实现代码，其中party guest收到请求后，会执行推理过程，与此同时，需要与host也一起进行推理，下面给出具体说明：
+```text
 1. 系统针对请求的id，同时给guest和host发起推理请求
 2. Host接收到推理指令后，执行forward函数的前向计算流程，并将结果返回，由系统调度给guest
 3. Guest接收到推理指令后，执行forward函数的前向计算流程，并且获取host的计算结果，组合一起，并计算sigmod得到最终评分，完成完整的推理流程  
+```

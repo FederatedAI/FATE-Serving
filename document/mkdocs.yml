@@ -70,17 +70,23 @@ nav:
       - admin的配置详解: config/admin.md
       - 安全证书配置: config/security.md
   - 部署实例: example/deploy.md
+  - 搭配Nginx使用: example/nginx.md
   - 加载模型: model/load.md
   - HOST如何获取特征: service/adapter.md
   - 推理接口:
       - 接口调用: inference/usage.md
       - 单笔接口: inference/single.md 
       - 批量接口: inference/batch.md
-  - 服务治理: service/service.md
+  - 服务治理: service/register.md
+  - 自定义grpc服务: service/grpc.md
   - serving-admin使用介绍: example/admin.md
-  - 日志相关: log/log.md
-  - 算法相关: 
-      - 基础: algo/base.md
-      - 特征工程: algo/feature.md
-      - 其他组件: algo/components.md
+  - serving-client命令行工具: service/client.md
+  - 源码导读:
+      - 源码结构: release/code.md
+      - 算法相关:
+          - 基础组件: algo/base.md
+          - 特征工程: algo/feature.md
+          - 其他组件: algo/components.md
+      - 日志相关: log/log.md
   - 版本相关: release/change_log.md
+  - FAQ: release/faq.md

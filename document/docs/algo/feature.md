@@ -1,8 +1,8 @@
-目前FATE-serving提供了以下特征工程组件，下面将会一一介绍。
+目前FATE-serving提供了以下特征工程组件:
 ### 纵向特征分箱（Hetero Feature Binning）
 该模块利用训练得到的模型，根据训练时输入的不同参数，将数据转化为数据所在分箱的index。
 #### 文件结构
-该模块由三个文件组成，分别是"HeteroFeatureBinning"， "HeteroFeatureBinningGuest"，"HeteroFeatureBinningHost"。 
+该模块由三个文件组成，分别是"HeteroFeatureBinning"、"HeteroFeatureBinningGuest"、"HeteroFeatureBinningHost"
 
 其中HeteroFeatureBinning是HeteroFeatureBinningGuest和HeteroFeatureBinningHost的基类。而HeteroFeatureBinning继承了BaseComponent。BaseComponent是所有模型组件的基类。
 #### 参数和方法说明
