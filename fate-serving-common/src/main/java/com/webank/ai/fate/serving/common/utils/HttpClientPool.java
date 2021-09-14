@@ -93,7 +93,7 @@ public class HttpClientPool {
         }
     }
 
-    private static CloseableHttpClient getConnection() {
+    public static CloseableHttpClient getConnection() {
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setConnectionManager(poolConnManager)
                 .setDefaultRequestConfig(requestConfig)
