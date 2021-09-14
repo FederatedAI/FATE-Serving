@@ -58,11 +58,8 @@ public class HttpAdapterClientPool {
     private static HttpAdapterResponse getResponse(HttpRequestBase request) {
         CloseableHttpResponse response = null;
         try {
-            logger.info("httpAdapter start!!!");
             response = HttpClientPool.getConnection().execute(request,
                     HttpClientContext.create());
-            logger.info("httpAdapter:{}",response);
-            logger.info("httpAdapter:{}",response.getStatusLine().getStatusCode());
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity, Dict.CHARSET_UTF8);
             return JsonUtil.json2Object(result, HttpAdapterResponse.class);
