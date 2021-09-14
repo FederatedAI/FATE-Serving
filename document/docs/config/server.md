@@ -1,4 +1,4 @@
-### application.properties配置   
+### serving-server.properties配置   
 以下为conf/serving-server.properties文件配置详解。源码中的配置文件没有罗列出所有配置，只保留了必需的配置，其他配置都采用了默认值。如果需要可以根据以下表格来在配置文件中新增条目
 
 <table>
