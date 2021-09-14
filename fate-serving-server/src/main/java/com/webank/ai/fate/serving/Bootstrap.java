@@ -124,6 +124,11 @@ public class Bootstrap {
             MetaInfo.HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT,"60000"));
             MetaInfo.HTTP_CLIENT_TRAN_CONN_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_TRAN_CONN_TIME_OUT,"60000"));
             MetaInfo.HTTP_CLIENT_TRAN_SOCK_TIME_OUT = Integer.valueOf(environment.getProperty(Dict.HTTP_CLIENT_TRAN_SOCK_TIME_OUT,"60000"));
+            MetaInfo.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT = environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT)):10000;
+            MetaInfo.PROPERTY_HTTP_CONNECT_TIMEOUT = environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_TIMEOUT) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_CONNECT_TIMEOUT)):10000;
+            MetaInfo.PROPERTY_HTTP_SOCKET_TIMEOUT = environment.getProperty(Dict.PROPERTY_HTTP_SOCKET_TIMEOUT) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_SOCKET_TIMEOUT)):10000;
+            MetaInfo.PROPERTY_HTTP_MAX_POOL_SIZE = environment.getProperty(Dict.PROPERTY_HTTP_MAX_POOL_SIZE) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_MAX_POOL_SIZE)):50;
+            MetaInfo.PROPERTY_HTTP_ADAPTER_URL = environment.getProperty(Dict.PROPERTY_HTTP_ADAPTER_URL);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("init metainfo error", e);
