@@ -1,4 +1,3 @@
-## fate-serving-client命令行工具
 FATE-Serving提供了fate-serving-client工具进行 下载系统对应版本fate-serving-client：
 >linux版本：fate-serving-client-2.1.0-linux.tar.gz     
 >mac版本：fate-serving-client-2.1.0-darwin.tar.gz
