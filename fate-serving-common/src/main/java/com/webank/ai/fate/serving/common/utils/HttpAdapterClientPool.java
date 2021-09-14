@@ -37,7 +37,7 @@ import java.util.Map;
 
 public class HttpAdapterClientPool {
     private static final Logger logger = LoggerFactory.getLogger(HttpAdapterClientPool.class);
-    private static CloseableHttpClient httpClient;
+//    private static CloseableHttpClient httpClient;
 
     public static HttpAdapterResponse doPost(String url, Map<String, Object> bodyMap) {
         HttpPost httpPost = new HttpPost(url);
@@ -58,8 +58,11 @@ public class HttpAdapterClientPool {
     private static HttpAdapterResponse getResponse(HttpRequestBase request) {
         CloseableHttpResponse response = null;
         try {
-            response = httpClient.execute(request,
+            logger.info("httpAdapter start!!!");
+            response = HttpClientPool.getConnection().execute(request,
                     HttpClientContext.create());
+            logger.info("httpAdapter:{}",response);
+            logger.info("httpAdapter:{}",response.getStatusLine().getStatusCode());
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity, Dict.CHARSET_UTF8);
             return JsonUtil.json2Object(result, HttpAdapterResponse.class);
@@ -97,7 +100,7 @@ public class HttpAdapterClientPool {
     private static HttpAdapterResponse getResponseByHeader(HttpRequestBase request) {
         CloseableHttpResponse response = null;
         try {
-            response = httpClient.execute(request,
+            response = HttpClientPool.getConnection().execute(request,
                     HttpClientContext.create());
             HttpEntity entity = response.getEntity();
             String data = EntityUtils.toString(entity, Dict.CHARSET_UTF8);
