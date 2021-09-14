@@ -18,6 +18,6 @@ FATE-Serving is a high-performance, industrialized serving system for federated 
 
 
 ###  document
-[document](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/FATE-SERVING-2.0.html    ) 
+[document](https://fate-serving.readthedocs.io/en/develop/) 
 
 
