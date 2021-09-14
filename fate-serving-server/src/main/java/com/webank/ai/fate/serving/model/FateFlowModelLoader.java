@@ -35,7 +35,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
@@ -192,6 +191,6 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         String modelParentPathx = "/" + Dict.DEFAULT_FATE_ROOT + "/" + TRANSFER_URI + "/providers";
         String modelParentPath = "/";
         List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
-        logger.info("children = {}", children);
+//        logger.info("children = {}", children);
     }
 }
