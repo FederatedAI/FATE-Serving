@@ -84,7 +84,7 @@ public class Bootstrap {
             MetaInfo.PROPERTY_FEATURE_SINGLE_ADAPTOR = environment.getProperty(Dict.PROPERTY_FEATURE_SINGLE_ADAPTOR);
             MetaInfo.PROPERTY_USE_REGISTER = environment.getProperty(Dict.PROPERTY_USE_REGISTER) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_REGISTER)) : true;
             MetaInfo.PROPERTY_USE_ZK_ROUTER = environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER)) : true;
-            MetaInfo.PROPERTY_PORT = environment.getProperty(Dict.PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PORT)) : 8000;
+            MetaInfo.PROPERTY_SERVER_PORT = environment.getProperty(Dict.PORT) != null ? Integer.valueOf(environment.getProperty(Dict.PORT)) : 8000;
             MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL);
             MetaInfo.PROPERTY_CACHE_TYPE = environment.getProperty(Dict.PROPERTY_CACHE_TYPE, "local");
             MetaInfo.PROPERTY_REDIS_IP = environment.getProperty(Dict.PROPERTY_REDIS_IP);
