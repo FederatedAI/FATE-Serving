@@ -79,7 +79,7 @@ nav:
       - 批量接口: inference/batch.md
   - 服务治理: service/register.md
   - 自定义grpc服务: service/grpc.md
-  - serving-admin使用介绍: example/admin.md
+  - serving-admin使用介绍: service/admin.md
   - serving-client命令行工具: service/client.md
   - 源码导读:
       - 源码结构: release/code.md
