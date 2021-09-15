@@ -7,6 +7,8 @@
 * Add a cluster one-click self-check tool on the admin page, you can view the cluster service self-check status, and the cluster will be self-checked regularly from the background, and the user can also take the initiative to perform one-click self-check.
 * Add routing table editing function, you can directly edit the routing table information of the current serving-proxy configuration through the page.
 * Service topology map optimization, showing the true mapping relationship between each machine, the specified machine can be selected on the topology map and its details can be viewed.
+* Add support for http communication between guest and host.
+* Add a general httpAdaptor for host to obtain features.
 
 # Release 2.0.0
 ## Major Features and Improvements
