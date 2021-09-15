@@ -2,24 +2,49 @@ FATE-Serving提供了fate-serving-client工具进行 下载系统对应版本fat
 >linux版本：[fate-serving-client-2.1.0-linux.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-linux.tar.gz )     
 >mac版本：[fate-serving-client-2.1.0-darwin.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-darwin.tar.gz)
 
-在终端中使用`./fate-serving-client`启动， 默认情况下，client连接localhost:8000，使用参数可以指定目标地址`./fate-serving-client [-h host] [-p port] `host为需要连接的serving-server的ip ， port 为serving-server对外暴露的端口。
->./fate-serving-client -h 127.0.0.1 -p 8000
-![connect](../img/client_connect.jpg)
+需要先确认下载解压出来的文件有没有可执行权限，没有权限就执行 `chmod +777 fate-serving-client-2.1.0-linux`授权。
+
+* 在终端中使用`./fate-serving-client`启动client
+
+![connect](../img/client-connect.jpg)
 
 提供了以下几种指令：
+* help 查看帮助信息
+
+![help](../img/client-help.jpg)
 
 * showconfig 查看服务配置
-![showconfig](../img/client_showconfig.jpg)
 
+![showconfig](../img/client-showconfig.jpg)
 
 * showmodel 查看已发布的模型信息
-![showmodel](../img/client_showmodel.jpg)
 
+![showmodel](../img/client-showmodel.jpg)
 
-* inference 在线单笔预测，参数为参数文件路径，如：
->inference  /data/projects/request.json     
+* flow 查看调用情况信息
 
- /data/projects/request.json文件的内容为：
+![flow](../img/client-flow.jpg)
+
+* showHealthInfo 查看健康监测信息
+
+![showHealthInfo](../img/client-health.jpg)
+
+* jvm 查看JVM信息
+
+![jvm](../img/client-jvm.jpg)
+
+* zk 查看zookeeper注册服务信息
+
+![zk](../img/client-zk.jpg)
+
+* clear 清空当前控制台内容
+
+![clear](../img/client-clear.jpg)
+
+* inference 在线单笔预测
+
+![inference](../img/client-inference.jpg)
+-f 参数为请求参数文件的路径；/data/projects/request.json文件内容，示例：
  ```json
 {
     "serviceId": "lr-test",
@@ -40,10 +65,10 @@ FATE-Serving提供了fate-serving-client工具进行 下载系统对应版本fat
 ``` 
 
 
-* batchInference 在线批量预测，参数为参数文件路径，如：
->batchInference /data/projects/request.json 
+* batchInference 在线批量预测
 
-/data/projects/request.json 的内容为： 
+![batchInference](../img/client-batchInference.jpg)
+-f 参数为请求参数文件的路径；/data/projects/request.json文件内容，示例：
 ```json
 {
     "serviceId": "lr-test",
@@ -70,8 +95,7 @@ FATE-Serving提供了fate-serving-client工具进行 下载系统对应版本fat
 }
 ```
 
-* help 查看帮助信息
-> help
+* exit 关闭连接
 
-* quit 关闭连接
-> quit
+![exit](../img/client-exit.jpg)
+
