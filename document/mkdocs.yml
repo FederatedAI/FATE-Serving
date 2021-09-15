@@ -87,6 +87,6 @@ nav:
           - 基础组件: algo/base.md
           - 特征工程: algo/feature.md
           - 其他组件: algo/components.md
-      - 日志相关: log/log.md
+  - 日志相关: log/log.md
   - 版本相关: release/change_log.md
   - FAQ: release/faq.md
