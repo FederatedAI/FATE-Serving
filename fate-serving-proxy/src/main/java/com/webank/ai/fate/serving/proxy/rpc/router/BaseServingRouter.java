@@ -22,7 +22,7 @@ import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.RouterInterface;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
+import com.webank.ai.fate.serving.core.exceptions.NoRouterInfoException;
 import com.webank.ai.fate.serving.core.rpc.router.RouteType;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.slf4j.Logger;
@@ -75,7 +75,7 @@ public abstract class BaseServingRouter implements RouterInterface {
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         RouterInfo routerInfo = this.route(context, inboundPackage);
         if (routerInfo == null) {
-            throw new NoRouteInfoException(StatusCode.PROXY_ROUTER_ERROR,"PROXY_ROUTER_ERROR");
+            throw new NoRouterInfoException(StatusCode.PROXY_ROUTER_ERROR,"PROXY_ROUTER_ERROR");
         }
         inboundPackage.setRouterInfo(routerInfo);
     }

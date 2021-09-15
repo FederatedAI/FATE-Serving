@@ -39,5 +39,7 @@ public @interface RegisterService {
 
     Role  role()  default   Role.COMMON;
 
+    String  protocol() default "grpc";
+
 
 }

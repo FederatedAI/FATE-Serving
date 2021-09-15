@@ -19,15 +19,18 @@ package com.webank.ai.fate.serving.proxy.rpc.services;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import com.webank.ai.fate.api.networking.proxy.DataTransferServiceGrpc;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.common.rpc.core.AbstractServiceAdaptor;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
+import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.*;
-import com.webank.ai.fate.serving.core.exceptions.ProxyAuthException;
-import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.*;
+import com.webank.ai.fate.serving.core.rpc.router.Protocol;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.security.AuthUtils;
@@ -62,31 +65,75 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     public Proxy.Packet doService(Context context, InboundPackage<Proxy.Packet> data, OutboundPackage<Proxy.Packet> outboundPackage) {
         Proxy.Packet sourcePackage = data.getBody();
         RouterInfo routerInfo = data.getRouterInfo();
-
         try {
             sourcePackage = authUtils.addAuthInfo(sourcePackage);
         } catch (Exception e) {
             logger.error("add auth info error", e);
             throw new ProxyAuthException("add auth info error");
         }
+        if(routerInfo.getProtocol()==null||routerInfo.getProtocol().equals(Protocol.GRPC)){
+            return grpcTransfer(context,sourcePackage,routerInfo);
+        }else if(routerInfo.getProtocol().equals(Protocol.HTTP)){
+            return httpTransfer(context,sourcePackage,routerInfo);
+        }else{
+            throw new  RemoteRpcException("");
+        }
+    }
+
+
+
+
+    private   Proxy.Packet  grpcTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo){
 
         try {
             NettyServerInfo nettyServerInfo;
-            ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo);
+            if (routerInfo.isUseSSL()) {
+                nettyServerInfo = new NettyServerInfo(routerInfo.getNegotiationType(), routerInfo.getCertChainFile(),
+                        routerInfo.getPrivateKeyFile(), routerInfo.getCaFile());
+
+            } else {
+                nettyServerInfo = new NettyServerInfo();
+            }
+
+            ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort(), nettyServerInfo);
             DataTransferServiceGrpc.DataTransferServiceFutureStub stub1 = DataTransferServiceGrpc.newFutureStub(managedChannel);
             stub1.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
             context.setDownstreamBegin(System.currentTimeMillis());
             ListenableFuture<Proxy.Packet> future = stub1.unaryCall(sourcePackage);
             Proxy.Packet packet = future.get(timeout, TimeUnit.MILLISECONDS);
             return packet;
+
         } catch (Exception e) {
             logger.error("unaryCall error", e);
-            throw new RemoteRpcException("unaryCall error " + routerInfo.toString());
+            throw new RemoteRpcException("grpc unaryCall error " + routerInfo.toString());
         } finally {
             long end = System.currentTimeMillis();
             context.setDownstreamCost(end - context.getDownstreamBegin());
         }
+    }
 
+    private  Proxy.Packet  httpTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo) throws BaseException{
+        try {
+            String url = routerInfo.getUrl();
+            String content = null;
+            content = JsonFormat.printer().print(sourcePackage);
+            String resultJson = HttpClientPool.sendPost(url, content, null);
+            logger.info("result json {}", resultJson);
+            Proxy.Packet.Builder resultBuilder = Proxy.Packet.newBuilder();
+            try {
+                JsonFormat.parser().merge(resultJson, resultBuilder);
+            }catch(Exception  e){
+                logger.error("receive invalid http response {}",resultJson);
+                throw  new InvalidResponseException("receive invalid http response");
+            }
+            return resultBuilder.build();
+        }catch(Exception e){
+            if(e instanceof BaseException){
+                throw (BaseException) e;
+            }else{
+                throw  new SysException(e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -94,7 +141,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         Proxy.Packet.Builder builder = Proxy.Packet.newBuilder();
         Proxy.Data.Builder dataBuilder = Proxy.Data.newBuilder();
         Map fateMap = Maps.newHashMap();
-        fateMap.put(Dict.RET_CODE, exceptionInfo.getCode());
+        fateMap.put(Dict.RET_CODE, exceptionInfo.getCode()+500);
         fateMap.put(Dict.RET_MSG, exceptionInfo.getMessage());
         builder.setBody(dataBuilder.setValue(ByteString.copyFromUtf8(JsonUtil.object2Json(fateMap))));
         return builder.build();

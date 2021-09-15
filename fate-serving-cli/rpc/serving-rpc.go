@@ -20,12 +20,91 @@ import (
 	"context"
 	"fate-serving-client/pb"
 	"fmt"
-	"google.golang.org/grpc"
 	"net"
 	"os"
 	"strconv"
 	"time"
+
+	"google.golang.org/grpc"
 )
+
+func QueryMetric(address string, queryPropsRequest *pb.QueryMetricRequest) (*pb.CommonResponse, error) {
+	//glogger.Info("try to UnaryCall,address",address)
+	var conn *grpc.ClientConn
+	var err error
+
+	defer panicRecover()
+
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	c := pb.NewCommonServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	r, err := c.QueryMetrics(ctx, queryPropsRequest)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func QueryJvmInfo(address string, queryJvmRequest *pb.QueryJvmInfoRequest) (*pb.CommonResponse, error) {
+	//glogger.Info("try to UnaryCall,address",address)
+	var conn *grpc.ClientConn
+	var err error
+
+	defer panicRecover()
+
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	c := pb.NewCommonServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	r, err := c.QueryJvmInfo(ctx, queryJvmRequest)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func QueryHealthInfo(address string, queryHealthInfoRequest *pb.HealthCheckRequest) (*pb.CommonResponse, error) {
+	//glogger.Info("try to UnaryCall,address",address)
+	var conn *grpc.ClientConn
+	var err error
+	defer panicRecover()
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	c := pb.NewCommonServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	r, err := c.CheckHealthService(ctx, queryHealthInfoRequest)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
 
 func QueryServingServerConfig(address string, queryPropsRequest *pb.QueryPropsRequest) (*pb.CommonResponse, error) {
 	//glogger.Info("try to UnaryCall,address",address)
@@ -126,6 +205,32 @@ func BatchInference(address string, message *pb.InferenceMessage) (*pb.Inference
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	r, err := c.BatchInference(ctx, message)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func FetchModel(address string, message *pb.FetchModelRequest) (*pb.FetchModelResponse, error) {
+	var conn *grpc.ClientConn
+	var err error
+
+	defer panicRecover()
+
+	conn, err = grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	c := pb.NewModelServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	r, err := c.FetchModel(ctx, message)
 	if err != nil {
 		return nil, err
 	}

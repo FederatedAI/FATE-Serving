@@ -22,5 +22,11 @@ public enum CommonActionType {
     LIST_PROPS,
     QUERY_JVM,
     UPDATE_SERVICE,
-    UPDATE_CONFIG
+    UPDATE_CONFIG,
+    CHECK_HEALTH,
+    QUERY_ROUTER,
+    ADD_ROUTER,
+    UPDATE_ROUTER,
+    DELETE_ROUTER,
+    SAVE_ROUTER
 }

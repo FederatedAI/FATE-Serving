@@ -16,11 +16,16 @@
 
 package com.webank.ai.fate.serving.core.exceptions;
 
-public class NoRouteInfoException extends BaseException {
+import com.webank.ai.fate.serving.core.constant.StatusCode;
 
-    public NoRouteInfoException(int retCode, String message) {
-        super(retCode, message);
+public class RouterInfoOperateException extends BaseException {
+
+    public RouterInfoOperateException(String message) {
+        super(StatusCode.PROXY_UPDATE_ROUTER_TABLE_ERROR, message);
     }
 
+    public RouterInfoOperateException(int retCode, String message) {
+        super(retCode, message);
+    }
 
 }

@@ -46,6 +46,8 @@ public class TestFilePickAdapter extends AbstractSingleFeatureDataAdaptor {
 
         try {
             if (featureMaps.isEmpty()) {
+                logger.info("user dir {}",System.getProperty(Dict.PROPERTY_USER_DIR));
+                logger.info("testHost data path = {}", Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
                 List<String> lines = Files.readAllLines(Paths.get(System.getProperty(Dict.PROPERTY_USER_DIR), "host_data.csv"));
                 for (int i = 0; i < lines.size(); i++) {
                     String[] idFeats = StringUtils.split(lines.get(i), ",");
@@ -64,19 +66,24 @@ public class TestFilePickAdapter extends AbstractSingleFeatureDataAdaptor {
                 }
             }
 
-            Map<String, Object> featureData = featureMaps.get(featureIds.get(Dict.DEVICE_ID));
+            Map<String, Object> featureData = featureMaps.get(featureIds.get(Dict.ID).toString());
             if (featureData != null) {
                 Map clone = (Map) ((HashMap) featureData).clone();
                 returnResult.setData(clone);
                 returnResult.setRetcode(StatusCode.SUCCESS);
+
+
+
             } else {
-                logger.error("cant not find features for {}.", featureIds.get(Dict.DEVICE_ID));
+                logger.error("cant not find features for {}.", featureIds.get(Dict.ID).toString());
                 returnResult.setRetcode(StatusCode.HOST_FEATURE_NOT_EXIST);
+                returnResult.setRetmsg("cant not find features for " +  featureIds.get(Dict.ID).toString());
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("test file adaptore error",ex);
             returnResult.setRetcode(StatusCode.HOST_FEATURE_ERROR);
         }
         return returnResult;
     }
+
 }

@@ -19,7 +19,7 @@ package com.webank.ai.fate.register.common;
 public class ServiceWrapper {
 
     private Integer weight;
-    private Long version;
+   // private Long version;
     private String routerMode;
 
     public ServiceWrapper() {
@@ -34,13 +34,13 @@ public class ServiceWrapper {
         this.weight = weight;
     }
 
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
+//    public Long getVersion() {
+//        return version;
+//    }
+//
+//    public void setVersion(Long version) {
+//        this.version = version;
+//    }
 
     public String getRouterMode() {
         return routerMode;
@@ -57,8 +57,8 @@ public class ServiceWrapper {
         if (wrapper.getWeight() != null) {
             this.setWeight(wrapper.getWeight());
         }
-        if (wrapper.getVersion() != null) {
-            this.setVersion(wrapper.getVersion());
-        }
+//        if (wrapper.getVersion() != null) {
+//            this.setVersion(wrapper.getVersion());
+//        }
     }
 }

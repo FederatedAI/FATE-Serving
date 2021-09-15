@@ -53,16 +53,25 @@ message ModelBindInfo{
 
 }
 
+message PipelineNode{
+    string name = 1;
+    string params = 2;
+}
+
+message ModelProcessorExt{
+
+    repeated PipelineNode nodes = 1;
+}
+
 message ModelInfoEx{
     string tableName = 1;
     string namespace = 2;
     repeated string serviceIds = 3;
     string content = 4;
     int32    index = 5;
-
+    ModelProcessorExt modelProcessorExt = 6;
+    string resourceAdress = 7;
 }
-
-
 
 message QueryModelResponse{
     int32 retcode = 1;
@@ -89,8 +98,33 @@ message PublishResponse{
     bytes data = 4;
 }
 
+message FetchModelRequest {
+    string tableName = 1;
+    string namespace = 2;
+    string sourceIp = 3;
+    int32 sourcePort = 4;
+    string targetIp = 5;
+    int32 targetPort = 6;
+    repeated string serviceIds = 7;
+}
 
+message FetchModelResponse {
+    int32 statusCode = 1;
+    string message = 2;
+}
 
+message ModelTransferRequest {
+    string tableName = 1;
+    string namespace = 2;
+    repeated string serviceIds = 3;
+}
+
+message ModelTransferResponse {
+    int32 statusCode = 1;
+    string message = 2;
+    bytes modelData = 3;
+    bytes cacheData = 4;
+}
 
 service ModelService{
     rpc publishLoad(PublishRequest) returns (PublishResponse);
@@ -99,4 +133,6 @@ service ModelService{
     rpc queryModel(QueryModelRequest)  returns (QueryModelResponse);
     rpc unload(UnloadRequest) returns (UnloadResponse);
     rpc unbind(UnbindRequest) returns (UnbindResponse);
+    rpc fetchModel(FetchModelRequest) returns (FetchModelResponse);
+    rpc modelTransfer(ModelTransferRequest) returns (ModelTransferResponse);
 }

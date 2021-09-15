@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.model;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.register.router.RouterService;
 import com.webank.ai.fate.register.url.URL;
+import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.utils.HttpClientPool;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -30,21 +31,25 @@ import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URLDecoder;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URLEncoder;
+import java.util.*;
 
 @Component
-public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>> {
+public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>> implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(FateFlowModelLoader.class);
+    private static final String TRANSFER_URI = "flow/online/transfer";
 
     @Autowired(required = false)
     private RouterService routerService;
+
+
+    @Autowired
+    ZookeeperRegistry zookeeperRegistry;
 
     @Override
     protected byte[] serialize(Context context, Map<String, byte[]> data) {
@@ -79,7 +84,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
     protected ModelProcessor initPipeLine(Context context, Map<String, byte[]> stringMap) {
         if (stringMap != null) {
             PipelineModelProcessor modelProcessor = new PipelineModelProcessor();
-            modelProcessor.initModel(stringMap);
+            modelProcessor.initModel(context,stringMap);
             return modelProcessor;
         } else {
             return null;
@@ -88,35 +93,9 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
 
     @Override
     protected Map<String, byte[]> doLoadModel(Context context, ModelLoaderParam modelLoaderParam) {
-
         logger.info("read model, name: {} namespace: {}", modelLoaderParam.tableName, modelLoaderParam.nameSpace);
         try {
-            String requestUrl = "";
-
-            String filePath = modelLoaderParam.getFilePath();
-            if (StringUtils.isNotBlank(filePath)) {
-                requestUrl = URLDecoder.decode(filePath);
-            } else if (routerService != null) {
-                URL url = URL.valueOf("flow/online/transfer");
-                List<URL> urls = routerService.router(url);
-                if (urls == null || urls.isEmpty()) {
-                    logger.info("register url not found, {}", url);
-                } else {
-                    url = urls.get(0);
-                    requestUrl = url.toFullString();
-                }
-            }
-
-            if (StringUtils.isBlank(requestUrl)) {
-                requestUrl = MetaInfo.PROPERTY_MODEL_TRANSFER_URL;
-            }
-
-            if (StringUtils.isBlank(requestUrl)) {
-                logger.info("fateflow address not found");
-                return null;
-            }
-
-            logger.info("use request url: {}", requestUrl);
+            String requestUrl =getResource(context,modelLoaderParam);
 
             Map<String, Object> requestData = new HashMap<>(8);
             requestData.put("name", modelLoaderParam.tableName);
@@ -153,4 +132,65 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         return null;
     }
 
+    @Override
+    public String getResource(Context context,ModelLoaderParam modelLoaderParam) {
+        String requestUrl = "";
+        try {
+
+            String filePath = modelLoaderParam.getFilePath();
+            if (StringUtils.isNotBlank(filePath)) {
+                requestUrl = URLDecoder.decode(filePath,"UTF-8");
+            } else if (routerService != null) {
+                //serving 2.1.0兼容
+                String modelParentPathx = "/" + Dict.DEFAULT_FATE_ROOT + "/" + TRANSFER_URI + "/providers";
+                List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
+                URL url = null;
+                List<URL> urls = new ArrayList<>();
+                if (children != null && children.size() > 0) {
+                    String modelVersion = modelLoaderParam.tableName;
+                    String modelId = modelLoaderParam.nameSpace.replace("#", "~");
+                    String uri = "/" + modelId + "/" + modelVersion;
+                    String encodeUri = URLEncoder.encode(uri,"UTF-8");
+                    for (String child : children) {
+                        if(child.endsWith(encodeUri)){
+                            urls.add(URL.valueOf(URLDecoder.decode(child,"UTF-8")));
+                            break;
+                        }
+                    }
+                }
+                if (urls == null || urls.isEmpty()) {
+                    url = URL.valueOf(TRANSFER_URI);
+                    urls = routerService.router(url);
+                }
+
+                if (urls == null || urls.isEmpty()) {
+                    logger.info("register url not found, {}", url);
+                } else {
+                    url = urls.get(0);
+                    requestUrl = url.toFullString();
+                }
+            }
+
+            if (StringUtils.isBlank(requestUrl)) {
+                requestUrl = MetaInfo.PROPERTY_MODEL_TRANSFER_URL;
+            }
+
+            if (StringUtils.isBlank(requestUrl)) {
+                logger.info("fateflow address not found");
+                return null;
+            }
+            logger.info("use request url: {}", requestUrl);
+        }catch (Exception e){
+            logger.error("get flow address error = {}",e);
+        }
+        return requestUrl;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        String modelParentPathx = "/" + Dict.DEFAULT_FATE_ROOT + "/" + TRANSFER_URI + "/providers";
+        String modelParentPath = "/";
+        List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
+//        logger.info("children = {}", children);
+    }
 }

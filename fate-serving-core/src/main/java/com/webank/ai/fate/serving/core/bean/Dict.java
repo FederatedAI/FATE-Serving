@@ -60,6 +60,8 @@ public class Dict {
     public static final String PROPERTY_FEATURE_SINGLE_ADAPTOR = "feature.single.adaptor";
     public static final String PROPERTY_BATCH_SPLIT_SIZE = "batch.split.size";
     public static final String PROPERTY_LR_SPLIT_SIZE = "lr.split.size";
+    public static final String CACHE_TYPE_REDIS = "redis";
+    public static final String DEFAULT_FATE_ROOT = "FATE-SERVICES";
 
 
     /**
@@ -112,6 +114,7 @@ public class Dict {
     public static final String PROPERTY_USE_ZK_ROUTER = "useZkRouter";
     public static final String PROPERTY_USE_REGISTER = "useRegister";
     public static final String PROPERTY_MODEL_TRANSFER_URL = "model.transfer.url";
+    public static final String PROPERTY_MODEL_SYNC = "model.synchronize";
     public static final String PROPERTY_SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
     public static final String PROPERTY_FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
     public static final String PROPERTY_ACL_ENABLE = "acl.enable";
@@ -150,6 +153,7 @@ public class Dict {
     public static final String PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT = "proxy.grpc.batch.inference.timeout";
     public static final String PROPERTY_MODEL_CACHE_PATH = "model.cache.path";
     public static final String PROPERTY_LR_USE_PARALLEL="lr.use.parallel";
+    public static final String PROPERTY_ALLOW_HEALTH_CHECK = "health.check.allow";
 
     public static final String ACTION_TYPE_ASYNC_EXECUTE = "ASYNC_EXECUTE";
 
@@ -181,6 +185,7 @@ public class Dict {
     public static final String MY_PARTY_NAME = "myPartyName";
     public static final String FEDERATED_INFERENCE = "federatedInference";
     public static final String FEDERATED_INFERENCE_FOR_TREE = "federatedInference4Tree";
+    public static final String ID = "id";
     public static final String DEVICE_ID = "device_id";
     public static final String PHONE_NUM = "phone_num";
     public static final String FEDERATED_PARAMS = "federatedParams";
@@ -271,5 +276,26 @@ public class Dict {
     public static final String PARAMS_JOB_PARAMETERS = "job_parameters";
     public static final String PARAMS_SERVICE_ID = "service_id";
     public static final String BATCH_INFERENCE_SPLIT_SIZE = "batch.inference.split.size";
+    public static final String WARN_LIST = "warnList";
+    public static final String ERROR_LIST =  "errorList";
+    public static final String HEALTH_INFO =  "healthInfo";
+    public static final String PROPERTY_ADMIN_HEALTH_CHECK_TIME = "health.check.time";
 
+    public static final String HTTP_CLIENT_CONFIG_CONN_REQ_TIME_OUT = "httpclinet.config.connection.req.timeout";
+    public static final String HTTP_CLIENT_CONFIG_CONN_TIME_OUT = "httpclient.config.connection.timeout";
+    public static final String HTTP_CLIENT_CONFIG_SOCK_TIME_OUT = "httpclient.config.sockect.timeout";
+    public static final String HTTP_CLIENT_INIT_POOL_MAX_TOTAL = "httpclient.init.pool.maxtotal";
+    public static final String HTTP_CLIENT_INIT_POOL_DEF_MAX_PER_ROUTE = "httpclient.init.pool.def.max.pre.route";
+    public static final String HTTP_CLIENT_INIT_POOL_SOCK_TIME_OUT = "httpclient.init.pool.sockect.timeout";
+    public static final String HTTP_CLIENT_INIT_POOL_CONN_TIME_OUT = "httpclient.init.pool.connection.timeout";
+    public static final String HTTP_CLIENT_INIT_POOL_CONN_REQ_TIME_OUT = "httpclient.init.pool.connection.req.timeout";
+    public static final String HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT = "httpclient.tran.connection.req.timeout";
+    public static final String HTTP_CLIENT_TRAN_CONN_TIME_OUT = "httpclient.tran.connection.timeout";
+    public static final String HTTP_CLIENT_TRAN_SOCK_TIME_OUT = "httpclient.tran.sockect.timeout";
+
+    public static final String PROPERTY_HTTP_CONNECT_TIMEOUT = "http.connect.timeout";
+    public static final String PROPERTY_HTTP_SOCKET_TIMEOUT = "http.socket.timeout";
+    public static final String PROPERTY_HTTP_MAX_POOL_SIZE = "http.max.pool.size";
+    public static final String PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT = "http.connect.request.timeout";
+    public static final String PROPERTY_HTTP_ADAPTER_URL = "http.adapter.url";
 }

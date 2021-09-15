@@ -66,6 +66,15 @@ message CommonResponse{
     bytes data = 3;
 }
 
+
+message HealthCheckRequest {
+    string type = 1;
+    string version = 2;
+    string mode = 3;
+
+}
+
+
 service CommonService {
     rpc queryMetrics(QueryMetricRequest)  returns (CommonResponse);
     rpc updateFlowRule(UpdateFlowRuleRequest)  returns (CommonResponse);
@@ -73,6 +82,7 @@ service CommonService {
     rpc queryJvmInfo(QueryJvmInfoRequest)  returns (CommonResponse);
     rpc updateService(UpdateServiceRequest)  returns (CommonResponse);
     rpc updateConfig(UpdateConfigRequest)  returns (CommonResponse);
+    rpc checkHealthService(HealthCheckRequest) returns (CommonResponse);
 }
 
 

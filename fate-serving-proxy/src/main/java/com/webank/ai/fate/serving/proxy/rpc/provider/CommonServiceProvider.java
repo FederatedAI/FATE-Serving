@@ -25,6 +25,7 @@ import com.webank.ai.fate.register.common.RouterMode;
 import com.webank.ai.fate.register.common.ServiceWrapper;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.common.health.HealthCheckResult;
 import com.webank.ai.fate.serving.common.flow.FlowCounterManager;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.JvmInfoCounter;
@@ -40,6 +41,7 @@ import com.webank.ai.fate.serving.core.exceptions.SysException;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import com.webank.ai.fate.serving.proxy.bean.RouteTableWrapper;
 import com.webank.ai.fate.serving.proxy.rpc.router.ConfigFileBasedServingRouter;
+import com.webank.ai.fate.serving.proxy.rpc.services.HealthCheckEndPointService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,9 +64,16 @@ import java.util.concurrent.ConcurrentMap;
 public class CommonServiceProvider extends AbstractProxyServiceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(CommonServiceProvider.class);
-
+    private String userDir = System.getProperty(Dict.PROPERTY_USER_DIR);
+    private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
+    private final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     @Autowired
     FlowCounterManager flowCounterManager;
+    @Autowired
+    HealthCheckEndPointService healthCheckEndPointService;
+
+    @Autowired
+    ConfigFileBasedServingRouter configFileBasedServingRouter;
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
@@ -116,7 +125,6 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         CommonServiceProto.QueryPropsRequest queryPropsRequest = (CommonServiceProto.QueryPropsRequest) inboundPackage.getBody();
         String keyword = queryPropsRequest.getKeyword();
         CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
-        builder.setStatusCode(StatusCode.SUCCESS);
         Map metaInfoMap = MetaInfo.toMap();
         Map map;
         if (StringUtils.isNotBlank(keyword)) {
@@ -130,7 +138,7 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         } else {
             map = metaInfoMap;
         }
-        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(map).getBytes()));
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(map).getBytes())).setStatusCode(StatusCode.SUCCESS).setMessage(Dict.SUCCESS);
         return builder.build();
     }
 
@@ -176,11 +184,11 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
             }
 
             String originVersion = originUrl.getParameter(Constants.VERSION_KEY);
-            if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
-                parameters.put(Constants.VERSION_KEY, String.valueOf(version));
-                serviceWrapper.setVersion(version);
-                hasChange = true;
-            }
+//            if (version != -1 && (originVersion == null || version != Long.parseLong(originVersion))) {
+//                parameters.put(Constants.VERSION_KEY, String.valueOf(version));
+//                serviceWrapper.setVersion(version);
+//                hasChange = true;
+//            }
 
             CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
 
@@ -251,5 +259,17 @@ public class CommonServiceProvider extends AbstractProxyServiceProvider {
         } catch (Exception e) {
             throw new SysException(e.getMessage());
         }
+    }
+
+
+
+    @FateServiceMethod(name = "CHECK_HEALTH")
+    public CommonServiceProto.CommonResponse checkHealthService(Context context, InboundPackage inboundPackage) {
+
+        HealthCheckResult healthCheckResult = healthCheckEndPointService.check(context);
+        CommonServiceProto.CommonResponse.Builder builder = CommonServiceProto.CommonResponse.newBuilder();
+        builder.setStatusCode(StatusCode.SUCCESS);
+        builder.setData(ByteString.copyFrom(JsonUtil.object2Json(healthCheckResult).getBytes()));
+        return builder.build();
     }
 }

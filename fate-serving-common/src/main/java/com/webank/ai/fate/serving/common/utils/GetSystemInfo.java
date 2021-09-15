@@ -115,7 +115,7 @@ public class GetSystemInfo {
                             Optional<InetAddress> addressOp = toValidAddress(addresses.nextElement());
                             if (addressOp.isPresent()) {
                                 try {
-                                    if (addressOp.get().isReachable(100)) {
+                                    if (addressOp.get().isReachable(10000)) {
                                         return addressOp.get();
                                     }
                                 } catch (IOException e) {

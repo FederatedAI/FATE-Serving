@@ -17,6 +17,7 @@
 package com.webank.ai.fate.serving.common.utils;
 
 import com.webank.ai.fate.serving.core.bean.Dict;
+import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.utils.ObjectTransform;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -56,9 +57,9 @@ public class HttpClientPool {
 
     private static void config(HttpRequestBase httpRequestBase, Map<String, String> headers) {
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(500)
-                .setConnectTimeout(500)
-                .setSocketTimeout(2000).build();
+                .setConnectionRequestTimeout(MetaInfo.HTTP_CLIENT_CONFIG_CONN_REQ_TIME_OUT)
+                .setConnectTimeout(MetaInfo.HTTP_CLIENT_CONFIG_CONN_TIME_OUT)
+                .setSocketTimeout(MetaInfo.HTTP_CLIENT_CONFIG_SOCK_TIME_OUT).build();
         httpRequestBase.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
         if (headers != null) {
             headers.forEach((key, value) -> {
@@ -78,11 +79,11 @@ public class HttpClientPool {
                     Dict.HTTPS, sslsf).build();
             poolConnManager = new PoolingHttpClientConnectionManager(
                     socketFactoryRegistry);
-            poolConnManager.setMaxTotal(500);
-            poolConnManager.setDefaultMaxPerRoute(200);
-            int socketTimeout = 10000;
-            int connectTimeout = 10000;
-            int connectionRequestTimeout = 10000;
+            poolConnManager.setMaxTotal(MetaInfo.HTTP_CLIENT_INIT_POOL_MAX_TOTAL);
+            poolConnManager.setDefaultMaxPerRoute(MetaInfo.HTTP_CLIENT_INIT_POOL_DEF_MAX_PER_ROUTE);
+            int socketTimeout = MetaInfo.HTTP_CLIENT_INIT_POOL_SOCK_TIME_OUT;
+            int connectTimeout = MetaInfo.HTTP_CLIENT_INIT_POOL_CONN_TIME_OUT;
+            int connectionRequestTimeout = MetaInfo.HTTP_CLIENT_INIT_POOL_CONN_REQ_TIME_OUT;
             requestConfig = RequestConfig.custom().setConnectionRequestTimeout(
                     connectionRequestTimeout).setSocketTimeout(socketTimeout).setConnectTimeout(
                     connectTimeout).build();
@@ -92,7 +93,7 @@ public class HttpClientPool {
         }
     }
 
-    private static CloseableHttpClient getConnection() {
+    public static CloseableHttpClient getConnection() {
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setConnectionManager(poolConnManager)
                 .setDefaultRequestConfig(requestConfig)
@@ -115,6 +116,14 @@ public class HttpClientPool {
         HttpPost httpPost = new HttpPost(url);
         config(httpPost, headers);
         StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);
+        stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
+        httpPost.setEntity(stringEntity);
+        return getResponse(httpPost);
+    }
+    public static String sendPost(String url, String requestData, Map<String, String> headers) {
+        HttpPost httpPost = new HttpPost(url);
+        config(httpPost, headers);
+        StringEntity stringEntity = new StringEntity(requestData, Dict.CHARSET_UTF8);
         stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
         httpPost.setEntity(stringEntity);
         return getResponse(httpPost);
@@ -160,9 +169,9 @@ public class HttpClientPool {
     public static String transferPost(String url, Map<String, Object> requestData) {
         HttpPost httpPost = new HttpPost(url);
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(60000)
-                .setConnectTimeout(60000)
-                .setSocketTimeout(60000).build();
+                .setConnectionRequestTimeout(MetaInfo.HTTP_CLIENT_TRAN_CONN_REQ_TIME_OUT)
+                .setConnectTimeout(MetaInfo.HTTP_CLIENT_TRAN_CONN_TIME_OUT)
+                .setSocketTimeout(MetaInfo.HTTP_CLIENT_TRAN_SOCK_TIME_OUT).build();
         httpPost.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
         httpPost.setConfig(requestConfig);
         StringEntity stringEntity = new StringEntity(ObjectTransform.bean2Json(requestData), Dict.CHARSET_UTF8);

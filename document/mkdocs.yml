@@ -1,0 +1,92 @@
+site_name: Fate-Serving
+repo_name: FederatedAI/FATE-Serving
+repo_url: https://github.com/FederatedAI/FATE-Serving
+site_url: https://github.com/FederatedAI/FATE-Serving
+
+copyright: © Copyright 2020 WeBank Co., Ltd. | All Rights Reserved.
+
+theme:
+  name: material
+  features:
+    tabs: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+      watch:
+        - fedvision
+  - mkdocs-jupyter
+
+markdown_extensions:
+  - pymdownx.snippets
+  - mdx_math
+  - codehilite
+  - admonition
+  - codehilite:
+      guess_lang: false
+      linenums: false
+  - toc:
+      permalink: true
+  - footnotes
+  - meta
+  - def_list
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed
+  - pymdownx.tilde
+
+extra_css:
+  - 'css/termynal.css'
+  - 'css/custom.css'
+
+extra_javascript:
+#  - 'https://unpkg.com/mermaid@8.4.6/dist/mermaid.min.js'
+  - 'js/termynal.js'
+  - 'js/custom.js'
+  - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
+
+nav:
+  - 简介: index.md
+  - 快速部署: quickstart/quickstart.md
+  - 相关配置:
+      - server的配置详解: config/server.md
+      - proxy的配置详解: config/proxy.md
+      - admin的配置详解: config/admin.md
+      - 安全证书配置: config/security.md
+  - 部署实例: example/deploy.md
+  - 搭配Nginx使用: example/nginx.md
+  - 加载模型: model/load.md
+  - HOST如何获取特征: service/adapter.md
+  - 推理接口:
+      - 接口调用: inference/usage.md
+      - 单笔接口: inference/single.md 
+      - 批量接口: inference/batch.md
+  - 服务治理: service/register.md
+  - 自定义grpc服务: service/grpc.md
+  - serving-admin使用介绍: service/admin.md
+  - serving-client命令行工具: service/client.md
+  - 源码导读:
+      - 源码结构: release/code.md
+      - 算法相关:
+          - 基础组件: algo/base.md
+          - 特征工程: algo/feature.md
+          - 其他组件: algo/components.md
+  - 日志相关: log/log.md
+  - 版本相关: release/change_log.md
+  - FAQ: release/faq.md

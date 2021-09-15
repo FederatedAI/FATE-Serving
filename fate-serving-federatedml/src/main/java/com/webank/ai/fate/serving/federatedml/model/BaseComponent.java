@@ -19,6 +19,7 @@ package com.webank.ai.fate.serving.federatedml.model;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.serving.common.cache.Cache;
 import com.webank.ai.fate.serving.common.model.LocalInferenceAware;
+import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.common.rpc.core.FederatedRpcInvoker;
 import com.webank.ai.fate.serving.core.bean.Context;
@@ -28,9 +29,7 @@ import com.webank.ai.fate.serving.core.utils.ProtobufUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 public abstract class BaseComponent implements LocalInferenceAware {
@@ -55,7 +54,19 @@ public abstract class BaseComponent implements LocalInferenceAware {
     protected FederatedRpcInvoker<Proxy.Packet> federatedRpcInvoker;
     protected Cache cache;
 
+    public String getSite() {
+        return site;
+    }
+
+    public void setSite(String site) {
+        this.site = site;
+    }
+
+    protected String site;
+    protected Model model;
+
     public abstract int initModel(byte[] protoMeta, byte[] protoParam);
+
 
     protected <T> T parseModel(com.google.protobuf.Parser<T> protoParser, byte[] protoString) throws com.google.protobuf.InvalidProtocolBufferException {
         return ProtobufUtils.parseProtoObject(protoParser, protoString);
@@ -142,5 +153,15 @@ public abstract class BaseComponent implements LocalInferenceAware {
     public void setCache(Cache cache) {
         this.cache = cache;
     }
+
+    public Model getModel() {
+        return model;
+    }
+
+    public void setModel(Model model) {
+        this.model = model;
+    }
+
+    public abstract Object getParam();
 
 }

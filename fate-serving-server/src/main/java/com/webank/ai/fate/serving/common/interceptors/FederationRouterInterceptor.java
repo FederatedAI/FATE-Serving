@@ -24,7 +24,7 @@ import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
-import com.webank.ai.fate.serving.core.exceptions.NoRouteInfoException;
+import com.webank.ai.fate.serving.core.exceptions.NoRouterInfoException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
         if (routerService == null) {
             address = MetaInfo.PROPERTY_PROXY_ADDRESS;
             if (!checkAddress(address)) {
-                throw new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR, "address is error in config file");
+                throw new NoRouterInfoException(StatusCode.GUEST_ROUTER_ERROR, "address is error in config file");
             }
             String[] args = address.split(":");
             routerInfo.setHost(args[0]);
@@ -58,7 +58,7 @@ public class FederationRouterInterceptor extends AbstractInterceptor {
                 routerInfo.setHost(ip);
                 routerInfo.setPort(port);
             } else {
-                throw new NoRouteInfoException(StatusCode.GUEST_ROUTER_ERROR, "serving-proxy address is not found in zk");
+                throw new NoRouterInfoException(StatusCode.GUEST_ROUTER_ERROR, "serving-proxy address is not found in zk");
             }
         }
         context.setRouterInfo(routerInfo);

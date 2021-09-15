@@ -1,0 +1,11 @@
+•	fate-serving-register：主要为服务治理相关的逻辑  
+•	fate-serving-admin：serving-admin模块，提供集群服务的可视化管理/监控  
+•	fate-serving-admin-ui：serving-admin的前端代码，使用Vue.js开发  
+•	fate-serving-common：fate-serving的公共组件模块  
+•	fate-serving-core：fate-serving的核心代码包  
+•	fate-serving-extension：主要用于实现一些扩展逻辑，如host端的自定义Adaptor  
+•	fate-serving-federatedml：算法组件的实现逻辑  
+•	fate-serving-proxy：serving-proxy模块，主要提供路由转发及鉴权，对外开放http/grpc接口  
+•	fate-serving-sdk：提供sdk代码，用于代码接入serving-server服务  
+•	fate-serving-server：serving-server模块，主要处理在线联邦预测业务和模型算法逻辑  
+•	fate-serving-cli：golang实现，命令行工具的代码，提供serving-server的查询和预测  
