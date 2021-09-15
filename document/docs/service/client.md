@@ -1,6 +1,6 @@
 FATE-Serving提供了fate-serving-client工具进行 下载系统对应版本fate-serving-client：
->linux版本：fate-serving-client-2.1.0-linux.tar.gz     
->mac版本：fate-serving-client-2.1.0-darwin.tar.gz
+>linux版本：[fate-serving-client-2.1.0-linux.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-linux.tar.gz )     
+>mac版本：[fate-serving-client-2.1.0-darwin.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-darwin.tar.gz)
 
 在终端中使用`./fate-serving-client`启动， 默认情况下，client连接localhost:8000，使用参数可以指定目标地址`./fate-serving-client [-h host] [-p port] `host为需要连接的serving-server的ip ， port 为serving-server对外暴露的端口。
 >./fate-serving-client -h 127.0.0.1 -p 8000

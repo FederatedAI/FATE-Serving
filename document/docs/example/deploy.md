@@ -7,7 +7,7 @@
 ```yml
 xxxxxxxxxx
 server.port=8059
-zk.url=172.168.0.1:2181,172.168.0.2:2181,172.168.0.3:2181
+zk.url=192.168.0.1:2181,192.168.0.2:2181,192.168.0.3:2181
 proxy.grpc.intra.port=8879
 proxy.grpc.inter.port=9370
 ```
@@ -21,7 +21,7 @@ xxxxxxxxxx
     "default": {
       "default": [
         {
-          "ip": "172.134.0.1",
+          "ip": "192.134.0.1",
           "port": 9370
         }
       ]
@@ -37,14 +37,14 @@ xxxxxxxxxx
 ```yml
 xxxxxxxxxx
 port=8000
-model.transfer.url=http://172.168.0.2:9380/v1/model/transfer  //FATE flow地址
-zk.url=172.168.0.1:2181,172.168.0.2:2181,172.168.0.3:2181
+model.transfer.url=http://192.168.0.2:9380/v1/model/transfer  //FATE flow地址
+zk.url=192.168.0.1:2181,192.168.0.2:2181,192.168.0.3:2181
 ``` 
 •	guest 的 serving-admin配置
 ```yml
 xxxxxxxxxx
 server.port=8350
-zk.url=172.168.0.1:2181,172.168.0.2:2181,172.168.0.2:2181
+zk.url=192.168.0.1:2181,192.168.0.2:2181,192.168.0.2:2181
 admin.username=admin
 admin.password=admin
 
@@ -55,7 +55,7 @@ admin.password=admin
 ```yml
 xxxxxxxxxx
 server.port=8059
-zk.url=172.134.0.1:2181,172.134.0.2:2181,172.134.0.3:2181
+zk.url=192.134.0.1:2181,192.134.0.2:2181,192.134.0.3:2181
 proxy.grpc.intra.port=8879
 proxy.grpc.inter.port=9370
 ```
@@ -66,7 +66,7 @@ xxxxxxxxxx
     "route_table": {
         "default": {
             "default": [{
-                "ip": "172.134.0.2",
+                "ip": "192.134.0.2",
                 "port": 8000
             }]
         }
@@ -82,8 +82,8 @@ xxxxxxxxxx
 ```yml
 xxxxxxxxxx
 port=8000
-model.transfer.url=http://172.134.0.1:9380/v1/model/transfer
-zk.url=172.134.0.1:2181,172.134.0.2:2181,172.134.0.3:2181
+model.transfer.url=http://192.134.0.1:9380/v1/model/transfer
+zk.url=192.134.0.1:2181,192.134.0.2:2181,192.134.0.3:2181
 feature.single.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.MockAdapter
 feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.MockBatchAdapter
 ```
@@ -92,7 +92,7 @@ feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.MockBatchAda
 ```yml
 xxxxxxxxxx
 server.port=8350
-zk.url=172.134.0.1:2181,172.134.0.2:2181,172.134.0.3:2181
+zk.url=192.134.0.1:2181,192.134.0.2:2181,192.134.0.3:2181
 admin.username=admin
 admin.password=admin
 
