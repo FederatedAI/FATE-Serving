@@ -1,5 +1,5 @@
 FATE-Serving提供了fate-serving-client工具
-## 下载对应版本的fate-serving-client：
+## 下载对应版本的fate-serving-client
 >linux版本：[fate-serving-client-2.1.0-linux.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-linux.tar.gz )     
 >mac版本：[fate-serving-client-2.1.0-darwin.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-darwin.tar.gz)
 
@@ -9,7 +9,7 @@ FATE-Serving提供了fate-serving-client工具
 
 ![connect](../img/client-connect.jpg)
 
-## 提供了以下几种指令：   
+## 提供了以下几种指令   
 
 >help 查看帮助信息
 
@@ -47,7 +47,7 @@ FATE-Serving提供了fate-serving-client工具
 
 ![inference](../img/client-inference.jpg)
 -f 参数为请求参数文件的路径；/data/projects/request.json文件内容，示例：
- ```json
+```json
 {
     "serviceId": "lr-test",
     "featureData": {
