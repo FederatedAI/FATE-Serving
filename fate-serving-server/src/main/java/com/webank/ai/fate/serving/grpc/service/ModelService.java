@@ -31,6 +31,8 @@ import com.webank.ai.fate.serving.core.bean.ModelActionType;
 import com.webank.ai.fate.serving.core.bean.ReturnResult;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
 
     @Autowired
     ModelServiceProvider modelServiceProvider;
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     @RegisterService(serviceName = "publishLoad")
@@ -50,6 +53,7 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         inboundPackage.setBody(req);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
         ReturnResult returnResult = (ReturnResult) outboundPackage.getData();
+        logger.info("PublishRequest = {}",req);
         PublishResponse.Builder builder = PublishResponse.newBuilder();
         builder.setStatusCode(Integer.valueOf(returnResult.getRetcode()));
         builder.setMessage(returnResult.getRetmsg() != null ? returnResult.getRetmsg() : "");
@@ -115,15 +119,43 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
     }
 
     @Override
+    @RegisterService(serviceName = "fetchModel")
+    public void fetchModel(ModelServiceProto.FetchModelRequest request, StreamObserver<ModelServiceProto.FetchModelResponse> responseObserver) {
+        Context context = prepareContext(ModelActionType.FETCH_MODEL.name());
+        InboundPackage<ModelServiceProto.FetchModelRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.FetchModelResponse fetchModelResponse = (ModelServiceProto.FetchModelResponse) outboundPackage.getData();
+        responseObserver.onNext(fetchModelResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    @RegisterService(serviceName = "modelTransfer")
+    public void modelTransfer(ModelServiceProto.ModelTransferRequest request, StreamObserver<ModelServiceProto.ModelTransferResponse> responseObserver) {
+        Context context = prepareContext(ModelActionType.MODEL_TRANSFER.name());
+        InboundPackage<ModelServiceProto.ModelTransferRequest> inboundPackage = new InboundPackage();
+        inboundPackage.setBody(request);
+        OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
+        ModelServiceProto.ModelTransferResponse modelTransferResponse = (ModelServiceProto.ModelTransferResponse) outboundPackage.getData();
+        responseObserver.onNext(modelTransferResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    @RegisterService(serviceName = "queryModel")
     public void queryModel(ModelServiceProto.QueryModelRequest request, StreamObserver<ModelServiceProto.QueryModelResponse> responseObserver) {
         Context context = prepareContext(ModelActionType.QUERY_MODEL.name());
         InboundPackage<ModelServiceProto.QueryModelRequest> inboundPackage = new InboundPackage();
         inboundPackage.setBody(request);
         OutboundPackage outboundPackage = modelServiceProvider.service(context, inboundPackage);
-        ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse) outboundPackage.getData();
+         ModelServiceProto.QueryModelResponse queryModelResponse = (ModelServiceProto.QueryModelResponse) outboundPackage.getData();
         responseObserver.onNext(queryModelResponse);
         responseObserver.onCompleted();
     }
+
+
+
 
     private Context prepareContext(String actionType) {
         ServingServerContext context = new ServingServerContext();
@@ -131,5 +163,4 @@ public class ModelService extends ModelServiceGrpc.ModelServiceImplBase {
         context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
         return context;
     }
-
 }

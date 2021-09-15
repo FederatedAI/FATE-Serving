@@ -1,0 +1,65 @@
+### application.properties配置
+>源码中的配置文件没有罗列出所有配置，只保留了必需的配置，其他配置都采用了默认值。如果需要可以根据以下表格来在配置文件中新增条目。
+
+<table>
+  <tr>
+    <td>配置项</td>
+    <td>配置项含义</td>
+    <td>默认值</td>
+  </tr>
+  <tr>
+    <td>server.port</td>
+    <td>服务端口</td>
+    <td>8350</td>
+  </tr>
+  <tr>
+    <td>local.cache.expire</td>
+    <td>内置缓存过期时间，单位：秒</td>
+    <td>300</td>
+  </tr>
+  <tr>
+    <td>zk.url</td>
+    <td>zookeeper集群地址，serving-admin需开启注册中心</td>
+    <td>localhost:2181,localhost:2182,localhost:2183</td>
+  </tr>
+  <tr>
+    <td>grpc.timeout</td>
+    <td>grpc请求超时时间</td>
+    <td>5000</td>
+  </tr>
+  <tr>
+    <td>admin.username</td>
+    <td>预设用户名</td>
+    <td>admin</td>
+  </tr>
+  <tr>
+    <td>admin.username</td>
+    <td>预设密码</td>
+    <td>admin</td>
+  </tr>
+  <tr>
+    <td>acl.enable</td>
+    <td>是否使用zookeeper acl鉴权</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>acl.username</td>
+    <td>acl 用户名</td>
+    <td>默认空</td>
+  </tr>
+  <tr>
+    <td>acl.password</td>
+    <td>acl 密码</td>
+    <td>默认空</td>
+  </tr>
+  <tr>
+    <td>print.input.data</td>
+    <td>flow日志打印请求参数</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>print.output.data</td>
+    <td>flow日志打印返回参数</td>
+    <td>false</td>
+  </tr>
+</table>

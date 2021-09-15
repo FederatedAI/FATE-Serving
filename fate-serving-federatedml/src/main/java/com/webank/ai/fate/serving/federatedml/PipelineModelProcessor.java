@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.proxy.Proxy;
 import com.webank.ai.fate.core.mlmodel.buffer.PipelineProto;
 import com.webank.ai.fate.serving.common.model.MergeInferenceAware;
+import com.webank.ai.fate.serving.common.model.Model;
 import com.webank.ai.fate.serving.common.model.ModelProcessor;
 import com.webank.ai.fate.serving.common.rpc.core.ErrorMessageUtil;
 import com.webank.ai.fate.serving.core.bean.*;
@@ -49,9 +50,30 @@ public class PipelineModelProcessor implements ModelProcessor {
     private static ForkJoinPool forkJoinPool = new ForkJoinPool();
     private List<BaseComponent> pipeLineNode = new ArrayList<>();
     private Map<String, BaseComponent> componentMap = new HashMap<String, BaseComponent>();
+    private Map<String, Map<String, Object>> componentParmasMap = new HashMap<String, Map<String, Object>>();
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
     private int splitSize = MetaInfo.PROPERTY_BATCH_SPLIT_SIZE;
+    private Model model;
+    public List<BaseComponent> getPipeLineNode() {
+        return pipeLineNode;
+    }
+
+    public Map<String, BaseComponent> getComponentMap() {
+        return componentMap;
+    }
+
+    public DSLParser getDslParser() {
+        return dslParser;
+    }
+
+    public String getModelPackage() {
+        return modelPackage;
+    }
+
+    public int getSplitSize() {
+        return splitSize;
+    }
 
     @Override
     public BatchInferenceResult guestBatchInference(Context context, BatchInferenceRequest batchInferenceRequest, Map<String, Future> remoteFutureMap, long timeout) {
@@ -154,7 +176,27 @@ public class PipelineModelProcessor implements ModelProcessor {
         return this.componentMap.get(name);
     }
 
-    public int initModel(Map<String, byte[]> modelProtoMap) {
+    @Override
+    public void setModel(Model model) {
+        this.model = model;
+        this.getPipeLineNode().forEach(baseComponent -> {
+            if(baseComponent!=null) {
+                baseComponent.setModel(model);
+                baseComponent.setSite(model.getPartId());
+            }
+
+        });
+    }
+
+//    @Override
+//    public ModelProcessor initComponentParmasMap() {
+////        componentMap.forEach((cptName,instance)->{
+////            componentParmasMap.put(cptName,instance.getParam());
+////        });
+//        return this;
+//    }
+
+    public int initModel(Context context, Map<String, byte[]> modelProtoMap) {
         if (modelProtoMap != null) {
             logger.info("start init pipeline,model components {}", modelProtoMap.keySet());
             try {
@@ -203,7 +245,7 @@ public class PipelineModelProcessor implements ModelProcessor {
 
     public Map<Integer, Map<String, Object>> batchLocalInference(Context context,
                                                                  BatchInferenceRequest batchFederatedParams) {
-        long  begin =  System.currentTimeMillis();
+        long begin = System.currentTimeMillis();
         List<BatchInferenceRequest.SingleInferenceData> inputList = batchFederatedParams.getBatchDataList();
         Map<String, Map<String, Object>> tempCache = Maps.newConcurrentMap();
         ForkJoinTask<Map<Integer, Map<String, Object>>> future = forkJoinPool.submit(new LocalInferenceTask(context, inputList, tempCache));
@@ -214,7 +256,7 @@ public class PipelineModelProcessor implements ModelProcessor {
             throw new SysException("get local inference result error");
         }
         long end = System.currentTimeMillis();
-        logger.info("batchLocalInference cost {}",end-begin);
+        logger.info("batchLocalInference cost {}", end - begin);
         return result;
     }
 
@@ -307,7 +349,7 @@ public class PipelineModelProcessor implements ModelProcessor {
         List<Map<String, Object>> tempList = Lists.newArrayList();
         Map<String, Object> result = Maps.newHashMap();
         result.put(Dict.RET_CODE, StatusCode.SUCCESS);
-        context.putData(Dict.ORIGINAL_PREDICT_DATA,inputData);
+        context.putData(Dict.ORIGINAL_PREDICT_DATA, inputData);
         int pipelineSize = this.pipeLineNode.size();
         for (int i = 0; i < pipelineSize; i++) {
             BaseComponent component = this.pipeLineNode.get(i);
@@ -375,10 +417,17 @@ public class PipelineModelProcessor implements ModelProcessor {
         return newModelProtoMap;
     }
 
+//    public Map<String,Object> getParmasMap(){
+//        Map<String,Object> parmas = Maps.newHashMap();
+//        componentMap.forEach((k,v)->{parmas.put(k,v.getParams());});
+//        return parmas;
+//    }
+
     class LocalInferenceTask extends RecursiveTask<Map<Integer, Map<String, Object>>> {
         Context context;
         Map<String, Map<String, Object>> tempCache;
         List<BatchInferenceRequest.SingleInferenceData> inputList;
+
         LocalInferenceTask(Context context, List<BatchInferenceRequest.SingleInferenceData> inputList, Map<String, Map<String, Object>> tempCache) {
             this.context = context;
             this.inputList = inputList;
@@ -387,55 +436,56 @@ public class PipelineModelProcessor implements ModelProcessor {
 
         @Override
         protected Map<Integer, Map<String, Object>> compute() {
-                Map<Integer, Map<String, Object>> result = new HashMap<>();
-                if (inputList.size() <= splitSize) {
-                    for (int i = 0; i < inputList.size(); i++) {
-                        BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
-                        try {
-                            String key = EncryptUtils.encrypt(JsonUtil.object2Json(input.getFeatureData()), EncryptMethod.MD5);
-                            Map<String, Object> singleResult = tempCache.get(key);
-                            if (singleResult == null) {
-                                singleResult = singleLocalPredict(context, input.getFeatureData());
-                                if (singleResult != null && singleResult.size() != 0) {
-                                    tempCache.putIfAbsent(key, singleResult);
-                                }
-                            } else {
-                                singleResult = Maps.newHashMap(tempCache.get(key));
+            Map<Integer, Map<String, Object>> result = new HashMap<>();
+            if (inputList.size() <= splitSize) {
+                for (int i = 0; i < inputList.size(); i++) {
+                    BatchInferenceRequest.SingleInferenceData input = inputList.get(i);
+                    try {
+                        String key = EncryptUtils.encrypt(JsonUtil.object2Json(input.getFeatureData()), EncryptMethod.MD5);
+                        Map<String, Object> singleResult = tempCache.get(key);
+                        if (singleResult == null) {
+                            singleResult = singleLocalPredict(context, input.getFeatureData());
+                            if (singleResult != null && singleResult.size() != 0) {
+                                tempCache.putIfAbsent(key, singleResult);
                             }
-                            result.put(input.getIndex(), singleResult);
-                            if (input.isNeedCheckFeature()) {
-                                if (input.getFeatureData() == null || input.getFeatureData().size() == 0) {
-                                    throw new HostGetFeatureErrorException("no feature");
-                                }
-                            }
-                        } catch (Throwable e) {
-                            if (result.get(input.getIndex()) == null) {
-                                result.put(input.getIndex(), ErrorMessageUtil.handleExceptionToMap(e));
-                            } else {
-                                result.get(input.getIndex()).putAll(ErrorMessageUtil.handleExceptionToMap(e));
+                        } else {
+                            singleResult = Maps.newHashMap(tempCache.get(key));
+                        }
+                        result.put(input.getIndex(), singleResult);
+                        if (input.isNeedCheckFeature()) {
+                            if (input.getFeatureData() == null || input.getFeatureData().size() == 0) {
+                                throw new HostGetFeatureErrorException("no feature");
                             }
                         }
-                    }
-                    return result;
-                } else {
-                    List<List<BatchInferenceRequest.SingleInferenceData>> splits = new ArrayList<List<BatchInferenceRequest.SingleInferenceData>>();
-                    int size = inputList.size();
-                    int count = (size + splitSize - 1) / splitSize;
-                    List<LocalInferenceTask> subJobs = Lists.newArrayList();
-                    for (int i = 0; i < count; i++) {
-                        List<BatchInferenceRequest.SingleInferenceData> subList = inputList.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
-                        LocalInferenceTask subLocalInferenceTask = new LocalInferenceTask(context, subList, tempCache);
-                        subLocalInferenceTask.fork();
-                        subJobs.add(subLocalInferenceTask);
-                    }
-                    subJobs.forEach(localInferenceTask -> {
-                        Map<Integer, Map<String, Object>> splitResult = localInferenceTask.join();
-                        if (splitResult != null) {
-                            result.putAll(splitResult);
+                    } catch (Throwable e) {
+                        logger.error(" compute error = {}", e);
+                        if (result.get(input.getIndex()) == null) {
+                            result.put(input.getIndex(), ErrorMessageUtil.handleExceptionToMap(e));
+                        } else {
+                            result.get(input.getIndex()).putAll(ErrorMessageUtil.handleExceptionToMap(e));
                         }
-                    });
-                    return result;
+                    }
                 }
+                return result;
+            } else {
+                List<List<BatchInferenceRequest.SingleInferenceData>> splits = new ArrayList<List<BatchInferenceRequest.SingleInferenceData>>();
+                int size = inputList.size();
+                int count = (size + splitSize - 1) / splitSize;
+                List<LocalInferenceTask> subJobs = Lists.newArrayList();
+                for (int i = 0; i < count; i++) {
+                    List<BatchInferenceRequest.SingleInferenceData> subList = inputList.subList(i * splitSize, ((i + 1) * splitSize > size ? size : splitSize * (i + 1)));
+                    LocalInferenceTask subLocalInferenceTask = new LocalInferenceTask(context, subList, tempCache);
+                    subLocalInferenceTask.fork();
+                    subJobs.add(subLocalInferenceTask);
+                }
+                subJobs.forEach(localInferenceTask -> {
+                    Map<Integer, Map<String, Object>> splitResult = localInferenceTask.join();
+                    if (splitResult != null) {
+                        result.putAll(splitResult);
+                    }
+                });
+                return result;
+            }
 
         }
     }

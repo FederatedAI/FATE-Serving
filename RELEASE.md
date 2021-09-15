@@ -1,3 +1,15 @@
+# Release 2.1.0
+## Major Features and Improvements
+* Support multi-host algorithm model online prediction,currently, the supported multi-host algorithms include HeteroLR and HeteroSecureBoost.
+* Support to display model information in pipeline on admin page.
+* Increase the model synchronization function, support the synchronous replication of models between different serving-server nodes in the cluster, which is convenient for machine expansion and contraction.
+* Admin page model operation/display function optimization.
+* Add a cluster one-click self-check tool on the admin page, you can view the cluster service self-check status, and the cluster will be self-checked regularly from the background, and the user can also take the initiative to perform one-click self-check.
+* Add routing table editing function, you can directly edit the routing table information of the current serving-proxy configuration through the page.
+* Service topology map optimization, showing the true mapping relationship between each machine, the specified machine can be selected on the topology map and its details can be viewed.
+* Add support for http protocol between guest and host.
+* Add a general httpAdaptor for host to obtain features.
+
 # Release 2.0.0
 ## Major Features and Improvements
 *  For single inference, the guest side and host side of version 2.0. * will be calculated in parallel, thus reducing the time consumption.

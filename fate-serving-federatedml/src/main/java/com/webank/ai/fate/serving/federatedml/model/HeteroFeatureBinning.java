@@ -16,12 +16,14 @@
 
 package com.webank.ai.fate.serving.federatedml.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.FeatureBinningMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningMetaProto.TransformMeta;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningParam;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.FeatureBinningResult;
 import com.webank.ai.fate.core.mlmodel.buffer.FeatureBinningParamProto.IVParam;
 import com.webank.ai.fate.serving.core.bean.Context;
+import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,7 @@ public class HeteroFeatureBinning extends BaseComponent {
     private List<Long> transformCols;
     private List<String> header;
     private boolean needRun;
+    private FeatureBinningParam featureBinningParam;
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
@@ -47,7 +50,7 @@ public class HeteroFeatureBinning extends BaseComponent {
             this.needRun = featureBinningMeta.getNeedRun();
             TransformMeta transformMeta = featureBinningMeta.getTransformParam();
             this.transformCols = transformMeta.getTransformColsList();
-            FeatureBinningParam featureBinningParam = this.parseModel(FeatureBinningParam.parser(), protoParam);
+            featureBinningParam = this.parseModel(FeatureBinningParam.parser(), protoParam);
             this.header = featureBinningParam.getHeaderList();
             FeatureBinningResult featureBinningResult = featureBinningParam.getBinningResult();
             Map<String, IVParam> binningResult = featureBinningResult.getBinningResultMap();
@@ -62,6 +65,12 @@ public class HeteroFeatureBinning extends BaseComponent {
         }
         logger.info("Finish init Feature Binning class");
         return OK;
+    }
+
+    @Override
+    public Object getParam() {
+        return featureBinningParam;
+        //return JsonUtil.object2Objcet(featureBinningParam, new TypeReference<Map<String, Object>>() {});
     }
 
     @Override

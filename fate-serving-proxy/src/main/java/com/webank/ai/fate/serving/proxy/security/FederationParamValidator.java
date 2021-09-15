@@ -33,6 +33,7 @@ public class FederationParamValidator implements Interceptor {
 
     @Override
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
+        
 
         Preconditions.checkArgument(StringUtils.isNotEmpty(context.getHostAppid()), "host id is null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(context.getGuestAppId()), "guest id is null");

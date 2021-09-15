@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -61,7 +62,7 @@ public class ModelController {
     private ComponentService componentService;
 
     @GetMapping("/model/query")
-    public ReturnResult queryModel(String host, int port, String serviceId, Integer page, Integer pageSize) throws Exception {
+    public ReturnResult queryModel(String host, Integer port, String serviceId,String tableName, String namespace, Integer page, Integer pageSize) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port is blank");
 
@@ -84,19 +85,24 @@ public class ModelController {
         if (StringUtils.isNotBlank(serviceId)) {
             // by service id
             queryModelRequestBuilder.setQueryType(1);
-//            queryModelRequestBuilder.setTableName(tableName);
-//            queryModelRequestBuilder.setNamespace(namespace);
             queryModelRequestBuilder.setServiceId(serviceId);
+        } else if (StringUtils.isNotBlank(namespace) && StringUtils.isNotBlank(tableName)) {
+            // query model by tableName and namespace
+            queryModelRequestBuilder.setTableName(tableName);
+            queryModelRequestBuilder.setNamespace(namespace);
+            queryModelRequestBuilder.setQueryType(2);
         } else {
             // list all
             queryModelRequestBuilder.setQueryType(0);
         }
 
         ModelServiceProto.QueryModelResponse response = blockingStub.queryModel(queryModelRequestBuilder.build());
-
+        parseComponentInfo(response);
         if (logger.isDebugEnabled()) {
             logger.debug("response: {}", response);
         }
+
+        //logger.info("response: {}", response);
 
         Map data = Maps.newHashMap();
         List rows = Lists.newArrayList();
@@ -104,7 +110,7 @@ public class ModelController {
         int totalSize = 0;
         if (modelInfosList != null) {
             totalSize = modelInfosList.size();
-            modelInfosList = modelInfosList.stream().sorted(Comparator.comparingInt(ModelServiceProto.ModelInfoEx::getIndex)).collect(Collectors.toList());
+            modelInfosList = modelInfosList.stream().sorted(Comparator.comparing(ModelServiceProto.ModelInfoEx::getTableName).reversed()).collect(Collectors.toList());
 
             // Pagination
             int totalPage = (modelInfosList.size() + pageSize - 1) / pageSize;
@@ -113,14 +119,85 @@ public class ModelController {
             }
 
             for (ModelServiceProto.ModelInfoEx modelInfoEx : modelInfosList) {
-                rows.add(JsonUtil.json2Object(modelInfoEx.getContent(), Map.class));
+                ModelServiceProto.ModelProcessorExt modelProcessorExt = modelInfoEx.getModelProcessorExt();
+                Map modelData = JsonUtil.json2Object(modelInfoEx.getContent(), Map.class);
+                List<Map>  componentList = Lists.newArrayList();
+                if(modelProcessorExt!=null) {
+                    List<ModelServiceProto.PipelineNode> nodes =  modelProcessorExt.getNodesList();
+                    if(nodes!=null){
+                        nodes.forEach(node ->{
+
+                          Map paramMap = JsonUtil.json2Object(node.getParams(),Map.class)  ;
+                          Map compnentMap =new HashMap();
+                          compnentMap.put("name",node.getName());
+                          compnentMap.put("params",paramMap);
+                            componentList.add(compnentMap);
+                        });
+                    }
+
+                    modelData.put("components",componentList);
+                }
+                rows.add(modelData);
             }
         }
 
         data.put("total", totalSize);
         data.put("rows", rows);
+
+//        logger.info("=============={}",data);
         return ReturnResult.build(response.getRetcode(), response.getMessage(), data);
     }
+
+    @PostMapping("/model/transfer")
+    public Callable<ReturnResult> transfer(@RequestBody RequestParamWrapper requestParams) throws Exception {
+        return () -> {
+            String host = requestParams.getHost();
+            Integer port = requestParams.getPort();
+            List<String> serviceIds = requestParams.getServiceIds();
+            String tableName = requestParams.getTableName();
+            String namespace = requestParams.getNamespace();
+
+            String targetHost = requestParams.getTargetHost();
+            Integer targetPort = requestParams.getTargetPort();
+
+
+
+            Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
+            Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
+
+            ReturnResult result = new ReturnResult();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("unload model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", host, port, tableName, namespace);
+            }
+
+            ModelServiceGrpc.ModelServiceFutureStub futureStub = getModelServiceFutureStub(targetHost, targetPort);
+            ModelServiceProto.FetchModelRequest   fetchModelRequest =  ModelServiceProto.FetchModelRequest.newBuilder()
+                    //.setServiceId()
+                    .setNamespace(namespace).setTableName(tableName).setSourceIp(host).setSourcePort(port).build();
+
+
+
+            ModelServiceProto.UnloadRequest unloadRequest = ModelServiceProto.UnloadRequest.newBuilder()
+                    .setTableName(tableName)
+                    .setNamespace(namespace)
+                    .build();
+
+            ListenableFuture<ModelServiceProto.FetchModelResponse> future = futureStub.fetchModel(fetchModelRequest);
+            ModelServiceProto.FetchModelResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("response: {}", response);
+            }
+
+            result.setRetcode(response.getStatusCode());
+//            result.setData(JSONObject.parseObject(response.getData().toStringUtf8()));
+            result.setRetmsg(response.getMessage());
+            return result;
+        };
+    }
+
+
 
     @PostMapping("/model/unload")
     public Callable<ReturnResult> unload(@RequestBody RequestParamWrapper requestParams) throws Exception {
@@ -233,6 +310,10 @@ public class ModelController {
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
         return futureStub;
+    }
+
+    public void parseComponentInfo(ModelServiceProto.QueryModelResponse response){
+
     }
 
 }

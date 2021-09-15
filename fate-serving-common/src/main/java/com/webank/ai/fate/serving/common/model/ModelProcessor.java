@@ -18,6 +18,7 @@ package com.webank.ai.fate.serving.common.model;
 
 import com.webank.ai.fate.serving.core.bean.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -32,5 +33,9 @@ public interface ModelProcessor {
     public ReturnResult hostInference(Context context, InferenceRequest inferenceRequest);
 
     public Object getComponent(String name);
+
+    public  void  setModel(Model model);
+
+  //  public ModelProcessor initComponentParmasMap();
 
 }

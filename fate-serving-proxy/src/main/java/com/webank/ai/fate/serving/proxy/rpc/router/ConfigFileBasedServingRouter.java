@@ -28,6 +28,7 @@ import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.core.bean.Context;
 import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
+import com.webank.ai.fate.serving.core.rpc.router.Protocol;
 import com.webank.ai.fate.serving.core.rpc.router.RouteType;
 import com.webank.ai.fate.serving.core.rpc.router.RouteTypeConvertor;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
@@ -50,8 +51,13 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private static final Logger logger = LoggerFactory.getLogger(ConfigFileBasedServingRouter.class);
     private static final String IP = "ip";
     private static final String PORT = "port";
+    private static final String URL = "url";
     private static final String USE_SSL = "useSSL";
     private static final String HOSTNAME = "hostname";
+    private static final String negotiationType = "negotiationType";
+    private static final String certChainFile = "certChainFile";
+    private static final String privateKeyFile = "privateKeyFile";
+    private static final String caFile = "caFile";
     private static final String DEFAULT = "default";
     private final String DEFAULT_ROUTER_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "route_table.json";
     private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
@@ -61,13 +67,27 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
     private Map<Proxy.Topic, Set<Proxy.Topic>> allow;
     private Map<Proxy.Topic, Set<Proxy.Topic>> deny;
     private boolean defaultAllow;
+
+    public Map<String, Map<String, List<BasicMeta.Endpoint>>> getRouteTable() {
+        return routeTable;
+    }
+
+    public void setRouteTable(Map<String, Map<String, List<BasicMeta.Endpoint>>> routeTable) {
+        this.routeTable = routeTable;
+    }
+
     private Map<String, Map<String, List<BasicMeta.Endpoint>>> routeTable;
     private Map<Proxy.Topic, List<RouterInfo>> topicEndpointMapping;
     private BasicMeta.Endpoint.Builder endpointBuilder;
 
+
     @Override
     public RouteType getRouteType() {
         return routeType;
+    }
+
+    public Map<Proxy.Topic, List<RouterInfo>> getAllRouterInfoMap(){
+        return   topicEndpointMapping;
     }
 
     @Override
@@ -131,8 +151,16 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             } else {
                 router.setHost(epoint.getHostname());
             }
+            if(epoint.getUrl()!=null&&StringUtils.isNotBlank(epoint.getUrl())){
+                router.setProtocol(Protocol.HTTP);
+            }
+            router.setUrl(epoint.getUrl());
             router.setUseSSL(epoint.getUseSSL());
             router.setPort(epoint.getPort());
+            router.setNegotiationType(epoint.getNegotiationType());
+            router.setCertChainFile(epoint.getCertChainFile());
+            router.setPrivateKeyFile(epoint.getPrivateKeyFile());
+            router.setCaFile(epoint.getCaFile());
             routeList.add(router);
         }
 
@@ -223,6 +251,7 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
 
     @Scheduled(fixedRate = 10000)
     public void loadRouteTable() {
+        //logger.info("load route table");
         String filePath = "";
         if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_ROUTE_TABLE)) {
             filePath = MetaInfo.PROPERTY_ROUTE_TABLE;
@@ -240,15 +269,14 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
             return;
         }
         String fileMd5 = FileUtils.fileMd5(filePath);
-        if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
+        if (StringUtils.isNotBlank(lastFileMd5)&&null != fileMd5 && fileMd5.equals(lastFileMd5)) {
             return;
         }
-        JsonParser jsonParser = new JsonParser();
         JsonReader jsonReader = null;
         JsonObject confJson = null;
         try {
             jsonReader = new JsonReader(new FileReader(filePath));
-            confJson = jsonParser.parse(jsonReader).getAsJsonObject();
+            confJson = JsonParser.parseReader(jsonReader).getAsJsonObject();
             MetaInfo.PROXY_ROUTER_TABLE = confJson.toString();
             logger.info("load router table {}", confJson);
 
@@ -295,7 +323,6 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
 
     private void initRouteTable(JsonObject confJson) {
         Map<String, Map<String, List<BasicMeta.Endpoint>>> newRouteTable = new ConcurrentHashMap<>();
-
         // loop through coordinator
         for (Map.Entry<String, JsonElement> coordinatorEntry : confJson.entrySet()) {
             String coordinatorKey = coordinatorEntry.getKey();
@@ -306,10 +333,12 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
                 serviceTable = new ConcurrentHashMap<>(4);
                 newRouteTable.put(coordinatorKey, serviceTable);
             }
-
             // loop through role in coordinator
             for (Map.Entry<String, JsonElement> roleEntry : coordinatorValue.entrySet()) {
                 String roleKey = roleEntry.getKey();
+                if(roleKey.equals("createTime")||roleKey.equals("updateTime")){
+                    continue;
+                }
                 JsonArray roleValue = roleEntry.getValue().getAsJsonArray();
 
                 List<BasicMeta.Endpoint> endpoints = serviceTable.get(roleKey);
@@ -332,6 +361,10 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
                         int targetPort = endpointJson.get(PORT).getAsInt();
                         endpointBuilder.setPort(targetPort);
                     }
+                    if(endpointJson.has(URL)){
+                        String url = endpointJson.get(URL).getAsString();
+                        endpointBuilder.setUrl(url);
+                    }
 
                     if (endpointJson.has(USE_SSL)) {
                         boolean targetUseSSL = endpointJson.get(USE_SSL).getAsBoolean();
@@ -341,6 +374,26 @@ public class ConfigFileBasedServingRouter extends BaseServingRouter implements I
                     if (endpointJson.has(HOSTNAME)) {
                         String targetHostname = endpointJson.get(HOSTNAME).getAsString();
                         endpointBuilder.setHostname(targetHostname);
+                    }
+
+                    if (endpointJson.has(negotiationType)) {
+                        String targetNegotiationType = endpointJson.get(negotiationType).getAsString();
+                        endpointBuilder.setNegotiationType(targetNegotiationType);
+                    }
+
+                    if (endpointJson.has(certChainFile)) {
+                        String targetCertChainFile = endpointJson.get(certChainFile).getAsString();
+                        endpointBuilder.setCertChainFile(targetCertChainFile);
+                    }
+
+                    if (endpointJson.has(privateKeyFile)) {
+                        String targetPrivateKeyFile = endpointJson.get(privateKeyFile).getAsString();
+                        endpointBuilder.setPrivateKeyFile(targetPrivateKeyFile);
+                    }
+
+                    if (endpointJson.has(caFile)) {
+                        String targetCaFile = endpointJson.get(caFile).getAsString();
+                        endpointBuilder.setCaFile(targetCaFile);
                     }
 
                     BasicMeta.Endpoint endpoint = endpointBuilder.build();

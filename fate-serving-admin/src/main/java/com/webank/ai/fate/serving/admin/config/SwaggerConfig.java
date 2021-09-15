@@ -53,7 +53,7 @@ public class SwaggerConfig {
                 .build().apiInfo(new ApiInfoBuilder()
                         .title("FATE-Serving-Admin")
                         .description("FATE-Serving-Admin Online interface documentation")
-                        .version("2.0.4")
+                        .version("2.1.0")
                         .build());
     }
 }

@@ -21,6 +21,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceGrpc;
 import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.api.serving.InferenceServiceProto.InferenceMessage;
 import com.webank.ai.fate.register.annotions.RegisterService;
+import com.webank.ai.fate.register.common.Role;
 import com.webank.ai.fate.serving.common.bean.ServingServerContext;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
 import com.webank.ai.fate.serving.common.rpc.core.OutboundPackage;
@@ -48,7 +49,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     GuestSingleInferenceProvider guestSingleInferenceProvider;
 
     @Override
-    @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE)
+    @RegisterService(useDynamicEnvironment = true, serviceName = INFERENCE,role = Role.GUEST)
     public void inference(InferenceMessage req, StreamObserver<InferenceMessage> responseObserver) {
         executor.submit(() -> {
             InferenceMessage.Builder response = InferenceMessage.newBuilder();
@@ -64,7 +65,7 @@ public class GuestInferenceService extends InferenceServiceGrpc.InferenceService
     }
 
     @Override
-    @RegisterService(useDynamicEnvironment = true, serviceName = BATCH_INFERENCE)
+    @RegisterService(useDynamicEnvironment = true, serviceName = BATCH_INFERENCE,role = Role.GUEST)
     public void batchInference(InferenceServiceProto.InferenceMessage req, StreamObserver<InferenceServiceProto.InferenceMessage> responseObserver) {
         executor.submit(() -> {
             InferenceMessage.Builder response = InferenceMessage.newBuilder();

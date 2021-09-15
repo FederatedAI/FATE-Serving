@@ -87,6 +87,9 @@ public class Bootstrap {
             MetaInfo.PROPERTY_ACL_PASSWORD = environment.getProperty(Dict.PROPERTY_ACL_PASSWORD);
             MetaInfo.PROPERTY_PRINT_INPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_INPUT_DATA)) : false;
             MetaInfo.PROPERTY_PRINT_OUTPUT_DATA = environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_PRINT_OUTPUT_DATA)) : false;
+            MetaInfo.PROPERTY_ADMIN_HEALTH_CHECK_TIME = environment.getProperty(Dict.PROPERTY_ADMIN_HEALTH_CHECK_TIME) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_ADMIN_HEALTH_CHECK_TIME)) : 30;
+            MetaInfo.PROPERTY_ALLOW_HEALTH_CHECK = environment.getProperty(Dict.PROPERTY_ALLOW_HEALTH_CHECK) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ALLOW_HEALTH_CHECK)) : true;
+
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("init meta info error", e);

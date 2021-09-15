@@ -71,7 +71,7 @@ public class LocalCacheModelLoader extends AbstractModelLoader<Map<String, byte[
     protected ModelProcessor initPipeLine(Context context, Map<String, byte[]> stringMap) {
         if (stringMap != null) {
             PipelineModelProcessor modelProcessor = new PipelineModelProcessor();
-            modelProcessor.initModel(stringMap);
+            modelProcessor.initModel(context, stringMap);
             return modelProcessor;
         } else {
             return null;
@@ -106,6 +106,11 @@ public class LocalCacheModelLoader extends AbstractModelLoader<Map<String, byte[
                 logger.error("failed to doRestore file ", e);
             }
         }
+        return null;
+    }
+
+    @Override
+    public String getResource(Context context, ModelLoaderParam modelLoaderParam) {
         return null;
     }
 }

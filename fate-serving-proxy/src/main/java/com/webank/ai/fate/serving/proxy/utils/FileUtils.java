@@ -20,9 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
@@ -44,6 +45,88 @@ public class FileUtils {
             }
         }
         return null;
+    }
+
+    public static boolean writeFile(String context, File target) {
+        BufferedWriter out = null;
+        try {
+            if (!target.exists()) {
+                target.createNewFile();
+            }
+            out = new BufferedWriter(new FileWriter(target));
+            out.write(context);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return false;
+        } finally {
+            try {
+                out.flush();
+                out.close();
+            } catch (IOException ex) {
+
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Write string to file,
+     * synchronize operation, exclusive lock
+     */
+    public static boolean writeStr2ReplaceFileSync(String str, String pathFile) throws Exception {
+        File file = new File(pathFile);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (IOException e) {
+            logger.error("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
+            throw new IOException("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
+        }
+        FileOutputStream fileOutputStream = null;
+        FileChannel fileChannel = null;
+        FileLock fileLock;
+        try {
+
+            /**
+             * write file
+             */
+            fileOutputStream = new FileOutputStream(file);
+            fileChannel = fileOutputStream.getChannel();
+
+            try {
+                fileLock = fileChannel.tryLock();// exclusive lock
+            } catch (Exception e) {
+                throw new IOException("another thread is writing ,refresh and try again");
+            }
+            if (fileLock != null) {
+                fileChannel.write(ByteBuffer.wrap(str.getBytes()));
+                if (fileLock.isValid()) {
+                    fileLock.release(); // release-write-lock
+                }
+                if (file.length() != str.getBytes().length) {
+                    throw new IOException("write successfully but the content was lost, reedit and try again");
+                }
+            }
+
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            throw new IOException(e.getMessage());
+        } finally {
+            close(fileChannel);
+            close(fileOutputStream);
+        }
+        return true;
+    }
+
+    public static void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

@@ -242,6 +242,7 @@ public class ModelManager implements InitializingBean {
                 modelLoaderParam.setTableName(model.getTableName());
                 modelLoaderParam.setNameSpace(model.getNamespace());
                 ModelProcessor modelProcessor = modelLoader.restoreModel(context, modelLoaderParam);
+                modelProcessor.setModel(model);
                 if (modelProcessor != null) {
                     model.setModelProcessor(modelProcessor);
                     if (model.getRole().equals(Dict.GUEST)) {
@@ -274,14 +275,14 @@ public class ModelManager implements InitializingBean {
 
         // register service after restore
         if (namespaceMap != null && namespaceMap.size() > 0) {
-            List<String> environments = Lists.newArrayList();
+            List<String> hostEnvironments = Lists.newArrayList();
             for (Model model : namespaceMap.values()) {
                 if (Dict.HOST.equals(model.getRole())) {
                     String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
-                    environments.add(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+                    hostEnvironments.add(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
                 }
             }
-            this.registerService(environments);
+            this.registerHostService(hostEnvironments);
         }
 
         if (serviceIdNamespaceMap != null && serviceIdNamespaceMap.size() > 0) {
@@ -293,7 +294,7 @@ public class ModelManager implements InitializingBean {
                     //environments.add(model.getPartId());
                 }
             }
-            this.registerService(environments);
+            this.registerGuestService(environments);
         }
 
         logger.info("restore model success ");
@@ -305,6 +306,21 @@ public class ModelManager implements InitializingBean {
             zookeeperRegistry.register(FateServer.serviceSets);
         }
     }
+
+    private void registerGuestService(Collection environments) {
+        if (zookeeperRegistry != null) {
+            zookeeperRegistry.addDynamicEnvironment(environments);
+            zookeeperRegistry.register(FateServer.guestServiceSets, environments);
+        }
+    }
+
+
+    private void registerHostService(Collection<String> environments) {
+        if (zookeeperRegistry != null) {
+            zookeeperRegistry.register(FateServer.hostServiceSets, environments);
+        }
+    }
+
 
     public synchronized ReturnResult bind(Context context, ModelServiceProto.PublishRequest req) {
         if (logger.isDebugEnabled()) {
@@ -327,7 +343,7 @@ public class ModelManager implements InitializingBean {
             if (StringUtils.isNotEmpty(serviceId)) {
                 zookeeperRegistry.addDynamicEnvironment(serviceId);
             }
-            zookeeperRegistry.register(FateServer.serviceSets);
+            zookeeperRegistry.register(FateServer.guestServiceSets, Lists.newArrayList(serviceId));
         }
         //update cache
         this.store(serviceIdNamespaceMap, serviceIdFile);
@@ -366,25 +382,53 @@ public class ModelManager implements InitializingBean {
         Map<String, ModelServiceProto.Party> roleMap = req.getRoleMap();
         String remotePartyRole = model.getRole().equals(Dict.GUEST) ? Dict.HOST : Dict.GUEST;
         ModelServiceProto.Party remoteParty = roleMap.get(remotePartyRole);
-        String remotePartyId = remoteParty.getPartyIdList().get(0);
-        ModelServiceProto.RoleModelInfo remoteRoleModelInfo = modelMap.get(remotePartyRole);
-        ModelServiceProto.ModelInfo remoteModelInfo = remoteRoleModelInfo.getRoleModelInfoMap().get(remotePartyId);
-        String remoteNamespace = remoteModelInfo.getNamespace();
-        String remoteTableName = remoteModelInfo.getTableName();
-        Model remoteModel = new Model();
-        remoteModel.setPartId(remotePartyId);
-        remoteModel.setNamespace(remoteNamespace);
-        remoteModel.setTableName(remoteTableName);
-        remoteModel.setRole(remotePartyRole);
-        model.getFederationModelMap().put(remoteModel.getPartId(), remoteModel);
+        List<String> remotePartyIdList = remoteParty.getPartyIdList();
+        for (String remotePartyId : remotePartyIdList) {
+            ModelServiceProto.RoleModelInfo remoteRoleModelInfo = modelMap.get(remotePartyRole);
+            ModelServiceProto.ModelInfo remoteModelInfo = remoteRoleModelInfo.getRoleModelInfoMap().get(remotePartyId);
+            Model remoteModel = new Model();
+            remoteModel.setPartId(remotePartyId);
+            remoteModel.setNamespace(remoteModelInfo.getNamespace());
+            remoteModel.setTableName(remoteModelInfo.getTableName());
+            remoteModel.setRole(remotePartyRole);
+            model.getFederationModelMap().put(remotePartyId, remoteModel);
+        }
         ModelServiceProto.Party selfParty = roleMap.get(model.getRole());
         String selfPartyId = selfParty.getPartyIdList().get(0);
-        ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(selfPartyId);
+        ModelServiceProto.ModelInfo selfModelInfo = modelInfoMap.get(model.getPartId());
+        Preconditions.checkArgument(selfModelInfo != null, "model info is invalid");
         String selfNamespace = selfModelInfo.getNamespace();
         String selfTableName = selfModelInfo.getTableName();
         model.setNamespace(selfNamespace);
         model.setTableName(selfTableName);
+        if (ModelLoader.LoadModelType.FATEFLOW.name().equals(req.getLoadType())) {
+            try {
+                ModelLoader.ModelLoaderParam modelLoaderParam = new ModelLoader.ModelLoaderParam();
+                modelLoaderParam.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+                modelLoaderParam.setTableName(model.getTableName());
+                modelLoaderParam.setNameSpace(model.getNamespace());
+                modelLoaderParam.setFilePath(req.getFilePath());
+                ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.FATEFLOW);
+                model.setResourceAdress(getAdressForUrl(modelLoader.getResource(context, modelLoaderParam)));
+            } catch (Exception e) {
+                logger.error("getloadModelUrl error = {}", e);
+            }
+        }
         return model;
+    }
+
+    public String getAdressForUrl(String url) {
+        String address = "";
+        if (StringUtils.isBlank(url)) {
+            return address;
+        }
+        if (url.contains("//")) {
+            String tempUrl = url.substring(url.indexOf("//") + 2);
+            if (tempUrl.contains("/")) {
+                address = tempUrl.substring(0, tempUrl.indexOf("/"));
+            }
+        }
+        return address;
     }
 
     public synchronized ReturnResult load(Context context, ModelServiceProto.PublishRequest req) {
@@ -412,6 +456,8 @@ public class ModelManager implements InitializingBean {
             throw new ModelProcessorInitException("model initialization error, please check if the model exists and the configuration of the FATEFLOW load model process is correct.");
         }
         model.setModelProcessor(modelProcessor);
+        modelProcessor.setModel(model);
+
         this.namespaceMap.put(namespaceKey, model);
 
         if (Dict.HOST.equals(model.getRole())) {
@@ -434,6 +480,102 @@ public class ModelManager implements InitializingBean {
 
     }
 
+    /**
+     * query model by service id
+     *
+     * @param serviceId
+     * @return
+     */
+    public Model queryModel(String serviceId) {
+        String namespaceKey = this.serviceIdNamespaceMap.get(serviceId);
+        if (namespaceKey != null && this.namespaceMap.get(namespaceKey) != null) {
+            Model model = (Model) this.namespaceMap.get(namespaceKey).clone();
+            if (model.getServiceIds() == null) {
+                model.setServiceIds(Lists.newArrayList());
+            }
+            model.getServiceIds().add(serviceId);
+            return model;
+        }
+        return null;
+    }
+
+    /**
+     * query model by tablename and namespace
+     *
+     * @param tableName
+     * @param namespace
+     * @return
+     */
+    public Model queryModel(String tableName, String namespace) {
+        String namespaceKey = this.getNameSpaceKey(tableName, namespace);
+        Model model = this.namespaceMap.get(namespaceKey);
+        if (model == null) {
+            return null;
+        }
+        Model clone = (Model) model.clone();
+        this.serviceIdNamespaceMap.forEach((k, v) -> {
+            if (clone.getServiceIds() == null) {
+                clone.setServiceIds(Lists.newArrayList());
+            }
+            if (namespaceKey.equals(v)) {
+                clone.getServiceIds().add(k);
+            }
+        });
+        return clone;
+    }
+
+    public void restoreByLocalCache(Context context, Model model, byte[] cacheData) {
+        // use local cache model loader
+        LocalCacheModelLoader modelLoader = (LocalCacheModelLoader) this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.CACHE);
+        // save to local cache
+        String cachePath = modelLoader.getCachePath(context, model.getTableName(), model.getNamespace());
+        modelLoader.saveCacheData(context, cachePath, cacheData);
+        // restore
+        ModelLoader.ModelLoaderParam param = new ModelLoader.ModelLoaderParam();
+        param.setTableName(model.getTableName());
+        param.setNameSpace(model.getNamespace());
+        // first lookup form fateflow
+        param.setLoadModelType(ModelLoader.LoadModelType.FATEFLOW);
+//       param.setFilePath(cachePath);
+
+        List<String> serviceIds= model.getServiceIds();
+        //remove serviceId in the fetched model
+        model.setServiceIds(null);
+
+        //save fetched model
+        this.doLoad(context, model, param);
+
+        //bind the relation <serviceId,model>
+        if (serviceIds != null) {
+            for (String serviceId : serviceIds) {
+                this.doBind(context, model, serviceId);
+            }
+        }
+    }
+
+
+    public byte[] getModelCacheData(Context context, String tableName, String namespace) {
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, ModelLoader.LoadModelType.CACHE);
+        String cachePath = modelLoader.getCachePath(context, tableName, namespace);
+        if (cachePath == null) {
+            return null;
+        }
+        File file = new File(cachePath);
+        if (file != null && file.exists()) {
+            try (InputStream in = new FileInputStream(file)) {
+                Long filelength = file.length();
+                byte[] filecontent = new byte[filelength.intValue()];
+                int readCount = in.read(filecontent);
+                if (readCount > 0) {
+                    return filecontent;
+                }
+            } catch (Throwable e) {
+                logger.error("load model cache fail ", e);
+            }
+        }
+        return null;
+    }
+
     public List<Model> queryModel(Context context, ModelServiceProto.QueryModelRequest queryModelRequest) {
         int queryType = queryModelRequest.getQueryType();
         switch (queryType) {
@@ -441,6 +583,7 @@ public class ModelManager implements InitializingBean {
                 List<Model> allModels = listAllModel();
                 return allModels.stream().map(e -> {
                     Model clone = (Model) e.clone();
+                    clone.setModelProcessor(e.getModelProcessor());
                     this.serviceIdNamespaceMap.forEach((k, v) -> {
                         if (clone.getServiceIds() == null) {
                             clone.setServiceIds(Lists.newArrayList());
@@ -482,6 +625,14 @@ public class ModelManager implements InitializingBean {
                             return clone;
                         })
                         .collect(Collectors.toList());
+            case 2:
+                // query model by tableName and namespace
+                List<Model> modelList = new ArrayList<>();
+                Model model = queryModel(queryModelRequest.getTableName(), queryModelRequest.getNamespace());
+                if (model != null)
+                    modelList.add(model);
+
+                return modelList;
             default:
                 return null;
         }
@@ -707,6 +858,89 @@ public class ModelManager implements InitializingBean {
         public String toString() {
             return content + ":" + timestamp;
         }
+    }
+
+    public synchronized ReturnResult doLoad(Context context, Model model, ModelLoader.ModelLoaderParam modelLoaderParam) {
+        ReturnResult returnResult = new ReturnResult();
+        returnResult.setRetcode(StatusCode.SUCCESS);
+        String namespaceKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        ModelLoader modelLoader = this.modelLoaderFactory.getModelLoader(context, modelLoaderParam.getLoadModelType());
+        Preconditions.checkArgument(modelLoader != null, "model loader not found");
+        ModelProcessor modelProcessor = modelLoader.loadModel(context, modelLoaderParam);
+        if (modelProcessor == null) {
+            throw new ModelProcessorInitException("model initialization error, please check if the model exists and the configuration of the FATEFLOW load model process is correct.");
+        }
+        model.setModelProcessor(modelProcessor);
+        modelProcessor.setModel(model);
+        this.buildModelRolePartyMap(model);
+        this.namespaceMap.put(namespaceKey, model);
+
+        if (Dict.HOST.equals(model.getRole())) {
+            model.getFederationModelMap().values().forEach(remoteModel -> {
+                String remoteNamespaceKey = this.getNameSpaceKey(remoteModel.getTableName(), remoteModel.getNamespace());
+                this.partnerModelMap.put(remoteNamespaceKey, model);
+            });
+        }
+        /**
+         *  host model
+         */
+        if (Dict.HOST.equals(model.getRole()) && zookeeperRegistry != null) {
+            String modelKey = ModelUtil.genModelKey(model.getTableName(), model.getNamespace());
+            zookeeperRegistry.addDynamicEnvironment(EncryptUtils.encrypt(modelKey, EncryptMethod.MD5));
+            zookeeperRegistry.register(FateServer.hostServiceSets);
+        }
+        // update cache
+        this.store(namespaceMap, namespaceFile);
+        return returnResult;
+
+    }
+
+    public synchronized ReturnResult doBind(Context context, Model model, String serviceId) {
+        ReturnResult returnResult = new ReturnResult();
+
+        Preconditions.checkArgument(StringUtils.isNotBlank(serviceId), "param service id is blank");
+        Preconditions.checkArgument(!StringUtils.containsAny(serviceId, URL_FILTER_CHARACTER), "Service id contains special characters, " + JsonUtil.object2Json(URL_FILTER_CHARACTER));
+
+        returnResult.setRetcode(StatusCode.SUCCESS);
+
+        String modelKey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
+        Model loadedModel = this.namespaceMap.get(modelKey);
+        if (loadedModel == null) {
+            throw new ModelNullException("model " + modelKey + " is not exist ");
+        }
+        this.serviceIdNamespaceMap.put(serviceId, modelKey);
+        if (zookeeperRegistry != null) {
+            if (StringUtils.isNotEmpty(serviceId)) {
+                zookeeperRegistry.addDynamicEnvironment(serviceId);
+            }
+            zookeeperRegistry.register(FateServer.serviceSets);
+        }
+        //update cache
+        this.store(serviceIdNamespaceMap, serviceIdFile);
+        return returnResult;
+    }
+
+    private void buildModelRolePartyMap(Model model) {
+        List<Map> rolePartyMapList = model.getRolePartyMapList();
+        if (rolePartyMapList == null) {
+            rolePartyMapList = new ArrayList<>();
+        }
+
+        Map rolePartyMap = new HashMap();
+        rolePartyMap.put(Dict.ROLE, model.getRole());
+        rolePartyMap.put(Dict.PART_ID, model.getPartId());
+        rolePartyMapList.add(rolePartyMap);
+
+        if (model.getFederationModelMap() != null) {
+            for (Model value : model.getFederationModelMap().values()) {
+                rolePartyMap = new HashMap();
+                rolePartyMap.put(Dict.ROLE, value.getRole());
+                rolePartyMap.put(Dict.PART_ID, value.getPartId());
+                rolePartyMapList.add(rolePartyMap);
+            }
+        }
+
+        model.setRolePartyMapList(rolePartyMapList);
     }
 
 }
