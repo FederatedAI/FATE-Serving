@@ -1,4 +1,4 @@
-FATE-Serving提供了fate-serving-client工具进行 下载系统对应版本fate-serving-client：
+FATE-Serving提供了fate-serving-client工具，下载对应版本的fate-serving-client：
 >linux版本：[fate-serving-client-2.1.0-linux.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-linux.tar.gz )     
 >mac版本：[fate-serving-client-2.1.0-darwin.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.0-darwin.tar.gz)
 
