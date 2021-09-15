@@ -7,7 +7,7 @@
 5.在admin页面增加cluster一键自检工具，可查看Cluster的服务自检状态，由后台定时对Cluster进行自检，用户也可以主动进行一键自检。
 6.增加路由表编辑功能，可通过页面直接编辑当前serving-proxy配置的路由表信息。
 7.服务拓扑图优化，展示各机器间的真实映射关系，拓扑图上可选取指定的机器并查看其详情。
-8.新增guest和host之间支持http通信。
+8.新增guest和host之间支持http协议。
 9.新增一个通用的httpAdaptor用于host获取特征。
 ```
  
