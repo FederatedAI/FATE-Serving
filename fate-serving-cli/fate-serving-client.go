@@ -18,6 +18,7 @@ package main
 
 import (
 	"encoding/json"
+	"fate-serving-client/cmd"
 	"fate-serving-client/common"
 	"fate-serving-client/pb"
 	"fate-serving-client/rpc"
@@ -541,60 +542,60 @@ func init() {
 		},
 	}
 
-	//inferenceCommand := &grumble.Command{
-	//	Name:     "inference",
-	//	Help:     "inference",
-	//	LongHelp: "inference",
-	//	Flags: func(f *grumble.Flags) {
-	//		f.String("a", "address", "localhost:8000", "the address of serving-server")
-	//		f.String("f", "filepath", "", "the file path of json file")
-	//		f.String("s", "serviceId", "", "the serviceId of model")
-	//		//f.String("h", "host", "localhost", "the ip of serving-server")
-	//
-	//		// flag.StringVar(&host, "h", "localhost", "host ip")
-	//		// flag.IntVar(&port, "p", 8000, "port")
-	//	},
-	//	Run: func(c *grumble.Context) error {
-	//		c.App.Config().PromptColor.Add()
-	//		var err error
-	//		address := c.Flags.String("address")
-	//		filePath := c.Flags.String("filepath")
-	//
-	//		var content []byte
-	//		if len(filePath) == 0 {
-	//			servieId := c.Flags.String("serviceId")
-	//			if len(servieId) == 0 {
-	//				fmt.Println("serviceId for default testing data is expected")
-	//				return nil
-	//			} else {
-	//				position := strings.IndexAny(INFERENCETEST, ":")
-	//				position += 3
-	//				content = []byte(INFERENCETEST[0:position] + servieId + INFERENCETEST[position:])
-	//			}
-	//		} else {
-	//			content, err = cmd.ReadParams(filePath)
-	//			if err != nil {
-	//				fmt.Println(err)
-	//				return nil
-	//			}
-	//		}
-	//		inferenceMsg := pb.InferenceMessage{
-	//			Body: content,
-	//		}
-	//
-	//		inferenceResp, err := rpc.Inference(address, &inferenceMsg)
-	//		if err != nil {
-	//			fmt.Println("Connection error")
-	//			return nil
-	//		}
-	//		if inferenceResp != nil {
-	//			resp := string(inferenceResp.GetBody())
-	//			fmt.Println(resp)
-	//		}
-	//		//c.App.Println(c.Flags.String("directory"))
-	//		return nil
-	//	},
-	//}
+	inferenceCommand := &grumble.Command{
+		Name:     "inference",
+		Help:     "inference",
+		LongHelp: "inference",
+		Flags: func(f *grumble.Flags) {
+			f.String("a", "address", "localhost:8000", "the address of serving-server")
+			f.String("f", "filepath", "", "the file path of json file")
+			f.String("s", "serviceId", "", "the serviceId of model")
+			//f.String("h", "host", "localhost", "the ip of serving-server")
+
+			// flag.StringVar(&host, "h", "localhost", "host ip")
+			// flag.IntVar(&port, "p", 8000, "port")
+		},
+		Run: func(c *grumble.Context) error {
+			c.App.Config().PromptColor.Add()
+			var err error
+			address := c.Flags.String("address")
+			filePath := c.Flags.String("filepath")
+
+			var content []byte
+			if len(filePath) == 0 {
+				servieId := c.Flags.String("serviceId")
+				if len(servieId) == 0 {
+					fmt.Println("serviceId for default testing data is expected")
+					return nil
+				} else {
+					position := strings.IndexAny(INFERENCETEST, ":")
+					position += 3
+					content = []byte(INFERENCETEST[0:position] + servieId + INFERENCETEST[position:])
+				}
+			} else {
+				content, err = cmd.ReadParams(filePath)
+				if err != nil {
+					fmt.Println(err)
+					return nil
+				}
+			}
+			inferenceMsg := pb.InferenceMessage{
+				Body: content,
+			}
+
+			inferenceResp, err := rpc.Inference(address, &inferenceMsg)
+			if err != nil {
+				fmt.Println("Connection error")
+				return nil
+			}
+			if inferenceResp != nil {
+				resp := string(inferenceResp.GetBody())
+				fmt.Println(resp)
+			}
+			//c.App.Println(c.Flags.String("directory"))
+			return nil
+		},
+	}
 
 	//batchInferenceCommand := &grumble.Command{
 	//	Name:     "batchInference",
@@ -654,7 +655,7 @@ func init() {
 
 	App.AddCommand(showModelCommand)
 	App.AddCommand(showConfigCommand)
-	//App.AddCommand(inferenceCommand)
+	App.AddCommand(inferenceCommand)
 	//App.AddCommand(batchInferenceCommand)
 	App.AddCommand(showflowCommand)
 	App.AddCommand(cluster)
