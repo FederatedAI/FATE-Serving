@@ -42,12 +42,20 @@ serving-admin仅实现简单的用户登录，用户可业务需求，自行实�
     <td>服务ID</td>
   </tr>
   <tr>
+    <td>FATE Flow Address</td>
+    <td>发布模型的flow的IP地址</td>
+  </tr>
+  <tr>
     <td>Role & Party ID</td>
     <td>模型对应的角色和节点ID</td>
   </tr>
   <tr>
     <td>Timestamp</td>
     <td>模型发布时间</td>
+  </tr>
+  <tr>
+    <td>Operation</td>
+    <td>模型操作</td>
   </tr>
 </table>
 
@@ -75,21 +83,13 @@ serving-admin仅实现简单的用户登录，用户可业务需求，自行实�
 #### 服务管理
 * 服务接口：展示注册中心中各实例注册的服务接口
 
-![weight](../img/weight.jpg)
+![weight](../img/service.jpg)
   
 列表字段  
 <table>
   <tr>
     <td>字段名</td>
     <td>备注</td>
-  </tr>
-  <tr>
-    <td>Project</td>
-    <td>服务项目，serving-server为serving，serving-proxy为proxy</td>
-  </tr>
-  <tr>
-    <td>Environment</td>
-    <td>环境，模型Bind操作绑定服务ID后，此字段会显示注册的服务接口的服务ID</td>
   </tr>
   <tr>
     <td>Name</td>

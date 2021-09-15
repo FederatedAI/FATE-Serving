@@ -18,7 +18,7 @@ zookeeper中使用的数据结构如下
 第二级路径：永久节点，各自模块的名字，比如serving-proxy的模块名为proxy ，serving-server的模块名为serving  
 第三级路径：永久节点，ID ，根据接口的不同ID的值不一样。与模型版本强相关的接口，如inference接口，ID为fate-flow推送模型时产生的serviceId ，这样可以使得不同版本模型注册路径不一样。其他接口为字符串online  
 第四级路径：永久节点，固定字符串provider  
-第五级路径：临时节点，详细描述注册信息 eg:  grpc://172.168.1.1:8000
+第五级路径：临时节点，详细描述注册信息 eg:  grpc://192.168.1.1:8000
 
 ### ACL鉴权
 FATE-Serving支持zookeeper acl鉴权，在使用zk注册中心时，启用zookeeper acl鉴权的服务所注册的接口节点，未配置acl鉴权的服务不能访问。启用添加如下配置： 
