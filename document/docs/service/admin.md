@@ -81,10 +81,11 @@ serving-admin仅实现简单的用户登录，用户可业务需求，自行实�
 ![model-pipeline](../img/model-pipeline.jpg)
 
 #### 服务管理
-* 服务接口：展示注册中心中各实例注册的服务接口
+* 服务接口：展示注册中心中各实例注册的服务接口    
 
 ![weight](../img/service.jpg)
-  
+
+ 
 列表字段  
 <table>
   <tr>
