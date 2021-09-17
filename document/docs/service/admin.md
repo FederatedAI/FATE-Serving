@@ -83,7 +83,7 @@ serving-admin仅实现简单的用户登录，用户可业务需求，自行实�
 #### 服务管理
 * 服务接口：展示注册中心中各实例注册的服务接口    
 
-![weight](../img/service.jpg)
+![service](../img/service.jpg)
 
  
 列表字段  
