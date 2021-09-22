@@ -14,7 +14,7 @@
     "dll": "webpack -p --progress --config ./webpack.dll.conf.js"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "core-js": "^2.6.5",
     "echarts": "^4.8.0",
     "element-ui": "^2.12.0",
