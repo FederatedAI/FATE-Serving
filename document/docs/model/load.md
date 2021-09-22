@@ -2,19 +2,19 @@
 源码中提供了简单的LR模型用于进行简单测试，可以在没有安装FATE的情况下使用该模式。将 [example/model_cache_example.zip](../src/model_cache_example.zip) 解压至guest与host双方serving-server实例部署目录下的.fate目录下（若是不存在可手动新建该目录），重启即可自动加载模型并绑定到lr-test。
 
 ### 模型推送流程
-前面介绍了如何安装各个组件，在各组件都成功安装后，接下来需要将模型推送至serving-server。
+前面介绍了如何安装各个组件，在各组件都成功安装后，接下来需要将模型推送至serving-server。 
+    
 推送模型的一般流程是：  
-
 1. 通过FATE建模  
 2. 分别部署guest方 Fate-serving 与host方Fate-serving
-3. 分别配置好guest方Fate-flow与guest方Fate-serving、host方Fate-flow 与host方Fate-serving ，Fateflow配置见github上的介绍，下文简单罗列了Fateflow的配置，可用作参考。
-4. Fateflow的配置，可用作参考。
-5. Fate-flow推送模型
-6. Fate-flow将模型绑定serviceId
-7. 以上操作完成后，可以在serving-admin页面上查看模型相关信息（此步操作非必需）。
-8. 可以在serving-admin页面上测试调用（此步操作非必需）
+3. 分别配置好guest方Fate-flow与guest方Fate-serving、host方Fate-flow 与host方Fate-serving。Fateflow配置见github上的介绍，下文简单罗列了Fateflow的配置，可用作参考。
+4. Fate-flow推送模型
+5. Fate-flow将模型绑定serviceId
+6. 以上操作完成后，可以在serving-admin页面上查看模型相关信息（此步操作非必需）。
+7. 可以在serving-admin页面上测试调用（此步操作非必需）。
 
 具体的工作流程如下图所示 蓝色为guest集群，灰色代表host集群  
+
 ![flow](../img/flow.jpg)
 
 ### FATE-Flow的配置（以1.4.x 版本为例）
@@ -104,10 +104,10 @@ zookeeper:
     ]
 }
 ```
-#### 模型在内存中的结构
+### 模型在内存中的结构
 ![model_structure](../img/model_structure.jpg)
 
-#### 常见问题
+### 常见问题
 <table>
   <tr>
     <td>常见问题</td>
@@ -125,10 +125,15 @@ zookeeper:
     <td>检查$pythonpath/logs/fate_flow/fate_flow_stat.log，确定是否有组件未启动，如果有，请正确启动组件后重试。</td>
   </tr>
   <tr>
+    <td>加载（load）模型提示“Only deployed models could be used to execute process of loading. Please deploy model before loading”</td>
+    <td>在fate1.5.x以后版本提供了两种dsl（v1/v2）训练模型，用dsl_v1时不需要执行deploy操作，用dsl_v2是需要的</td>
+    <td>在load之前先执行deploy操作生成新模型，然后再用deploy生成的模型id/version进行在线的load操作</td>
+  </tr>  
+  <tr>
     <td>绑定（bind）模型提示“no service id”</td>
     <td>bind任务配置文件中未指定service_id</td>
     <td>修改bind任务配置文件，自定义指定service_id。</td>
   </tr>
 </table>
 
->更多FATE-Flow问题请查看[FATE-Flow](https://github.com/FederatedAI/FATE/tree/master/fate_flow)
+>更多FATE-Flow问题请查看[FATE-Flow](https://github.com/FederatedAI/FATE/tree/master/python/fate_flow)

@@ -1,4 +1,4 @@
-## FATE-SERVING 2.1 新增特性： 
+## FATE-SERVING 2.1 新增特性
 ```text
 1.支持多host算法模型在线预测，目前支持的多host算法有：纵向LR、纵向SBT。
 2.支持在admin页面以pipeline方式展示模型信息。
@@ -11,7 +11,7 @@
 9.新增一个通用的httpAdaptor用于host获取特征。
 ```
  
-## FATE-SERVING 2.0 支持的特性：
+## FATE-SERVING 2.0 新增特性
  
 ```text
 1.单笔预测，2.0.*版本guest方与host方将并行计算，从而降低了耗时。    
@@ -34,4 +34,4 @@
 
 * 2.0.* 有部分配置项与1.3.* 不同，升级时参考各模块的配置 。
 
-[点击查看](../../../RELEASE.md)更多历史版本信息
+[点击查看](https://github.com/FederatedAI/FATE-Serving/blob/master/RELEASE.md)更多历史版本信息
