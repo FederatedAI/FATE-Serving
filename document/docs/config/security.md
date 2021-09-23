@@ -58,8 +58,8 @@ proxy.grpc.inter.client.privateKey.file=/data/projects/fate-serving/serving-prox
           "port": 9999,
           "useSSL": true        # 配置对外节点时，需要将useSSL配置成true，client端请求时将携带证书
           "negotiationType": "TLS",
-          "certChainFile": "/data/projects/fate-serving/serving-proxy/conf/ssl/server.crt ",
-	      "privateKeyFile": "/data/projects/fate-serving/serving-proxy/conf/ssl/server.pem",
+          "certChainFile": "/data/projects/fate-serving/serving-proxy/conf/ssl/client.crt ",
+	      "privateKeyFile": "/data/projects/fate-serving/serving-proxy/conf/ssl/client.pem",
 	      "caFile": "/data/projects/fate-serving/serving-proxy/conf/ssl/ca.crt"
         }
       ]
