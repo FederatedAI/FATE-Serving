@@ -125,45 +125,43 @@
 ```yaml
 {
   "route_table": {
-    "default": {
+    "default": {  //  使用此处的default配置就能向对方发送请求,能满足大部分需求。
       "default": [
-        // 此处用于配置serving-proxy默认对外转发地址，
-       // 切记不能配置成serving-proxy自己的ip端口，会形成回环
-        {
-          "ip": "127.0.0.1",
-          "port": 9999
+        {  // 此处用于配置serving-proxy默认对外转发地址， 切记不能配置成serving-proxy自己的ip端口，会形成回环
+          "ip": "192.168.1.1", 
+          "port": 8869
         }
       ]
     },
-    //  向对方发送请求使用上面的default配置就能满足大部分需求。
-    // 以下是路由中己方部分说明：
+    
+    // 以下是路由中己方部分的配置说明：
+      （提示：如果使用zk的话，己方的配置其实是可以省略的，因为路由信息在服务启动的时候全注册到zk了，系统会在zk上拿到想要的信息；
+             如果部署时候选择的是无zk方案，那么下面的配置不能缺少）
     
     //己方的serving-proxy 在收到grpc unaryCall接口的请求后，会根据请求中的目的partyId尝试匹配。
-    比如请求中目的partId为10000，则会在路由表中查找是否存在10000的配置
-    //此处的10000表示目的partId 为10000时的路由，匹配到10000之后，再根据请求中的角色信息role。
-    比如请求中role 为serving则会继续匹配下面是否有serving的配置
+      比如请求中目的partId为10000，则会在路由表中查找是否存在10000的配置
+    //此处的10000表示目的partId 为10000时的路由，匹配到10000之后再根据请求中的角色信息role，
+      比如请求role为serving，则会继续往下面匹配serving的配置
     "10000": {
-      // 在未找到对应role的路由地址时，会使用default的配置
-      "default": [
+      "default": [  //可以给出一个默认值， 在未找到对应role的路由地址时，会使用default的配置
         {
           "ip": "127.0.0.1",
-          "port": 8889
+          "port": 8879
         }
       ],
       "serving": [
-        // 当已经匹配到role为serving，则代表请求为发给serving-server的请求，这时检查是否启用了ZK为注册中心，
-        如果已启用ZK则优先从ZK中获取目标地址，未找到时使用以下地址
+        // 当匹配到role为serving，则代表请求为发给serving-server的请求，这时检查是否启用了ZK为注册中心，
+           如果启用ZK则优先从ZK中获取目标地址，未找到时使用以下地址
         
         {  // 此处配置己端对应serving服务地址列表，ip和port对应serving-server所启动的grpc服务地址
           "ip": "127.0.0.1",
-          "port": 8080
+          "port": 8000
         }
       ]
     }
   },
-  // 此处配置当前路由表规则开启/关闭
   "permission": {
-    "default_allow": true
+    "default_allow": true  // 此处配置当前路由表规则开启/关闭
   }
 }
 ```
@@ -181,9 +179,8 @@
     },
     ......
   },
-  // 此处配置当前路由表规则开启/关闭
   "permission": {
-    "default_allow": true
+    "default_allow": true  // 此处配置当前路由表规则开启/关闭
   }
 }
 
