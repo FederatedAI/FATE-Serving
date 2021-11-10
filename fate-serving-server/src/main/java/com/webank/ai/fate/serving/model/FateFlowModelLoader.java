@@ -31,7 +31,6 @@ import com.webank.ai.fate.serving.federatedml.PipelineModelProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,16 +39,15 @@ import java.net.URLEncoder;
 import java.util.*;
 
 @Component
-public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>> implements InitializingBean {
+public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>> {
     private static final Logger logger = LoggerFactory.getLogger(FateFlowModelLoader.class);
     private static final String TRANSFER_URI = "flow/online/transfer";
 
     @Autowired(required = false)
     private RouterService routerService;
 
-
-    @Autowired
-    ZookeeperRegistry zookeeperRegistry;
+    @Autowired(required = false)
+    private ZookeeperRegistry zookeeperRegistry;
 
     @Override
     protected byte[] serialize(Context context, Map<String, byte[]> data) {
@@ -140,7 +138,7 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
             String filePath = modelLoaderParam.getFilePath();
             if (StringUtils.isNotBlank(filePath)) {
                 requestUrl = URLDecoder.decode(filePath,"UTF-8");
-            } else if (routerService != null) {
+            } else if (routerService != null && zookeeperRegistry != null) {
                 //serving 2.1.0兼容
                 String modelParentPathx = "/" + Dict.DEFAULT_FATE_ROOT + "/" + TRANSFER_URI + "/providers";
                 List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
@@ -186,11 +184,4 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
         return requestUrl;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        String modelParentPathx = "/" + Dict.DEFAULT_FATE_ROOT + "/" + TRANSFER_URI + "/providers";
-        String modelParentPath = "/";
-        List<String> children = zookeeperRegistry.getZkClient().getChildren(modelParentPathx);
-//        logger.info("children = {}", children);
-    }
 }
