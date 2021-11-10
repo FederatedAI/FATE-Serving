@@ -125,9 +125,9 @@
 ```yaml
 {
   "route_table": {
-    "default": {  //  使用此处的default配置就能向对方发送请求,能满足大部分需求。
+    "default": {  //  使用此处的default配置就能向对方发送请求,能满足大部分需求。 
       "default": [
-        {  // 此处用于配置serving-proxy默认对外转发地址， 切记不能配置成serving-proxy自己的ip端口，会形成回环
+        {  // 此处用于配置serving-proxy默认对外转发地址， 切记不能配置成serving-proxy自己的ip端口，会形成回环  
           "ip": "192.168.1.1", 
           "port": 8869
         }
@@ -141,9 +141,9 @@
     //己方的serving-proxy 在收到grpc unaryCall接口的请求后，会根据请求中的目的partyId尝试匹配。
       比如请求中目的partId为10000，则会在路由表中查找是否存在10000的配置
     //此处的10000表示目的partId 为10000时的路由，匹配到10000之后再根据请求中的角色信息role，
-      比如请求role为serving，则会继续往下面匹配serving的配置
+      比如请求role为serving，则会继续往下面匹配serving的配置  
     "10000": {
-      "default": [  //可以给出一个默认值， 在未找到对应role的路由地址时，会使用default的配置
+      "default": [  //可以给出一个默认值， 在未找到对应role的路由地址时，会使用default的配置 
         {
           "ip": "127.0.0.1",
           "port": 8879
@@ -153,7 +153,7 @@
         // 当匹配到role为serving，则代表请求为发给serving-server的请求，这时检查是否启用了ZK为注册中心，
            如果启用ZK则优先从ZK中获取目标地址，未找到时使用以下地址
         
-        {  // 此处配置己端对应serving服务地址列表，ip和port对应serving-server所启动的grpc服务地址
+        {  // 此处配置己端对应serving服务地址列表，ip和port对应serving-server所启动的grpc服务地址 
           "ip": "127.0.0.1",
           "port": 8000
         }
