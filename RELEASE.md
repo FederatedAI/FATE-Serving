@@ -1,6 +1,6 @@
 # Release 2.1.1
 ## Major Features and Improvements
-* Fix the bug of starting the serving-server service when Zookeeper is not enabled.
+* Fix the bug that the serving-server service fails to start when zookeeper is not used as the service registration and coordination center.
 
 # Release 2.1.0
 ## Major Features and Improvements
