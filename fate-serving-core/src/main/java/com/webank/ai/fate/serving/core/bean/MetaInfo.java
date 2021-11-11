@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MetaInfo {
-    public static final long CURRENT_VERSION = 210;
+    public static final long CURRENT_VERSION = 211;
     public static List<AdaptorDescriptor.ParamDescriptor> inferenceParamDescriptorList;
     public static List<AdaptorDescriptor.ParamDescriptor> batchInferenceParamDescriptorList;
     public static Boolean PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH;
