@@ -60,9 +60,11 @@ export PATH=$PATH:$JAVA_HOME/bin
 3.sh service.sh restart (或 ./service.sh restart) 启动应用（windows 脚本暂时不支持，如有需要可自行编写）  
 有可能出现的问题：
  >jdk 没有安装成功，可以尝试执行 java -version 查看java命令是否能正常执行，可在bin/service.sh中指定jdk    
+```yaml
+xxxxxxxxxx
 export JAVA_HOME=/data/projects/fate/common/jdk/jdk-8u192
 export PATH=$PATH:$JAVA_HOME/bin
->
+```
 4.检查日志与端口看启动是否正常  
 
 ### serving-admin部署  
@@ -75,7 +77,9 @@ serving-admin提供了集群的可视化操作界面，可以展示集群中各�
 2.sh service.sh restart (或 ./service.sh restart) 启动应用（windows 脚本暂时不支持，如有需要可自行编写）  
 有可能出现的问题：
  >jdk 没有安装成功，可以尝试执行 java -version 查看java命令是否能正常执行，可在bin/service.sh中指定jdk    
+```yaml
+xxxxxxxxxx
 export JAVA_HOME=/data/projects/fate/common/jdk/jdk-8u192
 export PATH=$PATH:$JAVA_HOME/bin
->
+```
 3.通过浏览器访问admin页面，默认访问地址: [http://127.0.0.1:8350](http://127.0.0.1:8350) 
