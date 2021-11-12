@@ -149,8 +149,8 @@
   </tr>
   <tr>
     <td>proxy</td>
-    <td>离线路由proxy地址，建议通过zookeeper来获取地址，不建议直接配置</td>
-    <td>127.0.0.1:8000</td>
+    <td>proxy服务的地址，建议通过启用zookeeper自动获取地址，当不启用zk时需要直接在此处配置</td>
+    <td>127.0.0.1:8879</td>
   </tr>
   <tr>
     <td>zk.url</td>

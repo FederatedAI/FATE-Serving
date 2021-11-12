@@ -1,3 +1,7 @@
+# Release 2.1.1
+## Major Features and Improvements
+* Fix the bug that the serving-server service fails to start when zookeeper is not used as the service registration and coordination center.
+
 # Release 2.1.0
 ## Major Features and Improvements
 * Support multi-host algorithm model online prediction,currently, the supported multi-host algorithms include HeteroLR and HeteroSecureBoost.
