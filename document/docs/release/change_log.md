@@ -1,4 +1,9 @@
-## FATE-SERVING 2.1 新增特性
+## FATE-SERVING 2.1.1 
+```text
+1.修复不使用zookeeper作为服务注册和协调中心的情况下，serving-server服务启动失败的BUG。
+```
+
+## FATE-SERVING 2.1.0 新增特性
 ```text
 1.支持多host算法模型在线预测，目前支持的多host算法有：纵向LR、纵向SBT。
 2.支持在admin页面以pipeline方式展示模型信息。
@@ -11,7 +16,7 @@
 9.新增一个通用的httpAdaptor用于host获取特征。
 ```
  
-## FATE-SERVING 2.0 新增特性
+## FATE-SERVING 2.0.0 新增特性
  
 ```text
 1.单笔预测，2.0.*版本guest方与host方将并行计算，从而降低了耗时。    
