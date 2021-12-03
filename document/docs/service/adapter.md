@@ -51,7 +51,7 @@ feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.CustomBatchA
 >serving-server部署目录下extension``已加载到类路径
 
 ## 预设Adapter
-fate-serving-extension中预设了6种Adapter的简单实现
+fate-serving-extension中预设了6中Adapter的简单实现
 
 #### MockAdapter
 固定返回mock特征数据
@@ -63,15 +63,17 @@ fate-serving-extension中预设了6种Adapter的简单实现
 用于批量预测，原理同上
 
 #### TestFileAdapter
-从host_data.csv种读取特征数据，每次调用返回值为csv种所有内容, host_data.csv需上传至Host方serving-server实例部署根目录下，
+从host_data.csv中读取特征数据，每次调用返回值为csv中所有内容, host_data.csv需上传至Host方serving-server实例部署根目录下，
 >x0:-0.320167,x1:0.58883,x2:-0.18408,x3:-0.384207,x4:2.201839,x5:1.68401,x6:1.219096,x7:1.150692,x8:1.9656,x9:1.572462,x10:-0.35685
 x0:1,x1:5,x2:13,x3:58,x4:95,x5:352,x6:418,x7:833,x8:888,x9:937,x10:32776
 
 #### HttpAdapter
 在serving-server.properties文件中配置属性feature.single.adaptor和http.adapter.url，feature.single.adaptor为继承AbstractSingleFeatureDataAdaptor
-接口，url为调用获取数据接口地址。
-feature.single.adaptor=com..webank.ai.fate.serving.adaptor.dataaccess.HttpAdapter
+接口，url为调用获取数据接口地址。  
+```yaml
+feature.single.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.HttpAdapter
 http.adapter.url=http://127.0.0.1:9380/v1/http/adapter/getFeature
+```
 
-### HttpBatchAdapter
+#### HttpBatchAdapter
 用于批量预测，需将feature.single.adaptor配置改为feature.batch.adaptor
