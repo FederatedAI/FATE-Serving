@@ -37,7 +37,7 @@ import java.util.Properties;
 
 @SpringBootApplication
 @ConfigurationProperties
-@PropertySource(value = "classpath:serving-server.properties", ignoreResourceNotFound = false)
+@PropertySource(value = "classpath:serving-server.properties")
 @EnableScheduling
 public class Bootstrap {
     static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
@@ -71,6 +71,7 @@ public class Bootstrap {
             }
             int processors = Runtime.getRuntime().availableProcessors();
             MetaInfo.PROPERTY_ROOT_PATH = new File("").getCanonicalPath();
+            MetaInfo.PROPERTY_SERVER_PORT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVER_PORT, "8060"));
             MetaInfo.PROPERTY_PROXY_ADDRESS = environment.getProperty(Dict.PROPERTY_PROXY_ADDRESS);
             MetaInfo.PROPERTY_SERVING_CORE_POOL_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_CORE_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_CORE_POOL_SIZE)) : processors;
             MetaInfo.PROPERTY_SERVING_MAX_POOL_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_MAX_POOL_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_MAX_POOL_SIZE)) : processors * 2;
