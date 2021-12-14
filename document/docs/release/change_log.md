@@ -1,3 +1,8 @@
+## FATE-SERVING 2.1.2
+```text
+1.修复log4j的严重安全漏洞。
+```
+
 ## FATE-SERVING 2.1.1 
 ```text
 1.修复不使用zookeeper作为服务注册和协调中心的情况下，serving-server服务启动失败的BUG。
