@@ -1,3 +1,7 @@
+# Release 2.1.2
+## Major Features and Improvements
+* Fix serious security vulnerabilities in log4j.
+
 # Release 2.1.1
 ## Major Features and Improvements
 * Fix the bug that the serving-server service fails to start when zookeeper is not used as the service registration and coordination center.
