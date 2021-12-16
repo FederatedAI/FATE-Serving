@@ -54,8 +54,8 @@ export PATH=$PATH:$JAVA_HOME/bin
 
 ### serving-proxy部署  
 1.根据需求修改部署目录下 conf/application.properties文件，具体配置项解释见配置文件详解[proxy.md](../config/proxy.md)中application.properties配置。   
-2.配置router_table.json ，具体配置项解释见文件详解[proxy.md](../config/proxy.md)中route_table配置。  
->对router_table.json的修改是定时刷新生效，可以不需要重启serving-proxy；配置本身为json格式，修改时需要注意是否满足json格式。
+2.配置route_table.json ，具体配置项解释见文件详解[proxy.md](../config/proxy.md)中route_table配置。  
+>对route_table.json的修改是定时刷新生效，可以不需要重启serving-proxy；配置本身为json格式，修改时需要注意是否满足json格式。
   
 3.sh service.sh restart (或 ./service.sh restart) 启动应用（windows 脚本暂时不支持，如有需要可自行编写）  
 有可能出现的问题：
