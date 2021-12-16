@@ -98,7 +98,7 @@ public class RouterTableUtils {
 //            long now = new Date().getTime();
 //            JsonObject routerJson = loadRoutTable();
 //            if (routerJson == null) {
-//                throw new RouterInfoOperateException("router_table.json not exists");
+//                throw new RouterInfoOperateException("route_table.json not exists");
 //            }
 //            JsonObject route_table = routerJson.getAsJsonObject("route_table");
 //            if (route_table == null) {
@@ -126,8 +126,8 @@ public class RouterTableUtils {
 //            }
 //            routerJson.add("route_table", route_table);
 //            if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
-//                logger.error("write router_table.json error");
-//                throw new RouterInfoOperateException("write router_table.json error");
+//                logger.error("write route_table.json error");
+//                throw new RouterInfoOperateException("write route_table.json error");
 //            }
 //        } catch (RouterInfoOperateException routerEx) {
 //            throw new RouterInfoOperateException(routerEx.getMessage());
@@ -141,7 +141,7 @@ public class RouterTableUtils {
 //        try {
 //            JsonObject routerJson = loadRoutTable();
 //            if (routerJson == null) {
-//                throw new RouterInfoOperateException("router_table.json not exists");
+//                throw new RouterInfoOperateException("route_table.json not exists");
 //            }
 //            JsonObject route_table = routerJson.getAsJsonObject("route_table");
 //            if (route_table == null) {
@@ -167,8 +167,8 @@ public class RouterTableUtils {
 //                partyIdRouter.add(routerInfo.getServerType(), serverTypeArray);
 //            }
 //            if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
-//                logger.error("write router_table.json error");
-//                throw new RouterInfoOperateException("write router_table.json error");
+//                logger.error("write route_table.json error");
+//                throw new RouterInfoOperateException("write route_table.json error");
 //            }
 //        } catch (RouterInfoOperateException routerEx) {
 //            throw new RouterInfoOperateException(routerEx.getMessage());
@@ -182,7 +182,7 @@ public class RouterTableUtils {
 //        try {
 //            JsonObject routerJson = loadRoutTable();
 //            if (routerJson == null) {
-//                throw new RouterInfoOperateException("router_table.json not exists");
+//                throw new RouterInfoOperateException("route_table.json not exists");
 //            }
 //            JsonObject route_table = routerJson.getAsJsonObject("route_table");
 //            if (route_table == null) {
@@ -193,8 +193,8 @@ public class RouterTableUtils {
 //                if (StringUtils.isBlank(routerInfo.getServerType())) {
 //                    route_table.remove(routerInfo.getPartyId());
 //                    if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
-//                        logger.error("write router_table.json error");
-//                        throw new RouterInfoOperateException("write router_table.json error");
+//                        logger.error("write route_table.json error");
+//                        throw new RouterInfoOperateException("write route_table.json error");
 //                    }
 //                    return;
 //                }
@@ -216,8 +216,8 @@ public class RouterTableUtils {
 //            }
 //            routerJson.add("route_table", route_table);
 //            if (writeRouterFile(JsonUtil.formatJson(routerJson.toString()))) {
-//                logger.error("write router_table.json error");
-//                throw new RouterInfoOperateException("write router_table.json error");
+//                logger.error("write route_table.json error");
+//                throw new RouterInfoOperateException("write route_table.json error");
 //            }
 //        } catch (RouterInfoOperateException routerEx) {
 //            throw new RouterInfoOperateException(routerEx.getMessage());
@@ -230,17 +230,17 @@ public class RouterTableUtils {
     public static void saveRouter(String routerInfo){
         try {
             if (!RouteTableJsonValidator.isJSON(routerInfo)) {
-                logger.error("validate router_table.json format error");
+                logger.error("validate route_table.json format error");
             }
         } catch (Exception e) {
-            throw new RouterInfoOperateException("validate router_table.json format error:" + e.getMessage());
+            throw new RouterInfoOperateException("validate route_table.json format error:" + e.getMessage());
         }
         try {
             if (writeRouterFile(JsonUtil.formatJson(routerInfo))) {
-                    logger.error("write router_table.json fail");
+                    logger.error("write route_table.json fail");
                 }
         } catch (Exception e) {
-            throw new RouterInfoOperateException("router_table.json : " + e.getMessage());
+            throw new RouterInfoOperateException("route_table.json : " + e.getMessage());
         }
     }
 

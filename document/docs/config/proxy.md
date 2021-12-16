@@ -116,7 +116,7 @@
 </table>
 
 ### route_table配置
-下面的json代码大致说明了router_table.json的填写规则，根据具体案例来配置。
+下面的json代码大致说明了route_table.json的填写规则，根据具体案例来配置。
 
 >启动注册中心时，只配置默认对外转发地址（default）即可 ;   
 >在2.1.0版本开始支持HTTP接口配置，2.1.0之前的版本只支持GRPC配置。     

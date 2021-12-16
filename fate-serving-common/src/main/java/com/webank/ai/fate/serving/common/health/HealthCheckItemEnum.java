@@ -1,7 +1,7 @@
 package com.webank.ai.fate.serving.common.health;
 
 public enum HealthCheckItemEnum {
-    CHECK_ROUTER_FILE("check router_table.json exist",HealthCheckComponent.SERVINGPROXY),
+    CHECK_ROUTER_FILE("check route_table.json exist",HealthCheckComponent.SERVINGPROXY),
     CHECK_ZOOKEEPER_CONFIG("check zk config",HealthCheckComponent.ALL),
     CHECK_ROUTER_NET("check router",HealthCheckComponent.SERVINGPROXY),
     CHECK_MEMORY_USAGE("check memory usage",HealthCheckComponent.ALL),
