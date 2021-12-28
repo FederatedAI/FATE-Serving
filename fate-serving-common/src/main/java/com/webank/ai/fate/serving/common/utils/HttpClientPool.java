@@ -87,13 +87,17 @@ public class HttpClientPool {
             requestConfig = RequestConfig.custom().setConnectionRequestTimeout(
                     connectionRequestTimeout).setSocketTimeout(socketTimeout).setConnectTimeout(
                     connectTimeout).build();
-            httpClient = getConnection();
+            httpClient = createConnection();
         } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException ex) {
             logger.error("init http client pool failed:", ex);
         }
     }
 
     public static CloseableHttpClient getConnection() {
+        return httpClient;
+    }
+
+    public static CloseableHttpClient createConnection() {
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setConnectionManager(poolConnManager)
                 .setDefaultRequestConfig(requestConfig)
