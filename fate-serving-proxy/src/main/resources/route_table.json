@@ -4,7 +4,7 @@
       "default": [
         {
           "ip": "127.0.0.1",
-          "port": 8879,
+          "port": 8869,
           "useSSL": false
         }
       ]

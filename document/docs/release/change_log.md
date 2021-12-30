@@ -1,3 +1,9 @@
+## FATE-SERVING 2.1.3
+```text
+1.修复内置HttpAdapter线程泄露问题。
+2.升级log4j依赖版本。
+```
+
 ## FATE-SERVING 2.1.2
 ```text
 1.修复log4j的严重安全漏洞。

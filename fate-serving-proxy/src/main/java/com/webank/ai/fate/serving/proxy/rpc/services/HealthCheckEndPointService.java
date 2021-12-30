@@ -121,11 +121,11 @@ public class HealthCheckEndPointService implements HealthCheckAware {
 
             healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : no router info found",HealthCheckStatus.error));
 
-           // healthCheckResult.getErrorList().add("check router_table.json  "+": no router info found");
+           // healthCheckResult.getErrorList().add("check route_table.json  "+": no router info found");
         }else{
             healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is found",HealthCheckStatus.ok));
 
-          //  healthCheckResult.getOkList().add("check router_table.json  "+": router_table.json is found");
+          //  healthCheckResult.getOkList().add("check route_table.json  "+": route_table.json is found");
         }
 
         routerInfoCheck(healthCheckResult);
@@ -221,7 +221,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                 return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGPROXY;
             }).forEach((item) -> {
                         switch (item) {
-//                CHECK_ROUTER_FILE("check router_table.json exist",HealthCheckComponent.SERVINGPROXY),
+//                CHECK_ROUTER_FILE("check route_table.json exist",HealthCheckComponent.SERVINGPROXY),
 //                        CHECK_ZOOKEEPER_CONFIG("check zk config",HealthCheckComponent.ALL),
 //                        CHECK_ROUTER_NET("check router",HealthCheckComponent.SERVINGPROXY),
 //                        CHECK_MEMORY_USAGE("check memory usage",HealthCheckComponent.ALL),
