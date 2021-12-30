@@ -15,9 +15,9 @@ $ mvn clean package
 随后拷贝，比如 serving-server/target/fate-serving-server-{version}-release.zip 到想要部署的路径下，并解压。（version为当前版本号）
 
 用户也可选择下载已编译好的版本，链接如下:   
-•	[fate-serving-server-2.1.2-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-server-2.1.2-release.zip)  
-•	[fate-serving-proxy-2.1.2-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-proxy-2.1.2-release.zip)    
-•	[fate-serving-admin-2.1.2-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-admin-2.1.2-release.zip)  
+•	[fate-serving-server-2.1.3-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-server-2.1.3-release.zip)  
+•	[fate-serving-proxy-2.1.3-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-proxy-2.1.3-release.zip)    
+•	[fate-serving-admin-2.1.3-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-admin-2.1.3-release.zip)  
 
 
 ### zookeeper部署
@@ -54,15 +54,17 @@ export PATH=$PATH:$JAVA_HOME/bin
 
 ### serving-proxy部署  
 1.根据需求修改部署目录下 conf/application.properties文件，具体配置项解释见配置文件详解[proxy.md](../config/proxy.md)中application.properties配置。   
-2.配置router_table.json ，具体配置项解释见文件详解[proxy.md](../config/proxy.md)中route_table配置。  
->对router_table.json的修改是定时刷新生效，可以不需要重启serving-proxy；配置本身为json格式，修改时需要注意是否满足json格式。
+2.配置route_table.json ，具体配置项解释见文件详解[proxy.md](../config/proxy.md)中route_table配置。  
+>对route_table.json的修改是定时刷新生效，可以不需要重启serving-proxy；配置本身为json格式，修改时需要注意是否满足json格式。
   
 3.sh service.sh restart (或 ./service.sh restart) 启动应用（windows 脚本暂时不支持，如有需要可自行编写）  
 有可能出现的问题：
  >jdk 没有安装成功，可以尝试执行 java -version 查看java命令是否能正常执行，可在bin/service.sh中指定jdk    
+```yaml
+xxxxxxxxxx
 export JAVA_HOME=/data/projects/fate/common/jdk/jdk-8u192
 export PATH=$PATH:$JAVA_HOME/bin
->
+```
 4.检查日志与端口看启动是否正常  
 
 ### serving-admin部署  
@@ -75,7 +77,9 @@ serving-admin提供了集群的可视化操作界面，可以展示集群中各�
 2.sh service.sh restart (或 ./service.sh restart) 启动应用（windows 脚本暂时不支持，如有需要可自行编写）  
 有可能出现的问题：
  >jdk 没有安装成功，可以尝试执行 java -version 查看java命令是否能正常执行，可在bin/service.sh中指定jdk    
+```yaml
+xxxxxxxxxx
 export JAVA_HOME=/data/projects/fate/common/jdk/jdk-8u192
 export PATH=$PATH:$JAVA_HOME/bin
->
+```
 3.通过浏览器访问admin页面，默认访问地址: [http://127.0.0.1:8350](http://127.0.0.1:8350) 

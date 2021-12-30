@@ -1,3 +1,8 @@
+# Release 2.1.3
+## Major Features and Improvements
+* Fix the HttpAdapter thread leakage problem.
+* Upgrade log4j dependent version.
+
 # Release 2.1.2
 ## Major Features and Improvements
 * Fix serious security vulnerabilities in log4j.

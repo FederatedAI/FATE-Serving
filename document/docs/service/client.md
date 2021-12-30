@@ -1,12 +1,12 @@
 FATE-Serving提供了fate-serving-client工具
 ### 下载对应版本的fate-serving-client
->linux版本：[fate-serving-client-2.1.2-linux.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.2-linux.tar.gz )     
->mac版本：[fate-serving-client-2.1.2-darwin.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.2-darwin.tar.gz)
+>linux版本：[fate-serving-client-2.1.3-linux.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.3-linux.tar.gz )     
+>mac版本：[fate-serving-client-2.1.3-darwin.tar.gz](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-client-2.1.3-darwin.tar.gz)
 
-需要先确认下载解压出来的文件有没有可执行权限，没有权限就执行 `chmod +777 fate-serving-client-2.1.2-linux`授权。
+需要先确认下载解压出来的文件有没有可执行权限，没有权限就执行 `chmod +777 fate-serving-client-2.1.3-linux`授权。
 
 ### 启动client    
-在终端中使用`./fate-serving-client-2.1.2-linux`启动client  
+在终端中使用`./fate-serving-client-2.1.3-linux`启动client  
 ![connect](../img/client-connect.jpg)
 
 ### 提供了以下几种指令   
