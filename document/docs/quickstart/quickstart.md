@@ -15,9 +15,9 @@ $ mvn clean package
 随后拷贝，比如 serving-server/target/fate-serving-server-{version}-release.zip 到想要部署的路径下，并解压。（version为当前版本号）
 
 用户也可选择下载已编译好的版本，链接如下:   
-•	[fate-serving-server-2.1.3-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-server-2.1.3-release.zip)  
-•	[fate-serving-proxy-2.1.3-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-proxy-2.1.3-release.zip)    
-•	[fate-serving-admin-2.1.3-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-admin-2.1.3-release.zip)  
+•	[fate-serving-server-2.1.4-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-server-2.1.4-release.zip)  
+•	[fate-serving-proxy-2.1.4-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-proxy-2.1.4-release.zip)    
+•	[fate-serving-admin-2.1.4-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-admin-2.1.4-release.zip)  
 
 
 ### zookeeper部署
