@@ -21,7 +21,7 @@ public interface MergeInferenceAware {
 ```
 
 ### HeteroSecureBoost 在线推理
-HeteroSecureBoost 为纵向联邦SecureBoost在线推理的实现过程，与离线不同的是，目前serving只支持单个host的预测。  
+HeteroSecureBoost 为纵向联邦SecureBoost在线推理的实现过程,  
 它主要包含3个文件"HeteroSecureBoost", "HeteroSecureBoostingTreeGuest", "HeteroSecureBoostingTreeHost"，下面对这三个文件展开说明
 
 #### HeteroSecureBoost
