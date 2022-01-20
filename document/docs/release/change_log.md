@@ -1,3 +1,8 @@
+## FATE-SERVING 2.1.4
+```text
+1.升级SpringBoot依赖版本。
+```
+
 ## FATE-SERVING 2.1.3
 ```text
 1.修复内置HttpAdapter线程泄露问题。

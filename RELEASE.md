@@ -1,3 +1,7 @@
+# Release 2.1.4
+## Major Features and Improvements
+* Upgrade SpringBoot dependent version.
+
 # Release 2.1.3
 ## Major Features and Improvements
 * Fix the HttpAdapter thread leakage problem.
