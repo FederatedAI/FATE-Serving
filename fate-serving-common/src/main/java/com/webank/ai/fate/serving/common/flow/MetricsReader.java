@@ -47,10 +47,11 @@ class MetricsReader {
         FileInputStream in = null;
         long beginSecond = beginTimeMs / 1000;
         long endSecond = endTimeMs / 1000;
+        BufferedReader reader = null;
         try {
             in = new FileInputStream(fileName);
             in.getChannel().position(offset);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, charset));
+             reader = new BufferedReader(new InputStreamReader(in, charset));
             String line;
             while ((line = reader.readLine()) != null) {
                 MetricNode node = MetricNode.fromFatString(line);
@@ -74,8 +75,15 @@ class MetricsReader {
                 }
             }
         } finally {
-            if (in != null) {
-                in.close();
+            try {
+                if (in != null) {
+                    in.close();
+                }
+                if(reader!=null){
+                    reader.close();
+                }
+            }catch (Exception igore){
+
             }
         }
         return true;
@@ -91,10 +99,11 @@ class MetricsReader {
             lastSecond = list.get(list.size() - 1).getTimestamp() / 1000;
         }
         FileInputStream in = null;
+        BufferedReader reader = null;
         try {
             in = new FileInputStream(fileName);
             in.getChannel().position(offset);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, charset));
+            reader = new BufferedReader(new InputStreamReader(in, charset));
             String line;
             while ((line = reader.readLine()) != null) {
                 MetricNode node = MetricNode.fromFatString(line);
@@ -110,8 +119,15 @@ class MetricsReader {
                 lastSecond = currentSecond;
             }
         } finally {
-            if (in != null) {
-                in.close();
+            try {
+                if (in != null) {
+                    in.close();
+                }
+                if (reader != null) {
+                    reader.close();
+                }
+            }catch(Exception igore){
+
             }
         }
     }

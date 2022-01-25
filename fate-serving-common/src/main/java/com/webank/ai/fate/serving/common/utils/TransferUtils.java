@@ -95,24 +95,35 @@ public class TransferUtils {
             YAMLFactory yamlFactory = new YAMLFactory();
             YAMLGenerator generator = yamlFactory.createGenerator(
                     new OutputStreamWriter(new FileOutputStream(path), Charset.forName(ENCODING)));
+            try {
+                JsonToken token = parser.nextToken();
 
-            JsonToken token = parser.nextToken();
-
-            while (token != null) {
-                if (JsonToken.START_OBJECT.equals(token)) {
-                    generator.writeStartObject();
-                } else if (JsonToken.FIELD_NAME.equals(token)) {
-                    generator.writeFieldName(parser.getCurrentName());
-                } else if (JsonToken.VALUE_STRING.equals(token)) {
-                    generator.writeString(parser.getText());
-                } else if (JsonToken.END_OBJECT.equals(token)) {
-                    generator.writeEndObject();
+                while (token != null) {
+                    if (JsonToken.START_OBJECT.equals(token)) {
+                        generator.writeStartObject();
+                    } else if (JsonToken.FIELD_NAME.equals(token)) {
+                        generator.writeFieldName(parser.getCurrentName());
+                    } else if (JsonToken.VALUE_STRING.equals(token)) {
+                        generator.writeString(parser.getText());
+                    } else if (JsonToken.END_OBJECT.equals(token)) {
+                        generator.writeEndObject();
+                    }
+                    token = parser.nextToken();
                 }
-                token = parser.nextToken();
+            }finally {
+                try {
+                    if(parser!=null) {
+                        parser.close();
+                    }
+                    if(generator!=null) {
+                        generator.flush();
+                        generator.close();
+                    }
+                }catch (Exception igore){
+
+                }
             }
-            parser.close();
-            generator.flush();
-            generator.close();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

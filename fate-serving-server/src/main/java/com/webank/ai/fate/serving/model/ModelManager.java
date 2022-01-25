@@ -288,10 +288,12 @@ public class ModelManager implements InitializingBean {
         if (serviceIdNamespaceMap != null && serviceIdNamespaceMap.size() > 0) {
             List<String> environments = Lists.newArrayList();
             for (Map.Entry<String, String> modelEntry : serviceIdNamespaceMap.entrySet()) {
-                Model model = namespaceMap.get(modelEntry.getValue());
-                if (model != null) {
-                    environments.add(modelEntry.getKey());
-                    //environments.add(model.getPartId());
+                if(namespaceMap!=null) {
+                    Model model = namespaceMap.get(modelEntry.getValue());
+                    if (model != null) {
+                        environments.add(modelEntry.getKey());
+                        //environments.add(model.getPartId());
+                    }
                 }
             }
             this.registerGuestService(environments);
