@@ -60,10 +60,12 @@ public class FileUtils {
             return false;
         } finally {
             try {
-                out.flush();
-                out.close();
+                if(out!=null) {
+                    out.flush();
+                    out.close();
+                }
             } catch (IOException ex) {
-
+                logger.error("write file error",ex);
             }
         }
         return true;

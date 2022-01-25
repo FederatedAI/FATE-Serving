@@ -151,9 +151,13 @@ public class MetricSearcher {
         try {
             in = new FileInputStream(lastPosition.indexFileName);
             in.getChannel().position(lastPosition.offsetInIndex);
+
             DataInputStream indexIn = new DataInputStream(in);
-            // timestamp(second) in the specific position == that we cached
-            return indexIn.readLong() == lastPosition.second;
+            try {   // timestamp(second) in the specific position == that we cached
+                return indexIn.readLong() == lastPosition.second;
+            }finally {
+                indexIn.close();
+            }
         } catch (Exception e) {
             return false;
         } finally {
@@ -175,10 +179,12 @@ public class MetricSearcher {
         }
         long beginSecond = beginTime / 1000;
         FileInputStream in = new FileInputStream(idxFileName);
+
         in.getChannel().position(offsetInIndex);
         DataInputStream indexIn = new DataInputStream(in);
-        long offset;
         try {
+        long offset;
+
             long second;
             lastPosition.offsetInIndex = in.getChannel().position();
             while ((second = indexIn.readLong()) < beginSecond) {
@@ -193,7 +199,12 @@ public class MetricSearcher {
         } catch (EOFException ignore) {
             return -1;
         } finally {
-            indexIn.close();
+            try {
+                in.close();
+                indexIn.close();
+            }catch(Exception igore){
+
+            }
         }
     }
 

@@ -115,9 +115,11 @@ public class ProxyController {
                     result.getData().remove("log");
                     result.getData().remove("warn");
                     result.getData().remove("caseid");
+                    return JsonUtil.object2Json(result.getData());
                 }
+                return "";
 
-                return JsonUtil.object2Json(result.getData());
+
             }
         };
     }
