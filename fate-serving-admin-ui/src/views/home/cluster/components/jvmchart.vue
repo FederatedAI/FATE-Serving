@@ -100,7 +100,6 @@ export default {
                 }
             } else if (this.callsData.JVMInfo === 1) {
                 this.JVMseries = []
-                Yname = ''
                 jvmrArr = [{ name: 'fullGcCount', textStyle: { color: '#4AA2FF' } },
                     { name: 'yongGcCount', textStyle: { color: '#00C99E' } }]
                 this.JVMseries = [{
@@ -162,7 +161,6 @@ export default {
                 }]
             } else if (this.callsData.JVMInfo === 3) {
                 this.JVMseries = []
-                Yname = ''
                 this.JVMseries = [{
                     name: 'threadCount',
                     data: threadCount,
@@ -258,6 +256,3 @@ export default {
     }
 }
 </script>
-
-<style rel="stylesheet/scss" lang="scss">
-</style>
