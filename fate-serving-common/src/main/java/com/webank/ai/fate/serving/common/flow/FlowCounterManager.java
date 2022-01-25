@@ -78,35 +78,7 @@ public class FlowCounterManager {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        MetaInfo.PROPERTY_ROOT_PATH = new File("").getCanonicalPath();
 
-        FlowCounterManager flowCounterManager = new FlowCounterManager("test");
-        flowCounterManager.setMetricReport(new FileMetricReport("Test"));
-        flowCounterManager.setMetricSearcher(new MetricSearcher(MetricWriter.METRIC_BASE_DIR, "Test" + "-metrics.log.pid" + GetSystemInfo.getPid()));
-        flowCounterManager.startReport();
-        flowCounterManager.file = new File(MetaInfo.PROPERTY_ROOT_PATH + File.separator + ".fate" + File.separator + "flowRules.json");
-        flowCounterManager.initialize();
-
-        int i = 0;
-        while (true) {
-            flowCounterManager.setAllowQps("source-" + i, i);
-            i++;
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        /*while (true) {
-            flowCounterManager.pass("M_test");
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }*/
-    }
 
     public MetricSearcher getMetricSearcher() {
         return metricSearcher;

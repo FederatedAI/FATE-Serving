@@ -24,13 +24,9 @@
                 :data="serviceData"
                 height="100%"
                 :header-cell-style="{background:'#fff'}">
-                <!-- <el-table-column prop="project" label="Project" show-overflow-tooltip />
-                <el-table-column sortable  prop="environment" label="Environment" show-overflow-tooltip /> -->
                 <el-table-column prop="name" label="Name" show-overflow-tooltip />
                 <el-table-column prop="host" label="Host" show-overflow-tooltip />
                 <el-table-column prop="port" label="Port" show-overflow-tooltip />
-                <!-- <el-table-column sortable prop="CheckupStatus" label="Checkup Status" show-overflow-tooltip />
-                <el-table-column sortable prop="LastCheckup" label="Last Checkup" show-overflow-tooltip /> -->
                 <el-table-column sortable prop="weight" label="Weight" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span v-if="!(showEdit === scope.$index)">
@@ -255,11 +251,7 @@ export default {
             if (typeof str === 'string') {
                 try {
                     var obj = JSON.parse(str)
-                    if (typeof obj === 'object' && obj) {
-                        return true
-                    } else {
-                        return false
-                    }
+                    return typeof obj === 'object' && obj
                 } catch (e) {
                     return false
                 }
@@ -342,10 +334,10 @@ export default {
         height: calc(100% - 120px);
     }
     .service-tit {
-        font-family:Product Sans;
-        font-weight:bold;
-        line-height:20px;
-        color:rgba(33,122,217,1);
+        font-family: Product Sans, sans-serif;
+        font-weight: bold;
+        line-height: 20px;
+        color: rgba(33,122,217,1);
         opacity:1;
         font-size: 24px;
         margin-left: 10px;
@@ -430,12 +422,12 @@ export default {
                     background-color: #F5F8FA;
                     font-size: 14px;
                     border: none;
-                    font-family:Product Sans;
+                    font-family:Product Sans, sans-serif;
                 }
             }
            .response-data {
                overflow-y: auto;
-               font-family:Product Sans;
+               font-family:Product Sans, sans-serif;
                 width: 98%;
                 height: 160px;
                 background-color: #F5F8FA;

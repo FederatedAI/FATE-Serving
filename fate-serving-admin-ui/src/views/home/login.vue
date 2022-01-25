@@ -16,11 +16,11 @@
  -->
 <template>
 <div>
-<img src="@/assets/welcomepage.svg" />
+<img src="@/assets/welcomepage.svg" alt="" />
   <div class="login">
     <div class="title">Welcome</div>
     <div class="warning" v-if="passwordWarn">
-        <i class="el-icon-warning"></i>
+        <em class="el-icon-warning"></em>
         <span>
             Incorrect username or password. <br>
             The default username is admin, the default password is admin.
@@ -41,7 +41,7 @@
             @select="handleSelect"
             >
             <template slot-scope="{ item }">
-                <i class="el-icon-s-custom"></i>
+                <em class="el-icon-s-custom"></em>
                 <div>
                     <div class="name">{{ item.value }}</div>
                     <span class="addr">******</span>
@@ -65,7 +65,7 @@
           @focus="pwdInputStatus = true"
           @blur="pwdInputStatus = false"
           ref='pwdInput'>
-        <i slot="suffix" class="el-icon-view view" @click="showPwd"/></el-input>
+        <em slot="suffix" class="el-icon-view view" @click="showPwd"/></el-input>
       </div>
     </div>
     <div>

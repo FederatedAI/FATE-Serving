@@ -88,27 +88,5 @@ public class JVMGCUtils {
         return fullGC == null ? 0 : fullGC.getCollectionTime();
     }
 
-    public static void main(String[] args) {
-        List<List<Long>> listRoot = new ArrayList<List<Long>>();
-        for (; ; ) {
-//            System.out.println("=======================================================================");
-//            System.out.println("getYoungGCName: " + JVMGCUtils.getYoungGCName());
-//            System.out.println("getYoungGCCollectionCount: " + JVMGCUtils.getYoungGCCollectionCount());
-//            System.out.println("getYoungGCCollectionTime: " + JVMGCUtils.getYoungGCCollectionTime());
-//            System.out.println("getFullGCName: " + JVMGCUtils.getFullGCName());
-//            System.out.println("getFullGCCollectionCount: " + JVMGCUtils.getFullGCCollectionCount());
-//            System.out.println("getFullGCCollectionTime: " + JVMGCUtils.getFullGCCollectionTime());
-            List<Long> list = new ArrayList<Long>(1000);
-            listRoot.add(list);
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (list.size() > 1) {
-                list.remove(0);
-            }
-            Runtime.getRuntime().gc();
-        }
-    }
+
 }

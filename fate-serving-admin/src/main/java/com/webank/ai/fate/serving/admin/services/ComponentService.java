@@ -88,8 +88,10 @@ public class ComponentService {
             }
             return false;
         }).map(Map.Entry::getKey).findFirst();
-
-        return project.get();
+        if(project.isPresent())
+            return project.get();
+        else
+            return "";
     }
 
     public boolean isAllowAccess(String host, int port) {
