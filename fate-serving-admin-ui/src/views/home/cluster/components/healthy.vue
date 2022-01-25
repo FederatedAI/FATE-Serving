@@ -25,30 +25,30 @@
             <div class="healthy-content">
                 <div class="healthy-top">
                     <div>
-                        <span v-if="checkupStatus === 1" class="healthy-status"><i class="el-icon-success"></i>Cluster is healthy.</span>
-                        <span v-if="checkupStatus === 2" class="healthy-status"><i class="el-icon-loading" ></i><span class="span">Checkuping</span></span>
-                        <span v-if="checkupStatus === 3" class="healthy-status" style="color:#FE6363"><i class="el-icon-error"></i><span class="span">Error occurs !</span></span>
-                        <span v-if="checkupStatus === 4" class="healthy-status" style="color:#FF9D00"><i class="el-icon-warning"></i><span class="span">Warn</span></span>
+                        <span v-if="checkupStatus === 1" class="healthy-status"><em class="el-icon-success"></i>Cluster is healthy.</span>
+                        <span v-if="checkupStatus === 2" class="healthy-status"><em class="el-icon-loading" ></i><span class="span">Checkuping</span></span>
+                        <span v-if="checkupStatus === 3" class="healthy-status" style="color:#FE6363"><em class="el-icon-error"></i><span class="span">Error occurs !</span></span>
+                        <span v-if="checkupStatus === 4" class="healthy-status" style="color:#FF9D00"><em class="el-icon-warning"></i><span class="span">Warn</span></span>
                         <span class="healthy-time">Last checkup：{{ HealthData.timestamp | datefrom}}</span>
                     </div>
                     <el-button class="healthy-but" :disabled="checkup" :style="checkup ? 'background-color:#B8BFCC' : 'background-color:#217AD9'" @click="startCheckup">Start Checkup</el-button>
                 </div>
                   <div class="healthy-bottom">
                     <div class="healthy-item" v-if="HealthData && HealthData.proxy">
-                            <i v-if="proxypercentage !== 100" class="el-icon-loading"/>
-                            <i v-else-if="errorFlag" class="el-icon-error"/>
-                            <i v-else-if="warnFlag" class="el-icon-warning"/>
-                            <i v-else-if="okFlag" class="el-icon-success"/>
-                            <i v-else class="no-deta"/>
+                            <em v-if="proxypercentage !== 100" class="el-icon-loading"/>
+                            <em v-else-if="errorFlag" class="el-icon-error"/>
+                            <em v-else-if="warnFlag" class="el-icon-warning"/>
+                            <em v-else-if="okFlag" class="el-icon-success"/>
+                            <em v-else class="no-deta"/>
                         <span>Serving Proxy</span>
                         <el-progress :percentage="proxypercentage" :show-text="false" color="#217AD9"></el-progress>
-                        <i class="el-icon-arrow-down" :class="proxyCK ? 'active-down' : ''" @click="proxyCK = !proxyCK"></i>
+                        <em class="el-icon-arrow-down" :class="proxyCK ? 'active-down' : ''" @click="proxyCK = !proxyCK"></i>
                        <div v-show="proxyCK">
                             <div class="healthy-run" v-for="(item,i) in proxyStatus" :key="i">
-                                <i v-if="proxypercentage !== 100 && (((100 / proxyStatus.length) * (i + 1)) >= proxypercentage)" class="el-icon-loading"/>
-                                <i v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
-                                <i v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
-                                <i v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
+                                <em v-if="proxypercentage !== 100 && (((100 / proxyStatus.length) * (i + 1)) >= proxypercentage)" class="el-icon-loading"/>
+                                <em v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
+                                <em v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
+                                <em v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
                                 <span :title="item.ip + ' : ' + item.checkItemName" class="check-item">{{item.ip + ' : ' + item.checkItemName}}</span>
                                 <!-- <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span> -->
                                 <span :title="item.msg" class="check-msg">{{ item.msg }}</span>
@@ -56,20 +56,20 @@
                        </div>
                     </div>
                      <div class="healthy-item" v-if="HealthData && HealthData.serving">
-                            <i v-if="checkupStatus === 2 " class="el-icon-loading"/>
-                            <i v-else-if="SerrorFlag" class="el-icon-error"/>
-                            <i v-else-if="SwarnFlag" class="el-icon-warning"/>
-                            <i v-else-if="SokFlag" class="el-icon-success"/>
-                            <i v-else class="no-deta"/>
+                            <em v-if="checkupStatus === 2 " class="el-icon-loading"/>
+                            <em v-else-if="SerrorFlag" class="el-icon-error"/>
+                            <em v-else-if="SwarnFlag" class="el-icon-warning"/>
+                            <em v-else-if="SokFlag" class="el-icon-success"/>
+                            <em v-else class="no-deta"/>
                         <span style="margin-right:23px">Serving Server</span>
                         <el-progress :percentage="servingpercentage" :show-text="false" color="#217AD9"></el-progress>
-                        <i class="el-icon-arrow-down" :class="serverCK ? 'active-down' : ''" @click="serverCK = !serverCK"></i>
+                        <em class="el-icon-arrow-down" :class="serverCK ? 'active-down' : ''" @click="serverCK = !serverCK"></i>
                         <div v-show="serverCK">
                             <div class="healthy-run" v-for="(item,i) in servingStatus" :key="i">
-                                <i v-if="servingpercentage !== 100 && (((100 / servingStatus.length) * (i + 1)) >= servingpercentage)" class="el-icon-loading"/>
-                                <i v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
-                                <i v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
-                                <i v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
+                                <em v-if="servingpercentage !== 100 && (((100 / servingStatus.length) * (i + 1)) >= servingpercentage)" class="el-icon-loading"/>
+                                <em v-else-if="item.healthCheckStatus === 'ok'" class="el-icon-success"/>
+                                <em v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
+                                <em v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
                                 <span :title="item.ip + ' : ' + item.checkItemName"  class="check-item">{{item.ip + ' : ' + item.checkItemName}}</span>
                                 <!-- <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span> -->
                                 <span :title="item.msg"  class="check-msg">{{ item.msg }}</span>

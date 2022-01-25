@@ -27,11 +27,6 @@
             />
 
         <div class="page-contral" v-if="changeAble">
-            <!-- <el-button
-                type="primary"
-                @click="getTableData"
-                style="background:#B8BFCC;border-radius:0"
-            >Cancel</el-button> -->
             <el-button type="primary" class="save-page" :class="{'disable':!hasChange}" :disabled="!hasChange" @click="saveSureDialog = true">Save</el-button>
         </div>
 
@@ -213,11 +208,7 @@ export default {
             if (typeof data === 'string') {
                 try {
                     var obj = JSON.parse(data)
-                    if (typeof obj === 'object' && obj) {
-                        return true
-                    } else {
-                        return false
-                    }
+                    return typeof obj === 'object' && obj
                 } catch (e) {
                     return false
                 }

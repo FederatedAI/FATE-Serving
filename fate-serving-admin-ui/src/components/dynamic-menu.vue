@@ -23,10 +23,6 @@
         :key='v.name'
       >
         <template slot='title'>
-          <!-- <i
-            class='iconfont'
-            :class='v.meta.icon'
-          ></i> -->
           <svg-icon v-if="v.meta&&v.meta.icon" :icon-class="v.meta.icon"></svg-icon>
           <span>{{v.meta.name}}</span>
         </template>
@@ -40,10 +36,6 @@
         @click='gotoRoute(v.name)'
         v-else
       >
-        <!-- <i
-          class='iconfont'
-          :class='v.meta.icon'
-        ></i> -->
         <svg-icon v-if="v.meta&&v.meta.icon" :icon-class="v.meta.icon"></svg-icon>
         <span slot='title'>{{v.meta.name}}</span>
       </el-menu-item>

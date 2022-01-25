@@ -53,7 +53,7 @@
         }
         .cluster {
             font-size: 24px;
-            font-family: Product Sans;
+            font-family: Product Sans, sans-serif;
             font-weight: bold;
             line-height: 20px;
             color: rgba(33, 122, 217, 1);
@@ -226,7 +226,7 @@
             .ip-list-des {
                 width: 335px;
                 font-size: 12px;
-                font-family: Product Sans;
+                font-family: Product Sans, sans-serif;
                 font-weight: 400;
                 line-height: 20px;
                 color: rgba(184, 191, 204, 1);
@@ -283,7 +283,7 @@
         width: 304px;
         height: 87px;
         font-size: 72px;
-        font-family: Product Sans;
+        font-family: Product Sans, sans-serif;
         font-weight: bold;
         line-height: 20px;
         color: rgba(236, 246, 255, 1);
@@ -377,7 +377,7 @@
             }
             .dialogtit {
                 font-size: 32px;
-                font-family: Product Sans;
+                font-family: Product Sans, sans-serif;
                 font-weight: bold;
                 line-height: 20px;
                 .el-dialog__title {
@@ -475,7 +475,7 @@
                 text-align: center;
                 span {
                     font-size: 22px;
-                    font-family: Product Sans;
+                    font-family: Product Sans, sans-serif;
                     font-weight: 400;
                     line-height: 50px;
                     color: #2D3642;
@@ -623,7 +623,7 @@
         height: 30px;
         padding-left: 3px;
         font-size: 18px;
-        font-family: Product Sans;
+        font-family: Product Sans, sans-serif;
         font-weight: 400;
         line-height: 30px;
         color: rgba(78, 87, 102, 1);
@@ -765,7 +765,7 @@
     }
     .el-dialog__title {
         font-size: 24px;
-        font-family: Product Sans;
+        font-family: Product Sans, sans-serif;
         font-weight: bold;
         color: #217ad9;
     }
@@ -840,7 +840,7 @@
             .detail-title {
                 height: 22px;
                 font-size: 18px;
-                font-family: Product Sans;
+                font-family: Product Sans, sans-serif;
                 font-weight: bold;
                 line-height: 20px;
                 color: #217ad9;
@@ -866,7 +866,6 @@
        
         .overview{
             position: relative;
-            height: 100%;
             width: 1800px;
             height:82vh !important;
             // display: flex;
@@ -906,7 +905,7 @@
             display: block;
             margin: 10px 0;
             font-size: 32px;
-            font-family: Product Sans;
+            font-family: Product Sans, sans-serif;
             font-weight: bold;
             line-height: 20px;
             color: #217AD9;
@@ -920,7 +919,7 @@
             justify-content: space-between;
             .party-input-title{
                 font-size: 18px;
-                font-family: Product Sans;
+                font-family: Product Sans, sans-serif;
                 font-weight: 400;
                 line-height: 20px;
                 color: #848C99 !important;
@@ -933,7 +932,7 @@
                     height: 100%;
                     border-bottom: 2px solid #E6EBF0;
                     font-size: 18px;
-                    font-family: Product Sans;
+                    font-family: Product Sans, sans-serif;
                     font-weight: 400;
                     line-height: 20px;
                     color: #2D3642;

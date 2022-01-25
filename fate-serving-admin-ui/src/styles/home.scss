@@ -42,7 +42,6 @@
             .logo-t {
                 cursor: pointer;
                 font-size: 2em;
-                font-weight: 550;
                 font-weight: bold;
             }
             .name {
@@ -58,7 +57,7 @@
 
     .el-main {
         padding: 0;
-        background-color: #f5f8fa;
+        background-color: #fff;
         height: calc(100% - 65px);
         .welcomepage {
             text-align: center;
@@ -125,7 +124,7 @@
 
         .login {
             text-align: center;
-            font-family: 'Product Sans';
+            font-family: Product Sans, sans-serif;
             background-color: #fff;
             margin-top: -15px;
             padding-top: 5px;
@@ -157,7 +156,7 @@
             }
             .el-checkbox__label {
                 font-size:14px;
-                font-family:Product Sans;
+                font-family: Product Sans, sans-serif;
                 font-weight:400;
                 line-height:17px;
                 color:rgba(33,122,217,1);
@@ -270,7 +269,7 @@
 }
 .pname {
     font-size:18px;
-    font-family:Product Sans;
+    font-family: Product Sans, sans-serif;
     font-weight:bold;
     line-height:20px;
     color:rgba(33,122,217,1);

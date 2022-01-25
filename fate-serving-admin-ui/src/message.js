@@ -26,7 +26,7 @@ class GetMessage {
         let msg = (options && options.typeof === 'string') ? options : options.message
         console.log(nowTextArr, 'nowTextArr')
         if (single) {
-            if (!nowMessage !== null) {
+            if (nowMessage !== null) {
                 Message[type](options)
             } else if (!nowTextArr.includes(msg)) {
                 Message[type](options)
