@@ -1,3 +1,7 @@
+# Release 2.1.5
+## Major Features and Improvements
+* Upgrade log4j dependent version.
+
 # Release 2.1.4
 ## Major Features and Improvements
 * Upgrade SpringBoot dependent version.

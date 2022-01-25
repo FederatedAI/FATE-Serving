@@ -45,7 +45,7 @@ public abstract class HeteroSecureBoost extends BaseComponent {
 
     @Override
     public int initModel(byte[] protoMeta, byte[] protoParam) {
-        logger.info("start init HeteroLR class");
+        logger.info("start init HeteroSecureBoost class");
         try {
             param= this.parseModel(BoostingTreeModelParam.parser(), protoParam);
             BoostingTreeModelMeta meta = this.parseModel(BoostingTreeModelMeta.parser(), protoMeta);
