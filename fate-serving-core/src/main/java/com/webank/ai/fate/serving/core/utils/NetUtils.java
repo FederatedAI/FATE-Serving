@@ -145,10 +145,7 @@ public class NetUtils {
      */
     static boolean isPreferIpv6Address() {
         boolean preferIpv6 = Boolean.getBoolean("java.net.preferIPv6Addresses");
-        if (!preferIpv6) {
-            return false;
-        }
-        return false;
+        return  preferIpv6;
     }
 
     /**
