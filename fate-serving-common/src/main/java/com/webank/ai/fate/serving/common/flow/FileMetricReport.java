@@ -16,13 +16,18 @@
 
 package com.webank.ai.fate.serving.common.flow;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 public class FileMetricReport implements MetricReport {
 
-    private static final long DEFAULT_FILE_SIZE = 1024 * 1024;
+    private static final long DEFAULT_FILE_SIZE = 1048576L;
 
     MetricWriter metricWriter;
+
+    Logger logger = LoggerFactory.getLogger(FileMetricReport.class);
 
     public FileMetricReport(String appName) {
         this.metricWriter = new MetricWriter(appName, DEFAULT_FILE_SIZE);
@@ -37,7 +42,8 @@ public class FileMetricReport implements MetricReport {
         try {
             metricWriter.write(TimeUtil.currentTimeMillis(), data);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("metric writer error",e);
+
         }
     }
 }

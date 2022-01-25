@@ -43,34 +43,46 @@ public class ZipUtil {
         ZipFile zip = new ZipFile(new File(zipFile.getAbsolutePath()), Charset.forName("UTF-8"));
         String uuid = UUID.randomUUID().toString();
         File tempDir = new File(outputDirectory + uuid);
-        if (!tempDir.exists()) {
-            tempDir.mkdirs();
-        }
+        String resultPath = "";
+        try {
 
-        Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
+            if (!tempDir.exists()) {
+                tempDir.mkdirs();
+            }
+            resultPath = tempDir.getAbsolutePath();
+            Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
 
-            File outputFile = new File(outputDirectory + uuid + File.separator + entry.getName());
-            if (entry.isDirectory()) {
-                outputFile.mkdirs();
-                continue;
-            } else {
-                if (!outputFile.getParentFile().exists()) {
-                    outputFile.getParentFile().mkdirs();
+                File outputFile = new File(outputDirectory + uuid + File.separator + entry.getName());
+                if (entry.isDirectory()) {
+                    outputFile.mkdirs();
+                    continue;
+                } else {
+                    if (!outputFile.getParentFile().exists()) {
+                        outputFile.getParentFile().mkdirs();
+                    }
+                }
+
+                try (InputStream in = zip.getInputStream(entry); FileOutputStream out = new FileOutputStream(outputFile)) {
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
                 }
             }
+        }finally {
+            if(zip!=null) {
+                try {
+                    zip.close();
+                }catch (Exception igore){
 
-            try (InputStream in = zip.getInputStream(entry); FileOutputStream out = new FileOutputStream(outputFile)) {
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
                 }
             }
         }
 
-        return tempDir.getAbsolutePath();
+        return resultPath;
     }
 
     public static void delete(File file) {

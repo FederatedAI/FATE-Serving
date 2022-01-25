@@ -113,14 +113,16 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
                             File dataFile = new File(root + File.separator + "variables" + File.separator + "data" + File.separator + keySplit[2] + File.separator + keySplit[3] + File.separator + keySplit[4]);
                             if (dataFile.exists()) {
                                 in = new FileInputStream(dataFile);
+                                try{
                                 Long length = dataFile.length();
                                 byte[] content = new byte[length.intValue()];
                                 int readCount = in.read(content);
                                 if (readCount > 0) {
                                     String resultKey = keySplit[2] + "." + keySplit[3] + ":" + keySplit[4];
                                     resultMap.put(resultKey, content);
+                                }}finally {
+                                    in.close();
                                 }
-                                in.close();
                             } else {
                                 logger.warn("model proto file not found {}", dataFile.getPath());
                             }
