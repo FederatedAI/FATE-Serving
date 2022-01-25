@@ -50,7 +50,6 @@
                                 <em v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
                                 <em v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
                                 <span :title="item.ip + ' : ' + item.checkItemName" class="check-item">{{item.ip + ' : ' + item.checkItemName}}</span>
-                                <!-- <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span> -->
                                 <span :title="item.msg" class="check-msg">{{ item.msg }}</span>
                             </div>
                        </div>
@@ -71,7 +70,6 @@
                                 <em v-else-if="item.healthCheckStatus === 'warn'" class="el-icon-warning"/>
                                 <em v-else-if="item.healthCheckStatus === 'error'" class="el-icon-error"/>
                                 <span :title="item.ip + ' : ' + item.checkItemName"  class="check-item">{{item.ip + ' : ' + item.checkItemName}}</span>
-                                <!-- <span v-if="item.healthCheckStatus === 'ok'">Check up passed!</span> -->
                                 <span :title="item.msg"  class="check-msg">{{ item.msg }}</span>
                             </div>
                         </div>

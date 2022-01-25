@@ -63,7 +63,6 @@ module.exports = {
         https: false,
         hotOnly: false,
         // eslint-disable-next-line no-dupe-keys
-        open: true,
         proxy: {
             '/api': {
                 // target: 'http://172.16.153.168:8350',
@@ -101,7 +100,6 @@ module.exports = {
             if (process.env.npm_lifecycle_event === 'analyze') {
                 config.plugins.push(new BundleAnalyzerPlugin())
             }
-        } else {
         }
     },
     pluginOptions: {}

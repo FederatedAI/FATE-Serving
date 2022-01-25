@@ -372,9 +372,6 @@
             .el-table__body-wrapper {
                 height: 588px !important;
             }
-            .el-dialog__body {
-                padding: 5px 30px 20px 30px;
-            }
             .dialogtit {
                 font-size: 32px;
                 font-family: Product Sans, sans-serif;
@@ -472,6 +469,7 @@
                 }
             }
             .el-dialog__body {
+                padding: 5px 30px 20px 30px;
                 text-align: center;
                 span {
                     font-size: 22px;
@@ -685,30 +683,6 @@
             top: -55px !important;
         }
     }
-}
-.ip-info-JVM {
-    .jvm-chart {
-        background: #f5f8fa;
-        padding: 83px 32px 30px 42px;
-        box-sizing: border-box;
-        height: 100%;
-        overflow: hidden;
-        .jvm-ch {
-            background: #fff;
-            width: 100%;
-            height: 533px;
-            box-sizing: border-box;
-        }
-        .echarts {
-            margin: 0 auto;
-            width: 125%;
-            height: 120%;
-            left: -12.6% !important;
-            top: 0px !important;
-        }
-    }
-}
-.ip-info-Monitor {
     canvas {
         // transform: scale(1.25,1);
         height: 690px !important;
@@ -716,8 +690,7 @@
         // top: -65px !important;
     }
 }
-.ip-info-JVM {
-    margin-top: 54px !important;
+.ip-info-JVM {margin-top: 54px !important;
     position: relative;
     height: calc(100% - 54px);
     canvas {
@@ -753,8 +726,27 @@
             // border-top: 2px solid #217AD9;
         }
     }
+    .jvm-chart {
+        background: #f5f8fa;
+        padding: 83px 32px 30px 42px;
+        box-sizing: border-box;
+        height: 100%;
+        overflow: hidden;
+        .jvm-ch {
+            background: #fff;
+            width: 100%;
+            height: 533px;
+            box-sizing: border-box;
+        }
+        .echarts {
+            margin: 0 auto;
+            width: 125%;
+            height: 120%;
+            left: -12.6% !important;
+            top: 0px !important;
+        }
+    }
 }
-
 .pipeline-dialog {
     margin-top: unset;
     .el-dialog__header {

@@ -26,9 +26,7 @@ class GetMessage {
         let msg = (options && options.typeof === 'string') ? options : options.message
         console.log(nowTextArr, 'nowTextArr')
         if (single) {
-            if (nowMessage !== null) {
-                Message[type](options)
-            } else if (!nowTextArr.includes(msg)) {
+            if (nowMessage !== null || !nowTextArr.includes(msg)) {
                 Message[type](options)
             }
         } else {
@@ -37,6 +35,6 @@ class GetMessage {
     }
 }
 
-const singleMessageCell = new GetMessage()
+const message = new GetMessage()
 
-export default singleMessageCell
+export default message
