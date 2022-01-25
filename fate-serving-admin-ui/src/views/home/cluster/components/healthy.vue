@@ -25,10 +25,10 @@
             <div class="healthy-content">
                 <div class="healthy-top">
                     <div>
-                        <span v-if="checkupStatus === 1" class="healthy-status"><em class="el-icon-success"></i>Cluster is healthy.</span>
-                        <span v-if="checkupStatus === 2" class="healthy-status"><em class="el-icon-loading" ></i><span class="span">Checkuping</span></span>
-                        <span v-if="checkupStatus === 3" class="healthy-status" style="color:#FE6363"><em class="el-icon-error"></i><span class="span">Error occurs !</span></span>
-                        <span v-if="checkupStatus === 4" class="healthy-status" style="color:#FF9D00"><em class="el-icon-warning"></i><span class="span">Warn</span></span>
+                        <span v-if="checkupStatus === 1" class="healthy-status"><em class="el-icon-success"></em>Cluster is healthy.</span>
+                        <span v-if="checkupStatus === 2" class="healthy-status"><em class="el-icon-loading" ></em><span class="span">Checkuping</span></span>
+                        <span v-if="checkupStatus === 3" class="healthy-status" style="color:#FE6363"><em class="el-icon-error"></em><span class="span">Error occurs !</span></span>
+                        <span v-if="checkupStatus === 4" class="healthy-status" style="color:#FF9D00"><em class="el-icon-warning"></em><span class="span">Warn</span></span>
                         <span class="healthy-time">Last checkup：{{ HealthData.timestamp | datefrom}}</span>
                     </div>
                     <el-button class="healthy-but" :disabled="checkup" :style="checkup ? 'background-color:#B8BFCC' : 'background-color:#217AD9'" @click="startCheckup">Start Checkup</el-button>
@@ -42,7 +42,7 @@
                             <em v-else class="no-deta"/>
                         <span>Serving Proxy</span>
                         <el-progress :percentage="proxypercentage" :show-text="false" color="#217AD9"></el-progress>
-                        <em class="el-icon-arrow-down" :class="proxyCK ? 'active-down' : ''" @click="proxyCK = !proxyCK"></i>
+                        <em class="el-icon-arrow-down" :class="proxyCK ? 'active-down' : ''" @click="proxyCK = !proxyCK"></em>
                        <div v-show="proxyCK">
                             <div class="healthy-run" v-for="(item,i) in proxyStatus" :key="i">
                                 <em v-if="proxypercentage !== 100 && (((100 / proxyStatus.length) * (i + 1)) >= proxypercentage)" class="el-icon-loading"/>
@@ -63,7 +63,7 @@
                             <em v-else class="no-deta"/>
                         <span style="margin-right:23px">Serving Server</span>
                         <el-progress :percentage="servingpercentage" :show-text="false" color="#217AD9"></el-progress>
-                        <em class="el-icon-arrow-down" :class="serverCK ? 'active-down' : ''" @click="serverCK = !serverCK"></i>
+                        <em class="el-icon-arrow-down" :class="serverCK ? 'active-down' : ''" @click="serverCK = !serverCK"></em>
                         <div v-show="serverCK">
                             <div class="healthy-run" v-for="(item,i) in servingStatus" :key="i">
                                 <em v-if="servingpercentage !== 100 && (((100 / servingStatus.length) * (i + 1)) >= servingpercentage)" class="el-icon-loading"/>
