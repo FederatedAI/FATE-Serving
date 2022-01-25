@@ -20,10 +20,10 @@
             <div class="overview">
                 <div class="cluster">Cluster
                         <span class="healthy"  @click="heal">
-                        <span v-if="checkupStatus === 1"><i class="el-icon-success"></i><span class="span">Cluster is healthy.</span></span>
-                        <span v-if="checkupStatus === 2"><i class="el-icon-loading"></i><span class="span">Checkuping</span></span>
-                        <span v-if="checkupStatus === 3"><i class="el-icon-error"></i><span class="span"  style="color: #FE6363;">Error occurs !</span></span>
-                        <span v-if="checkupStatus === 4" style="color:#FE6363"><i class="el-icon-warning"></i><span class="span" style="color: #FF9D00;">Warn</span></span>
+                        <span v-if="checkupStatus === 1"><em class="el-icon-success"></em><span class="span">Cluster is healthy.</span></span>
+                        <span v-if="checkupStatus === 2"><em class="el-icon-loading"></em><span class="span">Checkuping</span></span>
+                        <span v-if="checkupStatus === 3"><em class="el-icon-error"></em><span class="span"  style="color: #FE6363;">Error occurs !</span></span>
+                        <span v-if="checkupStatus === 4" style="color:#FE6363"><em class="el-icon-warning"></em><span class="span" style="color: #FF9D00;">Warn</span></span>
                     </span>
                 </div>
                 <div class="enlarge" @click="setSize('1')" v-if="!isLarger"><img src="@/assets/zoom-in.png" alt=""></div>
@@ -57,7 +57,7 @@
                     </div>
                     <div class="ip-info-tit" slot="reference">
                         {{ ipchildrenData && ipchildrenData.label }}
-                        <i class="el-icon-caret-bottom"></i>
+                        <em class="el-icon-caret-bottom"></em>
                     </div>
                 </el-popover>
                 <ul class="ul" :class="[0,1,4].includes(ipInfo) ? 'ulBasic' : ''">
@@ -150,7 +150,7 @@
                                         placement="top"
                                         trigger="hover">
                                         <div>
-                                            <div style="wadth:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
+                                            <div style="width:75px"><p v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</p></div>
                                         </div>
                                         <span slot="reference" class="service_id" style="white-space: nowrap;">
                                             <span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}
@@ -158,7 +158,7 @@
                                             </span>
                                         </span>
                                     </el-popover>
-                                    <span v-else style="wadth:75px"><span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</span></span>
+                                    <span v-else style="width:75px"><span v-for="(item,index) in scope.row.serviceIds" :key="index">{{item}}</span></span>
                                 </template>
                             </el-table-column>
                             <el-table-column
@@ -260,25 +260,6 @@
                                             <el-dropdown-item command="ModelSynchronize">Model synchronize</el-dropdown-item>
                                         </el-dropdown-menu>
                                     </el-dropdown>
-                                    <!-- <el-button
-                                        type="text"
-                                        style="font-size: 14px"
-                                        size="mini"
-                                        @click="flowControl(scope.row)"
-                                    >FlowControl</el-button> -->
-                                    <!-- <el-button
-                                        type="text"
-                                        style="font-size: 14px"
-                                        size="mini"
-                                        @click="unload(scope.row)"
-                                    >Unload</el-button> -->
-                                    <!-- <el-button
-                                        v-if="scope.row.serviceIds && scope.row.serviceIds[0] !=='--'"
-                                        type="text"
-                                        style="font-size: 14px"
-                                        size="mini"
-                                        @click="unbind(scope.row)"
-                                    >Unbind</el-button> -->
                                 </template>
                             </el-table-column>
                         </el-table>

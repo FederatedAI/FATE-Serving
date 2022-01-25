@@ -28,7 +28,7 @@
             <div style="text-align: center; margin: 0">
                 <el-button type="primary" class="exitbut" size="mini" @click="exit">Exit <img class="exits" src="@/assets/exits.png" alt="" srcset=""></el-button>
             </div>
-            <span class="name" slot="reference">{{ username }} <i class="el-icon-caret-bottom"/> </span>
+            <span class="name" slot="reference">{{ username }} <em class="el-icon-caret-bottom"/> </span>
             </el-popover>
         </div>
       </div>
