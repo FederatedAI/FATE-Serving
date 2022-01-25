@@ -37,13 +37,13 @@
                     <div v-else class="no-data">No Data</div>
                     <div v-if="dagData" class="buttonList">
                         <div class="opera_btn" @click="suitableWhole">
-                            <i class="el-icon-full-screen" />
+                            <em class="el-icon-full-screen" />
                         </div>
                         <div class="opera_btn" @click="bigger">
-                            <i class="el-icon-plus" />
+                            <em class="el-icon-plus" />
                         </div>
                         <div class="opera_btn" @click="small">
-                            <i class="el-icon-minus" />
+                            <em class="el-icon-minus" />
                         </div>
                     </div>
                 </div>
@@ -268,7 +268,7 @@ export default {
             background: #EBEDF0;
             border-radius: 4px;
             margin-bottom: 60px;
-            font-family: Roboto;
+            font-family: Roboto, sans-serif;
             font-weight: bold;
             color: #6A6C75;
             text-align: center;

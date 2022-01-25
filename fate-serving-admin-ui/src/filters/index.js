@@ -33,13 +33,13 @@ export const parseTime = (time, fm) => { // 解析时间  time: 时间戳或者�
         date = new Date(time)
     }
     const formatObj = {
-        y: date.getFullYear(),
-        m: date.getMonth() + 1,
-        d: date.getDate(),
-        h: date.getHours(),
-        i: date.getMinutes(),
-        s: date.getSeconds(),
-        a: date.getDay()
+        y: date && date.getFullYear(),
+        m: date && date.getMonth() + 1,
+        d: date && date.getDate(),
+        h: date && date.getHours(),
+        i: date && date.getMinutes(),
+        s: date && date.getSeconds(),
+        a: date && date.getDay()
     }
     const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
         let value = formatObj[key]

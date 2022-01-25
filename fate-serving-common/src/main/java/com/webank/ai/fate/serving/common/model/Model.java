@@ -161,8 +161,15 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
 
     @Override
     public boolean equals(Object obj) {
-        Model model = (Model) obj;
-        return this.namespace.equals(model.namespace) && this.tableName.equals(model.tableName);
+        if(obj!=null&&obj instanceof  Model) {
+            Model model = (Model) obj;
+            if(this.namespace!=null&&this.namespace!=null)
+                return this.namespace.equals(model.namespace) && this.tableName.equals(model.tableName);
+            else
+                return false;
+        }else {
+            return false;
+        }
     }
 
     @Override
