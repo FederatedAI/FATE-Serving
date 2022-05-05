@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/java/jre:8u192-zulu-alpine
 
-WORKDIR /data/projects/fate/serving-server/
+WORKDIR /data/projects/fate-serving/serving-server/
 
 USER root
 
