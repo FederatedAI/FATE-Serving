@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/java/jre:8u192-zulu-alpine
 
 
-WORKDIR /data/projects/fate/serving-admin/
+WORKDIR /data/projects/fate-serving/serving-admin/
 USER root
 
 ARG version
