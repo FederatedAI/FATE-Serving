@@ -137,11 +137,22 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
 
                     if (pipelineModelProcessor != null) {
                         pipelineModelProcessor.getPipeLineNode().forEach(node -> {
+                            try{
                             if (node != null) {
                                 ModelServiceProto.PipelineNode.Builder pipelineNodeBuilder = ModelServiceProto.PipelineNode.newBuilder();
-                                pipelineNodeBuilder.setName(node.getComponentName());
-                                pipelineNodeBuilder.setParams(node.getParam() instanceof Message ? JsonUtil.pbToJson((Message) node.getParam()) : JsonUtil.object2Json(node.getParam()));
+                                if (node.getComponentName() != null) {
+                                    pipelineNodeBuilder.setName(node.getComponentName());
+                                } else {
+                                    pipelineNodeBuilder.setName("unknow");
+                                }
+                                if (node.getParam() != null) {
+                                    pipelineNodeBuilder.setParams(node.getParam() instanceof Message ? JsonUtil.pbToJson((Message) node.getParam()) : JsonUtil.object2Json(node.getParam()));
+                                }
                                 modelProcessorExtBuilder.addNodes(pipelineNodeBuilder.build());
+
+                            }
+                            }catch(Exception e){
+                                logger.error("query model info error",e);
                             }
                         });
                     }
