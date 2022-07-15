@@ -37,18 +37,18 @@
     </modules>
 
     <properties>
-        <fate.version>2.1.5</fate.version>
+        <fate.version>2.1.6</fate.version>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <guava.version>30.0-jre</guava.version>
-        <grpc.version>1.25.0</grpc.version>
-        <protobuf.version>3.6.1</protobuf.version>
+        <grpc.version>1.45.1</grpc.version>
+        <protobuf.version>3.20.1</protobuf.version>
         <junit.version>4.13.1</junit.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.1</os-maven-plugin.version>
-        <spring.boot.version>2.6.2</spring.boot.version>
-        <jackson.version>2.10.0</jackson.version>
+        <spring.boot.version>2.7.0</spring.boot.version>
+        <jackson.version>2.13.3</jackson.version>
         <jedis.version>2.9.0</jedis.version>
         <log4j2.version>2.17.1</log4j2.version>
         <skipTests>true</skipTests>
@@ -82,7 +82,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.12</version>
+            <version>1.15</version>
         </dependency>
 
         <dependency>
@@ -113,6 +113,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
             <version>${jackson.version}</version>
         </dependency>
 
@@ -217,17 +222,6 @@
                 <version>1.7.30</version>
             </dependency>
 
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>2.9.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>2.9.2</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -245,7 +239,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>2.9.4</version>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
@@ -263,7 +257,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-properties</artifactId>
-                <version>2.9.4</version>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
