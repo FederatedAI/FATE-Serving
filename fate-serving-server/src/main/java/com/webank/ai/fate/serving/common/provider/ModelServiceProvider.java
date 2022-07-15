@@ -141,8 +141,10 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
                             if (node != null) {
                                 ModelServiceProto.PipelineNode.Builder pipelineNodeBuilder = ModelServiceProto.PipelineNode.newBuilder();
                                 if (node.getComponentName() != null) {
+
                                     pipelineNodeBuilder.setName(node.getComponentName());
                                 } else {
+                                    
                                     pipelineNodeBuilder.setName("unknow");
                                 }
                                 if (node.getParam() != null) {
