@@ -21,6 +21,9 @@ $ mvn clean package
 •	[fate-serving-server-2.1.5-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-server-2.1.5-release.zip)  
 •	[fate-serving-proxy-2.1.5-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-proxy-2.1.5-release.zip)    
 •	[fate-serving-admin-2.1.5-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-admin-2.1.5-release.zip)
+•	[fate-serving-server-2.1.6-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-server-2.1.6-release.zip)  
+•	[fate-serving-proxy-2.1.6-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-proxy-2.1.6-release.zip)    
+•	[fate-serving-admin-2.1.6-release.zip](https://webank-ai-1251170195.cos.ap-guangzhou.myqcloud.com/fate-serving-admin-2.1.6-release.zip)
 
 
 ### zookeeper部署
