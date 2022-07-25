@@ -77,7 +77,7 @@ public class LoginController {
             result.setRetcode(StatusCode.SUCCESS);
             result.setData(data);
         } else {
-            logger.info("user {} login failure, username or password is wrong.", username);
+            logger.info("user {} login failure, username or password {} is wrong.", username,password);
             result.setRetcode(StatusCode.PARAM_ERROR);
             result.setRetmsg("username or password is wrong");
         }
