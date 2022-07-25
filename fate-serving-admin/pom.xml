@@ -51,6 +51,8 @@
             <version>${fate.version}</version>
         </dependency>
 
+
+
         <!--<dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
@@ -106,15 +108,7 @@
             </exclusions>
         </dependency>-->
 
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.webank.ai.fate</groupId>
             <artifactId>fate-serving-common</artifactId>

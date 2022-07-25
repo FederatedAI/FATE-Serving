@@ -24,7 +24,7 @@ basepath=$(cd `dirname $0`;pwd)
 configpath=$(cd $basepath/conf;pwd)
 module=serving-admin
 main_class=com.webank.ai.fate.serving.admin.Bootstrap
-module_version=2.1.5
+module_version=2.1.6
 
 case "$1" in
     start)
