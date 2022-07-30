@@ -54,7 +54,11 @@ public class ZipUtil {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
 
-                File outputFile = new File(outputDirectory + uuid + File.separator + entry.getName());
+                File outputFile = new File(outputDirectory + uuid, entry.getName());
+
+                if (!outputFile.toPath().normalize().startsWith(outputDirectory + uuid)) {
+                    throw new RuntimeException("Bad zip entry");
+                }
                 if (entry.isDirectory()) {
                     outputFile.mkdirs();
                     continue;
