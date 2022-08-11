@@ -20,7 +20,7 @@ if [ -z "$PREFIX" ]; then
         PREFIX=federatedai
 fi
 
-version=$(git describe --tags)
+version=$(grep "<fate.version>" ${source_code_dir}/pom.xml  | sed "s/[<|>]/ /g" | awk '{print $2}')
 
 source .env
 
@@ -29,7 +29,9 @@ echo "Info:"
 echo "  version: ${version}"
 echo "  PREFIX: ${PREFIX}"
 echo "  Tag: ${TAG}"
-
+echo "  BASEDIR: ${BASEDIR}"
+echo "  WORKINGDIR: ${WORKINGDIR}"
+echo "  source_code_dir: ${source_code_dir}"
 
 package() {
   docker run --rm -u $(id -u):$(id -g) -v ${source_code_dir}:/data/projects/fate/FATE-Serving --entrypoint="" maven:3.6-jdk-8 /bin/bash -c "cd /data/projects/fate/FATE-Serving && mvn clean package -DskipTests"
