@@ -91,7 +91,7 @@ public class InferenceRequest implements Request {
     }
 
     @Override
-    public String getCaseid() {
+    public String getCaseId() {
         return caseId;
     }
 
