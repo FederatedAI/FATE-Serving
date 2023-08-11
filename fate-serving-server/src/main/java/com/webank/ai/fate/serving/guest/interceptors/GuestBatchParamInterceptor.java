@@ -45,10 +45,10 @@ public class GuestBatchParamInterceptor implements Interceptor {
             inboundPackage.setBody(batchInferenceRequest);
             Preconditions.checkArgument(batchInferenceRequest != null, "request message parse error");
             Preconditions.checkArgument(StringUtils.isNotBlank(batchInferenceRequest.getServiceId()), "no service id");
-            if (batchInferenceRequest.getCaseid() == null || batchInferenceRequest.getCaseid().length() == 0) {
+            if (batchInferenceRequest.getCaseId() == null || batchInferenceRequest.getCaseId().length() == 0) {
                 batchInferenceRequest.setCaseId(InferenceUtils.generateCaseid());
             }
-            context.setCaseId(batchInferenceRequest.getCaseid());
+            context.setCaseId(batchInferenceRequest.getCaseId());
             context.setServiceId(batchInferenceRequest.getServiceId());
             if (batchInferenceRequest.getApplyId() != null) {
                 context.setApplyId(batchInferenceRequest.getApplyId());
