@@ -105,18 +105,28 @@ public class ProxyController {
                 if (logger.isDebugEnabled()) {
                     logger.debug("receive : {} headers {}", data, headers.toSingleValueMap());
                 }
+
+                String caseId = headers.getFirst("caseId");
                 final ServiceAdaptor serviceAdaptor = proxyServiceRegister.getServiceAdaptor(callName);
+
                 Context context = new BaseContext();
                 context.setCallName(callName);
                 context.setVersion(version);
+                context.setCaseId(caseId);
+                if (null == context.getCaseId() || context.getCaseId().isEmpty()) {
+                    context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
+                }
+
                 InboundPackage<Map> inboundPackage = buildInboundPackageFederation(context, data, httpServletRequest);
                 OutboundPackage<Map> result = serviceAdaptor.service(context, inboundPackage);
+
                 if (result != null && result.getData() != null) {
                     result.getData().remove("log");
                     result.getData().remove("warn");
                     result.getData().remove("caseid");
                     return JsonUtil.object2Json(result.getData());
                 }
+
                 return "";
 
 
@@ -134,10 +144,6 @@ public class ProxyController {
         Map head = (Map) jsonObject.getOrDefault(Dict.HEAD, new HashMap<>());
         Map body = (Map) jsonObject.getOrDefault(Dict.BODY, new HashMap<>());
         context.setHostAppid((String) head.getOrDefault(Dict.APP_ID, ""));
-        context.setCaseId((String) head.getOrDefault(Dict.CASE_ID, ""));
-        if (null == context.getCaseId() || context.getCaseId().isEmpty()) {
-            context.setCaseId(UUID.randomUUID().toString().replaceAll("-", ""));
-        }
 
         InboundPackage<Map> inboundPackage = new InboundPackage<Map>();
         inboundPackage.setBody(body);
