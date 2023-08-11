@@ -24,7 +24,7 @@ public interface Request {
 
     public String getAppid();
 
-    public String getCaseid();
+    public String getCaseId();
 
     public String getPartyId();
 
