@@ -57,11 +57,6 @@ public class BatchHostFederatedParams extends BatchInferenceRequest {
     }
 
     @Override
-    public String getCaseId() {
-        return caseId;
-    }
-
-    @Override
     public void setCaseId(String caseId) {
         this.caseId = caseId;
     }

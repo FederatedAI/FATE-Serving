@@ -35,10 +35,6 @@ public class BatchInferenceRequest extends InferenceRequest {
         this.batchDataList = batchDataList;
     }
 
-    public String getCaseId() {
-        return caseId;
-    }
-
     @Override
     public void setCaseId(String caseId) {
         this.caseId = caseId;
