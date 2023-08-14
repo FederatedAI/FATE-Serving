@@ -5,6 +5,8 @@ serving-admin提供了FATE-Serving集群的可视化操作界面，依赖zookeep
 ### 功能介绍
 #### 用户管理
 默认用户：admin，默认密码：admin，用户可在[conf/application.properties](config/admin.md)中修改预设用户。    
+除此之外serving-admin提供一个基本的登录密码加解密功能，用户可在[conf/application.properties](config/application.properties)
+中通过设置admin.isEncrypt参数为true（默认为false关闭），同时根据spring.security中的BCryptPasswordEncoder库对密码进行提前处理并预设为默认密码。
 serving-admin仅实现简单的用户登录，用户可业务需求，自行实现登录逻辑，或接入第三方平台。
 
 #### 节点管理
