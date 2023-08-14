@@ -128,8 +128,6 @@ public class ServiceController {
         totalSize = resultList.size();
 
         resultList = resultList.stream().sorted((Comparator.comparing(o -> (o.getProject() + o.getEnvironment())))).collect(Collectors.toList());
-//        resultList = resultList.stream().sorted((Comparator.comparingInt(o -> (o.getProject() + o.getEnvironment()).hashCode()))).collect(Collectors.toList());
-        // Pagination
         int totalPage = (resultList.size() + pageSize - 1) / pageSize;
         if (page <= totalPage) {
             resultList = resultList.subList((page - 1) * pageSize, Math.min(page * pageSize, resultList.size()));
