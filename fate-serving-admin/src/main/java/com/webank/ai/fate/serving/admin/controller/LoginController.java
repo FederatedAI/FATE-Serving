@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -51,7 +52,7 @@ public class LoginController {
     private String username;
 
     @Value("${admin.password}")
-    private String password;
+    private String hashedPassword;
 
     @Autowired
     private Cache cache;
@@ -65,7 +66,7 @@ public class LoginController {
         Preconditions.checkArgument(StringUtils.isNotBlank(password), "parameter password is blank");
 
         ReturnResult result = new ReturnResult();
-        if (username.equals(this.username) && password.equals(this.password)) {
+        if (username.equals(this.username) && new BCryptPasswordEncoder().matches(password, this.hashedPassword)) {
             String userInfo = StringUtils.join(Arrays.asList(username, password), "_");
             String token = EncryptUtils.encrypt(Dict.USER_CACHE_KEY_PREFIX + userInfo, EncryptMethod.MD5);
             cache.put(token, userInfo, MetaInfo.PROPERTY_CACHE_TYPE.equalsIgnoreCase("local") ? MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE : MetaInfo.PROPERTY_REDIS_EXPIRE);
