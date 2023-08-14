@@ -123,6 +123,10 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
             inferenceRequest.setApplyId(params.get("applyId").toString());
         }
 
+        if(params.get("caseId")!=null) {
+            inferenceRequest.setCaseId(params.get("caseId").toString());
+        }
+
         for (Map.Entry<String, Object> entry : featureData.entrySet()) {
             inferenceRequest.getFeatureData().put(entry.getKey(), entry.getValue());
         }
