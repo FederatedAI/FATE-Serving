@@ -59,9 +59,7 @@ public class HealthCheckUtil {
 
         nf.setMinimumFractionDigits(FractionDigits);// 小数点后保留几位
 
-        String str = nf.format(d);
-
-        return str;
+        return nf.format(d);
 
     }
 
