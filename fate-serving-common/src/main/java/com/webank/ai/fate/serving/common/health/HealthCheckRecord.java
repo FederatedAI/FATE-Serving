@@ -40,6 +40,7 @@ public class HealthCheckRecord{
         this.healthCheckStatus = healthCheckStatus;
     }
 
+    @Override
     public String  toString(){
         return JsonUtil.object2Json(this);
     }
