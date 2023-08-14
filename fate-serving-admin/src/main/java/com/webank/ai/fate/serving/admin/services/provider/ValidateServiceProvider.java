@@ -42,7 +42,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +102,10 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
     @FateServiceMethod(name = "inference")
     public Object inference(Context context, InboundPackage data) throws Exception {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        String caseId = request.getHeader("caseId");
+
         Map params = (Map) data.getBody();
         String host = (String) params.get(Dict.HOST);
         int port = (int) params.get(Dict.PORT);
@@ -121,6 +128,10 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         }
         if(params.get("applyId")!=null){
             inferenceRequest.setApplyId(params.get("applyId").toString());
+        }
+
+        if(caseId != null && !caseId.isEmpty()) {
+            inferenceRequest.setCaseId(caseId);
         }
 
         for (Map.Entry<String, Object> entry : featureData.entrySet()) {
