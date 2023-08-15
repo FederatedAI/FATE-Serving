@@ -47,8 +47,6 @@ public class HealthCheckService implements InitializingBean {
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     Map<String,Object> healthRecord = new ConcurrentHashMap<>();
 
-    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
-
     public    Map  getHealthCheckInfo(){
         return   healthRecord;
     }

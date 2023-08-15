@@ -88,18 +88,12 @@ public class ComponentService {
             }
             return false;
         }).map(Map.Entry::getKey).findFirst();
-        if(project.isPresent())
-            return project.get();
-        else
-            return "";
+        return project.orElse("");
     }
 
     public boolean isAllowAccess(String host, int port) {
         Set<String> whitelist = getWhitelist();
-        if (whitelist != null && whitelist.contains(host + ":" + port)) {
-            return true;
-        }
-        return false;
+        return whitelist != null && whitelist.contains(host + ":" + port);
     }
 
     @Scheduled(cron = "0/5 * * * * ?")
