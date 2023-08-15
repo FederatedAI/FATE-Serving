@@ -161,13 +161,14 @@ public class Model implements Comparable<Model>, Serializable, Cloneable {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj!=null&&obj instanceof  Model) {
+        if(obj instanceof Model) {
             Model model = (Model) obj;
-            if(this.namespace!=null&&this.namespace!=null)
+            if(this.namespace != null && this.tableName != null) {
                 return this.namespace.equals(model.namespace) && this.tableName.equals(model.tableName);
-            else
+            } else {
                 return false;
-        }else {
+            }
+        } else {
             return false;
         }
     }
