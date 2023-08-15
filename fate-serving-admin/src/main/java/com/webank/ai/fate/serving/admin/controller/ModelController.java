@@ -66,12 +66,15 @@ public class ModelController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port is blank");
 
-        if (page == null || page < 0) {
-            page = 1;
+        int defaultPage = 1;
+        int defaultPageSize = 10;
+
+        if (page == null || page <= 0) {
+            page = defaultPage;
         }
 
-        if (pageSize == null) {
-            pageSize = 10;
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = defaultPageSize;
         }
 
         if (logger.isDebugEnabled()) {
