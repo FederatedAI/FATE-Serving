@@ -119,6 +119,7 @@ public class Bootstrap {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            tryNum++;
         }
     }
 }
