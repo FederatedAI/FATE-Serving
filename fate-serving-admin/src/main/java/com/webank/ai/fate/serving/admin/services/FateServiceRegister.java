@@ -37,7 +37,6 @@ public class FateServiceRegister implements ServiceRegister, ApplicationContextA
     Logger logger = LoggerFactory.getLogger(FateServiceRegister.class);
     Map<String, ServiceAdaptor> serviceAdaptorMap = new HashMap<String, ServiceAdaptor>();
     ApplicationContext applicationContext;
-    GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
     @Override
     public ServiceAdaptor getServiceAdaptor(String name) {
