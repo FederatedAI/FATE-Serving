@@ -29,7 +29,8 @@ public class SecurityFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain filterChain) throws IOException, ServletException {
-        ((HttpServletResponse) resp).addHeader("X-Frame-Options","DENY");
+        ((HttpServletResponse) resp).addHeader("X-Frame-Options", "DENY");
+        ((HttpServletResponse) resp).addHeader("X-XSS-Protection", "1; mode=block");
         filterChain.doFilter(req, resp);
     }
 }
