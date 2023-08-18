@@ -72,12 +72,15 @@ public class ServiceController {
      */
     @GetMapping("/service/list")
     public ReturnResult listRegistered(Integer page, Integer pageSize) {
+        int defaultPage = 1;
+        int defaultPageSize = 10;
+
         if (page == null || page <= 0) {
-            page = 1;
+            page = defaultPage;
         }
 
         if (pageSize == null || pageSize <= 0) {
-            pageSize = 10;
+            pageSize = defaultPageSize;
         }
 
         if (logger.isDebugEnabled()) {
