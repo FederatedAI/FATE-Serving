@@ -88,12 +88,10 @@ public class PipelineModelProcessor implements ModelProcessor {
                     throw new RemoteRpcException(transformRemoteErrorCode(remoteInferenceResult.getRetcode()), buildRemoteRpcErrorMsg(remoteInferenceResult.getRetcode(), remoteInferenceResult.getRetmsg()));
                 }
                 remoteResultMap.put(partyId, remoteInferenceResult);
+            } catch (RemoteRpcException e) {
+                throw e;
             } catch (Exception e) {
-                if (!(e instanceof RemoteRpcException)) {
-                    throw new RemoteRpcException("party id " + partyId + " remote error");
-                } else {
-                    throw (RemoteRpcException) e;
-                }
+                throw new RemoteRpcException("party id " + partyId + " remote error");
             } finally {
                 context.setDownstreamCost(System.currentTimeMillis() - context.getDownstreamBegin());
             }
