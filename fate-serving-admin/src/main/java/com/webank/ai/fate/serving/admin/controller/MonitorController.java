@@ -29,6 +29,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.admin.services.HealthCheckService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.common.health.HealthCheckRecord;
@@ -278,13 +279,7 @@ public class MonitorController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
@@ -293,9 +288,7 @@ public class MonitorController {
 
     private InferenceServiceGrpc.InferenceServiceBlockingStub getInferenceServiceBlockingStub(String host, int port, int timeout) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "host is blank");
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
