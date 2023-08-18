@@ -43,7 +43,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Autowired
     private Cache cache;
 
-    private static List<String> EXCLUDES = Arrays.asList("/api/component/list", "/api/monitor/queryJvm", "/api/monitor/query", "/api/monitor/queryModel");
+    private static final List<String> EXCLUDES = Arrays.asList("/api/component/list", "/api/monitor/queryJvm", "/api/monitor/query", "/api/monitor/queryModel");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

@@ -47,18 +47,17 @@ public class HealthCheckService implements InitializingBean {
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     Map<String,Object> healthRecord = new ConcurrentHashMap<>();
 
-    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
-
     public    Map  getHealthCheckInfo(){
         return   healthRecord;
     }
 
     private void  checkRemoteHealth(Map<String,Map> componentMap, String address, String component) {
-        if(StringUtils.isBlank(address))
+        if (StringUtils.isBlank(address)) {
             return ;
+        }
         Map<String,Map> currentComponentMap = componentMap.get(component);
-        String host = address.substring(0,address.indexOf(":"));
-        int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
+        String host = address.substring(0,address.indexOf(':'));
+        int port = Integer.parseInt(address.substring(address.indexOf(':') + 1));
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
         CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
         CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
@@ -150,8 +149,7 @@ public class HealthCheckService implements InitializingBean {
         }
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
-        return blockingStub;
+        return CommonServiceGrpc.newBlockingStub(managedChannel);
     }
     @Override
     public void afterPropertiesSet() throws Exception {

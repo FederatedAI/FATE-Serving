@@ -34,9 +34,8 @@ import java.util.*;
 @Service
 public class ComponentService {
 
-    private final static String PATH_SEPARATOR = "/";
-    private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
-    private final static String PROVIDER = "providers";
+    private static final String PATH_SEPARATOR = "/";
+    private static final String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
     Logger logger = LoggerFactory.getLogger(ComponentService.class);
     @Autowired
     ZookeeperRegistry zookeeperRegistry;
@@ -88,10 +87,7 @@ public class ComponentService {
             }
             return false;
         }).map(Map.Entry::getKey).findFirst();
-        if(project.isPresent())
-            return project.get();
-        else
-            return "";
+        return project.orElse("");
     }
 
     public boolean isAllowAccess(String host, int port) {
