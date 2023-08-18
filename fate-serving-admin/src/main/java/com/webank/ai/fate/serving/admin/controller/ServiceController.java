@@ -103,8 +103,9 @@ public class ServiceController {
                     URL url = URL.valueOf(u);
                     if (!Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
                         String[] split = key.split("/");
-                        if(!filterSet.contains(split[2]))
+                        if (!filterSet.contains(split[2])) {
                             continue;
+                        }
                         ServiceDataWrapper wrapper = new ServiceDataWrapper();
                         wrapper.setUrl(url.toFullString());
                         wrapper.setProject(split[0]);
@@ -237,8 +238,7 @@ public class ServiceController {
         }
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        CommonServiceGrpc.CommonServiceFutureStub futureStub = CommonServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return CommonServiceGrpc.newFutureStub(managedChannel);
     }
 
 }

@@ -44,8 +44,7 @@ public enum ServiceConfiguration {
             return Boolean.FALSE;
         }
 
-        boolean match = Arrays.asList(value.config).contains(config);
-        return match;
+        return Arrays.asList(value.config).contains(config);
     }
 
 }
