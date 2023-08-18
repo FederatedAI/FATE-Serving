@@ -22,6 +22,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.serving.admin.bean.ServiceConfiguration;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
@@ -65,12 +66,7 @@ public class ComponentController {
 
     @GetMapping("/component/listProps")
     public ReturnResult listProps(String host, int port, String keyword) {
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-        if (!componentServices.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
         blockingStub = blockingStub.withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -102,17 +98,15 @@ public class ComponentController {
 
     @PostMapping("/component/updateConfig")
     public ReturnResult updateConfig(@RequestBody RequestParamWrapper requestParams) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(requestParams.getFilePath()), "file path is blank");
-        Preconditions.checkArgument(StringUtils.isNotBlank(requestParams.getData()), "data is blank");
+        String filePath = requestParams.getFilePath();
+        String data = requestParams.getData();
+        Preconditions.checkArgument(StringUtils.isNotBlank(filePath), "file path is blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(data), "data is blank");
 
         String host = requestParams.getHost();
         int port = requestParams.getPort();
+        NetAddressChecker.check(host, port);
 
-        if (!componentServices.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
-
-        String filePath = requestParams.getFilePath();
         String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
 
         String project = componentServices.getProject(host, port);
@@ -124,8 +118,8 @@ public class ComponentController {
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel)
                 .withDeadlineAfter(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
         CommonServiceProto.UpdateConfigRequest.Builder builder = CommonServiceProto.UpdateConfigRequest.newBuilder();
-        builder.setFilePath(requestParams.getFilePath());
-        builder.setData(requestParams.getData());
+        builder.setFilePath(filePath);
+        builder.setData(data);
 
         CommonServiceProto.CommonResponse response = blockingStub.updateConfig(builder.build());
         return ReturnResult.build(response.getStatusCode(), response.getMessage());
