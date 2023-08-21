@@ -157,7 +157,6 @@ public class ModelController {
         return () -> {
             String host = requestParams.getHost();
             Integer port = requestParams.getPort();
-            List<String> serviceIds = requestParams.getServiceIds();
             String tableName = requestParams.getTableName();
             String namespace = requestParams.getNamespace();
 
@@ -179,13 +178,6 @@ public class ModelController {
             ModelServiceProto.FetchModelRequest   fetchModelRequest =  ModelServiceProto.FetchModelRequest.newBuilder()
                     //.setServiceId()
                     .setNamespace(namespace).setTableName(tableName).setSourceIp(host).setSourcePort(port).build();
-
-
-
-            ModelServiceProto.UnloadRequest unloadRequest = ModelServiceProto.UnloadRequest.newBuilder()
-                    .setTableName(tableName)
-                    .setNamespace(namespace)
-                    .build();
 
             ListenableFuture<ModelServiceProto.FetchModelResponse> future = futureStub.fetchModel(fetchModelRequest);
             ModelServiceProto.FetchModelResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -300,8 +292,7 @@ public class ModelController {
         NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return ModelServiceGrpc.newFutureStub(managedChannel);
     }
 
     public void parseComponentInfo(ModelServiceProto.QueryModelResponse response){
