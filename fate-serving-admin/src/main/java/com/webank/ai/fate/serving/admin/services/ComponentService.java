@@ -36,7 +36,6 @@ public class ComponentService {
 
     private final static String PATH_SEPARATOR = "/";
     private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
-    private final static String PROVIDER = "providers";
     Logger logger = LoggerFactory.getLogger(ComponentService.class);
     @Autowired
     ZookeeperRegistry zookeeperRegistry;

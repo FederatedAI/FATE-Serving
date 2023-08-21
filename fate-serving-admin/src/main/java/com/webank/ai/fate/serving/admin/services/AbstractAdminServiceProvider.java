@@ -44,8 +44,7 @@ public abstract class AbstractAdminServiceProvider<req, resp> extends AbstractSe
         } catch (Throwable e) {
             e.printStackTrace();
             if (e.getCause() != null && e.getCause() instanceof BaseException) {
-                BaseException baseException = (BaseException) e.getCause();
-                throw baseException;
+                throw (BaseException) e.getCause();
             } else if (e instanceof InvocationTargetException) {
                 InvocationTargetException ex = (InvocationTargetException) e;
                 throw new SysException(ex.getTargetException().getMessage());
@@ -54,10 +53,5 @@ public abstract class AbstractAdminServiceProvider<req, resp> extends AbstractSe
             }
         }
         return result;
-    }
-
-    @Override
-    protected void printFlowLog(Context context) {
-
     }
 }
