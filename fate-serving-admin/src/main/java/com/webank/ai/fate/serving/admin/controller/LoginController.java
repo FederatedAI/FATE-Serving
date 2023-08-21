@@ -89,7 +89,7 @@ public class LoginController {
             result.setRetcode(StatusCode.SUCCESS);
             result.setData(data);
         } else {
-            logger.info("user {} login failure, username or password {} is wrong.", username,password);
+            logger.error("user {} login failure, username or password {} is wrong.", username,password);
             result.setRetcode(StatusCode.PARAM_ERROR);
             result.setRetmsg("username or password is wrong");
         }
@@ -106,7 +106,7 @@ public class LoginController {
             cache.delete(sessionToken);
             result.setRetcode(StatusCode.SUCCESS);
         } else {
-            logger.info("Session token unavailable");
+            logger.error("Session token unavailable");
             result.setRetcode(StatusCode.PARAM_ERROR);
             result.setRetmsg("Session token unavailable");
         }

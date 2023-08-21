@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
@@ -284,13 +285,7 @@ public class ModelController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
@@ -302,13 +297,7 @@ public class ModelController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
