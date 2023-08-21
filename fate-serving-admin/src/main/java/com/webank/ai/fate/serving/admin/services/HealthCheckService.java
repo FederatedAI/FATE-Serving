@@ -6,6 +6,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.common.health.HealthCheckRecord;
 import com.webank.ai.fate.serving.common.health.HealthCheckResult;
 import com.webank.ai.fate.serving.common.health.HealthCheckStatus;
@@ -140,13 +141,7 @@ public class HealthCheckService implements InitializingBean {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         return CommonServiceGrpc.newBlockingStub(managedChannel);

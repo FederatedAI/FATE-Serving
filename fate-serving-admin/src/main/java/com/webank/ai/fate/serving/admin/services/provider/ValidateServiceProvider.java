@@ -26,6 +26,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.admin.controller.ValidateController;
 import com.webank.ai.fate.serving.admin.services.AbstractAdminServiceProvider;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
@@ -275,13 +276,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
     }
 
     private ModelServiceGrpc.ModelServiceBlockingStub getModelServiceBlockingStub(String host, Integer port) throws Exception {
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
@@ -290,26 +285,14 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
     }
 
     private ModelServiceGrpc.ModelServiceFutureStub getModelServiceFutureStub(String host, Integer port) throws Exception {
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         return ModelServiceGrpc.newFutureStub(managedChannel);
     }
 
     private InferenceServiceGrpc.InferenceServiceFutureStub getInferenceServiceFutureStub(String host, Integer port) throws Exception {
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         return InferenceServiceGrpc.newFutureStub(managedChannel);

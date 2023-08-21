@@ -22,6 +22,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
 import com.webank.ai.fate.serving.core.exceptions.SysException;
@@ -108,12 +109,7 @@ public class RouterController {
     private RouterTableServiceGrpc.RouterTableServiceBlockingStub getRouterTableServiceBlockingStub(String host, Integer port) {
         ParameterUtils.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         ParameterUtils.checkArgument(port != null && port != 0, "parameter port was wrong");
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         RouterTableServiceGrpc.RouterTableServiceBlockingStub blockingStub = RouterTableServiceGrpc.newBlockingStub(managedChannel);
