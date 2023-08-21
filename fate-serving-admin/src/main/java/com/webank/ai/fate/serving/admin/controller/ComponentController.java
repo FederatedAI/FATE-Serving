@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.admin.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
@@ -54,6 +55,8 @@ public class ComponentController {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentController.class);
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Autowired
     ComponentService componentServices;
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
@@ -61,7 +64,8 @@ public class ComponentController {
     @GetMapping("/component/list")
     public ReturnResult list() {
         ComponentService.NodeData cachedNodeData = componentServices.getCachedNodeData();
-        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, JsonUtil.json2Object(JsonUtil.object2Json(cachedNodeData), Map.class));
+        Map<String, Object> cachedNodeDataMap = objectMapper.convertValue(cachedNodeData, Map.class);
+        return ReturnResult.build(StatusCode.SUCCESS, Dict.SUCCESS, cachedNodeDataMap);
     }
 
     @GetMapping("/component/listProps")
