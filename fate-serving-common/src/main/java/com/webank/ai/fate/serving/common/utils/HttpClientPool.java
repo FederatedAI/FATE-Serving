@@ -62,9 +62,7 @@ public class HttpClientPool {
                 .setSocketTimeout(MetaInfo.HTTP_CLIENT_CONFIG_SOCK_TIME_OUT).build();
         httpRequestBase.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
         if (headers != null) {
-            headers.forEach((key, value) -> {
-                httpRequestBase.addHeader(key, value);
-            });
+            headers.forEach(httpRequestBase::addHeader);
         }
         httpRequestBase.setConfig(requestConfig);
     }

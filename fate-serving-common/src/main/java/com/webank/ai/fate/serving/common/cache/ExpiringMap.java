@@ -32,7 +32,6 @@ public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
     private static final int DEFAULT_EXPIRATION_INTERVAL = 1;
     private static AtomicInteger expireCount = new AtomicInteger(1);
-    private final Lock lock = new ReentrantLock();
     private final ConcurrentHashMap<K, ExpiryObject> delegateMap;
     private final ExpireThread expireThread;
     private volatile int maxCapacity;
