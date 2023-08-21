@@ -282,8 +282,7 @@ public class MonitorController {
         NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
-        return blockingStub;
+        return CommonServiceGrpc.newBlockingStub(managedChannel);
     }
 
     private InferenceServiceGrpc.InferenceServiceBlockingStub getInferenceServiceBlockingStub(String host, int port, int timeout) throws Exception {
@@ -333,8 +332,8 @@ public class MonitorController {
             List currentList = currentComponentMap.get(serviceInfo.getHost() + ":" + port);
             Map<String,Object> currentInfoMap = new HashMap<>();
             currentInfoMap.put("type","inference");
-            if (result.getBody() == null || result.getBody().toStringUtf8() == "null") {
-                currentInfoMap.put("data",null);
+            if (result.getBody() == null || "null".equals(result.getBody().toStringUtf8())) {
+                currentInfoMap.put("data", null);
             }
             else{
                 Map resultMap = JsonUtil.json2Object(result.getBody().toStringUtf8(),Map.class);

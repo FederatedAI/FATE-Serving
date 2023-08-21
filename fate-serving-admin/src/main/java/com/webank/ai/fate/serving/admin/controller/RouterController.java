@@ -55,7 +55,7 @@ public class RouterController {
     ZookeeperRegistry zookeeperRegistry;
     @Autowired
     ComponentService componentService;
-    String ROUTER_URL = "proxy/online/queryRouter";
+    static final String ROUTER_URL = "proxy/online/queryRouter";
 
 
     @PostMapping("/router/query")

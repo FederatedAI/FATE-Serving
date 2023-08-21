@@ -34,8 +34,8 @@ import java.util.*;
 @Service
 public class ComponentService {
 
-    private final static String PATH_SEPARATOR = "/";
-    private final static String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
+    private static final String PATH_SEPARATOR = "/";
+    private static final String DEFAULT_COMPONENT_ROOT = "FATE-COMPONENTS";
     Logger logger = LoggerFactory.getLogger(ComponentService.class);
     @Autowired
     ZookeeperRegistry zookeeperRegistry;

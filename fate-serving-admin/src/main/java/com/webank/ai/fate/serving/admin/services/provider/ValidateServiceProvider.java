@@ -150,8 +150,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         ListenableFuture<InferenceServiceProto.InferenceMessage> future = inferenceServiceFutureStub.inference(builder.build());
         InferenceServiceProto.InferenceMessage response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT * 2, TimeUnit.MILLISECONDS);
 
-        Map returnResult = JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
-        return returnResult;
+        return JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
     }
 
     @FateServiceMethod(name = "batchInference")
@@ -202,8 +201,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         ListenableFuture<InferenceServiceProto.InferenceMessage> future = inferenceServiceFutureStub.batchInference(builder.build());
         InferenceServiceProto.InferenceMessage response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT * 2, TimeUnit.MILLISECONDS);
 
-        Map returnResult = JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
-        return returnResult;
+        return JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
     }
 
     /*private ModelServiceProto.PublishRequest buildPublishRequest(Map params) {
@@ -266,7 +264,6 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
     @Override
     protected Object transformExceptionInfo(Context context, ExceptionInfo data) {
-        String actionType = context.getActionType();
         Map returnResult = new HashMap();
         if (data != null) {
             int code = data.getCode();
@@ -291,15 +288,13 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return ModelServiceGrpc.newFutureStub(managedChannel);
     }
 
     private InferenceServiceGrpc.InferenceServiceFutureStub getInferenceServiceFutureStub(String host, Integer port) throws Exception {
         NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return InferenceServiceGrpc.newFutureStub(managedChannel);
     }
 }
