@@ -19,30 +19,53 @@ package com.webank.ai.fate.serving.adaptor.dataaccess;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
-import com.webank.ai.fate.serving.core.bean.BatchHostFeatureAdaptorResult;
-import com.webank.ai.fate.serving.core.bean.BatchHostFederatedParams;
-import com.webank.ai.fate.serving.core.bean.Context;
-import com.webank.ai.fate.serving.core.bean.ReturnResult;
+import com.webank.ai.fate.serving.core.bean.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 许多host方并未提供批量查询接口，这个类将批量请求拆分成单笔请求发送，再合结果
  */
 public class ParallelBatchToSingleFeatureAdaptor extends AbstractBatchFeatureDataAdaptor {
 
+    private static final Logger logger = LoggerFactory.getLogger(HttpAdapter.class);
+
     int timeout;
 
     SingleFeatureDataAdaptor singleFeatureDataAdaptor;
 
-    ListeningExecutorService listeningExecutorService = MoreExecutors.listeningDecorator(null);
+    ListeningExecutorService listeningExecutorService;
 
-    public ParallelBatchToSingleFeatureAdaptor(int core, int max) {
-        new ThreadPoolExecutor(core, max, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1000), new ThreadPoolExecutor.AbortPolicy());
+    // 自定义Adapter初始化
+    public ParallelBatchToSingleFeatureAdaptor(int core, int max, int timeout) {
+        initExecutor(core, max, timeout);
+    }
+
+    // 默认Adapter初始化
+    public ParallelBatchToSingleFeatureAdaptor() {
+
+        // 默认线程池核心线程10
+        int defaultCore = 10;
+
+        // 默认线程池最大线程 100
+        int defaultMax = 100;
+
+        // 默认countDownLatch超时时间永远比grpc超时时间小
+        timeout = MetaInfo.PROPERTY_GRPC_TIMEOUT.intValue() - 1;
+
+        initExecutor(defaultCore, defaultMax, timeout);
+    }
+
+
+    private void initExecutor(int core, int max, int timeout) {
+        this.timeout = timeout;
+
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(core, max, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1000), new ThreadPoolExecutor.AbortPolicy());
+
+        listeningExecutorService = MoreExecutors.listeningDecorator(threadPoolExecutor);
     }
 
     @Override
@@ -56,37 +79,47 @@ public class ParallelBatchToSingleFeatureAdaptor extends AbstractBatchFeatureDat
         CountDownLatch countDownLatch = new CountDownLatch(featureIdList.size());
         for (int i = 0; i < featureIdList.size(); i++) {
             BatchHostFederatedParams.SingleInferenceData singleInferenceData = featureIdList.get(i);
-            // TODO: 2020/3/4    这里需要加 线程池满后的异常处理
-            this.listeningExecutorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Integer index = singleInferenceData.getIndex();
-                        ReturnResult returnResult = singleFeatureDataAdaptor.getData(context, singleInferenceData.getFeatureData());
-                        BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult adaptorResult = new BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult();
-                        adaptorResult.setFeatures(returnResult.getData());
-                        result.getIndexResultMap().put(index, adaptorResult);
-                    } finally {
-                        countDownLatch.countDown();
+            try {
+                this.listeningExecutorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Integer index = singleInferenceData.getIndex();
+                            ReturnResult returnResult = singleFeatureDataAdaptor.getData(context, singleInferenceData.getSendToRemoteFeatureData());
+                            BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult adaptorResult = new BatchHostFeatureAdaptorResult.SingleBatchHostFeatureAdaptorResult();
+                            adaptorResult.setFeatures(returnResult.getData());
+                            result.getIndexResultMap().put(index, adaptorResult);
+                        } finally {
+                            countDownLatch.countDown();
+                        }
                     }
+                });
+            } catch (RejectedExecutionException ree) {
 
+                // 处理线程池满后的异常, 等待2s后重新提交
+                logger.error("The thread pool has exceeded the maximum capacity, sleep 3s and submit again : " + ree.getMessage(), ree);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    logger.error("Interrupt during thread sleep");
                 }
-            });
+                this.listeningExecutorService.submit((Runnable) this);
+            }
         }
+
         /**
          *   这里的超时时间需要设置比rpc超时时间短，否则没有意义
          */
         try {
             countDownLatch.await(timeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Interrupt during countDownLatch thread await", e);
         }
 
         /**
          *   如果等待超时也需要把已经返回的查询结果返回
          */
         return result;
-
     }
 
     @Override
