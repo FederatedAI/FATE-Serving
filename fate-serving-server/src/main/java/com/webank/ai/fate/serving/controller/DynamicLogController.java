@@ -1,6 +1,7 @@
 package com.webank.ai.fate.serving.controller;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ public class DynamicLogController {
     @GetMapping("/alterSysLogLevel/{level}")
     public String alterSysLogLevel(@PathVariable String level){
         try {
-            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+            LoggerContext context = (LoggerContext) LogManager.getContext(false);
             context.getLogger("ROOT").setLevel(Level.valueOf(level));
             return "ok";
         } catch (Exception ex) {
@@ -30,7 +31,7 @@ public class DynamicLogController {
     @GetMapping("/alterPkgLogLevel")
     public String alterPkgLogLevel(@RequestParam String level, @RequestParam String pkgName){
         try {
-            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+            LoggerContext context = (LoggerContext) LogManager.getContext(false);
             context.getLogger(pkgName).setLevel(Level.valueOf(level));
             return "ok";
         } catch (Exception ex) {
