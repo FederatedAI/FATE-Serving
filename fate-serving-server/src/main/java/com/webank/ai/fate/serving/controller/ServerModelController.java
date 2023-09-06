@@ -14,7 +14,6 @@ import io.grpc.ManagedChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,9 +24,9 @@ import java.util.concurrent.TimeUnit;
  * @author hcy
  */
 @RestController
-public class ServerController {
+public class ServerModelController {
 
-    Logger logger = LoggerFactory.getLogger(ServerController.class);
+    Logger logger = LoggerFactory.getLogger(ServerModelController.class);
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
@@ -47,7 +46,7 @@ public class ServerController {
 
             ReturnResult result = new ReturnResult();
 
-            logger.info("unbind model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", host, port, tableName, namespace);
+            logger.debug("unbind model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}", host, port, tableName, namespace);
 
             ModelServiceGrpc.ModelServiceFutureStub futureStub = getModelServiceFutureStub(host, port);
 
@@ -61,7 +60,42 @@ public class ServerController {
 
             ModelServiceProto.UnbindResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
 
-            logger.info("response: {}", response);
+            logger.debug("response: {}", response);
+
+            result.setRetcode(response.getStatusCode());
+            result.setRetmsg(response.getMessage());
+            return result;
+        };
+    }
+
+    @RequestMapping(value = "/server/model/transfer", method = RequestMethod.POST)
+    @ResponseBody
+    public Callable<ReturnResult> transfer(@RequestBody RequestParamWrapper requestParams) {
+        return () -> {
+            String host = requestParams.getHost();
+            Integer port = requestParams.getPort();
+            String tableName = requestParams.getTableName();
+            String namespace = requestParams.getNamespace();
+
+            String targetHost = requestParams.getTargetHost();
+            Integer targetPort = requestParams.getTargetPort();
+
+            Preconditions.checkArgument(StringUtils.isNotBlank(tableName), "parameter tableName is blank");
+            Preconditions.checkArgument(StringUtils.isNotBlank(namespace), "parameter namespace is blank");
+
+            ReturnResult result = new ReturnResult();
+
+            logger.debug("transfer model by tableName and namespace, host: {}, port: {}, tableName: {}, namespace: {}, targetHost: {}, targetPort: {}"
+                    , host, port, tableName, namespace, targetHost, targetPort);
+
+            ModelServiceGrpc.ModelServiceFutureStub futureStub = getModelServiceFutureStub(targetHost, targetPort);
+            ModelServiceProto.FetchModelRequest fetchModelRequest = ModelServiceProto.FetchModelRequest.newBuilder()
+                    .setNamespace(namespace).setTableName(tableName).setSourceIp(host).setSourcePort(port).build();
+
+            ListenableFuture<ModelServiceProto.FetchModelResponse> future = futureStub.fetchModel(fetchModelRequest);
+            ModelServiceProto.FetchModelResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
+
+            logger.debug("response: {}", response);
 
             result.setRetcode(response.getStatusCode());
             result.setRetmsg(response.getMessage());
