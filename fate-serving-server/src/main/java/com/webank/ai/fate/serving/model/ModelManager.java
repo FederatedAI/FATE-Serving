@@ -78,7 +78,7 @@ public class ModelManager implements InitializingBean {
         String modelKey = this.getNameSpaceKey(req.getTableName(), req.getNamespace());
         if (!this.namespaceMap.containsKey(modelKey)) {
             logger.error("not found model info table name {} namespace {}, please check if the model is already loaded.", req.getTableName(), req.getNamespace());
-            throw new ModelNullException(" found model info, please check if the model is already loaded.");
+            throw new ModelNullException("not found model info, please check if the model is already loaded.");
         }
         Model model = this.namespaceMap.get(modelKey);
         String tableNamekey = this.getNameSpaceKey(model.getTableName(), model.getNamespace());
