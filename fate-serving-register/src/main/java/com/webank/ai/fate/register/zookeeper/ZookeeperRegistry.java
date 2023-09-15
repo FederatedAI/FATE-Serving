@@ -162,14 +162,15 @@ public class ZookeeperRegistry extends FailbackRegistry {
             boolean exists = client.checkExists(toUrlPath(url));
             String urlPath = toUrlPath(url);
             if (exists) {
-                System.err.println("delete zk path "+urlPath);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("delete zk path " + urlPath);
+                }
                 zkClient.delete(toUrlPath(url));
                 registedString.remove(url.getServiceInterface() + url.getEnvironment());
                 syncServiceCacheFile();
                 return true;
-            }
-            else{
-                System.err.println(urlPath +"is not exist");
+            } else {
+                logger.error(urlPath + " is not exist");
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to unregister " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
