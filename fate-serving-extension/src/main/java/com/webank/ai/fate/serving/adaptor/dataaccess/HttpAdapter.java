@@ -16,6 +16,7 @@
 
 package com.webank.ai.fate.serving.adaptor.dataaccess;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.ai.fate.serving.common.utils.HttpAdapterClientPool;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
@@ -30,6 +31,7 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
 
     private final static String HTTP_ADAPTER_URL = MetaInfo.PROPERTY_HTTP_ADAPTER_URL;
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public void init() {
         environment.getProperty("port");
@@ -44,13 +46,18 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
             responseResult = HttpAdapterClientPool.doPost(HTTP_ADAPTER_URL, featureIds);
             int responseCode = responseResult.getCode();
             switch (responseCode) {
-                case HttpAdapterResponseCodeEnum.SUCCESS_CODE:
-                    if (responseResult.getData() == null || responseResult.getData().size() == 0) {
+                case HttpAdapterResponseCodeEnum.COMMON_HTTP_SUCCESS_CODE:
+                    Map<String, Object> responseResultData = responseResult.getData();
+                    if (responseResultData == null || responseResultData.size() == 0) {
                         returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
                         returnResult.setRetmsg("responseData is null ");
+                    } else if (!responseResultData.get("code").equals(HttpAdapterResponseCodeEnum.SUCCESS_CODE)) {
+                        returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
+                        returnResult.setRetmsg("responseData is : " + objectMapper.writeValueAsString(responseResultData.get("data")));
                     } else {
+                        ((Map<String, Object>)responseResultData.get("data")).remove("code");
                         returnResult.setRetcode(StatusCode.SUCCESS);
-                        returnResult.setData(responseResult.getData());
+                        returnResult.setData(responseResultData);
                     }
                     break;
 
