@@ -69,7 +69,7 @@ x0:1,x1:5,x2:13,x3:58,x4:95,x5:352,x6:418,x7:833,x8:888,x9:937,x10:32776
 
 #### HttpAdapter
 在serving-server.properties文件中配置属性feature.single.adaptor和http.adapter.url，feature.single.adaptor为继承AbstractSingleFeatureDataAdaptor
-接口，url为调用获取数据接口地址。  
+接口，url为调用获取数据接口地址。http.adapter.url中标明的用户接口，返回格式请定义为 {"code": 200, "data": xxx}标准格式即可，httpAdapter中会根据接口返回状态码是否为200判断用户数据拉取接口是否执行成功。
 ```yaml
 feature.single.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.HttpAdapter
 http.adapter.url=http://127.0.0.1:9380/v1/http/adapter/getFeature
