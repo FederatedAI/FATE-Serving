@@ -20,6 +20,8 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.webank.ai.fate.serving.core.adaptor.SingleFeatureDataAdaptor;
 import com.webank.ai.fate.serving.core.bean.*;
+import com.webank.ai.fate.serving.core.utils.InferenceUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +63,22 @@ public class ParallelBatchToSingleFeatureAdaptor extends AbstractBatchFeatureDat
 
 
     private void initExecutor(int core, int max, int timeout) {
+        SingleFeatureDataAdaptor singleFeatureDataAdaptor = null;
+        String adaptorClass = MetaInfo.PROPERTY_FETTURE_BATCH_SINGLE_ADAPTOR;
+        if (StringUtils.isNotEmpty(adaptorClass)) {
+            logger.info("try to load single adaptor for ParallelBatchToSingleFeatureAdaptor {}", adaptorClass);
+             singleFeatureDataAdaptor = (SingleFeatureDataAdaptor) InferenceUtils.getClassByName(adaptorClass);
+        }
+
+        if (singleFeatureDataAdaptor != null) {
+            String implementationClass = singleFeatureDataAdaptor.getClass().getName();
+            logger.info("SingleFeatureDataAdaptor implementation class: " + implementationClass);
+        } else {
+            logger.warn("SingleFeatureDataAdaptor is null.");
+        }
+
+        this.singleFeatureDataAdaptor = singleFeatureDataAdaptor;
+
         this.timeout = timeout;
 
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(core, max, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1000), new ThreadPoolExecutor.AbortPolicy());
