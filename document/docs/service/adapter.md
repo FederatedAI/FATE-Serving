@@ -40,8 +40,10 @@ Context为上下文信息，用于传递请求所需参数，featureIds用于传
 #在host方的配置文件serving-server.properties中将其配置成自定义的类的全路径，如下所示
 feature.single.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.CustomAdapter
 feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.CustomBatchAdapter
+feature.batch.single.adatpor=com.webank.ai.fate.serving.adaptor.dataaccess.CustomAdapter
 ```
 可以根据需要实现Adapter中的逻辑，并修改serving-server.properties中feature.single.adaptor或feature.batch.adaptor配置项为新增Adapter的全类名即可。可以参考源码中的MockAdaptor
+注: feature.batch.single.adatpor与feature.batch.adatpor配套使用，feature.batch.single.adatpor可根据用户场景自行实现,fate-serving中目前支持httpAdaptor
 
 ## fate-serving-extension
 为了更好的代码解耦合，代码中将自定义adapter分离到fate-serving-extension模块中。用户可在此模块中开发自定义的adapter。
