@@ -6,6 +6,7 @@ import com.webank.ai.fate.api.networking.common.CommonServiceGrpc;
 import com.webank.ai.fate.api.networking.common.CommonServiceProto;
 import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.common.health.HealthCheckRecord;
 import com.webank.ai.fate.serving.common.health.HealthCheckResult;
 import com.webank.ai.fate.serving.common.health.HealthCheckStatus;
@@ -47,18 +48,17 @@ public class HealthCheckService implements InitializingBean {
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
     Map<String,Object> healthRecord = new ConcurrentHashMap<>();
 
-    private static ThreadPoolExecutor executor = ThreadPoolUtil.newThreadPoolExecutor();
-
     public    Map  getHealthCheckInfo(){
         return   healthRecord;
     }
 
     private void  checkRemoteHealth(Map<String,Map> componentMap, String address, String component) {
-        if(StringUtils.isBlank(address))
+        if (StringUtils.isBlank(address)) {
             return ;
+        }
         Map<String,Map> currentComponentMap = componentMap.get(component);
-        String host = address.substring(0,address.indexOf(":"));
-        int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
+        String host = address.substring(0,address.indexOf(':'));
+        int port = Integer.parseInt(address.substring(address.indexOf(':') + 1));
         CommonServiceGrpc.CommonServiceBlockingStub blockingStub = getMonitorServiceBlockStub(host, port);
         CommonServiceProto.HealthCheckRequest.Builder builder = CommonServiceProto.HealthCheckRequest.newBuilder();
         CommonServiceProto.CommonResponse commonResponse = blockingStub.checkHealthService(builder.build());
@@ -141,17 +141,10 @@ public class HealthCheckService implements InitializingBean {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
-        return blockingStub;
+        return CommonServiceGrpc.newBlockingStub(managedChannel);
     }
     @Override
     public void afterPropertiesSet() throws Exception {

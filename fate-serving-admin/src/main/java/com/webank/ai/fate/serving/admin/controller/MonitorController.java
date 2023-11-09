@@ -29,6 +29,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 
 import com.webank.ai.fate.serving.admin.services.ComponentService;
 import com.webank.ai.fate.serving.admin.services.HealthCheckService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.common.flow.JvmInfo;
 import com.webank.ai.fate.serving.common.flow.MetricNode;
 import com.webank.ai.fate.serving.common.health.HealthCheckRecord;
@@ -278,24 +279,15 @@ public class MonitorController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        CommonServiceGrpc.CommonServiceBlockingStub blockingStub = CommonServiceGrpc.newBlockingStub(managedChannel);
-        return blockingStub;
+        return CommonServiceGrpc.newBlockingStub(managedChannel);
     }
 
     private InferenceServiceGrpc.InferenceServiceBlockingStub getInferenceServiceBlockingStub(String host, int port, int timeout) throws Exception {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "host is blank");
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = InferenceServiceGrpc.newBlockingStub(managedChannel);
@@ -340,8 +332,8 @@ public class MonitorController {
             List currentList = currentComponentMap.get(serviceInfo.getHost() + ":" + port);
             Map<String,Object> currentInfoMap = new HashMap<>();
             currentInfoMap.put("type","inference");
-            if (result.getBody() == null || result.getBody().toStringUtf8() == "null") {
-                currentInfoMap.put("data",null);
+            if (result.getBody() == null || "null".equals(result.getBody().toStringUtf8())) {
+                currentInfoMap.put("data", null);
             }
             else{
                 Map resultMap = JsonUtil.json2Object(result.getBody().toStringUtf8(),Map.class);

@@ -26,6 +26,7 @@ import com.webank.ai.fate.api.serving.InferenceServiceProto;
 import com.webank.ai.fate.serving.admin.controller.ValidateController;
 import com.webank.ai.fate.serving.admin.services.AbstractAdminServiceProvider;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.common.rpc.core.FateService;
 import com.webank.ai.fate.serving.common.rpc.core.FateServiceMethod;
 import com.webank.ai.fate.serving.common.rpc.core.InboundPackage;
@@ -42,7 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +103,10 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
     @FateServiceMethod(name = "inference")
     public Object inference(Context context, InboundPackage data) throws Exception {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        String caseId = request.getHeader("caseId");
+
         Map params = (Map) data.getBody();
         String host = (String) params.get(Dict.HOST);
         int port = (int) params.get(Dict.PORT);
@@ -123,6 +131,10 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
             inferenceRequest.setApplyId(params.get("applyId").toString());
         }
 
+        if(caseId != null && !caseId.isEmpty()) {
+            inferenceRequest.setCaseId(caseId);
+        }
+
         for (Map.Entry<String, Object> entry : featureData.entrySet()) {
             inferenceRequest.getFeatureData().put(entry.getKey(), entry.getValue());
         }
@@ -138,8 +150,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         ListenableFuture<InferenceServiceProto.InferenceMessage> future = inferenceServiceFutureStub.inference(builder.build());
         InferenceServiceProto.InferenceMessage response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT * 2, TimeUnit.MILLISECONDS);
 
-        Map returnResult = JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
-        return returnResult;
+        return JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
     }
 
     @FateServiceMethod(name = "batchInference")
@@ -190,8 +201,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
         ListenableFuture<InferenceServiceProto.InferenceMessage> future = inferenceServiceFutureStub.batchInference(builder.build());
         InferenceServiceProto.InferenceMessage response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT * 2, TimeUnit.MILLISECONDS);
 
-        Map returnResult = JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
-        return returnResult;
+        return JsonUtil.json2Object(response.getBody().toStringUtf8(), Map.class);
     }
 
     /*private ModelServiceProto.PublishRequest buildPublishRequest(Map params) {
@@ -254,7 +264,6 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
 
     @Override
     protected Object transformExceptionInfo(Context context, ExceptionInfo data) {
-        String actionType = context.getActionType();
         Map returnResult = new HashMap();
         if (data != null) {
             int code = data.getCode();
@@ -267,13 +276,7 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
     }
 
     private ModelServiceGrpc.ModelServiceBlockingStub getModelServiceBlockingStub(String host, Integer port) throws Exception {
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
@@ -282,30 +285,16 @@ public class ValidateServiceProvider extends AbstractAdminServiceProvider {
     }
 
     private ModelServiceGrpc.ModelServiceFutureStub getModelServiceFutureStub(String host, Integer port) throws Exception {
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return ModelServiceGrpc.newFutureStub(managedChannel);
     }
 
     private InferenceServiceGrpc.InferenceServiceFutureStub getInferenceServiceFutureStub(String host, Integer port) throws Exception {
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return InferenceServiceGrpc.newFutureStub(managedChannel);
     }
 }

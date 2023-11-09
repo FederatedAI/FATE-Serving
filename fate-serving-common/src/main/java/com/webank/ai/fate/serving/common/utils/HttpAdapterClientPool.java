@@ -104,7 +104,7 @@ public class HttpAdapterClientPool {
             int statusCode = response.getStatusLine().getStatusCode();
             HttpAdapterResponse result = new HttpAdapterResponse();
             result.setCode(statusCode);
-            result.setData(JsonUtil.json2Object(data,Map.class));
+            result.setData(JsonUtil.json2Object(data, Map.class));
             return result;
         } catch (IOException ex) {
             logger.error("get http response failed:", ex);

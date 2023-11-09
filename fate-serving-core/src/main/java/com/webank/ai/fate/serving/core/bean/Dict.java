@@ -117,6 +117,7 @@ public class Dict {
     public static final String PROPERTY_MODEL_SYNC = "model.synchronize";
     public static final String PROPERTY_SERVING_MAX_POOL_SIZE = "serving.max.pool.size";
     public static final String PROPERTY_FEATURE_BATCH_ADAPTOR = "feature.batch.adaptor";
+    public static final String PROPERTY_FEATURE_BATCH_SINGLE_ADAPTOR = "feature.batch.single.adaptor";
     public static final String PROPERTY_ACL_ENABLE = "acl.enable";
     public static final String PROPERTY_ACL_USERNAME = "acl.username";
     public static final String PROPERTY_ACL_PASSWORD = "acl.password";

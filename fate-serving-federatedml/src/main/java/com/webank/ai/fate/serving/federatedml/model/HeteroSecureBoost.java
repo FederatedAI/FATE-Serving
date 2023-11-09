@@ -73,7 +73,7 @@ public abstract class HeteroSecureBoost extends BaseComponent {
 
     protected String getSite(int treeId, int treeNodeId) {
           String siteName =   this.trees.get(treeId).getTree(treeNodeId).getSitename();
-          if(siteName!=null&&":".indexOf(siteName)!=0){
+          if(siteName != null && siteName.contains(":")){
               return  siteName.split(":")[1];
           }else{
               return  siteName;

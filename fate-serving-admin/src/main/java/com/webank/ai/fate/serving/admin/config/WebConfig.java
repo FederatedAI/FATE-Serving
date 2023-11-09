@@ -72,8 +72,7 @@ public class WebConfig implements WebMvcConfigurer {
         Integer maxSize = MetaInfo.PROPERTY_LOCAL_CACHE_MAXSIZE;
         Integer expireTime = MetaInfo.PROPERTY_LOCAL_CACHE_EXPIRE;
         Integer interval = MetaInfo.PROPERTY_LOCAL_CACHE_INTERVAL;
-        ExpiringLRUCache lruCache = new ExpiringLRUCache(maxSize, expireTime, interval);
-        return lruCache;
+        return new ExpiringLRUCache(maxSize, expireTime, interval);
     }
 
 
