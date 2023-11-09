@@ -15,6 +15,7 @@ public  class HealthCheckResult {
 
     List<HealthCheckRecord>  records  = Lists.newArrayList();
 
+    @Override
     public  String toString(){
         return JsonUtil.object2Json(this);
     }

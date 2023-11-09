@@ -117,24 +117,22 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     @Override
     public void doRegisterComponent(URL url) {
-        if(url==null) {
+        if(url == null) {
             String hostAddress = NetUtils.getLocalIp();
             String path = PATH_SEPARATOR + DEFAULT_COMPONENT_ROOT + PATH_SEPARATOR + project + PATH_SEPARATOR + hostAddress + ":" + port;
             url = new URL(path, Maps.newHashMap());
             //url=url.addParameter(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
         }
 
-        if(url !=null) {
-            String path = url.getPath();
-            Map content = new HashMap();
-            content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
-            content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
-            content.put(Dict.VERSION, MetaInfo.CURRENT_VERSION);
-            this.zkClient.create(path, JsonUtil.object2Json(content), true);
-            this.componentUrl = url;
+        String path = url.getPath();
+        Map content = new HashMap();
+        content.put(Constants.INSTANCE_ID, AbstractRegistry.INSTANCE_ID);
+        content.put(Constants.TIMESTAMP_KEY, System.currentTimeMillis());
+        content.put(Dict.VERSION, MetaInfo.CURRENT_VERSION);
+        this.zkClient.create(path, JsonUtil.object2Json(content), true);
+        this.componentUrl = url;
 
-            logger.info("register component {} ", path);
-        }
+        logger.info("register component {} ", path);
     }
 
 
@@ -155,7 +153,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }else{
             System.err.println("componentUrl is null");
         }
-
     }
 
 
@@ -165,14 +162,15 @@ public class ZookeeperRegistry extends FailbackRegistry {
             boolean exists = client.checkExists(toUrlPath(url));
             String urlPath = toUrlPath(url);
             if (exists) {
-                System.err.println("delete zk path "+urlPath);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("delete zk path " + urlPath);
+                }
                 zkClient.delete(toUrlPath(url));
                 registedString.remove(url.getServiceInterface() + url.getEnvironment());
                 syncServiceCacheFile();
                 return true;
-            }
-            else{
-                System.err.println(urlPath +"is not exist");
+            } else {
+                logger.error(urlPath + " is not exist");
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to unregister " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
@@ -253,7 +251,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
         param = param + "&";
         param = param + Constants.TIMESTAMP_KEY + "=" + System.currentTimeMillis();
         String key = serviceName;
-        boolean appendParam = false;
         if (version != 0) {
             param = param + "&" + Constants.VERSION + "=" + version;
         }
@@ -271,14 +268,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
             if (serviceWrapper.getWeight() != null) {
                 parameters.put(Constants.WEIGHT_KEY, String.valueOf(serviceWrapper.getWeight()));
             }
-//            if (serviceWrapper.getVersion() != null) {
-//                parameters.put(Constants.VERSION_KEY, String.valueOf(serviceWrapper.getVersion()));
-//            }
         } else {
             serviceWrapper = new ServiceWrapper();
             serviceWrapper.setRouterMode(parameters.get(Constants.ROUTER_MODE));
             serviceWrapper.setWeight(parameters.get(Constants.WEIGHT_KEY) != null ? Integer.valueOf(parameters.get(Constants.WEIGHT_KEY)) : null);
-            //serviceWrapper.setVersion(parameters.get(Constants.VERSION_KEY) != null ? Long.valueOf(parameters.get(Constants.VERSION_KEY)) : null);
             this.getServiceCacheMap().put(url.getEnvironment() + "/" + url.getPath(), serviceWrapper);
         }
     }
@@ -391,8 +384,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             throw new RuntimeException("Failed to register service:"+ service +" ,acquire serviceName is blank");
         }
 
-        URL url = URL.valueOf(protocol + "://" + hostAddress + ":" + hostPort + Constants.PATH_SEPARATOR + parseRegisterService(serviceName, service));
-        return url;
+        return URL.valueOf(protocol + "://" + hostAddress + ":" + hostPort + Constants.PATH_SEPARATOR + parseRegisterService(serviceName, service));
     }
 
     public void addDynamicEnvironment(String environment) {
@@ -580,8 +572,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             return toRootPath();
         }
 
-        String result = toRootDir() + project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR + URL.encode(name);
-        return result;
+        return toRootDir() + project + Constants.PATH_SEPARATOR + environment + Constants.PATH_SEPARATOR + URL.encode(name);
     }
 
     private String[] toCategoriesPath(URL url) {
@@ -632,7 +623,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     private List<URL> toUrlsWithEmpty(URL consumer, String path, List<String> providers) {
         List<URL> urls = toUrlsWithoutEmpty(consumer, providers);
-        if (urls == null || urls.isEmpty()) {
+        if (urls.isEmpty()) {
             int i = path.lastIndexOf(PATH_SEPARATOR);
             String category = i < 0 ? path : path.substring(i + 1);
             URL empty = URLBuilder.from(consumer)

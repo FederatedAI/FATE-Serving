@@ -27,6 +27,7 @@ import com.webank.ai.fate.register.url.URL;
 import com.webank.ai.fate.register.zookeeper.ZookeeperRegistry;
 import com.webank.ai.fate.serving.admin.bean.VerifyService;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.core.bean.*;
 import com.webank.ai.fate.serving.core.constant.StatusCode;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
@@ -72,12 +73,15 @@ public class ServiceController {
      */
     @GetMapping("/service/list")
     public ReturnResult listRegistered(Integer page, Integer pageSize) {
-        if (page == null || page < 0) {
-            page = 1;
+        int defaultPage = 1;
+        int defaultPageSize = 10;
+
+        if (page == null || page <= 0) {
+            page = defaultPage;
         }
 
-        if (pageSize == null) {
-            pageSize = 10;
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = defaultPageSize;
         }
 
         if (logger.isDebugEnabled()) {
@@ -103,8 +107,9 @@ public class ServiceController {
                     URL url = URL.valueOf(u);
                     if (!Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
                         String[] split = key.split("/");
-                        if(!filterSet.contains(split[2]))
+                        if (!filterSet.contains(split[2])) {
                             continue;
+                        }
                         ServiceDataWrapper wrapper = new ServiceDataWrapper();
                         wrapper.setUrl(url.toFullString());
                         wrapper.setProject(split[0]);
@@ -128,8 +133,6 @@ public class ServiceController {
         totalSize = resultList.size();
 
         resultList = resultList.stream().sorted((Comparator.comparing(o -> (o.getProject() + o.getEnvironment())))).collect(Collectors.toList());
-//        resultList = resultList.stream().sorted((Comparator.comparingInt(o -> (o.getProject() + o.getEnvironment()).hashCode()))).collect(Collectors.toList());
-        // Pagination
         int totalPage = (resultList.size() + pageSize - 1) / pageSize;
         if (page <= totalPage) {
             resultList = resultList.subList((page - 1) * pageSize, Math.min(page * pageSize, resultList.size()));
@@ -228,17 +231,10 @@ public class ServiceController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        CommonServiceGrpc.CommonServiceFutureStub futureStub = CommonServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return CommonServiceGrpc.newFutureStub(managedChannel);
     }
 
 }

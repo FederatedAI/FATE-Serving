@@ -40,8 +40,10 @@ Context为上下文信息，用于传递请求所需参数，featureIds用于传
 #在host方的配置文件serving-server.properties中将其配置成自定义的类的全路径，如下所示
 feature.single.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.CustomAdapter
 feature.batch.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.CustomBatchAdapter
+feature.batch.single.adatpor=com.webank.ai.fate.serving.adaptor.dataaccess.CustomAdapter
 ```
 可以根据需要实现Adapter中的逻辑，并修改serving-server.properties中feature.single.adaptor或feature.batch.adaptor配置项为新增Adapter的全类名即可。可以参考源码中的MockAdaptor
+注: feature.batch.single.adatpor与feature.batch.adatpor配套使用，feature.batch.single.adatpor可根据用户场景自行实现,fate-serving中目前支持httpAdaptor
 
 ## fate-serving-extension
 为了更好的代码解耦合，代码中将自定义adapter分离到fate-serving-extension模块中。用户可在此模块中开发自定义的adapter。
@@ -69,7 +71,7 @@ x0:1,x1:5,x2:13,x3:58,x4:95,x5:352,x6:418,x7:833,x8:888,x9:937,x10:32776
 
 #### HttpAdapter
 在serving-server.properties文件中配置属性feature.single.adaptor和http.adapter.url，feature.single.adaptor为继承AbstractSingleFeatureDataAdaptor
-接口，url为调用获取数据接口地址。  
+接口，url为调用获取数据接口地址。http.adapter.url中标明的用户接口，返回格式请定义为 {"code": 200, "data": xxx}标准格式即可，httpAdapter中会根据接口返回状态码是否为200判断用户数据拉取接口是否执行成功。
 ```yaml
 feature.single.adaptor=com.webank.ai.fate.serving.adaptor.dataaccess.HttpAdapter
 http.adapter.url=http://127.0.0.1:9380/v1/http/adapter/getFeature

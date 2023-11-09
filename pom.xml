@@ -30,14 +30,14 @@
         <module>fate-serving-register</module>
         <module>fate-serving-common</module>
         <module>fate-serving-proxy</module>
-        <module>fate-serving-admin</module>
-        <module>fate-serving-admin-ui</module>
+<!--        <module>fate-serving-admin</module>-->
+<!--        <module>fate-serving-admin-ui</module>-->
         <module>fate-serving-extension</module>
         <module>fate-serving-sdk</module>
     </modules>
 
     <properties>
-        <fate.version>2.1.6</fate.version>
+        <fate.version>2.1.7</fate.version>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -48,7 +48,7 @@
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.1</os-maven-plugin.version>
         <spring.boot.version>2.7.0</spring.boot.version>
-        <jackson.version>2.13.3</jackson.version>
+        <jackson.version>2.15.3</jackson.version>
         <jedis.version>2.9.0</jedis.version>
         <log4j2.version>2.17.1</log4j2.version>
         <skipTests>true</skipTests>
@@ -226,7 +226,7 @@
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.26</version>
+                <version>1.32</version>
                 <scope>compile</scope>
             </dependency>
 
@@ -251,7 +251,7 @@
             <dependency>
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
-                <version>3.8.0</version>
+                <version>3.9.0</version>
             </dependency>
 
             <dependency>

@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceGrpc;
 import com.webank.ai.fate.api.mlmodel.manager.ModelServiceProto;
 import com.webank.ai.fate.serving.admin.services.ComponentService;
+import com.webank.ai.fate.serving.admin.utils.NetAddressChecker;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.bean.RequestParamWrapper;
@@ -66,12 +67,15 @@ public class ModelController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != 0, "parameter port is blank");
 
-        if (page == null || page < 0) {
-            page = 1;
+        int defaultPage = 1;
+        int defaultPageSize = 10;
+
+        if (page == null || page <= 0) {
+            page = defaultPage;
         }
 
-        if (pageSize == null) {
-            pageSize = 10;
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = defaultPageSize;
         }
 
         if (logger.isDebugEnabled()) {
@@ -153,7 +157,6 @@ public class ModelController {
         return () -> {
             String host = requestParams.getHost();
             Integer port = requestParams.getPort();
-            List<String> serviceIds = requestParams.getServiceIds();
             String tableName = requestParams.getTableName();
             String namespace = requestParams.getNamespace();
 
@@ -175,13 +178,6 @@ public class ModelController {
             ModelServiceProto.FetchModelRequest   fetchModelRequest =  ModelServiceProto.FetchModelRequest.newBuilder()
                     //.setServiceId()
                     .setNamespace(namespace).setTableName(tableName).setSourceIp(host).setSourcePort(port).build();
-
-
-
-            ModelServiceProto.UnloadRequest unloadRequest = ModelServiceProto.UnloadRequest.newBuilder()
-                    .setTableName(tableName)
-                    .setNamespace(namespace)
-                    .build();
 
             ListenableFuture<ModelServiceProto.FetchModelResponse> future = futureStub.fetchModel(fetchModelRequest);
             ModelServiceProto.FetchModelResponse response = future.get(MetaInfo.PROPERTY_GRPC_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -281,13 +277,7 @@ public class ModelController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
         ModelServiceGrpc.ModelServiceBlockingStub blockingStub = ModelServiceGrpc.newBlockingStub(managedChannel);
@@ -299,17 +289,10 @@ public class ModelController {
         Preconditions.checkArgument(StringUtils.isNotBlank(host), "parameter host is blank");
         Preconditions.checkArgument(port != null && port.intValue() != 0, "parameter port was wrong");
 
-        if (!NetUtils.isValidAddress(host + ":" + port)) {
-            throw new SysException("invalid address");
-        }
-
-        if (!componentService.isAllowAccess(host, port)) {
-            throw new RemoteRpcException("no allow access, target: " + host + ":" + port);
-        }
+        NetAddressChecker.check(host, port);
 
         ManagedChannel managedChannel = grpcConnectionPool.getManagedChannel(host, port);
-        ModelServiceGrpc.ModelServiceFutureStub futureStub = ModelServiceGrpc.newFutureStub(managedChannel);
-        return futureStub;
+        return ModelServiceGrpc.newFutureStub(managedChannel);
     }
 
     public void parseComponentInfo(ModelServiceProto.QueryModelResponse response){

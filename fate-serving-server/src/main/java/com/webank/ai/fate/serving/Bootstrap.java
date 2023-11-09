@@ -77,6 +77,7 @@ public class Bootstrap {
             MetaInfo.PROPERTY_SERVING_POOL_ALIVE_TIME = environment.getProperty(Dict.PROPERTY_SERVING_POOL_ALIVE_TIME) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_POOL_ALIVE_TIME)) : 1000;
             MetaInfo.PROPERTY_SERVING_POOL_QUEUE_SIZE = environment.getProperty(Dict.PROPERTY_SERVING_POOL_QUEUE_SIZE) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SERVING_POOL_QUEUE_SIZE)) : 100;
             MetaInfo.PROPERTY_FEATURE_BATCH_ADAPTOR = environment.getProperty(Dict.PROPERTY_FEATURE_BATCH_ADAPTOR);
+            MetaInfo.PROPERTY_FETTURE_BATCH_SINGLE_ADAPTOR = environment.getProperty(Dict.PROPERTY_FEATURE_BATCH_SINGLE_ADAPTOR);
             MetaInfo.PROPERTY_BATCH_INFERENCE_MAX = environment.getProperty(Dict.PROPERTY_BATCH_INFERENCE_MAX) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_BATCH_INFERENCE_MAX)) : 300;
             MetaInfo.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH = environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH) != null ? Boolean.valueOf(environment.getProperty(Dict.PROPERTY_REMOTE_MODEL_INFERENCE_RESULT_CACHE_SWITCH)) : Boolean.FALSE;
             MetaInfo.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT = environment.getProperty(Dict.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT) != null ? Integer.valueOf(environment.getProperty(Dict.PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT)) : 3000;
@@ -104,7 +105,6 @@ public class Bootstrap {
             MetaInfo.PROPERTY_MODEL_TRANSFER_URL = environment.getProperty(Dict.PROPERTY_MODEL_TRANSFER_URL);
             MetaInfo.PROPERTY_MODEL_CACHE_PATH = StringUtils.isNotBlank(environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH)) ? environment.getProperty(Dict.PROPERTY_MODEL_CACHE_PATH) : MetaInfo.PROPERTY_ROOT_PATH;
             MetaInfo.PROPERTY_ACL_ENABLE = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_ACL_ENABLE, "false"));
-            MetaInfo.PROPERTY_MODEL_SYNC = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_MODEL_SYNC, "false"));
             MetaInfo.PROPERTY_MODEL_SYNC = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_MODEL_SYNC, "false"));
             MetaInfo.PROPERTY_GRPC_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_GRPC_TIMEOUT, "5000"));
             MetaInfo.PROPERTY_ACL_USERNAME = environment.getProperty(Dict.PROPERTY_ACL_USERNAME);

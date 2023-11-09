@@ -38,6 +38,7 @@ public class MetaInfo {
     public static Boolean PROPERTY_USE_REGISTER;
     public static Boolean PROPERTY_USE_ZK_ROUTER;
     public static String PROPERTY_FEATURE_BATCH_ADAPTOR;
+    public static String PROPERTY_FETTURE_BATCH_SINGLE_ADAPTOR;
     public static Integer PROPERTY_BATCH_INFERENCE_MAX;
     public static String PROPERTY_FEATURE_SINGLE_ADAPTOR;
     public static Integer PROPERTY_SINGLE_INFERENCE_RPC_TIMEOUT;
