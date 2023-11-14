@@ -148,10 +148,10 @@ public class FateFlowModelLoader extends AbstractModelLoader<Map<String, byte[]>
                     String modelVersion = modelLoaderParam.tableName;
                     String modelId = modelLoaderParam.nameSpace.replace("#", "~");
                     String uri = "/" + modelId + "/" + modelVersion;
-                    String encodeUri = URLEncoder.encode(uri,"UTF-8");
                     for (String child : children) {
-                        if(child.endsWith(encodeUri)){
-                            urls.add(URL.valueOf(URLDecoder.decode(child,"UTF-8")));
+                        String decodeChild = URLDecoder.decode(child,"UTF-8");
+                        if (decodeChild.endsWith(uri)){
+                            urls.add(URL.valueOf(decodeChild));
                             break;
                         }
                     }
