@@ -27,9 +27,6 @@ import java.util.*;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 
-/**
- * @author hcy
- */
 public abstract class HeteroLinR extends BaseComponent {
     private static final Logger logger = LoggerFactory.getLogger(HeteroLinR.class);
     private Map<String, Double> weight;

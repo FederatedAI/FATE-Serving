@@ -26,9 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author hcy
- */
 public class HeteroLinRHost extends HeteroLinR implements Returnable {
 
     private static final Logger logger = LoggerFactory.getLogger(HeteroLinRHost.class);
