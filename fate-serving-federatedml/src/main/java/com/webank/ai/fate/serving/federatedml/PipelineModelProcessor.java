@@ -49,8 +49,8 @@ public class PipelineModelProcessor implements ModelProcessor {
     private static String flower = "pipeline.pipeline:Pipeline";
     private static ForkJoinPool forkJoinPool = new ForkJoinPool();
     private List<BaseComponent> pipeLineNode = new ArrayList<>();
-    private Map<String, BaseComponent> componentMap = new HashMap<String, BaseComponent>();
-    private Map<String, Map<String, Object>> componentParmasMap = new HashMap<String, Map<String, Object>>();
+    private Map<String, BaseComponent> componentMap = new HashMap<String, BaseComponent>(8);
+    private Map<String, Map<String, Object>> componentParmasMap = new HashMap<String, Map<String, Object>>(8);
     private DSLParser dslParser = new DSLParser();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
     private int splitSize = MetaInfo.PROPERTY_BATCH_SPLIT_SIZE;

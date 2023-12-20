@@ -26,10 +26,10 @@ import java.util.*;
 
 public class DSLParser {
     private static final Logger logger = LoggerFactory.getLogger(DSLParser.class);
-    private HashMap<String, String> componentModuleMap = new HashMap<String, String>();
-    private HashMap<String, Integer> componentIds = new HashMap<String, Integer>();
-    private HashMap<String, List<String>> downStream = new HashMap<String, List<String>>();
-    private HashMap<Integer, HashSet<Integer>> upInputs = new HashMap<Integer, HashSet<Integer>>();
+    private HashMap<String, String> componentModuleMap = new HashMap<String, String>(8);
+    private HashMap<String, Integer> componentIds = new HashMap<String, Integer>(8);
+    private HashMap<String, List<String>> downStream = new HashMap<String, List<String>>(8);
+    private HashMap<Integer, HashSet<Integer>> upInputs = new HashMap<Integer, HashSet<Integer>>(8);
     private ArrayList<String> topoRankComponent = new ArrayList<String>();
     private String modelPackage = "com.webank.ai.fate.serving.federatedml.model";
 
