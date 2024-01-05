@@ -6,6 +6,8 @@
 #!/usr/bin/env bash
 set -e
 
+: "${Platform:=amd64}"
+
 BASEDIR=$(dirname "$0")
 cd $BASEDIR
 WORKINGDIR=`pwd`
@@ -32,16 +34,17 @@ echo "  Tag: ${TAG}"
 echo "  BASEDIR: ${BASEDIR}"
 echo "  WORKINGDIR: ${WORKINGDIR}"
 echo "  source_code_dir: ${source_code_dir}"
+echo "  Platform: ${Platform}"
 
 package() {
-  docker run --rm -u $(id -u):$(id -g) -v ${source_code_dir}:/data/projects/fate/FATE-Serving --entrypoint="" maven:3.6-jdk-8 /bin/bash -c "cd /data/projects/fate/FATE-Serving && mvn clean package -DskipTests"
+  docker run --rm --platform linux/amd64 -v ${source_code_dir}:/data/projects/fate/FATE-Serving --entrypoint="" maven:3.6-jdk-8 /bin/bash -c "cd /data/projects/fate/FATE-Serving && mvn clean package -DskipTests"
 }
 
 buildModule() {
   for module in "serving-proxy" "serving-server" "serving-admin"
   do
       echo "### START BUILDING ${module} ###"
-      docker build --build-arg version=${version} -t ${PREFIX}/${module}:${TAG} -f ${source_code_dir}/docker-build/${module}/Dockerfile ${source_code_dir}
+      docker build --platform linux/${Platform} --build-arg version=${version} -t ${PREFIX}/${module}:${TAG} -f ${source_code_dir}/docker-build/${module}/Dockerfile.${Platform} ${source_code_dir}
       echo "### FINISH BUILDING ${module} ###"
       echo ""
   done;
