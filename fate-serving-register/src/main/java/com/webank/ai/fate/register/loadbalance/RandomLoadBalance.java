@@ -24,44 +24,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomLoadBalance extends AbstractLoadBalancer {
 
-    public static final String NAME = "random";
-
     @Override
     protected List<URL> doSelect(List<URL> urls) {
-
-        int length = urls.size();
-
-        boolean sameWeight = true;
-
-        int[] weights = new int[length];
-
-        int firstWeight = getWeight(urls.get(0));
-        weights[0] = firstWeight;
-
-        int totalWeight = firstWeight;
-        for (int i = 1; i < length; i++) {
-            int weight = getWeight(urls.get(i));
-
-            weights[i] = weight;
-
-            totalWeight += weight;
-            if (sameWeight && weight != firstWeight) {
-                sameWeight = false;
-            }
-        }
-        if (totalWeight > 0 && !sameWeight) {
-
-            int offset = ThreadLocalRandom.current().nextInt(totalWeight);
-
-            for (int i = 0; i < length; i++) {
-                offset -= weights[i];
-                if (offset < 0) {
-                    return Lists.newArrayList(urls.get(i));
-                }
-            }
-        }
-
-        return Lists.newArrayList(urls.get(ThreadLocalRandom.current().nextInt(length)));
+        return Lists.newArrayList(urls.get(ThreadLocalRandom.current().nextInt(urls.size())));
     }
 
 }
