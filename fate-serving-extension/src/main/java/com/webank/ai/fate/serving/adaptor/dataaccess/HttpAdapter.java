@@ -55,9 +55,9 @@ public class HttpAdapter extends AbstractSingleFeatureDataAdaptor {
                         returnResult.setRetcode(StatusCode.FEATURE_DATA_ADAPTOR_ERROR);
                         returnResult.setRetmsg("responseData is : " + objectMapper.writeValueAsString(responseResultData.get("data")));
                     } else {
-                        ((Map<String, Object>)responseResultData.get("data")).remove("code");
+                        Map<String, Object> data = (Map<String, Object>) responseResultData.get("data");
                         returnResult.setRetcode(StatusCode.SUCCESS);
-                        returnResult.setData(responseResultData);
+                        returnResult.setData(data);
                     }
                     break;
 
