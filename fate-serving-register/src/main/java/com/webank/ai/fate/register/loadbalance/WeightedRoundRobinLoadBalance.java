@@ -4,6 +4,7 @@ import com.webank.ai.fate.register.url.URL;
 import org.apache.curator.shaded.com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WeightedRoundRobinLoadBalance extends AbstractLoadBalancer {
@@ -48,7 +49,7 @@ public class WeightedRoundRobinLoadBalance extends AbstractLoadBalancer {
             }
         }
 
-        // 如果所有服务器权重都为0，返回空列表
-        return Lists.newArrayList();
+        // 如果所有服务器权重都为0，则采用随机算法
+        return Lists.newArrayList(urls.get(ThreadLocalRandom.current().nextInt(urls.size())));
     }
 }
