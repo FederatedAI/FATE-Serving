@@ -27,6 +27,8 @@ public class DefaultLoadBalanceFactory implements LoadBalancerFactory {
         loaderBalanceRegister = new ConcurrentHashMap();
         loaderBalanceRegister.put(LoadBalanceModel.random_with_weight, new WeightedRandomLoadBalance());
         loaderBalanceRegister.put(LoadBalanceModel.random, new RandomLoadBalance());
+        loaderBalanceRegister.put(LoadBalanceModel.round_robin, new RoundRobinLoadBalance());
+        loaderBalanceRegister.put(LoadBalanceModel.round_robin_with_weight, new WeightedRoundRobinLoadBalance());
     }
 
     @Override
