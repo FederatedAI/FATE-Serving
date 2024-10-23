@@ -21,10 +21,10 @@ import java.util.concurrent.ConcurrentMap;
 
 public class DefaultLoadBalanceFactory implements LoadBalancerFactory {
 
-    private static ConcurrentMap<LoadBalanceModel, LoadBalancer> loaderBalanceRegister;
+    private static final ConcurrentMap<LoadBalanceModel, LoadBalancer> loaderBalanceRegister;
 
     static {
-        loaderBalanceRegister = new ConcurrentHashMap();
+        loaderBalanceRegister = new ConcurrentHashMap(4);
         loaderBalanceRegister.put(LoadBalanceModel.random_with_weight, new WeightedRandomLoadBalance());
         loaderBalanceRegister.put(LoadBalanceModel.random, new RandomLoadBalance());
         loaderBalanceRegister.put(LoadBalanceModel.round_robin, new RoundRobinLoadBalance());
