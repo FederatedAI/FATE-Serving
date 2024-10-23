@@ -42,8 +42,7 @@ public abstract class AbstractLoadBalancer implements LoadBalancer {
     protected abstract List<URL> doSelect(List<URL> url);
 
     protected int getWeight(URL url) {
-        int weight = url.getParameter(WEIGHT_KEY, DEFAULT_WEIGHT);
-        return weight;
+        return url.getParameter(WEIGHT_KEY, DEFAULT_WEIGHT);
     }
 
 }
