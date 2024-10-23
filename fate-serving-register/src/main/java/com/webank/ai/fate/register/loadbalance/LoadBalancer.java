@@ -21,5 +21,5 @@ import com.webank.ai.fate.register.url.URL;
 import java.util.List;
 
 public interface LoadBalancer {
-    public List<URL> select(List<URL> urls);
+    List<URL> select(List<URL> urls);
 }

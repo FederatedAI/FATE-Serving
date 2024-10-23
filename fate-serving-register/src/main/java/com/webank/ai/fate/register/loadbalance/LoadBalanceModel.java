@@ -24,5 +24,13 @@ public enum LoadBalanceModel {
     /**
      * random_with_weight
      */
-    random_with_weight
+    random_with_weight,
+    /**
+     * round_robin
+     */
+    round_robin,
+    /**
+     * round_robin_with_weight
+     */
+    round_robin_with_weight
 }
