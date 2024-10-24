@@ -237,7 +237,7 @@ public class ModelServiceProvider extends AbstractServingServiceProvider {
         byte[] modelData = modelTransferResponse.getModelData().toByteArray();
         byte[] cacheData = modelTransferResponse.getCacheData().toByteArray();
 
-        Model fetchModel = JsonUtil.json2Object(modelData, Model.class);
+        Model fetchModel = JsonUtil.deserializeJsonBytes(modelData, Model.class);
 
         modelManager.restoreByLocalCache(context, fetchModel, cacheData);
 

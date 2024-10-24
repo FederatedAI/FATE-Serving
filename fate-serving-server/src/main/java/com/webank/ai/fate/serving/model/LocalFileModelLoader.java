@@ -52,7 +52,7 @@ public class LocalFileModelLoader extends AbstractModelLoader<Map<String, byte[]
         Map<String, byte[]> result = Maps.newHashMap();
         try {
             if (data != null) {
-                Map originData = JsonUtil.json2Object(data, Map.class);
+                Map originData = JsonUtil.deserializeJsonBytes(data, Map.class);
                 if (originData != null) {
                     originData.forEach((k, v) -> {
                         result.put(k.toString(), Base64.getDecoder().decode(v.toString()));
