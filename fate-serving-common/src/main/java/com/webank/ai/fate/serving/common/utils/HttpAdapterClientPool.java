@@ -37,7 +37,6 @@ import java.util.Map;
 
 public class HttpAdapterClientPool {
     private static final Logger logger = LoggerFactory.getLogger(HttpAdapterClientPool.class);
-//    private static CloseableHttpClient httpClient;
 
     public static HttpAdapterResponse doPost(String url, Map<String, Object> bodyMap) {
         HttpPost httpPost = new HttpPost(url);
@@ -63,49 +62,6 @@ public class HttpAdapterClientPool {
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity, Dict.CHARSET_UTF8);
             return JsonUtil.json2Object(result, HttpAdapterResponse.class);
-        } catch (IOException ex) {
-            logger.error("get http response failed:", ex);
-            return null;
-        } finally {
-            try {
-                if (response != null) {
-                    response.close();
-                }
-            } catch (IOException ex) {
-                logger.error("get http response failed:", ex);
-            }
-        }
-    }
-
-
-    public static HttpAdapterResponse doPostgetCodeByHeader(String url, Map<String, Object> bodyMap) {
-        HttpPost httpPost = new HttpPost(url);
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(MetaInfo.PROPERTY_HTTP_CONNECT_REQUEST_TIMEOUT)
-                .setConnectTimeout(MetaInfo.PROPERTY_HTTP_CONNECT_TIMEOUT)
-                .setSocketTimeout(MetaInfo.PROPERTY_HTTP_SOCKET_TIMEOUT).build();
-        httpPost.addHeader(Dict.CONTENT_TYPE, Dict.CONTENT_TYPE_JSON_UTF8);
-        httpPost.setConfig(requestConfig);
-        String bodyJson = JsonUtil.object2Json(bodyMap);
-        StringEntity stringEntity = new StringEntity(bodyJson, Dict.CHARSET_UTF8);
-        stringEntity.setContentEncoding(Dict.CHARSET_UTF8);
-        httpPost.setEntity(stringEntity);
-        logger.info(" postUrl = {"+url+"}  body = {"+bodyJson+"} ");
-        return getResponseByHeader(httpPost);
-    }
-
-    private static HttpAdapterResponse getResponseByHeader(HttpRequestBase request) {
-        CloseableHttpResponse response = null;
-        try {
-            response = HttpClientPool.getConnection().execute(request,
-                    HttpClientContext.create());
-            HttpEntity entity = response.getEntity();
-            String data = EntityUtils.toString(entity, Dict.CHARSET_UTF8);
-            int statusCode = response.getStatusLine().getStatusCode();
-            HttpAdapterResponse result = new HttpAdapterResponse();
-            result.setCode(statusCode);
-            result.setData(JsonUtil.json2Object(data, Map.class));
-            return result;
         } catch (IOException ex) {
             logger.error("get http response failed:", ex);
             return null;
