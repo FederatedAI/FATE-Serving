@@ -65,7 +65,7 @@ public class JsonUtil {
         return t;
     }
 
-    public static <T> T json2Object(byte[] json, Class<T> c) {
+    public static <T> T deserializeJsonBytes(byte[] json, Class<T> c) {
         T t = null;
         try {
             t = mapper.readValue(json, c);

@@ -51,7 +51,7 @@ public class RegistedClient extends  SimpleClient{
         InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = this.getInferenceServiceBlockingStub(url.getHost(), url.getPort(),timeout);
         InferenceServiceProto.InferenceMessage result = blockingStub.inference(inferenceMessage);
         Preconditions.checkArgument(result != null && result.getBody() != null);
-        return JsonUtil.json2Object(result.getBody().toByteArray(), ReturnResult.class);
+        return JsonUtil.deserializeJsonBytes(result.getBody().toByteArray(), ReturnResult.class);
     }
 
     public BatchInferenceResult batchInference(BatchInferenceRequest batchInferenceRequest) throws Exception {
@@ -71,7 +71,7 @@ public class RegistedClient extends  SimpleClient{
         InferenceServiceGrpc.InferenceServiceBlockingStub blockingStub = this.getInferenceServiceBlockingStub(url.getHost(), url.getPort(),timeout);
         InferenceServiceProto.InferenceMessage result = blockingStub.batchInference(inferenceMessageBuilder.build());
         Preconditions.checkArgument(result != null && result.getBody() != null);
-        return JsonUtil.json2Object(result.getBody().toByteArray(), BatchInferenceResult.class);
+        return JsonUtil.deserializeJsonBytes(result.getBody().toByteArray(), BatchInferenceResult.class);
     }
 
     public ReturnResult singleInference(InferenceRequest inferenceRequest) throws Exception {
