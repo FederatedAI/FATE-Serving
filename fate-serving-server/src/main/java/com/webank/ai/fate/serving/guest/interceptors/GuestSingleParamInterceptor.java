@@ -37,7 +37,7 @@ public class GuestSingleParamInterceptor implements Interceptor {
         try {
             InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
             InferenceRequest inferenceRequest = null;
-            inferenceRequest = JsonUtil.json2Object(message.getBody().toByteArray(), InferenceRequest.class);
+            inferenceRequest = JsonUtil.deserializeJsonBytes(message.getBody().toByteArray(), InferenceRequest.class);
             inboundPackage.setBody(inferenceRequest);
             Preconditions.checkArgument(inferenceRequest != null, "request message parse error");
             Preconditions.checkArgument(inferenceRequest.getFeatureData() != null, "no feature data");

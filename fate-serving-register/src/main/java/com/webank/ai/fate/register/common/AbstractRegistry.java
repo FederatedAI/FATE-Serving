@@ -149,7 +149,7 @@ public abstract class AbstractRegistry implements Registry {
                 int readCount = in.read(bytes);
                 if (readCount > 0) {
                     data.clear();
-                    ConcurrentHashMap deserialize = JsonUtil.json2Object(Base64.getDecoder().decode(bytes), ConcurrentHashMap.class);
+                    ConcurrentHashMap deserialize = JsonUtil.deserializeJsonBytes(Base64.getDecoder().decode(bytes), ConcurrentHashMap.class);
                     if (deserialize != null) {
                         deserialize.forEach((k, v) -> {
                             ServiceWrapper serviceWrapper = JsonUtil.json2Object(JsonUtil.object2Json(v), ServiceWrapper.class);

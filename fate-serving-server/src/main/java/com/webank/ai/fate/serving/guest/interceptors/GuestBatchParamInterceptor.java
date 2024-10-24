@@ -41,7 +41,7 @@ public class GuestBatchParamInterceptor implements Interceptor {
         InferenceServiceProto.InferenceMessage message = (InferenceServiceProto.InferenceMessage) inboundPackage.getBody();
         BatchInferenceRequest batchInferenceRequest = null;
         try {
-            batchInferenceRequest = JsonUtil.json2Object(message.getBody().toByteArray(), BatchInferenceRequest.class);
+            batchInferenceRequest = JsonUtil.deserializeJsonBytes(message.getBody().toByteArray(), BatchInferenceRequest.class);
             inboundPackage.setBody(batchInferenceRequest);
             Preconditions.checkArgument(batchInferenceRequest != null, "request message parse error");
             Preconditions.checkArgument(StringUtils.isNotBlank(batchInferenceRequest.getServiceId()), "no service id");

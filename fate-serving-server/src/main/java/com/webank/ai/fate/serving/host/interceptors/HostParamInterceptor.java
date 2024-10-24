@@ -40,13 +40,13 @@ public class HostParamInterceptor implements Interceptor {
     public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
         byte[] reqBody = (byte[]) inboundPackage.getBody();
         if (context.getActionType().equalsIgnoreCase(Dict.FEDERATED_INFERENCE_FOR_TREE)) {
-            Map params = JsonUtil.json2Object(reqBody, HashMap.class);
+            Map params = JsonUtil.deserializeJsonBytes(reqBody, HashMap.class);
             Preconditions.checkArgument(params != null, "parse inference params error");
             inboundPackage.setBody(params);
         } else {
-            InferenceRequest inferenceRequest = JsonUtil.json2Object(reqBody, InferenceRequest.class);
+            InferenceRequest inferenceRequest = JsonUtil.deserializeJsonBytes(reqBody, InferenceRequest.class);
             if (StringUtils.isBlank(context.getVersion()) || Double.parseDouble(context.getVersion()) < 200) {
-                Map hostParams = JsonUtil.json2Object(reqBody, Map.class);
+                Map hostParams = JsonUtil.deserializeJsonBytes(reqBody, Map.class);
                 Preconditions.checkArgument(hostParams != null, "parse inference params error");
                 Preconditions.checkArgument(hostParams.get("featureIdMap") != null, "parse inference params featureIdMap error");
                 inferenceRequest.getSendToRemoteFeatureData().putAll((Map) hostParams.get("featureIdMap"));

@@ -37,7 +37,7 @@ public class HostBatchParamInterceptor implements Interceptor {
         try {
             byte[] reqBody = (byte[]) inboundPackage.getBody();
             BatchHostFederatedParams batchHostFederatedParams = null;
-            batchHostFederatedParams = JsonUtil.json2Object(reqBody, BatchHostFederatedParams.class);
+            batchHostFederatedParams = JsonUtil.deserializeJsonBytes(reqBody, BatchHostFederatedParams.class);
             inboundPackage.setBody(batchHostFederatedParams);
             Preconditions.checkArgument(batchHostFederatedParams != null, "");
             Preconditions.checkArgument(batchHostFederatedParams.getBatchDataList() != null && batchHostFederatedParams.getBatchDataList().size() > 0);
