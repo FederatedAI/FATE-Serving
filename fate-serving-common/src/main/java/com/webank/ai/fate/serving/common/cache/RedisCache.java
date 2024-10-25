@@ -24,6 +24,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class RedisCache implements Cache {
@@ -49,6 +50,7 @@ public class RedisCache implements Cache {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(maxTotal);
         jedisPoolConfig.setMaxIdle(maxIdel);
+        jedisPoolConfig.setMinIdle(16);
         jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, password);
     }
 
@@ -85,12 +87,17 @@ public class RedisCache implements Cache {
     @Override
     public List get(Object[] keys) {
         List<DataWrapper> result = Lists.newArrayList();
-        for (Object key : keys) {
-            Object singleResult = this.get(key);
-            if (singleResult != null) {
-                DataWrapper dataWrapper = new DataWrapper(key, singleResult);
-                result.add(dataWrapper);
+        try (Jedis jedis = jedisPool.getResource()) {
+            String[] keyStrings = Arrays.stream(keys).map(Object::toString).toArray(String[]::new);
+            List<String> values = jedis.mget(keyStrings);
+            for (int i = 0; i < keys.length; i++) {
+                if (values.get(i) != null) {
+                    DataWrapper dataWrapper = new DataWrapper(keys[i], (Object) values.get(i));
+                    result.add(dataWrapper);
+                }
             }
+        } catch (Exception e) {
+            logger.error("Failed to get cache keys: {}", Arrays.toString(keys), e);
         }
         return result;
     }
