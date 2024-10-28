@@ -16,8 +16,8 @@
 
 package com.webank.ai.fate.serving.common.utils;
 
-import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
@@ -27,14 +27,14 @@ import org.slf4j.LoggerFactory;
 
 public class DisruptorUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(DisruptorUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(DisruptorUtil.class);
 
-    private static Disruptor<AsyncMessageEvent> disruptor = null;
+    private static final Disruptor<AsyncMessageEvent> disruptor;
 
     static {
-        // Construct the Disruptor, use single event publisher
-        disruptor = new Disruptor(AsyncMessageEvent.FACTORY, 2048, DaemonThreadFactory.INSTANCE,
-                ProducerType.SINGLE, new BlockingWaitStrategy());
+        // Construct the Disruptor, use multi event publisher
+        disruptor = new Disruptor(AsyncMessageEvent.FACTORY, 8192, DaemonThreadFactory.INSTANCE,
+                ProducerType.MULTI, new YieldingWaitStrategy());
 
         // Connect the handler
         disruptor.handleEventsWith(new AsyncMessageEventHandler()).then(new ClearingEventHandler());
@@ -59,12 +59,13 @@ public class DisruptorUtil {
      * @param args
      */
     public static void producer(AsyncMessageEvent... args) {
+        logger.info("Producer thread: {}", Thread.currentThread().getName());
         RingBuffer<AsyncMessageEvent> ringBuffer = disruptor.getRingBuffer();
         AsyncMessageEventProducer producer = new AsyncMessageEventProducer(ringBuffer);
         producer.publishEvent(args);
     }
 
-    public void shutdown() {
+    public static void shutdown() {
         if (disruptor != null) {
             disruptor.shutdown();
         }
