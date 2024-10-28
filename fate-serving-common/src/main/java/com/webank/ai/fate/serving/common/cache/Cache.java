@@ -32,7 +32,7 @@ public interface Cache<K, V> {
 
     void delete(K key);
 
-    public static class DataWrapper<K, V> {
+    class DataWrapper<K, V> {
         K key;
         V value;
 
