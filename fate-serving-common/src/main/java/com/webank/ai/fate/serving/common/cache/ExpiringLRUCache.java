@@ -87,12 +87,4 @@ public class ExpiringLRUCache implements Cache {
         }
     }
 
-//    @Override
-//    public void put(List<DataWrapper> dataWrappers) {
-//        for(DataWrapper dataWrapper: dataWrappers ) {
-//            this.store.put(dataWrapper.getKey(),dataWrapper.getValue());
-//        }
-//
-//    }
-
 }

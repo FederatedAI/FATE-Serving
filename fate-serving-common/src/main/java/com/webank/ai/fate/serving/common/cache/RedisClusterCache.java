@@ -23,6 +23,7 @@ import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,13 +58,13 @@ public class RedisClusterCache extends RedisCache {
                     }
                 }
             } catch (Exception e) {
-                logger.error("redis.cluster.nodes is invalid format");
-                e.printStackTrace();
+                logger.error("redis.cluster.nodes is invalid format", e);
             }
 
             JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
             jedisPoolConfig.setMaxIdle(maxIdel);
             jedisPoolConfig.setMaxTotal(maxTotal);
+            jedisPoolConfig.setMinIdle(16);
             jedisPoolConfig.setMaxWaitMillis(timeout);
             jedisPoolConfig.setTestOnBorrow(true);
 
@@ -96,8 +97,11 @@ public class RedisClusterCache extends RedisCache {
     }
 
     @Override
-    public List get(Object[] keys) {
-        return super.get(keys);
+    public List<String> get(Object[] keys) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("get cache keys: {}", Arrays.toString(keys));
+        }
+        return jedisCluster.mget(Arrays.stream(keys).map(Object::toString).toArray(String[]::new));
     }
 
     @Override
@@ -113,4 +117,14 @@ public class RedisClusterCache extends RedisCache {
         super.put(list);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (jedisCluster != null) {
+                jedisCluster.close();
+            }
+        } finally {
+            super.finalize();
+        }
+    }
 }

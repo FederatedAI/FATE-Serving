@@ -29,7 +29,6 @@ public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
 
     private static final int DEFAULT_TIME_TO_LIVE = 180;
     private static final int DEFAULT_MAX_CAPACITY = 1000;
-    private static final float DEFAULT_LOAD_FACTOR = 0.75f;
     private static final int DEFAULT_EXPIRATION_INTERVAL = 1;
     private static AtomicInteger expireCount = new AtomicInteger(1);
     private final ConcurrentHashMap<K, ExpiryObject> delegateMap;
@@ -127,21 +126,12 @@ public class ExpiringMap<K, V> extends LinkedHashMap<K, V> {
         throw new UnsupportedOperationException();
     }
 
-//    @Override
-//    public Collection<V> values() {
-//        List<V> list = new ArrayList<V>();
-//        Set<Entry<K, ExpiryObject>> delegatedSet = delegateMap.entrySet();
-//        for (Entry<K, ExpiryObject> entry : delegatedSet) {
-//            ExpiryObject value = entry.getValue();
-//            list.add(value.getValue());
-//        }
-//        return list;
-//    }
-
-//    @Override
-//    public Set<Entry<K, V>> entrySet() {
-//        throw new UnsupportedOperationException();
-//    }
+    // 防止忘记显示调用clear方法, 确保后台线程被停止
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        expireThread.stopExpiring();
+    }
 
     public ExpireThread getExpireThread() {
         return expireThread;
