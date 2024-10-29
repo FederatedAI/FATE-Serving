@@ -20,10 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -31,75 +30,80 @@ import java.util.zip.ZipFile;
 
 public class ZipUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(ZipUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
+
+    private static final String ZIP_SUFFIX = ".zip";
 
     public static String unzip(File zipFile, String outputDirectory) throws Exception {
         String suffix = zipFile.getName().substring(zipFile.getName().lastIndexOf("."));
-        if (!zipFile.isFile() || !suffix.equalsIgnoreCase(".zip")) {
+        if (!zipFile.isFile() || !ZIP_SUFFIX.equalsIgnoreCase(suffix)) {
             logger.error("{} is not zip file", zipFile.getAbsolutePath());
             return null;
         }
 
-        ZipFile zip = new ZipFile(new File(zipFile.getAbsolutePath()), Charset.forName("UTF-8"));
-        String uuid = UUID.randomUUID().toString();
-        File tempDir = new File(outputDirectory + uuid);
-        String resultPath = "";
-        try {
-
-            if (!tempDir.exists()) {
-                tempDir.mkdirs();
-            }
-            resultPath = tempDir.getAbsolutePath();
-            Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-
-                File outputFile = new File(outputDirectory + uuid, entry.getName());
-
-                if (!outputFile.toPath().normalize().startsWith(outputDirectory + uuid)) {
-                    throw new RuntimeException("Bad zip entry");
+        try (ZipFile zip = new ZipFile(new File(zipFile.getAbsolutePath()), StandardCharsets.UTF_8)) {
+            String uuid = UUID.randomUUID().toString();
+            File tempDir = new File(outputDirectory + uuid);
+            String resultPath;
+            try {
+                if (!tempDir.exists()) {
+                    tempDir.mkdirs();
                 }
-                if (entry.isDirectory()) {
-                    outputFile.mkdirs();
-                    continue;
-                } else {
-                    if (!outputFile.getParentFile().exists()) {
-                        outputFile.getParentFile().mkdirs();
+                resultPath = tempDir.getAbsolutePath();
+                Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+
+                    File outputFile = new File(outputDirectory + uuid, entry.getName());
+
+                    if (!outputFile.toPath().normalize().startsWith(outputDirectory + uuid)) {
+                        throw new RuntimeException("Bad zip entry");
+                    }
+
+                    if (entry.isDirectory()) {
+                        outputFile.mkdirs();
+                        continue;
+                    } else {
+                        if (!outputFile.getParentFile().exists()) {
+                            outputFile.getParentFile().mkdirs();
+                        }
+                    }
+
+                    try (InputStream in = new BufferedInputStream(zip.getInputStream(entry));
+                         FileOutputStream out = new FileOutputStream(outputFile);
+                         BufferedOutputStream bout = new BufferedOutputStream(out)) {
+                        byte[] buf = new byte[8192];
+                        int len;
+                        while ((len = in.read(buf)) > 0) {
+                            bout.write(buf, 0, len);
+                        }
                     }
                 }
-
-                try (InputStream in = zip.getInputStream(entry); FileOutputStream out = new FileOutputStream(outputFile)) {
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = in.read(buf)) > 0) {
-                        out.write(buf, 0, len);
-                    }
-                }
+            } catch (IOException e) {
+                logger.error("Failed to unzip file: {}", zipFile.getAbsolutePath(), e);
+                throw e;
             }
-        }finally {
-            if(zip!=null) {
-                try {
-                    zip.close();
-                }catch (Exception igore){
 
+            return resultPath;
+        }
+    }
+
+    public static void delete(File file) {
+        if (file == null || !file.exists()) {
+            return;
+        }
+
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File listFile : files) {
+                    delete(listFile);
                 }
             }
         }
 
-        return resultPath;
-    }
-
-    public static void delete(File file) {
-        if (file != null && file.exists()) {
-            if (file.isDirectory()) {
-                for (File listFile : file.listFiles()) {
-                    if (listFile.isDirectory()) {
-                        delete(listFile);
-                    }
-                    listFile.delete();
-                }
-            }
-            file.delete();
+        if (!file.delete()) {
+            logger.warn("Failed to delete file: {}", file.getAbsolutePath());
         }
     }
 
