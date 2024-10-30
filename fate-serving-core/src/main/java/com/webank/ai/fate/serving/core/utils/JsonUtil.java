@@ -31,7 +31,7 @@ import java.io.IOException;
 
 public class JsonUtil {
 
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     static {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -131,7 +131,9 @@ public class JsonUtil {
      * format json string
      */
     public static String formatJson(String jsonStr,String formatChar) {
-        if (null == jsonStr || "".equals(jsonStr)) return "";
+        if (null == jsonStr || "".equals(jsonStr)) {
+            return "";
+        }
         jsonStr = jsonStr.replace("\\n", "");
         StringBuilder sb = new StringBuilder();
         char last;

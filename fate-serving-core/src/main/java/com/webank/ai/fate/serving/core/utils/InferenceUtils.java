@@ -36,7 +36,7 @@ public class InferenceUtils {
 
     public static Object getClassByName(String classPath) {
         try {
-            Class thisClass = Class.forName(classPath);
+            Class<?> thisClass = Class.forName(classPath);
             return thisClass.getConstructor().newInstance();
         } catch (ClassNotFoundException ex) {
             logger.error("Can not found this class: {}.", classPath);

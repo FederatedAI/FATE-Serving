@@ -33,11 +33,8 @@ import java.util.regex.Pattern;
 public class NetUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
-    //LoggerFactory.getLogger(NetUtils.class);
-    // returned port range is [30000, 39999]
     private static final int RND_PORT_START = 30000;
     private static final int RND_PORT_RANGE = 10000;
-    // valid port range is (0, 65535]
     private static final int MIN_PORT = 0;
     private static final int MAX_PORT = 65535;
     private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
@@ -46,28 +43,19 @@ public class NetUtils {
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
     private static final String SPLIT_IPV4_CHARECTER = "\\.";
     private static final String SPLIT_IPV6_CHARECTER = ":";
-    private static String ANYHOST_VALUE = "0.0.0.0";
-    private static String LOCALHOST_KEY = "localhost";
-    private static String LOCALHOST_VALUE = "127.0.0.1";
+    private static final String ANYHOST_VALUE = "0.0.0.0";
+    private static final String LOCALHOST_KEY = "localhost";
+    private static final String LOCALHOST_VALUE = "127.0.0.1";
     private static volatile InetAddress LOCAL_ADDRESS = null;
-
-    public static void main(String[] args) {
-//        System.out.println(NetUtils.getLocalHost());
-//        System.out.println(NetUtils.getAvailablePort());
-//        System.out.println(NetUtils.getLocalAddress());
-//        System.out.println(NetUtils.getLocalIp());
-//        System.out.println(NetUtils.getIpByHost("127.0.0.1"));
-//        System.out.println(NetUtils.getLocalAddress0(""));
-    }
 
     public static int getRandomPort() {
         return RND_PORT_START + ThreadLocalRandom.current().nextInt(RND_PORT_RANGE);
     }
 
-
     public static boolean isLocalhostAddress(String address){
        return LOCALHOST_PATTERN.matcher(address).matches();
     }
+
     public static int getAvailablePort() {
         try (ServerSocket ss = new ServerSocket()) {
             ss.bind(null);
@@ -131,11 +119,10 @@ public class NetUtils {
             return false;
         }
         String name = address.getHostAddress();
-        boolean result = (name != null
+        return (name != null
                 && IP_PATTERN.matcher(name).matches()
                 && !ANYHOST_VALUE.equals(name)
                 && !LOCALHOST_VALUE.equals(name));
-        return result;
     }
 
     /**
@@ -144,8 +131,7 @@ public class NetUtils {
      * @return true if it is reachable
      */
     static boolean isPreferIpv6Address() {
-        boolean preferIpv6 = Boolean.getBoolean("java.net.preferIPv6Addresses");
-        return  preferIpv6;
+        return Boolean.getBoolean("java.net.preferIPv6Addresses");
     }
 
     /**
@@ -206,7 +192,6 @@ public class NetUtils {
 
 
     public static String getLocalIp() {
-
         try {
             InetAddress inetAddress = getLocalAddress0("eth0");
             if (inetAddress != null) {
@@ -250,9 +235,7 @@ public class NetUtils {
 
 
     public static String getOsName() {
-
-        String osName = System.getProperty("os.name");
-        return osName;
+        return System.getProperty("os.name");
     }
 
 
@@ -397,18 +380,6 @@ public class NetUtils {
         }
     }
 
-//    public static boolean matchIpExpression(String pattern, String host, int port) throws UnknownHostException {
-//
-//        // if the pattern is subnet format, it will not be allowed to config port param in pattern.
-//        if (pattern.contains("/")) {
-//            CIDRUtils utils = new CIDRUtils(pattern);
-//            return utils.isInRange(host);
-//        }
-//
-//
-//        return matchIpRange(pattern, host, port);
-//    }
-
     /**
      * @param pattern
      * @param host
@@ -426,7 +397,7 @@ public class NetUtils {
         }
 
         InetAddress inetAddress = InetAddress.getByName(host);
-        boolean isIpv4 = isValidV4Address(inetAddress) ? true : false;
+        boolean isIpv4 = isValidV4Address(inetAddress);
         String[] hostAndPort = getPatternHostAndPort(pattern, isIpv4);
         if (hostAndPort[1] != null && !hostAndPort[1].equals(String.valueOf(port))) {
             return false;
@@ -450,11 +421,7 @@ public class NetUtils {
         // short name condition
         if (!ipPatternContainExpression(pattern)) {
             InetAddress patternAddress = InetAddress.getByName(pattern);
-            if (patternAddress.getHostAddress().equals(host)) {
-                return true;
-            } else {
-                return false;
-            }
+            return patternAddress.getHostAddress().equals(host);
         }
         for (int i = 0; i < mask.length; i++) {
             if ("*".equals(mask[i]) || mask[i].equals(ipAddress[i])) {

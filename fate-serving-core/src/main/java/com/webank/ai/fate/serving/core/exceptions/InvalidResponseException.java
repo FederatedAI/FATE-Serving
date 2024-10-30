@@ -8,5 +8,4 @@ public class InvalidResponseException extends BaseException{
         super(StatusCode.INVALID_ROLE_ERROR, message);
     }
 
-
 }

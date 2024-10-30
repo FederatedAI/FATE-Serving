@@ -43,13 +43,12 @@ public class GrpcConnectionPool {
 
     private static final Logger logger = LoggerFactory.getLogger(GrpcConnectionPool.class);
 
-    static private GrpcConnectionPool pool = new GrpcConnectionPool();
+    static private final GrpcConnectionPool pool = new GrpcConnectionPool();
 
     public ConcurrentHashMap<String, ChannelResource> poolMap = new ConcurrentHashMap<String, ChannelResource>();
     Random r = new Random();
-    private int maxTotalPerAddress = Runtime.getRuntime().availableProcessors();
-    private long defaultLoadFactor = 10;
-    private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
+    private final int maxTotalPerAddress = Runtime.getRuntime().availableProcessors();
+    private final ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
 
     private GrpcConnectionPool() {
 
@@ -121,11 +120,8 @@ public class GrpcConnectionPool {
         }
         if (channelSize > 0) {
 
-            if (loadFactor > defaultLoadFactor) {
-                return true;
-            } else {
-                return false;
-            }
+            long defaultLoadFactor = 10;
+            return loadFactor > defaultLoadFactor;
         } else {
             return true;
         }
@@ -223,13 +219,12 @@ public class GrpcConnectionPool {
             return channelBuilder.build();
         }
         catch (Exception e) {
-            logger.error("create channel error : " ,e);
-            //e.printStackTrace();
+            logger.error("create channel error" , e);
         }
         return null;
     }
 
-    class ChannelResource {
+    static class ChannelResource {
 
         String address;
         List<ManagedChannel> channels = Lists.newArrayList();

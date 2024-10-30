@@ -119,7 +119,6 @@ public class ReturnResult {
 
     @Override
     public String toString() {
-        String result = JsonUtil.object2Json(this);
-        return result;
+        return JsonUtil.object2Json(this);
     }
 }

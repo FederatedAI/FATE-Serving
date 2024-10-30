@@ -20,17 +20,17 @@ import java.util.Map;
 
 public interface Request {
 
-    public String getSeqno();
+    String getSeqno();
 
-    public String getAppid();
+    String getAppid();
 
-    public String getCaseId();
+    String getCaseId();
 
-    public String getPartyId();
+    String getPartyId();
 
-    public String getModelVersion();
+    String getModelVersion();
 
-    public String getModelId();
+    String getModelId();
 
-    public Map<String, Object> getFeatureData();
+    Map<String, Object> getFeatureData();
 }
