@@ -10,7 +10,6 @@ public enum HealthCheckItemEnum {
     CHECK_FATEFLOW_IN_ZK("check fateflow in zookeeper",HealthCheckComponent.SERVINGSERVER),
     CHECK_MODEL_LOADED("check model loaded",HealthCheckComponent.SERVINGSERVER);
 
-
     private String itemName;
     private HealthCheckComponent component;
 
@@ -25,12 +24,4 @@ public enum HealthCheckItemEnum {
     public  HealthCheckComponent  getComponent(){
         return this.component;
     }
-
-
-
-
-
-
-
-
 }

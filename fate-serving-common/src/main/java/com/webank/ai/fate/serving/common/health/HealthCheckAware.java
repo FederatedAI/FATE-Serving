@@ -4,5 +4,5 @@ import com.webank.ai.fate.serving.core.bean.Context;
 
 public interface HealthCheckAware {
 
-    public   HealthCheckResult   check(Context context );
+    HealthCheckResult check(Context context);
 }
