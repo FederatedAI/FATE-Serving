@@ -105,9 +105,7 @@ public class FederatedParams {
 
     @Override
     public String toString() {
-
         return ToStringBuilder.reflectionToString(this);
     }
-
 
 }

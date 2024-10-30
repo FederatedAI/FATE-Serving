@@ -17,4 +17,9 @@
 package com.webank.ai.fate.serving.core.exceptions;
 
 public class NoResultException extends RuntimeException {
+
+    public NoResultException() {
+        super("NoResult");
+    }
+
 }

@@ -20,9 +20,9 @@ import java.util.List;
 
 public interface AdaptorDescriptor {
 
-    public List<ParamDescriptor> desc();
+    List<ParamDescriptor> desc();
 
-    public static class ParamDescriptor {
+    class ParamDescriptor {
         String keyName;
         String keyType;
         boolean isRequired;

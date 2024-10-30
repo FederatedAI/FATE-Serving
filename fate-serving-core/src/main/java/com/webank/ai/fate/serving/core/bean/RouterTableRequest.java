@@ -1,7 +1,5 @@
 package com.webank.ai.fate.serving.core.bean;
 
-import java.util.List;
-
 /**
  * @auther Xiong li
  * @date 2021/6/29
@@ -38,10 +36,6 @@ public class RouterTableRequest {
     public void setServerPort(Integer serverPort) {
         this.serverPort = serverPort;
     }
-
-
-
-
 
     public Integer getPage() {
         return page;

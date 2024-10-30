@@ -16,25 +16,6 @@
 
 package com.webank.ai.fate.serving.core.exceptions;
 
-//public class InferenceRetCode {
-//    public static final int OK = 0;
-//    public static final int EMPTY_DATA = 100;
-//    public static final int NUMERICAL_ERROR = 101;
-//    public static final int INVALID_FEATURE = 102;
-//    public static final int GET_FEATURE_FAILED = 103;
-//    public static final int LOAD_MODEL_FAILED = 104;
-//    public static final int NETWORK_ERROR = 105;
-//    public static final int DISK_ERROR = 106;
-//    public static final int STORAGE_ERROR = 107;
-//    public static final int COMPUTE_ERROR = 108;
-//    public static final int NO_RESULT = 109;
-//    public static final int SYSTEM_ERROR = 110;
-//    public static final int ADAPTER_ERROR = 111;
-//    public static final int DEAL_FEATURE_FAILED = 112;
-//    public static final int NO_FEATURE = 113;
-//}
-
-
 /**
  * guest 参数错误   1100   异常  GuestInvalidParamException
  * host  参数错误   2100   异常  HostInvalidParamException

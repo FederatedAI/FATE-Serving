@@ -19,8 +19,13 @@ package com.webank.ai.fate.serving.core.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ObjectTransform {
+
+    private static final Logger logger = LoggerFactory.getLogger(ObjectTransform.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public ObjectTransform() {
     }
@@ -28,24 +33,24 @@ public class ObjectTransform {
     public static String bean2Json(Object object) {
         if (object == null) {
             return "";
-        } else {
-            try {
-                return (new ObjectMapper()).writeValueAsString(object);
-            } catch (JsonProcessingException var2) {
-                return "";
-            }
+        }
+        try {
+            return OBJECT_MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to convert object to JSON: {}", e.getMessage(), e);
+            return "";
         }
     }
 
-    public static Object json2Bean(String json, Class objectType) {
+    public static <T> T json2Bean(String json, Class<T> objectType) {
         if (StringUtils.isEmpty(json)) {
             return null;
-        } else {
-            try {
-                return (new ObjectMapper()).readValue(json, objectType);
-            } catch (Exception var3) {
-                return null;
-            }
+        }
+        try {
+            return OBJECT_MAPPER.readValue(json, objectType);
+        } catch (Exception e) {
+            logger.error("Failed to convert JSON to object: {}", e.getMessage(), e);
+            return null;
         }
     }
 }
