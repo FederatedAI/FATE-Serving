@@ -18,12 +18,17 @@ package com.webank.ai.fate.serving.core.bean;
 
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.adaptor.AdaptorDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
 public class MetaInfo {
+
+    private final static Logger logger = LoggerFactory.getLogger(MetaInfo.class);
+
     public static final long CURRENT_VERSION = 216;
     public static List<AdaptorDescriptor.ParamDescriptor> inferenceParamDescriptorList;
     public static List<AdaptorDescriptor.ParamDescriptor> batchInferenceParamDescriptorList;
@@ -128,7 +133,7 @@ public class MetaInfo {
                     result.put(key, field.get(MetaInfo.class));
                 }
             } catch (IllegalAccessException | NoSuchFieldException e) {
-
+                logger.error("throw exception", e);
             }
         }
         return result;

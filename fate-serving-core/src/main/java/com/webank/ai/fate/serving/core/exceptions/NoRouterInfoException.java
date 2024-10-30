@@ -22,5 +22,4 @@ public class NoRouterInfoException extends BaseException {
         super(retCode, message);
     }
 
-
 }

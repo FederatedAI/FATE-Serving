@@ -19,11 +19,16 @@ package com.webank.ai.fate.serving.core.bean;
 import com.webank.ai.fate.serving.core.utils.InferenceUtils;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class InferenceRequest implements Request {
+
+    private final static Logger logger = LoggerFactory.getLogger(InferenceRequest.class);
+
     protected String appid;
     protected String partyId;
     protected String modelVersion;
@@ -138,7 +143,7 @@ public class InferenceRequest implements Request {
         try {
             result = JsonUtil.object2Json(this);
         } catch (Throwable e) {
-
+            logger.error("throw exception", e);
         }
         return result;
     }

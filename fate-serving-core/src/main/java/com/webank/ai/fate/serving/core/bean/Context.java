@@ -22,114 +22,115 @@ import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 
 public interface Context<Req, Resp> {
 
-    static final String LOGGER_NAME = "flow";
+    String LOGGER_NAME = "flow";
 
-    public void preProcess();
+    void preProcess();
 
-    public Object getData(Object key);
+    Object getData(Object key);
 
-    public Object getDataOrDefault(Object key, Object defaultValue);
+    Object getDataOrDefault(Object key, Object defaultValue);
 
-    public void putData(Object key, Object data);
+    void putData(Object key, Object data);
 
-    public String getCaseId();
+    String getCaseId();
 
-    public void setCaseId(String caseId);
+    void setCaseId(String caseId);
 
-    public long getTimeStamp();
+    long getTimeStamp();
 
-    public default void postProcess(Req req, Resp resp) {
+    default void postProcess(Req req, Resp resp) {
+
     }
 
-    public ReturnResult getFederatedResult();
+    ReturnResult getFederatedResult();
 
-    public void setFederatedResult(ReturnResult returnResult);
+    void setFederatedResult(ReturnResult returnResult);
 
-    public boolean isHitCache();
+    boolean isHitCache();
 
-    public void hitCache(boolean hitCache);
+    void hitCache(boolean hitCache);
 
-    public Context subContext();
+    Context subContext();
 
-    public String getInterfaceName();
+    String getInterfaceName();
 
-    public void setInterfaceName(String interfaceName);
+    void setInterfaceName(String interfaceName);
 
-    public String getActionType();
+    String getActionType();
 
-    public void setActionType(String actionType);
+    void setActionType(String actionType);
 
-    public String getSeqNo();
+    String getSeqNo();
 
-    public long getCostTime();
+    long getCostTime();
 
     /**
      * proxy
      */
-    public GrpcType getGrpcType();
+    GrpcType getGrpcType();
 
-    public void setGrpcType(GrpcType grpcType);
+    void setGrpcType(GrpcType grpcType);
 
-    public String getVersion();
+    String getVersion();
 
-    public void setVersion(String version);
+    void setVersion(String version);
 
-    public String getGuestAppId();
+    String getGuestAppId();
 
-    public void setGuestAppId(String guestAppId);
+    void setGuestAppId(String guestAppId);
 
-    public String getHostAppid();
+    String getHostAppid();
 
-    public void setHostAppid(String hostAppid);
+    void setHostAppid(String hostAppid);
 
-    public RouterInfo getRouterInfo();
+    RouterInfo getRouterInfo();
 
-    public void setRouterInfo(RouterInfo routerInfo);
+    void setRouterInfo(RouterInfo routerInfo);
 
-    public Object getResultData();
+    Object getResultData();
 
-    public void setResultData(Object resultData);
+    void setResultData(Object resultData);
 
-    public int getReturnCode();
+    int getReturnCode();
 
-    public void setReturnCode(int returnCode);
+    void setReturnCode(int returnCode);
 
-    public long getDownstreamCost();
+    long getDownstreamCost();
 
-    public void setDownstreamCost(long downstreamCost);
+    void setDownstreamCost(long downstreamCost);
 
-    public long getDownstreamBegin();
+    long getDownstreamBegin();
 
-    public void setDownstreamBegin(long downstreamBegin);
+    void setDownstreamBegin(long downstreamBegin);
 
-    public long getRouteBasis();
+    long getRouteBasis();
 
-    public void setRouteBasis(long routeBasis);
+    void setRouteBasis(long routeBasis);
 
-    public String getSourceIp();
+    String getSourceIp();
 
-    public void setSourceIp(String sourceIp);
+    void setSourceIp(String sourceIp);
 
-    public String getServiceName();
+    String getServiceName();
 
-    public void setServiceName(String serviceName);
+    void setServiceName(String serviceName);
 
-    public String getCallName();
+    String getCallName();
 
-    public void setCallName(String callName);
+    void setCallName(String callName);
 
-    public String getServiceId();
+    String getServiceId();
 
-    public void setServiceId(String serviceId);
+    void setServiceId(String serviceId);
 
-    public String getApplyId();
+    String getApplyId();
 
-    public void setApplyId(String applyId);
+    void setApplyId(String applyId);
 
-    public ListenableFuture getRemoteFuture();
+    ListenableFuture getRemoteFuture();
 
-    public void setRemoteFuture(ListenableFuture future);
+    void setRemoteFuture(ListenableFuture future);
 
-    public String getResourceName();
+    String getResourceName();
 
 }

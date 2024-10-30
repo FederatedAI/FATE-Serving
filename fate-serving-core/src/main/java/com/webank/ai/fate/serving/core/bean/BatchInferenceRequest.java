@@ -18,11 +18,15 @@ package com.webank.ai.fate.serving.core.bean;
 
 import com.google.common.collect.Maps;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class BatchInferenceRequest extends InferenceRequest {
+
+    private final static Logger logger = LoggerFactory.getLogger(BatchInferenceRequest.class);
 
     private String serviceId;
     private List<SingleInferenceData> batchDataList;
@@ -67,7 +71,7 @@ public class BatchInferenceRequest extends InferenceRequest {
         try {
             result = JsonUtil.object2Json(this);
         } catch (Throwable e) {
-
+            logger.error("throw exception", e);
         }
         return result;
     }
