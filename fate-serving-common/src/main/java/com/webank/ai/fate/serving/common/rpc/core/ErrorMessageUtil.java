@@ -52,7 +52,7 @@ public class ErrorMessageUtil {
     }
 
     public static int transformRemoteErrorCode(int code) {
-        return Integer.valueOf(new StringBuilder().append("2").append(code).toString());
+        return Integer.parseInt(new StringBuilder().append("2").append(code).toString());
     }
 
     public static int getLocalExceptionCode(Exception e) {

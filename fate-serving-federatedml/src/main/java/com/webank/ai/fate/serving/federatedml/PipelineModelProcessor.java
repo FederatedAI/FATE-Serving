@@ -170,11 +170,6 @@ public class PipelineModelProcessor implements ModelProcessor {
     }
 
     @Override
-    public Object getComponent(String name) {
-        return this.componentMap.get(name);
-    }
-
-    @Override
     public void setModel(Model model) {
         this.model = model;
         this.getPipeLineNode().forEach(baseComponent -> {

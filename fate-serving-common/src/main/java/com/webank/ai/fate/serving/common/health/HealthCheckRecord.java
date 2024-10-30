@@ -5,6 +5,7 @@ import com.webank.ai.fate.serving.core.utils.JsonUtil;
 public class HealthCheckRecord{
     String  checkItemName;
     String  msg;
+    HealthCheckStatus  healthCheckStatus;
 
     public String getCheckItemName() {
         return checkItemName;
@@ -30,10 +31,10 @@ public class HealthCheckRecord{
         this.healthCheckStatus = healthCheckStatus;
     }
 
-    HealthCheckStatus  healthCheckStatus;
     public HealthCheckRecord(){
 
     }
+
     public HealthCheckRecord(String checkItemName, String msg, HealthCheckStatus healthCheckStatus) {
         this.checkItemName = checkItemName;
         this.msg = msg;
