@@ -39,6 +39,8 @@ public class WebConfiguration implements WebMvcConfigurer {
         executor.setMaxPoolSize(MetaInfo.PROPERTY_PROXY_ASYNC_MAXSIZE > 0 ? MetaInfo.PROPERTY_PROXY_ASYNC_MAXSIZE : 2 * processors);
         executor.setThreadNamePrefix("ProxyAsync");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
         executor.initialize();
         configurer.setTaskExecutor(executor);
         configurer.setDefaultTimeout(MetaInfo.PROPERTY_PROXY_ASYNC_TIMEOUT);

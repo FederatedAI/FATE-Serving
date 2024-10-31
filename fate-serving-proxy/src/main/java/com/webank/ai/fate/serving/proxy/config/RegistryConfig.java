@@ -44,7 +44,7 @@ public class RegistryConfig {
         }
         if (StringUtils.isEmpty(MetaInfo.PROPERTY_ZK_URL)) {
             logger.error("useZkRouter is true,but zkUrl is empty,please check zk.url in the config file");
-            throw new RuntimeException("wrong zk url");
+            throw new IllegalArgumentException("wrong zk url");
         }
         ZookeeperRegistry zookeeperRegistry = ZookeeperRegistry.createRegistry(MetaInfo.PROPERTY_ZK_URL, Dict.SERVICE_PROXY,
                 Dict.ONLINE_ENVIRONMENT, MetaInfo.PROPERTY_PROXY_GRPC_INTRA_PORT);
