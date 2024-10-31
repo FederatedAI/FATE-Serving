@@ -522,40 +522,7 @@ public class RouterTableUtils {
         /**
          * @throws JSONException 自定义JSON异常
          */
-        public static void validateString() throws JSONException {
-//            StringBuilder sb = new StringBuilder();
-//            do {
-//                curchar = next(); //JSON对字符串中的转义项有严格规定
-//                sb.append(curchar);
-//                if (curchar == '\\') {
-//                    if ("\"\\/bfnrtu".indexOf(next()) < 0) {
-//                        throw syntaxError("Invalid escape string");
-//                    }
-//                    if (curchar == 'u') { //校验unicode格式 后跟4位16进制 0-9 a-f A-F
-//                        for (int i = 0; i < 4; i++) {
-//                            next();
-//                            if (curchar < 48 || (curchar > 57 && curchar < 65) || (curchar > 70 && curchar < 97)
-//                                    || curchar > 102) {
-//                                throw syntaxError("Invalid hexadecimal digits");
-//                            }
-//                        }
-//                    }
-//                }
-//            } while (curchar >= ' ' && "\":{[,#/".indexOf(curchar)< 0 && curchar != 127);
-//            if (curchar == 0) { //仅正常闭合双引号可通过
-//                throw syntaxError("Unclosed quot");
-//            } else if (curchar != '"') {
-//                throw syntaxError("Invalid string {\""+ sb +"}, missing quot ");
-//            } else if (value.charAt(index)=='"') {
-//                throw syntaxError("Missing comma after string: \"" + sb);
-//            } else if (value.charAt(index)==':' ) {
-//                String str = sb.substring(0, sb.length() - 1);
-////                if (!validateRouteTableKey(sb.charAt(0), str)) {
-////                    throw syntaxError("Invalid RouteTable KEY:\"" + sb);
-////                }
-//                validateRouteTableValue(str);
-//            }
-        }
+        public static void validateString() throws JSONException {}
 
         /**
          * @throws JSONException 自定义JSON异常
@@ -626,10 +593,6 @@ public class RouterTableUtils {
             if("port".equals(key) && !str.matches(port_reg)){
                 throw syntaxError("Invalid Port : " + str);
             }
-//            String ip_reg = "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$";
-//            if("ip".equals(key) && !str.matches(ip_reg)){
-//                throw syntaxError("Invalid ip : " + str);
-//            }
         }
 
         public static boolean validateRouteTableKey(char firstChar, String str) throws JSONException {
