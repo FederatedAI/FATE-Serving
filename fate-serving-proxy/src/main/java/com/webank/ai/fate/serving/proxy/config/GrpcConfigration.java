@@ -42,6 +42,10 @@ public class GrpcConfigration {
 
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
 
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+
+        executor.setAwaitTerminationSeconds(30);
+
         executor.initialize();
 
         return executor;
