@@ -59,7 +59,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
     @Autowired
     AuthUtils authUtils;
 
-    private int timeout = MetaInfo.PROPERTY_PROXY_GRPC_UNARYCALL_TIMEOUT;
+    private final int timeout = MetaInfo.PROPERTY_PROXY_GRPC_UNARYCALL_TIMEOUT;
 
     @Override
     public Proxy.Packet doService(Context context, InboundPackage<Proxy.Packet> data, OutboundPackage<Proxy.Packet> outboundPackage) {
@@ -80,17 +80,13 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         }
     }
 
-
-
-
-    private   Proxy.Packet  grpcTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo){
+    private Proxy.Packet grpcTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo){
 
         try {
             NettyServerInfo nettyServerInfo;
             if (routerInfo.isUseSSL()) {
                 nettyServerInfo = new NettyServerInfo(routerInfo.getNegotiationType(), routerInfo.getCertChainFile(),
                         routerInfo.getPrivateKeyFile(), routerInfo.getCaFile());
-
             } else {
                 nettyServerInfo = new NettyServerInfo();
             }
@@ -112,7 +108,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
         }
     }
 
-    private  Proxy.Packet  httpTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo) throws BaseException{
+    private Proxy.Packet httpTransfer(Context context,Proxy.Packet sourcePackage,RouterInfo  routerInfo) throws BaseException{
         try {
             String url = routerInfo.getUrl();
             String content = null;
@@ -131,7 +127,7 @@ public class UnaryCallService extends AbstractServiceAdaptor<Proxy.Packet, Proxy
             if(e instanceof BaseException){
                 throw (BaseException) e;
             }else{
-                throw  new SysException(e.getMessage());
+                throw new SysException(e.getMessage());
             }
         }
     }
