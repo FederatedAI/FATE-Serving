@@ -29,46 +29,12 @@ public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
     public static String fileMd5(String filePath) {
-        InputStream in = null;
-        try {
-            in = new FileInputStream(filePath);
+        try (InputStream in = new FileInputStream(filePath)) {
             return DigestUtils.md5DigestAsHex(in);
         } catch (Exception e) {
-            logger.error(e.getMessage());
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage());
-                }
-            }
+            logger.error("Failed to calculate MD5 for file: {}, error: {}", filePath, e.getMessage());
         }
         return null;
-    }
-
-    public static boolean writeFile(String context, File target) {
-        BufferedWriter out = null;
-        try {
-            if (!target.exists()) {
-                target.createNewFile();
-            }
-            out = new BufferedWriter(new FileWriter(target));
-            out.write(context);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-            return false;
-        } finally {
-            try {
-                if(out!=null) {
-                    out.flush();
-                    out.close();
-                }
-            } catch (IOException ex) {
-                logger.error("write file error",ex);
-            }
-        }
-        return true;
     }
 
     /**
@@ -85,6 +51,7 @@ public class FileUtils {
             logger.error("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
             throw new IOException("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
         }
+
         FileOutputStream fileOutputStream = null;
         FileChannel fileChannel = null;
         FileLock fileLock;
@@ -97,7 +64,7 @@ public class FileUtils {
             fileChannel = fileOutputStream.getChannel();
 
             try {
-                fileLock = fileChannel.tryLock();// exclusive lock
+                fileLock = fileChannel.tryLock();
             } catch (Exception e) {
                 throw new IOException("another thread is writing ,refresh and try again");
             }

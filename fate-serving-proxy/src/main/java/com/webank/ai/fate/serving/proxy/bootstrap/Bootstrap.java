@@ -40,14 +40,14 @@ import java.util.Properties;
 @EnableScheduling
 public class Bootstrap {
     private static ApplicationContext applicationContext;
-    private static Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+    private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     public static void main(String[] args) {
         try {
             parseConfig();
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.start(args);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> bootstrap.stop()));
+            Runtime.getRuntime().addShutdownHook(new Thread(bootstrap::stop));
         } catch (Exception ex) {
             System.err.println("server start error, " + ex.getMessage());
             ex.printStackTrace();
@@ -121,12 +121,9 @@ public class Bootstrap {
             MetaInfo.PROPERTY_HTTP_MAX_POOL_SIZE = environment.getProperty(Dict.PROPERTY_HTTP_MAX_POOL_SIZE) !=null?Integer.parseInt(environment.getProperty(Dict.PROPERTY_HTTP_MAX_POOL_SIZE)):50;
             MetaInfo.PROPERTY_HTTP_ADAPTER_URL = environment.getProperty(Dict.PROPERTY_HTTP_ADAPTER_URL);
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("init metainfo error", e);
             System.exit(1);
-
         }
-
     }
 
     public void start(String[] args) {
