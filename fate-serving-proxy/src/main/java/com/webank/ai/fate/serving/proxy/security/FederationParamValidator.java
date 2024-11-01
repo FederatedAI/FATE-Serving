@@ -32,16 +32,14 @@ import org.springframework.stereotype.Service;
 public class FederationParamValidator implements Interceptor {
 
     @Override
-    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
-        
-
+    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
         Preconditions.checkArgument(StringUtils.isNotEmpty(context.getHostAppid()), "host id is null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(context.getGuestAppId()), "guest id is null");
         Preconditions.checkArgument(StringUtils.isNotEmpty(context.getCaseId()), "case id is null");
     }
 
     @Override
-    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
 
     }
 }
