@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Component
@@ -47,13 +48,17 @@ public class AuthUtils implements InitializingBean {
     private static Map<String, String> KEY_SECRET_MAP = new HashMap<>();
     private static Map<String, String> PARTYID_KEY_MAP = new HashMap<>();
     private static int validRequestTimeoutSecond = 10;
+    private static final long VALID_REQUEST_TIMEOUT_MILLIS = validRequestTimeoutSecond * 1000L;
     private static boolean ifUseAuth = false;
     private static String applyId = "";
+
+    private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
 
     private final String userDir = System.getProperty(Dict.PROPERTY_USER_DIR);
 
     private final String DEFAULT_AUTH_FILE = "conf" + System.getProperty(Dict.PROPERTY_FILE_SEPARATOR) + "auth_config.json";
     private final String fileSeparator = System.getProperty(Dict.PROPERTY_FILE_SEPARATOR);
+
     @Autowired
     private ToStringUtils toStringUtils;
 
@@ -62,10 +67,10 @@ public class AuthUtils implements InitializingBean {
     private String lastFileMd5 = "";
 
     @Scheduled(fixedRate = 10000)
-    public void loadConfig() {
-        if (Boolean.valueOf(MetaInfo.PROPERTY_AUTH_OPEN)) {
+    public void loadConfig() throws IOException {
+        if (MetaInfo.PROPERTY_AUTH_OPEN) {
 
-            String filePath = "";
+            String filePath;
             if (StringUtils.isNotEmpty(MetaInfo.PROPERTY_AUTH_FILE)) {
                 filePath = MetaInfo.PROPERTY_AUTH_FILE;
             } else {
@@ -76,36 +81,28 @@ public class AuthUtils implements InitializingBean {
             if (null != fileMd5 && fileMd5.equals(lastFileMd5)) {
                 return;
             }
+
             File file = new File(filePath);
             if (!file.exists()) {
                 logger.error("auth table {} is not exist", filePath);
                 return;
             }
 
-            JsonParser jsonParser = new JsonParser();
-            JsonReader jsonReader = null;
-            JsonObject jsonObject = null;
-            try {
-                jsonReader = new JsonReader(new FileReader(filePath));
-                jsonObject = jsonParser.parse(jsonReader).getAsJsonObject();
+            Gson gson = new Gson();
+            JsonObject jsonObject;
+            try (JsonReader jsonReader = new JsonReader(new FileReader(filePath))) {
+                jsonObject = gson.fromJson(jsonReader, JsonObject.class);
             } catch (FileNotFoundException e) {
-                logger.error("auth file not found: {}", filePath);
-                throw new RuntimeException(e);
-            } finally {
-                if (jsonReader != null) {
-                    try {
-                        jsonReader.close();
-                    } catch (IOException ignore) {
-                    }
-                }
+                logger.error("auth file not found: {}", filePath, e);
+                throw new FileNotFoundException(e.getMessage());
             }
+
             selfPartyId = jsonObject.get("self_party_id").getAsString();
             applyId = jsonObject.get("apply_id") != null ? jsonObject.get("apply_id").getAsString() : "";
             ifUseAuth = jsonObject.get("if_use_auth").getAsBoolean();
             validRequestTimeoutSecond = jsonObject.get("request_expire_seconds").getAsInt();
 
             JsonArray jsonArray = jsonObject.getAsJsonArray("access_keys");
-            Gson gson = new Gson();
             List<Map> allowKeys = gson.fromJson(jsonArray, ArrayList.class);
             KEY_SECRET_MAP.clear();
             for (Map allowKey : allowKeys) {
@@ -135,16 +132,17 @@ public class AuthUtils implements InitializingBean {
             logger.error("appSecret not found");
             return signature;
         }
-        String encryptText = String.valueOf(timestamp) + "\n"
-                + toStringUtils.toOneLineString(header) + "\n"
-                + toStringUtils.toOneLineString(body);
-        encryptText = new String(encryptText.getBytes(), EncryptUtils.UTF8);
-        signature = Base64.getEncoder().encodeToString(EncryptUtils.hmacSha1Encrypt(encryptText, appSecret));
-        return signature;
+
+        StringBuilder encryptTextBuilder = new StringBuilder();
+        encryptTextBuilder.append(timestamp).append("\n")
+                .append(toStringUtils.toOneLineString(header)).append("\n")
+                .append(toStringUtils.toOneLineString(body));
+        return BASE64_ENCODER.encodeToString(EncryptUtils.hmacSha1Encrypt(new String(encryptTextBuilder.toString().getBytes(),
+                StandardCharsets.UTF_8), appSecret));
     }
 
     public Proxy.Packet addAuthInfo(Proxy.Packet packet) throws Exception {
-        if (Boolean.valueOf(MetaInfo.PROPERTY_AUTH_OPEN) && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
+        if (MetaInfo.PROPERTY_AUTH_OPEN && !StringUtils.equals(selfPartyId, packet.getHeader().getDst().getPartyId())) {
             Proxy.Packet.Builder packetBuilder = packet.toBuilder();
 
             Proxy.AuthInfo.Builder authBuilder = packetBuilder.getAuthBuilder();
@@ -155,12 +153,7 @@ public class AuthUtils implements InitializingBean {
             String signature = calSignature(packet.getHeader(), packet.getBody(), timestamp, appKey);
             authBuilder.setSignature(signature);
             authBuilder.setServiceId(packet.getAuth().getServiceId());
-            if (!("".equals(packet.getAuth().getApplyId()))) {
-                authBuilder.setApplyId(packet.getAuth().getApplyId());
-            } else {
-                authBuilder.setApplyId(applyId);
-            }
-
+            authBuilder.setApplyId(StringUtils.defaultIfBlank(packet.getAuth().getApplyId(), applyId));
             packetBuilder.setAuth(authBuilder.build());
             return packetBuilder.build();
         }
@@ -168,11 +161,11 @@ public class AuthUtils implements InitializingBean {
     }
 
     public boolean checkAuthentication(Proxy.Packet packet) throws Exception {
-        if (Boolean.valueOf(MetaInfo.PROPERTY_AUTH_OPEN)) {
+        if (MetaInfo.PROPERTY_AUTH_OPEN) {
             // check timestamp
             long currentTimeMillis = System.currentTimeMillis();
             long requestTimeMillis = packet.getAuth().getTimestamp();
-            if (currentTimeMillis >= (requestTimeMillis + validRequestTimeoutSecond * 1000)) {
+            if (currentTimeMillis >= (requestTimeMillis + VALID_REQUEST_TIMEOUT_MILLIS)) {
                 logger.error("receive an expired request, currentTimeMillis:{}, requestTimeMillis{}.", currentTimeMillis, requestTimeMillis);
                 return false;
             }
@@ -188,12 +181,11 @@ public class AuthUtils implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         try {
             loadConfig();
         } catch (Throwable e) {
             logger.error("load authentication keys fail. ", e);
         }
-
     }
 }

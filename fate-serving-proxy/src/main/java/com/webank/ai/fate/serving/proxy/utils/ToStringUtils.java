@@ -27,35 +27,26 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("prototype")
 public class ToStringUtils {
-    private static final String NULL_STRING = "[null]";
-    private static final String LEFT_BRACKET = "[";
-    private static final String RIGHT_BRACKET = "]";
-    private static final String LEFT_BRACE = "{";
-    private static final String RIGHT_BRACE = "}";
-    private static final String LEFT_PARENTHESIS = "(";
-    private static final String RIGHT_PARENTHESIS = ")";
-    private static final String COLON = ":";
-    private static final String SEMICOLON = ";";
-    private static final String COMMA = ",";
+    private static final String NULL_RESULT = "[null]";
 
     private static final Logger logger = LoggerFactory.getLogger(ToStringUtils.class);
 
-    private JsonFormat.Printer protoPrinter = JsonFormat.printer()
+    private final JsonFormat.Printer protoPrinter = JsonFormat.printer()
             .preservingProtoFieldNames()
             .omittingInsignificantWhitespace();
 
     public String toOneLineString(Message target) {
-        String result = "[null]";
+        String result;
 
         if (target == null) {
-            logger.info("target is null");
-            return result;
+            return NULL_RESULT;
         }
 
         try {
             result = protoPrinter.print(target);
         } catch (Exception e) {
             logger.info(ExceptionUtils.getStackTrace(e));
+            return NULL_RESULT;
         }
 
         return result;
