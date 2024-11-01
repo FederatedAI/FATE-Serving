@@ -30,6 +30,7 @@ import com.webank.ai.fate.serving.core.bean.Dict;
 import com.webank.ai.fate.serving.core.bean.GrpcConnectionPool;
 import com.webank.ai.fate.serving.core.bean.MetaInfo;
 import com.webank.ai.fate.serving.core.exceptions.RemoteRpcException;
+import com.webank.ai.fate.serving.core.exceptions.UnSupportMethodException;
 import com.webank.ai.fate.serving.core.rpc.router.RouterInfo;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 import io.grpc.ManagedChannel;
@@ -52,7 +53,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
-    private int timeout = MetaInfo.PROPERTY_PROXY_GRPC_INFERENCE_TIMEOUT;
+    private final int timeout = MetaInfo.PROPERTY_PROXY_GRPC_INFERENCE_TIMEOUT;
 
     public InferenceService() {
     }
@@ -62,9 +63,11 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
 
         Map resultMap = Maps.newHashMap();
         RouterInfo routerInfo = data.getRouterInfo();
-        ManagedChannel managedChannel = null;
-        String resultString = null;
+        ManagedChannel managedChannel;
+        String resultString;
+        String callName = context.getCallName();
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
+
         try {
             managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
         } catch (Exception e) {
@@ -81,7 +84,14 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
-        resultFuture = futureStub.inference(reqBuilder.build());
+
+        if (callName.equals(Dict.SERVICENAME_INFERENCE)) {
+            resultFuture = futureStub.inference(reqBuilder.build());
+        } else {
+            logger.error("unknown callName {}.", callName);
+            throw new UnSupportMethodException();
+        }
+
         try {
             InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout, TimeUnit.MILLISECONDS);
             resultString = new String(result.getBody().toByteArray());
@@ -89,6 +99,7 @@ public class InferenceService extends AbstractServiceAdaptor<Map, Map> {
             logger.error("remote {} get grpc result error", routerInfo);
             throw new RemoteRpcException("remote rpc exception");
         }
+
         if (StringUtils.isNotEmpty(resultString)) {
             resultMap = JsonUtil.json2Object(resultString, Map.class);
         }

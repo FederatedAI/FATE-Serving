@@ -53,7 +53,7 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
 
     GrpcConnectionPool grpcConnectionPool = GrpcConnectionPool.getPool();
 
-    private int timeout = MetaInfo.PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT;
+    private final int timeout = MetaInfo.PROPERTY_PROXY_GRPC_BATCH_INFERENCE_TIMEOUT;
 
     public BatchInferenceService() {
     }
@@ -63,52 +63,48 @@ public class BatchInferenceService extends AbstractServiceAdaptor<Map, Map> {
 
         Map resultMap = Maps.newHashMap();
         RouterInfo routerInfo = data.getRouterInfo();
-        ManagedChannel managedChannel = null;
-        String resultString = null;
+        ManagedChannel managedChannel;
+        String resultString;
         String callName = context.getCallName();
         ListenableFuture<InferenceServiceProto.InferenceMessage> resultFuture;
-        try {
-            if (logger.isDebugEnabled()) {
-                logger.debug("try to get grpc connection");
-            }
-            managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
 
+        try {
+            managedChannel = this.grpcConnectionPool.getManagedChannel(routerInfo.getHost(), routerInfo.getPort());
         } catch (Exception e) {
             logger.error("get grpc channel error", e);
             throw new RemoteRpcException("remote rpc exception");
         }
+
         Map reqBodyMap = data.getBody();
         Map reqHeadMap = data.getHead();
         Map inferenceReqMap = Maps.newHashMap();
         inferenceReqMap.put(Dict.CASE_ID, context.getCaseId());
         inferenceReqMap.putAll(reqHeadMap);
         inferenceReqMap.putAll(reqBodyMap);
-        if (logger.isDebugEnabled()) {
-            logger.debug("batch inference req : {}", JsonUtil.object2Json(inferenceReqMap));
-        }
         InferenceServiceProto.InferenceMessage.Builder reqBuilder = InferenceServiceProto.InferenceMessage.newBuilder();
         reqBuilder.setBody(ByteString.copyFrom(JsonUtil.object2Json(inferenceReqMap).getBytes()));
         InferenceServiceGrpc.InferenceServiceFutureStub futureStub = InferenceServiceGrpc.newFutureStub(managedChannel);
+
         if (callName.equals(Dict.SERVICENAME_BATCH_INFERENCE)) {
             resultFuture = futureStub.batchInference(reqBuilder.build());
         } else {
             logger.error("unknown callName {}.", callName);
             throw new UnSupportMethodException();
         }
+
         try {
-            logger.info("routerinfo {}", routerInfo);
+            logger.info("routerinfo is {}", routerInfo);
             InferenceServiceProto.InferenceMessage result = resultFuture.get(timeout, TimeUnit.MILLISECONDS);
-            if (logger.isDebugEnabled()) {
-                logger.debug("send {} result {}", routerInfo, inferenceReqMap, result);
-            }
             resultString = new String(result.getBody().toByteArray());
         } catch (Exception e) {
             logger.error("get grpc result error", e);
             throw new RemoteRpcException("remote rpc exception");
         }
+
         if (StringUtils.isNotEmpty(resultString)) {
             resultMap = JsonUtil.json2Object(resultString, Map.class);
         }
+
         return resultMap;
     }
 
