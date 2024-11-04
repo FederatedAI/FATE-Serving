@@ -59,6 +59,11 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
         if (environment == null) {
             return null;
         }
+
+        if (zkRouterService == null) {
+            return null;
+        }
+
         List<URL> list = zkRouterService.router(Dict.SERVICE_SERVING, environment, context.getServiceName());
 
         logger.info("try to find zk ,{}:{}:{}, result {}", "serving", environment, context.getServiceName(), list);
@@ -68,24 +73,28 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
         }
         List<RouterInfo> routeList = new ArrayList<>();
         for (URL url : list) {
-            String urlip = url.getHost();
+            String urlIp = url.getHost();
             int port = url.getPort();
+            if (urlIp == null || port <= 0) {
+                logger.error("Invalid router info: " + url + " and port: " + port);
+                continue;
+            }
             RouterInfo router = new RouterInfo();
-            router.setHost(urlip);
+            router.setHost(urlIp);
             router.setPort(port);
             routeList.add(router);
         }
         return routeList;
     }
 
-    // TODO utu: sucks! have to reconstruct the entire protocol of online serving
     private String getEnvironment(Context context, InboundPackage inboundPackage) {
-        if (Dict.SERVICENAME_INFERENCE.equals(context.getServiceName()) || Dict.SERVICENAME_BATCH_INFERENCE.equals(context.getServiceName())) {
+        String serviceName = context.getServiceName();
+        if (Dict.SERVICENAME_INFERENCE.equals(serviceName) || Dict.SERVICENAME_BATCH_INFERENCE.equals(serviceName)) {
             // guest, proxy -> serving
             return (String) inboundPackage.getHead().get(Dict.SERVICE_ID);
         }
 
-        if (Dict.UNARYCALL.equals(context.getServiceName()) && context.getGrpcType() == GrpcType.INTER_GRPC) {
+        if (Dict.UNARYCALL.equals(serviceName) && context.getGrpcType() == GrpcType.INTER_GRPC) {
             // host, proxy -> serving
             Proxy.Packet sourcePacket = (Proxy.Packet) inboundPackage.getBody();
             return FederatedModelUtils.getModelRouteKey(context, sourcePacket);
@@ -96,7 +105,7 @@ public class ZkServingRouter extends BaseServingRouter implements InitializingBe
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         routeType = RouteTypeConvertor.string2RouteType(MetaInfo.PROPERTY_ROUTE_TYPE);
     }
 }
