@@ -28,6 +28,10 @@ public enum RouteType {
     /**
      * CONSISTENT_HASH_ROUTE
      */
-    CONSISTENT_HASH_ROUTE
+    CONSISTENT_HASH_ROUTE,
+    /**
+     * ROUND_ROBIN
+     */
+    ROUND_ROBIN
 }
 

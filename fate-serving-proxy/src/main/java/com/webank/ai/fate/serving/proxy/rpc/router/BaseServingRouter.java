@@ -30,9 +30,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class BaseServingRouter implements RouterInterface {
     private static final Logger logger = LoggerFactory.getLogger(BaseServingRouter.class);
+
+    private final AtomicInteger roundRobinCounter = new AtomicInteger(0);
 
     public abstract List<RouterInfo> getRouterInfoList(Context context, InboundPackage inboundPackage);
 
@@ -42,10 +45,10 @@ public abstract class BaseServingRouter implements RouterInterface {
     public RouterInfo route(Context context, InboundPackage inboundPackage) {
         List<RouterInfo> routeList = getRouterInfoList(context, inboundPackage);
 
-        if (routeList == null
-                || 0 == routeList.size()) {
+        if (routeList == null || routeList.isEmpty()) {
             return null;
         }
+
         int idx = 0;
         RouteType routeType = getRouteType();
         switch (routeType) {
@@ -57,11 +60,16 @@ public abstract class BaseServingRouter implements RouterInterface {
                 idx = Hashing.consistentHash(context.getRouteBasis(), routeList.size());
                 break;
             }
+            case ROUND_ROBIN: {
+                idx = roundRobinCounter.getAndIncrement() % routeList.size();
+                break;
+            }
             default: {
                 // to use the first one.
                 break;
             }
         }
+
         RouterInfo routerInfo = routeList.get(idx);
 
         context.setRouterInfo(routerInfo);
@@ -72,16 +80,16 @@ public abstract class BaseServingRouter implements RouterInterface {
     }
 
     @Override
-    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
+    public void doPreProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
         RouterInfo routerInfo = this.route(context, inboundPackage);
         if (routerInfo == null) {
-            throw new NoRouterInfoException(StatusCode.PROXY_ROUTER_ERROR,"PROXY_ROUTER_ERROR");
+            throw new NoRouterInfoException(StatusCode.PROXY_ROUTER_ERROR, "PROXY_ROUTER_ERROR");
         }
         inboundPackage.setRouterInfo(routerInfo);
     }
 
     @Override
-    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) throws Exception {
+    public void doPostProcess(Context context, InboundPackage inboundPackage, OutboundPackage outboundPackage) {
 
     }
 }

@@ -221,11 +221,6 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                 return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGPROXY;
             }).forEach((item) -> {
                         switch (item) {
-//                CHECK_ROUTER_FILE("check route_table.json exist",HealthCheckComponent.SERVINGPROXY),
-//                        CHECK_ZOOKEEPER_CONFIG("check zk config",HealthCheckComponent.ALL),
-//                        CHECK_ROUTER_NET("check router",HealthCheckComponent.SERVINGPROXY),
-//                        CHECK_MEMORY_USAGE("check memory usage",HealthCheckComponent.ALL),
-//                        CHECK_CERT_FILE("check cert file",HealthCheckComponent.SERVINGPROXY);
                             case CHECK_MEMORY_USAGE:
                                 HealthCheckUtil.memoryCheck(healthCheckResult);
                                 break;
