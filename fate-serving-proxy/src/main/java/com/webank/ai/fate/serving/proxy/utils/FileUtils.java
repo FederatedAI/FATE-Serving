@@ -43,48 +43,43 @@ public class FileUtils {
      */
     public static boolean writeStr2ReplaceFileSync(String str, String pathFile) throws Exception {
         File file = new File(pathFile);
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
+
+        if (!file.exists()) {
+            try {
+                boolean created = file.createNewFile();
+                if (!created) {
+                    throw new IOException("Failed to create the file: " + pathFile);
+                }
+            } catch (IOException e) {
+                logger.error("Failed to create the file. Check whether the path is valid and the read/write permission is correct", e);
+                throw e;
             }
-        } catch (IOException e) {
-            logger.error("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
-            throw new IOException("Failed to create the file. Check whether the path is valid and the read/write permission is correct");
         }
 
-        FileOutputStream fileOutputStream = null;
-        FileChannel fileChannel = null;
-        FileLock fileLock;
-        try {
-
-            /**
-             * write file
-             */
-            fileOutputStream = new FileOutputStream(file);
-            fileChannel = fileOutputStream.getChannel();
-
-            try {
-                fileLock = fileChannel.tryLock();
-            } catch (Exception e) {
-                throw new IOException("another thread is writing ,refresh and try again");
-            }
-            if (fileLock != null) {
+        FileLock fileLock = null;
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file, false);
+             FileChannel fileChannel = fileOutputStream.getChannel()) {
+             fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, false);
+            if (fileLock == null) {
+                throw new IOException("Unable to acquire file lock, the file is likely in use by another process");
+            } else {
                 fileChannel.write(ByteBuffer.wrap(str.getBytes()));
                 if (fileLock.isValid()) {
-                    fileLock.release(); // release-write-lock
+                    fileLock.release();
                 }
                 if (file.length() != str.getBytes().length) {
                     throw new IOException("write successfully but the content was lost, reedit and try again");
                 }
             }
-
         } catch (IOException e) {
             logger.error(e.getMessage());
-            throw new IOException(e.getMessage());
+            throw e;
         } finally {
-            close(fileChannel);
-            close(fileOutputStream);
+            if (fileLock != null && fileLock.isValid()) {
+                fileLock.release();
+            }
         }
+
         return true;
     }
 
