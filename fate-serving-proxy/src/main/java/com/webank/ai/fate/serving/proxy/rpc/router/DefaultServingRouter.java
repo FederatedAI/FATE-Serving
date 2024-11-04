@@ -52,7 +52,7 @@ public class DefaultServingRouter implements Interceptor {
             routerInfo = configFileBasedServingRouter.route(context, inboundPackage);
         }
         if (null == routerInfo) {
-            throw new NoRouterInfoException(StatusCode.PROXY_ROUTER_ERROR,"serving-proxy can not find router info ");
+            throw new NoRouterInfoException(StatusCode.PROXY_ROUTER_ERROR, "serving-proxy can not find router info ");
         }
         inboundPackage.setRouterInfo(routerInfo);
     }
