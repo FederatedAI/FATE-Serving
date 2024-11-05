@@ -29,24 +29,31 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class IntraGrpcServer implements InitializingBean {
-    Logger logger = LoggerFactory.getLogger(InterGrpcServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(InterGrpcServer.class);
+
     @Autowired
     IntraRequestHandler intraRequestHandler;
+
     @Autowired
     CommonRequestHandler commonRequestHandler;
+
     @Autowired
     RouterTableService routerTableService;
 
     @Autowired(required = false)
     ZookeeperRegistry zookeeperRegistry;
+
     @Resource(name = "grpcExecutorPool")
     Executor executor;
-    Server server;
+
+    private Server server;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -62,6 +69,21 @@ public class IntraGrpcServer implements InitializingBean {
             logger.info("register zk , {}", FateServer.serviceSets);
             zookeeperRegistry.register(FateServer.serviceSets);
         }
+    }
+
+    @PreDestroy
+    public void destroy() throws InterruptedException {
+        logger.info("start to shutdown IntraGrpcServer and await termination......");
+        try {
+            if (server != null) {
+                server.shutdown();
+                server.awaitTermination(10, TimeUnit.SECONDS);
+            }
+        } catch (Exception e) {
+            logger.error("shutdown IntraGrpcServer happen exception {}", e.getMessage());
+            throw e;
+        }
+        logger.info("IntraGrpcServer is shutdown");
     }
 }
 
