@@ -32,17 +32,18 @@ import java.util.Map;
 
 public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractServiceAdaptor<req, resp> {
 
-    Logger logger  = LoggerFactory.getLogger(AbstractProxyServiceProvider.class);
+    private static final Logger logger  = LoggerFactory.getLogger(AbstractProxyServiceProvider.class);
+
     @Override
     protected resp transformExceptionInfo(Context context, ExceptionInfo exceptionInfo) {
         return null;
     }
 
     @Override
-    protected resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage) {
+    protected resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage) throws InvocationTargetException, IllegalAccessException {
+        resp result;
         Map<String, Method> methodMap = this.getMethodMap();
         String actionType = context.getActionType();
-        resp result = null;
         try {
             Method method = methodMap.get(actionType);
             if (method == null) {
@@ -50,26 +51,16 @@ public abstract class AbstractProxyServiceProvider<req, resp> extends AbstractSe
             }
             result = (resp) method.invoke(this, context, data);
         } catch (Throwable e) {
-            logger.error("xxxxxxx",e);
-            if (e.getCause() != null && e.getCause() instanceof BaseException) {
-                BaseException baseException = (BaseException) e.getCause();
-                throw baseException;
-            } else if (e instanceof InvocationTargetException) {
-                InvocationTargetException ex = (InvocationTargetException) e;
-                throw new SysException(ex.getTargetException().getMessage());
-            } else {
-                throw new SysException(e.getMessage());
-            }
+            logger.error("Error processing request for caseId: {}, actionType: {}, error: {}", context.getCaseId(), actionType, e.getMessage());
+            throw e;
         }
         return result;
     }
 
     @Override
     protected void printFlowLog(Context context) {
-
         flowLogger.info("{}|{}|" +
-                        "{}|{}|{}|{}|" +
-                        "{}|{}",
+                        "{}|{}|{}|{}|",
                 context.getCaseId(), context.getReturnCode(), context.getCostTime(),
                 context.getDownstreamCost(), serviceName, context.getRouterInfo() != null ? context.getRouterInfo() : "");
     }

@@ -31,6 +31,7 @@ import io.grpc.stub.AbstractStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +107,7 @@ public abstract class AbstractServiceAdaptor<req, resp> implements ServiceAdapto
         this.serviceName = serviceName;
     }
 
-    protected abstract resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage);
+    protected abstract resp doService(Context context, InboundPackage<req> data, OutboundPackage<resp> outboundPackage) throws InvocationTargetException, IllegalAccessException;
 
     /**
      * @param context
