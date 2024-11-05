@@ -32,13 +32,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description TODO
@@ -47,8 +48,8 @@ import java.util.concurrent.Executor;
 @Service
 public class InterGrpcServer implements InitializingBean {
 
-    Logger logger = LoggerFactory.getLogger(InterGrpcServer.class);
-    Server server;
+    private static final Logger logger = LoggerFactory.getLogger(InterGrpcServer.class);
+    private Server server;
 
     @Autowired
     InterRequestHandler interRequestHandler;
@@ -93,5 +94,20 @@ public class InterGrpcServer implements InitializingBean {
         serverBuilder.addService(ServerInterceptors.intercept(interRequestHandler, new ServiceExceptionHandler()), InterRequestHandler.class);
         server = serverBuilder.build();
         server.start();
+    }
+
+    @PreDestroy
+    public void destroy() throws InterruptedException {
+        logger.info("start to shutdown InterGrpcServer and await termination......");
+        try {
+            if (server != null) {
+                server.shutdown();
+                server.awaitTermination(10, TimeUnit.SECONDS);
+            }
+        } catch (Exception e) {
+            logger.error("shutdown InterGrpcServer happen exception {}", e.getMessage());
+            throw e;
+        }
+        logger.info("InterGrpcServer is shutdown");
     }
 }
