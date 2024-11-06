@@ -209,7 +209,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
 
         if(MetaInfo.PROPERTY_ALLOW_HEALTH_CHECK) {
             HealthCheckItemEnum[] items = HealthCheckItemEnum.values();
-            HealthCheckResult  healthCheckResult = new  HealthCheckResult();
+            HealthCheckResult healthCheckResult = new HealthCheckResult();
             Arrays.stream(items).filter((item) -> {
                 HealthCheckComponent healthCheckComponent = item.getComponent();
                 return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGPROXY;
@@ -219,23 +219,28 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                                 HealthCheckUtil.memoryCheck(healthCheckResult);
                                 break;
                             case CHECK_CERT_FILE:
-                                this.checkSshCertConfig(healthCheckResult);break;
-
+                                this.checkSshCertConfig(healthCheckResult);
+                                break;
                             case CHECK_ZOOKEEPER_CONFIG:
+                                logger.info("check zk config");
+                                break;
+                            case CHECK_ROUTER_NET:
+                                logger.info("check route net");
                                 break;
                             case CHECK_ROUTER_FILE:
                                 this.checkRouterInfo(healthCheckResult);
                                 break;
-                            //  case  HealthCheckItemEnum.CHECK_CERT_FILE: break;
+                            default:
+                                logger.warn("Illegal verification items: {}", item.getItemName());
+                                break;
                         }
                     }
             );
 
             return healthCheckResult;
-        }else{
+        } else {
+            logger.warn("serving-proxy is not allowed health check");
             return  null;
         }
-
-
     }
 }
