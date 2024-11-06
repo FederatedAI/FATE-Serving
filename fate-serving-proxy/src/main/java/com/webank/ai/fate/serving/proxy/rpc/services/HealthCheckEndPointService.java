@@ -25,113 +25,108 @@ import java.util.regex.Pattern;
 
 @Service
 public class HealthCheckEndPointService implements HealthCheckAware {
+    private static final Logger logger = LoggerFactory.getLogger(HealthCheckEndPointService.class);
+
     @Autowired
     ConfigFileBasedServingRouter configFileBasedServingRouter;
+
     @Autowired(required = false)
-    ZookeeperRegistry   zookeeperRegistry;
+    ZookeeperRegistry zookeeperRegistry;
 
-    Logger logger = LoggerFactory.getLogger(HealthCheckEndPointService.class);
-
-    private  void  checkSshCertConfig(HealthCheckResult  healthCheckResult){
-        Map<Proxy.Topic, List<RouterInfo>>    routerInfoMap = configFileBasedServingRouter.getAllRouterInfoMap();
-        if(routerInfoMap!=null&&routerInfoMap.size()>0){
+    private void checkSshCertConfig(HealthCheckResult healthCheckResult) {
+        Map<Proxy.Topic, List<RouterInfo>> routerInfoMap = configFileBasedServingRouter.getAllRouterInfoMap();
+        if(routerInfoMap != null && routerInfoMap.size() > 0) {
             routerInfoMap.forEach((k,v)-> {
-                if(v!=null){
+                if(v != null) {
+                    String topicName = k.getName().concat("_").concat(k.getRole()).concat("_").concat(k.getPartyId());
                     v.forEach(routerInfo -> {
                         if (routerInfo.isUseSSL()) {
                             String caFilePath = routerInfo.getCaFile();
                             if (StringUtils.isNotEmpty(caFilePath)) {
                                 File caFile = new File(caFilePath);
                                 if (caFile.exists()) {
-                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(), "check cert file :" + caFilePath + " is found", HealthCheckStatus.ok));
+                                    healthCheckResult.getRecords().add(
+                                            new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(), topicName +
+                                                            " check ca file :" + caFilePath + " is found", HealthCheckStatus.ok));
                                 } else {
-                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(), "check cert file :" + caFilePath + " is not found", HealthCheckStatus.error));
+                                    healthCheckResult.getRecords().add(
+                                            new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(), topicName +
+                                                    " check ca file :" + caFilePath + " is not found", HealthCheckStatus.error));
                                 }
                             } else {
-                                // healthCheckResult.ge();
+                                healthCheckResult.getRecords().add(
+                                        new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(), topicName +
+                                                " check ca file :" + caFilePath + " is not found", HealthCheckStatus.warn));
                             }
 
                             String certChainFilePath = routerInfo.getCertChainFile();
                             if (StringUtils.isNotEmpty(certChainFilePath)) {
                                 File certChainFile = new File(certChainFilePath);
                                 if (certChainFile.exists()) {
-                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), "check cert file :" + certChainFilePath + " is found", HealthCheckStatus.ok));
+                                    healthCheckResult.getRecords().add(
+                                            new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), topicName +
+                                                    " check cert file :" + certChainFilePath + " is found", HealthCheckStatus.ok));
                                 } else {
-                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), "check cert file :" + certChainFilePath + " is not found", HealthCheckStatus.ok));
+                                    healthCheckResult.getRecords().add(
+                                            new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), topicName +
+                                                    " check cert file :" + certChainFilePath + " is not found", HealthCheckStatus.error));
                                 }
+                            } else {
+                                healthCheckResult.getRecords().add(
+                                        new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), topicName +
+                                                " check cert file :" + certChainFilePath + " is not found", HealthCheckStatus.warn));
                             }
 
                             String privateKeyFilePath = routerInfo.getPrivateKeyFile();
                             if (StringUtils.isNotEmpty(privateKeyFilePath)) {
                                 File privateKeyFile = new File(privateKeyFilePath);
                                 if (privateKeyFile.exists()) {
-                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), "check cert file :" + privateKeyFilePath + " is found", HealthCheckStatus.ok));
-
-                                    // healthCheckResult.getOkList().add("check cert file :" + privateKeyFilePath + " is found");
+                                    healthCheckResult.getRecords().add(
+                                            new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), topicName +
+                                                    " check privateKey file :" + privateKeyFilePath + " is found", HealthCheckStatus.ok));
                                 } else {
-                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), "check cert file :" + privateKeyFilePath + " is found", HealthCheckStatus.ok));
-
-                                    //  healthCheckResult.getErrorList().add("check cert file :" + privateKeyFilePath + " is not found");
+                                    healthCheckResult.getRecords().add(
+                                            new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), topicName +
+                                                    " check privateKey file :" + privateKeyFilePath + " is found", HealthCheckStatus.error));
                                 }
+                            } else {
+                                healthCheckResult.getRecords().add(
+                                        new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), topicName +
+                                                " check privateKey file :" + privateKeyFilePath + " is found", HealthCheckStatus.warn));
                             }
-
-
+                        } else {
+                            healthCheckResult.getRecords().add(
+                                    new HealthCheckRecord(HealthCheckItemEnum.CHECK_CERT_FILE.getItemName(), topicName +
+                                            " No CA authentication configured", HealthCheckStatus.ok));
                         }
                     });
                 }
             });
         }
-
     }
 
 
-    private  void  checkZkConfig(HealthCheckResult  healthCheckResult){
-        if(zookeeperRegistry==null){
-            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ZOOKEEPER_CONFIG.getItemName(),"zookeeper is not used or config is invalid",HealthCheckStatus.warn));
-        }else{
-            boolean isConnected  = zookeeperRegistry.getZkClient().isConnected();
-            if(isConnected){
-                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ZOOKEEPER_CONFIG.getItemName(),"zookeeper can not touched",HealthCheckStatus.error));
+    private void checkZkConfig(HealthCheckResult  healthCheckResult){
+        if(zookeeperRegistry == null){
+            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ZOOKEEPER_CONFIG.getItemName(),"zookeeper is not used or config is invalid", HealthCheckStatus.warn));
+        } else {
+            if(zookeeperRegistry.getZkClient().isConnected()) {
+                healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ZOOKEEPER_CONFIG.getItemName(),"zookeeper can not touched", HealthCheckStatus.error));
             }
         }
-//        if(!MetaInfo.PROPERTY_USE_ZK_ROUTER.booleanValue()){
-//            healthCheckResult.getWarnList().add(MetaInfo.PROPERTY_USE_ZK_ROUTER+":"+MetaInfo.PROPERTY_USE_ZK_ROUTER+"="+MetaInfo.PROPERTY_USE_ZK_ROUTER);
-//        }else{
-//            if(StringUtils.isNotEmpty(MetaInfo.PROPERTY_ZK_URL)){
-//                healthCheckResult.getOkList().add("check zk config "+": ok ");
-//            }else {
-//                healthCheckResult.getErrorList().add("check zk config "+": no config ");
-//            }
-//        }
     }
 
-    private  void  checkRouterInfo(HealthCheckResult  healthCheckResult){
-
-//        if(!MetaInfo.PROPERTY_USE_REGISTER.booleanValue()){
-//                healthCheckResult.getWarnList().add(MetaInfo.PROPERTY_USE_REGISTER+":"+MetaInfo.PROPERTY_USE_REGISTER+"="+MetaInfo.PROPERTY_USE_REGISTER);
-//        }else{
-//            if(StringUtils.isNotEmpty(MetaInfo.PROPERTY_ZK_URL)){
-//                healthCheckResult.getOkList().add(MetaInfo.PROPERTY_ZK_URL+":"+MetaInfo.PROPERTY_ZK_URL);
-//            }else {
-//                healthCheckResult.getErrorList().add(MetaInfo.PROPERTY_ZK_URL+":"+MetaInfo.PROPERTY_ZK_URL);
-//            }
-//        }
-        HealthCheckRecord  routerConfigCheck = new  HealthCheckRecord();
-        if(configFileBasedServingRouter.getRouteTable()==null||configFileBasedServingRouter.getRouteTable().size()==0){
-
-            healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : no router info found",HealthCheckStatus.error));
-
-           // healthCheckResult.getErrorList().add("check route_table.json  "+": no router info found");
-        }else{
-            healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is found",HealthCheckStatus.ok));
-
-          //  healthCheckResult.getOkList().add("check route_table.json  "+": route_table.json is found");
+    private void checkRouterInfo(HealthCheckResult  healthCheckResult){
+        HealthCheckRecord routerConfigCheck = new  HealthCheckRecord();
+        if(configFileBasedServingRouter.getRouteTable() == null || configFileBasedServingRouter.getRouteTable().size() == 0) {
+            healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is not found", HealthCheckStatus.error));
+        } else {
+            healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is found", HealthCheckStatus.ok));
         }
 
         routerInfoCheck(healthCheckResult);
-
-
     }
+
     private  void  routerInfoCheck(HealthCheckResult  healthCheckResult){
         Map<String, Map<String, List<BasicMeta.Endpoint>>>    routerInfoMap = configFileBasedServingRouter.getRouteTable();
         if(routerInfoMap!=null&&routerInfoMap.size()>0){
