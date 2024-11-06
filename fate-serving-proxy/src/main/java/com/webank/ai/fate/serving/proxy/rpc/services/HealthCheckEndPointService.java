@@ -27,6 +27,20 @@ import java.util.regex.Pattern;
 public class HealthCheckEndPointService implements HealthCheckAware {
     private static final Logger logger = LoggerFactory.getLogger(HealthCheckEndPointService.class);
 
+    private static final String IP = "IP";
+
+    private static final String PORT = "PORT";
+
+    private static final Pattern PATTERN = Pattern.compile("(?<=//|)((\\w)+\\.)+\\w+(:\\d{0,5})?");
+
+    private static final String HTTP_LOCALHOST = "http://localhost";
+
+    private static final String HTTPS_LOCALHOST = "https://localhost";
+
+    private static final String HTTP_LOCALHOST_IP = "http://127.0.0.1";
+
+    private static final String HTTPS_LOCALHOST_IP = "https://127.0.0.1";
+
     @Autowired
     ConfigFileBasedServingRouter configFileBasedServingRouter;
 
@@ -116,93 +130,78 @@ public class HealthCheckEndPointService implements HealthCheckAware {
         }
     }
 
-    private void checkRouterInfo(HealthCheckResult  healthCheckResult){
-        HealthCheckRecord routerConfigCheck = new  HealthCheckRecord();
+    private void checkRouterInfo(HealthCheckResult healthCheckResult){
         if(configFileBasedServingRouter.getRouteTable() == null || configFileBasedServingRouter.getRouteTable().size() == 0) {
-            healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is not found", HealthCheckStatus.error));
+            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is not found", HealthCheckStatus.error));
         } else {
-            healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is found", HealthCheckStatus.ok));
+            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is found", HealthCheckStatus.ok));
         }
 
         routerInfoCheck(healthCheckResult);
     }
 
-    private  void  routerInfoCheck(HealthCheckResult  healthCheckResult){
-        Map<String, Map<String, List<BasicMeta.Endpoint>>>    routerInfoMap = configFileBasedServingRouter.getRouteTable();
-        if(routerInfoMap!=null&&routerInfoMap.size()>0){
-            routerInfoMap.values().forEach(value->{
-                value.forEach((k,v)->{
-                    if(v!=null){
-                        v.forEach(endpoint -> {
-                            try {
-                                boolean connectAble;
-                                if(StringUtils.isNotEmpty(endpoint.getUrl())){
-                                    Map<String,String> resultMap = getIpPortFromUrl(endpoint.getUrl());
-                                    connectAble = TelnetUtil.tryTelnet(resultMap.get("IP"), Integer.valueOf(resultMap.get("PORT")));
-                                    if (!connectAble) {
-
-                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  resultMap.get("IP") + " " + Integer.valueOf(resultMap.get("PORT")) + ": can not be telneted",HealthCheckStatus.warn));
-                                        //("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
-                                    } else {
-                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  resultMap.get("IP") + " " + Integer.valueOf(resultMap.get("PORT")) + ": telneted",HealthCheckStatus.ok
-                                        ));
-                                    }
-                                }else{
-                                    connectAble = TelnetUtil.tryTelnet(endpoint.getIp(), endpoint.getPort());
-                                    if (!connectAble) {
-
-                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": can not be telneted",HealthCheckStatus.warn));
-                                        //("check router " + routerInfo.getHost() + " " + routerInfo.getPort() + ": can not be telneted");
-                                    } else {
-                                        healthCheckResult.getRecords().add(new  HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + " " + endpoint.getPort() + ": telneted",HealthCheckStatus.ok
-                                        ));
-                                    }
+    private void routerInfoCheck(HealthCheckResult healthCheckResult) {
+        Map<String, Map<String, List<BasicMeta.Endpoint>>> routerInfoMap = configFileBasedServingRouter.getRouteTable();
+        if(routerInfoMap != null && routerInfoMap.size() > 0) {
+            routerInfoMap.values().forEach(value-> value.forEach((k, v) -> {
+                if(v != null) {
+                    v.forEach(endpoint -> {
+                        try {
+                            if (StringUtils.isNotEmpty(endpoint.getUrl())) {
+                                Map<String,String> resultMap = getIpPortFromUrl(endpoint.getUrl());
+                                if (!TelnetUtil.tryTelnet(resultMap.get(IP), Integer.parseInt(resultMap.get(PORT)))) {
+                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  resultMap.get(IP) + ":" + Integer.valueOf(resultMap.get(PORT)) + ": can not be telneted", HealthCheckStatus.error));
+                                } else {
+                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  resultMap.get(IP) + ":" + Integer.valueOf(resultMap.get(PORT)) + ": telneted ok", HealthCheckStatus.ok));
                                 }
-
-                            }catch (Exception e){
-                                e.printStackTrace();
+                            } else {
+                                if (!TelnetUtil.tryTelnet(endpoint.getIp(), endpoint.getPort())) {
+                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + ":" + endpoint.getPort() + ": can not be telneted", HealthCheckStatus.error));
+                                } else {
+                                    healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_NET.getItemName(),  endpoint.getIp() + ":" + endpoint.getPort() + ": telneted ok", HealthCheckStatus.ok));
+                                }
                             }
-                        });
-                    }
-                });
-
-
-
-            });
-
+                        } catch (Exception e) {
+                            logger.error("routerInfoCheck happen exception: {}", e.getMessage());
+                            throw e;
+                        }
+                    });
+                } else {
+                    logger.warn("routerInfoCheck find {} have no value", k);
+                }
+            }));
+        } else {
+            logger.warn("routerInfoCheck find routeTable is null or routeTable content size is 0");
         }
-
     }
 
     private static Map<String,String> getIpPortFromUrl(String url){
-        Map<String,String> resutlMap = Maps.newHashMap();
-        if(url.startsWith("http://localhost")){
-            url = url.replace("http://localhost","http://127.0.0.1");
+        Map<String,String> resultMap = Maps.newHashMap();
+        if (url.startsWith(HTTP_LOCALHOST)) {
+            url = url.replace(HTTP_LOCALHOST, HTTP_LOCALHOST_IP);
         }
-        if(url.startsWith("https://localhost")){
-            url = url.replace("https://localhost","https://127.0.0.1");
+
+        if (url.startsWith(HTTPS_LOCALHOST)) {
+            url = url.replace(HTTPS_LOCALHOST, HTTPS_LOCALHOST_IP);
         }
+
         String host = "";
-        Pattern p = Pattern.compile("(?<=//|)((\\w)+\\.)+\\w+(:\\d{0,5})?");
-        Matcher matcher = p.matcher(url);
-        if(matcher.find()){
+        Matcher matcher = PATTERN.matcher(url);
+
+        if(matcher.find()) {
             host = matcher.group();
         }
-        if(host.contains(":") == false){
-            resutlMap.put("IP",host);
-            resutlMap.put("PORT","80");
-            return resutlMap;
+
+        if(!host.contains(":")) {
+            resultMap.put("IP",host);
+            resultMap.put("PORT","80");
+            return resultMap;
         }
+
         String[] ipPortArr = host.split(":");
-        resutlMap.put("IP",ipPortArr[0]);
-        resutlMap.put("PORT",ipPortArr[1]);
-        return resutlMap;
-    }
-
-
-    private  void  metircCheck(HealthCheckResult  healthCheckResult){
-
-
+        resultMap.put("IP",ipPortArr[0]);
+        resultMap.put("PORT",ipPortArr[1]);
+        return resultMap;
     }
 
     @Override
