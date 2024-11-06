@@ -17,7 +17,7 @@ public enum HealthCheckItemEnum {
         this.component = healthCheckComponent;
         this.itemName= name;
     }
-    public  String getItemName(){
+    public String getItemName(){
         return itemName;
     }
 

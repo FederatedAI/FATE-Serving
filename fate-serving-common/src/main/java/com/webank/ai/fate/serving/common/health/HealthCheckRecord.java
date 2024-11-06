@@ -3,9 +3,9 @@ package com.webank.ai.fate.serving.common.health;
 import com.webank.ai.fate.serving.core.utils.JsonUtil;
 
 public class HealthCheckRecord{
-    String  checkItemName;
-    String  msg;
-    HealthCheckStatus  healthCheckStatus;
+    String checkItemName;
+    String msg;
+    HealthCheckStatus healthCheckStatus;
 
     public String getCheckItemName() {
         return checkItemName;
@@ -42,7 +42,7 @@ public class HealthCheckRecord{
     }
 
     @Override
-    public String  toString(){
+    public String toString(){
         return JsonUtil.object2Json(this);
     }
 }
