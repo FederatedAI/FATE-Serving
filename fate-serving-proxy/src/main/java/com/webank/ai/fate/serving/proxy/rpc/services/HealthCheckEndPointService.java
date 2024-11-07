@@ -120,7 +120,7 @@ public class HealthCheckEndPointService implements HealthCheckAware {
     }
 
 
-    private void checkZkConfig(HealthCheckResult  healthCheckResult){
+    private void checkZkConfigConnectivity(HealthCheckResult healthCheckResult){
         if(zookeeperRegistry == null){
             healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ZOOKEEPER_CONFIG.getItemName(),"zookeeper is not used or config is invalid", HealthCheckStatus.warn));
         } else {
@@ -130,14 +130,20 @@ public class HealthCheckEndPointService implements HealthCheckAware {
         }
     }
 
-    private void checkRouterInfo(HealthCheckResult healthCheckResult){
-        if(configFileBasedServingRouter.getRouteTable() == null || configFileBasedServingRouter.getRouteTable().size() == 0) {
-            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is not found", HealthCheckStatus.error));
+    private void checkRouterFile(HealthCheckResult healthCheckResult) {
+        if (configFileBasedServingRouter.getRouteTable() == null || configFileBasedServingRouter.getRouteTable().size() == 0) {
+            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router file is not found", HealthCheckStatus.error));
         } else {
-            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router info is found", HealthCheckStatus.ok));
+            healthCheckResult.getRecords().add(new HealthCheckRecord(HealthCheckItemEnum.CHECK_ROUTER_FILE.getItemName(),"check router file : router file is found", HealthCheckStatus.ok));
         }
+    }
 
-        routerInfoCheck(healthCheckResult);
+    private void checkRouterInfoConnectivity(HealthCheckResult healthCheckResult) {
+        if (configFileBasedServingRouter.getRouteTable() == null || configFileBasedServingRouter.getRouteTable().size() == 0) {
+            logger.error("router file is not found in checkRouterInfo");
+        } else {
+            routerInfoCheck(healthCheckResult);
+        }
     }
 
     private void routerInfoCheck(HealthCheckResult healthCheckResult) {
@@ -206,7 +212,6 @@ public class HealthCheckEndPointService implements HealthCheckAware {
 
     @Override
     public HealthCheckResult check(Context context) {
-
         if(MetaInfo.PROPERTY_ALLOW_HEALTH_CHECK) {
             HealthCheckItemEnum[] items = HealthCheckItemEnum.values();
             HealthCheckResult healthCheckResult = new HealthCheckResult();
@@ -214,27 +219,27 @@ public class HealthCheckEndPointService implements HealthCheckAware {
                 HealthCheckComponent healthCheckComponent = item.getComponent();
                 return healthCheckComponent == HealthCheckComponent.ALL || healthCheckComponent == HealthCheckComponent.SERVINGPROXY;
             }).forEach((item) -> {
-                        switch (item) {
-                            case CHECK_MEMORY_USAGE:
-                                HealthCheckUtil.memoryCheck(healthCheckResult);
-                                break;
-                            case CHECK_CERT_FILE:
-                                this.checkSshCertConfig(healthCheckResult);
-                                break;
-                            case CHECK_ZOOKEEPER_CONFIG:
-                                logger.info("check zk config");
-                                break;
-                            case CHECK_ROUTER_NET:
-                                logger.info("check route net");
-                                break;
-                            case CHECK_ROUTER_FILE:
-                                this.checkRouterInfo(healthCheckResult);
-                                break;
-                            default:
-                                logger.warn("Illegal verification items: {}", item.getItemName());
-                                break;
-                        }
+                    switch (item) {
+                        case CHECK_MEMORY_USAGE:
+                            HealthCheckUtil.memoryCheck(healthCheckResult);
+                            break;
+                        case CHECK_CERT_FILE:
+                            this.checkSshCertConfig(healthCheckResult);
+                            break;
+                        case CHECK_ZOOKEEPER_CONFIG:
+                            checkZkConfigConnectivity(healthCheckResult);
+                            break;
+                        case CHECK_ROUTER_NET:
+                            this.checkRouterInfoConnectivity(healthCheckResult);
+                            break;
+                        case CHECK_ROUTER_FILE:
+                            this.checkRouterFile(healthCheckResult);
+                            break;
+                        default:
+                            logger.warn("Illegal verification items: {}", item.getItemName());
+                            break;
                     }
+                }
             );
 
             return healthCheckResult;
