@@ -66,7 +66,7 @@ public class AuthUtils implements InitializingBean {
 
     private String lastFileMd5 = "";
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 30000)
     public void loadConfig() throws IOException {
         if (MetaInfo.PROPERTY_AUTH_OPEN) {
 

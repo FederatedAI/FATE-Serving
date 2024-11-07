@@ -75,9 +75,9 @@ public class Bootstrap {
             MetaInfo.PROPERTY_ROUTE_TYPE = environment.getProperty(Dict.PROPERTY_ROUTE_TYPE, "random");
             MetaInfo.PROPERTY_ROUTE_TABLE = environment.getProperty(Dict.PROPERTY_ROUTE_TABLE);
             MetaInfo.PROPERTY_AUTH_FILE = environment.getProperty(Dict.PROPERTY_AUTH_FILE);
-            MetaInfo.PROPERTY_AUTH_OPEN = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_AUTH_OPEN, "false"));
+            MetaInfo.PROPERTY_AUTH_OPEN = Boolean.parseBoolean(environment.getProperty(Dict.PROPERTY_AUTH_OPEN, "false"));
             MetaInfo.PROPERTY_ZK_URL = environment.getProperty(Dict.PROPERTY_ZK_URL);
-            MetaInfo.PROPERTY_USE_ZK_ROUTER = Boolean.valueOf(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER, "true"));
+            MetaInfo.PROPERTY_USE_ZK_ROUTER = Boolean.parseBoolean(environment.getProperty(Dict.PROPERTY_USE_ZK_ROUTER, "true"));
             MetaInfo.PROPERTY_PROXY_GRPC_INTRA_PORT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTRA_PORT, "8879"));
             MetaInfo.PROPERTY_PROXY_GRPC_INTER_PORT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INTER_PORT, "8869"));
             MetaInfo.PROPERTY_PROXY_GRPC_INFERENCE_TIMEOUT = Integer.valueOf(environment.getProperty(Dict.PROPERTY_PROXY_GRPC_INFERENCE_TIMEOUT, "3000"));
