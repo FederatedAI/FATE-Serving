@@ -19,10 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @auther Xiongli
@@ -596,19 +593,21 @@ public class RouterTableUtils {
         }
 
         public static boolean validateRouteTableKey(char firstChar, String str) throws JSONException {
-            if ("".equals(str)) return false;
-            List<String> a_list = Arrays.asList("allow");
+            if ("".equals(str)) {
+                return false;
+            }
+            List<String> a_list = Collections.singletonList("allow");
             List<String> c_list = Arrays.asList("certChainFile","caFile","coordinator");
             List<String> d_list = Arrays.asList("default", "default_allow","deny");
-            List<String> f_list = Arrays.asList("from");
-            List<String> h_list = Arrays.asList("host");
-            List<String> i_list = Arrays.asList("ip");
+            List<String> f_list = Collections.singletonList("from");
+            List<String> h_list = Collections.singletonList("host");
+            List<String> i_list = Collections.singletonList("ip");
             List<String> n_list = Arrays.asList("negotiationType","caFile");
             List<String> p_list = Arrays.asList("permission", "port", "privateKeyFile");
             List<String> r_list = Arrays.asList("route_table","role");
-            List<String> s_list = Arrays.asList("serving");
-            List<String> t_list = Arrays.asList("to");
-            List<String> u_list = Arrays.asList("useSSL");
+            List<String> s_list = Collections.singletonList("serving");
+            List<String> t_list = Collections.singletonList("to");
+            List<String> u_list = Collections.singletonList("useSSL");
             switch (firstChar) {
                 case ' ':
                     return false;
