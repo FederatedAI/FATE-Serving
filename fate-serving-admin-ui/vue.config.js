@@ -65,7 +65,6 @@ module.exports = {
         // eslint-disable-next-line no-dupe-keys
         proxy: {
             '/api': {
-                // target: 'http://127.0.0.1:8350',
                 target: 'http://127.0.0.1:8350/',
                 changeOrigin: true,
                 pathRewrite: {
