@@ -58,15 +58,14 @@ module.exports = {
         disableHostCheck: true,
         open: process.platform === 'darwin',
         // host: 'localhost',
-        host: '10.36.17.37',
+        host: '127.0.0.1',
         port: 8010,
         https: false,
         hotOnly: false,
         // eslint-disable-next-line no-dupe-keys
         proxy: {
             '/api': {
-                // target: 'http://172.16.153.168:8350',
-                target: 'http://172.16.153.227:8350/',
+                target: 'http://127.0.0.1:8350/',
                 changeOrigin: true,
                 pathRewrite: {
                     '^/api': '/api'
