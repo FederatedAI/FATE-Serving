@@ -699,7 +699,7 @@ public class RouterTableUtils {
     }
 
     public static void main(String[] args) {
-//        String str = "{\"route_table\": {\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]},\"123\":[{\"host\":\"127.0.0.1\",\"port\":8888,\"useSSL\":false,\"negotiationType\":\"\",\"certChainFile\":\"\",\"privateKeyFile\":\"\",\"caFile\":\"\"}]},\"permission\":{\"default_allow\":true}}";
+//        String str = "{\"route_table\": {\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":9999,\"useSSL\":false}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]},\"123\":[{\"host\":\"10.35.27.23\",\"port\":8888,\"useSSL\":false,\"negotiationType\":\"\",\"certChainFile\":\"\",\"privateKeyFile\":\"\",\"caFile\":\"\"}]},\"permission\":{\"default_allow\":true}}";
         String str = "{\"route_table\":{\"default\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":2345}]},\"10000\":{\"default\":[{\"ip\":\"127.0.0.1\",\"port\":8889}],\"serving\":[{\"ip\":\"127.0.0.1\",\"port\":8080}]}},\"permission\":{\"default_allow\":true,\"allow\":[{\"from\":{\"coordinator\":\"9999\",\"role\":\"guest\"},\"to\":{\"coordinator\":\"10000\",\"role\":\"host\"}}],\"deny\":[{\"from\":{\"coordinator\":\"9999\",\"role\":\"guest\"},\"to\":{\"coordinator\":\"10000\",\"role\":\"host\"}}]}}";
         try {
             if (RouteTableJsonValidator.isJSON(str)) {
