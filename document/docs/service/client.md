@@ -5,6 +5,17 @@ FATE-Serving提供了fate-serving-client工具
 
 需要先确认下载解压出来的文件有没有可执行权限，没有权限就执行 `chmod +777 fate-serving-client-2.1.4-linux`授权。
 
+### 从源码构建客户端
+
+客户端的最低 Go 版本为 1.26.0。请使用仍受支持且包含最新安全补丁的 Go 工具链（本项目使用 Go 1.26.11 验证）。
+
+```sh
+cd fate-serving-cli
+go mod verify
+go test ./...
+go build -o fate-serving-client .
+```
+
 ### 启动client    
 在终端中使用`./fate-serving-client-2.1.4-linux`启动client  
 ![connect](../img/client-connect.jpg)
