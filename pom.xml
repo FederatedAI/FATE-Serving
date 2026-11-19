@@ -47,7 +47,8 @@
         <junit.version>4.13.1</junit.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <os-maven-plugin.version>1.6.1</os-maven-plugin.version>
-        <spring.boot.version>2.7.0</spring.boot.version>
+        <!-- Spring Boot 2.7.10 introduced SnakeYAML 2.x compatibility for YAML configuration. -->
+        <spring.boot.version>2.7.18</spring.boot.version>
         <jackson.version>2.15.3</jackson.version>
         <jedis.version>2.9.0</jedis.version>
         <log4j2.version>2.17.1</log4j2.version>
@@ -226,7 +227,7 @@
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.32</version>
+                <version>2.7</version>
                 <scope>compile</scope>
             </dependency>
 
