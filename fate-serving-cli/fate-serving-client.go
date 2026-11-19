@@ -399,7 +399,7 @@ func init() {
 					c.App.Println("error", dataString)
 				} else {
 					for k, v := range dataMap {
-						keyColor.Printf(k)
+						keyColor.Print(k)
 						c.App.Println("=", v)
 					}
 				}
@@ -447,7 +447,7 @@ func init() {
 					// tableName := modelInfo.TableName
 					// namespace := modelInfo.Namespace
 
-					keyColor.Printf(autuFillKey("index"))
+					keyColor.Print(autuFillKey("index"))
 					valueColor.Println(i + 1)
 					contentMap := common.JsonToMap(modelInfo.Content)
 					//if detail == "no" {
@@ -455,7 +455,7 @@ func init() {
 					delete(contentMap, "modelProcessor")
 
 					//}
-					keyColor.Printf(autuFillKey("content"))
+					keyColor.Print(autuFillKey("content"))
 					contentString, _ := json.MarshalIndent(contentMap, blank, "\t")
 					//	if err != nil {
 					valueColor.Println(string(contentString))
@@ -789,7 +789,7 @@ func printZkComponents(conn *zk.Conn) error {
 		if err != nil {
 			continue
 		}
-		keyColor.Printf(transformComponent(childlevel1) + " = ")
+		keyColor.Print(transformComponent(childlevel1) + " = ")
 		valueColor.Println(childlevel2)
 	}
 	gapColor.Println(gapLine)
